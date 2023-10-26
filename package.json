@@ -1,0 +1,26 @@
+{
+	"name": "a-bunny-s-revenge",
+	"type": "module",
+	"version": "0.0.0",
+	"private": true,
+	"scripts": {
+		"dev": "vite",
+		"build": "tsc && vite build",
+		"preview": "vite preview"
+	},
+	"dependencies": {
+		"@dimforge/rapier3d-compat": "^0.11.2",
+		"miniplex": "^2.0.0",
+		"three": "^0.155.0",
+		"three-csm": "^3.3.0"
+	},
+	"devDependencies": {
+		"@antfu/eslint-config": "^1.0.0-beta.28",
+		"@total-typescript/ts-reset": "^0.5.1",
+		"@types/node": "^20.8.7",
+		"@types/three": "^0.157.2",
+		"eslint": "^8.52.0",
+		"typescript": "^5.0.2",
+		"vite": "^4.4.5"
+	}
+}

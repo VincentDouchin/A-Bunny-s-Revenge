@@ -1,0 +1,10 @@
+import { World as MiniplexWorld } from 'miniplex'
+import { World as RapierWrold, init } from '@dimforge/rapier3d-compat'
+import { loadAssets } from './assets'
+import type { Entity } from './entity'
+
+await init()
+export const world = new RapierWrold({ x: 0, y: -9.81, z: 0 })
+export const assets = await loadAssets()
+
+export const ecs = new MiniplexWorld<Entity>()

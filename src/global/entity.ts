@@ -1,0 +1,51 @@
+import type { Collider, ColliderDesc, RigidBody, RigidBodyDesc } from '@dimforge/rapier3d-compat'
+import type { Camera, DirectionalLight, Group, Light, Mesh, Object3DEventMap, PerspectiveCamera, Quaternion, Scene, Vector3, WebGLRenderer } from 'three'
+import type { OrbitControls } from 'three/examples/jsm/controls/OrbitControls'
+import type { EffectComposer } from 'three/examples/jsm/postprocessing/EffectComposer'
+import type CSM from 'three-csm'
+import type { Animator } from './animator'
+import type { PlayerInputMap } from '@/lib/inputs'
+import type { playerAnimations } from '@/constants/animations'
+
+export interface Entity {
+	// ! Transforms
+	position?: Vector3
+	worldPosition?: Vector3
+	rotation?: Quaternion
+	// ! Camera
+	cameratarget?: true
+	followCamera?: true
+	mainCamera?: true
+	// ! ThreeJS
+	scene?: Scene
+	renderer?: WebGLRenderer
+	camera?: PerspectiveCamera
+	controls?: OrbitControls
+	light?: DirectionalLight
+	group?: Group
+	model?: Group<Object3DEventMap>
+	mesh?: Mesh
+	composer?: EffectComposer
+	csm?: CSM
+	// ! Hierarchy
+	parent?: Entity
+	children?: Set<Entity>
+	// ! InputMaps
+	playerControls?: PlayerInputMap
+	// ! Physics
+	bodyDesc?: RigidBodyDesc
+	body?: RigidBody
+	colliderDesc?: ColliderDesc
+	collider?: Collider
+	// ! Animations
+	playerAnimator?: Animator<playerAnimations>
+
+}
+type Prettify<T> = {
+	[K in keyof T]: T[K];
+} & unknown
+
+type KeysOfType<T, U> = {
+	[K in keyof T]: T[K] extends U ? K : never;
+}[keyof T]
+export type ComponentsOfType<T> = Prettify<KeysOfType<Required<Entity>, T>> & keyof Entity
