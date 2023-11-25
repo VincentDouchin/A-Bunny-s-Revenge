@@ -1,12 +1,18 @@
-import { CameraHelper, DirectionalLight, Vector3 } from 'three'
+import { AmbientLight, DirectionalLight, Vector3 } from 'three'
 import { ecs } from '@/global/init'
-import { camera } from '@/global/camera'
-import { scene } from '@/global/rendering'
 
 export const spawnLight = () => {
-	const light = new DirectionalLight(0xFFFFFF, 1)
+	const light = new DirectionalLight(0xFFFFFF, 0.5)
 	light.lookAt(new Vector3(0, 0, 0))
+	const size = 1024
+	light.shadow.mapSize.set(size * 8, size * 8)
+
 	light.castShadow = true
-	scene.add(new CameraHelper(light.shadow.camera))
-	ecs.add({ light, position: new Vector3(10, 10, 0) })
+	light.shadow.camera.top = size
+	light.shadow.camera.bottom = -size
+	light.shadow.camera.left = -size
+	light.shadow.camera.right = size
+	light.shadow.bias = 0.002
+	ecs.add({ light, position: new Vector3(0, 50, 0) })
+	ecs.add({ light: new AmbientLight(0xFFFFFF, 1), position: new Vector3() })
 }

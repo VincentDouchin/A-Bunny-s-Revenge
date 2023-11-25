@@ -1,4 +1,4 @@
-import { PCFSoftShadowMap, Scene, WebGLRenderer } from 'three'
+import { BasicShadowMap, Scene, WebGLRenderer } from 'three'
 import { EffectComposer } from 'three/examples/jsm/postprocessing/EffectComposer'
 import { RenderPass } from 'three/examples/jsm/postprocessing/RenderPass'
 import { camera } from './camera'
@@ -9,7 +9,7 @@ export const renderer = new WebGLRenderer()
 export const composer = new EffectComposer(renderer)
 export const initThree = (pixelation = 1) => () => {
 	renderer.shadowMap.enabled = true
-	renderer.shadowMap.type = PCFSoftShadowMap
+	renderer.shadowMap.type = BasicShadowMap
 	document.body.appendChild(renderer.domElement)
 	renderer.setSize(window.innerWidth / pixelation, window.innerHeight / pixelation)
 	composer.addPass(new RenderPass(scene, camera))

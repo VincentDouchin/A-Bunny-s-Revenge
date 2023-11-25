@@ -4,20 +4,19 @@ import { time } from '@/lib/time'
 
 const playerQuery = ecs.with('playerControls', 'body', 'playerAnimator', 'rotation')
 export const movePlayer = () => {
-	for (const { playerControls, body, playerAnimator, rotation } of playerQuery) {
+	for (const { playerControls, body, rotation } of playerQuery) {
 		const force = new Vector3()
 		force.x += playerControls.get('left').pressed
 		force.x -= playerControls.get('right').pressed
 		force.z -= playerControls.get('backward').pressed
 		force.z += playerControls.get('forward').pressed
 		const moving = force.length() > 0
-		playerAnimator.current = moving ? 'Running_A' : 'Idle'
 		const forceNormalized = force.normalize()
 		if (moving) {
 			rotation.setFromAxisAngle(new Vector3(0, 1, 0), Math.atan2(forceNormalized.x, forceNormalized.z))
 		}
 
-		const finalForce = forceNormalized.multiplyScalar(0.1 * time.delta)
+		const finalForce = forceNormalized.multiplyScalar(100 * time.delta)
 		body.applyImpulse(finalForce, true)
 	}
 }

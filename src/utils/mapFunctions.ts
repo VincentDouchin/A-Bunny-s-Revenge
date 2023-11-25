@@ -66,3 +66,6 @@ export const asyncMap = async <V, F extends (value: V) => Promise<any>>(arr: V[]
 	}
 	return res
 }
+export const getRandom = <T>(arr: T[]) => arr[Math.floor(Math.random() * arr.length)]
+
+export const between = (min: number, max: number) => Math.random() * (max - min) + min

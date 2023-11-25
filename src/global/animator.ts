@@ -1,39 +1,38 @@
-import { type AnimationClip, AnimationMixer } from 'three'
+import type { AnimationAction, AnimationClip } from 'three'
+import { AnimationMixer } from 'three'
+
 import type { GLTF } from 'three/examples/jsm/loaders/GLTFLoader'
 
 export class Animator<K extends string> extends AnimationMixer {
-	last?: K
-	#current: K
+	#current?: K
+	#action?: AnimationAction
 	#clips: AnimationClip[]
 	constructor(current: K, glb: GLTF) {
 		super(glb.scene)
 		this.#clips = glb.animations
-		this.#current = current
-		this.play()
+		this.playAnimation(current)
 	}
 
-	get changed() {
-		return this.last !== this.#current
+	#getAction(animation?: K) {
+		const clip = this.#clips.find(clip => clip.name === animation)
+		if (clip) {
+			return this.clipAction(clip)
+		}
 	}
 
-	set current(value: K) {
-		this.last = this.#current
-		this.#current = value
-		this.play()
+	play(animation: K) {
+		const action = this.#getAction(animation)
+		if (action) {
+			this.#action?.fadeOut(1)
+			action.reset().fadeIn(1).play()
+			this.#action = action
+			this.#current = animation
+		}
 	}
 
-	get current() {
-		return this.#current
-	}
-
-	get clip() {
-		return this.#clips.find(clip => clip.name === this.#current)
-	}
-
-	play() {
-		if (this.changed && this.clip) {
-			this.clipAction(this.clip).play()
-			this.last = this.#current
+	playAnimation(animation: K) {
+		if (animation !== this.#current) {
+			this.play(animation)
 		}
 	}
 }

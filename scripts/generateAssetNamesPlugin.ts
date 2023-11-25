@@ -4,7 +4,6 @@ import { readdir, writeFile } from 'node:fs/promises'
 import path from 'node:path'
 import process from 'node:process'
 import type { PluginOption } from 'vite'
-import { loadGLB } from './../src/global/assetLoaders'
 
 export const getFileName = (path: string) => {
 	return	path.split(/[./]/g).at(-2) ?? ''
@@ -15,9 +14,10 @@ export const getFolderName = (path: string) => {
 
 export default function generateAssetNames(): PluginOption {
 	const launchScript = async (filePath?: string) => {
-		if (!filePath || (filePath.includes('assets\\') && filePath.split('.').at(-1) === 'png')) {
+		if (!filePath || (filePath.includes('assets\\'))) {
 			const folders: Record<string, string[]> = {}
 			const assetsDir = await readdir('./assets', { recursive: true, withFileTypes: true })
+
 			for (const dir of assetsDir) {
 				if (dir.isDirectory() && dir.name[0] !== '_') {
 					const files = (await readdir(`./assets/${dir.name}`))

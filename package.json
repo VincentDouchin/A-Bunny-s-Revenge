@@ -11,6 +11,7 @@
 	"dependencies": {
 		"@dimforge/rapier3d-compat": "^0.11.2",
 		"miniplex": "^2.0.0",
+		"preact": "^10.19.2",
 		"three": "^0.155.0",
 		"three-csm": "^3.3.0"
 	},
@@ -20,7 +21,8 @@
 		"@types/node": "^20.8.7",
 		"@types/three": "^0.157.2",
 		"eslint": "^8.52.0",
-		"typescript": "^5.0.2",
+		"glob": "^10.3.10",
+		"typescript": "^5.3.2",
 		"vite": "^4.4.5"
 	}
 }

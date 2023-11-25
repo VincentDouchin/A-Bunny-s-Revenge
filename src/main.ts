@@ -11,18 +11,18 @@ import { transformsPlugin } from './lib/transforms'
 import { updateInputs } from './lib/updateInputs'
 import { movePlayer } from './states/game/movePlayer'
 import { spawnCharacter } from './states/game/spawnCharacter'
-import { spawnGround } from './states/game/spawnGround'
+import { spawnGround, spawnSkyBox, spawnTrees } from './states/game/spawnGround'
 import { spawnLight } from './states/game/spawnLights'
 
 coreState
-	.addPlugins(updateInputs('playerControls'), physicsPlugin, transformsPlugin)
+	.addPlugins(updateInputs('playerControls'), physicsPlugin, transformsPlugin, addToScene('camera', 'light', 'mesh', 'model'))
 	.addSubscribers(addChildren, despanwChildren, removeChildren)
-	.onEnter(initThree(4), initCamera(true))
+	.onEnter(initThree(4), initCamera(false))
 	.onUpdate(...playAnimations('playerAnimator'), moveCamera)
 	.onPostUpdate(updateControls, render)
 	.enable()
 gameState
-	.onEnter()
+	.onEnter(spawnCharacter, spawnLight, spawnGround, spawnSkyBox, spawnTrees)
 	.onUpdate(movePlayer)
 	.enable()
 

@@ -4,11 +4,12 @@ import { defineConfig } from 'vite'
 
 // import { VitePWA } from 'vite-plugin-pwa'
 import generateAssetNames from './scripts/generateAssetNamesPlugin'
+import { autoConvertFBXtoGLB } from './scripts/convertFbx2GLB'
 
 // https://vitejs.dev/config/
 export default defineConfig(() => {
 	const config: UserConfig = {
-		plugins: [generateAssetNames()],
+		plugins: [generateAssetNames(), autoConvertFBXtoGLB()],
 		base: '',
 
 		build: {
