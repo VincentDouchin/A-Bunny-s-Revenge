@@ -33,7 +33,7 @@ const skyboxLoader = async (glob: defaultGlob) => {
 }
 
 export const loadAssets = async () => ({
-	characters: await loadGLBAsToon<models>(import.meta.glob('@assets/models/*.*')),
+	characters: await loadGLBAsToon<models>(import.meta.glob('@assets/models/*.*', { as: 'url' })),
 	skybox: await skyboxLoader(import.meta.glob('@assets/skybox/*.png', { eager: true })),
-	trees: await loadGLBAsToon<trees>(import.meta.glob('@assets/trees/*.glb')),
+	trees: await loadGLBAsToon<trees>(import.meta.glob('@assets/trees/*.glb', { as: 'url' })),
 } as const)
