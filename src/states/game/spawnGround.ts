@@ -6,7 +6,7 @@ import { between, getRandom, objectValues, range } from '@/utils/mapFunctions'
 export const spawnGround = () => {
 	const size = 64
 	const geometry = new BoxGeometry(size, 1, size)
-	const material = new MeshStandardMaterial({ color: 0x239063 })
+	const material = new MeshStandardMaterial({ color: 0x339933 })
 	const mesh = new Mesh(geometry, material)
 	mesh.receiveShadow = true
 
@@ -31,8 +31,10 @@ export const spawnSkyBox = () => {
 export const spawnTrees = () => {
 	range(0, 20, (_) => {
 		ecs.add({
+			scale: 4,
 			model: getRandom(objectValues(assets.trees).map(glb => glb.scene)).clone(),
 			position: new Vector3(between(-32, 32), 0, between(-32, 32)),
+			outline: true,
 		})
 	})
 }

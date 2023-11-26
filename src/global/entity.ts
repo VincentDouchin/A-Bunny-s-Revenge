@@ -3,11 +3,14 @@ import type { Group, Light, Mesh, Object3DEventMap, PerspectiveCamera, Quaternio
 import type CSM from 'three-csm'
 import type { OrbitControls } from 'three/examples/jsm/controls/OrbitControls'
 import type { EffectComposer } from 'three/examples/jsm/postprocessing/EffectComposer'
+import type { JSXElement } from 'solid-js'
 import type { Animator } from './animator'
 import type { PlayerInputMap } from '@/lib/inputs'
 import type { playerAnimations } from '@/constants/animations'
 
 export interface Entity {
+	// ! Models
+	scale?: number
 	// ! Transforms
 	position?: Vector3
 	worldPosition?: Vector3
@@ -39,7 +42,12 @@ export interface Entity {
 	collider?: Collider
 	// ! Animations
 	playerAnimator?: Animator<playerAnimations>
-
+	template?: () => JSXElement
+	el?: HTMLElement
+	cssObject?: true
+	uiRoot?: true
+	// ! Detect edges
+	outline?: true
 }
 type Prettify<T> = {
 	[K in keyof T]: T[K];

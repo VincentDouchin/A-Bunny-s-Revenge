@@ -11,6 +11,7 @@ const loadGLBAsToon = async <K extends string>(glob: Glob) => {
 	for (const glb of glbs) {
 		glb.scene.traverse((node) => {
 			if (node instanceof Mesh) {
+				node.geometry?.computeVertexNormals()
 				if (node.material.constructor.name === 'MeshStandardMaterial') {
 					node.material = new MeshToonMaterial({ color: node.material.color, map: node.material.map })
 					node.castShadow = true

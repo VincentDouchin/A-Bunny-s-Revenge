@@ -1,5 +1,5 @@
-import { World as MiniplexWorld } from 'miniplex'
 import { World as RapierWrold, init } from '@dimforge/rapier3d-compat'
+import { World as MiniplexWorld } from 'miniplex'
 import { loadAssets } from './assets'
 import type { Entity } from './entity'
 
