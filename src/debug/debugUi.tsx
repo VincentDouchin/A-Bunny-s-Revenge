@@ -1,13 +1,13 @@
 import { params } from '@/global/context'
 import { ecs } from '@/global/init'
-import { rendererQuery } from '@/global/rendering'
+import { renderer } from '@/global/rendering'
 
 export const DebugUi = () => {
 	const updatePixelation = (e: Event) => {
 		const target = e.target as HTMLInputElement
 		const val = target.valueAsNumber
 		params.pixelation = val
-		rendererQuery.first?.renderer.setSize(window.innerWidth / val, window.innerHeight / val)
+		renderer.setSize(window.innerWidth / val, window.innerHeight / val)
 	}
 	return (
 		<>
