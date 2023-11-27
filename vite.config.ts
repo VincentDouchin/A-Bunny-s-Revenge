@@ -11,6 +11,7 @@ import { autoConvertFBXtoGLB } from './scripts/convertFbx2GLB'
 export default defineConfig(() => {
 	const config: UserConfig = {
 		plugins: [generateAssetNames(), autoConvertFBXtoGLB(), solidPlugin()],
+		assetsInclude: ['**/*.glb'],
 		base: '',
 
 		build: {
