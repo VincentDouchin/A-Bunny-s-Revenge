@@ -1,10 +1,9 @@
-import { OrthographicCamera, PerspectiveCamera, Vector3 } from 'three'
+import { PerspectiveCamera, Vector3 } from 'three'
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls'
+import { params } from './context'
 import { ecs } from './init'
 import { rendererQuery, sceneQuery } from './rendering'
-import { params } from './context'
 
-// export const camera = new OrthographicCamera(-200, 200, 200, -200, 0.1, 100000)
 export const camera = new PerspectiveCamera(params.fov, window.innerWidth / window.innerHeight, 0.1, 100000)
 
 export const initCamera = (debug: boolean = false) => () => {
