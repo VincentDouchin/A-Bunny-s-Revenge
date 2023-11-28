@@ -1,10 +1,11 @@
-import { PerspectiveCamera, Vector3 } from 'three'
+import { OrthographicCamera, PerspectiveCamera, Vector3 } from 'three'
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls'
 import { ecs } from './init'
 import { rendererQuery, sceneQuery } from './rendering'
 import { params } from './context'
 
-export const camera = new PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 100000)
+// export const camera = new OrthographicCamera(-200, 200, 200, -200, 0.1, 100000)
+export const camera = new PerspectiveCamera(params.fov, window.innerWidth / window.innerHeight, 0.1, 100000)
 
 export const initCamera = (debug: boolean = false) => () => {
 	if (debug) {
@@ -16,7 +17,7 @@ export const initCamera = (debug: boolean = false) => () => {
 		const controls = new OrbitControls(camera, renderer.renderer.domElement)
 		ecs.add({ controls })
 	} else {
-		camera.zoom = window.innerWidth / window.innerHeight / 3
+		camera.zoom = window.innerWidth / window.innerHeight / params.zoom
 		camera.updateProjectionMatrix()
 		ecs.add({ camera, position: new Vector3(), mainCamera: true })
 	}
@@ -30,6 +31,8 @@ export const moveCamera = () => {
 			position.x = worldPosition.x
 			position.y = worldPosition.y + params.cameraOffsetY
 			position.z = worldPosition.z + params.cameraOffsetZ
+			camera.zoom = window.innerWidth / window.innerHeight / params.zoom
+			camera.fov = params.fov
 			camera.updateProjectionMatrix()
 		}
 	}

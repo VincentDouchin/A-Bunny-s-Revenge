@@ -1,11 +1,11 @@
-import { ColliderDesc, RigidBodyDesc } from '@dimforge/rapier3d-compat'
-import { Box3, Quaternion, Vector3 } from 'three'
-import type { playerAnimations } from '@/constants/animations'
-import { Animator } from '@/global/animator'
+import { Box3, Vector3 } from 'three'
 import { assets, ecs } from '@/global/init'
-import { playerInputMap } from '@/lib/inputs'
-import type { System } from '@/lib/state'
 import type { DungeonRessources } from '@/global/states'
+import { playerInputMap } from '@/lib/inputs'
+import { modelColliderBundle } from '@/lib/models'
+import type { System } from '@/lib/state'
+import { type Entity, Faction } from '@/global/entity'
+import { Animator } from '@/global/animator'
 
 const playerBundle = () => {
 	const model = assets.characters.BunnyMain
@@ -14,14 +14,12 @@ const playerBundle = () => {
 	size.divideScalar(2)
 	return {
 		inMap: true,
-		model: model.scene,
 		playerControls: playerInputMap(),
-		bodyDesc: RigidBodyDesc.dynamic().setCcdEnabled(true).lockRotations().setLinearDamping(7),
-		colliderDesc: ColliderDesc.cuboid(size.x, size.y, size.z).setTranslation(0, size.y, 0),
-		playerAnimator: new Animator<playerAnimations>('idle', model),
-		rotation: new Quaternion(),
 		cameratarget: true,
-	} as const
+		...modelColliderBundle(model.scene),
+		playerAnimator: new Animator('idle', model),
+		faction: Faction.Player,
+	} as const satisfies Entity
 }
 
 export const spawnCharacter = () => {

@@ -1,13 +1,14 @@
-export const time = new class Time {
+export class Time {
 	current = Date.now()
 	delta = 0
 	elapsed = 0
-	tick(newTime: number) {
+	tick() {
+		const newTime = Date.now()
 		this.delta = newTime - this.current
 		this.current = newTime
 		this.elapsed += this.delta
 	}
-}()
+}
 
 export class Timer {
 	elapsed = 0

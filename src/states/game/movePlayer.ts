@@ -1,6 +1,5 @@
 import { Vector3 } from 'three'
-import { ecs } from '@/global/init'
-import { time } from '@/lib/time'
+import { ecs, time } from '@/global/init'
 
 const playerQuery = ecs.with('playerControls', 'body', 'playerAnimator', 'rotation')
 export const movePlayer = () => {

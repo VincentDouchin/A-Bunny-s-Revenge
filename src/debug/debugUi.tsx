@@ -38,6 +38,24 @@ export const DebugUi = () => {
 				>
 				</input>
 			</div>
+			<div>
+				Zoom
+				<input
+					type="number"
+					value={params?.zoom}
+					onChange={e => params.zoom = e.target.valueAsNumber}
+				>
+				</input>
+			</div>
+			<div>
+				Fov
+				<input
+					type="number"
+					value={params?.fov}
+					onChange={e => params.fov = e.target.valueAsNumber}
+				>
+				</input>
+			</div>
 		</>
 	)
 }

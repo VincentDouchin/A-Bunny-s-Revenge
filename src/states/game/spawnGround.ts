@@ -35,7 +35,7 @@ export const spawnTrees = (size = 256, amount = 100) => () => {
 			inMap: true,
 			parent,
 			scale: 4,
-			model: getRandom(objectValues(assets.trees).map(glb => glb.scene)).clone(),
+			model: getRandom(objectValues(assets.trees)).scene.clone(),
 			position: new Vector3(between(-size / 2, size / 2), 0, between(-size / 2, size / 2)),
 			outline: true,
 		})

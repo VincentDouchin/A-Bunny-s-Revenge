@@ -1,5 +1,5 @@
 import type { Collider, ColliderDesc, RigidBody, RigidBodyDesc } from '@dimforge/rapier3d-compat'
-import type { Group, Light, Mesh, Object3DEventMap, PerspectiveCamera, Quaternion, Scene, Vector3, WebGLRenderer } from 'three'
+import type { Group, Light, Mesh, Object3D, Object3DEventMap, PerspectiveCamera, Quaternion, Scene, Vector3, WebGLRenderer } from 'three'
 import type CSM from 'three-csm'
 import type { OrbitControls } from 'three/examples/jsm/controls/OrbitControls'
 import type { EffectComposer } from 'three/examples/jsm/postprocessing/EffectComposer'
@@ -8,6 +8,11 @@ import type { Animator } from './animator'
 import type { PlayerInputMap } from '@/lib/inputs'
 import type { playerAnimations } from '@/constants/animations'
 import type { direction } from '@/lib/directions'
+
+export enum Faction {
+	Player,
+	Enemy,
+}
 
 export interface Entity {
 	// ! Models
@@ -27,7 +32,7 @@ export interface Entity {
 	controls?: OrbitControls
 	light?: Light
 	group?: Group
-	model?: Group<Object3DEventMap>
+	model?: Object3D<Object3DEventMap>
 	mesh?: Mesh
 	composer?: EffectComposer
 	csm?: CSM
@@ -54,6 +59,8 @@ export interface Entity {
 	map?: true
 	// ! Camp
 	door?: { index: number; direction: direction }
+	// ! Dungeon
+	faction?: Faction
 }
 type Prettify<T> = {
 	[K in keyof T]: T[K];

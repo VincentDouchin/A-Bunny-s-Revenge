@@ -2,7 +2,7 @@ import type { State } from './state'
 import { ecs, world } from '@/global/init'
 
 export const physicsPlugin = (state: State) => {
-	const addBodies = () => ecs.with('bodyDesc', 'worldPosition').onEntityAdded.subscribe((entity) => {
+	const addBodies = () => ecs.with('bodyDesc', 'worldPosition').onEntityAdded.subscribe(async (entity) => {
 		const body = world.createRigidBody(entity.bodyDesc)
 		body.setTranslation(entity.worldPosition, true)
 		ecs.addComponent(entity, 'body', body)
@@ -24,5 +24,5 @@ export const physicsPlugin = (state: State) => {
 	}
 	state
 		.addSubscriber(addBodies, addColliders, removeColliders, removeBodies)
-		.onPostUpdate(stepWorld)
+		.onPreUpdate(stepWorld)
 }
