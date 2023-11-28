@@ -37,6 +37,6 @@ declare module 'solid-js' {
 // ! Plugin
 export const uiPlugin = (state: State) => {
 	state
-		.addSubscribers(addElement)
+		.addSubscriber(addElement)
 		.onEnter(spawnUiRoot)
 }

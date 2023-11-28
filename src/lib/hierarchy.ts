@@ -1,13 +1,17 @@
 import { ecs } from '../global/init'
 import type { Entity } from '../global/entity'
+import type { State } from './state'
+import { set } from './state'
 
+const mapQuery = ecs.with('map')
 export const addChildren = () => ecs.onEntityAdded.subscribe((entity) => {
-	if (entity.parent) {
-		if (entity.parent.children) {
-			entity.parent.children.add(entity)
+	const parent = entity.inMap ? mapQuery.first : entity.parent
+	if (parent) {
+		if (parent.children) {
+			parent.children.add(entity)
 		}
 		else {
-			ecs.addComponent(entity.parent, 'children', new Set([entity]))
+			ecs.addComponent(parent, 'children', new Set([entity]))
 		}
 	}
 })
@@ -29,4 +33,18 @@ export const removeParent = (entity: Entity) => {
 			entity.group.removeFromParent()
 		}
 	}
+}
+export const despawnOfType = (...components: (keyof Entity)[]) => {
+	return set(components.map((component) => {
+		const query = ecs.with(component)
+		return () => {
+			for (const entity of query) {
+				ecs.remove(entity)
+			}
+		}
+	}))
+}
+
+export const hierarchyPlugin = (state: State) => {
+	state.addSubscriber(addChildren, removeChildren, despanwChildren)
 }

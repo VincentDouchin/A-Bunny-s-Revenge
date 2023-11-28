@@ -1,101 +1,147 @@
-export class State {
-	static #states = new Set<State>()
-	static update() {
-		for (const state of this.#states) {
-			state.#preUpdate()
+export type System<R> = (ressources: R) => void
+export type Subscriber<R> = (ressources: R) => (ressources: R) => void
+
+export class StateMananger {
+	states = new Map<State<any>, any>()
+	callbacks = new Map<State<any>, System<any>[]>()
+	create<R = void>() {
+		return new State<R>(this)
+	}
+
+	enable<S extends State<R>, R>(state: S, ressources: R) {
+		this.states.set(state, ressources)
+		if (state._subscribers.length) {
+			this.callbacks.set(state, state._subscribers.map(s => s(ressources)))
 		}
-		for (const state of this.#states) {
-			state.#update()
-		}
-		for (const state of this.#states) {
-			state.#postUpdate()
+		for (const system of state._enter) {
+			system(ressources)
 		}
 	}
 
-	get active() {
-		return State.#states.has(this)
+	disable(state: State<any>) {
+		const ressources = this.states.get(state)
+		for (const system of state._exit) {
+			system(ressources)
+		}
+		const callbacks = this.callbacks.get(state)
+		if (callbacks) {
+			for (const callback of callbacks) {
+				callback(ressources)
+			}
+		}
+		this.states.delete(state)
 	}
 
-	addPlugins(...plugins: Array<(state: State) => void>) {
+	update() {
+		for (const [state, ressources] of this.states.entries()) {
+			for (const system of state._preUpdate) {
+				system(ressources)
+			}
+		}
+		for (const [state, ressources] of this.states.entries()) {
+			for (const system of state._update) {
+				system(ressources)
+			}
+		}
+		for (const [state, ressources] of this.states.entries()) {
+			for (const system of state._postUpdate) {
+				system(ressources)
+			}
+		}
+	}
+
+	exclusive(...states: State<any>[]) {
+		for (const state of states) {
+			state.onEnter(...states.filter(s => s !== state).map(s => () => this.states.has(s) && s.disable()))
+		}
+	}
+}
+export class State<R = void> {
+	_enter = new Array<System<R>>()
+	_exit = new Array<System<R>>()
+	_preUpdate = new Array<System<R>>()
+	_postUpdate = new Array<System<R>>()
+	_update = new Array<System<R>>()
+	_subscribers = new Array<Subscriber<R>>()
+	_callBacks = new Array<System<R>>()
+	#app: StateMananger
+	constructor(app: StateMananger) {
+		this.#app = app
+	}
+
+	get enabled() {
+		return this.#app.states.has(this)
+	}
+
+	addSubscriber(...subscribers: Subscriber<R>[]) {
+		this._subscribers.push(...subscribers)
+		return this
+	}
+
+	onEnter(...systems: System<R>[]) {
+		this._enter.push(...systems)
+		return this
+	}
+
+	onExit(...systems: System<R>[]) {
+		this._exit.push(...systems)
+		return this
+	}
+
+	onPreUpdate(...systems: System<R>[]) {
+		this._preUpdate.push(...systems)
+		return this
+	}
+
+	onPostUpdate(...systems: System<R>[]) {
+		this._postUpdate.push(...systems)
+		return this
+	}
+
+	onUpdate(...systems: System<R>[]) {
+		this._update.push(...systems)
+		return this
+	}
+
+	addPlugins(...plugins: Array<(state: State<R>) => void>) {
 		for (const plugin of plugins) {
 			plugin(this)
 		}
 		return this
 	}
 
-	#enterSystems = new Array<() => void>()
-	#updateSystems = new Array<() => void>()
-	#preUpdateSystems = new Array<() => void>()
-	#postUpdateSystems = new Array<() => void>()
-	#exitSystems = new Array<() => void>()
-	#subscribers = new Array<() => () => void>()
-	#unsubscribers = new Array<() => void>()
-	onEnter(...systems: Array<() => void>) {
-		this.#enterSystems.push(...systems)
-		return this
-	}
-
-	addSubscribers(...subscribers: Array<() => () => void>) {
-		this.#subscribers.push(...subscribers)
-		return this
-	}
-
-	onUpdate(...systems: Array<() => void>) {
-		this.#updateSystems.push(...systems)
-		return this
-	}
-
-	onPreUpdate(...systems: Array<() => void>) {
-		this.#preUpdateSystems.push(...systems)
-		return this
-	}
-
-	onPostUpdate(...systems: Array<() => void>) {
-		this.#postUpdateSystems.push(...systems)
-		return this
-	}
-
-	onExit(...systems: Array<() => void>) {
-		this.#exitSystems.push(...systems)
-		return this
-	}
-
-	#preUpdate() {
-		for (const system of this.#preUpdateSystems) {
-			system()
+	enable(ressources: R) {
+		if (this.enabled) {
+			this.disable()
 		}
-	}
-
-	#postUpdate() {
-		for (const system of this.#postUpdateSystems) {
-			system()
-		}
-	}
-
-	#update() {
-		for (const system of this.#updateSystems) {
-			system()
-		}
-	}
-
-	enable() {
-		this.#unsubscribers.push(...this.#subscribers.map(sub => sub()))
-		for (const system of this.#enterSystems) {
-			system()
-		}
-		State.#states.add(this)
-		return this
+		this.#app.enable(this, ressources)
 	}
 
 	disable() {
-		for (const unsubscriber of this.#unsubscribers) {
-			unsubscriber()
+		this.#app.disable(this)
+	}
+}
+export const runIf = <R>(condition: () => boolean, ...systems: System<R>[]) => (ressources: R) => {
+	if (condition()) {
+		for (const system of systems) {
+			system(ressources)
 		}
-		this.#unsubscribers = []
-		for (const system of this.#exitSystems) {
-			system()
+	}
+}
+
+export const throttle = <R>(delay: number, ...systems: System<R>[]) => {
+	let time = Date.now()
+	return (ressources: R) => {
+		if (Date.now() - time >= delay) {
+			for (const system of systems) {
+				system(ressources)
+			}
+			time = Date.now()
 		}
-		State.#states.delete(this)
-		return this
+	}
+}
+export const set = <R>(systems: System<R>[]): System<R> => (ressources: R) => {
+	for (const system of systems) {
+		system(ressources)
 	}
 }

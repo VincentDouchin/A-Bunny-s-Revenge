@@ -1,4 +1,4 @@
-import { BasicShadowMap, Scene, WebGLRenderer } from 'three'
+import { BasicShadowMap, SRGBColorSpace, Scene, WebGLRenderer } from 'three'
 import { EffectComposer } from 'three/examples/jsm/postprocessing/EffectComposer'
 import { RenderPass } from 'three/examples/jsm/postprocessing/RenderPass'
 import { camera } from './camera'
@@ -12,6 +12,7 @@ export const initThree = (pixelation = 1) => () => {
 	renderer.shadowMap.enabled = true
 	renderer.shadowMap.type = BasicShadowMap
 	document.body.appendChild(renderer.domElement)
+	renderer.outputColorSpace = SRGBColorSpace
 	renderer.setSize(window.innerWidth / pixelation, window.innerHeight / pixelation)
 	const renderPass = new RenderPass(scene, camera)
 	composer.addPass(renderPass)

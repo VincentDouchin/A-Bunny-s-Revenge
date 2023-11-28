@@ -23,6 +23,6 @@ export const physicsPlugin = (state: State) => {
 		world.step()
 	}
 	state
-		.addSubscribers(addBodies, addColliders, removeColliders, removeBodies)
+		.addSubscriber(addBodies, addColliders, removeColliders, removeBodies)
 		.onPostUpdate(stepWorld)
 }

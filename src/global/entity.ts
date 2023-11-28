@@ -7,6 +7,7 @@ import type { JSXElement } from 'solid-js'
 import type { Animator } from './animator'
 import type { PlayerInputMap } from '@/lib/inputs'
 import type { playerAnimations } from '@/constants/animations'
+import type { direction } from '@/lib/directions'
 
 export interface Entity {
 	// ! Models
@@ -33,6 +34,7 @@ export interface Entity {
 	// ! Hierarchy
 	parent?: Entity
 	children?: Set<Entity>
+	inMap?: true
 	// ! InputMaps
 	playerControls?: PlayerInputMap
 	// ! Physics
@@ -48,6 +50,10 @@ export interface Entity {
 	uiRoot?: true
 	// ! Detect edges
 	outline?: true
+	// ! Game
+	map?: true
+	// ! Camp
+	door?: { index: number; direction: direction }
 }
 type Prettify<T> = {
 	[K in keyof T]: T[K];

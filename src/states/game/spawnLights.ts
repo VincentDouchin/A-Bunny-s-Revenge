@@ -13,6 +13,14 @@ export const spawnLight = () => {
 	light.shadow.camera.left = -size
 	light.shadow.camera.right = size
 	light.shadow.bias = 0.002
-	ecs.add({ light, position: new Vector3(0, 50, 0) })
-	ecs.add({ light: new AmbientLight(0xFFFFFF, 1), position: new Vector3() })
+	ecs.add({
+		inMap: true,
+		light,
+		position: new Vector3(0, 50, 0),
+	})
+	ecs.add({
+		inMap: true,
+		light: new AmbientLight(0xFFFFFF, 1),
+		position: new Vector3(),
+	})
 }

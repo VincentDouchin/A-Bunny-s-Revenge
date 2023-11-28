@@ -5,7 +5,7 @@ import { ecs } from '@/global/init'
 
 const updateAndApply = <T extends Entity>(query: Query<T>, fn: (entity: T) => void) => {
 	return (state: State) => {
-		state.addSubscribers(() => query.onEntityAdded.subscribe(fn))
+		state.addSubscriber(() => query.onEntityAdded.subscribe(fn))
 		state.onUpdate(() => {
 			for (const entity of query) {
 				fn(entity)

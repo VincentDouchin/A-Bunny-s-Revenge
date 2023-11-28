@@ -37,6 +37,6 @@ const updateRotation = () => {
 
 export const transformsPlugin = (state: State) => {
 	state
-		.addSubscribers(addWorldPosition)
+		.addSubscriber(addWorldPosition)
 		.onUpdate(updateGroupPosition, updateMeshPosition, updateRotation)
 }
