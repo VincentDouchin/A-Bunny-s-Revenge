@@ -4,6 +4,7 @@ export type Subscriber<R> = (ressources: R) => (ressources: R) => void
 export class StateMananger {
 	states = new Map<State<any>, any>()
 	callbacks = new Map<State<any>, System<any>[]>()
+	queue = new Set<() => void>()
 	create<R = void>() {
 		return new State<R>(this)
 	}
@@ -48,6 +49,10 @@ export class StateMananger {
 				system(ressources)
 			}
 		}
+		for (const callback of this.queue) {
+			callback()
+		}
+		this.queue.clear()
 	}
 
 	exclusive(...states: State<any>[]) {
@@ -111,10 +116,12 @@ export class State<R = void> {
 	}
 
 	enable(ressources: R) {
-		if (this.enabled) {
-			this.disable()
-		}
-		this.#app.enable(this, ressources)
+		this.#app.queue.add(() => {
+			if (this.enabled) {
+				this.disable()
+			}
+			this.#app.enable(this, ressources)
+		})
 	}
 
 	disable() {

@@ -20,9 +20,9 @@ import { spawnGround, spawnRocks, spawnSkyBox, spawnTrees } from './states/game/
 import { spawnLight } from './states/game/spawnLights'
 
 coreState
-	.addPlugins(hierarchyPlugin, updateInputs('playerControls'), physicsPlugin, transformsPlugin, addToScene('camera', 'light', 'mesh', 'model'), updateModels, uiPlugin)
+	.addPlugins(hierarchyPlugin, physicsPlugin, updateInputs('playerControls'), transformsPlugin, addToScene('camera', 'light', 'mesh', 'model'), updateModels, uiPlugin)
 	.addSubscriber()
-	.onEnter(initThree(4), initCamera(false))
+	.onEnter(initThree(4), initCamera(false), spawnDebugUi)
 	.onUpdate(...playAnimations('playerAnimator'), moveCamera, rerender)
 	.onPostUpdate(updateControls, render)
 	.enable()
@@ -41,7 +41,6 @@ dungeonState
 	.onExit(despawnOfType('map'))
 	// .enable({ direction: 'front', door: 3 })
 
-spawnDebugUi()
 const animate = async () => {
 	time.tick()
 	app.update()
