@@ -6,7 +6,7 @@ import { between, range } from '@/utils/mapFunctions'
 
 export const spawnEnemy = (size: number, amount: number) => {
 	const beeModel = assets.characters.Armabee.scene
-	beeModel.scale.multiplyScalar(3)
+	beeModel.scale.multiplyScalar(2)
 	return () => {
 		range(0, amount, () => {
 			ecs.add({
@@ -27,7 +27,7 @@ export const enemyAttackPlayer = () => {
 		for (const player of playerQuery) {
 			const direction = player.position.clone().sub(enemy.position).normalize()
 			enemy.rotation.setFromUnitVectors(new Vector3(0, 0, 1), new Vector3(direction.x, 0, direction.z))
-			const force = 5 * time.delta
+			const force = 1 * time.delta
 			enemy.body.applyImpulse(direction.multiply(new Vector3(force, 0, force)), true)
 		}
 	}
