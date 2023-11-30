@@ -19,6 +19,7 @@ const playerBundle = () => {
 		...modelColliderBundle(model.scene),
 		playerAnimator: new Animator('idle', model),
 		faction: Faction.Player,
+		sensor: true,
 	} as const satisfies Entity
 }
 

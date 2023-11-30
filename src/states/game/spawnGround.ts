@@ -1,5 +1,6 @@
 import { ColliderDesc, RigidBodyDesc } from '@dimforge/rapier3d-compat'
 import { BackSide, BoxGeometry, Mesh, MeshBasicMaterial, MeshStandardMaterial, Vector3 } from 'three'
+import { insideCircle } from 'randomish'
 import { assets, ecs } from '@/global/init'
 import { between, getRandom, objectValues, range } from '@/utils/mapFunctions'
 
@@ -31,12 +32,13 @@ export const spawnSkyBox = () => {
 }
 export const spawnTrees = (size = 256, amount = 100) => () => {
 	range(0, amount, () => {
+		const position = insideCircle(size / 2)
 		ecs.add({
 			inMap: true,
 			parent,
 			scale: 4,
 			model: getRandom(objectValues(assets.trees)).scene.clone(),
-			position: new Vector3(between(-size / 2, size / 2), 0, between(-size / 2, size / 2)),
+			position: new Vector3(position.x + Math.sign(position.x) * size / 16, 0, position.y + Math.sign(position.y) * size / 16),
 			outline: true,
 		})
 	})

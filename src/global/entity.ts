@@ -1,13 +1,13 @@
 import type { Collider, ColliderDesc, RigidBody, RigidBodyDesc } from '@dimforge/rapier3d-compat'
+import type { JSXElement } from 'solid-js'
 import type { Group, Light, Mesh, Object3D, Object3DEventMap, PerspectiveCamera, Quaternion, Scene, Vector3, WebGLRenderer } from 'three'
 import type CSM from 'three-csm'
 import type { OrbitControls } from 'three/examples/jsm/controls/OrbitControls'
 import type { EffectComposer } from 'three/examples/jsm/postprocessing/EffectComposer'
-import type { JSXElement } from 'solid-js'
 import type { Animator } from './animator'
 import type { PlayerInputMap } from '@/lib/inputs'
-import type { playerAnimations } from '@/constants/animations'
 import type { direction } from '@/lib/directions'
+import type { playerAnimations } from '@/constants/animations'
 
 export enum Faction {
 	Player,
@@ -53,14 +53,16 @@ export interface Entity {
 	el?: HTMLElement
 	cssObject?: true
 	uiRoot?: true
-	// ! Detect edges
-	outline?: true
+	// ! Farming
+	sensor?: true
+	sensorCollider?: Collider
 	// ! Game
 	map?: true
 	// ! Camp
 	door?: { index: number; direction: direction }
 	// ! Dungeon
 	faction?: Faction
+	test?: true
 }
 type Prettify<T> = {
 	[K in keyof T]: T[K];

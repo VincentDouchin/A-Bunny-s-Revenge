@@ -158,11 +158,11 @@ export class InputMap<T extends readonly string[]> {
 }
 export type PlayerInputMap = ReturnType<typeof playerInputMap>
 export const playerInputMap = () => {
-	const map = new InputMap('left', 'right', 'forward', 'backward', 'jump')
+	const map = new InputMap('left', 'right', 'forward', 'backward', 'plant')
 	map.get('left').setKey('KeyA')
 	map.get('right').setKey('KeyD')
 	map.get('forward').setKey('KeyW')
 	map.get('backward').setKey('KeyS')
-	map.get('jump').setKey('Space')
+	map.get('plant').setKey('Space')
 	return map
 }

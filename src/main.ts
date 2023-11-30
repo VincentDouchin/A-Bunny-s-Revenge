@@ -12,16 +12,18 @@ import { transformsPlugin } from './lib/transforms'
 import { rerender } from './lib/uiManager'
 import { uiPlugin } from './lib/uiPlugin'
 import { updateInputs } from './lib/updateInputs'
+import { plantSeed } from './states/farm/plantSeed'
 import { movePlayer } from './states/game/movePlayer'
 import { spawnCharacter, spawnCharacterDungeon } from './states/game/spawnCharacter'
 import { collideWithDoor, collideWithDoorCamp, spawnCampDoor, spawnDungeonDoors } from './states/game/spawnDoor'
 import { enemyAttackPlayer, spawnEnemy } from './states/game/spawnEnemy'
 import { spawnGround, spawnRocks, spawnSkyBox, spawnTrees } from './states/game/spawnGround'
 import { spawnLight } from './states/game/spawnLights'
+import { target } from './states/game/target'
 
 coreState
 	.addPlugins(hierarchyPlugin, physicsPlugin, updateInputs('playerControls'), transformsPlugin, addToScene('camera', 'light', 'mesh', 'model'), updateModels, uiPlugin)
-	.addSubscriber()
+	.addSubscriber(...target)
 	.onEnter(initThree(4), initCamera(false), spawnDebugUi)
 	.onUpdate(...playAnimations('playerAnimator'), moveCamera, rerender)
 	.onPostUpdate(updateControls, render)
@@ -32,7 +34,7 @@ gameState
 	.enable()
 campState
 	.onEnter(spawnGround(), spawnCharacter, spawnLight, spawnSkyBox, spawnTrees(), spawnRocks(), spawnCampDoor)
-	.onUpdate(collideWithDoorCamp)
+	.onUpdate(collideWithDoorCamp, plantSeed)
 	.onExit(despawnOfType('map'))
 	.enable()
 dungeonState

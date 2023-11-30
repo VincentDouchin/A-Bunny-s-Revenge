@@ -1,3 +1,4 @@
+import { Vector3 } from 'three'
 import type { State } from './state'
 import { ecs } from '@/global/init'
 
@@ -12,12 +13,24 @@ const updateMeshPosition = () => {
 
 const bodiesWithoutWorldPositionQuery = ecs.with('bodyDesc', 'group').without('worldPosition')
 const addWorldPosition = () => bodiesWithoutWorldPositionQuery.onEntityAdded.subscribe((entity) => {
-	ecs.addComponent(entity, 'worldPosition', entity.group.position)
+	const worldPosition = new Vector3()
+	entity.group.getWorldPosition(worldPosition)
+	ecs.addComponent(entity, 'worldPosition', worldPosition)
 })
-const bodiesQuery = ecs.with('body', 'position')
+const worldPositionQuery = ecs.with('group', 'worldPosition', 'body')
+const updateWorldPosition = () => {
+	for (const { group, worldPosition, body } of worldPositionQuery) {
+		group.getWorldPosition(worldPosition)
+		body.setTranslation(worldPosition, true)
+	}
+}
+
+const bodiesQuery = ecs.with('body', 'position').where(({ body }) => body.isDynamic())
 const updateGroupPosition = () => {
-	for (const { body, position } of bodiesQuery) {
+	for (const entity of bodiesQuery) {
+		const { body, position } = entity
 		const bodyPos = body.translation()
+
 		position.x = bodyPos.x
 		position.y = bodyPos.y
 		position.z = bodyPos.z
@@ -39,4 +52,5 @@ export const transformsPlugin = (state: State) => {
 	state
 		.addSubscriber(addWorldPosition)
 		.onUpdate(updateGroupPosition, updateMeshPosition, updateRotation)
+		.onPostUpdate(updateWorldPosition)
 }

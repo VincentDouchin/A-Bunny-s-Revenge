@@ -1,5 +1,5 @@
-import { ecs } from '../global/init'
 import type { Entity } from '../global/entity'
+import { ecs } from '../global/init'
 import type { State } from './state'
 import { set } from './state'
 
