@@ -4,10 +4,12 @@ import type { Group, Light, Mesh, Object3D, Object3DEventMap, PerspectiveCamera,
 import type CSM from 'three-csm'
 import type { OrbitControls } from 'three/examples/jsm/controls/OrbitControls'
 import type { EffectComposer } from 'three/examples/jsm/postprocessing/EffectComposer'
+import type { Tween } from '@tweenjs/tween.js'
 import type { Animator } from './animator'
 import type { PlayerInputMap } from '@/lib/inputs'
 import type { direction } from '@/lib/directions'
 import type { playerAnimations } from '@/constants/animations'
+import type { TweenGroup } from '@/lib/tweenGroup'
 
 export enum Faction {
 	Player,
@@ -15,6 +17,8 @@ export enum Faction {
 }
 
 export interface Entity {
+	// ! Tween
+	tween?: Tween<any> | TweenGroup
 	// ! Models
 	scale?: number
 	// ! Transforms
@@ -47,6 +51,7 @@ export interface Entity {
 	body?: RigidBody
 	colliderDesc?: ColliderDesc
 	collider?: Collider
+	size?: Vector3
 	// ! Animations
 	playerAnimator?: Animator<playerAnimations>
 	template?: () => JSXElement
@@ -56,6 +61,7 @@ export interface Entity {
 	// ! Farming
 	sensor?: true
 	sensorCollider?: Collider
+	crop?: { stage: number; name: 'carrot' }
 	// ! Game
 	map?: true
 	// ! Camp
@@ -63,6 +69,8 @@ export interface Entity {
 	// ! Dungeon
 	faction?: Faction
 	test?: true
+	// ! Items
+	item?: true
 }
 type Prettify<T> = {
 	[K in keyof T]: T[K];

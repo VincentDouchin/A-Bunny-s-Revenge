@@ -27,7 +27,7 @@ const doorBundle = (index: number, direction: direction, init = false) => {
 
 export const spawnCampDoor = () => {
 	ecs.add({
-		...doorBundle(3, 'front'),
+		...doorBundle(1, 'front'),
 		position: new Vector3(0, 0, 100),
 	})
 }
@@ -57,7 +57,7 @@ export const collideWithDoor: System<DungeonRessources> = ({ direction }) => {
 					if (roomsLeft) {
 						dungeonState.enable({ door: roomsLeft, direction: otherDirection[door.door.direction] })
 					} else {
-						campState.enable()
+						campState.enable({ previousState: 'dungeon' })
 					}
 				}
 			}

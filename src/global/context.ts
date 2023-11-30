@@ -1,4 +1,6 @@
-export const context = {}
+export const context = {
+	save: 'save',
+}
 
 export const params = {
 	pixelation: 4,

@@ -1,8 +1,9 @@
 import toneMapsrc from '@assets/_singles/tonemap.png'
 import { Mesh, MeshPhysicalMaterial, MeshStandardMaterial, MeshToonMaterial, NearestFilter, TextureLoader } from 'three'
+import type { GLTF } from 'three/examples/jsm/loaders/GLTFLoader'
 import type { stringCaster } from './assetLoaders'
 import { getFileName, loadGLB } from './assetLoaders'
-import { addKeys, asyncMap, asyncMapValues } from '@/utils/mapFunctions'
+import { addKeys, asyncMap, asyncMapValues, entries, groupByObject, mapValues } from '@/utils/mapFunctions'
 
 const loadToneMap = async () => {
 	const texture = await new TextureLoader().loadAsync(toneMapsrc)
@@ -11,7 +12,7 @@ const loadToneMap = async () => {
 }
 
 type Glob = Record<string, () => Promise<any>>
-type defaultGlob = Record<string, { default: string }>
+type defaultGlob = Record<string, string >
 
 const loadGLBAsToon = async <K extends string>(glob: Glob) => {
 	const gradientMap = await loadToneMap()
@@ -41,13 +42,30 @@ const skyboxLoader = async (glob: defaultGlob) => {
 	const loader = new TextureLoader()
 	const entries = Object.entries(glob)
 	return await Promise.all(['right', 'left', 'up', 'down', 'back', 'front'].map((side) => {
-		const path = entries.find(([name]) => name.toLowerCase().includes(side))![1].default
+		const path = entries.find(([name]) => name.toLowerCase().includes(side))![1]
 		return loader.loadAsync(path)
 	}))
 }
+const cropsLoader = async (glob: Glob) => {
+	const models = await loadGLBAsToon(glob)
+	const grouped = groupByObject(models, key => key.split('_')[0].toLowerCase() as 'carrot')
+	return mapValues(grouped, (group) => {
+		let crop: GLTF | null = null
+		const stages = new Array<GLTF>()
+		for (const [key, model] of entries(group)) {
+			if (key.toLowerCase().includes('crop')) {
+				crop = model
+			} else {
+				stages[Number(key.split('_')[1]) - 1] = model
+			}
+		}
+		return { crop: crop!, stages }
+	})
+}
 export const loadAssets = async () => ({
 	characters: await loadGLBAsToon<models>(import.meta.glob('@assets/models/*.*', { as: 'url' })),
-	skybox: await skyboxLoader(import.meta.glob('@assets/skybox/*.png', { eager: true })),
+	skybox: await skyboxLoader(import.meta.glob('@assets/skybox/*.png', { eager: true, import: 'default' })),
 	trees: await loadGLBAsToon<trees>(import.meta.glob('@assets/trees/*.glb', { as: 'url' })),
 	rocks: await loadGLBAsToon<rocks>(import.meta.glob('@assets/rocks/*.glb', { as: 'url' })),
+	crops: await cropsLoader(import.meta.glob('@assets/crops/*.glb', { as: 'url' })),
 } as const)
