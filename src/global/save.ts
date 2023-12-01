@@ -1,6 +1,7 @@
 import { get, set } from 'idb-keyval'
 import { context } from './context'
 import { ecs } from './init'
+import type { ItemData } from '@/constants/items'
 
 interface CropData {
 	name: 'carrot'
@@ -10,10 +11,12 @@ interface CropData {
 }
 interface SaveData {
 	crops: CropData[]
+	items: ItemData[]
 }
 
 const blankSave = (): SaveData => ({
 	crops: [],
+	items: [],
 })
 
 export const save: Readonly<SaveData> = blankSave()
@@ -34,5 +37,12 @@ const cropsQuery = ecs.with('crop', 'position')
 export const saveCrops = () => {
 	updateSave((s) => {
 		s.crops = [...cropsQuery].map(({ crop, position }) => ({ ...crop, x: position.x, z: position.z }))
+	})
+}
+export const addItem = (item: ItemData) => {
+	updateSave((s) => {
+		const existingItem = s.items.find(i => i.icon === item.icon)
+		if (existingItem)existingItem.quantity += item.quantity
+		else s.items.push(item)
 	})
 }

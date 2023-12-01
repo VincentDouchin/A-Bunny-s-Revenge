@@ -1,5 +1,4 @@
 import { params } from '@/global/context'
-import { ecs } from '@/global/init'
 import { renderer } from '@/global/rendering'
 
 export const DebugUi = () => {
@@ -10,7 +9,7 @@ export const DebugUi = () => {
 		renderer.setSize(window.innerWidth / val, window.innerHeight / val)
 	}
 	return (
-		<>
+		<div style={{ position: 'absolute' }}>
 			<div>
 				Pixelation
 				<input
@@ -56,11 +55,6 @@ export const DebugUi = () => {
 				>
 				</input>
 			</div>
-		</>
+		</div>
 	)
-}
-export const spawnDebugUi = () => {
-	ecs.add({
-		template: DebugUi,
-	})
 }

@@ -1,10 +1,10 @@
-import { Vector3 } from 'three'
 import { RigidBodyType } from '@dimforge/rapier3d-compat'
+import { Vector3 } from 'three'
 import { assets, ecs, world } from '@/global/init'
 import { save, saveCrops } from '@/global/save'
-import type { System } from '@/lib/state'
 import type { FarmRessources } from '@/global/states'
 import { modelColliderBundle } from '@/lib/models'
+import type { System } from '@/lib/state'
 
 const playerQuery = ecs.with('playerControls', 'sensorCollider')
 const cropsQuery = ecs.with('position', 'crop', 'collider')
@@ -61,6 +61,7 @@ export const harvestCrop = () => {
 						position: position.clone().add(new Vector3(0, bundle.size.y + 2, 0)),
 						inMap: true,
 					})
+
 					saveCrops()
 				}
 			}

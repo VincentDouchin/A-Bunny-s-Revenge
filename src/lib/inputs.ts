@@ -24,145 +24,104 @@ export const GAMEPAD_BUTTON = {
 	RIGHT: 15,
 } as const
 
-const keys: Record<string, boolean> = {}
-
-window.addEventListener('keydown', (e) => {
-	if (e.code in keys) {
-		keys[e.code] = true
+export const InputManager = new class {
+	keys: Record<string, 0 | 1> = {}
+	constructor() {
+		window.addEventListener('keydown', (e) => {
+			if (e.code in this.keys) {
+				this.keys[e.code] = 1
+			}
+		})
+		window.addEventListener('keyup', (e) => {
+			if (e.code in this.keys) {
+				this.keys[e.code] = 0
+			}
+		})
 	}
-})
-window.addEventListener('keyup', (e) => {
-	if (e.code in keys) {
-		keys[e.code] = false
-	}
-})
-
-window.addEventListener('touchstart', () => {
-	document.body.requestFullscreen()
-})
-
-const touchJoystickInputs = {
-	up: 0,
-	down: 0,
-	right: 0,
-	left: 0,
-	reset() {
-		this.up = 0
-		this.down = 0
-		this.left = 0
-		this.right = 0
-	},
-}
-type touchDirection = 'up' | 'down' | 'left' | 'right'
+}()
 
 export class Input {
 	pressed = 0
 	wasPressed = 0
-	buttons: number[] = []
-	axis: { index: number; direction: 'up' | 'down' }[] = []
-	codes: string[] = []
-	touchAxis?: touchDirection
-	setKey(...codes: string[]) {
-		for (const code of codes) {
-			keys[code] = false
+	#keys: string[] = []
+	#buttons: number[] = []
+	setKeys(...keys: string[]) {
+		this.#keys.push(...keys)
+		for (const key of keys) {
+			InputManager.keys[key] = 0
 		}
-		this.codes.push(...codes)
 		return this
 	}
 
-	setTouchAxis(axis: touchDirection) {
-		this.touchAxis = axis
-		return this
+	setButtons(...buttons: number[]) {
+		this.#buttons.push(...buttons)
 	}
 
-	setButton(button: number) {
-		this.buttons.push(button)
-		return this
-	}
-
-	setAxis(axis: number, direction: 'up' | 'down') {
-		this.axis.push({ index: axis, direction })
-		return this
-	}
-
-	update(gamepad?: Gamepad) {
-		for (const code of this.codes) {
-			if (keys[code]) {
-				this.pressed = 1
-			}
+	update(gamepads: Gamepad[]) {
+		this.wasPressed = this.pressed
+		this.pressed = 0
+		for (const key of this.#keys) {
+			this.pressed = InputManager.keys[key]
 		}
-		if (this.touchAxis && Math.abs(touchJoystickInputs[this.touchAxis]) > 0.01) {
-			this.pressed = touchJoystickInputs[this.touchAxis]
-		}
-		if (gamepad) {
-			for (const button of this.buttons) {
+		for (const gamepad of gamepads) {
+			for (const button of this.#buttons) {
 				if (gamepad.buttons[button].pressed) {
 					this.pressed = gamepad.buttons[button].value
-				}
-			}
-			for (const axis of this.axis) {
-				if (Math.abs(gamepad.axes[axis.index]) > 0.2 && (gamepad.axes[axis.index] > 0) !== (axis.direction === 'up')) {
-					this.pressed = Math.abs(gamepad.axes[axis.index])
 				}
 			}
 		}
 	}
 
 	get justPressed() {
-		return this.wasPressed === 0 && this.pressed > 0
+		return this.pressed > 0 && this.wasPressed === 0
 	}
 
 	get justReleased() {
-		return this.wasPressed > 0 && this.pressed === 0
+		return this.pressed === 0 && this.wasPressed > 0
 	}
 }
-
-export class InputMap<T extends readonly string[]> {
-	inputs = new Map<T[number], Input>()
+export class InputMap<K extends string> {
+	#inputs = new Map<K, Input>()
+	static #maps = new Set<InputMap<any>>()
 	#gamepads: number[] = []
-	setGamepad(...gamepadIndexes: number[]) {
-		this.#gamepads = gamepadIndexes
+	constructor(actions: readonly K[]) {
+		for (const action of actions) {
+			this.#inputs.set(action, new Input())
+		}
+		InputMap.#maps.add(this)
+	}
+
+	static update() {
+		const gamepads = navigator.getGamepads().filter(Boolean)
+		for (const map of InputMap.#maps) {
+			map.update(gamepads)
+		}
+	}
+
+	update(gamepads: Gamepad[]) {
+		const gamepadsToUse = gamepads.filter(g => g !== null && this.#gamepads.includes(g?.index))
+		for (const input of this.#inputs.values()) {
+			input.update(gamepadsToUse)
+		}
+	}
+
+	get(action: K) {
+		return this.#inputs.get(action)!
+	}
+
+	setGamepads(...gamepads: number[]) {
+		this.#gamepads = gamepads
 		return this
-	}
-
-	constructor(...inputNames: T) {
-		for (const name of inputNames) {
-			this.inputs.set(name, new Input())
-		}
-	}
-
-	get(name: T[number]) {
-		return this.inputs.get(name)!
-	}
-
-	reset() {
-		for (const input of this.inputs.values()) {
-			input.wasPressed = input.pressed
-			input.pressed = 0
-		}
-	}
-
-	updateInputsFromGamepad(gamepads: (Gamepad | null)[]) {
-		for (const input of this.inputs.values()) {
-			if (gamepads.filter(Boolean).length) {
-				for (const gamepad of gamepads.filter((gamepad, i) => gamepad && this.#gamepads.includes(i))) {
-					if (gamepad) {
-						input.update(gamepad)
-					}
-				}
-			} else {
-				input.update()
-			}
-		}
 	}
 }
 export type PlayerInputMap = ReturnType<typeof playerInputMap>
 export const playerInputMap = () => {
-	const map = new InputMap('left', 'right', 'forward', 'backward', 'plant')
-	map.get('left').setKey('KeyA')
-	map.get('right').setKey('KeyD')
-	map.get('forward').setKey('KeyW')
-	map.get('backward').setKey('KeyS')
-	map.get('plant').setKey('Space')
+	const map = new InputMap(['left', 'right', 'forward', 'backward', 'plant', 'inventory'])
+	map.get('left').setKeys('KeyA')
+	map.get('right').setKeys('KeyD')
+	map.get('forward').setKeys('KeyW')
+	map.get('backward').setKeys('KeyS')
+	map.get('plant').setKeys('Space')
+	map.get('inventory').setKeys('KeyE')
 	return map
 }

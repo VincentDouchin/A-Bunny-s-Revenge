@@ -19,8 +19,41 @@ body {
   min-width: 320px;
   min-height: 100vh;
 }
+img{
+  image-rendering:pixelated;
+}
 canvas{
   width:100% !important;
   height:100% !important;
   image-rendering:pixelated;
+}
+.slide{
+ translate:0% 100vh
+}
+.slide-in{
+  animation-name:slide-in;
+  animation-duration:500ms;
+  animation-fill-mode: forwards;
+}
+@keyframes slide-in{
+  from{
+    translate:0% 100vh
+  }
+  to{
+    translate:0% 0%
+  }
+}
+.slide-out{
+  animation-name:slide-out;
+  animation-duration:500ms;
+      animation-fill-mode: forwards;
+  
+}
+@keyframes slide-out{
+  from{
+    translate:0% 0%
+  }
+  to{
+    translate:0% 100vh
+  }
 }

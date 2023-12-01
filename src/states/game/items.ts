@@ -2,6 +2,7 @@ import { Easing, Tween } from '@tweenjs/tween.js'
 import { Vector3 } from 'three'
 import { ecs, world } from '@/global/init'
 import { TweenGroup } from '@/lib/tweenGroup'
+import { addItem } from '@/global/save'
 
 const itemsQuery = ecs.with('item', 'rotation', 'position', 'model', 'collider')
 export const bobItems = () => itemsQuery.onEntityAdded.subscribe((entity) => {
@@ -16,6 +17,8 @@ export const collectItems = () => {
 		for (const item of itemsQuery) {
 			if (world.intersectionPair(player.collider, item.collider)) {
 				ecs.removeComponent(item, 'tween')
+				ecs.removeComponent(item, 'collider')
+				addItem({ icon: 'carrot', quantity: 1 })
 				const tween = new TweenGroup([
 					new Tween(item.position).to({ ...player.position, y: item.position.y }, 500).onComplete(() => {
 						ecs.remove(item)
