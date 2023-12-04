@@ -1,4 +1,4 @@
-export const runif = (...systems: Array<() => unknown>) => (condition: () => boolean) => () => {
+export const runif = (condition: () => boolean, ...systems: Array<() => unknown>) => () => {
 	if (condition()) {
 		for (const system of systems) {
 			system()

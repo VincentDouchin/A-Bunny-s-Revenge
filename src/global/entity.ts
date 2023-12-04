@@ -5,11 +5,13 @@ import type CSM from 'three-csm'
 import type { OrbitControls } from 'three/examples/jsm/controls/OrbitControls'
 import type { EffectComposer } from 'three/examples/jsm/postprocessing/EffectComposer'
 import type { Tween } from '@tweenjs/tween.js'
+import type { With } from 'miniplex'
 import type { Animator } from './animator'
-import type { PlayerInputMap } from '@/lib/inputs'
+import type { MenuInputMap, PlayerInputMap } from '@/lib/inputs'
 import type { direction } from '@/lib/directions'
 import type { playerAnimations } from '@/constants/animations'
 import type { TweenGroup } from '@/lib/tweenGroup'
+import type { ItemData } from '@/constants/items'
 
 export enum Faction {
 	Player,
@@ -46,6 +48,7 @@ export interface Entity {
 	inMap?: true
 	// ! InputMaps
 	playerControls?: PlayerInputMap
+	menuInputs?: MenuInputMap
 	// ! Physics
 	bodyDesc?: RigidBodyDesc
 	body?: RigidBody
@@ -71,7 +74,11 @@ export interface Entity {
 	test?: true
 	// ! Items
 	item?: true
+	// ! Cooking
+	cauldron?: (ItemData | null)[]
+	openInventory?: true
 }
+export type Bundle<C extends keyof Entity> = () => With<Entity, C>
 type Prettify<T> = {
 	[K in keyof T]: T[K];
 } & unknown

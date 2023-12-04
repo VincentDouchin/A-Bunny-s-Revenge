@@ -9,7 +9,7 @@ export interface FarmRessources {
 }
 export const campState = app.create<FarmRessources>()
 export const setupState = app.create()
-
+export const openMenuState = app.create()
 export interface DungeonRessources {
 	door: number
 	direction: direction

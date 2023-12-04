@@ -61,7 +61,6 @@ export const harvestCrop = () => {
 						position: position.clone().add(new Vector3(0, bundle.size.y + 2, 0)),
 						inMap: true,
 					})
-
 					saveCrops()
 				}
 			}

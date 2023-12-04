@@ -1,4 +1,5 @@
 export const directions = ['front', 'back', 'left', 'right'] as const
+export const directionsXY = ['up', 'down', 'left', 'right'] as const
 
 export type direction = typeof directions[number]
 

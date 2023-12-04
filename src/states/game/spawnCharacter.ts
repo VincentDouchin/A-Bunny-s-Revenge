@@ -3,17 +3,19 @@ import { Animator } from '@/global/animator'
 import { type Entity, Faction } from '@/global/entity'
 import { assets, ecs } from '@/global/init'
 import type { DungeonRessources } from '@/global/states'
-import { playerInputMap } from '@/lib/inputs'
+import { menuInputMap, playerInputMap } from '@/lib/inputs'
 import { modelColliderBundle } from '@/lib/models'
 import type { System } from '@/lib/state'
 
 const playerBundle = () => {
 	const model = assets.characters.BunnyMain
 	return {
-		inMap: true,
-		playerControls: playerInputMap(),
-		cameratarget: true,
+		...playerInputMap(),
+		...menuInputMap(),
 		...modelColliderBundle(model.scene),
+
+		inMap: true,
+		cameratarget: true,
 		playerAnimator: new Animator('idle', model),
 		faction: Faction.Player,
 		sensor: true,

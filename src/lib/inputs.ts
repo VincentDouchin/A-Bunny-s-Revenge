@@ -1,3 +1,5 @@
+import type { Bundle } from '@/global/entity'
+
 export const GAMEPAD_AXIS = {
 	LEFT_X: 0,
 	LEFT_Y: 1,
@@ -114,14 +116,29 @@ export class InputMap<K extends string> {
 		return this
 	}
 }
-export type PlayerInputMap = ReturnType<typeof playerInputMap>
-export const playerInputMap = () => {
-	const map = new InputMap(['left', 'right', 'forward', 'backward', 'plant', 'inventory'])
+const playerInputs = ['left', 'right', 'forward', 'backward', 'plant', 'inventory', 'interact'] as const
+export type PlayerInputMap = InputMap<typeof playerInputs[number]>
+export const playerInputMap: Bundle<'playerControls'> = () => {
+	const map = new InputMap(playerInputs)
 	map.get('left').setKeys('KeyA')
 	map.get('right').setKeys('KeyD')
 	map.get('forward').setKeys('KeyW')
 	map.get('backward').setKeys('KeyS')
 	map.get('plant').setKeys('Space')
 	map.get('inventory').setKeys('KeyE')
-	return map
+	map.get('interact').setKeys('Space')
+	return { playerControls: map }
+}
+
+const menuInputs = ['up', 'down', 'left', 'right', 'validate', 'cancel'] as const
+export type MenuInputMap = InputMap<typeof menuInputs[number]>
+export const menuInputMap: Bundle<'menuInputs'> = () => {
+	const map = new InputMap(menuInputs)
+	map.get('up').setKeys('KeyW')
+	map.get('down').setKeys('KeyS')
+	map.get('left').setKeys('KeyA')
+	map.get('right').setKeys('KeyD')
+	map.get('validate').setKeys('Enter', 'Space')
+	map.get('cancel').setKeys('Escape')
+	return { menuInputs: map }
 }

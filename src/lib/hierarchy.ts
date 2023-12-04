@@ -1,4 +1,4 @@
-import type { Entity } from '../global/entity'
+import type { ComponentsOfType, Entity } from '../global/entity'
 import { ecs } from '../global/init'
 import type { State } from './state'
 import { set } from './state'
@@ -47,4 +47,7 @@ export const despawnOfType = (...components: (keyof Entity)[]) => {
 
 export const hierarchyPlugin = (state: State) => {
 	state.addSubscriber(addChildren, removeChildren, despanwChildren)
+}
+export const addTag = (entity: Entity, tag: ComponentsOfType<true>) => {
+	ecs.addComponent(entity, tag, true)
 }

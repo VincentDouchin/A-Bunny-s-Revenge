@@ -28,9 +28,9 @@ export const getSave = async () => {
 		Object.assign(save, data)
 	}
 }
-export const updateSave = async (saveFn: (save: SaveData) => void) => {
+export const updateSave = async (saveFn: (save: SaveData) => void, saved = true) => {
 	saveFn(save)
-	await set(context.save, save)
+	saved && await set(context.save, save)
 }
 
 const cropsQuery = ecs.with('crop', 'position')
@@ -39,10 +39,10 @@ export const saveCrops = () => {
 		s.crops = [...cropsQuery].map(({ crop, position }) => ({ ...crop, x: position.x, z: position.z }))
 	})
 }
-export const addItem = (item: ItemData) => {
+export const addItem = (item: ItemData, save = true) => {
 	updateSave((s) => {
 		const existingItem = s.items.find(i => i.icon === item.icon)
 		if (existingItem)existingItem.quantity += item.quantity
 		else s.items.push(item)
-	})
+	}, save)
 }
