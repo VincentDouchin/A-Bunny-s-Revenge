@@ -8,24 +8,25 @@ import { InputMap } from './lib/inputs'
 import { updateModels } from './lib/modelsProperties'
 import { physicsPlugin } from './lib/physics'
 import { addToScene } from './lib/registerComponents'
+import { runIf } from './lib/state'
+import { runif } from './lib/systemset'
 import { transformsPlugin } from './lib/transforms'
 import { uiPlugin } from './lib/uiPlugin'
 import { startTweens, updateTweens } from './lib/updateTween'
-import { closeCauldronInventory, openCauldronInventory, spawnCauldron } from './states/farm/cooking'
+import { closeCauldronInventory, openCauldronInventory } from './states/farm/cooking'
 import { addCropModel, harvestCrop, plantSeed, spawnCrops } from './states/farm/farming'
+import { closeInventory, openInventory, toggleMenuState } from './states/farm/openInventory'
 import { bobItems, collectItems } from './states/game/items'
 import { movePlayer } from './states/game/movePlayer'
+import { target } from './states/game/sensor'
 import { spawnCharacter, spawnCharacterDungeon } from './states/game/spawnCharacter'
-import { collideWithDoor, collideWithDoorCamp, spawnCampDoor, spawnDungeonDoors } from './states/game/spawnDoor'
+import { collideWithDoor, collideWithDoorCamp, spawnDungeonDoors } from './states/game/spawnDoor'
 import { enemyAttackPlayer, spawnEnemy } from './states/game/spawnEnemy'
 import { spawnGround, spawnRocks, spawnSkyBox, spawnTrees } from './states/game/spawnGround'
+import { spawnLevel } from './states/game/spawnLevel'
 import { spawnLight } from './states/game/spawnLights'
-import { target } from './states/game/sensor'
 import { setupGame } from './states/setup/setupGame'
 import { UI } from './ui/UI'
-import { runif } from './lib/systemset'
-import { closeInventory, openInventory, toggleMenuState } from './states/farm/openInventory'
-import { runIf } from './lib/state'
 
 coreState
 	.addPlugins(hierarchyPlugin, physicsPlugin, transformsPlugin, addToScene('camera', 'light', 'mesh', 'model'), updateModels, uiPlugin)
@@ -44,7 +45,7 @@ gameState
 	.enable()
 campState
 	.addSubscriber(addCropModel)
-	.onEnter(spawnGround(), spawnCharacter, spawnLight, spawnSkyBox, spawnTrees(), spawnRocks(), spawnCampDoor, spawnCrops, spawnCauldron)
+	.onEnter(spawnLevel('farm'), spawnCharacter, spawnLight, spawnSkyBox, spawnCrops)
 	.onUpdate(collideWithDoorCamp, runif(() => !openMenuState.enabled, plantSeed, harvestCrop, openCauldronInventory, openInventory))
 	.onExit(despawnOfType('map'))
 openMenuState

@@ -63,7 +63,8 @@ export class Input {
 		this.wasPressed = this.pressed
 		this.pressed = 0
 		for (const key of this.#keys) {
-			this.pressed = InputManager.keys[key]
+			if (InputManager.keys[key])
+				this.pressed = 1
 		}
 		for (const gamepad of gamepads) {
 			for (const button of this.#buttons) {

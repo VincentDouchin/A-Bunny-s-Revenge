@@ -1,11 +1,11 @@
 import { ColliderDesc, RigidBodyDesc, RigidBodyType } from '@dimforge/rapier3d-compat'
-import type { Group, Object3DEventMap } from 'three'
+import type { Object3D, Object3DEventMap } from 'three'
 import { Box3, Quaternion, Vector3 } from 'three'
 
 import { clone } from 'three/examples/jsm/utils/SkeletonUtils.js'
 import type { Entity } from '@/global/entity'
 
-export const modelColliderBundle = (model: Group<Object3DEventMap>, type = RigidBodyType.Dynamic, sensor = false) => {
+export const modelColliderBundle = (model: Object3D<Object3DEventMap>, type = RigidBodyType.Dynamic, sensor = false) => {
 	const cloneModel = clone(model)
 	const size = new Vector3()
 	new Box3().setFromObject(model).getSize(size)

@@ -75,6 +75,9 @@ const fontLoader = async (glob: Glob) => {
 		document.fonts.add(font)
 	}
 }
+const levelLoader = async (glob: GlobEager) => {
+	return mapKeys(await asyncMapValues(glob, loadImage), getFileName as stringCaster<levels>)
+}
 export const loadAssets = async () => ({
 	characters: await loadGLBAsToon<models>(import.meta.glob('@assets/models/*.*', { as: 'url' })),
 	skybox: await skyboxLoader(import.meta.glob('@assets/skybox/*.png', { eager: true, import: 'default' })),
@@ -83,4 +86,5 @@ export const loadAssets = async () => ({
 	crops: await cropsLoader(import.meta.glob('@assets/crops/*.glb', { as: 'url' })),
 	items: await itemsLoader(import.meta.glob('@assets/items/*.png', { eager: true, import: 'default' })),
 	fonts: await fontLoader(import.meta.glob('@assets/fonts/*.ttf', { eager: true, import: 'default' })),
+	levels: await levelLoader(import.meta.glob('@assets/levels/*.png', { eager: true, import: 'default' })),
 } as const)

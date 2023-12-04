@@ -1,10 +1,8 @@
 import type { With } from 'miniplex'
-import { createComputed, createRoot, createSignal } from 'solid-js'
 import type { ItemData } from '@/constants/items'
 import type { Entity } from '@/global/entity'
 import { assets, ecs, ui } from '@/global/init'
 import { save } from '@/global/save'
-import { menuInputMap } from '@/lib/inputs'
 import { textStroke } from '@/lib/uiManager'
 import { ForQuery } from '@/ui/ForQuery'
 import { Menu } from '@/ui/Menu'
@@ -20,6 +18,7 @@ export const ItemDisplay = (props: { item: ItemData | null; selected: boolean })
 					<div style={{ 'color': 'white', 'position': 'absolute', 'width': '1rem', 'bottom': '0.5rem', 'right': '0.5rem', ...textStroke('black'), 'text-align': 'center' }}>{props.item.quantity}</div>
 				</>
 			)}
+			{props.selected && <div style={{ color: 'white', position: 'absolute', top: '100%' }}>{props.item?.icon}</div>}
 
 		</div>
 	)
@@ -34,8 +33,8 @@ export const Inventory = (props: { player: With<Entity, 'playerControls'> }) => 
 				inputs={props.player.menuInputs}
 			>
 				{({ getProps }) => {
-					return items().map((item) => {
-						const props = getProps()
+					return items().map((item, i) => {
+						const props = getProps(i === 0)
 						return (
 							<div {...props}>
 								<ItemDisplay item={item} selected={props.selected()}></ItemDisplay>

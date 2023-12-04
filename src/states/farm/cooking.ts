@@ -1,22 +1,21 @@
-import { Vector3 } from 'three'
 import { RigidBodyType } from '@dimforge/rapier3d-compat'
+import type { Entity } from '@/global/entity'
 import { assets, ecs, world } from '@/global/init'
-import { modelColliderBundle } from '@/lib/models'
-import { menuInputMap } from '@/lib/inputs'
 import { addTag } from '@/lib/hierarchy'
+import { menuInputMap } from '@/lib/inputs'
+import { modelColliderBundle } from '@/lib/models'
 
-export const spawnCauldron = () => {
+export const cauldronBundle = (): Entity => {
 	const model = assets.characters.cauldron.scene.clone()
 	model.scale.setScalar(10)
 	const bundle = modelColliderBundle(model, RigidBodyType.Fixed)
-	ecs.add({
+	return {
 		...bundle,
 		...menuInputMap(),
-		position: new Vector3(20, bundle.size.y, 0),
 		cauldron: [null, null, null, null],
 		inMap: true,
 
-	})
+	}
 }
 const playerCollider = ecs.with('sensorCollider', 'playerControls')
 const cauldronQuery = ecs.with('cauldron', 'collider', 'menuInputs')

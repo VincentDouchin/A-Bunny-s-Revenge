@@ -10,7 +10,7 @@ export default antfu({
 		'style/brace-style': 'off',
 		'antfu/top-level-function': 'off',
 		'antfu/if-newline': 'off',
-
+		'no-lone-blocks': 'off',
 	},
 	ignores: ['dev-dist', 'assets/*', 'node-modules', 'dist'],
 })

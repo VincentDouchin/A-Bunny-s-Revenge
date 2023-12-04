@@ -7,7 +7,7 @@ import { type direction, otherDirection } from '@/lib/directions'
 import type { System } from '@/lib/state'
 import { entries } from '@/utils/mapFunctions'
 
-const doorBundle = (index: number, direction: direction, init = false) => {
+export const doorBundle = (index: number, direction: direction, init = false) => {
 	const rotation = new Quaternion()
 	if (direction === 'left' || direction === 'right') {
 		rotation.setFromAxisAngle(new Vector3(0, 1, 0), Math.PI / 2)
@@ -25,12 +25,6 @@ const doorBundle = (index: number, direction: direction, init = false) => {
 	} as const
 }
 
-export const spawnCampDoor = () => {
-	ecs.add({
-		...doorBundle(1, 'front'),
-		position: new Vector3(0, 0, 100),
-	})
-}
 export const spawnDungeonDoors: System<DungeonRessources> = ({ door, direction }) => {
 	const doors = {
 		front: new Vector3(0, 0, 48),
