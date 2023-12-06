@@ -31,7 +31,7 @@ import { UI } from './ui/UI'
 coreState
 	.addPlugins(hierarchyPlugin, physicsPlugin, transformsPlugin, addToScene('camera', 'light', 'mesh', 'model'), updateModels, uiPlugin)
 	.addSubscriber(...target, startTweens)
-	.onEnter(initThree(4), initCamera(false), ui.render(UI))
+	.onEnter(initThree(4), initCamera, ui.render(UI))
 	.onUpdate(...playAnimations('playerAnimator'), moveCamera, updateTweens, InputMap.update, ui.update)
 	.onPostUpdate(updateControls, render)
 	.enable()

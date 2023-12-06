@@ -1,25 +1,16 @@
 import { PerspectiveCamera, Vector3 } from 'three'
-import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls'
 import { params } from './context'
 import { ecs } from './init'
-import { rendererQuery, sceneQuery } from './rendering'
 
 export const camera = new PerspectiveCamera(params.fov, window.innerWidth / window.innerHeight, 0.1, 100000)
+// const aspect = window.innerWidth / window.innerHeight
+// const CAMERA_SIZE = 20
+// export const camera = new OrthographicCamera(-CAMERA_SIZE * aspect, CAMERA_SIZE * aspect, CAMERA_SIZE, -CAMERA_SIZE, 0.1, 100000)
 
-export const initCamera = (debug: boolean = false) => () => {
-	if (debug) {
-		camera.position.set(0, params.cameraOffsetY, params.cameraOffsetZ)
-		const [scene] = sceneQuery
-		scene.scene.add(camera)
-		ecs.add({ camera, mainCamera: true })
-		const [renderer] = rendererQuery
-		const controls = new OrbitControls(camera, renderer.renderer.domElement)
-		ecs.add({ controls })
-	} else {
-		camera.zoom = window.innerWidth / window.innerHeight / params.zoom
-		camera.updateProjectionMatrix()
-		ecs.add({ camera, position: new Vector3(), mainCamera: true })
-	}
+export const initCamera = () => {
+	camera.zoom = window.innerWidth / window.innerHeight / params.zoom
+	camera.updateProjectionMatrix()
+	ecs.add({ camera, position: new Vector3(), mainCamera: true })
 }
 const cameraQuery = ecs.with('camera', 'position', 'mainCamera')
 const cameraTargetQuery = ecs.with('cameratarget', 'worldPosition')
@@ -27,11 +18,13 @@ export const moveCamera = () => {
 	for (const { position, camera } of cameraQuery) {
 		for (const { worldPosition } of cameraTargetQuery) {
 			camera.lookAt(worldPosition)
-			position.x = worldPosition.x
+			position.x = worldPosition.x + params.cameraOffsetX
 			position.y = worldPosition.y + params.cameraOffsetY
 			position.z = worldPosition.z + params.cameraOffsetZ
 			camera.zoom = window.innerWidth / window.innerHeight / params.zoom
-			camera.fov = params.fov
+			if (camera instanceof PerspectiveCamera) {
+				camera.fov = params.fov
+			}
 			camera.updateProjectionMatrix()
 		}
 	}

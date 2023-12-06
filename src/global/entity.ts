@@ -1,17 +1,17 @@
 import type { Collider, ColliderDesc, RigidBody, RigidBodyDesc } from '@dimforge/rapier3d-compat'
+import type { Tween } from '@tweenjs/tween.js'
+import type { With } from 'miniplex'
 import type { JSXElement } from 'solid-js'
 import type { Group, Light, Mesh, Object3D, Object3DEventMap, PerspectiveCamera, Quaternion, Scene, Vector3, WebGLRenderer } from 'three'
 import type CSM from 'three-csm'
 import type { OrbitControls } from 'three/examples/jsm/controls/OrbitControls'
 import type { EffectComposer } from 'three/examples/jsm/postprocessing/EffectComposer'
-import type { Tween } from '@tweenjs/tween.js'
-import type { With } from 'miniplex'
 import type { Animator } from './animator'
+import type { TweenGroup } from '@/lib/tweenGroup'
 import type { MenuInputMap, PlayerInputMap } from '@/lib/inputs'
 import type { direction } from '@/lib/directions'
-import type { playerAnimations } from '@/constants/animations'
-import type { TweenGroup } from '@/lib/tweenGroup'
 import type { ItemData } from '@/constants/items'
+import type { playerAnimations } from '@/constants/animations'
 
 export enum Faction {
 	Player,

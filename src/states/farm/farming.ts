@@ -1,4 +1,5 @@
 import { RigidBodyType } from '@dimforge/rapier3d-compat'
+import { Easing, Tween } from '@tweenjs/tween.js'
 import { Vector3 } from 'three'
 import { assets, ecs, world } from '@/global/init'
 import { save, saveCrops } from '@/global/save'
@@ -29,6 +30,11 @@ export const addCropModel = () => ecs.with('crop').without('model').onEntityAdde
 	model.scale.setScalar(10)
 	const bundle = modelColliderBundle(model, RigidBodyType.Fixed, true)
 	ecs.update(entity, bundle)
+	if (entity.crop.stage === 0) {
+		ecs.addComponent(entity, 'scale', 0)
+		const tween = new Tween(entity).to({ scale: 1 }, 1000).easing(Easing.Elastic.Out)
+		ecs.update(entity, { tween })
+	}
 })
 
 export const spawnCrops: System<FarmRessources> = ({ previousState }) => {

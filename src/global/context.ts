@@ -4,8 +4,9 @@ export const context = {
 
 export const params = {
 	pixelation: 4,
-	cameraOffsetY: 25,
-	cameraOffsetZ: -20,
-	zoom: 4,
+	cameraOffsetX: 0,
+	cameraOffsetY: 50,
+	cameraOffsetZ: -75,
+	zoom: 1,
 	fov: 50,
 }

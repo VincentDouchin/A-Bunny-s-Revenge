@@ -20,6 +20,15 @@ export const DebugUi = () => {
 				</input>
 			</div>
 			<div>
+				Camera Offset X
+				<input
+					type="number"
+					value={params?.cameraOffsetX}
+					onChange={e => params.cameraOffsetX = e.target.valueAsNumber}
+				>
+				</input>
+			</div>
+			<div>
 				Camera Offset Y
 				<input
 					type="number"

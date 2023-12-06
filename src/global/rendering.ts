@@ -1,8 +1,8 @@
 import { BasicShadowMap, SRGBColorSpace, Scene, WebGLRenderer } from 'three'
 import { EffectComposer } from 'three/examples/jsm/postprocessing/EffectComposer'
 import { RenderPass } from 'three/examples/jsm/postprocessing/RenderPass'
-import { camera } from './camera'
 import { ecs } from './init'
+import { camera } from './camera'
 
 export const scene = new Scene()
 export const renderer = new WebGLRenderer()
