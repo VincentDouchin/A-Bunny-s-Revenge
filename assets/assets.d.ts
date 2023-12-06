@@ -1,5 +1,6 @@
 type crops = 'Carrot_1' | 'Carrot_2' | 'Carrot_3' | 'Carrot_4' | 'Carrot_Crop'
 type fonts = 'GrapeSoda'
+type grass = '_grass_1' | '_grass_2'
 type items = 'carrot' | 'carrot_soup'
 type levels = 'farm'
 type models = 'Armabee' | 'BunnyMain' | 'cauldron'

@@ -20,7 +20,7 @@ export const spawnLight = () => {
 	})
 	ecs.add({
 		inMap: true,
-		light: new AmbientLight(0xFFFFFF, 1),
+		light: new AmbientLight(0xFFFFFF, 4),
 		position: new Vector3(),
 	})
 }

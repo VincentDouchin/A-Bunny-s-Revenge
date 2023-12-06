@@ -56,3 +56,14 @@ export const spawnRocks = (size = 256, amount = 100) => () => {
 		})
 	})
 }
+export const spawnGrass = (size = 256, amount = 100) => () => {
+	range(0, amount, () => {
+		ecs.add({
+			inMap: true,
+			scale: 4,
+			model: getRandom(objectValues(assets.grass).map(glb => glb.scene)).clone(),
+			position: new Vector3(between(-size / 2, size / 2), 0, between(-size / 2, size / 2)),
+			outline: true,
+		})
+	})
+}

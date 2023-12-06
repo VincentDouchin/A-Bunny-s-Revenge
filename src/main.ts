@@ -22,7 +22,7 @@ import { target } from './states/game/sensor'
 import { spawnCharacter, spawnCharacterDungeon } from './states/game/spawnCharacter'
 import { collideWithDoor, collideWithDoorCamp, spawnDungeonDoors } from './states/game/spawnDoor'
 import { enemyAttackPlayer, spawnEnemy } from './states/game/spawnEnemy'
-import { spawnGround, spawnRocks, spawnSkyBox, spawnTrees } from './states/game/spawnGround'
+import { spawnGrass, spawnGround, spawnRocks, spawnSkyBox } from './states/game/spawnGround'
 import { spawnLevel } from './states/game/spawnLevel'
 import { spawnLight } from './states/game/spawnLights'
 import { setupGame } from './states/setup/setupGame'
@@ -51,7 +51,7 @@ campState
 openMenuState
 	.onUpdate(closeInventory, closeCauldronInventory)
 dungeonState
-	.onEnter(spawnGround(96), spawnLight, spawnSkyBox, spawnTrees(96, 30), spawnRocks(96, 30), spawnDungeonDoors, spawnCharacterDungeon, spawnEnemy(96, 5))
+	.onEnter(spawnGround(96), spawnLight, spawnSkyBox, spawnRocks(96, 30), spawnGrass(96, 1000), spawnDungeonDoors, spawnCharacterDungeon, spawnEnemy(96, 5))
 	.onUpdate(collideWithDoor, enemyAttackPlayer)
 	.onExit(despawnOfType('map'))
 
