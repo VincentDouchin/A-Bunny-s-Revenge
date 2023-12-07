@@ -1,11 +1,12 @@
 import { RigidBodyType } from '@dimforge/rapier3d-compat'
 import { between } from 'randomish'
-import { BoxGeometry, Color, Mesh, MeshStandardMaterial, Vector3 } from 'three'
+import { BoxGeometry, Color, Mesh, MeshStandardMaterial, ShaderMaterial, Vector3 } from 'three'
 import { cauldronBundle } from '../farm/cooking'
 import { doorBundle } from './spawnDoor'
 import { getRandom, objectValues } from '@/utils/mapFunctions'
 import { modelColliderBundle } from '@/lib/models'
 import { assets, ecs } from '@/global/init'
+import { GroundShader } from '@/shaders/GroundShader'
 
 export const treeBundle = () => {
 	const model = getRandom(objectValues(assets.trees)).scene.clone()
@@ -24,7 +25,8 @@ export const spawnLevel = (level: levels) => () => {
 	const levelImage = assets.levels[level]
 	const groundMesh = new Mesh(
 		new BoxGeometry(levelImage.width * SCALE, 1, levelImage.height * SCALE),
-		new MeshStandardMaterial({ color: 0x26854C }),
+		new GroundShader(new Color(0x26854C)),
+		// new MeshStandardMaterial({ color: 0x26854C }),
 	)
 	groundMesh.receiveShadow = true
 
