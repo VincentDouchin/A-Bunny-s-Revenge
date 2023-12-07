@@ -51,7 +51,7 @@ campState
 openMenuState
 	.onUpdate(closeInventory, closeCauldronInventory)
 dungeonState
-	.onEnter(spawnGround(96), spawnLight, spawnSkyBox, spawnRocks(96, 30), spawnGrass(96, 1000), spawnDungeonDoors, spawnCharacterDungeon, spawnEnemy(96, 5))
+	.onEnter(spawnLevel('dungeon-1'), spawnLight, spawnSkyBox, spawnRocks(96, 30), spawnCharacterDungeon, spawnEnemy(96, 5))
 	.onUpdate(collideWithDoor, enemyAttackPlayer)
 	.onExit(despawnOfType('map'))
 

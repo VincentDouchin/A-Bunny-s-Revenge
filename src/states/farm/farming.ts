@@ -13,7 +13,7 @@ export const plantSeed = () => {
 	for (const { playerControls, sensorCollider } of playerQuery) {
 		if (playerControls.get('plant').justPressed) {
 			const pos = sensorCollider.translation()
-			const position = new Vector3(pos.x, pos.y, pos.z).divideScalar(5).floor().multiplyScalar(5)
+			const position = new Vector3(pos.x, pos.y, pos.z).divideScalar(5).round().multiplyScalar(5)
 			if (![...cropsQuery].some(otherCrop => otherCrop.position.x === position.x && otherCrop.position.z === position.z)) {
 				ecs.add({
 					position,

@@ -19,12 +19,12 @@ export const treeBundle = () => {
 	} as const
 }
 
+const SCALE = 7
 export const spawnLevel = (level: levels) => () => {
 	const levelImage = assets.levels[level]
-	const SCALE = 10
 	const groundMesh = new Mesh(
 		new BoxGeometry(levelImage.width * SCALE, 1, levelImage.height * SCALE),
-		new MeshStandardMaterial({ color: 0x4E6E49 }),
+		new MeshStandardMaterial({ color: 0x26854C }),
 	)
 	groundMesh.receiveShadow = true
 
@@ -41,11 +41,13 @@ export const spawnLevel = (level: levels) => () => {
 		for (let y = 0; y < levelImage.height; y++) {
 			const i = (x * levelImage.width + y) * 4
 			const color = new Color(`rgb(${data[i]}, ${data[i + 1]}, ${data[i + 2]})`)
-			const position = new Vector3(-y + levelImage.height / 2 + between(-0.5, 0.5), 0, -x + levelImage.width / 2 + between(-0.5, 0.5)).multiplyScalar(10)
-
+			const position = new Vector3(-y + levelImage.height / 2 + between(-0.5, 0.5), 0, -x + levelImage.width / 2 + between(-0.5, 0.5)).multiplyScalar(SCALE)
 			switch (color.getHexString()) {
 				case '4b692f': ecs.add({ ...treeBundle(), position }); break
-				case 'e52ee5': ecs.add({ ...doorBundle(1, 'front'), position }); break
+				case 'e55ce5': ecs.add({ ...doorBundle(1, 'back'), position }); break
+				case '2ee5e5': ecs.add({ ...doorBundle(1, 'left'), position }); break
+				case 'e55c2e': ecs.add({ ...doorBundle(1, 'right'), position }); break
+				case 'e5e52e': ecs.add({ ...doorBundle(1, 'front'), position }); break
 				case '222034': ecs.add({ ...cauldronBundle(), position }); break
 			}
 		}

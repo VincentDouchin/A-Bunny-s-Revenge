@@ -1,5 +1,5 @@
 import { params } from '@/global/context'
-import { renderer } from '@/global/rendering'
+import { composer, renderer } from '@/global/rendering'
 
 export const DebugUi = () => {
 	const updatePixelation = (e: Event) => {
@@ -7,6 +7,7 @@ export const DebugUi = () => {
 		const val = target.valueAsNumber
 		params.pixelation = val
 		renderer.setSize(window.innerWidth / val, window.innerHeight / val)
+		composer.setSize(window.innerWidth / val, window.innerHeight / val)
 	}
 	return (
 		<div style={{ position: 'absolute' }}>

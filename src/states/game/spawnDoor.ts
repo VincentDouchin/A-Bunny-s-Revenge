@@ -25,8 +25,8 @@ const doorGroup = () => {
 	return group
 }
 const rotations = {
-	left: -1,
-	right: 1,
+	left: 1,
+	right: -1,
 	front: 0,
 	back: 2,
 }
