@@ -1,12 +1,13 @@
-import toneMapsrc from '@assets/_singles/tonemap.png'
+import toneMapDefaultsrc from '@assets/_singles/tonemap-default.png'
+import toneMapTreessrc from '@assets/_singles/tonemap-trees.png'
 import { Mesh, MeshPhysicalMaterial, MeshStandardMaterial, MeshToonMaterial, NearestFilter, TextureLoader } from 'three'
 import type { GLTF } from 'three/examples/jsm/loaders/GLTFLoader'
 import type { stringCaster } from './assetLoaders'
 import { getFileName, loadGLB, loadImage } from './assetLoaders'
-import { addKeys, asyncMap, asyncMapValues, entries, groupByObject, mapKeys, mapValues } from '@/utils/mapFunctions'
+import { asyncMapValues, entries, groupByObject, mapKeys, mapValues } from '@/utils/mapFunctions'
 
-const loadToneMap = async () => {
-	const texture = await new TextureLoader().loadAsync(toneMapsrc)
+const loadToneMap = async (url: string) => {
+	const texture = await new TextureLoader().loadAsync(url)
 	texture.minFilter = texture.magFilter = NearestFilter
 	return texture
 }
@@ -14,15 +15,11 @@ const loadToneMap = async () => {
 type Glob = Record<string, () => Promise<any>>
 type GlobEager<T = string> = Record<string, T>
 
-const loadGLBAsToon = async <K extends string>(glob: Glob) => {
-	const gradientMap = await loadToneMap()
-	const promises = await asyncMapValues(glob, f => f())
-	const urls = Object.values(promises)
-	const keys = Object.keys(glob)
-	const glbs = await asyncMap(urls, loadGLB)
-	for (let i = 0; i < glbs.length; i++) {
-		const glb = glbs[i]
-		glb.scene.traverse((node) => {
+const loadGLBAsToon = async <K extends string>(glob: Glob, src: string) => {
+	const gradientMap = await loadToneMap(src)
+	const glbs = await asyncMapValues(glob, async f => loadGLB(await f()))
+	const toons = mapValues(glbs, (glb) => {
+	 	glb.scene.traverse((node) => {
 			if (node instanceof Mesh) {
 				if (node.material instanceof MeshStandardMaterial && !(node.material instanceof MeshPhysicalMaterial)) {
 					node.material = new MeshToonMaterial({
@@ -34,8 +31,9 @@ const loadGLBAsToon = async <K extends string>(glob: Glob) => {
 				}
 			}
 		})
-	}
-	return addKeys(keys.map(getFileName as stringCaster<K>), glbs)
+		return glb
+	})
+	return mapKeys(toons, getFileName as stringCaster<K>)
 }
 
 const skyboxLoader = async (glob: GlobEager) => {
@@ -46,8 +44,8 @@ const skyboxLoader = async (glob: GlobEager) => {
 		return loader.loadAsync(path)
 	}))
 }
-const cropsLoader = async (glob: Glob) => {
-	const models = await loadGLBAsToon(glob)
+const cropsLoader = async (glob: Glob, src: string) => {
+	const models = await loadGLBAsToon(glob, src)
 	const grouped = groupByObject(models, key => key.split('_')[0].toLowerCase() as 'carrot')
 	return mapValues(grouped, (group) => {
 		let crop: GLTF | null = null
@@ -79,11 +77,11 @@ const levelLoader = async (glob: GlobEager) => {
 	return mapKeys(await asyncMapValues(glob, loadImage), getFileName as stringCaster<levels>)
 }
 export const loadAssets = async () => ({
-	characters: await loadGLBAsToon<models>(import.meta.glob('@assets/models/*.*', { as: 'url' })),
+	characters: await loadGLBAsToon<models>(import.meta.glob('@assets/models/*.*', { as: 'url' }), toneMapDefaultsrc),
 	skybox: await skyboxLoader(import.meta.glob('@assets/skybox/*.png', { eager: true, import: 'default' })),
-	trees: await loadGLBAsToon<trees>(import.meta.glob('@assets/trees/*.glb', { as: 'url' })),
-	rocks: await loadGLBAsToon<rocks>(import.meta.glob('@assets/rocks/*.glb', { as: 'url' })),
-	crops: await cropsLoader(import.meta.glob('@assets/crops/*.glb', { as: 'url' })),
+	trees: await loadGLBAsToon<trees>(import.meta.glob('@assets/trees/*.glb', { as: 'url' }), toneMapTreessrc),
+	rocks: await loadGLBAsToon<rocks>(import.meta.glob('@assets/rocks/*.glb', { as: 'url' }), toneMapDefaultsrc),
+	crops: await cropsLoader(import.meta.glob('@assets/crops/*.glb', { as: 'url' }), toneMapDefaultsrc),
 	items: await itemsLoader(import.meta.glob('@assets/items/*.png', { eager: true, import: 'default' })),
 	fonts: await fontLoader(import.meta.glob('@assets/fonts/*.ttf', { eager: true, import: 'default' })),
 	levels: await levelLoader(import.meta.glob('@assets/levels/*.png', { eager: true, import: 'default' })),

@@ -9,9 +9,11 @@ export const spawnEnemy = (size: number, amount: number) => {
 	beeModel.scale.multiplyScalar(2)
 	return () => {
 		range(0, amount, () => {
+			const bundle = modelColliderBundle(beeModel)
+			bundle.bodyDesc.setLinearDamping(10)
 			ecs.add({
 				inMap: true,
-				...modelColliderBundle(beeModel),
+				...bundle,
 				position: new Vector3(between(-size / 2, size / 2), 0, between(-size / 2, size / 2)),
 				faction: Faction.Enemy,
 			})

@@ -15,7 +15,7 @@ export class GroundShader extends ShaderMaterial {
 			]),
 			lights: true,
 
-			  vertexShader: /* glsl */`
+			vertexShader: /* glsl */`
 				#include <common>
 				#include <fog_pars_vertex>
 				#include <shadowmap_pars_vertex>

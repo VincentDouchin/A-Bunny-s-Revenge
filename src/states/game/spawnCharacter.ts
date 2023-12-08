@@ -9,10 +9,12 @@ import type { System } from '@/lib/state'
 
 const playerBundle = () => {
 	const model = assets.characters.BunnyMain
+	const bundle = modelColliderBundle(model.scene)
+	bundle.bodyDesc.setLinearDamping(15)
 	return {
 		...playerInputMap(),
 		...menuInputMap(),
-		...modelColliderBundle(model.scene),
+		...bundle,
 
 		inMap: true,
 		cameratarget: true,

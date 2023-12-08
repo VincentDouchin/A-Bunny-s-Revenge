@@ -33,7 +33,7 @@ export const spawnSkyBox = () => {
 export const spawnTrees = (size = 256, amount = 100) => () => {
 	range(0, amount, () => {
 		const model = getRandom(objectValues(assets.trees)).scene.clone()
-		model.scale.setScalar(2)
+		model.scale.setScalar(between(2, 2.5))
 		const position = insideCircle(size / 2)
 		ecs.add({
 			inMap: true,

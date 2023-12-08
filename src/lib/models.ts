@@ -13,7 +13,7 @@ export const modelColliderBundle = (model: Object3D<Object3DEventMap>, type = Ri
 
 	return {
 		model: cloneModel,
-		bodyDesc: new RigidBodyDesc(type).lockRotations().setLinearDamping(7),
+		bodyDesc: new RigidBodyDesc(type).lockRotations(),
 		colliderDesc: ColliderDesc.cuboid(size.x, size.y, size.z).setTranslation(0, size.y, 0).setSensor(sensor),
 		rotation: new Quaternion(),
 		size,
