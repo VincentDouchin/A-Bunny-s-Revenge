@@ -19,7 +19,7 @@
 		"three-csm": "^3.3.0"
 	},
 	"devDependencies": {
-		"@antfu/eslint-config": "^1.0.0-beta.28",
+		"@antfu/eslint-config": "^2.4.5",
 		"@total-typescript/ts-reset": "^0.5.1",
 		"@types/node": "^20.8.7",
 		"@types/three": "^0.157.2",

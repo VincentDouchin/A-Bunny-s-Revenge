@@ -2,7 +2,7 @@ import { playAnimations } from './global/animations'
 import { initCamera, moveCamera } from './global/camera'
 import { time, ui } from './global/init'
 import { initThree, render, updateControls } from './global/rendering'
-import { app, campState, coreState, dungeonState, gameState, openMenuState, setupState } from './global/states'
+import { app, campState, coreState, dungeonState, gameState, genDungeonState, openMenuState, setupState } from './global/states'
 import { despawnOfType, hierarchyPlugin } from './lib/hierarchy'
 import { InputMap } from './lib/inputs'
 import { updateModels } from './lib/modelsProperties'
@@ -13,17 +13,18 @@ import { runif } from './lib/systemset'
 import { transformsPlugin } from './lib/transforms'
 import { uiPlugin } from './lib/uiPlugin'
 import { startTweens, updateTweens } from './lib/updateTween'
+import { generateDungeon } from './states/dungeon/generateDungeon'
 import { closeCauldronInventory, openCauldronInventory } from './states/farm/cooking'
 import { addCropModel, harvestCrop, plantSeed, spawnCrops } from './states/farm/farming'
 import { closeInventory, openInventory, toggleMenuState } from './states/farm/openInventory'
 import { bobItems, collectItems } from './states/game/items'
 import { movePlayer } from './states/game/movePlayer'
 import { target } from './states/game/sensor'
-import { spawnCharacter, spawnCharacterDungeon } from './states/game/spawnCharacter'
-import { collideWithDoor, collideWithDoorCamp } from './states/game/spawnDoor'
-import { enemyAttackPlayer, spawnEnemy } from './states/game/spawnEnemy'
-import { spawnRocks, spawnSkyBox } from './states/game/spawnGround'
-import { spawnLevel } from './states/game/spawnLevel'
+import { spawnCharacter } from './states/game/spawnCharacter'
+import { allowDoorCollision, collideWithDoor, collideWithDoorCamp } from './states/game/spawnDoor'
+import { enemyAttackPlayer } from './states/game/spawnEnemy'
+import { spawnSkyBox } from './states/game/spawnGround'
+import { spawnDungeon, spawnFarm } from './states/game/spawnLevel'
 import { spawnLight } from './states/game/spawnLights'
 import { setupGame } from './states/setup/setupGame'
 import { UI } from './ui/UI'
@@ -45,14 +46,17 @@ gameState
 	.enable()
 campState
 	.addSubscriber(addCropModel)
-	.onEnter(spawnLevel('farm'), spawnCharacter, spawnLight, spawnSkyBox, spawnCrops)
+	.onEnter(spawnFarm, spawnCharacter, spawnLight, spawnSkyBox, spawnCrops)
 	.onUpdate(collideWithDoorCamp, runif(() => !openMenuState.enabled, plantSeed, harvestCrop, openCauldronInventory, openInventory))
 	.onExit(despawnOfType('map'))
 openMenuState
 	.onUpdate(closeInventory, closeCauldronInventory)
+
+genDungeonState
+	.onEnter(generateDungeon)
 dungeonState
-	.onEnter(spawnLevel('dungeon-1'), spawnLight, spawnSkyBox, spawnRocks(96, 30), spawnCharacterDungeon, spawnEnemy(96, 5))
-	.onUpdate(collideWithDoor, enemyAttackPlayer)
+	.onEnter(spawnDungeon, spawnLight, spawnSkyBox)
+	.onUpdate(allowDoorCollision,collideWithDoor, enemyAttackPlayer)
 	.onExit(despawnOfType('map'))
 
 const animate = async () => {

@@ -1,11 +1,11 @@
 import { ColliderDesc, RigidBodyDesc } from '@dimforge/rapier3d-compat'
 import { DoubleSide, Group, Mesh, MeshBasicMaterial, PlaneGeometry, Quaternion, Vector3 } from 'three'
+import type { Entity } from '@/global/entity'
 import { ecs, world } from '@/global/init'
 import type { DungeonRessources } from '@/global/states'
-import { campState, dungeonState } from '@/global/states'
-import { type direction, otherDirection } from '@/lib/directions'
+import { campState, dungeonState, genDungeonState } from '@/global/states'
+import type { direction } from '@/lib/directions'
 import type { System } from '@/lib/state'
-import { entries } from '@/utils/mapFunctions'
 
 const getDoorLayer = (opacity: number) => {
 	const sizeFactor = (3 - opacity) / 3
@@ -30,9 +30,8 @@ const rotations = {
 	front: 0,
 	back: 2,
 }
-export const doorBundle = (index: number, direction: direction) => {
+export const doorBundle = (to: number, direction: direction) => {
 	const rotation = new Quaternion()
-
 	rotation.setFromAxisAngle(new Vector3(0, 1, 0), Math.PI / 2 * rotations[direction])
 	return {
 		inMap: true,
@@ -40,38 +39,20 @@ export const doorBundle = (index: number, direction: direction) => {
 		model: doorGroup(),
 		bodyDesc: RigidBodyDesc.fixed().lockRotations(),
 		colliderDesc: ColliderDesc.cuboid(10, 15, 1).setSensor(true),
-		door: { index, direction },
-	} as const
-}
-
-export const spawnDungeonDoors: System<DungeonRessources> = ({ door }) => {
-	const doors = {
-		front: new Vector3(0, 0, 48),
-		back: new Vector3(0, 0, -48),
-		left: new Vector3(-48, 0, 0),
-		right: new Vector3(48, 0, 0),
-	} as const
-	for (const [doorDirection, position] of entries(doors)) {
-		ecs.add({
-			...doorBundle(door, doorDirection),
-			position,
-		})
-	}
+		door: { direction, to },
+	} as const satisfies Entity
 }
 
 const doorQuery = ecs.with('collider', 'door')
-const playerQuery = ecs.with('collider', 'playerControls')
-export const collideWithDoor: System<DungeonRessources> = ({ direction }) => {
+const playerQuery = ecs.with('collider', 'playerControls').without('ignoreDoor')
+export const collideWithDoor: System<DungeonRessources> = ({ dungeon }) => {
 	for (const door of doorQuery) {
 		for (const player of playerQuery) {
-			if (direction !== door.door.direction) {
-				if (world.intersectionPair(door.collider, player.collider)) {
-					const roomsLeft = door.door.index - 1
-					if (roomsLeft) {
-						dungeonState.enable({ door: roomsLeft, direction: otherDirection[door.door.direction] })
-					} else {
-						campState.enable({ previousState: 'dungeon' })
-					}
+			if (world.intersectionPair(door.collider, player.collider)) {
+				if (dungeon.rooms.length === door.door.to) {
+					campState.enable({ previousState: 'dungeon' })
+				} else {
+					dungeonState.enable({ dungeon, direction: door.door.direction, roomIndex: door.door.to })
 				}
 			}
 		}
@@ -81,8 +62,18 @@ export const collideWithDoorCamp = () => {
 	for (const door of doorQuery) {
 		for (const player of playerQuery) {
 			if (world.intersectionPair(door.collider, player.collider)) {
-				const roomsLeft = door.door.index
-				dungeonState.enable({ door: roomsLeft, direction: otherDirection[door.door.direction] })
+				genDungeonState.enable()
+			}
+		}
+	}
+}
+
+const playerInDoor = ecs.with('playerControls', 'ignoreDoor', 'collider')
+export const allowDoorCollision: System<DungeonRessources> = () => {
+	for (const player of playerInDoor) {
+		for (const door of doorQuery) {
+			if (door.door.direction === player.ignoreDoor && !world.intersectionPair(player.collider, door.collider)) {
+				ecs.removeComponent(player, 'ignoreDoor')
 			}
 		}
 	}

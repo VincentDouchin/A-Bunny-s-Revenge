@@ -64,14 +64,14 @@ export interface Entity {
 	// ! Farming
 	sensor?: true
 	sensorCollider?: Collider
-	crop?: { stage: number; name: 'carrot' }
+	crop?: { stage: number, name: 'carrot' }
 	// ! Game
 	map?: true
 	// ! Camp
-	door?: { index: number; direction: direction }
+	door?: { to: number, direction: direction }
 	// ! Dungeon
 	faction?: Faction
-	test?: true
+	ignoreDoor?: direction
 	// ! Items
 	item?: true
 	// ! Cooking

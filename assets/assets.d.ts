@@ -1,7 +1,7 @@
 type crops = 'Carrot_1' | 'Carrot_2' | 'Carrot_3' | 'Carrot_4' | 'Carrot_Crop'
 type fonts = 'GrapeSoda'
 type items = 'carrot' | 'carrot_soup'
-type levels = 'dungeon-1' | 'farm' | 'farm'
+type levels = 'levels'
 type models = 'Armabee' | 'BunnyMain' | 'cauldron'
 type rocks = 'Rock_Moss_1' | 'Rock_Moss_2' | 'Rock_Moss_3' | 'Rock_Moss_4' | 'Rock_Moss_5' | 'Rock_Moss_6' | 'Rock_Moss_7'
 type skybox = 'CloudyCrown_Midday_Back' | 'CloudyCrown_Midday_Down' | 'CloudyCrown_Midday_Front' | 'CloudyCrown_Midday_Left' | 'CloudyCrown_Midday_Right' | 'CloudyCrown_Midday_Up'

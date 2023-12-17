@@ -19,7 +19,7 @@ export const spawnGround = (size = 256) => () => {
 	})
 }
 export const spawnSkyBox = () => {
-	const size = 512
+	const size = 1024
 	const skybox = new Mesh(
 		new BoxGeometry(size, size, size),
 		assets.skybox.map(t => new MeshBasicMaterial({ map: t, side: BackSide })),

@@ -5,6 +5,7 @@ import type { GLTF } from 'three/examples/jsm/loaders/GLTFLoader'
 import type { stringCaster } from './assetLoaders'
 import { getFileName, loadGLB, loadImage } from './assetLoaders'
 import { asyncMapValues, entries, groupByObject, mapKeys, mapValues } from '@/utils/mapFunctions'
+import type { LDTKMap } from '@/LDTKMap'
 
 const loadToneMap = async (url: string) => {
 	const texture = await new TextureLoader().loadAsync(url)
@@ -74,7 +75,7 @@ const fontLoader = async (glob: Glob) => {
 	}
 }
 const levelLoader = async (glob: GlobEager) => {
-	return mapKeys(await asyncMapValues(glob, loadImage), getFileName as stringCaster<levels>)
+	return JSON.parse(Object.values(glob)[0]) as LDTKMap
 }
 export const loadAssets = async () => ({
 	characters: await loadGLBAsToon<models>(import.meta.glob('@assets/models/*.*', { as: 'url' }), toneMapDefaultsrc),
@@ -84,5 +85,5 @@ export const loadAssets = async () => ({
 	crops: await cropsLoader(import.meta.glob('@assets/crops/*.glb', { as: 'url' }), toneMapDefaultsrc),
 	items: await itemsLoader(import.meta.glob('@assets/items/*.png', { eager: true, import: 'default' })),
 	fonts: await fontLoader(import.meta.glob('@assets/fonts/*.ttf', { eager: true, import: 'default' })),
-	levels: await levelLoader(import.meta.glob('@assets/levels/*.png', { eager: true, import: 'default' })),
+	levels: await levelLoader(import.meta.glob('@assets/levels/*.ldtk', { eager: true, as: 'raw' })),
 } as const)
