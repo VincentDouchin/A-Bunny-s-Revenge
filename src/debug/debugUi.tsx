@@ -12,7 +12,7 @@ export const DebugUi = () => {
 	}
 	const [showUi, setShowUi] = createSignal(false)
 	return (
-		<div style={{ position: 'absolute' }}>
+		<div style={{ position: 'absolute', color: 'white' }}>
 			<button onClick={() => setShowUi(!showUi())}>{showUi() ? 'Hide debug Ui' : 'Show debug ui'}</button>
 			<Show when={showUi()}>
 				<div>
@@ -66,6 +66,15 @@ export const DebugUi = () => {
 						type="number"
 						value={params?.fov}
 						onChange={e => params.fov = e.target.valueAsNumber}
+					>
+					</input>
+				</div>
+				<div>
+					SpeedUp
+					<input
+						type="number"
+						value={params?.speedUp}
+						onChange={e => params.speedUp = e.target.valueAsNumber}
 					>
 					</input>
 				</div>

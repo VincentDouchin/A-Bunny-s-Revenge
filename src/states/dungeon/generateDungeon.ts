@@ -19,7 +19,7 @@ export const createDungeon = (roomsAmount: number): Dungeon => {
 	let lastDirection: direction = 'front'
 	for (let i = 0; i < roomsAmount; i++) {
 		const type = getRoomType(i, roomsAmount)
-		const newDirection = getRandom(directions.filter(d => d !== lastDirection))
+		const newDirection = getRandom(directions.filter(d => d !== otherDirection[lastDirection]))
 		const room: Room = {
 			plan: getRandom(levels),
 			enemies: [],

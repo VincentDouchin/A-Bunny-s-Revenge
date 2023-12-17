@@ -1,4 +1,5 @@
 import { Vector3 } from 'three'
+import { params } from '@/global/context'
 import { ecs, time } from '@/global/init'
 
 const playerQuery = ecs.with('playerControls', 'body', 'playerAnimator', 'rotation')
@@ -15,7 +16,7 @@ export const movePlayer = () => {
 			rotation.setFromAxisAngle(new Vector3(0, 1, 0), Math.atan2(forceNormalized.x, forceNormalized.z))
 		}
 
-		const finalForce = forceNormalized.multiplyScalar(100 * time.delta)
+		const finalForce = forceNormalized.multiplyScalar(100 * params.speedUp * time.delta)
 		body.applyImpulse(finalForce, true)
 	}
 }

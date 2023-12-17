@@ -45,22 +45,23 @@ export const getFieldIntances = <Name extends keyof FieldInstances>(entity: Enti
 		return { ...acc, [v.__identifier]: v.__value }
 	}, {} as FieldInstances[Name])
 }
-const getEntityPosition = (entity: EntityInstance, layer: LayerInstance) => {
+const getEntityPosition = (entity: EntityInstance, layer: LayerInstance, offsetX = 0, offsetY = 0) => {
 	return new Vector3(
-		-entity.__grid[0] + layer.__cWid / 2 + between(-0.5, 0.5),
+		-entity.__grid[0] + layer.__cWid / 2 + offsetX,
 		0,
-		-entity.__grid[1] + layer.__cHei / 2 + between(-0.5, 0.5),
+		-entity.__grid[1] + layer.__cHei / 2 + offsetY,
 	).multiplyScalar(SCALE)
 }
 
 const spawnEntity = (entity: EntityInstance, layer: LayerInstance) => {
-	const position = getEntityPosition(entity, layer)
 	switch (entity.__identifier) {
 		case 'door':{
+			const position = getEntityPosition(entity, layer)
 			const data = getFieldIntances<'door'>(entity)
 			ecs.add({ ...doorBundle(1, data.direction), position })
 		};break
 		case 'cauldron':{
+			const position = getEntityPosition(entity, layer)
 			ecs.add({ ...cauldronBundle(), position })
 		}
 	}
