@@ -45,13 +45,13 @@ const skyboxLoader = async (glob: GlobEager) => {
 		return loader.loadAsync(path)
 	}))
 }
-const cropsLoader = async (glob: Glob, src: string) => {
+const cropsLoader = async <K extends string>(glob: Glob, src: string) => {
 	const models = await loadGLBAsToon(glob, src)
-	const grouped = groupByObject(models, key => key.split('_')[0].toLowerCase() as 'carrot')
+	const grouped = groupByObject(models, key => key.split('_')[0].toLowerCase() as K)
 	return mapValues(grouped, (group) => {
 		let crop: GLTF | null = null
 		const stages = new Array<GLTF>()
-		for (const [key, model] of entries(group)) {
+		for (const [key, model] of entries(group) as [string, GLTF][]) {
 			if (key.toLowerCase().includes('crop')) {
 				crop = model
 			} else {
@@ -82,7 +82,7 @@ export const loadAssets = async () => ({
 	skybox: await skyboxLoader(import.meta.glob('@assets/skybox/*.png', { eager: true, import: 'default' })),
 	trees: await loadGLBAsToon<trees>(import.meta.glob('@assets/trees/*.glb', { as: 'url' }), toneMapTreessrc),
 	rocks: await loadGLBAsToon<rocks>(import.meta.glob('@assets/rocks/*.glb', { as: 'url' }), toneMapDefaultsrc),
-	crops: await cropsLoader(import.meta.glob('@assets/crops/*.glb', { as: 'url' }), toneMapDefaultsrc),
+	crops: await cropsLoader<'carrot' | 'mushroom'>(import.meta.glob('@assets/crops/*.glb', { as: 'url' }), toneMapDefaultsrc),
 	items: await itemsLoader(import.meta.glob('@assets/items/*.png', { eager: true, import: 'default' })),
 	fonts: await fontLoader(import.meta.glob('@assets/fonts/*.ttf', { eager: true, import: 'default' })),
 	levels: await levelLoader(import.meta.glob('@assets/levels/*.ldtk', { eager: true, as: 'raw' })),

@@ -11,6 +11,7 @@ export const cauldronBundle = (): Entity => {
 	const bundle = modelColliderBundle(model, RigidBodyType.Fixed)
 	return {
 		...bundle,
+		interactable: true,
 		...menuInputMap(),
 		cauldron: [null, null, null, null],
 		inMap: true,

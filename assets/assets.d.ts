@@ -1,4 +1,4 @@
-type crops = 'Carrot_1' | 'Carrot_2' | 'Carrot_3' | 'Carrot_4' | 'Carrot_Crop'
+type crops = 'Carrot_1' | 'Carrot_2' | 'Carrot_3' | 'Carrot_4' | 'Carrot_Crop' | 'Mushroom_1' | 'Mushroom_2' | 'Mushroom_3' | 'Mushroom_4'
 type fonts = 'GrapeSoda'
 type items = 'carrot' | 'carrot_soup'
 type levels = 'levels'

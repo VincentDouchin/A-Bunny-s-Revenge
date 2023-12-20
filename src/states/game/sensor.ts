@@ -3,7 +3,7 @@ import { ecs, world } from '@/global/init'
 
 const withSensorQuery = ecs.with('sensor', 'group', 'body')
 const addTarget = () => withSensorQuery.onEntityAdded.subscribe((entity) => {
-	const sensorDesc = ColliderDesc.ball(1).setTranslation(0, 1, 5).setSensor(true)
+	const sensorDesc = ColliderDesc.ball(0.01).setTranslation(0, 1, 5).setSensor(true)
 	const sensorCollider = world.createCollider(sensorDesc, entity.body)
 	ecs.addComponent(entity, 'sensorCollider', sensorCollider)
 })

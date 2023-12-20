@@ -67,6 +67,8 @@ export interface Entity {
 	crop?: { stage: number, name: 'carrot' }
 	// ! Game
 	map?: true
+	interactable?: true
+	outline?: With<Entity, 'model'>
 	// ! Camp
 	door?: { to: number, direction: direction }
 	// ! Dungeon

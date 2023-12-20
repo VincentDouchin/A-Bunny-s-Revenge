@@ -9,5 +9,5 @@ export const params = {
 	cameraOffsetZ: -75,
 	zoom: 1,
 	fov: 50,
-	speedUp: 1,
+	speedUp: 3,
 }

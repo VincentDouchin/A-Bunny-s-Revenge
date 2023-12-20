@@ -14,6 +14,7 @@ import { transformsPlugin } from './lib/transforms'
 import { uiPlugin } from './lib/uiPlugin'
 import { startTweens, updateTweens } from './lib/updateTween'
 import { generateDungeon } from './states/dungeon/generateDungeon'
+import { spawnItems } from './states/dungeon/itemRoom'
 import { closeCauldronInventory, openCauldronInventory } from './states/farm/cooking'
 import { addCropModel, harvestCrop, plantSeed, spawnCrops } from './states/farm/farming'
 import { closeInventory, openInventory, toggleMenuState } from './states/farm/openInventory'
@@ -26,6 +27,7 @@ import { enemyAttackPlayer } from './states/game/spawnEnemy'
 import { spawnSkyBox } from './states/game/spawnGround'
 import { spawnDungeon, spawnFarm } from './states/game/spawnLevel'
 import { spawnLight } from './states/game/spawnLights'
+import { touchItem } from './states/game/touchItem'
 import { setupGame } from './states/setup/setupGame'
 import { UI } from './ui/UI'
 
@@ -42,7 +44,7 @@ setupState
 gameState
 	.onEnter()
 	.addSubscriber(bobItems, ...toggleMenuState)
-	.onUpdate(runIf(() => !openMenuState.enabled, movePlayer), collectItems)
+	.onUpdate(runIf(() => !openMenuState.enabled, movePlayer), collectItems, touchItem)
 	.enable()
 campState
 	.addSubscriber(addCropModel)
@@ -55,8 +57,8 @@ openMenuState
 genDungeonState
 	.onEnter(generateDungeon)
 dungeonState
-	.onEnter(spawnDungeon, spawnLight, spawnSkyBox)
-	.onUpdate(allowDoorCollision,collideWithDoor, enemyAttackPlayer)
+	.onEnter(spawnDungeon, spawnLight, spawnSkyBox, spawnItems)
+	.onUpdate(allowDoorCollision, collideWithDoor, enemyAttackPlayer)
 	.onExit(despawnOfType('map'))
 
 const animate = async () => {
