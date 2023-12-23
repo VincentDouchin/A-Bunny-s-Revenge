@@ -97,7 +97,10 @@ export function Menu(props: MenuProps) {
 		}
 		const isSelected = createMemo(() => id === selected())
 		return {
-			ref: (el: HTMLElement) => { refs.set(id, el); inverseRefs.set(el, id) },
+			ref: (el: HTMLElement) => {
+				refs.set(id, el)
+				inverseRefs.set(el, id)
+			},
 			onMouseEnter: () => setSelected(() => id),
 			selected: isSelected,
 		}

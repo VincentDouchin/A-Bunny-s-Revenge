@@ -6,7 +6,7 @@ import cnoise from '@/shaders/glsl/lib/cnoise.glsl?raw'
 export class GroundShader extends ShaderMaterial {
 	constructor(color1: Color) {
 		super({
-			 uniforms: mergeUniforms([
+			uniforms: mergeUniforms([
 				UniformsLib.lights,
 				UniformsLib.fog,
 				{

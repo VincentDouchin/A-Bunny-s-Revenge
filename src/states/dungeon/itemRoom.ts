@@ -1,11 +1,11 @@
+import { RigidBodyType } from '@dimforge/rapier3d-compat'
+import { Vector3 } from 'three'
+import { RoomType } from './dungeonTypes'
 import { assets, ecs } from '@/global/init'
 import type { DungeonRessources } from '@/global/states'
 import { modelColliderBundle } from '@/lib/models'
 import type { System } from '@/lib/state'
 import { getRandom } from '@/utils/mapFunctions'
-import { RigidBodyType } from '@dimforge/rapier3d-compat'
-import { Vector3 } from 'three'
-import { RoomType } from './dungeonTypes'
 
 export const spawnItems: System<DungeonRessources> = ({ dungeon, roomIndex }) => {
 	if (dungeon.rooms[roomIndex].type === RoomType.Item) {

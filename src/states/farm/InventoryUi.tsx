@@ -8,7 +8,7 @@ import { ForQuery } from '@/ui/ForQuery'
 import { Menu } from '@/ui/Menu'
 import { range } from '@/utils/mapFunctions'
 
-export const ItemDisplay = (props: { item: ItemData | null; selected: boolean }) => {
+export const ItemDisplay = (props: { item: ItemData | null, selected: boolean }) => {
 	return (
 		<div style={{ 'border-radius': '1rem', 'background': 'hsla(0 0% 0% / 50%)', 'width': '5rem', 'height': '5rem', 'display': 'grid', 'place-items': 'center', 'position': 'relative', 'border': props.selected ? 'solid 0.2rem white' : '', 'box-sizing': 'border-box' }}>
 
@@ -41,7 +41,7 @@ export const Inventory = (props: { player: With<Entity, 'playerControls'> }) => 
 							</div>
 						)
 					})
-					 }}
+				}}
 			</Menu>
 		</div>
 	)

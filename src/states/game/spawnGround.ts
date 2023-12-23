@@ -13,9 +13,9 @@ export const spawnGround = (size = 256) => () => {
 	ecs.add({
 		map: true,
 		mesh,
-		 position: new Vector3(),
-		 bodyDesc: RigidBodyDesc.fixed().setCcdEnabled(true),
-		 colliderDesc: ColliderDesc.cuboid(size / 2, 0.5, size / 2),
+		position: new Vector3(),
+		bodyDesc: RigidBodyDesc.fixed().setCcdEnabled(true),
+		colliderDesc: ColliderDesc.cuboid(size / 2, 0.5, size / 2),
 	})
 }
 export const spawnSkyBox = () => {
@@ -41,7 +41,6 @@ export const spawnTrees = (size = 256, amount = 100) => () => {
 			parent,
 			scale: 4,
 			position: new Vector3(position.x + Math.sign(position.x) * size / 16, 0, position.y + Math.sign(position.y) * size / 16),
-			outline: true,
 		})
 	})
 }
@@ -52,7 +51,6 @@ export const spawnRocks = (size = 256, amount = 100) => () => {
 			scale: 4,
 			model: getRandom(objectValues(assets.rocks).map(glb => glb.scene)).clone(),
 			position: new Vector3(between(-size / 2, size / 2), 0, between(-size / 2, size / 2)),
-			outline: true,
 		})
 	})
 }

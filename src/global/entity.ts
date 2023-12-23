@@ -6,13 +6,14 @@ import type { Group, Light, Mesh, Object3D, Object3DEventMap, PerspectiveCamera,
 import type CSM from 'three-csm'
 import type { OrbitControls } from 'three/examples/jsm/controls/OrbitControls'
 import type { EffectComposer } from 'three/examples/jsm/postprocessing/EffectComposer'
+import type { CSS2DObject } from 'three/examples/jsm/renderers/CSS2DRenderer'
 import type { Animator } from './animator'
 import type { TweenGroup } from '@/lib/tweenGroup'
 import type { MenuInputMap, PlayerInputMap } from '@/lib/inputs'
 import type { direction } from '@/lib/directions'
 import type { ItemData } from '@/constants/items'
-import type { playerAnimations } from '@/constants/animations'
 
+export type Dialog = Generator<string | string[] | void, void, number | void>
 export enum Faction {
 	Player,
 	Enemy,
@@ -56,7 +57,7 @@ export interface Entity {
 	collider?: Collider
 	size?: Vector3
 	// ! Animations
-	playerAnimator?: Animator<playerAnimations>
+	playerAnimator?: Animator<string>
 	template?: () => JSXElement
 	el?: HTMLElement
 	cssObject?: true
@@ -79,6 +80,12 @@ export interface Entity {
 	// ! Cooking
 	cauldron?: (ItemData | null)[]
 	openInventory?: true
+	// ! NPC
+	npc?: true
+	// ! Dialog
+	dialog?: Dialog
+	currentDialog?: string | string[]
+	dialogContainer?: CSS2DObject
 }
 export type Bundle<C extends keyof Entity> = () => With<Entity, C>
 type Prettify<T> = {

@@ -2,9 +2,9 @@ import { Vector3 } from 'three'
 import { params } from '@/global/context'
 import { ecs, time } from '@/global/init'
 
-const playerQuery = ecs.with('playerControls', 'body', 'playerAnimator', 'rotation')
+const playerQuery = ecs.with('playerControls', 'body', 'rotation', 'playerAnimator')
 export const movePlayer = () => {
-	for (const { playerControls, body, rotation } of playerQuery) {
+	for (const { playerControls, body, rotation, playerAnimator } of playerQuery) {
 		const force = new Vector3()
 		force.x += playerControls.get('left').pressed
 		force.x -= playerControls.get('right').pressed
@@ -14,6 +14,9 @@ export const movePlayer = () => {
 		const forceNormalized = force.normalize()
 		if (moving) {
 			rotation.setFromAxisAngle(new Vector3(0, 1, 0), Math.atan2(forceNormalized.x, forceNormalized.z))
+			playerAnimator.playAnimation('run')
+		} else {
+			playerAnimator.playAnimation('idle')
 		}
 
 		const finalForce = forceNormalized.multiplyScalar(100 * params.speedUp * time.delta)

@@ -66,6 +66,15 @@ export const asyncMap = async <V, F extends (value: V) => Promise<any>>(arr: V[]
 	}
 	return res
 }
+
+export const filterKeys = <T>(obj: Record<string, T>, fn: (key: string) => boolean) => {
+	const filtered: Record<string, T> = {}
+	const notFiltered: Record<string, T> = {}
+	for (const [key, val] of entries(obj)) {
+		(fn(key) ? filtered : notFiltered)[key] = val
+	}
+	return [filtered, notFiltered]
+}
 export const getRandom = <T>(arr: T[]) => arr[Math.floor(Math.random() * arr.length)]
 
 export const between = (min: number, max: number) => Math.random() * (max - min) + min

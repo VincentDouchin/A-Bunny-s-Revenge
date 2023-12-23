@@ -1,3 +1,4 @@
+import { TextureLoader } from 'three'
 import { DRACOLoader } from 'three/examples/jsm/loaders/DRACOLoader'
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader'
 
@@ -13,6 +14,7 @@ const loader = new GLTFLoader()
 const dracoLoader = new DRACOLoader()
 dracoLoader.setDecoderPath('/examples/jsm/libs/draco/')
 loader.setDRACOLoader(dracoLoader)
+export const textureLoader = new TextureLoader()
 export const loadGLB = (path: string) => loader.loadAsync(path)
 export const loadImage = (path: string) => new Promise<HTMLImageElement>((resolve) => {
 	const img = new Image()

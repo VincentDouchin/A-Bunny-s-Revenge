@@ -1,4 +1,4 @@
-import { CanvasTexture } from "three"
+import { CanvasTexture } from 'three'
 
 export const getScreenBuffer = (width: number, height: number) => {
 	const canvas = document.createElement('canvas')

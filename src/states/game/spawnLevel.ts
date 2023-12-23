@@ -132,7 +132,7 @@ export const spawnDungeon: System<DungeonRessources> = ({ dungeon, direction, ro
 						const dungeonDoor = room.doors.find(d => d?.direction === doorData.direction || doorData.direction === otherDirection[direction])
 						if (dungeonDoor) {
 							ecs.add({
-								 ...doorBundle(dungeonDoor.to, dungeonDoor.direction),
+								...doorBundle(dungeonDoor.to, dungeonDoor.direction),
 								position,
 							})
 						}

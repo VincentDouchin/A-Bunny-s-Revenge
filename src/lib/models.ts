@@ -10,7 +10,6 @@ export const modelColliderBundle = (model: Object3D<Object3DEventMap>, type = Ri
 	const size = new Vector3()
 	new Box3().setFromObject(model).getSize(size)
 	size.divideScalar(2)
-
 	return {
 		model: cloneModel,
 		bodyDesc: new RigidBodyDesc(type).lockRotations(),

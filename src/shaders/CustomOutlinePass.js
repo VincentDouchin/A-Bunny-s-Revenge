@@ -68,37 +68,37 @@ class CustomOutlinePass extends Pass {
 	// Helper functions for hiding/showing objects based on whether they should have outlines applied
 	setOutlineObjectsVisibile(bVisible) {
 		this.renderScene.traverse((node) => {
-		    if (node.applyOutline === true && node.type === 'Mesh') {
-		    	if (!bVisible) {
-		    		node.oldVisibleValue = node.visible
-		    		node.visible = false
-		    	} else {
-		    		// Restore original visible value. This way objects
-		    		// that were originally hidden stay hidden
-		    		if (node.oldVisibleValue !== undefined) {
-		    			node.visible = node.oldVisibleValue
-		    			delete node.oldVisibleValue
-		    		}
-		    	}
-		    }
+			if (node.applyOutline === true && node.type === 'Mesh') {
+				if (!bVisible) {
+					node.oldVisibleValue = node.visible
+					node.visible = false
+				} else {
+					// Restore original visible value. This way objects
+					// that were originally hidden stay hidden
+					if (node.oldVisibleValue !== undefined) {
+						node.visible = node.oldVisibleValue
+						delete node.oldVisibleValue
+					}
+				}
+			}
 		})
 	}
 
 	setNonOutlineObjectsVisible(bVisible) {
 		this.renderScene.traverse((node) => {
-		    if (node.applyOutline !== true && node.type === 'Mesh') {
-		    	if (!bVisible) {
-		    		node.oldVisibleValue = node.visible
-		    		node.visible = false
-		    	} else {
-		    		// Restore original visible value. This way objects
-		    		// that were originally hidden stay hidden
-		    		if (node.oldVisibleValue !== undefined) {
-		    			node.visible = node.oldVisibleValue
-		    			delete node.oldVisibleValue
-		    		}
-		    	}
-		    }
+			if (node.applyOutline !== true && node.type === 'Mesh') {
+				if (!bVisible) {
+					node.oldVisibleValue = node.visible
+					node.visible = false
+				} else {
+					// Restore original visible value. This way objects
+					// that were originally hidden stay hidden
+					if (node.oldVisibleValue !== undefined) {
+						node.visible = node.oldVisibleValue
+						delete node.oldVisibleValue
+					}
+				}
+			}
 		})
 	}
 
