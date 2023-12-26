@@ -1,13 +1,15 @@
 import { Vector3 } from 'three'
+import { RigidBodyType } from '@dimforge/rapier3d-compat'
 import { Animator } from '@/global/animator'
 import { type Entity, Faction } from '@/global/entity'
 import { assets, ecs } from '@/global/init'
 import { menuInputMap, playerInputMap } from '@/lib/inputs'
 import { modelColliderBundle } from '@/lib/models'
+import { Sizes } from '@/constants/sizes'
 
 export const playerBundle = () => {
 	const model = assets.characters.Running
-	const bundle = modelColliderBundle(model.scene)
+	const bundle = modelColliderBundle(model.scene, RigidBodyType.Dynamic, false, Sizes.character)
 	const idle = assets.characters.Idle.animations
 	idle.forEach(x => x.name = 'idle')
 	const run = assets.characters.Running.animations

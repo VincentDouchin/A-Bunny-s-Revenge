@@ -19,7 +19,7 @@ export const movePlayer = () => {
 			playerAnimator.playAnimation('idle')
 		}
 
-		const finalForce = forceNormalized.multiplyScalar(100 * params.speedUp * time.delta)
+		const finalForce = forceNormalized.multiplyScalar(300 * params.speedUp * time.delta)
 		body.applyImpulse(finalForce, true)
 	}
 }

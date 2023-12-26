@@ -6,6 +6,7 @@ import { save, saveCrops } from '@/global/save'
 import type { FarmRessources } from '@/global/states'
 import { modelColliderBundle } from '@/lib/models'
 import type { System } from '@/lib/state'
+import { Sizes } from '@/constants/sizes'
 
 const playerQuery = ecs.with('playerControls', 'sensorCollider')
 const cropsQuery = ecs.with('position', 'crop', 'collider')
@@ -18,7 +19,7 @@ export const plantSeed = () => {
 				ecs.add({
 					position,
 					inMap: true,
-					crop: { stage: 0, name: 'carrot' },
+					crop: { stage: 0, name: 'beet' },
 				})
 				saveCrops()
 			}
@@ -28,8 +29,9 @@ export const plantSeed = () => {
 export const addCropModel = () => ecs.with('crop').without('model').onEntityAdded.subscribe((entity) => {
 	const model = assets.crops[entity.crop.name].stages[entity.crop.stage].scene.clone()
 	model.scale.setScalar(10)
-	const bundle = modelColliderBundle(model, RigidBodyType.Fixed, true)
+	const bundle = modelColliderBundle(model, RigidBodyType.Fixed, true, Sizes.small)
 	ecs.update(entity, bundle)
+
 	if (entity.crop.stage === 0) {
 		ecs.addComponent(entity, 'scale', 0)
 		const tween = new Tween(entity).to({ scale: 1 }, 1000).easing(Easing.Elastic.Out)
@@ -67,6 +69,7 @@ export const harvestCrop = () => {
 						item: true,
 						position: position.clone().add(new Vector3(0, bundle.size.y + 2, 0)),
 						inMap: true,
+						itemLabel: crop.name,
 					})
 					saveCrops()
 				}

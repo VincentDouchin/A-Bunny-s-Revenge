@@ -56,6 +56,8 @@ export interface Entity {
 	colliderDesc?: ColliderDesc
 	collider?: Collider
 	size?: Vector3
+	debugCollider?: true
+	debugColliderMesh?: Mesh
 	// ! Animations
 	playerAnimator?: Animator<string>
 	template?: () => JSXElement
@@ -65,7 +67,7 @@ export interface Entity {
 	// ! Farming
 	sensor?: true
 	sensorCollider?: Collider
-	crop?: { stage: number, name: 'carrot' }
+	crop?: { stage: number, name: 'carrot' | 'beet' }
 	// ! Game
 	map?: true
 	interactable?: true
@@ -77,6 +79,7 @@ export interface Entity {
 	ignoreDoor?: direction
 	// ! Items
 	item?: true
+	itemLabel?: items
 	// ! Cooking
 	cauldron?: (ItemData | null)[]
 	openInventory?: true

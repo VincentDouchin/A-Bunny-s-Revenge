@@ -4,7 +4,7 @@ import { ecs } from './init'
 import type { ItemData } from '@/constants/items'
 
 interface CropData {
-	name: 'carrot'
+	name: 'carrot' | 'beet'
 	stage: number
 	x: number
 	z: number

@@ -14,7 +14,7 @@ export const spawnGround = (size = 256) => () => {
 		map: true,
 		mesh,
 		position: new Vector3(),
-		bodyDesc: RigidBodyDesc.fixed().setCcdEnabled(true),
+		bodyDesc: RigidBodyDesc.fixed(),
 		colliderDesc: ColliderDesc.cuboid(size / 2, 0.5, size / 2),
 	})
 }

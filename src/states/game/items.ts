@@ -4,7 +4,7 @@ import { ecs, world } from '@/global/init'
 import { TweenGroup } from '@/lib/tweenGroup'
 import { addItem } from '@/global/save'
 
-const itemsQuery = ecs.with('item', 'rotation', 'position', 'model', 'collider')
+const itemsQuery = ecs.with('item', 'rotation', 'position', 'model', 'collider', 'itemLabel')
 export const bobItems = () => itemsQuery.onEntityAdded.subscribe((entity) => {
 	const tween	= new Tween(entity.model.position).to({ y: 2 }, 2000).repeat(Number.POSITIVE_INFINITY).yoyo(true).easing(Easing.Quadratic.InOut)
 
@@ -18,7 +18,7 @@ export const collectItems = () => {
 			if (world.intersectionPair(player.collider, item.collider)) {
 				ecs.removeComponent(item, 'tween')
 				ecs.removeComponent(item, 'collider')
-				addItem({ icon: 'carrot', quantity: 1 })
+				addItem({ icon: item.itemLabel, quantity: 1 })
 				const tween = new TweenGroup([
 					new Tween(item.position).to({ ...player.position, y: item.position.y }, 500).onComplete(() => {
 						ecs.remove(item)

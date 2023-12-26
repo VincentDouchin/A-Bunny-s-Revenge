@@ -1,6 +1,6 @@
-type crops = 'Carrot_1' | 'Carrot_2' | 'Carrot_3' | 'Carrot_4' | 'Carrot_Crop' | 'Mushroom_1' | 'Mushroom_2' | 'Mushroom_3' | 'Mushroom_4'
+type crops = 'Beet_1' | 'Beet_2' | 'Beet_3' | 'Beet_4' | 'Beet_Crop' | 'Carrot_1' | 'Carrot_2' | 'Carrot_3' | 'Carrot_4' | 'Carrot_Crop' | 'Mushroom_1' | 'Mushroom_2' | 'Mushroom_3' | 'Mushroom_4'
 type fonts = 'GrapeSoda' | 'NanoPlus'
-type items = 'carrot' | 'carrot_soup'
+type items = 'beet' | 'carrot' | 'carrot_soup'
 type levels = 'levels'
 type models = 'Armabee' | 'BunnyMain' | 'cauldron' | 'Idle' | 'Panda' | 'Running' | 'Running'
 type rocks = 'Rock_Moss_1' | 'Rock_Moss_2' | 'Rock_Moss_3' | 'Rock_Moss_4' | 'Rock_Moss_5' | 'Rock_Moss_6' | 'Rock_Moss_7'

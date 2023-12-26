@@ -1,6 +1,8 @@
 import { Show, createSignal } from 'solid-js'
 import { params } from '@/global/context'
 import { composer, renderer } from '@/global/rendering'
+import { campState } from '@/global/states'
+import { updateSave } from '@/global/save'
 
 export const DebugUi = () => {
 	const updatePixelation = (e: Event) => {
@@ -11,6 +13,15 @@ export const DebugUi = () => {
 		composer.setSize(window.innerWidth / val, window.innerHeight / val)
 	}
 	const [showUi, setShowUi] = createSignal(false)
+	const growCrops = () => {
+		campState.enable({ previousState: 'dungeon' })
+	}
+	const destroyCrops = () => {
+		updateSave((s) => {
+			s.crops = []
+			campState.enable({ })
+		})
+	}
 	return (
 		<div style={{ position: 'absolute', color: 'white' }}>
 			<button onClick={() => setShowUi(!showUi())}>{showUi() ? 'Hide debug Ui' : 'Show debug ui'}</button>
@@ -78,6 +89,8 @@ export const DebugUi = () => {
 					>
 					</input>
 				</div>
+				<button onClick={growCrops}>Grow crops</button>
+				<button onClick={destroyCrops}>Destroy crops</button>
 			</Show>
 		</div>
 	)
