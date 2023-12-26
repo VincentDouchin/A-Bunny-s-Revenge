@@ -3,7 +3,7 @@ export const context = {
 }
 
 export const params = {
-	pixelation: 4,
+	renderWidth: 360,
 	cameraOffsetX: 0,
 	cameraOffsetY: 50,
 	cameraOffsetZ: -75,

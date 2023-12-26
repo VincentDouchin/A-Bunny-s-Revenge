@@ -15,13 +15,14 @@ export const cssRenderer = new CSS2DRenderer()
 
 export const initThree = () => {
 	renderer.clear()
-	const pixelation = params.pixelation
+	const ratio = window.innerHeight / window.innerWidth
+	const width = params.renderWidth
 	renderer.shadowMap.enabled = true
 	renderer.shadowMap.type = BasicShadowMap
 	document.body.appendChild(renderer.domElement)
 	renderer.outputColorSpace = LinearSRGBColorSpace
-	renderer.setSize(window.innerWidth / pixelation, window.innerHeight / pixelation)
-	composer.setSize(window.innerWidth / pixelation, window.innerHeight / pixelation)
+	renderer.setSize(width, width * ratio)
+	composer.setSize(width, width * ratio)
 	cssRenderer.setSize(window.innerWidth, window.innerHeight)
 	cssRenderer.domElement.style.position = 'fixed'
 	cssRenderer.domElement.style.left = '0'

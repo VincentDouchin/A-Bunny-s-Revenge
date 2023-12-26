@@ -8,9 +8,9 @@ export const DebugUi = () => {
 	const updatePixelation = (e: Event) => {
 		const target = e.target as HTMLInputElement
 		const val = target.valueAsNumber
-		params.pixelation = val
-		renderer.setSize(window.innerWidth / val, window.innerHeight / val)
-		composer.setSize(window.innerWidth / val, window.innerHeight / val)
+		const ratio = window.innerHeight / window.innerWidth
+		renderer.setSize(val, val * ratio)
+		composer.setSize(val, val * ratio)
 	}
 	const [showUi, setShowUi] = createSignal(false)
 	const growCrops = () => {
@@ -27,10 +27,10 @@ export const DebugUi = () => {
 			<button onClick={() => setShowUi(!showUi())}>{showUi() ? 'Hide debug Ui' : 'Show debug ui'}</button>
 			<Show when={showUi()}>
 				<div>
-					Pixelation
+					Render width
 					<input
 						type="number"
-						value={params.pixelation}
+						value={params.renderWidth}
 						onChange={updatePixelation}
 					>
 					</input>
