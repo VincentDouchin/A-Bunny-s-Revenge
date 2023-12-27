@@ -10,4 +10,5 @@ export const params = {
 	zoom: 1,
 	fov: 50,
 	speedUp: 1,
+	dialogSpeed: 1,
 }

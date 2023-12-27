@@ -35,6 +35,7 @@ const loadGLBAsToon = async <K extends string>(glob: Glob, src: string) => {
 						map: node.material.map,
 
 					})
+
 					node.castShadow = true
 					node.receiveShadow = false
 				}

@@ -19,6 +19,7 @@ export enum Faction {
 	Enemy,
 }
 
+export type crops = 'carrot' | 'beet' | 'mushroom'
 export interface Entity {
 	// ! Tween
 	tween?: Tween<any> | TweenGroup
@@ -67,7 +68,7 @@ export interface Entity {
 	// ! Farming
 	sensor?: true
 	sensorCollider?: Collider
-	crop?: { stage: number, name: 'carrot' | 'beet' }
+	crop?: { stage: number, name: crops }
 	// ! Game
 	map?: true
 	interactable?: true

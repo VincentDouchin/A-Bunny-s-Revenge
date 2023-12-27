@@ -6,6 +6,7 @@ import type { DungeonRessources } from '@/global/states'
 import { modelColliderBundle } from '@/lib/models'
 import type { System } from '@/lib/state'
 import { getRandom } from '@/utils/mapFunctions'
+import { Sizes } from '@/constants/sizes'
 
 export const spawnItems: System<DungeonRessources> = ({ dungeon, roomIndex }) => {
 	if (dungeon.rooms[roomIndex].type === RoomType.Item) {
@@ -15,8 +16,9 @@ export const spawnItems: System<DungeonRessources> = ({ dungeon, roomIndex }) =>
 			const x = Math.cos(i * Math.PI / 4) * 5
 			const y = Math.sin(i * Math.PI / 4) * 5
 			ecs.add({
-				...modelColliderBundle(model, RigidBodyType.Fixed, true),
+				...modelColliderBundle(model, RigidBodyType.Fixed, true, Sizes.small),
 				position: new Vector3(x, 0, y),
+				crop: { stage: 3, name: 'mushroom' },
 				interactable: true,
 				inMap: true,
 			})

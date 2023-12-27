@@ -21,14 +21,14 @@ export class StateMananger {
 
 	disable(state: State<any>) {
 		const ressources = this.states.get(state)
-		for (const system of state._exit) {
-			system(ressources)
-		}
 		const callbacks = this.callbacks.get(state)
 		if (callbacks) {
 			for (const callback of callbacks) {
 				callback(ressources)
 			}
+		}
+		for (const system of state._exit) {
+			system(ressources)
 		}
 		this.states.delete(state)
 	}

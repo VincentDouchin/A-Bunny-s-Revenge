@@ -2,14 +2,21 @@ import { RigidBodyType } from '@dimforge/rapier3d-compat'
 import { Easing, Tween } from '@tweenjs/tween.js'
 import { Vector3 } from 'three'
 import { assets, ecs, world } from '@/global/init'
-import { save, saveCrops } from '@/global/save'
+import { save, updateSave } from '@/global/save'
 import type { FarmRessources } from '@/global/states'
 import { modelColliderBundle } from '@/lib/models'
 import type { System } from '@/lib/state'
 import { Sizes } from '@/constants/sizes'
 
 const playerQuery = ecs.with('playerControls', 'sensorCollider')
-const cropsQuery = ecs.with('position', 'crop', 'collider')
+const cropsQuery = ecs.with('position', 'crop')
+
+const updateCropsSave = () => {
+	updateSave((s) => {
+		s.crops = [...cropsQuery].map(({ crop, position }) => ({ ...crop, x: position.x, z: position.z }))
+	})
+}
+
 export const plantSeed = () => {
 	for (const { playerControls, sensorCollider } of playerQuery) {
 		if (playerControls.get('plant').justPressed) {
@@ -21,7 +28,7 @@ export const plantSeed = () => {
 					inMap: true,
 					crop: { stage: 0, name: 'beet' },
 				})
-				saveCrops()
+				updateCropsSave()
 			}
 		}
 	}
@@ -49,14 +56,15 @@ export const spawnCrops: System<FarmRessources> = ({ previousState }) => {
 			inMap: true,
 			interactable: true,
 		})
-		saveCrops()
 	}
 }
+
+const cropsColliderQuery = cropsQuery.with('collider')
 
 export const harvestCrop = () => {
 	for (const { playerControls, sensorCollider } of playerQuery) {
 		if (playerControls.get('plant').justPressed) {
-			for (const cropEntity of cropsQuery) {
+			for (const cropEntity of cropsColliderQuery) {
 				const { collider, crop, position } = cropEntity
 				if (crop.stage === assets.crops[crop.name].stages.length - 1 && world.intersectionPair(sensorCollider, collider)) {
 					ecs.remove(cropEntity)
@@ -71,9 +79,10 @@ export const harvestCrop = () => {
 						inMap: true,
 						itemLabel: crop.name,
 					})
-					saveCrops()
 				}
 			}
 		}
 	}
 }
+
+export const saveCrops = [() => cropsQuery.onEntityAdded.subscribe(updateCropsSave), () => cropsQuery.onEntityRemoved.subscribe(updateCropsSave)]

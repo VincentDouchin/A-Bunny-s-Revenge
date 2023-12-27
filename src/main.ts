@@ -17,7 +17,7 @@ import { startTweens, updateTweens } from './lib/updateTween'
 import { generateDungeon } from './states/dungeon/generateDungeon'
 import { spawnItems } from './states/dungeon/itemRoom'
 import { closeCauldronInventory, openCauldronInventory } from './states/farm/cooking'
-import { addCropModel, harvestCrop, plantSeed, spawnCrops } from './states/farm/farming'
+import { addCropModel, harvestCrop, plantSeed, saveCrops, spawnCrops } from './states/farm/farming'
 import { closeInventory, openInventory, toggleMenuState } from './states/farm/openInventory'
 import { spawnNPC } from './states/farm/spawnNPC'
 import { talkToNPC } from './states/game/dialog'
@@ -50,7 +50,7 @@ gameState
 	.onUpdate(runIf(() => !openMenuState.enabled, movePlayer), collectItems, touchItem, talkToNPC)
 	.enable()
 campState
-	.addSubscriber(addCropModel)
+	.addSubscriber(addCropModel, ...saveCrops)
 	.onEnter(spawnFarm, spawnCharacter, spawnLight, spawnSkyBox, spawnCrops, spawnNPC)
 	.onUpdate(collideWithDoorCamp, runif(() => !openMenuState.enabled, plantSeed, harvestCrop, openCauldronInventory, openInventory))
 	.onExit(despawnOfType('map'))
@@ -61,7 +61,7 @@ genDungeonState
 	.onEnter(generateDungeon)
 dungeonState
 	.onEnter(spawnDungeon, spawnLight, spawnSkyBox, spawnItems)
-	.onUpdate(allowDoorCollision, collideWithDoor, enemyAttackPlayer)
+	.onUpdate(allowDoorCollision, collideWithDoor, enemyAttackPlayer, harvestCrop)
 	.onExit(despawnOfType('map'))
 
 const animate = async () => {

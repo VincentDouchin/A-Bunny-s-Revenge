@@ -57,3 +57,26 @@ canvas{
     translate:0% 100vh
   }
 }
+
+@keyframes letter-pop{
+  from{
+    transform: scale(1.5);
+  }
+  to{
+   transform: scale(1);
+  }
+}
+
+.letter-visible{
+  animation-name:letter-pop;
+  animation-duration:0.1s;
+}
+
+.letter-hidden{
+  opacity:0
+}
+.letter{
+}
+.space{
+  width:0.5rem
+}
