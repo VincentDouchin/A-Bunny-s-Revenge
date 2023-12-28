@@ -1,5 +1,7 @@
 import { CanvasTexture } from 'three'
 
+export const randomColor = () => `#${Math.floor(Math.random() * 16777215).toString(16)}`
+
 export const getScreenBuffer = (width: number, height: number) => {
 	const canvas = document.createElement('canvas')
 	canvas.width = width

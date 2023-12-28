@@ -2,9 +2,11 @@ import { RigidBodyType } from '@dimforge/rapier3d-compat'
 import { between } from 'randomish'
 import { BoxGeometry, Color, Mesh, MeshStandardMaterial, Vector3 } from 'three'
 import { cauldronBundle } from '../farm/cooking'
-import { doorBundle } from './spawnDoor'
 import { playerBundle } from './spawnCharacter'
+import { doorBundle } from './spawnDoor'
 import type { EntityInstance, LayerInstance, Level } from '@/LDTKMap'
+import { dialogs } from '@/constants/dialogs'
+import { instanceMesh } from '@/global/assetLoaders'
 import { assets, ecs } from '@/global/init'
 import type { DungeonRessources } from '@/global/states'
 import { type direction, otherDirection } from '@/lib/directions'
@@ -12,7 +14,6 @@ import { modelColliderBundle } from '@/lib/models'
 import type { System } from '@/lib/state'
 import { GroundShader } from '@/shaders/GroundShader'
 import { getRandom, objectValues } from '@/utils/mapFunctions'
-import { dialogs } from '@/constants/dialogs'
 
 export const treeBundle = () => {
 	const model = getRandom(objectValues(assets.trees)).scene.clone()
@@ -80,6 +81,7 @@ const spawnEntity = (entity: EntityInstance, layer: LayerInstance) => {
 				dialog: dialogs.GrandmasHouse(),
 				position,
 				...houseBundle,
+				inMap: true,
 			})
 
 			ecs.add({
@@ -92,11 +94,12 @@ const spawnEntity = (entity: EntityInstance, layer: LayerInstance) => {
 		}
 	}
 }
-
 const spawnGroundAndTrees = (layer: LayerInstance) => {
 	// ! Ground
+	const w = layer.__cWid * SCALE
+	const h = layer.__cHei * SCALE
 	const groundMesh = new Mesh(
-		new BoxGeometry(layer.__cWid * SCALE, 1, layer.__cHei * SCALE),
+		new BoxGeometry(w, 1, h),
 		new GroundShader(new Color(0x26854C)),
 	)
 	groundMesh.receiveShadow = true
@@ -106,6 +109,7 @@ const spawnGroundAndTrees = (layer: LayerInstance) => {
 		position: new Vector3(),
 		...modelColliderBundle(groundMesh, RigidBodyType.Fixed),
 	})
+	const trees = Object.values(assets.trees).map(instanceMesh)
 	for (let i = 0; i < layer.intGridCsv.length; i++) {
 		const val = layer.intGridCsv[i]
 		if (val === GroundType.Tree) {
@@ -114,11 +118,16 @@ const spawnGroundAndTrees = (layer: LayerInstance) => {
 			const position = new Vector3(
 				-x + layer.__cWid / 2 + between(-0.5, 0.5),
 				0,
-				-y + layer.__cHei / 2 + between(-0.5, 0.5),
+				y - layer.__cHei / 2 + between(-0.5, 0.5),
 			).multiplyScalar(SCALE)
-			ecs.add({ ...treeBundle(), position })
+			const tree = getRandom(trees)
+			tree.addAt(position, 10)
 		}
 	}
+	trees.forEach((t) => {
+		const group = t.process()
+		ecs.add({ group, inMap: true })
+	})
 }
 
 export const spawnLevel = (level: Level) => () => {

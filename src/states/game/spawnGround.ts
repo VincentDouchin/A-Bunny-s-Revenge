@@ -1,23 +1,8 @@
-import { ColliderDesc, RigidBodyDesc } from '@dimforge/rapier3d-compat'
-import { BackSide, BoxGeometry, Mesh, MeshBasicMaterial, MeshStandardMaterial, Vector3 } from 'three'
-import { insideCircle } from 'randomish'
+import { BackSide, BoxGeometry, Mesh, MeshBasicMaterial, Vector3 } from 'three'
+import type { Entity } from '@/global/entity'
 import { assets, ecs } from '@/global/init'
-import { between, getRandom, objectValues, range } from '@/utils/mapFunctions'
+import { getRandom } from '@/utils/mapFunctions'
 
-export const spawnGround = (size = 256) => () => {
-	const geometry = new BoxGeometry(size, 1, size)
-	const material = new MeshStandardMaterial({ color: 0x4E6E49 })
-	const mesh = new Mesh(geometry, material)
-	mesh.receiveShadow = true
-
-	ecs.add({
-		map: true,
-		mesh,
-		position: new Vector3(),
-		bodyDesc: RigidBodyDesc.fixed(),
-		colliderDesc: ColliderDesc.cuboid(size / 2, 0.5, size / 2),
-	})
-}
 export const spawnSkyBox = () => {
 	const size = 1024
 	const skybox = new Mesh(
@@ -30,27 +15,9 @@ export const spawnSkyBox = () => {
 		position: new Vector3(0, -64, 0),
 	})
 }
-export const spawnTrees = (size = 256, amount = 100) => () => {
-	range(0, amount, () => {
-		const model = getRandom(objectValues(assets.trees)).scene.clone()
-		model.scale.setScalar(between(3, 5))
-		const position = insideCircle(size / 2)
-		ecs.add({
-			model,
-			inMap: true,
-			parent,
-			scale: 4,
-			position: new Vector3(position.x + Math.sign(position.x) * size / 16, 0, position.y + Math.sign(position.y) * size / 16),
-		})
-	})
-}
-export const spawnRocks = (size = 256, amount = 100) => () => {
-	range(0, amount, () => {
-		ecs.add({
-			inMap: true,
-			scale: 4,
-			model: getRandom(objectValues(assets.rocks).map(glb => glb.scene)).clone(),
-			position: new Vector3(between(-size / 2, size / 2), 0, between(-size / 2, size / 2)),
-		})
-	})
-}
+
+export const grassBundle = () => ({
+	scale: 10,
+	model: getRandom(Object.values(assets.grass)).scene.clone(),
+	inMap: true,
+} as const satisfies Entity)

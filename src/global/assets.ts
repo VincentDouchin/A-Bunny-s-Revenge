@@ -1,5 +1,6 @@
 import toneMapDefaultsrc from '@assets/_singles/tonemap-default.png'
 import toneMapTreessrc from '@assets/_singles/tonemap-trees.png'
+import type { ColorRepresentation } from 'three'
 import { LinearSRGBColorSpace, Mesh, MeshPhysicalMaterial, MeshStandardMaterial, MeshToonMaterial, NearestFilter, TextureLoader } from 'three'
 import type { GLTF } from 'three/examples/jsm/loaders/GLTFLoader'
 import type { stringCaster } from './assetLoaders'
@@ -16,8 +17,8 @@ const loadToneMap = async (url: string) => {
 type Glob = Record<string, () => Promise<any>>
 type GlobEager<T = string> = Record<string, T>
 
-const loadGLBAsToon = async <K extends string>(glob: Glob, src: string) => {
-	const gradientMap = await loadToneMap(src)
+const loadGLBAsToon = async <K extends string>(glob: Glob, options?: { src?: string, color?: ColorRepresentation }) => {
+	const gradientMap = await loadToneMap(options?.src ?? toneMapDefaultsrc)
 	const glbs = await asyncMapValues(glob, async f => loadGLB(await f()))
 	const toons = mapValues(glbs, (glb) => {
 		glb.scene.traverse((node) => {
@@ -28,9 +29,10 @@ const loadGLBAsToon = async <K extends string>(glob: Glob, src: string) => {
 						node.material.map.minFilter = NearestFilter
 						node.material.map.magFilter = NearestFilter
 					}
+
 					node.material = new MeshToonMaterial({
 
-						color: node.material.color,
+						color: options?.color ?? node.material.color,
 						gradientMap,
 						map: node.material.map,
 
@@ -55,7 +57,7 @@ const skyboxLoader = async (glob: GlobEager) => {
 	}))
 }
 const cropsLoader = async <K extends string>(glob: Glob, src: string) => {
-	const models = await loadGLBAsToon(glob, src)
+	const models = await loadGLBAsToon(glob, { src })
 	const grouped = groupByObject(models, key => key.split('_')[0].toLowerCase() as K)
 	return mapValues(grouped, (group) => {
 		let crop: GLTF | null = null
@@ -86,11 +88,13 @@ const fontLoader = async (glob: Glob) => {
 const levelLoader = async (glob: GlobEager) => {
 	return JSON.parse(Object.values(glob)[0]) as LDTKMap
 }
+
 export const loadAssets = async () => ({
-	characters: await loadGLBAsToon<models>(import.meta.glob('@assets/models/*.glb', { as: 'url' }), toneMapDefaultsrc),
+	characters: await loadGLBAsToon<models>(import.meta.glob('@assets/models/*.glb', { as: 'url' })),
 	skybox: await skyboxLoader(import.meta.glob('@assets/skybox/*.png', { eager: true, import: 'default' })),
-	trees: await loadGLBAsToon<trees>(import.meta.glob('@assets/trees/*.glb', { as: 'url' }), toneMapTreessrc),
-	rocks: await loadGLBAsToon<rocks>(import.meta.glob('@assets/rocks/*.glb', { as: 'url' }), toneMapDefaultsrc),
+	trees: await loadGLBAsToon<trees>(import.meta.glob('@assets/trees/*.glb', { as: 'url' }), { src: toneMapTreessrc }),
+	rocks: await loadGLBAsToon<rocks>(import.meta.glob('@assets/rocks/*.glb', { as: 'url' })),
+	grass: await loadGLBAsToon<grass>(import.meta.glob('@assets/grass/*.glb', { as: 'url' }), { color: 0x26854C }),
 	crops: await cropsLoader<'carrot' | 'mushroom' | 'beet'>(import.meta.glob('@assets/crops/*.glb', { as: 'url' }), toneMapDefaultsrc),
 	items: await itemsLoader(import.meta.glob('@assets/items/*.png', { eager: true, import: 'default' })),
 	fonts: await fontLoader(import.meta.glob('@assets/fonts/*.ttf', { eager: true, import: 'default' })),
