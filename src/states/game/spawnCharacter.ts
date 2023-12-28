@@ -24,6 +24,8 @@ export const playerBundle = () => {
 		playerAnimator: new Animator('idle', bundle.model, [...idle, ...run]),
 		faction: Faction.Player,
 		sensor: true,
+		player: true,
+		movementForce: new Vector3(),
 	} as const satisfies Entity
 }
 

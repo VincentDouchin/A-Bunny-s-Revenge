@@ -1,4 +1,4 @@
-import { For, createEffect, createSignal, onCleanup } from 'solid-js'
+import { For, Show, createEffect, createSignal, onCleanup } from 'solid-js'
 import { Portal } from 'solid-js/web'
 import { params } from '@/global/context'
 import { ecs, ui } from '@/global/init'
@@ -37,7 +37,10 @@ export const DialogUi = () => {
 
 				return (
 					<Portal mount={entity.dialogContainer.element}>
-						<div style={{ 'color': 'white', 'font-family': 'NanoPlus', 'font-size': '2rem', 'background': 'hsl(0, 0%, 0%, 50%)', 'border-radius': '1rem', 'padding': '1rem', 'display': 'flex' }}><DialogText text={dialog() as string} /></div>
+						<Show when={entity.npcName}>
+							<div style={{ 'color': 'white', 'position': 'absolute', 'translate': '1rem -50%', 'font-family': 'NanoPlus', 'font-size': '1.5rem' }}>{entity.npcName}</div>
+						</Show>
+						<div class="dialog-container"><DialogText text={dialog() as string} /></div>
 					</Portal>
 				)
 			}}

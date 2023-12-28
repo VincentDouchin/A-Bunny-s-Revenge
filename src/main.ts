@@ -1,7 +1,7 @@
 import { addDebugCollider } from './debug/debugCollider'
 import { playAnimations } from './global/animations'
 import { initCamera, moveCamera } from './global/camera'
-import { time, ui } from './global/init'
+import { coroutines, time, ui } from './global/init'
 import { initThree, render, updateControls } from './global/rendering'
 import { app, campState, coreState, dungeonState, gameState, genDungeonState, openMenuState, setupState } from './global/states'
 import { despawnOfType, hierarchyPlugin } from './lib/hierarchy'
@@ -22,7 +22,7 @@ import { closeInventory, openInventory, toggleMenuState } from './states/farm/op
 import { spawnNPC } from './states/farm/spawnNPC'
 import { talkToNPC } from './states/game/dialog'
 import { bobItems, collectItems } from './states/game/items'
-import { movePlayer } from './states/game/movePlayer'
+import { applyMove, canPlayerMove, movePlayer } from './states/game/movePlayer'
 import { target } from './states/game/sensor'
 import { spawnCharacter } from './states/game/spawnCharacter'
 import { allowDoorCollision, collideWithDoor, collideWithDoorCamp } from './states/game/spawnDoor'
@@ -38,6 +38,7 @@ coreState
 	.addPlugins(hierarchyPlugin, physicsPlugin, transformsPlugin, addToScene('camera', 'light', 'mesh', 'model', 'dialogContainer'), updateModels, uiPlugin)
 	.addSubscriber(...target, startTweens, addDebugCollider)
 	.onEnter(initThree, initCamera, ui.render(UI))
+	.onPreUpdate(coroutines.tick)
 	.onUpdate(...playAnimations('playerAnimator'), moveCamera, updateTweens, InputMap.update, ui.update)
 	.onPostUpdate(updateControls, render)
 	.enable()
@@ -47,12 +48,23 @@ setupState
 gameState
 	.onEnter()
 	.addSubscriber(bobItems, ...toggleMenuState)
-	.onUpdate(runIf(() => !openMenuState.enabled, movePlayer), collectItems, touchItem, talkToNPC)
+	.onUpdate(runIf(
+		canPlayerMove,
+		movePlayer,
+	))
+	.onUpdate(collectItems, touchItem, talkToNPC, applyMove)
 	.enable()
 campState
 	.addSubscriber(addCropModel, ...saveCrops)
 	.onEnter(spawnFarm, spawnCharacter, spawnLight, spawnSkyBox, spawnCrops, spawnNPC)
-	.onUpdate(collideWithDoorCamp, runif(() => !openMenuState.enabled, plantSeed, harvestCrop, openCauldronInventory, openInventory))
+	.onUpdate(collideWithDoorCamp)
+	.onUpdate(runif(
+		canPlayerMove,
+		plantSeed,
+		harvestCrop,
+		openCauldronInventory,
+		openInventory,
+	))
 	.onExit(despawnOfType('map'))
 openMenuState
 	.onUpdate(closeInventory, closeCauldronInventory)

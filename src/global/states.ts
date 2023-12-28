@@ -11,7 +11,7 @@ export interface FarmRessources {
 export const campState = app.create<FarmRessources>()
 export const setupState = app.create()
 export const openMenuState = app.create()
-
+export const cutSceneState = app.create()
 export const genDungeonState = app.create()
 
 export interface DungeonRessources {

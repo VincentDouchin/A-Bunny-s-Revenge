@@ -12,8 +12,9 @@ import type { TweenGroup } from '@/lib/tweenGroup'
 import type { MenuInputMap, PlayerInputMap } from '@/lib/inputs'
 import type { direction } from '@/lib/directions'
 import type { ItemData } from '@/constants/items'
+import type { NPC } from '@/constants/NPC'
 
-export type Dialog = Generator<string | string[] | void, void, number | void>
+export type Dialog = Generator<string | string[] | void | false, void, number | void>
 export enum Faction {
 	Player,
 	Enemy,
@@ -26,6 +27,7 @@ export interface Entity {
 	// ! Models
 	scale?: number
 	// ! Transforms
+	movementForce?: Vector3
 	position?: Vector3
 	worldPosition?: Vector3
 	rotation?: Quaternion
@@ -84,10 +86,14 @@ export interface Entity {
 	// ! Cooking
 	cauldron?: (ItemData | null)[]
 	openInventory?: true
+	// ! Player
+	player?: true
 	// ! NPC
 	npc?: true
+	npcName?: (typeof NPC)[number]
 	// ! Dialog
 	dialog?: Dialog
+	activeDialog?: true
 	currentDialog?: string | string[]
 	dialogContainer?: CSS2DObject
 }

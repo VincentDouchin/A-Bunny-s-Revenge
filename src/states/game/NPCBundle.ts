@@ -11,6 +11,7 @@ export const NPCBundle = (character: models) => {
 		...bundle,
 		inMap: true,
 		npc: true,
+		npcName: 'Panda',
 		rotation: new Quaternion().setFromAxisAngle(new Vector3(0, 1, 0), Math.PI),
 	} as const satisfies Entity
 }

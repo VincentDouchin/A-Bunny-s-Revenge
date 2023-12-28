@@ -1,6 +1,6 @@
 import { RigidBodyType } from '@dimforge/rapier3d-compat'
 import { between } from 'randomish'
-import { BoxGeometry, Color, Mesh, Vector3 } from 'three'
+import { BoxGeometry, Color, Mesh, MeshStandardMaterial, Vector3 } from 'three'
 import { cauldronBundle } from '../farm/cooking'
 import { doorBundle } from './spawnDoor'
 import { playerBundle } from './spawnCharacter'
@@ -12,6 +12,7 @@ import { modelColliderBundle } from '@/lib/models'
 import type { System } from '@/lib/state'
 import { GroundShader } from '@/shaders/GroundShader'
 import { getRandom, objectValues } from '@/utils/mapFunctions'
+import { dialogs } from '@/constants/dialogs'
 
 export const treeBundle = () => {
 	const model = getRandom(objectValues(assets.trees)).scene.clone()
@@ -54,15 +55,40 @@ const getEntityPosition = (entity: EntityInstance, layer: LayerInstance, offsetX
 }
 
 const spawnEntity = (entity: EntityInstance, layer: LayerInstance) => {
+	const position = getEntityPosition(entity, layer)
 	switch (entity.__identifier) {
 		case 'door':{
-			const position = getEntityPosition(entity, layer)
 			const data = getFieldIntances<'door'>(entity)
 			ecs.add({ ...doorBundle(1, data.direction), position })
 		};break
 		case 'cauldron':{
-			const position = getEntityPosition(entity, layer)
 			ecs.add({ ...cauldronBundle(), position })
+		};break
+		case 'house':{
+			const houseModel = new Mesh(
+				new BoxGeometry(30, 40, 30),
+				new MeshStandardMaterial({ color: 'brown', opacity: 0.2, transparent: true }),
+			)
+			const doorModel = new Mesh(
+				new BoxGeometry(10, 30, 2),
+				new MeshStandardMaterial({ color: 'black' }),
+			)
+			const houseBundle = modelColliderBundle(houseModel, RigidBodyType.Fixed)
+			const doorBundle = modelColliderBundle(doorModel, RigidBodyType.Fixed)
+			const house = ecs.add({
+				npcName: 'Grandma',
+				dialog: dialogs.GrandmasHouse(),
+				position,
+				...houseBundle,
+			})
+
+			ecs.add({
+				parent: house,
+				npcName: 'door',
+				position: new Vector3(0, 0, -15),
+				dialog: dialogs.GrandmasDoor(),
+				...doorBundle,
+			})
 		}
 	}
 }

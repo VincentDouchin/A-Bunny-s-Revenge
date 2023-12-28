@@ -67,6 +67,16 @@ canvas{
   }
 }
 
+.dialog-container{
+  color: white;
+  font-family: NanoPlus;
+  font-size: 2rem;
+  background: hsl(0, 0%, 0%, 50%);
+  border-radius: 1rem; 
+  padding: 1rem; 
+  display: flex;
+}
+
 .letter-visible{
   animation-name:letter-pop;
   animation-duration:0.1s;

@@ -89,8 +89,21 @@ export const DebugUi = () => {
 					>
 					</input>
 				</div>
-				<button onClick={growCrops}>Grow crops</button>
-				<button onClick={destroyCrops}>Destroy crops</button>
+				<div>
+					Dialog speed
+					<input
+						type="number"
+						value={params?.dialogSpeed}
+						onChange={e => params.dialogSpeed = e.target.valueAsNumber}
+					>
+					</input>
+				</div>
+				<div>
+					<button onClick={growCrops}>Grow crops</button>
+				</div>
+				<div>
+					<button onClick={destroyCrops}>Destroy crops</button>
+				</div>
 			</Show>
 		</div>
 	)
