@@ -67,11 +67,11 @@ const spawnEntity = (entity: EntityInstance, layer: LayerInstance) => {
 		case 'house':{
 			const houseModel = new Mesh(
 				new BoxGeometry(30, 40, 30),
-				new MeshStandardMaterial({ color: 'brown', opacity: 0.2, transparent: true }),
+				new MeshStandardMaterial({ color: 0x944F00 }),
 			)
 			const doorModel = new Mesh(
 				new BoxGeometry(10, 30, 2),
-				new MeshStandardMaterial({ color: 'black' }),
+				new MeshStandardMaterial({ color: 0x753F00 }),
 			)
 			const houseBundle = modelColliderBundle(houseModel, RigidBodyType.Fixed)
 			const doorBundle = modelColliderBundle(doorModel, RigidBodyType.Fixed)
