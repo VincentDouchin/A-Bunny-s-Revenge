@@ -3,7 +3,7 @@ import type { Level } from '@/LDTKMap'
 import type { Entity } from '@/global/entity'
 
 export interface Enemy {
-	name: models
+	name: characters
 	position: Vec2
 	currentHealth: number
 	maxHealth: number

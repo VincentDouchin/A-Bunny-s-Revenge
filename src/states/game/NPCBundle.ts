@@ -4,7 +4,7 @@ import type { Entity } from '@/global/entity'
 import { assets } from '@/global/init'
 import { modelColliderBundle } from '@/lib/models'
 
-export const NPCBundle = (character: models) => {
+export const NPCBundle = (character: characters) => {
 	const model = assets.characters[character]
 	const bundle = modelColliderBundle(model.scene, RigidBodyType.Fixed, false)
 	return {

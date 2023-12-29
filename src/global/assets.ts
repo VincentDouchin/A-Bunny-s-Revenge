@@ -90,7 +90,7 @@ const levelLoader = async (glob: GlobEager) => {
 }
 
 export const loadAssets = async () => ({
-	characters: await loadGLBAsToon<models>(import.meta.glob('@assets/models/*.glb', { as: 'url' })),
+	characters: await loadGLBAsToon<characters>(import.meta.glob('@assets/characters/*.glb', { as: 'url' })),
 	skybox: await skyboxLoader(import.meta.glob('@assets/skybox/*.png', { eager: true, import: 'default' })),
 	trees: await loadGLBAsToon<trees>(import.meta.glob('@assets/trees/*.glb', { as: 'url' }), { src: toneMapTreessrc }),
 	rocks: await loadGLBAsToon<rocks>(import.meta.glob('@assets/rocks/*.glb', { as: 'url' })),

@@ -121,7 +121,7 @@ const spawnGroundAndTrees = (layer: LayerInstance) => {
 				y - layer.__cHei / 2 + between(-0.5, 0.5),
 			).multiplyScalar(SCALE)
 			const tree = getRandom(trees)
-			tree.addAt(position, 10)
+			tree.addAt(position, between(8, 12))
 		}
 	}
 	trees.forEach((t) => {
