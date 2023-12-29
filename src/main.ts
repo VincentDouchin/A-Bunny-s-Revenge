@@ -16,6 +16,7 @@ import { uiPlugin } from './lib/uiPlugin'
 import { startTweens, updateTweens } from './lib/updateTween'
 import { generateDungeon } from './states/dungeon/generateDungeon'
 import { spawnItems } from './states/dungeon/itemRoom'
+import { displayOnCuttinBoard } from './states/farm/CookingUi'
 import { closeCauldronInventory, openCauldronInventory } from './states/farm/cooking'
 import { addCropModel, harvestCrop, plantSeed, saveCrops, spawnCrops } from './states/farm/farming'
 import { closeInventory, openInventory, toggleMenuState } from './states/farm/openInventory'
@@ -57,7 +58,7 @@ gameState
 campState
 	.addSubscriber(addCropModel, ...saveCrops)
 	.onEnter(spawnFarm, spawnCharacter, spawnLight, spawnSkyBox, spawnCrops, spawnNPC)
-	.onUpdate(collideWithDoorCamp, savePlayerPosition)
+	.onUpdate(collideWithDoorCamp, savePlayerPosition, displayOnCuttinBoard)
 	.onUpdate(runif(
 		canPlayerMove,
 		plantSeed,

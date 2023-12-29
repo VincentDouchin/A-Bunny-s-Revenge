@@ -7,3 +7,5 @@ export interface StackableItem {
 interface CropItem extends StackableItem {
 
 }
+
+export const choppables = ['carrot'] as const

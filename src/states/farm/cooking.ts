@@ -13,13 +13,13 @@ export const cauldronBundle = (): Entity => {
 		...bundle,
 		interactable: true,
 		...menuInputMap(),
-		cauldron: [null, null, null, null],
+		inventory: [null, null, null, null],
 		inMap: true,
 
 	}
 }
 const playerCollider = ecs.with('sensorCollider', 'playerControls')
-const cauldronQuery = ecs.with('cauldron', 'collider', 'menuInputs')
+const cauldronQuery = ecs.with('inventory', 'collider', 'menuInputs')
 export const openCauldronInventory = () => {
 	for (const player of playerCollider) {
 		const { sensorCollider, playerControls } = player

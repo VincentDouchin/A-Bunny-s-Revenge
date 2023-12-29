@@ -7,6 +7,7 @@ import type { FarmRessources } from '@/global/states'
 import { modelColliderBundle } from '@/lib/models'
 import type { System } from '@/lib/state'
 import { Sizes } from '@/constants/sizes'
+import { isInIntersectionWithCollider } from '@/lib/transforms'
 
 const playerQuery = ecs.with('playerControls', 'sensorCollider')
 const cropsQuery = ecs.with('position', 'crop')
@@ -20,6 +21,7 @@ const updateCropsSave = () => {
 export const plantSeed = () => {
 	for (const { playerControls, sensorCollider } of playerQuery) {
 		if (playerControls.get('plant').justPressed) {
+			if (isInIntersectionWithCollider(sensorCollider)) return
 			const pos = sensorCollider.translation()
 			const position = new Vector3(pos.x, pos.y, pos.z).divideScalar(5).round().multiplyScalar(5)
 			if (![...cropsQuery].some(otherCrop => otherCrop.position.x === position.x && otherCrop.position.z === position.z)) {

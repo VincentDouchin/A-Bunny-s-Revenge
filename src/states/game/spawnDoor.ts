@@ -1,5 +1,5 @@
 import { ColliderDesc, RigidBodyDesc } from '@dimforge/rapier3d-compat'
-import { DoubleSide, Group, Mesh, MeshBasicMaterial, PlaneGeometry, Quaternion, Vector3 } from 'three'
+import { DoubleSide, Group, Mesh, MeshBasicMaterial, PlaneGeometry } from 'three'
 import type { Entity } from '@/global/entity'
 import { ecs, world } from '@/global/init'
 import type { DungeonRessources } from '@/global/states'
@@ -24,18 +24,10 @@ const doorGroup = () => {
 	group.position.y = 15
 	return group
 }
-const rotations = {
-	left: 1,
-	right: -1,
-	front: 0,
-	back: 2,
-}
+
 export const doorBundle = (to: number, direction: direction) => {
-	const rotation = new Quaternion()
-	rotation.setFromAxisAngle(new Vector3(0, 1, 0), Math.PI / 2 * rotations[direction])
 	return {
 		inMap: true,
-		rotation,
 		model: doorGroup(),
 		bodyDesc: RigidBodyDesc.fixed().lockRotations(),
 		colliderDesc: ColliderDesc.cuboid(10, 15, 1).setSensor(true),

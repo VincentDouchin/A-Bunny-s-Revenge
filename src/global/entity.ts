@@ -19,7 +19,7 @@ export enum Faction {
 	Player,
 	Enemy,
 }
-
+export type InventoryTypes = 'oven' | 'cuttingBoard'
 export type crops = 'carrot' | 'beet' | 'mushroom'
 export interface Entity {
 	// ! Tween
@@ -83,9 +83,13 @@ export interface Entity {
 	// ! Items
 	item?: true
 	itemLabel?: items
-	// ! Cooking
-	cauldron?: (ItemData | null)[]
+	// ! Inventory
+	inventory?: (ItemData | null)[]
+	inventorySize?: number
 	openInventory?: true
+	inventoryType?: InventoryTypes
+	// ! Cooking
+	displayedItem?: Entity
 	// ! Player
 	player?: true
 	// ! NPC

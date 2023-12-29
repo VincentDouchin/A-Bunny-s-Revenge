@@ -50,12 +50,13 @@ interface MenuProps {
 	children: Component<MenuItemProps>
 	inputs?: MenuInputMap
 }
+export type getProps = (first?: boolean) => {
+	ref: (el: HTMLElement) => void
+	onMouseEnter: () => void
+	selected: Accessor<boolean>
+}
 export interface MenuItemProps {
-	getProps: (first?: boolean) => {
-		ref: (el: HTMLElement) => void
-		onMouseEnter: () => void
-		selected: Accessor<boolean>
-	}
+	getProps: getProps
 }
 export function Menu(props: MenuProps) {
 	const [selected, setSelected] = createSignal('')

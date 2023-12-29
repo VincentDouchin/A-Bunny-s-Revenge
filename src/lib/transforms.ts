@@ -1,8 +1,21 @@
-import { Vector3 } from 'three'
+import { Quaternion, Vector3 } from 'three'
+import type { Collider } from '@dimforge/rapier3d-compat'
 import type { State } from './state'
-import { ecs } from '@/global/init'
+import type { direction } from './directions'
+import { ecs, world } from '@/global/init'
 
 const positionQuery = ecs.with('position', 'group')
+export const getRotationFromDirection = (direction: direction) => {
+	const rotations = {
+		left: 1,
+		right: -1,
+		front: 0,
+		back: 2,
+	}
+	const rotation = new Quaternion()
+	rotation.setFromAxisAngle(new Vector3(0, 1, 0), Math.PI / 2 * rotations[direction])
+	return rotation
+}
 const updateMeshPosition = () => {
 	for (const { position, group } of positionQuery) {
 		group.position.x = position.x
@@ -53,4 +66,10 @@ export const transformsPlugin = (state: State) => {
 		.addSubscriber(addWorldPosition)
 		.onUpdate(updateGroupPosition, updateMeshPosition, updateRotation)
 		.onPostUpdate(updateWorldPosition)
+}
+
+export const isInIntersectionWithCollider = (collider: Collider) => {
+	let isInIntersection = false
+	world.intersectionsWith(collider, () => isInIntersection = true)
+	return isInIntersection
 }

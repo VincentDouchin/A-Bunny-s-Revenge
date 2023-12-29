@@ -1,8 +1,8 @@
-import { StateUi } from './StateUi'
 import { DialogUi } from './DialogUi'
+import { StateUi } from './StateUi'
 import { DebugUi } from '@/debug/debugUi'
 import { campState } from '@/global/states'
-import { CauldronUi } from '@/states/farm/CauldronUi'
+import { CuttingBoardUi, OvenUi } from '@/states/farm/CookingUi'
 import { InventoryUi } from '@/states/farm/InventoryUi'
 
 export const UI = () => (
@@ -10,8 +10,9 @@ export const UI = () => (
 		<DebugUi />
 		<StateUi state={campState}>
 			<InventoryUi />
-			<CauldronUi />
 			<DialogUi />
+			<CuttingBoardUi />
+			<OvenUi />
 		</StateUi>
 	</>
 )

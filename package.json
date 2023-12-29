@@ -16,6 +16,7 @@
 		"randomish": "^0.1.6",
 		"simplex-noise": "^4.0.1",
 		"solid-js": "^1.8.6",
+		"solid-transition-group": "^0.2.3",
 		"three": "^0.155.0",
 		"three-csm": "^3.3.0"
 	},

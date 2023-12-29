@@ -1,0 +1,34 @@
+import { RigidBodyType } from '@dimforge/rapier3d-compat'
+import { BoxGeometry, Mesh, MeshStandardMaterial, Vector3 } from 'three'
+
+import { ecs } from '@/global/init'
+import { modelColliderBundle } from '@/lib/models'
+import { dialogs } from '@/constants/dialogs'
+
+export const spawnHouse = (position: Vector3) => {
+	const houseModel = new Mesh(
+		new BoxGeometry(30, 40, 30),
+		new MeshStandardMaterial({ color: 0x944F00 }),
+	)
+	const doorModel = new Mesh(
+		new BoxGeometry(10, 30, 2),
+		new MeshStandardMaterial({ color: 0x753F00 }),
+	)
+	const houseBundle = modelColliderBundle(houseModel, RigidBodyType.Fixed)
+	const doorBundle = modelColliderBundle(doorModel, RigidBodyType.Fixed)
+	const house = ecs.add({
+		npcName: 'Grandma',
+		dialog: dialogs.GrandmasHouse(),
+		position,
+		...houseBundle,
+		inMap: true,
+	})
+
+	ecs.add({
+		parent: house,
+		npcName: 'door',
+		position: new Vector3(0, 0, -15),
+		dialog: dialogs.GrandmasDoor(),
+		...doorBundle,
+	})
+}
