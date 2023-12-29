@@ -8,16 +8,20 @@ import { getFileName, loadGLB, loadImage } from './assetLoaders'
 import { asyncMapValues, entries, groupByObject, mapKeys, mapValues } from '@/utils/mapFunctions'
 import type { LDTKMap } from '@/LDTKMap'
 
+type Glob = Record<string, () => Promise<any>>
+type GlobEager<T = string> = Record<string, T>
+
 const loadToneMap = async (url: string) => {
 	const texture = await new TextureLoader().loadAsync(url)
 	texture.minFilter = texture.magFilter = NearestFilter
 	return texture
 }
 
-type Glob = Record<string, () => Promise<any>>
-type GlobEager<T = string> = Record<string, T>
+const typeGlob = <K extends string>(glob: Record<string, any>) => async <F extends (glob: Record<string, any>) => Promise<Record<string, any>>>(fn: F) => {
+	return await fn(glob) as Record<K, Awaited<ReturnType<F>>[string]>
+}
 
-const loadGLBAsToon = async <K extends string>(glob: Glob, options?: { src?: string, color?: ColorRepresentation }) => {
+const loadGLBAsToon = (options?: { src?: string, color?: ColorRepresentation }) => async (glob: Glob) => {
 	const gradientMap = await loadToneMap(options?.src ?? toneMapDefaultsrc)
 	const glbs = await asyncMapValues(glob, async f => loadGLB(await f()))
 	const toons = mapValues(glbs, (glb) => {
@@ -45,7 +49,7 @@ const loadGLBAsToon = async <K extends string>(glob: Glob, options?: { src?: str
 		})
 		return glb
 	})
-	return mapKeys(toons, getFileName as stringCaster<K>)
+	return mapKeys(toons, getFileName)
 }
 
 const skyboxLoader = async (glob: GlobEager) => {
@@ -57,7 +61,7 @@ const skyboxLoader = async (glob: GlobEager) => {
 	}))
 }
 const cropsLoader = async <K extends string>(glob: Glob, src: string) => {
-	const models = await loadGLBAsToon(glob, { src })
+	const models = await typeGlob<crops>(glob)(loadGLBAsToon({ src }))
 	const grouped = groupByObject(models, key => key.split('_')[0].toLowerCase() as K)
 	return mapValues(grouped, (group) => {
 		let crop: GLTF | null = null
@@ -90,13 +94,15 @@ const levelLoader = async (glob: GlobEager) => {
 }
 
 export const loadAssets = async () => ({
-	characters: await loadGLBAsToon<characters>(import.meta.glob('@assets/characters/*.glb', { as: 'url' })),
+	characters: await typeGlob<characters>(import.meta.glob('@assets/characters/*.glb', { as: 'url' }))(loadGLBAsToon()),
+	// characters: await loadGLBAsToon<characters>(import.meta.glob('@assets/characters/*.glb', { as: 'url' })),
+	kitchen: await typeGlob<kitchen>(import.meta.glob('@assets/kitchen/*.glb', { as: 'url' }))(loadGLBAsToon()),
 	skybox: await skyboxLoader(import.meta.glob('@assets/skybox/*.png', { eager: true, import: 'default' })),
-	trees: await loadGLBAsToon<trees>(import.meta.glob('@assets/trees/*.glb', { as: 'url' }), { src: toneMapTreessrc }),
-	rocks: await loadGLBAsToon<rocks>(import.meta.glob('@assets/rocks/*.glb', { as: 'url' })),
-	grass: await loadGLBAsToon<grass>(import.meta.glob('@assets/grass/*.glb', { as: 'url' }), { color: 0x26854C }),
+	trees: await typeGlob<trees>(import.meta.glob('@assets/trees/*.glb', { as: 'url' }))(loadGLBAsToon({ src: toneMapTreessrc })),
+	rocks: await typeGlob(import.meta.glob('@assets/rocks/*.glb', { as: 'url' }))(loadGLBAsToon()),
+	grass: await typeGlob(import.meta.glob('@assets/grass/*.glb', { as: 'url' }))(loadGLBAsToon({ color: 0x26854C })),
 	crops: await cropsLoader<'carrot' | 'mushroom' | 'beet'>(import.meta.glob('@assets/crops/*.glb', { as: 'url' }), toneMapDefaultsrc),
-	items: await itemsLoader(import.meta.glob('@assets/items/*.png', { eager: true, import: 'default' })),
+	items: await typeGlob<items>(import.meta.glob('@assets/items/*.png', { eager: true, import: 'default' }))(itemsLoader),
 	fonts: await fontLoader(import.meta.glob('@assets/fonts/*.ttf', { eager: true, import: 'default' })),
 	levels: await levelLoader(import.meta.glob('@assets/levels/*.ldtk', { eager: true, as: 'raw' })),
 } as const)

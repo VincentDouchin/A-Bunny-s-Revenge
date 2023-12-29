@@ -22,7 +22,7 @@ import { closeInventory, openInventory, toggleMenuState } from './states/farm/op
 import { spawnNPC } from './states/farm/spawnNPC'
 import { talkToNPC } from './states/game/dialog'
 import { bobItems, collectItems } from './states/game/items'
-import { applyMove, canPlayerMove, movePlayer } from './states/game/movePlayer'
+import { applyMove, canPlayerMove, movePlayer, savePlayerPosition } from './states/game/movePlayer'
 import { target } from './states/game/sensor'
 import { spawnCharacter } from './states/game/spawnCharacter'
 import { allowDoorCollision, collideWithDoor, collideWithDoorCamp } from './states/game/spawnDoor'
@@ -57,7 +57,7 @@ gameState
 campState
 	.addSubscriber(addCropModel, ...saveCrops)
 	.onEnter(spawnFarm, spawnCharacter, spawnLight, spawnSkyBox, spawnCrops, spawnNPC)
-	.onUpdate(collideWithDoorCamp)
+	.onUpdate(collideWithDoorCamp, savePlayerPosition)
 	.onUpdate(runif(
 		canPlayerMove,
 		plantSeed,

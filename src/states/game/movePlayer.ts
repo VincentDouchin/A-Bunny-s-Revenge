@@ -2,8 +2,10 @@ import { Vector3 } from 'three'
 import { params } from '@/global/context'
 import { ecs, time } from '@/global/init'
 import { cutSceneState, openMenuState } from '@/global/states'
+import { throttle } from '@/lib/state'
+import { updateSave } from '@/global/save'
 
-const playerQuery = ecs.with('playerControls', 'body', 'rotation', 'playerAnimator', 'movementForce')
+const playerQuery = ecs.with('playerControls', 'body', 'rotation', 'playerAnimator', 'movementForce', 'position')
 
 export const movePlayer = () => {
 	for (const { playerControls, movementForce } of playerQuery) {
@@ -31,3 +33,13 @@ export const applyMove = () => {
 	}
 }
 export const canPlayerMove = () => !openMenuState.enabled && !cutSceneState.enabled
+
+export const savePlayerPosition = throttle(1000, () => {
+	const player = playerQuery.first
+	if (player) {
+		updateSave((s) => {
+			s.playerPosition = player.position.toArray()
+			s.playerRotation = player.rotation.toArray()
+		})
+	}
+})

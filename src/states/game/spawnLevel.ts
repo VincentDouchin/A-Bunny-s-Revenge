@@ -65,6 +65,12 @@ const spawnEntity = (entity: EntityInstance, layer: LayerInstance) => {
 		case 'cauldron':{
 			ecs.add({ ...cauldronBundle(), position })
 		};break
+		case 'counter':{
+			const model = assets.kitchen.kitchencounter_straight_B.scene.clone()
+			model.scale.setScalar(5)
+			const bundle = modelColliderBundle(model, RigidBodyType.Fixed)
+			ecs.add({ ...bundle, position, inMap: true })
+		};break
 		case 'house':{
 			const houseModel = new Mesh(
 				new BoxGeometry(30, 40, 30),

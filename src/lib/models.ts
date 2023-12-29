@@ -13,18 +13,6 @@ export const modelColliderBundle = (model: Object3D<Object3DEventMap>, type = Ri
 		const boxSize = new Box3().setFromObject(cloneModel)
 		boxSize.getSize(size)
 	}
-	// const y = boxSize.max.y - boxSize.min.y
-	// const x = boxSize.max.x - boxSize.min.x
-	// const z = boxSize.max.z - boxSize.min.z
-	// if (debug) {
-	// 	debugger
-	// 	const box = new Mesh(
-	// 		new BoxGeometry(x, y, z),
-	// 		new MeshBasicMaterial({ color: `#${Math.floor(Math.random() * 16777215).toString(16)}`, opacity: 0.5, transparent: true }),
-	// 	)
-	// 	box.position.y = y / 2
-	// 	cloneModel.add(box)
-	// }
 	return {
 		model: cloneModel,
 		bodyDesc: new RigidBodyDesc(type).lockRotations(),

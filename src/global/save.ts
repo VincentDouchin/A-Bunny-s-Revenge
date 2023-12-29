@@ -1,4 +1,5 @@
 import { get, set } from 'idb-keyval'
+import { Quaternion, Vector3 } from 'three'
 import { context } from './context'
 import type { crops } from './entity'
 import type { ItemData } from '@/constants/items'
@@ -12,11 +13,15 @@ interface CropData {
 interface SaveData {
 	crops: CropData[]
 	items: ItemData[]
+	playerPosition: number[]
+	playerRotation: number[]
 }
 
 const blankSave = (): SaveData => ({
 	crops: [],
 	items: [],
+	playerPosition: new Vector3().toArray(),
+	playerRotation: new Quaternion().toArray(),
 })
 
 export const save: Readonly<SaveData> = blankSave()
