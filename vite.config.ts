@@ -59,7 +59,7 @@ export default defineConfig(() => {
 		base: '',
 
 		build: {
-			target: 'es6',
+			target: 'esnext',
 
 		},
 
