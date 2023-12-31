@@ -20,7 +20,7 @@ export const playerInputMap = () => {
 const menuInputs = ['up', 'down', 'left', 'right', 'validate', 'cancel'] as const
 export type MenuInputMap = InputMap<typeof menuInputs[number]>
 export const menuInputMap = () => {
-	const map = inputManager.createMap(menuInputs).setGamepads(0)
+	const map = inputManager.createMap(menuInputs, true).setGamepads(0)
 	map.get('up').setKeys('KeyW').setButtons(GAMEPAD_BUTTON.UP)
 	map.get('down').setKeys('KeyS').setButtons(GAMEPAD_BUTTON.DOWN)
 	map.get('left').setKeys('KeyA').setButtons(GAMEPAD_BUTTON.LEFT)

@@ -1,11 +1,12 @@
 import type { With } from 'miniplex'
-import { For } from 'solid-js'
+import { For, Show, createMemo, onCleanup } from 'solid-js'
 import { Quaternion, Vector3 } from 'three'
+import xmark from '@assets/icons/xmark-solid.svg?raw'
 import { InventorySlots, ItemDisplay } from './InventoryUi'
 import type { Entity, InventoryTypes } from '@/global/entity'
 import { type ItemData, choppables } from '@/constants/items'
 
-import { assets, ecs, ui } from '@/global/init'
+import { assets, ecs, inputManager, ui } from '@/global/init'
 import { addItem, save, updateSave } from '@/global/save'
 import { menuInputMap } from '@/global/inputMaps'
 import { ForQuery } from '@/ui/ForQuery'
@@ -136,6 +137,30 @@ export const displayOnCuttinBoard = () => {
 		}
 	}
 }
+const playerControlsQuery = ecs.with('menuInputs', 'playerControls')
+const menuQuery = ecs.with('openInventory', 'menuInputs')
+const CloseButton = () => {
+	const controls = ui.sync(() => inputManager.controls)
+	const isTouch = createMemo(() => controls() === 'touch')
+	const playerTouchController = ui.sync(() => playerControlsQuery.first?.playerControls.touchController)
+	const menuTouchController = ui.sync(() => menuQuery.first?.menuInputs.touchController)
+	const closeInventory = () => {
+		menuTouchController()?.set('cancel', 1)
+		playerTouchController()?.set('inventory', 1)
+	}
+	const reset = () => {
+		menuTouchController()?.set('cancel', 0)
+		playerTouchController()?.set('inventory', 0)
+	}
+	onCleanup(reset)
+
+	return (
+		<Show when={isTouch()}>
+			<div style={{ 'width': '4rem', 'height': '4rem', 'background': 'hsl(0,0%,0%, 20%)', 'position': 'absolute', 'top': '0', 'right': '0', 'margin': '1rem', 'border-radius': '1rem', 'border': `solid 0.1rem hsl(0, 0%,100%, 30% )`, 'box-sizing': 'border-box', 'font-size': '3rem', 'color': 'white', 'display': 'grid', 'place-items': 'center' }} innerHTML={xmark} class="icon-container" onTouchStart={closeInventory} onTouchEnd={reset}></div>
+		</Show>
+	)
+}
+
 export const CuttingBoardUi = () => {
 	return (
 		<ForQuery query={inventoryQuery.with('inventoryType').where(({ inventoryType }) => inventoryType === 'cuttingBoard')}>
@@ -144,8 +169,9 @@ export const CuttingBoardUi = () => {
 				const addToCuttingBoard = addToInventory(cuttingBoard)
 				const removeFromCuttingBoard = removeFromInventory(cuttingBoard)
 				return (
-					<div style={{ 'background': 'hsla(0 0% 0% / 20%)', 'place-self': 'center', 'padding': '2rem', 'border-radius': '1rem', 'display': 'grid', 'gap': '2rem' }}>
+					<div style={{ 'background': 'hsla(0 0% 0% / 20%)', 'place-self': 'center', 'padding': '2rem', 'border-radius': '1rem', 'display': 'grid', 'gap': '2rem', 'position': 'relative' }}>
 						<div>
+							<CloseButton />
 							<Menu inputs={cuttingBoard.menuInputs}>
 								{({ getProps }) => {
 									return (
