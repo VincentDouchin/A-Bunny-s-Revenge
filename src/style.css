@@ -34,7 +34,7 @@ body {
   place-items: center;
   min-width: 320px;
   min-height: 100vh;
-  overscroll-behaviour: contain;
+  overscroll-behaviour: none;
 }
 img{
   image-rendering:pixelated;
