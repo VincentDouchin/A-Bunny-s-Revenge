@@ -221,8 +221,9 @@ export const OvenUi = () => {
 				const addToOven = addToInventory(oven)
 				const removeFromOven = removeFromInventory(oven)
 				return (
-					<div style={{ 'background': 'hsla(0 0% 0% / 20%)', 'place-self': 'center', 'padding': '2rem', 'border-radius': '1rem', 'display': 'grid', 'gap': '2rem' }}>
+					<div style={{ 'background': 'hsla(0 0% 0% / 20%)', 'place-self': 'center', 'padding': '2rem', 'border-radius': '1rem', 'display': 'grid', 'gap': '2rem', 'position': 'relative' }}>
 						<div>
+							<CloseButton />
 							<Menu inputs={oven.menuInputs}>
 								{({ getProps }) => {
 									return (
