@@ -3,18 +3,21 @@
 		"target": "ESNext",
 		"jsx": "react-jsx",
 		"jsxImportSource": "solid-js",
-		"lib": ["ESNext", "DOM", "DOM.Iterable"],
+		"lib": [ "ESNext", "DOM", "DOM.Iterable" ],
 		"useDefineForClassFields": true,
 		"experimentalDecorators": true,
 		"module": "ESNext",
 		/* Bundler mode */
 		"moduleResolution": "Node",
 		"paths": {
-			"@/*": ["./src/*"],
-			"@assets/*": ["./assets/*"]
+			"@/*": [ "./src/*" ],
+			"@assets/*": [ "./assets/*" ]
 		},
 		"resolveJsonModule": true,
-		"types": ["vite/client"],
+		"types": [
+			"vite/client",
+			"vite-plugin-pwa/client"
+		],
 		"allowImportingTsExtensions": true,
 		/* Linting */
 		"strict": true,
@@ -27,5 +30,5 @@
 		"skipLibCheck": true
 	},
 
-	"include": ["src", "assets", "vite"]
+	"include": [ "src", "assets", "vite" ]
 }

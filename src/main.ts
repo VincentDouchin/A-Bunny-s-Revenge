@@ -1,3 +1,4 @@
+import { registerSW } from 'virtual:pwa-register'
 import { addDebugCollider } from './debug/debugCollider'
 import { playAnimations } from './global/animations'
 import { initCamera, moveCamera } from './global/camera'
@@ -34,6 +35,7 @@ import { touchItem } from './states/game/touchItem'
 import { setupGame } from './states/setup/setupGame'
 import { UI } from './ui/UI'
 
+registerSW({ immediate: true })
 coreState
 	.addPlugins(hierarchyPlugin, physicsPlugin, transformsPlugin, addToScene('camera', 'light', 'mesh', 'model', 'dialogContainer'), updateModels, uiPlugin)
 	.addSubscriber(...target, startTweens, addDebugCollider)
