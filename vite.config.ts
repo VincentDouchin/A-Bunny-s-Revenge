@@ -24,9 +24,9 @@ export default defineConfig(() => {
 					start_url: 'index.html?fullscreen=true',
 					display: 'fullscreen',
 					orientation: 'landscape',
-					name: 'Time Loop RPG',
-					short_name: 'Time Loop RPG',
-					description: 'Time Loop RPG',
+					name: 'Fabled Recipes',
+					short_name: 'Fabled Recipes',
+					description: 'Fabled Recipes',
 					theme_color: '#000000',
 					icons: [
 						{
