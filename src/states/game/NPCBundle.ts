@@ -3,10 +3,11 @@ import { Quaternion, Vector3 } from 'three'
 import type { Entity } from '@/global/entity'
 import { assets } from '@/global/init'
 import { modelColliderBundle } from '@/lib/models'
+import { Sizes } from '@/constants/sizes'
 
 export const NPCBundle = (character: characters) => {
 	const model = assets.characters[character]
-	const bundle = modelColliderBundle(model.scene, RigidBodyType.Fixed, false)
+	const bundle = modelColliderBundle(model.scene, RigidBodyType.Fixed, false, Sizes.character)
 	return {
 		...bundle,
 		inMap: true,

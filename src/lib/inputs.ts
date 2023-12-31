@@ -1,10 +1,14 @@
-import type { Bundle } from '@/global/entity'
-
 export const GAMEPAD_AXIS = {
 	LEFT_X: 0,
 	LEFT_Y: 1,
 	RIGHT_X: 2,
 	RIGHT_Y: 3,
+}
+export const OPPOSITE_AXIS = {
+	0: 1,
+	1: 0,
+	2: 3,
+	3: 2,
 }
 
 export const GAMEPAD_BUTTON = {
@@ -26,8 +30,11 @@ export const GAMEPAD_BUTTON = {
 	RIGHT: 15,
 } as const
 
-export const InputManager = new class {
+export class InputManager {
 	keys: Record<string, 0 | 1> = {}
+	controls: 'gamepad' | 'touch' | 'keyboard' = 'keyboard'
+	#maps = new Set<InputMap<any>>()
+
 	constructor() {
 		window.addEventListener('keydown', (e) => {
 			if (e.code in this.keys) {
@@ -39,37 +46,81 @@ export const InputManager = new class {
 				this.keys[e.code] = 0
 			}
 		})
+		window.addEventListener('keydown', () => {
+			this.controls = 'keyboard'
+		})
+		window.addEventListener('touchstart', () => {
+			this.controls = 'touch'
+		})
 	}
-}()
+
+	update = () => {
+		const gamepads = navigator.getGamepads().filter(Boolean)
+		for (const map of this.#maps) {
+			map.update(gamepads)
+		}
+	}
+
+	createMap<K extends string>(inputs: readonly K[], touch = false) {
+		const map = new InputMap(this, inputs, touch)
+		this.#maps.add(map)
+		return map as InputMap<K>
+	}
+}
 
 export class Input {
 	pressed = 0
 	wasPressed = 0
 	#keys: string[] = []
 	#buttons: number[] = []
+	#axes: [number, 1 | -1][] = []
+	#manager: InputManager
+	constructor(manager: InputManager) {
+		this.#manager = manager
+	}
+
 	setKeys(...keys: string[]) {
 		this.#keys.push(...keys)
 		for (const key of keys) {
-			InputManager.keys[key] = 0
+			this.#manager.keys[key] = 0
 		}
 		return this
 	}
 
 	setButtons(...buttons: number[]) {
 		this.#buttons.push(...buttons)
+		return this
 	}
 
-	update(gamepads: Gamepad[]) {
+	setAxes(axis: number, direction: 1 | -1) {
+		this.#axes.push([axis, direction])
+		return this
+	}
+
+	update(gamepads: Gamepad[], touchValue?: number) {
 		this.wasPressed = this.pressed
 		this.pressed = 0
+		if (touchValue !== undefined) {
+			this.pressed = touchValue
+		}
 		for (const key of this.#keys) {
-			if (InputManager.keys[key])
+			if (this.#manager.keys[key])
 				this.pressed = 1
 		}
 		for (const gamepad of gamepads) {
 			for (const button of this.#buttons) {
 				if (gamepad.buttons[button].pressed) {
 					this.pressed = gamepad.buttons[button].value
+				}
+			}
+			for (const [axis, direction] of this.#axes) {
+				const amount = gamepad.axes[axis]
+				if (Math.abs(amount) > 0.1) {
+					if (Math.sign(amount) === direction) {
+						this.pressed = Math.abs(amount)
+					} else {
+						this.pressed = 0
+					}
 				}
 			}
 		}
@@ -83,28 +134,44 @@ export class Input {
 		return this.pressed === 0 && this.wasPressed > 0
 	}
 }
-export class InputMap<K extends string> {
-	#inputs = new Map<K, Input>()
-	static #maps = new Set<InputMap<any>>()
-	#gamepads: number[] = []
-	constructor(actions: readonly K[]) {
-		for (const action of actions) {
-			this.#inputs.set(action, new Input())
+
+export class TouchController< Buttons extends string> {
+	#buttons = new Map<Buttons, number>()
+	constructor(...buttons: Buttons[]) {
+		for (const button of buttons) {
+			this.#buttons.set(button, 0)
 		}
-		InputMap.#maps.add(this)
 	}
 
-	static update() {
-		const gamepads = navigator.getGamepads().filter(Boolean)
-		for (const map of InputMap.#maps) {
-			map.update(gamepads)
+	set(key: Buttons, value: number) {
+		return this.#buttons.set(key, value)!
+	}
+
+	get(key: Buttons) {
+		return this.#buttons.get(key)!
+	}
+}
+
+export class InputMap<K extends string> {
+	#inputs = new Map<K, Input>()
+	#manager: InputManager
+	#gamepads: number[] = []
+	touchController: null | TouchController<K> = null
+	constructor(manager: InputManager, actions: readonly K[], touch?: boolean) {
+		this.#manager = manager
+		for (const action of actions) {
+			this.#inputs.set(action, new Input(this.#manager))
+		}
+		if (touch) {
+			this.touchController = new TouchController(...actions)
 		}
 	}
 
 	update(gamepads: Gamepad[]) {
 		const gamepadsToUse = gamepads.filter(g => g !== null && this.#gamepads.includes(g?.index))
-		for (const input of this.#inputs.values()) {
-			input.update(gamepadsToUse)
+		for (const [name, input] of this.#inputs.entries()) {
+			const touchValue = this.touchController?.get(name)
+			input.update(gamepadsToUse, touchValue)
 		}
 	}
 
@@ -116,30 +183,4 @@ export class InputMap<K extends string> {
 		this.#gamepads = gamepads
 		return this
 	}
-}
-const playerInputs = ['left', 'right', 'forward', 'backward', 'plant', 'inventory', 'interact'] as const
-export type PlayerInputMap = InputMap<typeof playerInputs[number]>
-export const playerInputMap: Bundle<'playerControls'> = () => {
-	const map = new InputMap(playerInputs)
-	map.get('left').setKeys('KeyA')
-	map.get('right').setKeys('KeyD')
-	map.get('forward').setKeys('KeyW')
-	map.get('backward').setKeys('KeyS')
-	map.get('plant').setKeys('Space')
-	map.get('inventory').setKeys('KeyE')
-	map.get('interact').setKeys('Space')
-	return { playerControls: map }
-}
-
-const menuInputs = ['up', 'down', 'left', 'right', 'validate', 'cancel'] as const
-export type MenuInputMap = InputMap<typeof menuInputs[number]>
-export const menuInputMap: Bundle<'menuInputs'> = () => {
-	const map = new InputMap(menuInputs)
-	map.get('up').setKeys('KeyW')
-	map.get('down').setKeys('KeyS')
-	map.get('left').setKeys('KeyA')
-	map.get('right').setKeys('KeyD')
-	map.get('validate').setKeys('Enter', 'Space')
-	map.get('cancel').setKeys('Escape')
-	return { menuInputs: map }
 }

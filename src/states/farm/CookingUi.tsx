@@ -7,7 +7,7 @@ import { type ItemData, choppables } from '@/constants/items'
 
 import { assets, ecs, ui } from '@/global/init'
 import { addItem, save, updateSave } from '@/global/save'
-import { menuInputMap } from '@/lib/inputs'
+import { menuInputMap } from '@/global/inputMaps'
 import { ForQuery } from '@/ui/ForQuery'
 import { Menu } from '@/ui/Menu'
 

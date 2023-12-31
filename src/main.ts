@@ -1,11 +1,10 @@
 import { addDebugCollider } from './debug/debugCollider'
 import { playAnimations } from './global/animations'
 import { initCamera, moveCamera } from './global/camera'
-import { coroutines, time, ui } from './global/init'
+import { coroutines, inputManager, time, ui } from './global/init'
 import { initThree, render, updateControls } from './global/rendering'
 import { app, campState, coreState, dungeonState, gameState, genDungeonState, openMenuState, setupState } from './global/states'
 import { despawnOfType, hierarchyPlugin } from './lib/hierarchy'
-import { InputMap } from './lib/inputs'
 import { updateModels } from './lib/modelsProperties'
 import { physicsPlugin } from './lib/physics'
 import { addToScene } from './lib/registerComponents'
@@ -40,7 +39,7 @@ coreState
 	.addSubscriber(...target, startTweens, addDebugCollider)
 	.onEnter(initThree, initCamera, ui.render(UI))
 	.onPreUpdate(coroutines.tick)
-	.onUpdate(...playAnimations('playerAnimator'), moveCamera, updateTweens, InputMap.update, ui.update)
+	.onUpdate(...playAnimations('playerAnimator'), moveCamera, updateTweens, inputManager.update, ui.update)
 	.onPostUpdate(updateControls, render)
 	.enable()
 setupState

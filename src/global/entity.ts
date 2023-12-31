@@ -9,7 +9,7 @@ import type { EffectComposer } from 'three/examples/jsm/postprocessing/EffectCom
 import type { CSS2DObject } from 'three/examples/jsm/renderers/CSS2DRenderer'
 import type { Animator } from './animator'
 import type { TweenGroup } from '@/lib/tweenGroup'
-import type { MenuInputMap, PlayerInputMap } from '@/lib/inputs'
+import type { MenuInputMap, PlayerInputMap } from '@/global/inputMaps'
 import type { direction } from '@/lib/directions'
 import type { ItemData } from '@/constants/items'
 import type { NPC } from '@/constants/NPC'

@@ -3,7 +3,7 @@ import { createEffect, createMemo, createRoot, createSignal } from 'solid-js'
 
 import { generateUUID } from 'three/src/math/MathUtils'
 import { ui } from '@/global/init'
-import type { MenuInputMap } from '@/lib/inputs'
+import type { MenuInputMap } from '@/global/inputMaps'
 
 const findClosest = (selected: HTMLElement, neighbors: IterableIterator<HTMLElement>) => (direction: 'up' | 'down' | 'left' | 'right') => {
 	let distance = Number.POSITIVE_INFINITY

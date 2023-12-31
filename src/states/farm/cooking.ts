@@ -2,7 +2,7 @@ import { RigidBodyType } from '@dimforge/rapier3d-compat'
 import type { Entity } from '@/global/entity'
 import { assets, ecs, world } from '@/global/init'
 import { addTag } from '@/lib/hierarchy'
-import { menuInputMap } from '@/lib/inputs'
+import { menuInputMap } from '@/global/inputMaps'
 import { modelColliderBundle } from '@/lib/models'
 
 export const cauldronBundle = (): Entity => {
