@@ -15,6 +15,7 @@ export const TouchControls = () => {
 	const [container, setContainer] = createSignal<null | HTMLDivElement>(null)
 	const [isJoystickPressed, setIsJoystickPressed] = createSignal(false)
 	const moveCenter = (e: TouchEvent) => {
+		e.preventDefault()
 		setIsJoystickPressed(true)
 		const cont = container()
 		if (cont) {
