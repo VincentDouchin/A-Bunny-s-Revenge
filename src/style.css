@@ -23,6 +23,7 @@
 }
 html, body, *{
   overscroll-behaviour: contain;
+  touch-action: none;
 }
 .icon-container svg{
   width:1em;
@@ -65,7 +66,7 @@ canvas{
 .slide-out{
   animation-name:slide-out;
   animation-duration:500ms;
-      animation-fill-mode: forwards;
+  animation-fill-mode: forwards;
   
 }
 @keyframes slide-out{
