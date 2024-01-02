@@ -28,7 +28,10 @@ function addToInventory<E extends With<Entity, 'inventory'>>(entity: E) {
 			if (item.quantity > 1) {
 				item.quantity--
 			} else {
-				updateSave(s => s.items = save.items.filter(i => i !== item), false)
+				updateSave((s) => {
+					const index = Object.values(save.items).findIndex(i => i !== item)
+					delete s.items[index]
+				}, false)
 			}
 			const firstEmptyIndex = entity.inventory.indexOf(null)
 			entity.inventory.splice(firstEmptyIndex, 1, { ...item, quantity: 1 })

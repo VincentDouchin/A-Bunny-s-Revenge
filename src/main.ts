@@ -34,6 +34,7 @@ import { spawnLight } from './states/game/spawnLights'
 import { touchItem } from './states/game/touchItem'
 import { setupGame } from './states/setup/setupGame'
 import { UI } from './ui/UI'
+import { menuManager } from './ui/Menu'
 
 registerSW({ immediate: true })
 coreState
@@ -41,7 +42,7 @@ coreState
 	.addSubscriber(...target, startTweens, addDebugCollider)
 	.onEnter(initThree, initCamera, ui.render(UI))
 	.onPreUpdate(coroutines.tick)
-	.onUpdate(...playAnimations('playerAnimator'), moveCamera, updateTweens, inputManager.update, ui.update)
+	.onUpdate(...playAnimations('playerAnimator'), moveCamera, updateTweens, inputManager.update, ui.update, menuManager.update)
 	.onPostUpdate(updateControls, render)
 	.enable()
 setupState

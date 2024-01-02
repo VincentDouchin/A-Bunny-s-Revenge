@@ -3,6 +3,7 @@ import { Quaternion, Vector3 } from 'three'
 import { context } from './context'
 import type { crops } from './entity'
 import type { ItemData } from '@/constants/items'
+import { entries } from '@/utils/mapFunctions'
 
 interface CropData {
 	name: crops
@@ -12,14 +13,14 @@ interface CropData {
 }
 interface SaveData {
 	crops: CropData[]
-	items: ItemData[]
+	items: Record<number, ItemData>
 	playerPosition: number[]
 	playerRotation: number[]
 }
 
 const blankSave = (): SaveData => ({
 	crops: [],
-	items: [],
+	items: {},
 	playerPosition: new Vector3().toArray(),
 	playerRotation: new Quaternion().toArray(),
 })
@@ -40,8 +41,16 @@ export const updateSave = async (saveFn: (save: SaveData) => void, saved = true)
 
 export const addItem = (item: ItemData, save = true) => {
 	updateSave((s) => {
-		const existingItem = s.items.find(i => i.icon === item.icon)
-		if (existingItem)existingItem.quantity += item.quantity
-		else s.items.push(item)
+		const existingItem = Object.values(s.items).find(i => i.icon === item.icon)
+		if (existingItem) {
+			existingItem.quantity += item.quantity }
+		else {
+			for (const [index, item] of entries(s.items)) {
+				if (item === undefined) {
+					s.items[index] = item
+					break
+				}
+			}
+		}
 	}, save)
 }

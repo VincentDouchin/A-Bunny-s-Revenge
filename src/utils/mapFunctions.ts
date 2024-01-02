@@ -43,7 +43,7 @@ export const reduce = <T extends Record<string, any>, F extends (key: keyof T, v
 	}, {}) as ReturnType<F>
 }
 
-export const range = <R >(start: number, end: number, fn: (i: number) => R) => {
+export const range = <R >(start: number, end: number, fn: (i: number) => R = (i: number) => i as R) => {
 	const res: R[] = []
 	for (let i = start; i < end; i++) {
 		res.push(fn(i))

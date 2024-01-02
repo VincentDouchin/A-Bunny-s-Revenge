@@ -29,19 +29,19 @@ export const ItemDisplay = (props: { item: ItemData | null, selected: boolean, d
 		</div>
 	)
 }
-const useItems = () => ui.sync(() => [...save.items, ...range(save.items.length, 24, () => null)])
+const useItems = () => ui.sync(() => save.items)
 const playerQuery = ecs.with('playerControls', 'openInventory')
 
 export const InventorySlots = (props: { getProps: getProps, click?: (item: ItemData | null) => void, disabled?: (item: ItemData | null) => boolean | undefined }) => {
 	const items = useItems()
 	return (
-		<For each={items()}>
-			{(item, i) => {
+		<For each={range(0, 24)}>
+			{(_, i) => {
 				const slotProps = props.getProps(i() === 0)
-				const itemSynced = ui.sync(() => item)
-				const disabled = props.disabled && props.disabled(item)
+				const itemSynced = ui.sync(() => items()[i()])
+				const disabled = props.disabled && props.disabled(itemSynced())
 				return (
-					<div {...slotProps} onClick={() => props.click && !disabled && props.click(item)}>
+					<div {...slotProps} onClick={() => props.click && !disabled && props.click(itemSynced())}>
 						<ItemDisplay
 							disabled={disabled}
 							item={itemSynced()}
