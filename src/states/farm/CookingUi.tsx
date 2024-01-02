@@ -156,7 +156,7 @@ const CloseButton = () => {
 
 	return (
 		<Show when={isTouch()}>
-			<div style={{ 'width': '4rem', 'height': '4rem', 'background': 'hsl(0,0%,0%, 20%)', 'position': 'absolute', 'top': '0', 'right': '0', 'margin': '1rem', 'border-radius': '1rem', 'border': `solid 0.1rem hsl(0, 0%,100%, 30% )`, 'box-sizing': 'border-box', 'font-size': '3rem', 'color': 'white', 'display': 'grid', 'place-items': 'center' }} innerHTML={xmark} class="icon-container" onTouchStart={closeInventory} onTouchEnd={reset}></div>
+			<div style={{ 'width': '4rem', 'height': '4rem', 'background': 'hsl(0,0%,0%, 20%)', 'position': 'absolute', 'top': '0', 'right': '0', 'margin': '1rem', 'border-radius': '1rem', 'border': `solid 0.1rem hsl(0, 0%,100%, 30% )`, 'font-size': '3rem', 'color': 'white', 'display': 'grid', 'place-items': 'center' }} innerHTML={xmark} class="icon-container" onTouchStart={closeInventory} onTouchEnd={reset}></div>
 		</Show>
 	)
 }

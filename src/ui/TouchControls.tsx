@@ -15,7 +15,6 @@ export const TouchControls = () => {
 	const [container, setContainer] = createSignal<null | HTMLDivElement>(null)
 	const [isJoystickPressed, setIsJoystickPressed] = createSignal(false)
 	const moveCenter = (e: TouchEvent) => {
-		e.preventDefault()
 		setIsJoystickPressed(true)
 		const cont = container()
 		if (cont) {
@@ -68,10 +67,10 @@ export const TouchControls = () => {
 	return (
 		<Show when={areControlsShow()}>
 			<div style={{ position: 'fixed', margin: '3rem', left: '0', bottom: '0', right: '0' }}>
-				<div ref={el => setContainer(el)} onTouchMove={moveCenter} onTouchEnd={resetCenter} style={{ 'position': 'relative', 'background': 'hsl(0,0%,0%, 20%)', 'border-radius': '1000px', 'width': '8rem', 'height': '8rem', 'border': `solid ${isJoystickPressed() ? '0.3rem' : '0.1rem'} hsl(0, 0%,100%, 30% )`, 'box-sizing': 'border-box' }}>
+				<div ref={el => setContainer(el)} onTouchMove={moveCenter} onTouchEnd={resetCenter} style={{ 'position': 'relative', 'background': 'hsl(0,0%,0%, 20%)', 'border-radius': '1000px', 'width': '8rem', 'height': '8rem', 'border': `solid ${isJoystickPressed() ? '0.3rem' : '0.1rem'} hsl(0, 0%,100%, 30% )` }}>
 					<div style={{ 'border-radius': '1000px', 'width': '3rem', 'height': '3rem', 'background': 'hsl(0, 0%,100%, 30% )', 'position': 'absolute', 'top': '50%', 'left': '50%', 'transform': centerPostion() }}></div>
 				</div>
-				<div style={{ 'width': '4rem', 'height': '4rem', 'background': 'hsl(0,0%,0%, 20%)', 'position': 'absolute', 'bottom': '0', 'right': '0', 'margin': '2em', 'border-radius': '1rem', 'border': `solid ${isInteractPressed() ? '0.3rem' : '0.1rem'} hsl(0, 0%,100%, 30% )`, 'box-sizing': 'border-box' }} onTouchStart={interact(1)} onTouchEnd={interact(0)}></div>
+				<div style={{ 'width': '4rem', 'height': '4rem', 'background': 'hsl(0,0%,0%, 20%)', 'position': 'absolute', 'bottom': '0', 'right': '0', 'margin': '2em', 'border-radius': '1rem', 'border': `solid ${isInteractPressed() ? '0.3rem' : '0.1rem'} hsl(0, 0%,100%, 30% )` }} onTouchStart={interact(1)} onTouchEnd={interact(0)}></div>
 			</div>
 		</Show>
 	)

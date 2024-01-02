@@ -16,7 +16,7 @@ export const ItemDisplay = (props: { item: ItemData | null, selected: boolean, d
 			: {}
 	})
 	return (
-		<div style={{ 'border-radius': '1rem', 'background': 'hsla(0 0% 0% / 50%)', 'width': '5rem', 'height': '5rem', 'display': 'grid', 'place-items': 'center', 'position': 'relative', 'border': props.selected ? 'solid 0.2rem white' : '', 'box-sizing': 'border-box' }}>
+		<div style={{ 'border-radius': '1rem', 'background': 'hsla(0 0% 0% / 50%)', 'width': '5rem', 'height': '5rem', 'display': 'grid', 'place-items': 'center', 'position': 'relative', 'border': props.selected ? 'solid 0.2rem white' : '' }}>
 
 			{props.item?.icon && (
 				<>
