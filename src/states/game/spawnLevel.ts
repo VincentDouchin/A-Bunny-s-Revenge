@@ -1,6 +1,7 @@
 import { RigidBodyType } from '@dimforge/rapier3d-compat'
 import { between } from 'randomish'
 import { BoxGeometry, Color, Mesh, Vector3 } from 'three'
+import { createNoise2D } from 'simplex-noise'
 import { inventoryBundle } from '../farm/CookingUi'
 import { cauldronBundle } from '../farm/cooking'
 import { spawnHouse } from '../farm/house'
@@ -107,7 +108,6 @@ const spawnFarmEntities = spawnLDTKEntities({
 	},
 	house: spawnHouse,
 })
-
 const spawnGroundAndTrees = (layer: LayerInstance) => {
 	// ! Ground
 	const w = layer.__cWid * SCALE
@@ -124,17 +124,18 @@ const spawnGroundAndTrees = (layer: LayerInstance) => {
 		...modelColliderBundle(groundMesh, RigidBodyType.Fixed),
 	})
 	const trees = Object.values(assets.trees).map(instanceMesh)
+	const noise = createNoise2D(() => 0)
 	for (let i = 0; i < layer.intGridCsv.length; i++) {
 		const val = layer.intGridCsv[i]
 		if (val === GroundType.Tree) {
 			const x = i % layer.__cWid
 			const y = Math.floor(i / layer.__cWid)
 			const position = new Vector3(
-				-x + layer.__cWid / 2 + between(-0.5, 0.5),
+				-x + layer.__cWid / 2 + noise(x, y),
 				0,
-				y - layer.__cHei / 2 + between(-0.5, 0.5),
+				y - layer.__cHei / 2 + noise(y, x),
 			).multiplyScalar(SCALE)
-			const tree = getRandom(trees)
+			const tree = trees[Math.floor(trees.length * Math.abs(Math.sin((x + y) * 50 * (x - y))))]
 			tree.addAt(position, between(8, 12))
 		}
 	}
