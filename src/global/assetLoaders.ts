@@ -24,28 +24,6 @@ export const loadImage = (path: string) => new Promise<HTMLImageElement>((resolv
 	img.onload = () => resolve(img)
 })
 
-// export const instanceGLTF = (obj: GLTF) => {
-// 	const meshes: InstancedMesh[] = []
-// 	const rotation = new Vector3()
-// 	const scale = new Vector3(1, 1, 1)
-// 	obj.scene.traverse((node) => {
-// 		scale.x *= node.scale.x
-// 		scale.y *= node.scale.y
-// 		scale.z *= node.scale.z
-// 		rotation.x += node.rotation.x
-// 		rotation.y += node.rotation.y
-// 		rotation.z += node.rotation.z
-// 		if (node instanceof Mesh) {
-// 			const mesh = new InstancedMesh(node.geometry.clone(), node.material.clone(), 1000)
-
-// 			mesh.instanceMatrix.setUsage(DynamicDrawUsage)
-// 			meshes.push(mesh)
-// 		}
-// 	})
-
-// 	return { meshes }
-// }
-
 export const instanceMesh = (obj: GLTF) => {
 	const positions: Vector3[] = []
 	const scales: number[] = []
