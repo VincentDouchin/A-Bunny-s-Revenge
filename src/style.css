@@ -21,7 +21,9 @@
     font-size:5px
   }
 }
-
+html, body{
+  overscroll-behaviour: contain;
+}
 .icon-container svg{
   width:1em;
   height:1em;
@@ -32,7 +34,6 @@ body {
   place-items: center;
   min-width: 320px;
   min-height: 100vh;
-  overscroll-behaviour: contain;
 }
 * {
   box-sizing: border-box;
