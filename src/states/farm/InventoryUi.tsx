@@ -1,11 +1,11 @@
-import { For, createMemo } from 'solid-js'
+import { For, Show, createMemo } from 'solid-js'
 import type { ItemData } from '@/constants/items'
 import { assets, ecs, ui } from '@/global/init'
 import { save } from '@/global/save'
 import { textStroke } from '@/lib/uiManager'
-import { ForQuery } from '@/ui/ForQuery'
 import type { getProps } from '@/ui/Menu'
 import { Menu } from '@/ui/Menu'
+import { Modal } from '@/ui/Modal'
 import { range } from '@/utils/mapFunctions'
 
 export const ItemDisplay = (props: { item: ItemData | null, selected: boolean, disabled?: boolean }) => {
@@ -56,19 +56,22 @@ export const InventorySlots = (props: { getProps: getProps, click?: (item: ItemD
 }
 
 export const InventoryUi = () => {
+	const player = ui.sync(() => playerQuery.first)
 	return (
-		<ForQuery query={playerQuery}>
-			{player => (
-				<div class="slide-in" style={{ 'display': 'grid', 'grid-template-columns': 'repeat(8, 1fr)', 'place-self': 'center', 'gap': '1rem' }}>
-					<Menu
-						inputs={player.menuInputs}
-					>
-						{({ getProps }) => {
-							return <InventorySlots getProps={getProps} />
-						}}
-					</Menu>
-				</div>
-			)}
-		</ForQuery>
+		<Modal open={player()}>
+			<Show when={player()}>
+				{player => (
+					<div style={{ 'display': 'grid', 'grid-template-columns': 'repeat(8, 1fr)', 'gap': '1rem' }}>
+						<Menu
+							inputs={player().menuInputs}
+						>
+							{({ getProps }) => {
+								return <InventorySlots getProps={getProps} />
+							}}
+						</Menu>
+					</div>
+				)}
+			</Show>
+		</Modal>
 	)
 }

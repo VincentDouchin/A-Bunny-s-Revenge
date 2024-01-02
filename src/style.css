@@ -47,35 +47,17 @@ canvas{
   height:100% !important;
   image-rendering:pixelated;
 }
-.slide{
- translate:0% 100vh
+
+.slide-enter-active,
+.slide-exit-active {
+  transition: transform 0.2s ease;
 }
-.slide-in{
-  animation-name:slide-in;
-  animation-duration:500ms;
-  animation-fill-mode: forwards;
+.slide-enter,
+.slide-exit-to {
+  transform: translateY(100vh);
 }
-@keyframes slide-in{
-  from{
-    translate:0% 100vh
-  }
-  to{
-    translate:0% 0%
-  }
-}
-.slide-out{
-  animation-name:slide-out;
-  animation-duration:500ms;
-  animation-fill-mode: forwards;
-  
-}
-@keyframes slide-out{
-  from{
-    translate:0% 0%
-  }
-  to{
-    translate:0% 100vh
-  }
+.slide-enter {
+  transform: translateY(100vh);
 }
 
 @keyframes letter-pop{

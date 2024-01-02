@@ -1,16 +1,15 @@
 import type { With } from 'miniplex'
-import { For, Show, createMemo, onCleanup } from 'solid-js'
+import { For, Show } from 'solid-js'
 import { Quaternion, Vector3 } from 'three'
-import xmark from '@assets/icons/xmark-solid.svg?raw'
 import { InventorySlots, ItemDisplay } from './InventoryUi'
 import type { Entity, InventoryTypes } from '@/global/entity'
 import { type ItemData, choppables } from '@/constants/items'
 
-import { assets, ecs, inputManager, ui } from '@/global/init'
-import { addItem, save, updateSave } from '@/global/save'
+import { assets, ecs, ui } from '@/global/init'
 import { menuInputMap } from '@/global/inputMaps'
-import { ForQuery } from '@/ui/ForQuery'
+import { addItem, save, updateSave } from '@/global/save'
 import { Menu } from '@/ui/Menu'
+import { Modal } from '@/ui/Modal'
 
 export const inventoryBundle = (inventoryType: InventoryTypes, size: number) => {
 	return {
@@ -140,127 +139,104 @@ export const displayOnCuttinBoard = () => {
 		}
 	}
 }
-const playerControlsQuery = ecs.with('menuInputs', 'playerControls')
-const menuQuery = ecs.with('openInventory', 'menuInputs')
-const CloseButton = () => {
-	const controls = ui.sync(() => inputManager.controls)
-	const isTouch = createMemo(() => controls() === 'touch')
-	const playerTouchController = ui.sync(() => playerControlsQuery.first?.playerControls.touchController)
-	const menuTouchController = ui.sync(() => menuQuery.first?.menuInputs.touchController)
-	const closeInventory = () => {
-		menuTouchController()?.set('cancel', 1)
-		playerTouchController()?.set('inventory', 1)
-	}
-	const reset = () => {
-		menuTouchController()?.set('cancel', 0)
-		playerTouchController()?.set('inventory', 0)
-	}
-	onCleanup(reset)
-
-	return (
-		<Show when={isTouch()}>
-			<div style={{ 'width': '4rem', 'height': '4rem', 'background': 'hsl(0,0%,0%, 20%)', 'position': 'absolute', 'top': '0', 'right': '0', 'margin': '1rem', 'border-radius': '1rem', 'border': `solid 0.1rem hsl(0, 0%,100%, 30% )`, 'font-size': '3rem', 'color': 'white', 'display': 'grid', 'place-items': 'center' }} innerHTML={xmark} class="icon-container" onTouchStart={closeInventory} onTouchEnd={reset}></div>
-		</Show>
-	)
-}
-
+const openCuttingBoardQuery = cuttingBoardQuery.with('openInventory')
 export const CuttingBoardUi = () => {
+	const cuttingBoardEntity = ui.sync(() => openCuttingBoardQuery.first)
+
 	return (
-		<ForQuery query={inventoryQuery.with('inventoryType').where(({ inventoryType }) => inventoryType === 'cuttingBoard')}>
-			{(cuttingBoard) => {
-				const cuttingBoardInventory = ui.sync(() => cuttingBoard.inventory)
-				const addToCuttingBoard = addToInventory(cuttingBoard)
-				const removeFromCuttingBoard = removeFromInventory(cuttingBoard)
-				return (
-					<div style={{ 'background': 'hsla(0 0% 0% / 20%)', 'place-self': 'center', 'padding': '2rem', 'border-radius': '1rem', 'display': 'grid', 'gap': '2rem', 'position': 'relative' }}>
-						<div>
-							<CloseButton />
-							<Menu inputs={cuttingBoard.menuInputs}>
-								{({ getProps }) => {
-									return (
-										<div style={{ display: 'grid', gap: '2rem' }}>
-											<div>
-												<InventoryTitle>Cutting board</InventoryTitle>
-												<div style={{ 'display': 'grid', 'gap': '1rem', 'place-items': 'center' }}>
-													<For each={cuttingBoardInventory()}>
-														{(slot, i) => {
-															const props = getProps()
-															const item = ui.sync(() => slot)
-															return (
-																<div {...props} onClick={() => removeFromCuttingBoard(slot, i())}>
-																	<ItemDisplay
-																		item={item()}
-																		selected={props.selected()}
-																	/>
-																</div>
-															)
-														}}
-													</For>
-												</div>
-											</div>
-											<div style={{ 'display': 'grid', 'grid-template-columns': 'repeat(8, 1fr)', 'gap': '1rem' }}>
-												<InventorySlots
-													getProps={getProps}
-													click={addToCuttingBoard}
-													disabled={item => item?.icon && !choppables.includes(item.icon)}
-												/>
+		<Modal open={cuttingBoardEntity()}>
+			<Show when={cuttingBoardEntity()}>
+				{(cuttingBoard) => {
+					const cuttingBoardInventory = ui.sync(() => cuttingBoard().inventory)
+					const addToCuttingBoard = addToInventory(cuttingBoard())
+					const removeFromCuttingBoard = removeFromInventory(cuttingBoard())
+					return (
+						<Menu inputs={cuttingBoard().menuInputs}>
+							{({ getProps }) => {
+								return (
+									<div style={{ display: 'grid', gap: '2rem' }}>
+										<div>
+											<InventoryTitle>Cutting board</InventoryTitle>
+											<div style={{ 'display': 'grid', 'gap': '1rem', 'place-items': 'center' }}>
+												<For each={cuttingBoardInventory()}>
+													{(slot, i) => {
+														const props = getProps()
+														const item = ui.sync(() => slot)
+														return (
+															<div {...props} onClick={() => removeFromCuttingBoard(slot, i())}>
+																<ItemDisplay
+																	item={item()}
+																	selected={props.selected()}
+																/>
+															</div>
+														)
+													}}
+												</For>
 											</div>
 										</div>
-									) }}
-							</Menu>
-						</div>
-
-					</div>
-				)
-			}}
-		</ForQuery>
+										<div style={{ 'display': 'grid', 'grid-template-columns': 'repeat(8, 1fr)', 'gap': '1rem' }}>
+											<InventorySlots
+												getProps={getProps}
+												click={addToCuttingBoard}
+												disabled={item => item?.icon && !choppables.includes(item.icon)}
+											/>
+										</div>
+									</div>
+								)
+							}}
+						</Menu>
+					)
+				}}
+			</Show>
+		</Modal>
 	)
 }
+const ovenQuery = inventoryQuery.with('inventoryType').where(({ inventoryType }) => inventoryType === 'oven')
 export const OvenUi = () => {
+	const oven = ui.sync(() => ovenQuery.first)
+
 	return (
-		<ForQuery query={inventoryQuery.with('inventoryType').where(({ inventoryType }) => inventoryType === 'oven')}>
-			{(oven) => {
-				const ovenInventory = ui.sync(() => oven.inventory)
-				const addToOven = addToInventory(oven)
-				const removeFromOven = removeFromInventory(oven)
-				return (
-					<div style={{ 'background': 'hsla(0 0% 0% / 20%)', 'place-self': 'center', 'padding': '2rem', 'border-radius': '1rem', 'display': 'grid', 'gap': '2rem', 'position': 'relative' }}>
-						<div>
-							<CloseButton />
-							<Menu inputs={oven.menuInputs}>
-								{({ getProps }) => {
-									return (
-										<div style={{ display: 'grid', gap: '2rem' }}>
-											<div>
-												<InventoryTitle>Oven</InventoryTitle>
-												<div style={{ 'display': 'flex', 'gap': '1rem', 'place-items': 'center' }}>
-													<For each={ovenInventory()}>
-														{(cauldronSlot, i) => {
-															const props = getProps()
-															const item = ui.sync(() => cauldronSlot)
-															return (
-																<div {...props} onClick={() => removeFromOven(cauldronSlot, i())}>
-																	<ItemDisplay
-																		item={item()}
-																		selected={props.selected()}
-																	/>
-																</div>
-															)
-														}}
-													</For>
-												</div>
-											</div>
-											<div style={{ 'display': 'grid', 'grid-template-columns': 'repeat(8, 1fr)', 'gap': '1rem' }}>
-												<InventorySlots getProps={getProps} click={addToOven}></InventorySlots>
+		<Modal open={oven()}>
+			<Show when={oven()}>
+				{(ovenEntity) => {
+					const ovenInventory = ui.sync(() => ovenEntity().inventory)
+					const addToOven = addToInventory(ovenEntity())
+					const removeFromOven = removeFromInventory(ovenEntity())
+					return (
+						<Menu inputs={ovenEntity().menuInputs}>
+							{({ getProps }) => {
+								return (
+									<div style={{ display: 'grid', gap: '2rem' }}>
+										<div>
+											<InventoryTitle>Oven</InventoryTitle>
+											<div style={{ 'display': 'flex', 'gap': '1rem', 'place-items': 'center' }}>
+												<For each={ovenInventory()}>
+													{(cauldronSlot, i) => {
+														const props = getProps()
+														const item = ui.sync(() => cauldronSlot)
+														return (
+															<div {...props} onClick={() => removeFromOven(cauldronSlot, i())}>
+																<ItemDisplay
+																	item={item()}
+																	selected={props.selected()}
+																/>
+															</div>
+														)
+													}}
+												</For>
 											</div>
 										</div>
-									) }}
-							</Menu>
-						</div>
+										<div style={{ 'display': 'grid', 'grid-template-columns': 'repeat(8, 1fr)', 'gap': '1rem' }}>
+											<InventorySlots getProps={getProps} click={addToOven}></InventorySlots>
+										</div>
+									</div>
+								)
+							}}
+						</Menu>
+					)
+				}}
+			</Show>
 
-					</div>
-				)
-			}}
-		</ForQuery>
+		</Modal>
 	)
 }

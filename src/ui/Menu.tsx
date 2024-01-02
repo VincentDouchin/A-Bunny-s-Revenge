@@ -1,5 +1,5 @@
 import type { Accessor, Component } from 'solid-js'
-import { createEffect, createMemo, createRoot, createSignal, onCleanup } from 'solid-js'
+import { createMemo, createRoot, createSignal, onCleanup } from 'solid-js'
 
 import { generateUUID } from 'three/src/math/MathUtils'
 import { ui } from '@/global/init'
@@ -73,7 +73,8 @@ export function Menu(props: MenuProps) {
 	const inverseRefs = new Map<HTMLElement, string>()
 
 	const inputs = ui.sync(() => props.inputs)
-	createEffect(() => {
+
+	const update = () => {
 		for (const direction of ['up', 'down', 'left', 'right'] as const) {
 			if (inputs()?.get(direction).justPressed) {
 				const selectedId = createRoot(selected)
@@ -90,8 +91,6 @@ export function Menu(props: MenuProps) {
 				}
 			}
 		}
-	})
-	const update = () => {
 		if (inputs()?.get('validate').justPressed) {
 			const selectedElement = refs.get(selected())
 			if (selectedElement) {
