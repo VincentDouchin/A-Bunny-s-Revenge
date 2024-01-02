@@ -21,7 +21,7 @@
     font-size:5px
   }
 }
-html, body{
+html, body, *{
   overscroll-behaviour: contain;
 }
 .icon-container svg{
