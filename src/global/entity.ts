@@ -28,6 +28,7 @@ export interface Entity {
 	scale?: number
 	// ! Transforms
 	movementForce?: Vector3
+	speed?: number
 	position?: Vector3
 	worldPosition?: Vector3
 	rotation?: Quaternion
@@ -100,6 +101,9 @@ export interface Entity {
 	activeDialog?: true
 	currentDialog?: string | string[]
 	dialogContainer?: CSS2DObject
+	// ! Health
+	currentHealth?: number
+	maxHealth?: number
 }
 export type Bundle<C extends keyof Entity> = () => With<Entity, C>
 type Prettify<T> = {

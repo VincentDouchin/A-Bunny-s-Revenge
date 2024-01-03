@@ -27,7 +27,6 @@ import { applyMove, canPlayerMove, movePlayer, savePlayerPosition } from './stat
 import { target } from './states/game/sensor'
 import { spawnCharacter } from './states/game/spawnCharacter'
 import { allowDoorCollision, collideWithDoor, collideWithDoorCamp } from './states/game/spawnDoor'
-import { enemyAttackPlayer } from './states/game/spawnEnemy'
 import { spawnSkyBox } from './states/game/spawnGround'
 import { spawnDungeon, spawnFarm } from './states/game/spawnLevel'
 import { spawnLight } from './states/game/spawnLights'
@@ -35,6 +34,9 @@ import { touchItem } from './states/game/touchItem'
 import { setupGame } from './states/setup/setupGame'
 import { UI } from './ui/UI'
 import { menuManager } from './ui/Menu'
+import { enemyAttackPlayer } from './states/dungeon/enemies'
+import { playerAttack } from './states/dungeon/battle'
+import { killEntities } from './states/dungeon/health'
 
 registerSW({ immediate: true })
 coreState
@@ -76,7 +78,7 @@ genDungeonState
 	.onEnter(generateDungeon)
 dungeonState
 	.onEnter(spawnDungeon, spawnLight, spawnSkyBox, spawnItems)
-	.onUpdate(allowDoorCollision, collideWithDoor, enemyAttackPlayer, harvestCrop)
+	.onUpdate(allowDoorCollision, collideWithDoor, enemyAttackPlayer, harvestCrop, playerAttack, killEntities)
 	.onExit(despawnOfType('map'))
 
 const animate = async () => {

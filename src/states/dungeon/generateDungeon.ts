@@ -9,7 +9,7 @@ import { directions, otherDirection } from '@/lib/directions'
 
 const getRoomType = (index: number, max: number): RoomType => {
 	if (index === 0) return RoomType.Entrance
-	if (index === 1) return RoomType.Item
+	// if (index === 1) return RoomType.Item
 	if (index === max - 1) return RoomType.Boss
 	return RoomType.Battle
 }

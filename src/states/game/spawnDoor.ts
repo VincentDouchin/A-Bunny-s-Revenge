@@ -1,5 +1,5 @@
 import { ColliderDesc, RigidBodyDesc } from '@dimforge/rapier3d-compat'
-import { DoubleSide, Group, Mesh, MeshBasicMaterial, PlaneGeometry } from 'three'
+import { DoubleSide, Group, Mesh, MeshBasicMaterial, PlaneGeometry, PointLight } from 'three'
 import type { Entity } from '@/global/entity'
 import { ecs, world } from '@/global/init'
 import type { DungeonRessources } from '@/global/states'
@@ -28,6 +28,9 @@ const doorGroup = () => {
 
 export const doorBundle = (to: number, direction: direction) => {
 	const rotation = getRotationFromDirection(direction)
+	const light = new PointLight(0xFFFFFF, 5, 50, 0.5)
+	light.position.y = 10
+	light.castShadow = true
 	return {
 		inMap: true,
 		model: doorGroup(),
@@ -35,6 +38,7 @@ export const doorBundle = (to: number, direction: direction) => {
 		colliderDesc: ColliderDesc.cuboid(10, 15, 1).setSensor(true),
 		door: { direction, to },
 		rotation,
+		// light,
 	} as const satisfies Entity
 }
 

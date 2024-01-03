@@ -5,7 +5,8 @@ import { cutSceneState, openMenuState } from '@/global/states'
 import { throttle } from '@/lib/state'
 import { updateSave } from '@/global/save'
 
-const playerQuery = ecs.with('playerControls', 'body', 'rotation', 'playerAnimator', 'movementForce', 'position')
+const movementQuery = ecs.with('body', 'rotation', 'movementForce', 'speed')
+const playerQuery = movementQuery.with('playerControls', 'playerAnimator', 'position')
 
 export const movePlayer = () => {
 	for (const { playerControls, movementForce } of playerQuery) {
@@ -19,14 +20,14 @@ export const movePlayer = () => {
 }
 
 export const applyMove = () => {
-	for (const { body, rotation, playerAnimator, movementForce } of playerQuery) {
-		const force = movementForce.clone().multiplyScalar(300 * params.speedUp * time.delta)
+	for (const { body, rotation, playerAnimator, movementForce, speed } of movementQuery) {
+		const force = movementForce.clone().multiplyScalar(speed * params.speedUp * time.delta)
 		const moving = force.length() > 0
 		if (moving) {
 			rotation.setFromAxisAngle(new Vector3(0, 1, 0), Math.atan2(force.x, force.z))
-			playerAnimator.playAnimation('run')
+			playerAnimator?.playAnimation('run')
 		} else {
-			playerAnimator.playAnimation('idle')
+			playerAnimator?.playAnimation('idle')
 		}
 
 		body.applyImpulse(force, true)

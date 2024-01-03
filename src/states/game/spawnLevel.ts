@@ -6,6 +6,8 @@ import { inventoryBundle } from '../farm/CookingUi'
 import { cauldronBundle } from '../farm/cooking'
 import { spawnHouse } from '../farm/house'
 import { kitchenApplianceBundle } from '../farm/kitchen'
+import { RoomType } from '../dungeon/dungeonTypes'
+import { enemyBundle } from '../dungeon/enemies'
 import { playerBundle } from './spawnCharacter'
 import { doorBundle } from './spawnDoor'
 import type { EntityInstance, LayerInstance, Level } from '@/LDTKMap'
@@ -17,7 +19,7 @@ import { modelColliderBundle } from '@/lib/models'
 import type { System } from '@/lib/state'
 import { getRotationFromDirection } from '@/lib/transforms'
 import { GroundShader } from '@/shaders/GroundShader'
-import { getRandom, objectValues } from '@/utils/mapFunctions'
+import { getRandom, objectValues, range } from '@/utils/mapFunctions'
 
 export const treeBundle = () => {
 	const model = getRandom(objectValues(assets.trees)).scene.clone()
@@ -136,7 +138,8 @@ const spawnGroundAndTrees = (layer: LayerInstance) => {
 				y - layer.__cHei / 2 + noise(y, x),
 			).multiplyScalar(SCALE)
 			const tree = trees[Math.floor(trees.length * Math.abs(Math.sin((x + y) * 50 * (x - y))))]
-			tree.addAt(position, between(8, 12))
+			const smol = layer.intGridCsv[x + (y - 1) * layer.__cWid] === GroundType.Grass
+			tree.addAt(position, smol ? between(5, 8) : between(8, 10))
 		}
 	}
 	trees.forEach((t) => {
@@ -165,6 +168,16 @@ export const spawnFarm = spawnLevel(assets.levels.levels.find(l => l.identifier 
 export const spawnDungeon: System<DungeonRessources> = ({ dungeon, direction, roomIndex }) => {
 	ecs.add({ map: true })
 	const room = dungeon.rooms[roomIndex]
+	if (room.type === RoomType.Entrance) {
+		const model = assets.characters.Armabee.scene
+		model.scale.setScalar(3)
+		for (const _ in range(0, 1)) {
+			ecs.add({
+				...enemyBundle(model, 3),
+				position: new Vector3(between(-10, 10), 0, between(-10, 10)),
+			})
+		}
+	}
 	for (const layer of room.plan.layerInstances!) {
 		switch (layer.__type) {
 			case 'IntGrid':{

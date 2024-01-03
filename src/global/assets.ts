@@ -1,11 +1,12 @@
 import toneMapDefaultsrc from '@assets/_singles/tonemap-default.png'
 import toneMapTreessrc from '@assets/_singles/tonemap-trees.png'
 import type { ColorRepresentation, Material } from 'three'
-import { LinearSRGBColorSpace, Mesh, MeshPhysicalMaterial, MeshStandardMaterial, MeshToonMaterial, NearestFilter, TextureLoader } from 'three'
+import { Mesh, MeshStandardMaterial, NearestFilter, TextureLoader } from 'three'
 import type { GLTF } from 'three/examples/jsm/loaders/GLTFLoader'
 import type { stringCaster } from './assetLoaders'
 import { getFileName, loadGLB, loadImage } from './assetLoaders'
 import { asyncMapValues, entries, groupByObject, mapKeys, mapValues } from '@/utils/mapFunctions'
+import { CustomToonMaterial } from '@/shaders/CustomToonMaterial'
 import type { LDTKMap } from '@/LDTKMap'
 
 type Glob = Record<string, () => Promise<any>>
@@ -27,16 +28,10 @@ const loadGLBAsToon = (options?: { src?: string, color?: ColorRepresentation, ma
 	const toons = mapValues(glbs, (glb) => {
 		glb.scene.traverse((node) => {
 			if (node instanceof Mesh) {
-				if (node.material instanceof MeshStandardMaterial && !(node.material instanceof MeshPhysicalMaterial)) {
-					if (node.material.map) {
-						node.material.map.colorSpace = LinearSRGBColorSpace
-						node.material.map.minFilter = NearestFilter
-						node.material.map.magFilter = NearestFilter
-					}
-
+				if (node.material instanceof MeshStandardMaterial) {
 					node.material = options?.material
 						? options?.material(node)
-						: new MeshToonMaterial({ color: options?.color ?? node.material.color, gradientMap, map: node.material.map })
+						: new CustomToonMaterial({ color: options?.color ?? node.material.color, gradientMap, map: node.material.map })
 
 					node.castShadow = true
 					node.receiveShadow = false
