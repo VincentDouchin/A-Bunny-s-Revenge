@@ -32,7 +32,6 @@ const loadGLBAsToon = (options?: { src?: string, color?: ColorRepresentation, ma
 					node.material = options?.material
 						? options?.material(node)
 						: new CustomToonMaterial({ color: options?.color ?? node.material.color, gradientMap, map: node.material.map })
-
 					node.castShadow = true
 					node.receiveShadow = false
 				}

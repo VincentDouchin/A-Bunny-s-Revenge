@@ -6,12 +6,14 @@ import solidPlugin from 'vite-plugin-solid'
 import { VitePWA } from 'vite-plugin-pwa'
 import generateAssetNames from './scripts/generateAssetNamesPlugin'
 import { autoConvertFBXtoGLB } from './scripts/convertFbx2GLB'
+import { extractAnimations } from './scripts/extractAnimations'
 
 export default defineConfig(() => {
 	const config: UserConfig = {
 		plugins: [
 			generateAssetNames(),
 			autoConvertFBXtoGLB(),
+			extractAnimations(),
 			solidPlugin(),
 			VitePWA({
 				registerType: 'autoUpdate',

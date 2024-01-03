@@ -6,7 +6,7 @@ import { throttle } from '@/lib/state'
 import { updateSave } from '@/global/save'
 
 const movementQuery = ecs.with('body', 'rotation', 'movementForce', 'speed')
-const playerQuery = movementQuery.with('playerControls', 'playerAnimator', 'position')
+const playerQuery = movementQuery.with('playerControls', 'animator', 'position')
 
 export const movePlayer = () => {
 	for (const { playerControls, movementForce } of playerQuery) {
@@ -20,14 +20,18 @@ export const movePlayer = () => {
 }
 
 export const applyMove = () => {
-	for (const { body, rotation, playerAnimator, movementForce, speed } of movementQuery) {
+	for (const { body, rotation, animator, movementForce, speed } of movementQuery) {
 		const force = movementForce.clone().multiplyScalar(speed * params.speedUp * time.delta)
 		const moving = force.length() > 0
 		if (moving) {
 			rotation.setFromAxisAngle(new Vector3(0, 1, 0), Math.atan2(force.x, force.z))
-			playerAnimator?.playAnimation('run')
+			if (animator?.has('run')) {
+				animator?.playAnimation('run')
+			}
 		} else {
-			playerAnimator?.playAnimation('idle')
+			if (animator?.has('idle')) {
+				animator?.playAnimation('idle')
+			}
 		}
 
 		body.applyImpulse(force, true)

@@ -1,6 +1,6 @@
 import { ColliderDesc, RigidBodyDesc, RigidBodyType } from '@dimforge/rapier3d-compat'
 import type { Object3D, Object3DEventMap } from 'three'
-import { Box3, Color, Mesh, Quaternion, Vector3 } from 'three'
+import { Box3, Mesh, Quaternion, Vector3 } from 'three'
 
 import { clone } from 'three/examples/jsm/utils/SkeletonUtils.js'
 import type { Entity } from '@/global/entity'

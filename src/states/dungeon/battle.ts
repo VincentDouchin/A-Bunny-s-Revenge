@@ -12,6 +12,10 @@ export const playerAttack = () => {
 				if (world.intersectionPair(sensorCollider, enemy.collider)) {
 					// ! damage
 					enemy.currentHealth--
+					// ! animations
+					if (enemy.currentHealth > 0) {
+						enemy.animator?.playOnce('HitReact')
+					}
 					// ! knockback
 					const force = position.clone().sub(enemy.position).normalize().multiplyScalar(-50000)
 					enemy.body.applyImpulse(force, true)

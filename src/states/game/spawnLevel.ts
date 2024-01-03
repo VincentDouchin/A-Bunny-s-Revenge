@@ -168,12 +168,12 @@ export const spawnFarm = spawnLevel(assets.levels.levels.find(l => l.identifier 
 export const spawnDungeon: System<DungeonRessources> = ({ dungeon, direction, roomIndex }) => {
 	ecs.add({ map: true })
 	const room = dungeon.rooms[roomIndex]
-	if (room.type === RoomType.Entrance) {
+	if (room.type === RoomType.Battle) {
 		const model = assets.characters.Armabee.scene
 		model.scale.setScalar(3)
-		for (const _ in range(0, 1)) {
+		for (const _ in range(0, 5)) {
 			ecs.add({
-				...enemyBundle(model, 3),
+				...enemyBundle('Armabee'),
 				position: new Vector3(between(-10, 10), 0, between(-10, 10)),
 			})
 		}

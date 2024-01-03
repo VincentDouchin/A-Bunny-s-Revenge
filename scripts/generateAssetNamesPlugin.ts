@@ -6,7 +6,7 @@ import process from 'node:process'
 import type { PluginOption } from 'vite'
 
 export const getFileName = (path: string) => {
-	return	path.split(/[./]/g).at(-2) ?? ''
+	return	path.split(/[./\\]/g).at(-2) ?? ''
 }
 export const getFolderName = (path: string) => {
 	return	path.split(/[./]/g).at(-3) ?? ''

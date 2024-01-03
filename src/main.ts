@@ -36,7 +36,7 @@ import { UI } from './ui/UI'
 import { menuManager } from './ui/Menu'
 import { enemyAttackPlayer } from './states/dungeon/enemies'
 import { playerAttack } from './states/dungeon/battle'
-import { killEntities } from './states/dungeon/health'
+import { killAnimation, killEntities } from './states/dungeon/health'
 
 registerSW({ immediate: true })
 coreState
@@ -44,7 +44,7 @@ coreState
 	.addSubscriber(...target, startTweens, addDebugCollider)
 	.onEnter(initThree, initCamera, ui.render(UI))
 	.onPreUpdate(coroutines.tick)
-	.onUpdate(...playAnimations('playerAnimator'), moveCamera, updateTweens, inputManager.update, ui.update, menuManager.update)
+	.onUpdate(playAnimations, moveCamera, updateTweens, inputManager.update, ui.update, menuManager.update)
 	.onPostUpdate(updateControls, render)
 	.enable()
 setupState
@@ -52,7 +52,7 @@ setupState
 	.enable()
 gameState
 	.onEnter()
-	.addSubscriber(bobItems, ...toggleMenuState)
+	.addSubscriber(bobItems, ...toggleMenuState, killAnimation)
 	.onUpdate(runIf(
 		canPlayerMove,
 		movePlayer,

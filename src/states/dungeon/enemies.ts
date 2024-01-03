@@ -1,18 +1,23 @@
 import { RigidBodyType } from '@dimforge/rapier3d-compat'
-import type { Object3D, Object3DEventMap } from 'three'
 import { Vector3 } from 'three'
 import { healthBundle } from './health'
+import { enemies } from '@/constants/enemies'
 import { Sizes } from '@/constants/sizes'
 import { type Entity, Faction } from '@/global/entity'
-import { ecs } from '@/global/init'
+import { assets, ecs } from '@/global/init'
 import { modelColliderBundle } from '@/lib/models'
+import { Animator } from '@/global/animator'
 
-export const enemyBundle = (model: Object3D<Object3DEventMap>, health: number) => {
-	const bundle = modelColliderBundle(model, RigidBodyType.Dynamic, false, Sizes.character)
+export const enemyBundle = (name: keyof typeof enemies) => {
+	const model = assets.characters[name]
+	const enemy = enemies[name]
+	model.scene.scale.setScalar(enemy.scale)
+	const bundle = modelColliderBundle(model.scene, RigidBodyType.Dynamic, false, Sizes.character)
 	bundle.bodyDesc.setLinearDamping(20)
 	return {
 		...bundle,
-		...healthBundle(health),
+		animator: new Animator('Flying_Idle', bundle.model, model.animations),
+		...healthBundle(enemy.health),
 		inMap: true,
 		faction: Faction.Enemy,
 		movementForce: new Vector3(),

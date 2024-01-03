@@ -3,6 +3,7 @@ import { Color, MeshToonMaterial, Uniform } from 'three'
 
 export class CustomToonMaterial extends MeshToonMaterial {
 	shader?: Shader
+	transparent = true
 	onBeforeCompile(shader: Shader, _renderer: WebGLRenderer): void {
 		shader.uniforms.colorAdd = new Uniform(new Color(0, 0, 0))
 		this.shader = shader
@@ -67,7 +68,7 @@ export class CustomToonMaterial extends MeshToonMaterial {
 			vec3 outgoingLight = reflectedLight.directDiffuse + reflectedLight.indirectDiffuse + totalEmissiveRadiance;
 
 			#ifdef OPAQUE
-			diffuseColor.a = 1.0;
+			// diffuseColor.a = 1.0;
 			#endif
 
 			#ifdef USE_TRANSMISSION
