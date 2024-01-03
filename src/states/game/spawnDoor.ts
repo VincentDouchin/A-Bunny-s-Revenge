@@ -6,6 +6,7 @@ import type { DungeonRessources } from '@/global/states'
 import { campState, dungeonState, genDungeonState } from '@/global/states'
 import type { direction } from '@/lib/directions'
 import type { System } from '@/lib/state'
+import { getRotationFromDirection } from '@/lib/transforms'
 
 const getDoorLayer = (opacity: number) => {
 	const sizeFactor = (3 - opacity) / 3
@@ -26,12 +27,14 @@ const doorGroup = () => {
 }
 
 export const doorBundle = (to: number, direction: direction) => {
+	const rotation = getRotationFromDirection(direction)
 	return {
 		inMap: true,
 		model: doorGroup(),
 		bodyDesc: RigidBodyDesc.fixed().lockRotations(),
 		colliderDesc: ColliderDesc.cuboid(10, 15, 1).setSensor(true),
 		door: { direction, to },
+		rotation,
 	} as const satisfies Entity
 }
 

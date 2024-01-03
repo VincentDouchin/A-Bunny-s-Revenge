@@ -1,6 +1,6 @@
 import toneMapDefaultsrc from '@assets/_singles/tonemap-default.png'
 import toneMapTreessrc from '@assets/_singles/tonemap-trees.png'
-import type { ColorRepresentation } from 'three'
+import type { ColorRepresentation, Material } from 'three'
 import { LinearSRGBColorSpace, Mesh, MeshPhysicalMaterial, MeshStandardMaterial, MeshToonMaterial, NearestFilter, TextureLoader } from 'three'
 import type { GLTF } from 'three/examples/jsm/loaders/GLTFLoader'
 import type { stringCaster } from './assetLoaders'
@@ -21,7 +21,7 @@ const typeGlob = <K extends string>(glob: Record<string, any>) => async <F exten
 	return await fn(glob) as Record<K, Awaited<ReturnType<F>>[string]>
 }
 
-const loadGLBAsToon = (options?: { src?: string, color?: ColorRepresentation }) => async (glob: Glob) => {
+const loadGLBAsToon = (options?: { src?: string, color?: ColorRepresentation, material?: (node: Mesh) => Material }) => async (glob: Glob) => {
 	const gradientMap = await loadToneMap(options?.src ?? toneMapDefaultsrc)
 	const glbs = await asyncMapValues(glob, async f => loadGLB(await f()))
 	const toons = mapValues(glbs, (glb) => {
@@ -34,13 +34,9 @@ const loadGLBAsToon = (options?: { src?: string, color?: ColorRepresentation }) 
 						node.material.map.magFilter = NearestFilter
 					}
 
-					node.material = new MeshToonMaterial({
-
-						color: options?.color ?? node.material.color,
-						gradientMap,
-						map: node.material.map,
-
-					})
+					node.material = options?.material
+						? options?.material(node)
+						: new MeshToonMaterial({ color: options?.color ?? node.material.color, gradientMap, map: node.material.map })
 
 					node.castShadow = true
 					node.receiveShadow = false

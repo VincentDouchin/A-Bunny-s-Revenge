@@ -24,16 +24,20 @@ export const loadImage = (path: string) => new Promise<HTMLImageElement>((resolv
 	img.onload = () => resolve(img)
 })
 
+interface InstanceParams {
+	position: Vector3
+	scale: number
+	opacity: number
+}
+
 export const instanceMesh = (obj: GLTF) => {
-	const positions: Vector3[] = []
-	const scales: number[] = []
+	const intanceParams: InstanceParams[] = []
 	const rotation = new Vector3()
 	const scale = new Vector3(1, 1, 1)
 	const meshes: InstancedMesh[] = []
 	const group = new Group()
-	const addAt = (position: Vector3, scale = 1) => {
-		positions.push(position)
-		scales.push(scale)
+	const addAt = (position: Vector3, scale = 1, opacity = 1) => {
+		intanceParams.push({ position, scale, opacity })
 	}
 	const process = () => {
 		obj.scene.traverse((node) => {
@@ -44,7 +48,7 @@ export const instanceMesh = (obj: GLTF) => {
 			rotation.y += node.rotation.y
 			rotation.z += node.rotation.z
 			if (node instanceof Mesh) {
-				const mesh = new InstancedMesh(node.geometry.clone(), node.material.clone(), positions.length)
+				const mesh = new InstancedMesh(node.geometry.clone(), node.material.clone(), intanceParams.length)
 
 				mesh.instanceMatrix.setUsage(DynamicDrawUsage)
 				meshes.push(mesh)
@@ -54,12 +58,13 @@ export const instanceMesh = (obj: GLTF) => {
 			mesh.rotation.set(rotation.x, rotation.y, rotation.z)
 			mesh.castShadow = true
 			group.add(mesh)
-			for (let i = 0; i < positions.length; i++) {
+			for (let i = 0; i < intanceParams.length; i++) {
+				const params = intanceParams[i]
 				const o = new Object3D()
-				const position = positions[i]
+				const position = params.position
 				o.position.set(position.x, position.z, position.y)
 				o.scale.set(scale.x, scale.y, scale.z)
-				o.scale.multiplyScalar(scales[i])
+				o.scale.multiplyScalar(params.scale)
 				o.updateMatrix()
 				mesh.setMatrixAt(i, o.matrix)
 			}
