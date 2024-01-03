@@ -22,7 +22,7 @@ export const killEntities = () => {
 export const killAnimation = () => dyingQuery.onEntityAdded.subscribe((entity) => {
 	ecs.removeComponent(entity, 'movementForce')
 	ecs.removeComponent(entity, 'body')
-	entity.animator.playOnce('Death', false, true)?.then(() => {
+	entity.animator.playOnce('Death', false)?.then(() => {
 		const tween = new Tween({ opacity: 1 }).to({ opacity: 0 }, 500)
 			.onComplete(() => {
 				ecs.remove(entity)
