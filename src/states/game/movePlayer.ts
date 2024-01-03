@@ -1,7 +1,7 @@
 import { Vector3 } from 'three'
 import { params } from '@/global/context'
 import { ecs, time } from '@/global/init'
-import { cutSceneState, openMenuState } from '@/global/states'
+import { cutSceneState, openMenuState, pausedState } from '@/global/states'
 import { throttle } from '@/lib/state'
 import { updateSave } from '@/global/save'
 
@@ -37,7 +37,7 @@ export const applyMove = () => {
 		body.applyImpulse(force, true)
 	}
 }
-export const canPlayerMove = () => !openMenuState.enabled && !cutSceneState.enabled
+export const canPlayerMove = () => !openMenuState.enabled && !cutSceneState.enabled && !pausedState.enabled
 
 export const savePlayerPosition = throttle(1000, () => {
 	const player = playerQuery.first

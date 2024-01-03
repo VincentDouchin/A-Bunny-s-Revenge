@@ -169,14 +169,20 @@ export const spawnDungeon: System<DungeonRessources> = ({ dungeon, direction, ro
 	ecs.add({ map: true })
 	const room = dungeon.rooms[roomIndex]
 	if (room.type === RoomType.Battle) {
-		const model = assets.characters.Armabee.scene
-		model.scale.setScalar(3)
 		for (const _ in range(0, 5)) {
 			ecs.add({
 				...enemyBundle('Armabee'),
 				position: new Vector3(between(-10, 10), 0, between(-10, 10)),
 			})
 		}
+	}
+	if (room.type === RoomType.Boss) {
+		const model = assets.characters.Armabee_Evolved.scene
+		model.scale.setScalar(4)
+		ecs.add({
+			...enemyBundle('Armabee_Evolved'),
+			position: new Vector3(),
+		})
 	}
 	for (const layer of room.plan.layerInstances!) {
 		switch (layer.__type) {

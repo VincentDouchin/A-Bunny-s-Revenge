@@ -1,5 +1,5 @@
 import type { AnimationAction, AnimationClip, Object3D, Object3DEventMap } from 'three'
-import { AnimationMixer } from 'three'
+import { AnimationMixer, LoopOnce } from 'three'
 
 interface Animation<T extends string> extends AnimationClip {
 	name: T
@@ -37,7 +37,7 @@ export class Animator<K extends string> extends AnimationMixer {
 		}
 	}
 
-	playOnce(animation: K, reset = true, stop = false) {
+	playOnce(animation: K, reset = true) {
 		if (animation === this.#current) return
 		return new Promise<void>((resolve) => {
 			const current = this.#current
@@ -49,14 +49,11 @@ export class Animator<K extends string> extends AnimationMixer {
 						this.play(current)
 					}, (action.getClip().duration - 0.2) * 1000)
 				} else {
-					setTimeout(() => {
-						if (stop) {
-							action.timeScale = 0
-							action.paused = true
-						}
-
+					action.setLoop(LoopOnce, 1)
+					action.clampWhenFinished = true
+					this.addEventListener('finished', () => {
 						resolve()
-					}, action.getClip().duration * 1000)
+					})
 				}
 			} else {
 				resolve()

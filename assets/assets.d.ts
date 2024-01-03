@@ -1,4 +1,4 @@
-type characters = 'Armabee' | 'cauldron' | 'Idle' | 'Panda' | 'Running'
+type characters = 'Armabee' | 'Armabee_Evolved' | 'cauldron' | 'Idle' | 'Panda' | 'Running'
 type crops = 'Beet_1' | 'Beet_2' | 'Beet_3' | 'Beet_4' | 'Beet_Crop' | 'Carrot_1' | 'Carrot_2' | 'Carrot_3' | 'Carrot_4' | 'Carrot_Crop' | 'Mushroom_1' | 'Mushroom_2' | 'Mushroom_3' | 'Mushroom_4' | 'Mushroom_Crop'
 type fonts = 'GrapeSoda' | 'NanoPlus'
 type grass = 'SM_Env_Grass_01' | 'SM_Env_Grass_02'

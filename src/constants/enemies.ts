@@ -7,4 +7,8 @@ export const enemies = {
 		health: 3,
 		scale: 4,
 	},
+	Armabee_Evolved: {
+		health: 5,
+		scale: 5,
+	},
 } as const satisfies Partial<Record<characters, Enemy>>

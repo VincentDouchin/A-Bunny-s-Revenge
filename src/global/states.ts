@@ -13,7 +13,7 @@ export const setupState = app.create()
 export const openMenuState = app.create()
 export const cutSceneState = app.create()
 export const genDungeonState = app.create()
-
+export const pausedState = app.create()
 export interface DungeonRessources {
 	dungeon: Dungeon
 	direction: direction

@@ -124,6 +124,14 @@ export class State<R = void> {
 		})
 	}
 
+	toggle(ressources: R) {
+		if (this.enabled) {
+			this.disable()
+		} else {
+			this.enable(ressources)
+		}
+	}
+
 	disable() {
 		this.#app.disable(this)
 	}

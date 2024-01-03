@@ -50,6 +50,8 @@ export const collideWithDoor: System<DungeonRessources> = ({ dungeon }) => {
 			if (world.intersectionPair(door.collider, player.collider)) {
 				if (dungeon.rooms.length === door.door.to) {
 					campState.enable({ previousState: 'dungeon' })
+				} else if (door.door.to === -1) {
+					campState.enable({ })
 				} else {
 					dungeonState.enable({ dungeon, direction: door.door.direction, roomIndex: door.door.to })
 				}

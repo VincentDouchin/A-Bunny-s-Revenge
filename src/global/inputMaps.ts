@@ -3,7 +3,7 @@ import { inputManager } from './init'
 import type { InputMap } from '@/lib/inputs'
 import { GAMEPAD_AXIS, GAMEPAD_BUTTON } from '@/lib/inputs'
 
-const playerInputs = ['left', 'right', 'forward', 'backward', 'plant', 'inventory', 'interact'] as const
+const playerInputs = ['left', 'right', 'forward', 'backward', 'plant', 'inventory', 'interact', 'pause'] as const
 export type PlayerInputMap = InputMap<typeof playerInputs[number]>
 export const playerInputMap = () => {
 	const map = inputManager.createMap(playerInputs, true).setGamepads(0)
@@ -12,8 +12,9 @@ export const playerInputMap = () => {
 	map.get('forward').setKeys('KeyW').setAxes(GAMEPAD_AXIS.LEFT_Y, -1)
 	map.get('backward').setKeys('KeyS').setAxes(GAMEPAD_AXIS.LEFT_Y, 1)
 	map.get('plant').setKeys('Space').setButtons(GAMEPAD_BUTTON.A)
-	map.get('inventory').setKeys('KeyE').setButtons(GAMEPAD_BUTTON.START)
+	map.get('inventory').setKeys('KeyE').setButtons(GAMEPAD_BUTTON.Y)
 	map.get('interact').setKeys('Space').setButtons(GAMEPAD_BUTTON.A)
+	map.get('pause').setKeys('Escape').setButtons(GAMEPAD_BUTTON.START)
 	return { playerControls: map } as const satisfies Entity
 }
 

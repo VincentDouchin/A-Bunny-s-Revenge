@@ -4,7 +4,7 @@ import { Faction } from '@/global/entity'
 import { ecs, world } from '@/global/init'
 
 const playerQuery = ecs.with('playerControls', 'sensorCollider', 'position')
-const enemiesQuery = ecs.with('collider', 'faction', 'model', 'body', 'position', 'currentHealth').without('tween').where(({ faction }) => faction === Faction.Enemy)
+const enemiesQuery = ecs.with('collider', 'faction', 'model', 'body', 'position', 'currentHealth').without('tween', 'dying').where(({ faction }) => faction === Faction.Enemy)
 export const playerAttack = () => {
 	for (const { playerControls, sensorCollider, position } of playerQuery) {
 		if (playerControls.get('interact').justPressed) {
