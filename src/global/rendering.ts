@@ -12,7 +12,6 @@ export const scene = new Scene()
 export const renderer = new WebGLRenderer({ alpha: true })
 export const composer = new EffectComposer(renderer)
 export const cssRenderer = new CSS2DRenderer()
-
 export const initThree = () => {
 	renderer.clear()
 	const ratio = window.innerHeight / window.innerWidth
@@ -33,12 +32,12 @@ export const initThree = () => {
 	composer.addPass(new RenderPass(scene, camera))
 
 	composer.addPass(new ShaderPass(VignetteShader()))
-
 	ecs.add({ scene })
 }
 export const rendererQuery = ecs.with('renderer')
 export const sceneQuery = ecs.with('scene')
 export const cameraQuery = ecs.with('camera')
+
 export const render = () => {
 	composer.render()
 	cssRenderer.render(scene, camera)

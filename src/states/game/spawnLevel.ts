@@ -148,7 +148,7 @@ const spawnGroundAndTrees = (layer: LayerInstance) => {
 	})
 }
 
-export const spawnLevel = (level: Level) => () => {
+export const spawnLevel = (level: Level) => {
 	for (const layer of level.layerInstances!) {
 		ecs.add({ map: true })
 		switch (layer.__type) {
@@ -164,7 +164,9 @@ export const spawnLevel = (level: Level) => () => {
 	}
 }
 
-export const spawnFarm = spawnLevel(assets.levels.levels.find(l => l.identifier === 'farm')!)
+export const spawnFarm = () => {
+	spawnLevel(assets.levels.levels.find(l => l.identifier === 'farm')!)
+}
 export const spawnDungeon: System<DungeonRessources> = ({ dungeon, direction, roomIndex }) => {
 	ecs.add({ map: true })
 	const room = dungeon.rooms[roomIndex]

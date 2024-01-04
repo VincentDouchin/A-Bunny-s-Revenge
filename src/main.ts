@@ -38,15 +38,16 @@ import { touchItem } from './states/game/touchItem'
 import { setupGame } from './states/setup/setupGame'
 import { menuManager } from './ui/Menu'
 import { UI } from './ui/UI'
-import { updateParticles } from './lib/particles'
+import { particlesPlugin, updateParticles } from './lib/particles'
 
-registerSW({ immediate: true })
+registerSW({ immediate: true, onNeedRefresh: () => window.location.reload() })
+
 coreState
-	.addPlugins(hierarchyPlugin, physicsPlugin, transformsPlugin, addToScene('camera', 'light', 'mesh', 'model', 'dialogContainer'), updateModels, uiPlugin)
+	.addPlugins(hierarchyPlugin, physicsPlugin, transformsPlugin, addToScene('camera', 'light', 'mesh', 'model', 'dialogContainer', 'batchRenderer', 'emitter'), updateModels, uiPlugin, particlesPlugin)
 	.addSubscriber(...target, startTweens, addDebugCollider)
 	.onEnter(initThree, initCamera, ui.render(UI))
 	.onPreUpdate(coroutines.tick)
-	.onUpdate(runIf(() => !pausedState.enabled, playAnimations, () => time.tick()), moveCamera, updateTweens, inputManager.update, ui.update, menuManager.update)
+	.onUpdate(runIf(() => !pausedState.enabled, playAnimations, () => time.tick()), moveCamera, updateTweens, inputManager.update, ui.update, menuManager.update, updateParticles)
 	.onPostUpdate(updateControls, render)
 	.enable()
 setupState
@@ -62,13 +63,7 @@ campState
 	.addSubscriber(addCropModel, ...saveCrops)
 	.onEnter(spawnFarm, spawnCharacter, spawnLight, spawnSkyBox, spawnCrops, spawnNPC)
 	.onUpdate(collideWithDoorCamp, savePlayerPosition, displayOnCuttinBoard)
-	.onUpdate(runif(
-		canPlayerMove,
-		plantSeed,
-		harvestCrop,
-		openCauldronInventory,
-		openInventory,
-	))
+	.onUpdate(runif(canPlayerMove, plantSeed, harvestCrop, openCauldronInventory, openInventory))
 	.onExit(despawnOfType('map'))
 openMenuState
 	.onUpdate(closeInventory, closeCauldronInventory)
@@ -79,7 +74,9 @@ dungeonState
 	.onEnter(spawnDungeon, spawnLight, spawnSkyBox, spawnItems)
 	.onUpdate(runIf(canPlayerMove, allowDoorCollision, collideWithDoor, enemyAttackPlayer, harvestCrop, playerAttack, killEntities))
 	.onExit(despawnOfType('map'))
-pausedState.onExit(() => time.reset())
+pausedState
+	.onExit(() => time.reset())
+
 const animate = async () => {
 	app.update()
 	requestAnimationFrame(animate)

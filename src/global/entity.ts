@@ -3,6 +3,7 @@ import type { Tween } from '@tweenjs/tween.js'
 import type { With } from 'miniplex'
 import type { JSXElement } from 'solid-js'
 import type { Group, Light, Mesh, Object3D, Object3DEventMap, PerspectiveCamera, Quaternion, Scene, Vector3, WebGLRenderer } from 'three'
+import type { BatchedRenderer, ParticleEmitter } from 'three.quarks'
 import type { OrbitControls } from 'three/examples/jsm/controls/OrbitControls'
 import type { EffectComposer } from 'three/examples/jsm/postprocessing/EffectComposer'
 import type { CSS2DObject } from 'three/examples/jsm/renderers/CSS2DRenderer'
@@ -39,6 +40,7 @@ export interface Entity {
 	// ! ThreeJS
 	scene?: Scene
 	renderer?: WebGLRenderer
+	batchRenderer?: BatchedRenderer
 	camera?: PerspectiveCamera
 	controls?: OrbitControls
 	light?: Light
@@ -104,6 +106,8 @@ export interface Entity {
 	currentHealth?: number
 	maxHealth?: number
 	dying?: true
+	// ! Particles
+	emitter?: ParticleEmitter<Object3DEventMap>
 }
 export type Bundle<C extends keyof Entity> = () => With<Entity, C>
 type Prettify<T> = {

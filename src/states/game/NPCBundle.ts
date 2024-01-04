@@ -1,10 +1,10 @@
 import { RigidBodyType } from '@dimforge/rapier3d-compat'
 import { Quaternion, Vector3 } from 'three'
+import { Sizes } from '@/constants/sizes'
+import { Animator } from '@/global/animator'
 import type { Entity } from '@/global/entity'
 import { assets } from '@/global/init'
 import { modelColliderBundle } from '@/lib/models'
-import { Sizes } from '@/constants/sizes'
-import { Animator } from '@/global/animator'
 
 export const NPCBundle = (character: 'Panda') => {
 	const model = assets.characters[character]

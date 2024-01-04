@@ -4,7 +4,7 @@ import type { ColorRepresentation, Material } from 'three'
 import { Mesh, MeshStandardMaterial, NearestFilter, TextureLoader } from 'three'
 import type { GLTF } from 'three/examples/jsm/loaders/GLTFLoader'
 import type { stringCaster } from './assetLoaders'
-import { getFileName, loadGLB, loadImage } from './assetLoaders'
+import { getFileName, loadGLB, loadImage, textureLoader } from './assetLoaders'
 import { asyncMapValues, entries, groupByObject, mapKeys, mapValues } from '@/utils/mapFunctions'
 import { CustomToonMaterial } from '@/shaders/CustomToonMaterial'
 import type { LDTKMap } from '@/LDTKMap'
@@ -82,6 +82,9 @@ const fontLoader = async (glob: Glob) => {
 const levelLoader = async (glob: GlobEager) => {
 	return JSON.parse(Object.values(glob)[0]) as LDTKMap
 }
+const texturesLoader = async (glob: GlobEager) => {
+	return mapKeys(await asyncMapValues(glob, async src => textureLoader.loadAsync(src)), getFileName)
+}
 
 export const loadAssets = async () => ({
 	characters: await typeGlob<characters>(import.meta.glob('@assets/characters/*.glb', { as: 'url' }))(loadGLBAsToon()),
@@ -93,6 +96,7 @@ export const loadAssets = async () => ({
 	grass: await typeGlob(import.meta.glob('@assets/grass/*.glb', { as: 'url' }))(loadGLBAsToon({ color: 0x26854C })),
 	crops: await cropsLoader<'carrot' | 'mushroom' | 'beet'>(import.meta.glob('@assets/crops/*.glb', { as: 'url' }), toneMapDefaultsrc),
 	items: await typeGlob<items>(import.meta.glob('@assets/items/*.png', { eager: true, import: 'default' }))(itemsLoader),
+	particles: await typeGlob<particles>(import.meta.glob('@assets/particles/*.png', { eager: true, import: 'default' }))(texturesLoader),
 	fonts: await fontLoader(import.meta.glob('@assets/fonts/*.ttf', { eager: true, import: 'default' })),
 	levels: await levelLoader(import.meta.glob('@assets/levels/*.ldtk', { eager: true, as: 'raw' })),
 } as const)
