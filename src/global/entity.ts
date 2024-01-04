@@ -20,7 +20,7 @@ export enum Faction {
 }
 export type InventoryTypes = 'oven' | 'cuttingBoard'
 export type crops = 'carrot' | 'beet' | 'mushroom'
-
+export interface Door { to: number, direction: direction }
 export interface Entity {
 	// ! Tween
 	tween?: Tween<any> | TweenGroup
@@ -76,7 +76,7 @@ export interface Entity {
 	interactable?: true
 	outline?: With<Entity, 'model'>
 	// ! Camp
-	door?: { to: number, direction: direction }
+	door?: Door
 	// ! Dungeon
 	faction?: Faction
 	ignoreDoor?: direction

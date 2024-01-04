@@ -196,7 +196,7 @@ export const spawnDungeon: System<DungeonRessources> = ({ dungeon, direction, ro
 					const position = getEntityPosition(entity, layer)
 					if (entity.__identifier === 'door') {
 						const doorData = getFieldIntances<'door'>(entity)
-						const dungeonDoor = room.doors.find(d => d?.direction === doorData.direction || doorData.direction === otherDirection[direction])
+						const dungeonDoor = room.doors.find(d => d.direction === doorData.direction)
 						if (dungeonDoor) {
 							ecs.add({
 								...doorBundle(dungeonDoor.to, dungeonDoor.direction),

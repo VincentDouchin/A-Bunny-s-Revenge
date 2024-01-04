@@ -17,7 +17,7 @@ export enum RoomType {
 export interface Room {
 	plan: Level
 	enemies: Enemy[]
-	doors: Entity['door'][]
+	doors: NonNullable<Entity['door']>[]
 	type: RoomType
 }
 export interface Dungeon {

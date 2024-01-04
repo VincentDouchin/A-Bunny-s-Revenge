@@ -3,7 +3,6 @@ import { Color, MeshToonMaterial, Uniform } from 'three'
 
 export class CustomToonMaterial extends MeshToonMaterial {
 	shader?: Shader
-	transparent = true
 	onBeforeCompile(shader: Shader, _renderer: WebGLRenderer): void {
 		shader.uniforms.colorAdd = new Uniform(new Color(0, 0, 0))
 		this.shader = shader

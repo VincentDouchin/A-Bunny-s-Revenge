@@ -14,7 +14,7 @@ const needToDieQuery = healthQuery.without('dying')
 const dyingQuery = ecs.with('dying', 'animator', 'model')
 export const killEntities = () => {
 	for (const entity of needToDieQuery) {
-		if (entity.currentHealth === 0) {
+		if (entity.currentHealth <= 0) {
 			addTag(entity, 'dying')
 		}
 	}
@@ -29,9 +29,8 @@ export const killAnimation = () => dyingQuery.onEntityAdded.subscribe((entity) =
 			})
 		entity.model.traverse((node) => {
 			if (node instanceof Mesh && node.material) {
-				tween.onUpdate(({ opacity }) => {
-					node.material.opacity = opacity
-				})
+				node.material.transparent = true
+				tween.onUpdate(({ opacity }) => node.material.opacity = opacity)
 			}
 		})
 		ecs.update(entity, { tween })
