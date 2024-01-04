@@ -38,6 +38,7 @@ import { touchItem } from './states/game/touchItem'
 import { setupGame } from './states/setup/setupGame'
 import { menuManager } from './ui/Menu'
 import { UI } from './ui/UI'
+import { updateParticles } from './lib/particles'
 
 registerSW({ immediate: true })
 coreState
@@ -54,11 +55,7 @@ setupState
 gameState
 	.onEnter()
 	.addSubscriber(bobItems, ...toggleMenuState, killAnimation)
-	.onUpdate(runIf(
-		canPlayerMove,
-		movePlayer,
-		applyMove,
-	))
+	.onUpdate(runIf(canPlayerMove, movePlayer), runIf(() => !pausedState.enabled, applyMove))
 	.onUpdate(collectItems, touchItem, talkToNPC, pauseGame)
 	.enable()
 campState
