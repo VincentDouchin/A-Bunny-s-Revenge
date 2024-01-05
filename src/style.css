@@ -1,5 +1,5 @@
 :root {
-  font-family: Inter, system-ui, Avenir, Helvetica, Arial, sans-serif;
+  font-family: NanoPlus;
   line-height: 1.5;
   font-weight: 400;
   background-color: #242424;
@@ -91,4 +91,19 @@ canvas{
 }
 .space{
   width:0.5rem
+}
+
+button{
+  all:unset;
+  display:grid;
+  place-items:center;
+  padding:0.2rem 0.5rem;
+  background:hsl(0, 0%, 0%, 0.3);
+  color:white;
+  font-size:2rem;
+  border-radius:1rem;
+  box-shadow:0 0.2rem 0 0 hsl(0, 0%, 0%, 0.8);
+}
+button:hover {
+  outline:solid 0.2rem hsl(0, 0%, 100%,0.3);
 }

@@ -9,23 +9,23 @@ const mat = new MeshStandardMaterial({
 	transparent: true,
 })
 
-export const ps = () => {
+export const impact = () => {
 	const system = new ParticleSystem({
 		duration: 3,
 		looping: false,
 		prewarm: true,
 		instancingGeometry: geo,
-		startLife: new IntervalValue(2.0, 3.0),
+		startLife: new IntervalValue(1.0, 2.0),
 		startSpeed: new ConstantValue(0.6),
 		startRotation: new RandomQuatGenerator(),
 		worldSpace: true,
-		emissionOverTime: new ConstantValue(5),
+		emissionOverTime: new ConstantValue(2),
 		emissionBursts: [],
-		shape: new SphereEmitter({ radius: 5 }),
+		shape: new SphereEmitter({ radius: 10 }),
 		material: mat,
-		renderMode: RenderMode.Mesh,
+		renderMode: RenderMode.BillBoard,
 		renderOrder: 1,
 	})
-	system.addBehavior(new SizeOverLife(new PiecewiseBezier([[new Bezier(1, 0.75, 0.25, 0), 0]])))
+	system.addBehavior(new SizeOverLife(new PiecewiseBezier([[new Bezier(1, 0.50, 0.25, 0), 0]])))
 	return system
 }

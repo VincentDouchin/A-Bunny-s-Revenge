@@ -2,7 +2,7 @@ import { Tween } from '@tweenjs/tween.js'
 import { Mesh } from 'three'
 import { Faction } from '@/global/entity'
 import { ecs, world } from '@/global/init'
-import { ps } from '@/particles/test'
+import { impact } from '@/particles/impact'
 
 const playerQuery = ecs.with('playerControls', 'sensorCollider', 'position')
 const enemiesQuery = ecs.with('collider', 'faction', 'model', 'body', 'position', 'currentHealth').without('tween', 'dying').where(({ faction }) => faction === Faction.Enemy)
@@ -17,7 +17,7 @@ export const playerAttack = () => {
 					if (enemy.currentHealth > 0) {
 						enemy.animator?.playOnce('HitReact')
 					}
-					const emitter = ps().emitter
+					const emitter = impact().emitter
 					emitter.position.y = 5
 					ecs.update(enemy, { emitter })
 					// ! knockback

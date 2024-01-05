@@ -83,7 +83,12 @@ const levelLoader = async (glob: GlobEager) => {
 	return JSON.parse(Object.values(glob)[0]) as LDTKMap
 }
 const texturesLoader = async (glob: GlobEager) => {
-	return mapKeys(await asyncMapValues(glob, async src => textureLoader.loadAsync(src)), getFileName)
+	return mapKeys(await asyncMapValues(glob, async (src) => {
+		const texture = await textureLoader.loadAsync(src)
+		texture.magFilter = NearestFilter
+		texture.minFilter = NearestFilter
+		return texture
+	}), getFileName)
 }
 
 export const loadAssets = async () => ({

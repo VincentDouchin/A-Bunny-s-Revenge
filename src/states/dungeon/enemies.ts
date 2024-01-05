@@ -34,5 +34,20 @@ export const enemyAttackPlayer = () => {
 			enemy.movementForce.x = direction.x
 			enemy.movementForce.z = direction.z
 		}
+		const avoidOtherEnemies = new Vector3()
+		let closeEnemies = 0
+		for (const otherEnemy of enemiesQuery) {
+			if (otherEnemy !== enemy) {
+				const dist = enemy.position.distanceTo(otherEnemy.position)
+				if (dist < 50) {
+					avoidOtherEnemies.add(enemy.position.clone().sub(otherEnemy.position).normalize().multiplyScalar(20 / dist))
+					closeEnemies++
+				}
+			}
+		}
+		if (closeEnemies > 0) {
+			enemy.movementForce.add(avoidOtherEnemies.divideScalar(closeEnemies || 1))
+		}
+		enemy.movementForce.normalize()
 	}
 }

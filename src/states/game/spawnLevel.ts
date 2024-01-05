@@ -170,7 +170,7 @@ export const spawnFarm = () => {
 export const spawnDungeon: System<DungeonRessources> = ({ dungeon, direction, roomIndex }) => {
 	ecs.add({ map: true })
 	const room = dungeon.rooms[roomIndex]
-	if (room.type === RoomType.Battle) {
+	if (room.type === RoomType.Entrance) {
 		for (const _ in range(0, 5)) {
 			ecs.add({
 				...enemyBundle('Armabee'),

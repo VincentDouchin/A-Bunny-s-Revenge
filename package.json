@@ -12,6 +12,7 @@
 	"dependencies": {
 		"@dimforge/rapier3d-compat": "^0.11.2",
 		"@tweenjs/tween.js": "^21.0.0",
+		"howler": "^2.2.4",
 		"idb-keyval": "^6.2.1",
 		"miniplex": "^2.0.0",
 		"randomish": "^0.1.6",
