@@ -24,7 +24,7 @@ export const ItemDisplay = (props: { item: ItemData | null, selected: boolean, d
 					<div style={{ 'color': 'white', 'position': 'absolute', 'width': '1rem', 'bottom': '0.5rem', 'right': '0.5rem', ...textStroke('black'), 'text-align': 'center' }}>{props.item.quantity}</div>
 				</>
 			)}
-			{props.selected && <div style={{ color: 'white', position: 'absolute', top: '100%' }}>{props.item?.icon}</div>}
+			{props.selected && <div style={{ 'color': 'white', 'position': 'absolute', 'top': '100%', 'font-size': '1.5rem', 'z-index': 2 }}>{props.item?.icon}</div>}
 
 		</div>
 	)

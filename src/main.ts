@@ -57,7 +57,7 @@ gameState
 	.onEnter()
 	.addSubscriber(bobItems, ...toggleMenuState, killAnimation)
 	.onUpdate(runIf(canPlayerMove, movePlayer), runIf(() => !pausedState.enabled, applyMove))
-	.onUpdate(collectItems, touchItem, talkToNPC, pauseGame)
+	.onUpdate(collectItems, touchItem, talkToNPC, runIf(() => !openMenuState.enabled, pauseGame))
 	.enable()
 campState
 	.addSubscriber(addCropModel, ...saveCrops)
