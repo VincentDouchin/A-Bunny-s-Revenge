@@ -1,4 +1,5 @@
 import { For, Show, createMemo, createSignal } from 'solid-js'
+import { InventoryTitle } from './CookingUi'
 import type { ItemData } from '@/constants/items'
 import { assets, ecs, ui } from '@/global/init'
 import { save, updateSave } from '@/global/save'
@@ -99,14 +100,17 @@ export const InventoryUi = () => {
 		<Modal open={player()}>
 			<Show when={player()}>
 				{player => (
-					<div style={{ 'display': 'grid', 'grid-template-columns': 'repeat(8, 1fr)', 'gap': '1rem' }}>
-						<Menu
-							inputs={player().menuInputs}
-						>
-							{({ getProps }) => {
-								return <InventorySlots getProps={getProps} />
-							}}
-						</Menu>
+					<div>
+						<InventoryTitle>Inventory</InventoryTitle>
+						<div style={{ 'display': 'grid', 'grid-template-columns': 'repeat(8, 1fr)', 'gap': '1rem' }}>
+							<Menu
+								inputs={player().menuInputs}
+							>
+								{({ getProps }) => {
+									return <InventorySlots getProps={getProps} />
+								}}
+							</Menu>
+						</div>
 					</div>
 				)}
 			</Show>
