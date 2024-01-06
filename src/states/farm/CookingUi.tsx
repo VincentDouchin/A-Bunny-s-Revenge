@@ -1,15 +1,17 @@
 import type { With } from 'miniplex'
-import { For, Show } from 'solid-js'
+import { For, Show, createMemo } from 'solid-js'
 import { Quaternion, Vector3 } from 'three'
 import { InventorySlots, ItemDisplay } from './InventoryUi'
 import type { Entity, InventoryTypes } from '@/global/entity'
 import { type ItemData, choppables } from '@/constants/items'
 
+import { recipes } from '@/constants/recipes'
 import { assets, ecs, ui } from '@/global/init'
 import { menuInputMap } from '@/global/inputMaps'
 import { addItem, save, updateSave } from '@/global/save'
 import { Menu } from '@/ui/Menu'
 import { Modal } from '@/ui/Modal'
+import { range } from '@/utils/mapFunctions'
 
 export const inventoryBundle = (inventoryType: InventoryTypes, size: number) => {
 	return {
@@ -194,7 +196,18 @@ export const CuttingBoardUi = () => {
 const ovenQuery = inventoryQuery.with('inventoryType').where(({ inventoryType }) => inventoryType === 'oven')
 export const OvenUi = () => {
 	const oven = ui.sync(() => ovenQuery.first)
-
+	const output = createMemo(() => {
+		return recipes.find(({ input }) => {
+			return input.every((item, i) => oven()?.inventory[i]?.icon === item)
+		})?.output
+	})
+	const cook = (output: ItemData) => {
+		const o = oven()
+		if (o) {
+			addItem({ ...output })
+			ecs.update(o, { inventory: range(0, o.inventorySize, () => null) })
+		}
+	}
 	return (
 		<Modal open={oven()}>
 			<Show when={oven()}>
@@ -205,6 +218,7 @@ export const OvenUi = () => {
 					return (
 						<Menu inputs={ovenEntity().menuInputs}>
 							{({ getProps }) => {
+								const outputProps = getProps()
 								return (
 									<div style={{ display: 'grid', gap: '2rem' }}>
 										<div>
@@ -224,6 +238,15 @@ export const OvenUi = () => {
 														)
 													}}
 												</For>
+												<Show when={output()}>
+													{(output) => {
+														return (
+															<div {...outputProps} onClick={() => cook(output())}>
+																<ItemDisplay item={output()} selected={outputProps.selected()} />
+															</div>
+														)
+													}}
+												</Show>
 											</div>
 										</div>
 										<div style={{ 'display': 'grid', 'grid-template-columns': 'repeat(8, 1fr)', 'gap': '1rem' }}>

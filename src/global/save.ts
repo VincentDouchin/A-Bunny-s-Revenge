@@ -3,7 +3,6 @@ import { Quaternion, Vector3 } from 'three'
 import { context } from './context'
 import type { crops } from './entity'
 import type { ItemData } from '@/constants/items'
-import { entries } from '@/utils/mapFunctions'
 
 interface CropData {
 	name: crops
@@ -45,9 +44,9 @@ export const addItem = (item: ItemData, save = true) => {
 		if (existingItem) {
 			existingItem.quantity += item.quantity }
 		else {
-			for (const [index, item] of entries(s.items)) {
-				if (item === undefined) {
-					s.items[index] = item
+			for (let i = 0; i < 24; i++) {
+				if (s.items[i] === undefined) {
+					s.items[i] = item
 					break
 				}
 			}

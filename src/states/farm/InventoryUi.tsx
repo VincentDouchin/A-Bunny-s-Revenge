@@ -1,7 +1,7 @@
-import { For, Show, createMemo } from 'solid-js'
+import { For, Show, createMemo, createSignal } from 'solid-js'
 import type { ItemData } from '@/constants/items'
 import { assets, ecs, ui } from '@/global/init'
-import { save } from '@/global/save'
+import { save, updateSave } from '@/global/save'
 import { textStroke } from '@/lib/uiManager'
 import type { getProps } from '@/ui/Menu'
 import { Menu } from '@/ui/Menu'
@@ -40,8 +40,40 @@ export const InventorySlots = (props: { getProps: getProps, click?: (item: ItemD
 				const slotProps = props.getProps(i() === 0)
 				const itemSynced = ui.sync(() => items()[i()])
 				const disabled = props.disabled && props.disabled(itemSynced())
+				const [ref, setRef] = createSignal()
 				return (
-					<div {...slotProps} onClick={() => props.click && !disabled && props.click(itemSynced())}>
+					<div
+						{...slotProps}
+						draggable={itemSynced() !== undefined}
+						class="item-drag"
+						ref={setRef}
+						onClick={() => props.click && !disabled && props.click(itemSynced())}
+						onDragStart={(e) => {
+							e.dataTransfer?.setData('text/plain', JSON.stringify([itemSynced(), i()]))
+						}}
+						onDragOver={e => e.preventDefault()}
+						onDrop={(e) => {
+							const data = e.dataTransfer?.getData('text/plain')
+							if (data && e.target.closest('.item-drag') === ref()) {
+								try {
+									const [dataParsed, position]: [ItemData, number] = JSON.parse(data) as any
+									if (itemSynced() === undefined) {
+										updateSave((s) => {
+											delete s.items[position]
+											s.items[i()] = dataParsed
+										})
+									}
+									if (dataParsed.icon === itemSynced().icon) {
+										updateSave((s) => {
+											delete s.items[position]
+											s.items[i()].quantity += dataParsed.quantity
+										})
+									}
+								} catch (_) {
+								}
+							}
+						}}
+					>
 						<ItemDisplay
 							disabled={disabled}
 							item={itemSynced()}
