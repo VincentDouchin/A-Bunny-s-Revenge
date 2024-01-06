@@ -29,12 +29,12 @@ const CloseButton = () => {
 	)
 }
 
-export function Modal<T>(props: { children: JSXElement, open: T }) {
+export function Modal<T>(props: { children: JSXElement, open: T, showClose?: boolean }) {
 	return (
 		<Transition name="slide">
 			<Show when={props.open}>
 				<div style={{ 'background': 'hsla(0 0% 0% / 20%)', 'place-self': 'center', 'padding': '2rem', 'border-radius': '1rem', 'display': 'grid', 'gap': '2rem', 'position': 'relative' }}>
-					<CloseButton />
+					{(props.showClose ?? true) && <CloseButton />}
 					{props.children}
 				</div>
 			</Show>

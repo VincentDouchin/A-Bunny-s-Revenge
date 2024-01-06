@@ -1,7 +1,8 @@
 import { Show, createEffect, createMemo, createSignal } from 'solid-js'
 import { Vector2 } from 'three'
+import pause from '@assets/icons/pause-solid.svg?raw'
 import { ecs, inputManager, ui } from '@/global/init'
-import { openMenuState } from '@/global/states'
+import { openMenuState, pausedState } from '@/global/states'
 
 const playerQuery = ecs.with('playerControls')
 
@@ -66,6 +67,7 @@ export const TouchControls = () => {
 	})
 	return (
 		<Show when={areControlsShow()}>
+			<div style={{ 'width': '4rem', 'height': '4rem', 'background': 'hsl(0,0%,0%, 20%)', 'position': 'absolute', 'top': '0', 'right': '0', 'margin': '1rem', 'border-radius': '1rem', 'border': `solid 0.1rem hsl(0, 0%,100%, 30% )`, 'font-size': '2rem', 'color': 'white', 'display': 'grid', 'place-items': 'center' }} class="icon-container" innerHTML={pause} onTouchStart={() => pausedState.enable()}></div>
 			<div style={{ position: 'fixed', margin: '3rem', left: '0', bottom: '0', right: '0' }}>
 				<div ref={el => setContainer(el)} onTouchMove={moveCenter} onTouchEnd={resetCenter} style={{ 'position': 'relative', 'background': 'hsl(0,0%,0%, 20%)', 'border-radius': '1000px', 'width': '8rem', 'height': '8rem', 'border': `solid ${isJoystickPressed() ? '0.3rem' : '0.1rem'} hsl(0, 0%,100%, 30% )` }}>
 					<div style={{ 'border-radius': '1000px', 'width': '3rem', 'height': '3rem', 'background': 'hsl(0, 0%,100%, 30% )', 'position': 'absolute', 'top': '50%', 'left': '50%', 'transform': centerPostion() }}></div>

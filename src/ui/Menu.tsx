@@ -1,5 +1,5 @@
 import type { Accessor, Component } from 'solid-js'
-import { createMemo, createRoot, createSignal, onCleanup } from 'solid-js'
+import { createMemo, createRoot, createSignal } from 'solid-js'
 
 import { generateUUID } from 'three/src/math/MathUtils'
 import { ui } from '@/global/init'
@@ -58,14 +58,7 @@ export type getProps = (first?: boolean) => {
 export interface MenuItemProps {
 	getProps: getProps
 }
-export const menuManager = new class {
-	updaters = new Set<() => void>()
-	update = () => {
-		for (const updateFn of this.updaters) {
-			updateFn()
-		}
-	}
-}()
+
 export function Menu(props: MenuProps) {
 	const [selected, setSelected] = createSignal('')
 
@@ -98,10 +91,7 @@ export function Menu(props: MenuProps) {
 			}
 		}
 	}
-	menuManager.updaters.add(update)
-	onCleanup(() => {
-		menuManager.updaters.delete(update)
-	})
+	ui.updateSync(update)
 	const getProps = (first = false) => {
 		const id = generateUUID()
 		if (first) {

@@ -36,7 +36,6 @@ import { spawnDungeon, spawnFarm } from './states/game/spawnLevel'
 import { spawnLight } from './states/game/spawnLights'
 import { touchItem } from './states/game/touchItem'
 import { setupGame } from './states/setup/setupGame'
-import { menuManager } from './ui/Menu'
 import { UI } from './ui/UI'
 import { particlesPlugin, updateParticles } from './lib/particles'
 
@@ -47,7 +46,7 @@ coreState
 	.addSubscriber(...target, startTweens, addDebugCollider)
 	.onEnter(initThree, initCamera, ui.render(UI))
 	.onPreUpdate(coroutines.tick)
-	.onUpdate(runIf(() => !pausedState.enabled, playAnimations, () => time.tick()), moveCamera, updateTweens, inputManager.update, ui.update, menuManager.update, updateParticles)
+	.onUpdate(runIf(() => !pausedState.enabled, playAnimations, () => time.tick()), moveCamera, updateTweens, inputManager.update, ui.update, updateParticles)
 	.onPostUpdate(updateControls, render)
 	.enable()
 setupState

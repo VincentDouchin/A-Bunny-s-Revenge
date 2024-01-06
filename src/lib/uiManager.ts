@@ -1,3 +1,4 @@
+import type { JSXElement } from 'solid-js'
 import { createSignal, onCleanup } from 'solid-js'
 import type { JSX } from 'solid-js/jsx-runtime'
 import { render } from 'solid-js/web'
@@ -17,7 +18,7 @@ export class UIManager {
 
 	listeners = new Set<() => void>()
 
-	render(ui: () => JSX.Element) {
+	render(ui: () => JSXElement) {
 		return () => render(() => ui(), this.root)
 	}
 
@@ -27,6 +28,11 @@ export class UIManager {
 		this.listeners.add(refetch)
 		onCleanup(() => this.listeners.delete(refetch))
 		return state
+	}
+
+	updateSync(fn: () => void) {
+		this.listeners.add(fn)
+		onCleanup(() => this.listeners.delete(fn))
 	}
 
 	update = () => {

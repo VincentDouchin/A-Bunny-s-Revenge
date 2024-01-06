@@ -57,6 +57,12 @@ export const InventorySlots = (props: { getProps: getProps, click?: (item: ItemD
 
 export const InventoryUi = () => {
 	const player = ui.sync(() => playerQuery.first)
+	ui.updateSync(() => {
+		const p = player()
+		if (p?.menuInputs?.get('cancel').justPressed) {
+			ecs.removeComponent(p, 'openInventory')
+		}
+	})
 	return (
 		<Modal open={player()}>
 			<Show when={player()}>
