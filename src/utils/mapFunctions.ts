@@ -78,3 +78,5 @@ export const filterKeys = <T>(obj: Record<string, T>, fn: (key: string) => boole
 export const getRandom = <T>(arr: T[]) => arr[Math.floor(Math.random() * arr.length)]
 
 export const between = (min: number, max: number) => Math.random() * (max - min) + min
+
+export const enumerate = <T>(arr: T[]): [T, number][] => arr.map((el, i) => ([el, i]))

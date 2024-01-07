@@ -1,5 +1,5 @@
 import { Show } from 'solid-js'
-import { Modal } from './Modal'
+import { Modal } from './components/Modal'
 import { ui } from '@/global/init'
 import { pausedState } from '@/global/states'
 

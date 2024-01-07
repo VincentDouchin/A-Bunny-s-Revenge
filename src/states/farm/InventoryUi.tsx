@@ -1,12 +1,16 @@
 import { For, Show, createMemo, createSignal } from 'solid-js'
 import { InventoryTitle } from './CookingUi'
 import type { ItemData } from '@/constants/items'
+import { quests } from '@/constants/quests'
+import type { Quest, QuestName } from '@/constants/quests'
+
 import { assets, ecs, ui } from '@/global/init'
 import { save, updateSave } from '@/global/save'
 import { textStroke } from '@/lib/uiManager'
-import type { getProps } from '@/ui/Menu'
-import { Menu } from '@/ui/Menu'
-import { Modal } from '@/ui/Modal'
+import { IconButton } from '@/ui/components/Button'
+import type { getProps } from '@/ui/components/Menu'
+import { Menu } from '@/ui/components/Menu'
+import { Modal } from '@/ui/components/Modal'
 import { range } from '@/utils/mapFunctions'
 
 export const ItemDisplay = (props: { item: ItemData | null, selected: boolean, disabled?: boolean }) => {
@@ -96,21 +100,57 @@ export const InventoryUi = () => {
 			ecs.removeComponent(p, 'openInventory')
 		}
 	})
+	const [tab, setTab] = createSignal<'inventory' | 'quests'>('inventory')
+	const questsToComplete = ui.sync(() => Object.entries(save.quests) as [QuestName, boolean[]][])
 	return (
 		<Modal open={player()}>
 			<Show when={player()}>
 				{player => (
-					<div>
-						<InventoryTitle>Inventory</InventoryTitle>
-						<div style={{ 'display': 'grid', 'grid-template-columns': 'repeat(8, 1fr)', 'gap': '1rem' }}>
-							<Menu
-								inputs={player().menuInputs}
-							>
-								{({ getProps }) => {
-									return <InventorySlots getProps={getProps} />
-								}}
-							</Menu>
+					<div style={{ }}>
+						<div style={{ display: 'flex', gap: '1rem' }}>
+							<IconButton icon="basket-shopping-solid" onClick={() => setTab('inventory')}></IconButton>
+							<IconButton icon="list-check-solid" onClick={() => setTab('quests')}></IconButton>
 						</div>
+						<InventoryTitle>{tab()}</InventoryTitle>
+						<Show when={tab() === 'inventory'}>
+							<div style={{ 'display': 'grid', 'grid-template-columns': 'repeat(8, 1fr)', 'gap': '1rem' }}>
+								<Menu
+									inputs={player().menuInputs}
+								>
+									{({ getProps }) => {
+										return <InventorySlots getProps={getProps} />
+									}}
+								</Menu>
+							</div>
+						</Show>
+						<Show when={tab() === 'quests'}>
+							<For each={questsToComplete()}>
+								{([questName, compltetedSteps]) => {
+									const quest = quests[questName] as Quest
+									return (
+										<div style={{ 'color': 'white', 'background': 'hsl(0, 0%, 0%, 0.3)', 'padding': '1rem', 'border-radius': '1rem' }}>
+											<div style={{ 'font-size': '2rem' }}>{quest.name}</div>
+											<For each={quest.steps}>
+												{(step, i) => {
+													const isCompleted = compltetedSteps[i()]
+													return (
+														<div>
+															{step?.description && <div>{step.description}</div>}
+															{step.items?.map(item => (
+																<div style={{ position: 'relative' }}>
+																	<div innerHTML={assets.icons[isCompleted ? 'circle-check-solid' : 'circle-xmark-solid']} style={{ 'position': 'absolute', 'z-index': 1, 'top': '0.5rem', 'left': '0.5rem', 'color': isCompleted ? '#33cc33' : 'red' }}></div>
+																	<ItemDisplay item={item} selected={false}></ItemDisplay>
+																</div>
+															))}
+														</div>
+													)
+												}}
+											</For>
+										</div>
+									)
+								}}
+							</For>
+						</Show>
 					</div>
 				)}
 			</Show>

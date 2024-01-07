@@ -21,6 +21,9 @@ const loadToneMap = async (url: string) => {
 const typeGlob = <K extends string>(glob: Record<string, any>) => async <F extends (glob: Record<string, any>) => Promise<Record<string, any>>>(fn: F) => {
 	return await fn(glob) as Record<K, Awaited<ReturnType<F>>[string]>
 }
+const typeGlobEager = <K extends string>(glob: GlobEager) => <F extends (glob: GlobEager) => Record<string, any>>(fn: F) => {
+	return fn(glob) as Record<K, ReturnType<F>[string]>
+}
 
 const loadGLBAsToon = (options?: { src?: string, color?: ColorRepresentation, material?: (node: Mesh) => Material }) => async (glob: Glob) => {
 	const gradientMap = await loadToneMap(options?.src ?? toneMapDefaultsrc)
@@ -90,6 +93,9 @@ const texturesLoader = async (glob: GlobEager) => {
 		return texture
 	}), getFileName)
 }
+const iconsLoader = (glob: GlobEager) => {
+	return mapKeys(glob, getFileName)
+}
 
 export const loadAssets = async () => ({
 	characters: await typeGlob<characters>(import.meta.glob('@assets/characters/*.glb', { as: 'url' }))(loadGLBAsToon()),
@@ -104,4 +110,5 @@ export const loadAssets = async () => ({
 	particles: await typeGlob<particles>(import.meta.glob('@assets/particles/*.png', { eager: true, import: 'default' }))(texturesLoader),
 	fonts: await fontLoader(import.meta.glob('@assets/fonts/*.ttf', { eager: true, import: 'default' })),
 	levels: await levelLoader(import.meta.glob('@assets/levels/*.ldtk', { eager: true, as: 'raw' })),
+	icons: await typeGlobEager(import.meta.glob('@assets/icons/*.svg', { eager: true, import: 'default', as: 'raw' }))(iconsLoader),
 } as const)

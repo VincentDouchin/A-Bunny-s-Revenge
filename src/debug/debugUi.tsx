@@ -2,7 +2,7 @@ import { Show, createSignal } from 'solid-js'
 import { params } from '@/global/context'
 import { composer, renderer } from '@/global/rendering'
 import { campState } from '@/global/states'
-import { updateSave } from '@/global/save'
+import { resetSave, updateSave } from '@/global/save'
 
 export const DebugUi = () => {
 	const updatePixelation = (e: Event) => {
@@ -21,6 +21,11 @@ export const DebugUi = () => {
 			s.crops = []
 			campState.enable({ })
 		})
+	}
+	const reset = async () => {
+		campState.disable()
+		await resetSave()
+		window.location.reload()
 	}
 	return (
 		<div style={{ position: 'absolute', color: 'white' }}>
@@ -103,6 +108,9 @@ export const DebugUi = () => {
 				</div>
 				<div>
 					<button onClick={destroyCrops}>Destroy crops</button>
+				</div>
+				<div>
+					<button onClick={reset}>Reset Save</button>
 				</div>
 			</Show>
 		</div>

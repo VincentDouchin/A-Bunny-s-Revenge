@@ -28,7 +28,7 @@ export const plantSeed = () => {
 				ecs.add({
 					position,
 					inMap: true,
-					crop: { stage: 0, name: 'beet' },
+					crop: { stage: 0, name: 'carrot' },
 				})
 				updateCropsSave()
 			}

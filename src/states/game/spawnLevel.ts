@@ -55,6 +55,7 @@ interface FieldInstances {
 	}
 	house: Record<string, unknown>
 	cauldron: Record<string, unknown>
+	planter: Record<string, unknown>
 
 }
 
@@ -94,6 +95,10 @@ const spawnFarmEntities = spawnLDTKEntities({
 			...kitchenApplianceBundle('oven', data.direction),
 			position,
 		})
+	},
+	planter: (_position) => {
+		// const model = new Mesh(new BoxGeometry(50, 2, 10), new MeshBasicMaterial({ color: 0xFFFFFF }))
+		// ecs.add({ position, model })
 	},
 	counter: (position, data) => {
 		const counter = ecs.add({ position, ...kitchenApplianceBundle('kitchencounter_straight_B', data.direction) })

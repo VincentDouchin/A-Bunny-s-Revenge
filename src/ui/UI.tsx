@@ -1,6 +1,6 @@
 import { DialogUi } from './DialogUi'
 import { PauseUI } from './PauseUI'
-import { StateUi } from './StateUi'
+import { StateUi } from './components/StateUi'
 import { TouchControls } from './TouchControls'
 import { DebugUi } from '@/debug/debugUi'
 import { campState } from '@/global/states'

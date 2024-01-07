@@ -9,8 +9,8 @@ import { recipes } from '@/constants/recipes'
 import { assets, ecs, ui } from '@/global/init'
 import { menuInputMap } from '@/global/inputMaps'
 import { addItem, save, updateSave } from '@/global/save'
-import { Menu } from '@/ui/Menu'
-import { Modal } from '@/ui/Modal'
+import { Menu } from '@/ui/components/Menu'
+import { Modal } from '@/ui/components/Modal'
 import { range } from '@/utils/mapFunctions'
 
 export const inventoryBundle = (inventoryType: InventoryTypes, size: number) => {
@@ -30,7 +30,7 @@ function addToInventory<E extends With<Entity, 'inventory'>>(entity: E) {
 				item.quantity--
 			} else {
 				updateSave((s) => {
-					const index = Object.values(save.items).findIndex(i => i !== item)
+					const index = Object.values(save.items).findIndex(i => i === item)
 					delete s.items[index]
 				}, false)
 			}
@@ -48,7 +48,7 @@ function removeFromInventory<E extends With<Entity, 'inventory'>>(entity: E) {
 }
 
 const inventoryQuery = ecs.with('inventory', 'openInventory', 'menuInputs', 'inventorySize')
-export const InventoryTitle = (props: { children: string }) => <div style={{ 'font-size': '3rem', 'color': 'white', 'font-family': 'NanoPlus' }}>{props.children}</div>
+export const InventoryTitle = (props: { children: string }) => <div style={{ 'font-size': '3rem', 'color': 'white', 'font-family': 'NanoPlus', 'text-transform': 'capitalize' }}>{props.children}</div>
 // export const CauldronUi = () => {
 // 	return (
 // 		<ForQuery query={inventoryQuery}>
