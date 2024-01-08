@@ -2,6 +2,7 @@ import { DialogUi } from './DialogUi'
 import { PauseUI } from './PauseUI'
 import { StateUi } from './components/StateUi'
 import { TouchControls } from './TouchControls'
+import { InteractionUi } from './Interactions'
 import { DebugUi } from '@/debug/debugUi'
 import { campState } from '@/global/states'
 import { CuttingBoardUi, OvenUi } from '@/states/farm/CookingUi'
@@ -16,6 +17,7 @@ export const UI = () => (
 			<CuttingBoardUi />
 			<OvenUi />
 		</StateUi>
+		<InteractionUi />
 		<TouchControls />
 		<PauseUI />
 	</>

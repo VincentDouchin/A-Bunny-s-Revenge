@@ -56,7 +56,7 @@ export const spawnCrops: System<FarmRessources> = ({ previousState }) => {
 			crop: { name: crop.name, stage },
 			position: new Vector3(crop.x, 0, crop.z),
 			inMap: true,
-			interactable: true,
+			interactable: 'harvest',
 		})
 	}
 }

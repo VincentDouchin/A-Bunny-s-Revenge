@@ -1,3 +1,5 @@
+import { metaKeys } from '@/constants/keys'
+
 export const GAMEPAD_AXIS = {
 	LEFT_X: 0,
 	LEFT_Y: 1,
@@ -34,7 +36,7 @@ export class InputManager {
 	keys: Record<string, 0 | 1> = {}
 	controls: 'gamepad' | 'touch' | 'keyboard' = 'keyboard'
 	#maps = new Set<InputMap<any>>()
-
+	layoutMap: KeyboardLayoutMap | null = null
 	constructor() {
 		window.addEventListener('keydown', (e) => {
 			if (e.code in this.keys) {
@@ -52,6 +54,13 @@ export class InputManager {
 		window.addEventListener('touchstart', () => {
 			this.controls = 'touch'
 		})
+		navigator.keyboard.getLayoutMap().then((map) => {
+			this.layoutMap = map
+		})
+	}
+
+	getKeyName(input: Input) {
+		return input.keys.map(key => this.layoutMap?.get(key) ?? metaKeys[key])
 	}
 
 	update = () => {
@@ -71,16 +80,16 @@ export class InputManager {
 export class Input {
 	pressed = 0
 	wasPressed = 0
-	#keys: string[] = []
-	#buttons: number[] = []
-	#axes: [number, 1 | -1][] = []
+	keys: string[] = []
+	buttons: number[] = []
+	axes: [number, 1 | -1][] = []
 	#manager: InputManager
 	constructor(manager: InputManager) {
 		this.#manager = manager
 	}
 
 	setKeys(...keys: string[]) {
-		this.#keys.push(...keys)
+		this.keys.push(...keys)
 		for (const key of keys) {
 			this.#manager.keys[key] = 0
 		}
@@ -88,12 +97,12 @@ export class Input {
 	}
 
 	setButtons(...buttons: number[]) {
-		this.#buttons.push(...buttons)
+		this.buttons.push(...buttons)
 		return this
 	}
 
 	setAxes(axis: number, direction: 1 | -1) {
-		this.#axes.push([axis, direction])
+		this.axes.push([axis, direction])
 		return this
 	}
 
@@ -103,17 +112,17 @@ export class Input {
 		if (touchValue !== undefined) {
 			this.pressed = touchValue
 		}
-		for (const key of this.#keys) {
+		for (const key of this.keys) {
 			if (this.#manager.keys[key])
 				this.pressed = 1
 		}
 		for (const gamepad of gamepads) {
-			for (const button of this.#buttons) {
+			for (const button of this.buttons) {
 				if (gamepad.buttons[button].pressed) {
 					this.pressed = gamepad.buttons[button].value
 				}
 			}
-			for (const [axis, direction] of this.#axes) {
+			for (const [axis, direction] of this.axes) {
 				const amount = gamepad.axes[axis]
 				if (Math.abs(amount) > 0.1) {
 					if (Math.sign(amount) === direction) {

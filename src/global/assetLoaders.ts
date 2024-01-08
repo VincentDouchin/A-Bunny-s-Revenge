@@ -11,6 +11,12 @@ export const getFileName = <K extends string>(path: string) => {
 export const getFolderName = (path: string) => {
 	return	path.split(/[./]/g).at(-3) ?? ''
 }
+export const getExtension = (path: string) => {
+	return	path.split(/[./]/g).at(-1) ?? ''
+}
+export const getPathPart = (part: number) => (path: string) => {
+	return	path.split(/[./]/g).at(part) ?? ''
+}
 
 const loader = new GLTFLoader()
 const dracoLoader = new DRACOLoader()

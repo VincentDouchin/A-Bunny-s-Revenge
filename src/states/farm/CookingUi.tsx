@@ -19,7 +19,7 @@ export const inventoryBundle = (inventoryType: InventoryTypes, size: number) => 
 		inventoryType,
 		inventorySize: size,
 		inventory: Array.from({ length: size }, () => null),
-		interactable: true,
+		interactable: inventoryType,
 	} as const satisfies Entity
 }
 

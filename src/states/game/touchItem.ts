@@ -1,5 +1,6 @@
 import { Mesh, MeshBasicMaterial, Vector3 } from 'three'
 import { Tween } from '@tweenjs/tween.js'
+import { CSS2DObject } from 'three/examples/jsm/renderers/CSS2DRenderer'
 import { ecs, world } from '@/global/init'
 import { TweenGroup } from '@/lib/tweenGroup'
 
@@ -23,13 +24,15 @@ export const touchItem = () => {
 
 				item.group.add(outline)
 				const outlineEntity = ecs.add({ model: outline, parent: item, position: new Vector3(), tween: tweenGroup })
-				ecs.update(item, { outline: outlineEntity })
+				const interactionContainer = new CSS2DObject(document.createElement('div'))
+				ecs.update(item, { outline: outlineEntity, interactionContainer })
 			}
 		}
 		for (const item of itemsToUnOuline) {
 			if (!world.intersectionPair(player.sensorCollider, item.collider)) {
 				ecs.remove(item.outline)
 				ecs.removeComponent(item, 'outline')
+				ecs.removeComponent(item, 'interactionContainer')
 			}
 		}
 	}

@@ -19,7 +19,7 @@ export const spawnItems: System<DungeonRessources> = ({ dungeon, roomIndex }) =>
 				...modelColliderBundle(model, RigidBodyType.Fixed, true, Sizes.small),
 				position: new Vector3(x, 0, y),
 				crop: { stage: 3, name: 'mushroom' },
-				interactable: true,
+				interactable: 'harvest',
 				inMap: true,
 			})
 		}

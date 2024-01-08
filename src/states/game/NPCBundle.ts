@@ -8,6 +8,7 @@ import { modelColliderBundle } from '@/lib/models'
 
 export const NPCBundle = (character: 'Panda') => {
 	const model = assets.characters[character]
+	model.scene.scale.setScalar(4)
 	const bundle = modelColliderBundle(model.scene, RigidBodyType.Fixed, false, Sizes.character)
 
 	return {
@@ -17,5 +18,7 @@ export const NPCBundle = (character: 'Panda') => {
 		npc: true,
 		npcName: 'Panda',
 		rotation: new Quaternion().setFromAxisAngle(new Vector3(0, 1, 0), Math.PI),
+		interactable: 'talk',
+
 	} as const satisfies Entity
 }

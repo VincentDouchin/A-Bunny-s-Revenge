@@ -75,7 +75,8 @@ export interface Entity {
 	crop?: { stage: number, name: crops }
 	// ! Game
 	map?: true
-	interactable?: true
+	interactable?: string
+	interactionContainer?: CSS2DObject
 	outline?: With<Entity, 'model'>
 	// ! Camp
 	door?: Door

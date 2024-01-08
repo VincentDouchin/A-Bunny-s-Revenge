@@ -7,7 +7,6 @@ export const spawnNPC = () => {
 	ecs.add({
 		...NPCBundle('Panda'),
 		position: new Vector3(20, 0, 0),
-		scale: 3,
 		...dialogBundle('Panda'),
 	})
 }

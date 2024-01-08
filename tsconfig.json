@@ -16,7 +16,8 @@
 		"resolveJsonModule": true,
 		"types": [
 			"vite/client",
-			"vite-plugin-pwa/client"
+			"vite-plugin-pwa/client",
+			"new-javascript"
 		],
 		"allowImportingTsExtensions": true,
 		/* Linting */

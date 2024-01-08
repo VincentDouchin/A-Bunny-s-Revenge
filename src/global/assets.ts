@@ -4,9 +4,11 @@ import type { ColorRepresentation, Material } from 'three'
 import { Mesh, MeshStandardMaterial, NearestFilter, TextureLoader } from 'three'
 import type { GLTF } from 'three/examples/jsm/loaders/GLTFLoader'
 import type { stringCaster } from './assetLoaders'
-import { getFileName, loadGLB, loadImage, textureLoader } from './assetLoaders'
+import { getExtension, getFileName, loadGLB, loadImage, textureLoader } from './assetLoaders'
 import { asyncMapValues, entries, groupByObject, mapKeys, mapValues } from '@/utils/mapFunctions'
+import { getScreenBuffer } from '@/utils/buffer'
 import { CustomToonMaterial } from '@/shaders/CustomToonMaterial'
+import { keys } from '@/constants/keys'
 import type { LDTKMap } from '@/LDTKMap'
 
 type Glob = Record<string, () => Promise<any>>
@@ -97,6 +99,26 @@ const iconsLoader = (glob: GlobEager) => {
 	return mapKeys(glob, getFileName)
 }
 
+interface PackedJSON {
+	frames: Record<string, { frame: { x: number, y: number, w: number, h: number } }>
+}
+
+const buttonsLoader = async (glob: Record<string, any>) => {
+	const { json, png } = mapKeys(glob, getExtension)
+	const packed = json as PackedJSON
+	const img = await loadImage(png)
+	const getImg = (frame: { x: number, y: number, w: number, h: number }) => {
+		const buffer = getScreenBuffer(frame.w, frame.h)
+		buffer.drawImage(img, frame.x, frame.y, frame.w, frame.h, 0, 0, frame.w, frame.h)
+		return buffer.canvas
+	}
+	const frames = mapKeys(packed.frames, val => val.replace('folder/', ''))
+
+	return (key: string) => {
+		return getImg(frames[keys[key]].frame)
+	}
+}
+
 export const loadAssets = async () => ({
 	characters: await typeGlob<characters>(import.meta.glob('@assets/characters/*.glb', { as: 'url' }))(loadGLBAsToon()),
 	// characters: await loadGLBAsToon<characters>(import.meta.glob('@assets/characters/*.glb', { as: 'url' })),
@@ -111,4 +133,5 @@ export const loadAssets = async () => ({
 	fonts: await fontLoader(import.meta.glob('@assets/fonts/*.ttf', { eager: true, import: 'default' })),
 	levels: await levelLoader(import.meta.glob('@assets/levels/*.ldtk', { eager: true, as: 'raw' })),
 	icons: await typeGlobEager(import.meta.glob('@assets/icons/*.svg', { eager: true, import: 'default', as: 'raw' }))(iconsLoader),
+	buttons: await buttonsLoader(import.meta.glob('@assets/buttons/*.*', { eager: true, import: 'default' })),
 } as const)

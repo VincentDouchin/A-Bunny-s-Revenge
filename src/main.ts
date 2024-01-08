@@ -42,7 +42,7 @@ import { particlesPlugin, updateParticles } from './lib/particles'
 registerSW({ immediate: true, onNeedRefresh: () => window.location.reload() })
 
 coreState
-	.addPlugins(hierarchyPlugin, physicsPlugin, transformsPlugin, addToScene('camera', 'light', 'mesh', 'model', 'dialogContainer', 'batchRenderer', 'emitter'), updateModels, uiPlugin, particlesPlugin)
+	.addPlugins(hierarchyPlugin, physicsPlugin, transformsPlugin, addToScene('camera', 'light', 'mesh', 'model', 'dialogContainer', 'batchRenderer', 'emitter', 'interactionContainer'), updateModels, uiPlugin, particlesPlugin)
 	.addSubscriber(...target, startTweens, addDebugCollider)
 	.onEnter(initThree, initCamera, ui.render(UI))
 	.onPreUpdate(coroutines.tick)

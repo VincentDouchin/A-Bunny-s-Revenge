@@ -12,6 +12,7 @@ import type { getProps } from '@/ui/components/Menu'
 import { Menu } from '@/ui/components/Menu'
 import { Modal } from '@/ui/components/Modal'
 import { range } from '@/utils/mapFunctions'
+import { InputIcon } from '@/ui/InputIcon'
 
 export const ItemDisplay = (props: { item: ItemData | null, selected: boolean, disabled?: boolean }) => {
 	const isDisabled = createMemo(() => props.disabled ?? false)
@@ -106,8 +107,9 @@ export const InventoryUi = () => {
 		<Modal open={player()}>
 			<Show when={player()}>
 				{player => (
-					<div style={{ }}>
+					<div>
 						<div style={{ display: 'flex', gap: '1rem' }}>
+							<InputIcon input={player().menuInputs!.get('cancel')}></InputIcon>
 							<IconButton icon="basket-shopping-solid" onClick={() => setTab('inventory')}></IconButton>
 							<IconButton icon="list-check-solid" onClick={() => setTab('quests')}></IconButton>
 						</div>

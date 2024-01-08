@@ -7,13 +7,15 @@ import { dialogs } from '@/constants/dialogs'
 
 export const spawnHouse = (position: Vector3) => {
 	const houseModel = new Mesh(
-		new BoxGeometry(30, 40, 30),
+		new BoxGeometry(30, 20, 30),
 		new MeshStandardMaterial({ color: 0x944F00 }),
 	)
 	const doorModel = new Mesh(
-		new BoxGeometry(10, 30, 2),
+		new BoxGeometry(10, 15, 2),
 		new MeshStandardMaterial({ color: 0x753F00 }),
 	)
+	houseModel.position.setY(10)
+	doorModel.position.setY(15 / 2)
 	const houseBundle = modelColliderBundle(houseModel, RigidBodyType.Fixed)
 	const doorBundle = modelColliderBundle(doorModel, RigidBodyType.Fixed)
 	const house = ecs.add({
@@ -30,5 +32,6 @@ export const spawnHouse = (position: Vector3) => {
 		position: new Vector3(0, 0, -15),
 		dialog: dialogs.GrandmasDoor(),
 		...doorBundle,
+		interactable: 'enter',
 	})
 }
