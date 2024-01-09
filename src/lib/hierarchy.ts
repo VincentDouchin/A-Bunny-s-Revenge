@@ -1,3 +1,4 @@
+import type { With } from 'miniplex'
 import type { ComponentsOfType, Entity } from '../global/entity'
 import { ecs } from '../global/init'
 import type { State } from './state'
@@ -50,4 +51,12 @@ export const hierarchyPlugin = (state: State) => {
 }
 export const addTag = (entity: Entity, tag: ComponentsOfType<true>) => {
 	ecs.addComponent(entity, tag, true)
+}
+export const removeEntityRef = <C extends ComponentsOfType<Entity>>(entity: With<Entity, C>, component: C) => {
+	const ref = entity[component]
+	if (ref) {
+		ecs.removeComponent(entity, component)
+		ecs.reindex(entity)
+		ecs.remove(ref)
+	}
 }

@@ -11,11 +11,11 @@ export class StateMananger {
 
 	enable<S extends State<R>, R>(state: S, ressources: R) {
 		this.states.set(state, ressources)
-		if (state._subscribers.length) {
-			this.callbacks.set(state, state._subscribers.map(s => s(ressources)))
-		}
 		for (const system of state._enter) {
 			system(ressources)
+		}
+		if (state._subscribers.length) {
+			this.callbacks.set(state, state._subscribers.map(s => s(ressources)))
 		}
 	}
 

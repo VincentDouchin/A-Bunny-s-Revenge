@@ -1,13 +1,14 @@
-import { RigidBodyType } from '@dimforge/rapier3d-compat'
+import { ColliderDesc, RigidBodyDesc, RigidBodyType } from '@dimforge/rapier3d-compat'
 import { between } from 'randomish'
 import { createNoise2D } from 'simplex-noise'
-import { BoxGeometry, Color, Mesh, Vector3 } from 'three'
+import { BoxGeometry, Color, Group, Mesh, MeshBasicMaterial, Vector3 } from 'three'
 import { RoomType } from '../dungeon/dungeonTypes'
 import { enemyBundle } from '../dungeon/enemies'
 import { inventoryBundle } from '../farm/CookingUi'
 import { cauldronBundle } from '../farm/cooking'
 import { spawnHouse } from '../farm/house'
 import { kitchenApplianceBundle } from '../farm/kitchen'
+import { cropBundle } from '../farm/farming'
 import { playerBundle } from './spawnCharacter'
 import { doorBundle } from './spawnDoor'
 import { getRandom, objectValues, range } from '@/utils/mapFunctions'
@@ -16,10 +17,11 @@ import { getRotationFromDirection } from '@/lib/transforms'
 import type { System } from '@/lib/state'
 import { modelColliderBundle } from '@/lib/models'
 import { type direction, otherDirection } from '@/lib/directions'
-import type { DungeonRessources } from '@/global/states'
+import type { DungeonRessources, FarmRessources } from '@/global/states'
 import { assets, ecs } from '@/global/init'
 import { instanceMesh } from '@/global/assetLoaders'
 import type { EntityInstance, LayerInstance, Level } from '@/LDTKMap'
+import { save } from '@/global/save'
 
 export const treeBundle = () => {
 	const model = getRandom(objectValues(assets.trees)).scene.clone()
@@ -56,13 +58,13 @@ interface FieldInstances {
 	house: Record<string, unknown>
 	cauldron: Record<string, unknown>
 	planter: Record<string, unknown>
-
 }
+type EntityData<K extends keyof FieldInstances> = FieldInstances[K] & { id: string }
 
 export const getFieldIntances = <Name extends keyof FieldInstances>(entity: EntityInstance | Level) => {
 	return entity.fieldInstances.reduce((acc, v) => {
 		return { ...acc, [v.__identifier]: v.__value }
-	}, {} as FieldInstances[Name])
+	}, { id: entity.iid } as EntityData<Name>)
 }
 const getEntityPosition = (entity: EntityInstance, layer: LayerInstance, offsetX = 0, offsetY = 0) => {
 	return new Vector3(
@@ -72,7 +74,7 @@ const getEntityPosition = (entity: EntityInstance, layer: LayerInstance, offsetX
 	).multiplyScalar(SCALE)
 }
 
-export const spawnLDTKEntities = (constructors: { [key in keyof FieldInstances ]?: (position: Vector3, data: FieldInstances[key]) => void }) => (layer: LayerInstance) => {
+export const spawnLDTKEntities = (constructors: { [key in keyof FieldInstances]?: (position: Vector3, data: EntityData<key>) => void }) => (layer: LayerInstance) => {
 	for (const entityInstance of layer.entityInstances) {
 		const position = getEntityPosition(entityInstance, layer)
 		const name = entityInstance.__identifier as keyof FieldInstances
@@ -81,40 +83,63 @@ export const spawnLDTKEntities = (constructors: { [key in keyof FieldInstances ]
 	}
 }
 
-const spawnFarmEntities = spawnLDTKEntities({
-	door: (position, data) => {
-		const rotation = getRotationFromDirection(data.direction)
-		ecs.add({ ...doorBundle(1, data.direction), position, rotation })
-	},
-	cauldron: (position) => {
-		ecs.add({ ...cauldronBundle(), position })
-	},
-	oven: (position, data) => {
-		ecs.add({
-			...inventoryBundle('oven', 3),
-			...kitchenApplianceBundle('oven', data.direction),
-			position,
-		})
-	},
-	planter: (_position) => {
-		// const model = new Mesh(new BoxGeometry(50, 2, 10), new MeshBasicMaterial({ color: 0xFFFFFF }))
-		// ecs.add({ position, model })
-	},
-	counter: (position, data) => {
-		const counter = ecs.add({ position, ...kitchenApplianceBundle('kitchencounter_straight_B', data.direction) })
-		if (data.cutting_board) {
-			ecs.update(counter, inventoryBundle('cuttingBoard', 1))
-			const model = assets.kitchen.cutting_board.scene.clone()
-			model.scale.setScalar(4)
+const spawnFarmEntities = (wasDungeon: boolean) => {
+	return spawnLDTKEntities({
+		door: (position, data) => {
+			const rotation = getRotationFromDirection(data.direction)
+			ecs.add({ ...doorBundle(1, data.direction), position, rotation })
+		},
+		cauldron: (position) => {
+			ecs.add({ ...cauldronBundle(), position })
+		},
+		oven: (position, data) => {
 			ecs.add({
-				parent: counter,
-				model,
-				position: new Vector3(0, counter.size.y, 0),
+				...inventoryBundle('oven', 3, 'oven'),
+				...kitchenApplianceBundle('oven', data.direction),
+
+				position,
 			})
-		}
-	},
-	house: spawnHouse,
-})
+		},
+		planter: (position, data) => {
+			const model = new Mesh(new BoxGeometry(60, 2, 8), new MeshBasicMaterial({ color: 0xFFFFFF }))
+			const planter = ecs.add({ position, model, inMap: true })
+			for (let i = 0; i < 50; i += 10) {
+				const key = data.id + i
+				const crop = save.crops[key]
+				const spot = ecs.add({
+					position: new Vector3(i - 20, 2),
+					group: new Group(),
+					parent: planter,
+					bodyDesc: RigidBodyDesc.fixed(),
+					colliderDesc: ColliderDesc.cuboid(3, 3, 3).setSensor(true),
+					plantableSpot: key,
+				})
+				if (crop) {
+					const planted = ecs.add({
+						parent: spot,
+						position: new Vector3(),
+						...cropBundle(wasDungeon, crop),
+					})
+					ecs.update(spot, { planted })
+				}
+			}
+		},
+		counter: (position, data) => {
+			const counter = ecs.add({ position, ...kitchenApplianceBundle('kitchencounter_straight_B', data.direction) })
+			if (data.cutting_board) {
+				ecs.update(counter, inventoryBundle('cuttingBoard', 1, 'cutting board'))
+				const model = assets.kitchen.cutting_board.scene.clone()
+				model.scale.setScalar(4)
+				ecs.add({
+					parent: counter,
+					model,
+					position: new Vector3(0, counter.size.y, 0),
+				})
+			}
+		},
+		house: spawnHouse,
+	})
+}
 const spawnGroundAndTrees = (layer: LayerInstance) => {
 	// ! Ground
 	const w = layer.__cWid * SCALE
@@ -153,24 +178,21 @@ const spawnGroundAndTrees = (layer: LayerInstance) => {
 	})
 }
 
-export const spawnLevel = (level: Level) => {
+export const spawnFarm: System<FarmRessources> = ({ previousState }) => {
+	const level = assets.levels.levels.find(l => l.identifier === 'farm')!
 	for (const layer of level.layerInstances!) {
 		ecs.add({ map: true })
 		switch (layer.__type) {
-			case 'IntGrid' : {
+			case 'IntGrid': {
 				if (layer.__identifier === 'ground') {
 					spawnGroundAndTrees(layer)
 				}
-			};break
-			case 'Entities':{
-				spawnFarmEntities(layer)
-			};break
+			}; break
+			case 'Entities': {
+				spawnFarmEntities(previousState === 'dungeon')(layer)
+			}; break
 		}
 	}
-}
-
-export const spawnFarm = () => {
-	spawnLevel(assets.levels.levels.find(l => l.identifier === 'farm')!)
 }
 export const spawnDungeon: System<DungeonRessources> = ({ dungeon, direction, roomIndex }) => {
 	ecs.add({ map: true })

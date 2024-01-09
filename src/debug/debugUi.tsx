@@ -18,7 +18,7 @@ export const DebugUi = () => {
 	}
 	const destroyCrops = () => {
 		updateSave((s) => {
-			s.crops = []
+			s.crops = {}
 			campState.enable({ })
 		})
 	}

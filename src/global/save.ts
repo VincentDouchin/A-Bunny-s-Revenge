@@ -5,14 +5,8 @@ import type { crops } from './entity'
 import type { ItemData } from '@/constants/items'
 import type { QuestName } from '@/constants/quests'
 
-interface CropData {
-	name: crops
-	stage: number
-	x: number
-	z: number
-}
 interface SaveData {
-	crops: CropData[]
+	crops: Record<string, { stage: number, name: crops }>
 	items: Record<number, ItemData>
 	playerPosition: number[]
 	playerRotation: number[]
@@ -20,7 +14,7 @@ interface SaveData {
 }
 
 const blankSave = (): SaveData => ({
-	crops: [],
+	crops: {},
 	items: {},
 	playerPosition: new Vector3().toArray(),
 	playerRotation: new Quaternion().toArray(),

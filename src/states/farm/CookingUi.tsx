@@ -13,13 +13,13 @@ import { Menu } from '@/ui/components/Menu'
 import { Modal } from '@/ui/components/Modal'
 import { range } from '@/utils/mapFunctions'
 
-export const inventoryBundle = (inventoryType: InventoryTypes, size: number) => {
+export const inventoryBundle = (inventoryType: InventoryTypes, size: number, interactable: string) => {
 	return {
 		...menuInputMap(),
 		inventoryType,
 		inventorySize: size,
 		inventory: Array.from({ length: size }, () => null),
-		interactable: inventoryType,
+		interactable,
 	} as const satisfies Entity
 }
 

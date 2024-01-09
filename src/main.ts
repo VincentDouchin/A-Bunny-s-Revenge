@@ -7,6 +7,7 @@ import { initThree, render, updateControls } from './global/rendering'
 import { app, campState, coreState, dungeonState, gameState, genDungeonState, openMenuState, pausedState, setupState } from './global/states'
 import { despawnOfType, hierarchyPlugin } from './lib/hierarchy'
 import { updateModels } from './lib/modelsProperties'
+import { particlesPlugin, updateParticles } from './lib/particles'
 import { physicsPlugin } from './lib/physics'
 import { addToScene } from './lib/registerComponents'
 import { runIf } from './lib/state'
@@ -21,7 +22,7 @@ import { killAnimation, killEntities } from './states/dungeon/health'
 import { spawnItems } from './states/dungeon/itemRoom'
 import { displayOnCuttinBoard } from './states/farm/CookingUi'
 import { closeCauldronInventory, openCauldronInventory } from './states/farm/cooking'
-import { addCropModel, harvestCrop, plantSeed, saveCrops, spawnCrops } from './states/farm/farming'
+import { harvestCrop, interactablePlantableSpot, plantSeed, updateCropsSave } from './states/farm/farming'
 import { closeInventory, openInventory, toggleMenuState } from './states/farm/openInventory'
 import { spawnNPC } from './states/farm/spawnNPC'
 import { talkToNPC } from './states/game/dialog'
@@ -34,10 +35,9 @@ import { allowDoorCollision, collideWithDoor, collideWithDoorCamp } from './stat
 import { spawnSkyBox } from './states/game/spawnGround'
 import { spawnDungeon, spawnFarm } from './states/game/spawnLevel'
 import { spawnLight } from './states/game/spawnLights'
-import { touchItem } from './states/game/touchItem'
+import { showInteraction, touchItem } from './states/game/touchItem'
 import { setupGame } from './states/setup/setupGame'
 import { UI } from './ui/UI'
-import { particlesPlugin, updateParticles } from './lib/particles'
 
 registerSW({ immediate: true, onNeedRefresh: () => window.location.reload() })
 
@@ -45,8 +45,8 @@ coreState
 	.addPlugins(hierarchyPlugin, physicsPlugin, transformsPlugin, addToScene('camera', 'light', 'mesh', 'model', 'dialogContainer', 'batchRenderer', 'emitter', 'interactionContainer'), updateModels, uiPlugin, particlesPlugin)
 	.addSubscriber(...target, startTweens, addDebugCollider)
 	.onEnter(initThree, initCamera, ui.render(UI))
-	.onPreUpdate(coroutines.tick)
-	.onUpdate(runIf(() => !pausedState.enabled, playAnimations, () => time.tick()), moveCamera, updateTweens, inputManager.update, ui.update, updateParticles)
+	.onPreUpdate(coroutines.tick, moveCamera)
+	.onUpdate(runIf(() => !pausedState.enabled, playAnimations, () => time.tick()), updateTweens, inputManager.update, ui.update, updateParticles)
 	.onPostUpdate(updateControls, render)
 	.enable()
 setupState
@@ -54,15 +54,15 @@ setupState
 	.enable()
 gameState
 	.onEnter()
-	.addSubscriber(bobItems, ...toggleMenuState, killAnimation)
+	.addSubscriber(bobItems, ...toggleMenuState, killAnimation, ...showInteraction)
 	.onUpdate(runIf(canPlayerMove, movePlayer), runIf(() => !pausedState.enabled, applyMove))
 	.onUpdate(collectItems, touchItem, talkToNPC, runIf(() => !openMenuState.enabled, pauseGame))
 	.enable()
 campState
-	.addSubscriber(addCropModel, ...saveCrops)
-	.onEnter(spawnFarm, spawnCharacter, spawnLight, spawnSkyBox, spawnCrops, spawnNPC)
-	.onUpdate(collideWithDoorCamp, savePlayerPosition, displayOnCuttinBoard)
-	.onUpdate(runif(canPlayerMove, plantSeed, harvestCrop, openCauldronInventory, openInventory))
+	.addSubscriber(...interactablePlantableSpot)
+	.onEnter(spawnFarm, updateCropsSave, spawnCharacter, spawnLight, spawnSkyBox, spawnNPC)
+	.onUpdate(collideWithDoorCamp, displayOnCuttinBoard)
+	.onUpdate(runif(canPlayerMove, plantSeed, harvestCrop, openCauldronInventory, openInventory), savePlayerPosition)
 	.onExit(despawnOfType('map'))
 openMenuState
 	.onUpdate(closeInventory, closeCauldronInventory)

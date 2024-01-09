@@ -1,8 +1,8 @@
 import { For, Show, createMemo, createSignal } from 'solid-js'
 import { InventoryTitle } from './CookingUi'
 import type { ItemData } from '@/constants/items'
-import { quests } from '@/constants/quests'
 import type { Quest, QuestName } from '@/constants/quests'
+import { quests } from '@/constants/quests'
 
 import { assets, ecs, ui } from '@/global/init'
 import { save, updateSave } from '@/global/save'
@@ -12,7 +12,6 @@ import type { getProps } from '@/ui/components/Menu'
 import { Menu } from '@/ui/components/Menu'
 import { Modal } from '@/ui/components/Modal'
 import { range } from '@/utils/mapFunctions'
-import { InputIcon } from '@/ui/InputIcon'
 
 export const ItemDisplay = (props: { item: ItemData | null, selected: boolean, disabled?: boolean }) => {
 	const isDisabled = createMemo(() => props.disabled ?? false)
@@ -109,7 +108,6 @@ export const InventoryUi = () => {
 				{player => (
 					<div>
 						<div style={{ display: 'flex', gap: '1rem' }}>
-							<InputIcon input={player().menuInputs!.get('cancel')}></InputIcon>
 							<IconButton icon="basket-shopping-solid" onClick={() => setTab('inventory')}></IconButton>
 							<IconButton icon="list-check-solid" onClick={() => setTab('quests')}></IconButton>
 						</div>

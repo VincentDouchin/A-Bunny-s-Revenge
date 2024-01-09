@@ -73,8 +73,11 @@ export interface Entity {
 	sensor?: true
 	sensorCollider?: Collider
 	crop?: { stage: number, name: crops }
+	plantableSpot?: string
+	planted?: With<Entity, 'crop'>
 	// ! Game
 	map?: true
+	interacting?: true
 	interactable?: string
 	interactionContainer?: CSS2DObject
 	outline?: With<Entity, 'model'>
@@ -111,11 +114,8 @@ export interface Entity {
 	emitter?: ParticleEmitter<Object3DEventMap>
 }
 export type Bundle<C extends keyof Entity> = () => With<Entity, C>
-type Prettify<T> = {
-	[K in keyof T]: T[K];
-} & unknown
 
 type KeysOfType<T, U> = {
 	[K in keyof T]: T[K] extends U ? K : never;
 }[keyof T]
-export type ComponentsOfType<T> = Prettify<KeysOfType<Required<Entity>, T>> & keyof Entity
+export type ComponentsOfType<T> = KeysOfType<Required<Entity>, T>
