@@ -2,7 +2,7 @@ import type { With } from 'miniplex'
 import { For, Show, createMemo } from 'solid-js'
 import { Quaternion, Vector3 } from 'three'
 import { InventorySlots, ItemDisplay } from './InventoryUi'
-import type { Entity, InventoryTypes, crops } from '@/global/entity'
+import type { Entity, Interactable, InventoryTypes, crops } from '@/global/entity'
 import { type Item, items } from '@/constants/items'
 
 import { recipes } from '@/constants/recipes'
@@ -13,7 +13,7 @@ import { Menu } from '@/ui/components/Menu'
 import { Modal } from '@/ui/components/Modal'
 import { range } from '@/utils/mapFunctions'
 
-export const inventoryBundle = (inventoryType: InventoryTypes, size: number, interactable: string) => {
+export const inventoryBundle = (inventoryType: InventoryTypes, size: number, interactable: Interactable) => {
 	return {
 		...menuInputMap(),
 		inventoryType,

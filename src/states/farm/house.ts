@@ -4,6 +4,7 @@ import { BoxGeometry, Mesh, MeshStandardMaterial, Vector3 } from 'three'
 import { ecs } from '@/global/init'
 import { modelColliderBundle } from '@/lib/models'
 import { dialogs } from '@/constants/dialogs'
+import { Interactable } from '@/global/entity'
 
 export const spawnHouse = (position: Vector3) => {
 	const houseModel = new Mesh(
@@ -32,6 +33,6 @@ export const spawnHouse = (position: Vector3) => {
 		position: new Vector3(0, 0, -15),
 		dialog: dialogs.GrandmasDoor(),
 		...doorBundle,
-		interactable: 'enter',
+		interactable: Interactable.Enter,
 	})
 }

@@ -19,6 +19,14 @@ export enum Faction {
 	Player,
 	Enemy,
 }
+export enum Interactable {
+	Talk = 'talk',
+	Plant = 'plant',
+	Harvest = 'harvest',
+	Enter = 'enter',
+	Cook = 'cook',
+	Chop = 'chop',
+}
 export type InventoryTypes = 'oven' | 'cuttingBoard'
 export type crops = 'carrot' | 'beet' | 'mushroom'
 export interface Door { to: number, direction: direction }
@@ -78,7 +86,7 @@ export interface Entity {
 	// ! Game
 	map?: true
 	interacting?: true
-	interactable?: string
+	interactable?: Interactable
 	interactionContainer?: CSS2DObject
 	outline?: With<Entity, 'model'>
 	// ! Camp

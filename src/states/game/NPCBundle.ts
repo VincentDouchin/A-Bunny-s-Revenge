@@ -2,7 +2,7 @@ import { RigidBodyType } from '@dimforge/rapier3d-compat'
 import { Quaternion, Vector3 } from 'three'
 import { Sizes } from '@/constants/sizes'
 import { Animator } from '@/global/animator'
-import type { Entity } from '@/global/entity'
+import { type Entity, Interactable } from '@/global/entity'
 import { assets } from '@/global/init'
 import { modelColliderBundle } from '@/lib/models'
 
@@ -18,7 +18,7 @@ export const NPCBundle = (character: 'Panda') => {
 		npc: true,
 		npcName: 'Panda',
 		rotation: new Quaternion().setFromAxisAngle(new Vector3(0, 1, 0), Math.PI),
-		interactable: 'talk',
+		interactable: Interactable.Talk,
 
 	} as const satisfies Entity
 }

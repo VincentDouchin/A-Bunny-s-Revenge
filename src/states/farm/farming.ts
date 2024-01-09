@@ -3,7 +3,7 @@ import { Easing, Tween } from '@tweenjs/tween.js'
 import type { With } from 'miniplex'
 import { Vector3 } from 'three'
 import { Sizes } from '@/constants/sizes'
-import type { Entity, crops } from '@/global/entity'
+import { type Entity, Interactable, type crops } from '@/global/entity'
 import { assets, ecs, world } from '@/global/init'
 import { save, updateSave } from '@/global/save'
 import { modelColliderBundle } from '@/lib/models'
@@ -39,7 +39,7 @@ export const cropBundle = (grow: boolean, crop: { name: crops, stage: number }) 
 		ecs.update(bundle, { tween })
 	}
 	if (stage === maxStage(crop.name)) {
-		bundle.interactable = 'harvest'
+		bundle.interactable = Interactable.Harvest
 	}
 	return bundle
 }
@@ -67,7 +67,7 @@ export const plantSeed = () => {
 
 export const initPlantableSpotsInteractions = () => {
 	for (const spot of plantableSpotsQuery) {
-		ecs.update(spot, { interactable: 'plant' })
+		ecs.update(spot, { interactable: Interactable.Plant })
 	}
 }
 export const interactablePlantableSpot = [
@@ -76,7 +76,7 @@ export const interactablePlantableSpot = [
 		updateCropsSave()
 	}),
 	() => plantableSpotsQuery.onEntityAdded.subscribe((entity) => {
-		ecs.update(entity, { interactable: 'plant' })
+		ecs.update(entity, { interactable: Interactable.Plant })
 		updateCropsSave()
 	}),
 ]

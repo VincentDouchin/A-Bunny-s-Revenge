@@ -22,6 +22,7 @@ import { assets, ecs } from '@/global/init'
 import { instanceMesh } from '@/global/assetLoaders'
 import type { EntityInstance, LayerInstance, Level } from '@/LDTKMap'
 import { save } from '@/global/save'
+import { Interactable } from '@/global/entity'
 
 export const treeBundle = () => {
 	const model = getRandom(objectValues(assets.trees)).scene.clone()
@@ -94,7 +95,7 @@ const spawnFarmEntities = (wasDungeon: boolean) => {
 		},
 		oven: (position, data) => {
 			ecs.add({
-				...inventoryBundle('oven', 3, 'oven'),
+				...inventoryBundle('oven', 3, Interactable.Cook),
 				...kitchenApplianceBundle('oven', data.direction),
 
 				position,
@@ -127,7 +128,7 @@ const spawnFarmEntities = (wasDungeon: boolean) => {
 		counter: (position, data) => {
 			const counter = ecs.add({ position, ...kitchenApplianceBundle('kitchencounter_straight_B', data.direction) })
 			if (data.cutting_board) {
-				ecs.update(counter, inventoryBundle('cuttingBoard', 1, 'cutting board'))
+				ecs.update(counter, inventoryBundle('cuttingBoard', 1, Interactable.Chop))
 				const model = assets.kitchen.cutting_board.scene.clone()
 				model.scale.setScalar(4)
 				ecs.add({

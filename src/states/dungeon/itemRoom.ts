@@ -7,6 +7,7 @@ import { modelColliderBundle } from '@/lib/models'
 import type { System } from '@/lib/state'
 import { getRandom } from '@/utils/mapFunctions'
 import { Sizes } from '@/constants/sizes'
+import { Interactable } from '@/global/entity'
 
 export const spawnItems: System<DungeonRessources> = ({ dungeon, roomIndex }) => {
 	if (dungeon.rooms[roomIndex].type === RoomType.Item) {
@@ -19,7 +20,7 @@ export const spawnItems: System<DungeonRessources> = ({ dungeon, roomIndex }) =>
 				...modelColliderBundle(model, RigidBodyType.Fixed, true, Sizes.small),
 				position: new Vector3(x, 0, y),
 				crop: { stage: 3, name: 'mushroom' },
-				interactable: 'harvest',
+				interactable: Interactable.Harvest,
 				inMap: true,
 			})
 		}
