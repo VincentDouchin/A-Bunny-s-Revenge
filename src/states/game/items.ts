@@ -18,7 +18,7 @@ export const collectItems = () => {
 			if (world.intersectionPair(player.collider, item.collider)) {
 				ecs.removeComponent(item, 'tween')
 				ecs.removeComponent(item, 'collider')
-				addItem({ icon: item.itemLabel, quantity: 1 })
+				addItem({ name: item.itemLabel, quantity: 1 })
 				const tween = new TweenGroup([
 					new Tween(item.position).to({ ...player.position, y: item.position.y }, 500).onComplete(() => {
 						ecs.remove(item)

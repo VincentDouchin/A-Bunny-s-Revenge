@@ -1,5 +1,5 @@
 import type { Query } from 'miniplex'
-import type { Accessor, JSX } from 'solid-js'
+import type { JSX } from 'solid-js'
 import { For } from 'solid-js'
 import { ui } from '@/global/init'
 

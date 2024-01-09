@@ -2,8 +2,8 @@ import type { With } from 'miniplex'
 import { For, Show, createMemo } from 'solid-js'
 import { Quaternion, Vector3 } from 'three'
 import { InventorySlots, ItemDisplay } from './InventoryUi'
-import type { Entity, InventoryTypes } from '@/global/entity'
-import { type ItemData, choppables } from '@/constants/items'
+import type { Entity, InventoryTypes, crops } from '@/global/entity'
+import { type Item, items } from '@/constants/items'
 
 import { recipes } from '@/constants/recipes'
 import { assets, ecs, ui } from '@/global/init'
@@ -24,7 +24,7 @@ export const inventoryBundle = (inventoryType: InventoryTypes, size: number, int
 }
 
 function addToInventory<E extends With<Entity, 'inventory'>>(entity: E) {
-	return (item: ItemData | null) => {
+	return (item: Item | null) => {
 		if (entity.inventory.includes(null) && item) {
 			if (item.quantity > 1) {
 				item.quantity--
@@ -41,7 +41,7 @@ function addToInventory<E extends With<Entity, 'inventory'>>(entity: E) {
 }
 
 function removeFromInventory<E extends With<Entity, 'inventory'>>(entity: E) {
-	return (item: ItemData | null, index: number) => {
+	return (item: Item | null, index: number) => {
 		item && addItem(item, false)
 		entity.inventory.splice(index, 1, null)
 	}
@@ -119,11 +119,11 @@ export const InventoryTitle = (props: { children: string }) => <div style={{ 'fo
 const cuttingBoardQuery = ecs.with('inventory', 'inventoryType', 'size').where(e => e.inventoryType === 'cuttingBoard')
 export const displayOnCuttinBoard = () => {
 	for (const cuttingBoard of cuttingBoardQuery) {
-		const item = cuttingBoard.inventory[0]?.icon
+		const item = cuttingBoard.inventory[0]?.name
 
 		if (item && !cuttingBoard.displayedItem) {
-			if (choppables.includes(item)) {
-				const crop = item as (typeof choppables)[number]
+			if (items[item].choppable) {
+				const crop = item as crops
 				const model = assets.crops[crop].crop.scene.clone()
 				model.scale.setScalar(10)
 				const displayedItem = ecs.add({
@@ -180,7 +180,7 @@ export const CuttingBoardUi = () => {
 											<InventorySlots
 												getProps={getProps}
 												click={addToCuttingBoard}
-												disabled={item => item?.icon && !choppables.includes(item.icon)}
+												disabled={item => item?.name && !items[item.name].choppable}
 											/>
 										</div>
 									</div>
@@ -198,10 +198,10 @@ export const OvenUi = () => {
 	const oven = ui.sync(() => ovenQuery.first)
 	const output = createMemo(() => {
 		return recipes.find(({ input }) => {
-			return input.every((item, i) => oven()?.inventory[i]?.icon === item)
+			return input.every((item, i) => oven()?.inventory[i]?.name === item)
 		})?.output
 	})
-	const cook = (output: ItemData) => {
+	const cook = (output: Item) => {
 		const o = oven()
 		if (o) {
 			addItem({ ...output })
@@ -250,7 +250,11 @@ export const OvenUi = () => {
 											</div>
 										</div>
 										<div style={{ 'display': 'grid', 'grid-template-columns': 'repeat(8, 1fr)', 'gap': '1rem' }}>
-											<InventorySlots getProps={getProps} click={addToOven}></InventorySlots>
+											<InventorySlots
+												getProps={getProps}
+												click={addToOven}
+												disabled={item => item?.name && !items[item.name].cookable}
+											/>
 										</div>
 									</div>
 								)

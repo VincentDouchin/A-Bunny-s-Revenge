@@ -63,7 +63,7 @@ export const canCompleteQuest = (name: QuestName) => {
 	return quests[name].steps.every((step, i) => {
 		return save.quests[name]?.[i] === true || step.items?.every((item) => {
 			return Object.values(save.items).some((saveItem) => {
-				return saveItem.icon === item.icon && saveItem.quantity >= item.quantity
+				return saveItem.name === item.name && saveItem.quantity >= item.quantity
 			})
 		})
 	})

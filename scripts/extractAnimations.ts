@@ -1,13 +1,10 @@
-import { exec, execSync } from 'node:child_process'
-import { readFile } from 'node:fs/promises'
-import process from 'node:process'
+import { exec } from 'node:child_process'
 import { writeFileSync } from 'node:fs'
-import type { PluginOption } from 'vite'
-import { glob } from 'glob'
-import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader'
-import { Document, NodeIO } from '@gltf-transform/core'
+import { NodeIO } from '@gltf-transform/core'
 import { ALL_EXTENSIONS } from '@gltf-transform/extensions'
 import draco3d from 'draco3dgltf'
+import { glob } from 'glob'
+import type { PluginOption } from 'vite'
 import { getFileName } from './generateAssetNamesPlugin'
 
 const launchScript = async (filePath?: string) => {

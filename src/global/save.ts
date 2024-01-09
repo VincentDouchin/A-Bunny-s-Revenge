@@ -2,12 +2,12 @@ import { get, set } from 'idb-keyval'
 import { Quaternion, Vector3 } from 'three'
 import { context } from './context'
 import type { crops } from './entity'
-import type { ItemData } from '@/constants/items'
+import type { Item } from '@/constants/items'
 import type { QuestName } from '@/constants/quests'
 
 interface SaveData {
 	crops: Record<string, { stage: number, name: crops }>
-	items: Record<number, ItemData>
+	items: Record<number, Item>
 	playerPosition: number[]
 	playerRotation: number[]
 	quests: Partial<Record<QuestName, Array<boolean>>>
@@ -38,9 +38,9 @@ export const resetSave = async () => {
 	await set(context.save, blankSave())
 }
 
-export const addItem = (item: ItemData, save = true) => {
+export const addItem = (item: Item, save = true) => {
 	updateSave((s) => {
-		const existingItem = Object.values(s.items).find(i => i.icon === item.icon)
+		const existingItem = Object.values(s.items).find(i => i.name === item.name)
 		if (existingItem) {
 			existingItem.quantity += item.quantity }
 		else {
@@ -53,9 +53,9 @@ export const addItem = (item: ItemData, save = true) => {
 		}
 	}, save)
 }
-export const removeItem = (item: ItemData, save = true) => {
+export const removeItem = (item: Item, save = true) => {
 	updateSave((s) => {
-		const existingItemIndex = Object.values(s.items).findIndex(i => i.icon === item.icon)
+		const existingItemIndex = Object.values(s.items).findIndex(i => i.name === item.name)
 		const existingItem = s.items[existingItemIndex]
 		if (existingItem) {
 			existingItem.quantity -= item.quantity

@@ -1,6 +1,6 @@
 import { For, Show, createMemo, createSignal } from 'solid-js'
 import { InventoryTitle } from './CookingUi'
-import type { ItemData } from '@/constants/items'
+import type { Item } from '@/constants/items'
 import type { Quest, QuestName } from '@/constants/quests'
 import { quests } from '@/constants/quests'
 
@@ -13,7 +13,7 @@ import { Menu } from '@/ui/components/Menu'
 import { Modal } from '@/ui/components/Modal'
 import { range } from '@/utils/mapFunctions'
 
-export const ItemDisplay = (props: { item: ItemData | null, selected: boolean, disabled?: boolean }) => {
+export const ItemDisplay = (props: { item: Item | null, selected: boolean, disabled?: boolean }) => {
 	const isDisabled = createMemo(() => props.disabled ?? false)
 	const disabledStyles = createMemo(() => {
 		return isDisabled()
@@ -23,13 +23,13 @@ export const ItemDisplay = (props: { item: ItemData | null, selected: boolean, d
 	return (
 		<div style={{ 'border-radius': '1rem', 'background': 'hsla(0 0% 0% / 50%)', 'width': '5rem', 'height': '5rem', 'display': 'grid', 'place-items': 'center', 'position': 'relative', 'border': props.selected ? 'solid 0.2rem white' : '' }}>
 
-			{props.item?.icon && (
+			{props.item?.name && (
 				<>
-					<img src={assets.items[props.item.icon].src} style={{ width: '80%', ...disabledStyles() }}></img>
+					<img src={assets.items[props.item.name].src} style={{ width: '80%', ...disabledStyles() }}></img>
 					<div style={{ 'color': 'white', 'position': 'absolute', 'width': '1rem', 'bottom': '0.5rem', 'right': '0.5rem', ...textStroke('black'), 'text-align': 'center' }}>{props.item.quantity}</div>
 				</>
 			)}
-			{props.selected && <div style={{ 'color': 'white', 'position': 'absolute', 'top': '100%', 'font-size': '1.5rem', 'z-index': 2 }}>{props.item?.icon}</div>}
+			{props.selected && <div style={{ 'color': 'white', 'position': 'absolute', 'top': '100%', 'font-size': '1.5rem', 'z-index': 2 }}>{props.item?.name}</div>}
 
 		</div>
 	)
@@ -37,7 +37,7 @@ export const ItemDisplay = (props: { item: ItemData | null, selected: boolean, d
 const useItems = () => ui.sync(() => save.items)
 const playerQuery = ecs.with('playerControls', 'openInventory')
 
-export const InventorySlots = (props: { getProps: getProps, click?: (item: ItemData | null) => void, disabled?: (item: ItemData | null) => boolean | undefined }) => {
+export const InventorySlots = (props: { getProps: getProps, click?: (item: Item | null) => void, disabled?: (item: Item | null) => boolean | undefined }) => {
 	const items = useItems()
 	return (
 		<For each={range(0, 24)}>
@@ -61,14 +61,14 @@ export const InventorySlots = (props: { getProps: getProps, click?: (item: ItemD
 							const data = e.dataTransfer?.getData('text/plain')
 							if (data && e.target.closest('.item-drag') === ref()) {
 								try {
-									const [dataParsed, position]: [ItemData, number] = JSON.parse(data) as any
+									const [dataParsed, position]: [Item, number] = JSON.parse(data) as any
 									if (itemSynced() === undefined) {
 										updateSave((s) => {
 											delete s.items[position]
 											s.items[i()] = dataParsed
 										})
 									}
-									if (dataParsed.icon === itemSynced().icon) {
+									if (dataParsed.name === itemSynced().name) {
 										updateSave((s) => {
 											delete s.items[position]
 											s.items[i()].quantity += dataParsed.quantity

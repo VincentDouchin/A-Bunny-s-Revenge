@@ -11,7 +11,7 @@ import type { Animator } from './animator'
 import type { TweenGroup } from '@/lib/tweenGroup'
 import type { direction } from '@/lib/directions'
 import type { MenuInputMap, PlayerInputMap } from '@/global/inputMaps'
-import type { ItemData } from '@/constants/items'
+import type { Item } from '@/constants/items'
 import type { NPC } from '@/constants/NPC'
 
 export type Dialog = Generator<string | string[] | void | false, void, number | void>
@@ -90,7 +90,7 @@ export interface Entity {
 	item?: true
 	itemLabel?: items
 	// ! Inventory
-	inventory?: (ItemData | null)[]
+	inventory?: (Item | null)[]
 	inventorySize?: number
 	openInventory?: true
 	inventoryType?: InventoryTypes
