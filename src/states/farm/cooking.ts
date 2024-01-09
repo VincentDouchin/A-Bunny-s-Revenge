@@ -1,5 +1,5 @@
 import { RigidBodyType } from '@dimforge/rapier3d-compat'
-import type { Entity } from '@/global/entity'
+import { type Entity, Interactable } from '@/global/entity'
 import { assets, ecs, world } from '@/global/init'
 import { addTag } from '@/lib/hierarchy'
 import { menuInputMap } from '@/global/inputMaps'
@@ -11,7 +11,7 @@ export const cauldronBundle = (): Entity => {
 	const bundle = modelColliderBundle(model, RigidBodyType.Fixed)
 	return {
 		...bundle,
-		interactable: 'cook',
+		interactable: Interactable.Cook,
 		...menuInputMap(),
 		inventory: [null, null, null, null],
 		inMap: true,
