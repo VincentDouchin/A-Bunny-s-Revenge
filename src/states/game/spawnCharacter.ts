@@ -11,7 +11,7 @@ import { modelColliderBundle } from '@/lib/models'
 import type { System } from '@/lib/state'
 
 export const playerBundle = () => {
-	const model = assets.characters.Running
+	const model = assets.characters.BunnydAnim
 	model.scene.traverse((node) => {
 		if (node instanceof Mesh && node.material.map) {
 			node.material.map.colorSpace = LinearSRGBColorSpace
@@ -20,16 +20,12 @@ export const playerBundle = () => {
 		}
 	})
 	const bundle = modelColliderBundle(model.scene, RigidBodyType.Dynamic, false, Sizes.character)
-	const idle = assets.characters.Idle.animations
-	idle.forEach(x => x.name = 'idle')
-	const run = assets.characters.Running.animations
-	run.forEach(x => x.name = 'run')
 	bundle.bodyDesc.setLinearDamping(20)
 	return {
 		...playerInputMap(),
 		...menuInputMap(),
 		...bundle,
-		animator: new Animator('idle', bundle.model, [...run, ...idle]),
+		animator: new Animator('idle', bundle.model, model.animations),
 		inMap: true,
 		cameratarget: true,
 		faction: Faction.Player,
