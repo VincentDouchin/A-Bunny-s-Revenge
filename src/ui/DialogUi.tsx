@@ -37,7 +37,6 @@ export const DialogUi = () => {
 		<For each={dialogs()}>
 			{ (entity) => {
 				const dialog = ui.sync(() => entity.currentDialog)
-
 				return (
 					<Portal mount={entity.dialogContainer.element}>
 						<Show when={entity.npcName}>
