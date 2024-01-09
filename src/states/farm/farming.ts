@@ -64,6 +64,12 @@ export const plantSeed = () => {
 		}
 	}
 }
+
+export const initPlantableSpotsInteractions = () => {
+	for (const spot of plantableSpotsQuery) {
+		ecs.update(spot, { interactable: 'plant' })
+	}
+}
 export const interactablePlantableSpot = [
 	() => plantedSpotQuery.onEntityAdded.subscribe((entity) => {
 		ecs.removeComponent(entity, 'interactable')

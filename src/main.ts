@@ -22,7 +22,7 @@ import { killAnimation, killEntities } from './states/dungeon/health'
 import { spawnItems } from './states/dungeon/itemRoom'
 import { displayOnCuttinBoard } from './states/farm/CookingUi'
 import { closeCauldronInventory, openCauldronInventory } from './states/farm/cooking'
-import { harvestCrop, interactablePlantableSpot, plantSeed, updateCropsSave } from './states/farm/farming'
+import { harvestCrop, initPlantableSpotsInteractions, interactablePlantableSpot, plantSeed, updateCropsSave } from './states/farm/farming'
 import { closeInventory, openInventory, toggleMenuState } from './states/farm/openInventory'
 import { spawnNPC } from './states/farm/spawnNPC'
 import { talkToNPC } from './states/game/dialog'
@@ -60,7 +60,7 @@ gameState
 	.enable()
 campState
 	.addSubscriber(...interactablePlantableSpot)
-	.onEnter(spawnFarm, updateCropsSave, spawnCharacter, spawnLight, spawnSkyBox, spawnNPC)
+	.onEnter(spawnFarm, updateCropsSave, initPlantableSpotsInteractions, spawnCharacter, spawnLight, spawnSkyBox, spawnNPC)
 	.onUpdate(collideWithDoorCamp, displayOnCuttinBoard)
 	.onUpdate(runif(canPlayerMove, plantSeed, harvestCrop, openCauldronInventory, openInventory), savePlayerPosition)
 	.onExit(despawnOfType('map'))

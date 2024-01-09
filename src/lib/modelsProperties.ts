@@ -14,8 +14,6 @@ const updateAndApply = <T extends Entity>(query: Query<T>, fn: (entity: T) => vo
 	}
 }
 
-export const updateModels = (state: State) => {
-	updateAndApply(ecs.with('scale', 'group'), (entity) => {
-		entity.group.scale.set(entity.scale, entity.scale, entity.scale)
-	})(state)
-}
+export const updateModels =	updateAndApply(ecs.with('scale', 'group'), (entity) => {
+	entity.group.scale.set(entity.scale, entity.scale, entity.scale)
+})
