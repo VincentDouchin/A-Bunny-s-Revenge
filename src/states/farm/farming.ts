@@ -9,7 +9,7 @@ import { save, updateSave } from '@/global/save'
 import { modelColliderBundle } from '@/lib/models'
 import { removeEntityRef } from '@/lib/hierarchy'
 
-const playerQuery = ecs.with('playerControls', 'sensorCollider')
+const playerQuery = ecs.with('playerControls', 'sensorCollider', 'animator', 'movementForce')
 const plantedSpotQuery = ecs.with('plantableSpot', 'collider', 'worldPosition', 'planted')
 
 export const updateCropsSave = () => {
@@ -82,10 +82,16 @@ export const interactablePlantableSpot = [
 ]
 
 export const harvestCrop = () => {
-	for (const { playerControls, sensorCollider } of playerQuery) {
+	for (const player of playerQuery) {
+		const { playerControls, sensorCollider, animator } = player
 		if (playerControls.get('interact').justPressed) {
 			for (const spot of plantedSpotQuery) {
 				if (maxStage(spot.planted.crop.name) === spot.planted.crop.stage && world.intersectionPair(sensorCollider, spot.collider)) {
+					const movementForce = player.movementForce
+					ecs.removeComponent(player, 'movementForce')
+					animator.playOnce('picking_vegetables', false)?.then(() => {
+						ecs.update(player, { movementForce })
+					})
 					const model = assets.crops[spot.planted.crop.name].crop.scene.clone()
 					model.scale.setScalar(8)
 					const bundle = modelColliderBundle(model, RigidBodyType.Fixed, true)
