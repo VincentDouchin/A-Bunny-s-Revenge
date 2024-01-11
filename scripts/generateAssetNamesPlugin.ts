@@ -31,11 +31,11 @@ export default function generateAssetNames(): PluginOption {
 			let result = ''
 
 			for (const [folder, files] of Object.entries(folders)) {
-				result += `type ${folder} = ${files.map(x => `'${x}'`).join(' | ')}\n`
+				result += `export type ${folder} = ${files.map(x => `\`${x}\``).join(' | ')}\n`
 			}
 
-			await writeFile(path.join(process.cwd(), 'assets', 'assets.d.ts'), result)
-			exec('eslint assets/assets.d.ts --fix')
+			await writeFile(path.join(process.cwd(), 'assets', 'assets.ts'), result)
+			exec('eslint assets/assets.ts --fix')
 			console.log('regenerated asset names')
 		}
 	}

@@ -32,7 +32,7 @@ export const DialogText = (props: { text: string }) => {
 const dialogQuery = ecs.with('currentDialog', 'dialogContainer')
 export const DialogUi = () => {
 	const dialogs = ui.sync(() => [...dialogQuery])
-	const input = playerInputMap().playerControls.get('interact')
+	const input = playerInputMap().playerControls.get('primary')
 	return (
 		<For each={dialogs()}>
 			{ (entity) => {

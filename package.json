@@ -7,13 +7,15 @@
 		"dev": "vite",
 		"build": "tsc && vite build",
 		"preview": "vite preview",
-		"generate-pwa-assets": "pwa-assets-generator --preset minimal public/logo.png"
+		"generate-pwa-assets": "pwa-assets-generator --preset minimal public/logo.png",
+		"save data schema": "npx ts-json-schema-generator --path './src/global/save.ts' --type 'SaveData' --tsconfig ./tsconfig.json --no-type-check --out ./src/debug/saveDataSchema.json"
 	},
 	"dependencies": {
 		"@dimforge/rapier3d-compat": "^0.11.2",
 		"@tweenjs/tween.js": "^21.0.0",
 		"howler": "^2.2.4",
 		"idb-keyval": "^6.2.1",
+		"jsoneditor": "^10.0.0",
 		"miniplex": "^2.0.0",
 		"randomish": "^0.1.6",
 		"simplex-noise": "^4.0.1",
@@ -28,6 +30,7 @@
 		"@gltf-transform/extensions": "^3.10.0",
 		"@gltf-transform/functions": "^3.10.0",
 		"@total-typescript/ts-reset": "^0.5.1",
+		"@types/jsoneditor": "^9.9.5",
 		"@types/node": "^20.8.7",
 		"@types/three": "^0.157.2",
 		"@vite-pwa/assets-generator": "^0.2.2",
@@ -35,6 +38,7 @@
 		"eslint": "^8.52.0",
 		"glob": "^10.3.10",
 		"new-javascript": "^0.4.1",
+		"ts-json-schema-generator": "^1.5.0",
 		"typescript": "^5.3.3",
 		"vite": "^4.5.0",
 		"vite-plugin-pwa": "^0.17.4",

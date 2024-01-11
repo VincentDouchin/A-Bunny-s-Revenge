@@ -1,3 +1,5 @@
+import type { items } from '@assets/assets'
+
 export interface Item {
 	name: items
 	quantity: number
@@ -6,7 +8,7 @@ export interface Item {
 export type ItemTags = 'choppable' | 'cookable' | 'meal' | 'seed'
 export type ItemData = Partial<Record<ItemTags, true>>
 
-export const items: Record<items, ItemData> = {
+export const itemsData: Record<items, ItemData> = {
 	beet: {
 		choppable: true,
 	},
@@ -22,6 +24,9 @@ export const items: Record<items, ItemData> = {
 	},
 	carrot_soup: {
 		meal: true,
+	},
+	carrot_seeds: {
+		seed: true,
 	},
 
 }

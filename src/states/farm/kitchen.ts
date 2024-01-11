@@ -1,4 +1,5 @@
 import { RigidBodyType } from '@dimforge/rapier3d-compat'
+import type { kitchen } from '@assets/assets'
 import type { Entity } from '@/global/entity'
 import { assets } from '@/global/init'
 import type { direction } from '@/lib/directions'

@@ -1,3 +1,4 @@
+import type { items } from '@assets/assets'
 import type { Item } from './items'
 
 interface Recipe {

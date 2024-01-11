@@ -25,7 +25,7 @@ export const openCauldronInventory = () => {
 		const { sensorCollider, playerControls } = player
 		for (const cauldron of cauldronQuery) {
 			if (world.intersectionPair(cauldron.collider, sensorCollider)) {
-				if (playerControls.get('interact').justPressed) {
+				if (playerControls.get('primary').justPressed) {
 					addTag(cauldron, 'openInventory')
 				}
 			}

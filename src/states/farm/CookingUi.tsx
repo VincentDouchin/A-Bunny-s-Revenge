@@ -3,7 +3,7 @@ import { For, Show, createMemo } from 'solid-js'
 import { Quaternion, Vector3 } from 'three'
 import { InventorySlots, ItemDisplay } from './InventoryUi'
 import type { Entity, Interactable, InventoryTypes, crops } from '@/global/entity'
-import { type Item, items } from '@/constants/items'
+import { type Item, itemsData } from '@/constants/items'
 
 import { recipes } from '@/constants/recipes'
 import { assets, ecs, ui } from '@/global/init'
@@ -122,7 +122,7 @@ export const displayOnCuttinBoard = () => {
 		const item = cuttingBoard.inventory[0]?.name
 
 		if (item && !cuttingBoard.displayedItem) {
-			if (items[item].choppable) {
+			if (itemsData[item].choppable) {
 				const crop = item as crops
 				const model = assets.crops[crop].crop.scene.clone()
 				model.scale.setScalar(10)
@@ -180,7 +180,7 @@ export const CuttingBoardUi = () => {
 											<InventorySlots
 												getProps={getProps}
 												click={addToCuttingBoard}
-												disabled={item => item?.name && !items[item.name].choppable}
+												disabled={item => item?.name && !itemsData[item.name].choppable}
 											/>
 										</div>
 									</div>
@@ -253,7 +253,7 @@ export const OvenUi = () => {
 											<InventorySlots
 												getProps={getProps}
 												click={addToOven}
-												disabled={item => item?.name && !items[item.name].cookable}
+												disabled={item => item?.name && !itemsData[item.name].cookable}
 											/>
 										</div>
 									</div>

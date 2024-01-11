@@ -1,14 +1,24 @@
-import type { Shader, WebGLRenderer } from 'three'
+import type { ColorRepresentation, Shader, Vec2, WebGLRenderer } from 'three'
 import { Color, MeshToonMaterial, Uniform } from 'three'
+import cnoise from '@/shaders/glsl/lib/cnoise.glsl?raw'
 
-export class CustomToonMaterial extends MeshToonMaterial {
+export class PlanterMaterial extends MeshToonMaterial {
 	shader?: Shader
+	constructor(public args: { size: Vec2, color: ColorRepresentation }) {
+		super({ color: args.color })
+	}
 
 	onBeforeCompile(shader: Shader, _renderer: WebGLRenderer): void {
 		shader.uniforms.colorAdd = new Uniform(new Color(0, 0, 0))
+		shader.uniforms.size = new Uniform(this.args.size)
 		this.shader = shader
+		shader.vertexShader = /* glsl */`
+		#define USE_UV
+		${shader.vertexShader}
+		`
 		shader.fragmentShader = /* glsl */`
 		#define TOON
+		#define USE_UV
 		uniform vec3 colorAdd;
 		uniform vec3 diffuse;
 		uniform vec3 emissive;
@@ -37,7 +47,8 @@ export class CustomToonMaterial extends MeshToonMaterial {
 		#include <normalmap_pars_fragment>
 		#include <logdepthbuf_pars_fragment>
 		#include <clipping_planes_pars_fragment>
-
+		${cnoise}
+		uniform vec2 size;
 		void main() {
 
 			#include <clipping_planes_fragment>
@@ -64,7 +75,6 @@ export class CustomToonMaterial extends MeshToonMaterial {
 
 			// modulation
 			#include <aomap_fragment>
-
 			vec3 outgoingLight = reflectedLight.directDiffuse + reflectedLight.indirectDiffuse + totalEmissiveRadiance;
 
 			#ifdef OPAQUE
@@ -74,8 +84,10 @@ export class CustomToonMaterial extends MeshToonMaterial {
 			#ifdef USE_TRANSMISSION
 			diffuseColor.a *= material.transmissionAlpha;
 			#endif
-
-			gl_FragColor = vec4( outgoingLight + colorAdd, diffuseColor.a );
+			vec2 sizedUv = (1. -abs(vUv * 2. - 1.)) * size;
+			float noise = cnoise(vec3(vUv*size*0.2,1));
+			float borders = noise * max(smoothstep(0.,3.,sizedUv.x) * smoothstep(0.,3.,sizedUv.y) + 0.3,1.);
+			gl_FragColor = vec4( outgoingLight * (borders * 2.) , diffuseColor.a );
 			#include <tonemapping_fragment>
 			#include <colorspace_fragment>
 			#include <fog_fragment>

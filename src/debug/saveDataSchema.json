@@ -1,0 +1,103 @@
+{
+  "$ref": "#/definitions/SaveData",
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "definitions": {
+    "Item": {
+      "additionalProperties": false,
+      "properties": {
+        "name": {
+          "$ref": "#/definitions/items"
+        },
+        "quantity": {
+          "type": "number"
+        }
+      },
+      "required": [
+        "name",
+        "quantity"
+      ],
+      "type": "object"
+    },
+    "SaveData": {
+      "additionalProperties": false,
+      "properties": {
+        "crops": {
+          "additionalProperties": {
+            "additionalProperties": false,
+            "properties": {
+              "name": {
+                "$ref": "#/definitions/crops"
+              },
+              "stage": {
+                "type": "number"
+              }
+            },
+            "required": [
+              "stage",
+              "name"
+            ],
+            "type": "object"
+          },
+          "type": "object"
+        },
+        "items": {
+          "items": {
+            "$ref": "#/definitions/Item"
+          },
+          "type": "array"
+        },
+        "playerPosition": {
+          "items": {
+            "type": "number"
+          },
+          "type": "array"
+        },
+        "playerRotation": {
+          "items": {
+            "type": "number"
+          },
+          "type": "array"
+        },
+        "quests": {
+          "additionalProperties": false,
+          "properties": {
+            "grandma_1": {
+              "items": {
+                "type": "boolean"
+              },
+              "type": "array"
+            }
+          },
+          "type": "object"
+        }
+      },
+      "required": [
+        "crops",
+        "items",
+        "playerPosition",
+        "playerRotation",
+        "quests"
+      ],
+      "type": "object"
+    },
+    "crops": {
+      "enum": [
+        "carrot",
+        "beet",
+        "mushroom"
+      ],
+      "type": "string"
+    },
+    "items": {
+      "enum": [
+        "beet",
+        "carrot",
+        "carrot_seeds",
+        "carrot_soup",
+        "mushroom",
+        "roasted_carrot"
+      ],
+      "type": "string"
+    }
+  }
+}

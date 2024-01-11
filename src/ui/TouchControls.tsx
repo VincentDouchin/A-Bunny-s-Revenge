@@ -47,9 +47,9 @@ export const TouchControls = () => {
 		}
 	}
 	const interact = (value: number) => () => {
-		playerInputs()?.set('interact', value)
+		playerInputs()?.set('primary', value)
 	}
-	const isInteractPressed = ui.sync(() => playerInputs()?.get('interact'))
+	const isInteractPressed = ui.sync(() => playerInputs()?.get('primary'))
 	const isPauseState = ui.sync(() => pausedState.enabled)
 	const resetCenter = () => {
 		setIsJoystickPressed(false)
@@ -66,7 +66,7 @@ export const TouchControls = () => {
 			playerInputs()?.set('forward', 0)
 			playerInputs()?.set('left', 0)
 			playerInputs()?.set('right', 0)
-			playerInputs()?.set('interact', 0)
+			playerInputs()?.set('primary', 0)
 		}
 	})
 	const openInventory = () => {

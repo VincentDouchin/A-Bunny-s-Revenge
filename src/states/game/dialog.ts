@@ -15,7 +15,7 @@ const playerQuery = ecs.with('worldPosition', 'playerControls')
 const activeDialogQuery = dialogQuery.with('activeDialog')
 export const talkToNPC = () => {
 	for (const player of playerQuery) {
-		if (player.playerControls.get('interact').justPressed) {
+		if (player.playerControls.get('primary').justPressed) {
 			for (const npc of dialogQuery) {
 				if (player.worldPosition.distanceTo(npc.worldPosition) < 10) {
 					addTag(npc, 'activeDialog')

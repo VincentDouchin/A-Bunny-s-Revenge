@@ -7,6 +7,7 @@ import type { BatchedRenderer, ParticleEmitter } from 'three.quarks'
 import type { OrbitControls } from 'three/examples/jsm/controls/OrbitControls'
 import type { EffectComposer } from 'three/examples/jsm/postprocessing/EffectComposer'
 import type { CSS2DObject } from 'three/examples/jsm/renderers/CSS2DRenderer'
+import type { items } from '@assets/assets'
 import type { Animator } from './animator'
 import type { TweenGroup } from '@/lib/tweenGroup'
 import type { direction } from '@/lib/directions'
@@ -26,6 +27,7 @@ export enum Interactable {
 	Enter = 'enter',
 	Cook = 'cook',
 	Chop = 'chop',
+	SelectSeed = 'select seed',
 }
 export type InventoryTypes = 'oven' | 'cuttingBoard'
 export type crops = 'carrot' | 'beet' | 'mushroom'
@@ -87,6 +89,7 @@ export interface Entity {
 	map?: true
 	interacting?: true
 	interactable?: Interactable
+	interactableSecondary?: Interactable
 	interactionContainer?: CSS2DObject
 	outline?: With<Entity, 'model'>
 	// ! Camp

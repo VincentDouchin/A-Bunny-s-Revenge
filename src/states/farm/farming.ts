@@ -48,7 +48,7 @@ const plantableSpotsQuery = ecs.with('plantableSpot').without('planted')
 
 export const plantSeed = () => {
 	for (const { playerControls } of playerQuery) {
-		if (playerControls.get('interact').justPressed) {
+		if (playerControls.get('primary').justPressed) {
 			for (const spot of plantableSpotsQuery) {
 				if (spot.interactionContainer) {
 					if (save.crops[spot.plantableSpot] === undefined) {
@@ -67,7 +67,7 @@ export const plantSeed = () => {
 
 export const initPlantableSpotsInteractions = () => {
 	for (const spot of plantableSpotsQuery) {
-		ecs.update(spot, { interactable: Interactable.Plant })
+		ecs.update(spot, { interactable: Interactable.Plant, interactableSecondary: Interactable.SelectSeed })
 	}
 }
 export const interactablePlantableSpot = [
@@ -76,7 +76,7 @@ export const interactablePlantableSpot = [
 		updateCropsSave()
 	}),
 	() => plantableSpotsQuery.onEntityAdded.subscribe((entity) => {
-		ecs.update(entity, { interactable: Interactable.Plant })
+		ecs.update(entity, { interactable: Interactable.Plant, interactableSecondary: Interactable.SelectSeed })
 		updateCropsSave()
 	}),
 ]
@@ -84,7 +84,7 @@ export const interactablePlantableSpot = [
 export const harvestCrop = () => {
 	for (const player of playerQuery) {
 		const { playerControls, sensorCollider, animator } = player
-		if (playerControls.get('interact').justPressed) {
+		if (playerControls.get('primary').justPressed) {
 			for (const spot of plantedSpotQuery) {
 				if (maxStage(spot.planted.crop.name) === spot.planted.crop.stage && world.intersectionPair(sensorCollider, spot.collider)) {
 					const movementForce = player.movementForce

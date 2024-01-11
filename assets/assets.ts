@@ -1,0 +1,13 @@
+export type buttons = `texture` | `texture`
+export type characters = `Armabee` | `Armabee_Evolved` | `BunnydAnim` | `cauldron` | `Panda`
+export type crops = `Beet_1` | `Beet_2` | `Beet_3` | `Beet_4` | `Beet_Crop` | `Carrot_1` | `Carrot_2` | `Carrot_3` | `Carrot_4` | `Carrot_Crop` | `Mushroom_1` | `Mushroom_2` | `Mushroom_3` | `Mushroom_4` | `Mushroom_Crop`
+export type fonts = `GrapeSoda` | `NanoPlus`
+export type grass = `SM_Env_Grass_01` | `SM_Env_Grass_02`
+export type icons = `basket-shopping-solid` | `circle-check-solid` | `circle-xmark-solid` | `list-check-solid` | `pause-solid` | `xmark-solid`
+export type items = `beet` | `carrot` | `carrot_seeds` | `carrot_soup` | `mushroom` | `roasted_carrot`
+export type kitchen = `Chest` | `cutting_board` | `kitchencounter_innercorner` | `kitchencounter_straight_B` | `oven`
+export type levels = `levels`
+export type particles = `star_07`
+export type rocks = `Rock_Moss_1` | `Rock_Moss_2` | `Rock_Moss_3` | `Rock_Moss_4` | `Rock_Moss_5` | `Rock_Moss_6` | `Rock_Moss_7`
+export type skybox = `CloudyCrown_Midday_Back` | `CloudyCrown_Midday_Down` | `CloudyCrown_Midday_Front` | `CloudyCrown_Midday_Left` | `CloudyCrown_Midday_Right` | `CloudyCrown_Midday_Up`
+export type trees = `CommonTree_1` | `CommonTree_2` | `CommonTree_3` | `CommonTree_4` | `CommonTree_5` | `PineTree_1` | `PineTree_2` | `PineTree_3` | `PineTree_4` | `PineTree_5`

@@ -1,3 +1,5 @@
+import type { characters } from '@assets/assets'
+
 interface Enemy {
 	health: number
 	scale?: number

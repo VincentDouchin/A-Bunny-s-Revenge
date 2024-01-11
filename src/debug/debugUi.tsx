@@ -1,4 +1,5 @@
 import { Show, createSignal } from 'solid-js'
+import { SaveEditor } from './saveEditor'
 import { params } from '@/global/context'
 import { composer, renderer } from '@/global/rendering'
 import { campState } from '@/global/states'
@@ -112,6 +113,7 @@ export const DebugUi = () => {
 				<div>
 					<button onClick={reset}>Reset Save</button>
 				</div>
+				<SaveEditor />
 			</Show>
 		</div>
 	)

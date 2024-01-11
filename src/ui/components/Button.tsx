@@ -1,3 +1,4 @@
+import type { icons } from '@assets/assets'
 import { assets } from '@/global/init'
 
 export const IconButton = (props: { icon?: icons, onClick?: () => void }) => {

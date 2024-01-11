@@ -5,7 +5,7 @@ import type { crops } from './entity'
 import type { Item } from '@/constants/items'
 import type { QuestName } from '@/constants/quests'
 
-interface SaveData {
+export interface SaveData {
 	crops: Record<string, { stage: number, name: crops }>
 	items: Record<number, Item>
 	playerPosition: number[]
@@ -15,7 +15,7 @@ interface SaveData {
 
 const blankSave = (): SaveData => ({
 	crops: {},
-	items: {},
+	items: [],
 	playerPosition: new Vector3().toArray(),
 	playerRotation: new Quaternion().toArray(),
 	quests: {},
@@ -34,8 +34,8 @@ export const updateSave = async (saveFn: (save: SaveData) => void, saved = true)
 	saveFn(save)
 	saved && await set(context.save, save)
 }
-export const resetSave = async () => {
-	await set(context.save, blankSave())
+export const resetSave = async (newSave?: SaveData) => {
+	await set(context.save, newSave ?? blankSave())
 }
 
 export const addItem = (item: Item, save = true) => {

@@ -1,4 +1,5 @@
 import type { Vec2 } from 'three'
+import type { characters } from '@assets/assets'
 import type { Level } from '@/LDTKMap'
 import type { Entity } from '@/global/entity'
 

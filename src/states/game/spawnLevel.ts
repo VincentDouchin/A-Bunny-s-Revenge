@@ -1,14 +1,14 @@
 import { ColliderDesc, RigidBodyDesc, RigidBodyType } from '@dimforge/rapier3d-compat'
 import { between } from 'randomish'
 import { createNoise2D } from 'simplex-noise'
-import { BoxGeometry, Color, Group, Mesh, MeshBasicMaterial, Vector3 } from 'three'
+import { BoxGeometry, Color, Group, Mesh, MeshStandardMaterial, PlaneGeometry, Vector3 } from 'three'
 import { RoomType } from '../dungeon/dungeonTypes'
 import { enemyBundle } from '../dungeon/enemies'
 import { inventoryBundle } from '../farm/CookingUi'
 import { cauldronBundle } from '../farm/cooking'
+import { cropBundle } from '../farm/farming'
 import { spawnHouse } from '../farm/house'
 import { kitchenApplianceBundle } from '../farm/kitchen'
-import { cropBundle } from '../farm/farming'
 import { playerBundle } from './spawnCharacter'
 import { doorBundle } from './spawnDoor'
 import { getRandom, objectValues, range } from '@/utils/mapFunctions'
@@ -18,11 +18,11 @@ import type { System } from '@/lib/state'
 import { modelColliderBundle } from '@/lib/models'
 import { type direction, otherDirection } from '@/lib/directions'
 import type { DungeonRessources, FarmRessources } from '@/global/states'
+import { save } from '@/global/save'
 import { assets, ecs } from '@/global/init'
+import { Interactable } from '@/global/entity'
 import { instanceMesh } from '@/global/assetLoaders'
 import type { EntityInstance, LayerInstance, Level } from '@/LDTKMap'
-import { save } from '@/global/save'
-import { Interactable } from '@/global/entity'
 
 export const treeBundle = () => {
 	const model = getRandom(objectValues(assets.trees)).scene.clone()
@@ -102,7 +102,14 @@ const spawnFarmEntities = (wasDungeon: boolean) => {
 			})
 		},
 		planter: (position, data) => {
-			const model = new Mesh(new BoxGeometry(60, 2, 8), new MeshBasicMaterial({ color: 0xFFFFFF }))
+			const model = new Mesh(
+				new PlaneGeometry(60, 8),
+				new MeshStandardMaterial({ color: 0x996633 }),
+				// new PlanterMaterial({ color: 0x996633, size: new Vector2(60, 8) }),
+			)
+			model.rotation.x = -Math.PI / 2
+			model.position.y = 1
+			model.receiveShadow = true
 			const planter = ecs.add({ position, model, inMap: true })
 			for (let i = 0; i < 50; i += 10) {
 				const key = data.id + i
