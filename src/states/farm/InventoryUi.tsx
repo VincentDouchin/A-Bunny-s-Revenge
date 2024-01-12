@@ -96,7 +96,7 @@ export const InventoryUi = () => {
 	const player = ui.sync(() => playerQuery.first)
 	ui.updateSync(() => {
 		const p = player()
-		if (p?.menuInputs?.get('cancel').justPressed) {
+		if (p?.menuInputs?.get('cancel').justReleased) {
 			ecs.removeComponent(p, 'openInventory')
 		}
 	})

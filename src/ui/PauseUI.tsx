@@ -9,7 +9,7 @@ export const PauseUI = () => {
 		<Modal open={paused()} showClose={false}>
 			<Show when={paused()}>
 				<div style={{ 'font-family': 'NanoPlus', 'color': 'white', 'font-size': '4rem' }}>Paused</div>
-				<button onClick={() => pausedState.disable()}>Resume</button>
+				<button class="button" onClick={() => pausedState.disable()}>Resume</button>
 			</Show>
 		</Modal>
 	)

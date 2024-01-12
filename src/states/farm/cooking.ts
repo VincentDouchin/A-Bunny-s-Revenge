@@ -25,7 +25,7 @@ export const openCauldronInventory = () => {
 		const { sensorCollider, playerControls } = player
 		for (const cauldron of cauldronQuery) {
 			if (world.intersectionPair(cauldron.collider, sensorCollider)) {
-				if (playerControls.get('primary').justPressed) {
+				if (playerControls.get('primary').justReleased) {
 					addTag(cauldron, 'openInventory')
 				}
 			}
@@ -34,7 +34,7 @@ export const openCauldronInventory = () => {
 }
 export const closeCauldronInventory = () => {
 	for (const cauldron of cauldronQuery) {
-		if (cauldron.menuInputs.get('cancel').justPressed) {
+		if (cauldron.menuInputs.get('cancel').justReleased) {
 			ecs.removeComponent(cauldron, 'openInventory')
 		}
 	}

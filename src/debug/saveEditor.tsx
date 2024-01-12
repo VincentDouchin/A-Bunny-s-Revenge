@@ -23,7 +23,6 @@ export const SaveEditor = () => {
 			onChangeText: (text: string) => setJson(JSON.parse(text) as SaveData),
 			allowSchemaSuggestions: true,
 			modes: ['code', 'tree'],
-
 		}
 		const editor = new JSONEditor(el()!, options)
 		editor.set(json())

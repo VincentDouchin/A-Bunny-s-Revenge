@@ -19,10 +19,9 @@ export const closeInventory = () => {
 	}
 }
 const openInventoryQuery = ecs.with('openInventory')
-const enableInventoryState = () => openInventoryQuery.onEntityAdded.subscribe(() => {
+export const enableInventoryState = () => openInventoryQuery.onEntityAdded.subscribe(() => {
 	openMenuState.enable()
 })
-const disableInventoryState = () => openInventoryQuery.onEntityRemoved.subscribe(() => {
+export const disableInventoryState = () => openInventoryQuery.onEntityRemoved.subscribe(() => {
 	openMenuState.disable()
 })
-export const toggleMenuState = [enableInventoryState, disableInventoryState]
