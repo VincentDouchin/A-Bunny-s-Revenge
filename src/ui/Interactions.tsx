@@ -1,10 +1,12 @@
-import { Portal, Show } from 'solid-js/web'
+import { Match, Portal, Show, Switch } from 'solid-js/web'
 import { ForQuery } from './components/ForQuery'
 import { InputIcon } from './InputIcon'
 import { ecs, ui } from '@/global/init'
 import { playerInputMap } from '@/global/inputMaps'
+import { Interactable } from '@/global/entity'
+import { save } from '@/global/save'
 
-const interactionQuery = ecs.with('interactable', 'interactionContainer', 'position')
+const interactionQuery = ecs.with('interactable', 'interactionContainer', 'position').without('openInventory')
 export const InteractionUi = () => {
 	const primary = playerInputMap().playerControls.get('primary')
 	const secondary = playerInputMap().playerControls.get('secondary')
@@ -15,6 +17,7 @@ export const InteractionUi = () => {
 					entity.interactionContainer.position.y = entity.size.y - entity.position.y
 				}
 				const dialog = ui.sync(() => entity.currentDialog)
+				const interactable = ui.sync(() => entity.interactable)
 				return (
 					<Show when={!dialog()}>
 						<Portal mount={entity.interactionContainer.element}>
@@ -27,9 +30,11 @@ export const InteractionUi = () => {
 								</Show>
 								<div style={{ display: 'flex', gap: '0.5rem' }}>
 									<InputIcon input={primary}></InputIcon>
-									<div>
-										{entity.interactable}
-									</div>
+									<Switch fallback={(<div>{interactable()}</div>)}>
+										<Match when={interactable() === Interactable.Plant}>
+											{`plant ${save.selectedSeed}`}
+										</Match>
+									</Switch>
 								</div>
 							</div>
 						</Portal>

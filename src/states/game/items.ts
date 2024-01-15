@@ -11,14 +11,14 @@ export const bobItems = () => itemsQuery.onEntityAdded.subscribe((entity) => {
 	ecs.update(entity, { tween })
 })
 
-const playerQuery = ecs.with('playerControls', 'collider', 'position')
+const playerQuery = ecs.with('playerControls', 'collider', 'position', 'inventoryId', 'inventorySize', 'inventory')
 export const collectItems = () => {
 	for (const player of playerQuery) {
 		for (const item of itemsQuery) {
 			if (world.intersectionPair(player.collider, item.collider)) {
 				ecs.removeComponent(item, 'tween')
 				ecs.removeComponent(item, 'collider')
-				addItem({ name: item.itemLabel, quantity: 1 })
+				addItem(player, { name: item.itemLabel, quantity: 1 })
 				const tween = new TweenGroup([
 					new Tween(item.position).to({ ...player.position, y: item.position.y }, 500).onComplete(() => {
 						ecs.remove(item)

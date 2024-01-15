@@ -22,6 +22,7 @@ export const spawnHouse = (position: Vector3) => {
 	const house = ecs.add({
 		npcName: 'Grandma',
 		dialog: dialogs.GrandmasHouse(),
+		dialogHeight: 4,
 		position,
 		...houseBundle,
 		inMap: true,

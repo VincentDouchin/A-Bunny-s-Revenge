@@ -23,7 +23,7 @@ import { spawnItems } from './states/dungeon/itemRoom'
 import { displayOnCuttinBoard } from './states/farm/CookingUi'
 import { closeCauldronInventory as closeInventory, openCauldronInventory } from './states/farm/cooking'
 import { harvestCrop, initPlantableSpotsInteractions, interactablePlantableSpot, plantSeed, updateCropsSave } from './states/farm/farming'
-import { closeInventory as closePlayerInventory, disableInventoryState, enableInventoryState, openInventory, toggleMenuState } from './states/farm/openInventory'
+import { closeInventory as closePlayerInventory, disableInventoryState, enableInventoryState, openInventory } from './states/farm/openInventory'
 import { spawnNPC } from './states/farm/spawnNPC'
 import { talkToNPC } from './states/game/dialog'
 import { bobItems, collectItems } from './states/game/items'
@@ -38,6 +38,7 @@ import { spawnLight } from './states/game/spawnLights'
 import { showInteraction, touchItem } from './states/game/touchItem'
 import { setupGame } from './states/setup/setupGame'
 import { UI } from './ui/UI'
+import { spawnChest } from './states/farm/spawnChest'
 
 registerSW({ immediate: true, onNeedRefresh: () => window.location.reload() })
 
@@ -60,7 +61,7 @@ gameState
 	.enable()
 campState
 	.addSubscriber(...interactablePlantableSpot)
-	.onEnter(spawnFarm, updateCropsSave, initPlantableSpotsInteractions, spawnCharacter, spawnLight, spawnSkyBox, spawnNPC)
+	.onEnter(spawnFarm, updateCropsSave, initPlantableSpotsInteractions, spawnCharacter, spawnLight, spawnSkyBox, spawnNPC, spawnChest)
 	.onUpdate(collideWithDoorCamp, displayOnCuttinBoard)
 	.onUpdate(runif(canPlayerMove, plantSeed, harvestCrop, openCauldronInventory, openInventory), savePlayerPosition)
 	.onExit(despawnOfType('map'))

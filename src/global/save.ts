@@ -1,24 +1,27 @@
 import { get, set } from 'idb-keyval'
 import { Quaternion, Vector3 } from 'three'
+import type { With } from 'miniplex'
 import { context } from './context'
-import type { crops } from './entity'
-import type { Item } from '@/constants/items'
+import type { Entity, crops } from './entity'
 import type { QuestName } from '@/constants/quests'
+import type { Item } from '@/constants/items'
 
 export interface SaveData {
 	crops: Record<string, { stage: number, name: crops }>
-	items: Record<number, Item>
 	playerPosition: number[]
 	playerRotation: number[]
 	quests: Partial<Record<QuestName, Array<boolean>>>
+	selectedSeed: null | crops
+	inventories: Record<string, Item[]>
 }
 
 const blankSave = (): SaveData => ({
 	crops: {},
-	items: [],
 	playerPosition: new Vector3().toArray(),
 	playerRotation: new Quaternion().toArray(),
 	quests: {},
+	selectedSeed: null,
+	inventories: {},
 })
 
 export const save: Readonly<SaveData> = blankSave()
@@ -38,30 +41,32 @@ export const resetSave = async (newSave?: SaveData) => {
 	await set(context.save, newSave ?? blankSave())
 }
 
-export const addItem = (item: Item, save = true) => {
+export const addItem = (entity: With<Entity, 'inventoryId' | 'inventory' | 'inventorySize'>, item: Item, slot?: number) => {
 	updateSave((s) => {
-		const existingItem = Object.values(s.items).find(i => i.name === item.name)
+		const inventory = s.inventories[entity.inventoryId]
+		const existingItem = inventory.find((it, i) => it && it.name === item.name && (slot === undefined || i === slot))
 		if (existingItem) {
-			existingItem.quantity += item.quantity }
-		else {
-			for (let i = 0; i < 24; i++) {
-				if (s.items[i] === undefined) {
-					s.items[i] = item
+			existingItem.quantity += item.quantity
+		} else {
+			for (let i = 0; i < entity.inventorySize; i++) {
+				if (inventory[i] === undefined) {
+					inventory[i] = item
 					break
 				}
 			}
 		}
-	}, save)
+	})
 }
-export const removeItem = (item: Item, save = true) => {
+export const removeItem = (entity: With<Entity, 'inventoryId' | 'inventory' | 'inventorySize'>, item: Item, slot?: number) => {
 	updateSave((s) => {
-		const existingItemIndex = Object.values(s.items).findIndex(i => i.name === item.name)
-		const existingItem = s.items[existingItemIndex]
+		const inventory = s.inventories[entity.inventoryId]
+		const existingItemIndex = inventory.findIndex((it, i) => it && it.name === item.name && (slot === undefined || i === slot))
+		const existingItem = inventory[existingItemIndex]
 		if (existingItem) {
 			existingItem.quantity -= item.quantity
 			if (existingItem.quantity <= 0) {
-				delete s.items[existingItemIndex]
+				delete inventory[existingItemIndex]
 			}
 		}
-	}, save)
+	})
 }

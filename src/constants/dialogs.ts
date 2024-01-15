@@ -1,7 +1,6 @@
 import type { Dialog } from '@/global/entity'
-import { addItem } from '@/global/save'
 import { cutSceneState } from '@/global/states'
-import { addQuest, canCompleteQuest, completeQuest, enterHouse, hasCompletedQuest, hasQuest, leaveHouse, pandaQuery } from '@/utils/dialogHelpers'
+import { addItemToPlayer, addQuest, canCompleteQuest, completeQuest, enterHouse, hasCompletedQuest, hasQuest, leaveHouse, pandaQuery } from '@/utils/dialogHelpers'
 
 export const dialogs = {
 	*Panda() {
@@ -23,7 +22,7 @@ export const dialogs = {
 		while (true) {
 			yield 'Hello dear'
 			yield 'How are you doing?'
-			addItem({ name: 'carrot_seeds', quantity: 10 })
+			addItemToPlayer({ name: 'carrot_seeds', quantity: 10 })
 			if (hasQuest('grandma_1')) {
 				if (canCompleteQuest('grandma_1')) {
 					yield 'Oh you brought me the roasted carrots I asked for!'

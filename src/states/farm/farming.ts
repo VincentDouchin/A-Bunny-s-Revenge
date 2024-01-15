@@ -4,13 +4,13 @@ import type { With } from 'miniplex'
 import { Vector3 } from 'three'
 import { Sizes } from '@/constants/sizes'
 import { type Entity, Interactable, type crops } from '@/global/entity'
-import { assets, ecs, world } from '@/global/init'
+import { assets, ecs } from '@/global/init'
 import { save, updateSave } from '@/global/save'
+import { addTag, removeEntityRef } from '@/lib/hierarchy'
 import { modelColliderBundle } from '@/lib/models'
-import { removeEntityRef } from '@/lib/hierarchy'
 
 const playerQuery = ecs.with('playerControls', 'sensorCollider', 'animator', 'movementForce')
-const plantedSpotQuery = ecs.with('plantableSpot', 'collider', 'worldPosition', 'planted')
+const plantedSpotQuery = ecs.with('plantableSpot', 'worldPosition', 'planted')
 
 export const updateCropsSave = () => {
 	updateSave((s) => {
@@ -50,10 +50,10 @@ export const plantSeed = () => {
 	for (const { playerControls } of playerQuery) {
 		if (playerControls.get('primary').justPressed) {
 			for (const spot of plantableSpotsQuery) {
-				if (spot.interactionContainer) {
+				if (spot.interactionContainer && save.selectedSeed) {
 					if (save.crops[spot.plantableSpot] === undefined) {
 						const planted = ecs.add({
-							...cropBundle(false, { name: 'carrot', stage: 0 }),
+							...cropBundle(false, { name: save.selectedSeed, stage: 0 }),
 							parent: spot,
 							position: new Vector3(),
 						})
@@ -81,12 +81,19 @@ export const interactablePlantableSpot = [
 	}),
 ]
 
+const touchedPlantablespotQuery = plantableSpotsQuery.with('interactionContainer')
+
 export const harvestCrop = () => {
 	for (const player of playerQuery) {
-		const { playerControls, sensorCollider, animator } = player
+		const { playerControls, animator } = player
+		if (playerControls.get('secondary').justPressed) {
+			for (const spot of touchedPlantablespotQuery) {
+				addTag(spot, 'openInventory')
+			}
+		}
 		if (playerControls.get('primary').justPressed) {
 			for (const spot of plantedSpotQuery) {
-				if (maxStage(spot.planted.crop.name) === spot.planted.crop.stage && world.intersectionPair(sensorCollider, spot.collider)) {
+				if (spot.planted.interactionContainer && maxStage(spot.planted.crop.name) === spot.planted.crop.stage) {
 					const movementForce = player.movementForce
 					ecs.removeComponent(player, 'movementForce')
 					animator.playOnce('picking_vegetables', false)?.then(() => {

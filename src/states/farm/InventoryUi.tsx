@@ -1,9 +1,11 @@
-import { For, Show, createMemo, createSignal } from 'solid-js'
+import type { With } from 'miniplex'
+import { For, Show, createEffect, createMemo, createSignal } from 'solid-js'
 import { InventoryTitle } from './CookingUi'
 import type { Item } from '@/constants/items'
 import type { Quest, QuestName } from '@/constants/quests'
 import { quests } from '@/constants/quests'
 
+import type { Entity } from '@/global/entity'
 import { assets, ecs, ui } from '@/global/init'
 import { save, updateSave } from '@/global/save'
 import { textStroke } from '@/lib/uiManager'
@@ -11,6 +13,7 @@ import { IconButton } from '@/ui/components/Button'
 import type { getProps } from '@/ui/components/Menu'
 import { Menu } from '@/ui/components/Menu'
 import { Modal } from '@/ui/components/Modal'
+import type { FarmUiProps } from '@/ui/types'
 import { range } from '@/utils/mapFunctions'
 
 export const ItemDisplay = (props: { item: Item | null, selected: boolean, disabled?: boolean }) => {
@@ -34,16 +37,18 @@ export const ItemDisplay = (props: { item: Item | null, selected: boolean, disab
 		</div>
 	)
 }
-const useItems = () => ui.sync(() => save.items)
-const playerQuery = ecs.with('playerControls', 'openInventory')
 
-export const InventorySlots = (props: { getProps: getProps, click?: (item: Item | null) => void, disabled?: (item: Item | null) => boolean | undefined }) => {
-	const items = useItems()
+export const InventorySlots = (props: {
+	getProps: getProps
+	click?: (item: Item | null, index: number) => void
+	disabled?: (item: Item | null) => boolean | undefined
+	entity: With<Entity, 'inventorySize' | 'inventory' | 'inventoryId'>
+}) => {
 	return (
-		<For each={range(0, 24)}>
+		<For each={range(0, props.entity.inventorySize)}>
 			{(_, i) => {
 				const slotProps = props.getProps(i() === 0)
-				const itemSynced = ui.sync(() => items()[i()])
+				const itemSynced = ui.sync(() => props.entity.inventory[i()])
 				const disabled = props.disabled && props.disabled(itemSynced())
 				const [ref, setRef] = createSignal()
 				return (
@@ -52,26 +57,28 @@ export const InventorySlots = (props: { getProps: getProps, click?: (item: Item 
 						draggable={itemSynced() !== undefined}
 						class="item-drag"
 						ref={setRef}
-						onClick={() => props.click && !disabled && props.click(itemSynced())}
+						onClick={() => props.click && !disabled && props.click(itemSynced(), i())}
 						onDragStart={(e) => {
-							e.dataTransfer?.setData('text/plain', JSON.stringify([itemSynced(), i()]))
+							e.dataTransfer?.setData('text/plain', JSON.stringify([itemSynced(), props.entity.inventoryId, i()]))
 						}}
 						onDragOver={e => e.preventDefault()}
 						onDrop={(e) => {
+							const item = itemSynced()
+
 							const data = e.dataTransfer?.getData('text/plain')
 							if (data && e.target.closest('.item-drag') === ref()) {
 								try {
-									const [dataParsed, position]: [Item, number] = JSON.parse(data) as any
-									if (itemSynced() === undefined) {
+									const [dataParsed, id, position]: [Item, string, number] = JSON.parse(data) as any
+									if (item === undefined || item === null) {
 										updateSave((s) => {
-											delete s.items[position]
-											s.items[i()] = dataParsed
+											delete s.inventories[id][position]
+											// s.items[i()] = dataParsed
+											s.inventories[props.entity.inventoryId][i()] = dataParsed
 										})
-									}
-									if (dataParsed.name === itemSynced().name) {
+									} else if (dataParsed.name === item.name) {
 										updateSave((s) => {
-											delete s.items[position]
-											s.items[i()].quantity += dataParsed.quantity
+											delete s.inventories[id][position]
+											s.inventories[props.entity.inventoryId][i()].quantity += dataParsed.quantity
 										})
 									}
 								} catch (_) {
@@ -92,67 +99,64 @@ export const InventorySlots = (props: { getProps: getProps, click?: (item: Item 
 	)
 }
 
-export const InventoryUi = () => {
-	const player = ui.sync(() => playerQuery.first)
+export const InventoryUi = ({ player }: FarmUiProps) => {
 	ui.updateSync(() => {
-		const p = player()
-		if (p?.menuInputs?.get('cancel').justReleased) {
-			ecs.removeComponent(p, 'openInventory')
+		if (player?.menuInputs?.get('cancel').justReleased) {
+			ecs.removeComponent(player, 'openInventory')
 		}
 	})
 	const [tab, setTab] = createSignal<'inventory' | 'quests'>('inventory')
+	const open = ui.sync(() => player.openInventory)
 	const questsToComplete = ui.sync(() => Object.entries(save.quests) as [QuestName, boolean[]][])
 	return (
-		<Modal open={player()}>
-			<Show when={player()}>
-				{player => (
-					<div>
-						<div style={{ display: 'flex', gap: '1rem' }}>
-							<IconButton icon="basket-shopping-solid" onClick={() => setTab('inventory')}></IconButton>
-							<IconButton icon="list-check-solid" onClick={() => setTab('quests')}></IconButton>
-						</div>
-						<InventoryTitle>{tab()}</InventoryTitle>
-						<Show when={tab() === 'inventory'}>
-							<div style={{ 'display': 'grid', 'grid-template-columns': 'repeat(8, 1fr)', 'gap': '1rem' }}>
-								<Menu
-									inputs={player().menuInputs}
-								>
-									{({ getProps }) => {
-										return <InventorySlots getProps={getProps} />
-									}}
-								</Menu>
-							</div>
-						</Show>
-						<Show when={tab() === 'quests'}>
-							<For each={questsToComplete()}>
-								{([questName, compltetedSteps]) => {
-									const quest = quests[questName] as Quest
-									return (
-										<div style={{ 'color': 'white', 'background': 'hsl(0, 0%, 0%, 0.3)', 'padding': '1rem', 'border-radius': '1rem' }}>
-											<div style={{ 'font-size': '2rem' }}>{quest.name}</div>
-											<For each={quest.steps}>
-												{(step, i) => {
-													const isCompleted = compltetedSteps[i()]
-													return (
-														<div>
-															{step?.description && <div>{step.description}</div>}
-															{step.items?.map(item => (
-																<div style={{ position: 'relative' }}>
-																	<div innerHTML={assets.icons[isCompleted ? 'circle-check-solid' : 'circle-xmark-solid']} style={{ 'position': 'absolute', 'z-index': 1, 'top': '0.5rem', 'left': '0.5rem', 'color': isCompleted ? '#33cc33' : 'red' }}></div>
-																	<ItemDisplay item={item} selected={false}></ItemDisplay>
-																</div>
-															))}
-														</div>
-													)
-												}}
-											</For>
-										</div>
-									)
-								}}
-							</For>
-						</Show>
+		<Modal open={open()}>
+			<Show when={open()}>
+				<div>
+					<div style={{ display: 'flex', gap: '1rem' }}>
+						<IconButton icon="basket-shopping-solid" onClick={() => setTab('inventory')}></IconButton>
+						<IconButton icon="list-check-solid" onClick={() => setTab('quests')}></IconButton>
 					</div>
-				)}
+					<InventoryTitle>{tab()}</InventoryTitle>
+					<Show when={tab() === 'inventory'}>
+						<div style={{ 'display': 'grid', 'grid-template-columns': 'repeat(8, 1fr)', 'gap': '1rem' }}>
+							<Menu
+								inputs={player.menuInputs}
+							>
+								{({ getProps }) => {
+									return <InventorySlots getProps={getProps} entity={player} />
+								}}
+							</Menu>
+						</div>
+					</Show>
+					<Show when={tab() === 'quests'}>
+						<For each={questsToComplete()}>
+							{([questName, compltetedSteps]) => {
+								const quest = quests[questName] as Quest
+								return (
+									<div style={{ 'color': 'white', 'background': 'hsl(0, 0%, 0%, 0.3)', 'padding': '1rem', 'border-radius': '1rem' }}>
+										<div style={{ 'font-size': '2rem' }}>{quest.name}</div>
+										<For each={quest.steps}>
+											{(step, i) => {
+												const isCompleted = compltetedSteps[i()]
+												return (
+													<div>
+														{step?.description && <div>{step.description}</div>}
+														{step.items?.map(item => (
+															<div style={{ position: 'relative' }}>
+																<div innerHTML={assets.icons[isCompleted ? 'circle-check-solid' : 'circle-xmark-solid']} style={{ 'position': 'absolute', 'z-index': 1, 'top': '0.5rem', 'left': '0.5rem', 'color': isCompleted ? '#33cc33' : 'red' }}></div>
+																<ItemDisplay item={item} selected={false}></ItemDisplay>
+															</div>
+														))}
+													</div>
+												)
+											}}
+										</For>
+									</div>
+								)
+							}}
+						</For>
+					</Show>
+				</div>
 			</Show>
 		</Modal>
 	)

@@ -1,14 +1,15 @@
 import type { Query, With } from 'miniplex'
 import { Vector3 } from 'three'
 import { enumerate, range } from './mapFunctions'
-import type { Entity } from '@/global/entity'
+import { type Entity, InventoryTypes } from '@/global/entity'
 import { coroutines, ecs } from '@/global/init'
 import { cutSceneState } from '@/global/states'
 import { addTag } from '@/lib/hierarchy'
 import { quests } from '@/constants/quests'
 import type { QuestName } from '@/constants/quests'
 
-import { removeItem, save, updateSave } from '@/global/save'
+import { addItem, removeItem, save, updateSave } from '@/global/save'
+import type { Item } from '@/constants/items'
 
 const playerQuery = ecs.with('player', 'position', 'collider', 'movementForce')
 const houseQuery = ecs.with('npcName', 'position', 'collider').where(({ npcName }) => npcName === 'Grandma')
@@ -33,6 +34,20 @@ export const movePlayerTo = (dest: Vector3) => {
 			})
 		}
 	})
+}
+export const playerInventoryQuery = ecs.with('inventoryType', 'inventoryId', 'inventory', 'inventorySize').where(({ inventoryType }) => inventoryType === InventoryTypes.Player)
+
+export const addItemToPlayer = (item: Item) => {
+	const player = playerInventoryQuery.first
+	if (player) {
+		addItem(player, item)
+	}
+}
+export const removeItemFromPlayer = (item: Item) => {
+	const player = playerInventoryQuery.first
+	if (player) {
+		removeItem(player, item)
+	}
 }
 
 export const enterHouse = () => {
@@ -60,13 +75,16 @@ export const leaveHouse = () => {
 // ! Quests
 
 export const canCompleteQuest = (name: QuestName) => {
-	return quests[name].steps.every((step, i) => {
-		return save.quests[name]?.[i] === true || step.items?.every((item) => {
-			return Object.values(save.items).some((saveItem) => {
-				return saveItem.name === item.name && saveItem.quantity >= item.quantity
+	const player = playerInventoryQuery.first
+	if (player) {
+		return quests[name].steps.every((step, i) => {
+			return save.quests[name]?.[i] === true || step.items?.every((item) => {
+				return player.inventory.some((saveItem) => {
+					return saveItem && saveItem.name === item.name && saveItem.quantity >= item.quantity
+				})
 			})
 		})
-	})
+	}
 }
 
 export const completeQuest = (name: QuestName) => {
@@ -76,7 +94,7 @@ export const completeQuest = (name: QuestName) => {
 			if (quest) {
 				for (const [step, i] of enumerate(quests[name].steps)) {
 					for (const item of step.items ?? []) {
-						removeItem(item)
+						removeItemFromPlayer(item)
 					}
 					quest[i] = true
 				}

@@ -1,122 +1,22 @@
-import type { With } from 'miniplex'
-import { For, Show, createMemo } from 'solid-js'
+import { Show, createMemo } from 'solid-js'
 import { Quaternion, Vector3 } from 'three'
 import { InventorySlots, ItemDisplay } from './InventoryUi'
-import type { Entity, Interactable, InventoryTypes, crops } from '@/global/entity'
+import { InventoryTypes, type crops } from '@/global/entity'
 import { type Item, itemsData } from '@/constants/items'
 
 import { recipes } from '@/constants/recipes'
 import { assets, ecs, ui } from '@/global/init'
-import { menuInputMap } from '@/global/inputMaps'
-import { addItem, save, updateSave } from '@/global/save'
+import { addItem, removeItem } from '@/global/save'
 import { Menu } from '@/ui/components/Menu'
 import { Modal } from '@/ui/components/Modal'
+import type { FarmUiProps } from '@/ui/types'
+import { addItemToPlayer } from '@/utils/dialogHelpers'
 import { range } from '@/utils/mapFunctions'
 
-export const inventoryBundle = (inventoryType: InventoryTypes, size: number, interactable: Interactable) => {
-	return {
-		...menuInputMap(),
-		inventoryType,
-		inventorySize: size,
-		inventory: Array.from({ length: size }, () => null),
-		interactable,
-	} as const satisfies Entity
-}
-
-function addToInventory<E extends With<Entity, 'inventory'>>(entity: E) {
-	return (item: Item | null) => {
-		if (entity.inventory.includes(null) && item) {
-			if (item.quantity > 1) {
-				item.quantity--
-			} else {
-				updateSave((s) => {
-					const index = Object.values(save.items).findIndex(i => i === item)
-					delete s.items[index]
-				}, false)
-			}
-			const firstEmptyIndex = entity.inventory.indexOf(null)
-			entity.inventory.splice(firstEmptyIndex, 1, { ...item, quantity: 1 })
-		}
-	}
-}
-
-function removeFromInventory<E extends With<Entity, 'inventory'>>(entity: E) {
-	return (item: Item | null, index: number) => {
-		item && addItem(item, false)
-		entity.inventory.splice(index, 1, null)
-	}
-}
-
-const inventoryQuery = ecs.with('inventory', 'openInventory', 'menuInputs', 'inventorySize')
+const inventoryQuery = ecs.with('inventory', 'openInventory', 'menuInputs', 'inventorySize', 'inventoryId')
 export const InventoryTitle = (props: { children: string }) => <div style={{ 'font-size': '3rem', 'color': 'white', 'font-family': 'NanoPlus', 'text-transform': 'capitalize' }}>{props.children}</div>
-// export const CauldronUi = () => {
-// 	return (
-// 		<ForQuery query={inventoryQuery}>
-// 			{(cauldron) => {
-// 				const cauldronInventory = ui.sync(() => cauldron.inventory)
-// 				const addToCauldron = addToInventory(cauldron)
-// 				const removeFromCauldron = removeFromInventory(cauldron)
-// 				const output = createMemo(() => {
-// 					return recipes.find(({ input }) => {
-// 						return cauldronInventory().every((slot, i) => slot?.icon === input[i])
-// 					})?.output ?? null
-// 				})
-// 				const cook = () => {
-// 					const meal = output()
-// 					if (meal) {
-// 						addItem({ ...meal })
-// 						cauldron.inventory = Array.from({ length: cauldron.inventorySize }, () => null)
-// 					}
-// 				}
-// 				return (
-// 					<div style={{ 'background': 'hsla(0 0% 0% / 20%)', 'place-self': 'center', 'padding': '2rem', 'border-radius': '1rem', 'display': 'grid', 'gap': '2rem' }}>
-// 						<div>
-// 							<Menu inputs={cauldron.menuInputs}>
-// 								{({ getProps }) => {
-// 									const outputProps = getProps()
-// 									return (
-// 										<div style={{ display: 'grid', gap: '2rem' }}>
-// 											<div>
-// 												<InventoryTitle>Cauldron</InventoryTitle>
-// 												<div style={{ display: 'flex', gap: '1rem' }}>
-// 													<For each={cauldronInventory()}>
-// 														{(cauldronSlot, i) => {
-// 															const props = getProps()
-// 															const item = ui.sync(() => cauldronSlot)
-// 															return (
-// 																<div {...props} onClick={removeFromCauldron(cauldronSlot, i())}>
-// 																	<ItemDisplay
-// 																		item={item()}
-// 																		selected={props.selected()}
-// 																	/>
-// 																</div>
-// 															)
-// 														}}
-// 													</For>
-// 													<Show when={output()}>
-// 														<div {...outputProps} onClick={cook}>
-// 															<ItemDisplay item={output()} selected={outputProps.selected()}></ItemDisplay>
-// 														</div>
-// 													</Show>
-// 													I
 
-// 												</div>
-// 											</div>
-// 											<div style={{ 'display': 'grid', 'grid-template-columns': 'repeat(8, 1fr)', 'gap': '1rem' }}>
-// 												<InventorySlots getProps={getProps} click={addToCauldron}></InventorySlots>
-// 											</div>
-// 										</div>
-// 									) }}
-// 							</Menu>
-// 						</div>
-
-// 					</div>
-// 				)
-// 			}}
-// 		</ForQuery>
-// 	)
-// }
-const cuttingBoardQuery = ecs.with('inventory', 'inventoryType', 'size').where(e => e.inventoryType === 'cuttingBoard')
+const cuttingBoardQuery = inventoryQuery.with('size').where(e => e.inventoryType === InventoryTypes.CuttingBoard)
 export const displayOnCuttinBoard = () => {
 	for (const cuttingBoard of cuttingBoardQuery) {
 		const item = cuttingBoard.inventory[0]?.name
@@ -142,16 +42,19 @@ export const displayOnCuttinBoard = () => {
 	}
 }
 const openCuttingBoardQuery = cuttingBoardQuery.with('openInventory')
-export const CuttingBoardUi = () => {
+export const CuttingBoardUi = ({ player }: FarmUiProps) => {
 	const cuttingBoardEntity = ui.sync(() => openCuttingBoardQuery.first)
 
 	return (
 		<Modal open={cuttingBoardEntity()}>
 			<Show when={cuttingBoardEntity()}>
 				{(cuttingBoard) => {
-					const cuttingBoardInventory = ui.sync(() => cuttingBoard().inventory)
-					const addToCuttingBoard = addToInventory(cuttingBoard())
-					const removeFromCuttingBoard = removeFromInventory(cuttingBoard())
+					const addToCuttingBoard = (item: Item | null) => {
+						const filled = cuttingBoard().inventory.filter(Boolean).length
+						if (item && filled < cuttingBoard().inventorySize)
+							addItem(cuttingBoard(), { name: item.name, quantity: 1 }, filled)
+					}
+					const removeFromCuttingBoard = (item: Item | null, index: number) => item && removeItem(cuttingBoard(), item, index)
 					return (
 						<Menu inputs={cuttingBoard().menuInputs}>
 							{({ getProps }) => {
@@ -160,20 +63,11 @@ export const CuttingBoardUi = () => {
 										<div>
 											<InventoryTitle>Cutting board</InventoryTitle>
 											<div style={{ 'display': 'grid', 'gap': '1rem', 'place-items': 'center' }}>
-												<For each={cuttingBoardInventory()}>
-													{(slot, i) => {
-														const props = getProps()
-														const item = ui.sync(() => slot)
-														return (
-															<div {...props} onClick={() => removeFromCuttingBoard(slot, i())}>
-																<ItemDisplay
-																	item={item()}
-																	selected={props.selected()}
-																/>
-															</div>
-														)
-													}}
-												</For>
+												<InventorySlots
+													click={removeFromCuttingBoard}
+													getProps={getProps}
+													entity={cuttingBoard()}
+												/>
 											</div>
 										</div>
 										<div style={{ 'display': 'grid', 'grid-template-columns': 'repeat(8, 1fr)', 'gap': '1rem' }}>
@@ -181,6 +75,7 @@ export const CuttingBoardUi = () => {
 												getProps={getProps}
 												click={addToCuttingBoard}
 												disabled={item => item?.name && !itemsData[item.name].choppable}
+												entity={player}
 											/>
 										</div>
 									</div>
@@ -193,8 +88,8 @@ export const CuttingBoardUi = () => {
 		</Modal>
 	)
 }
-const ovenQuery = inventoryQuery.with('inventoryType').where(({ inventoryType }) => inventoryType === 'oven')
-export const OvenUi = () => {
+const ovenQuery = inventoryQuery.with('inventoryType').where(({ inventoryType }) => inventoryType === InventoryTypes.Oven)
+export const OvenUi = ({ player }: FarmUiProps) => {
 	const oven = ui.sync(() => ovenQuery.first)
 	const output = createMemo(() => {
 		return recipes.find(({ input }) => {
@@ -204,17 +99,28 @@ export const OvenUi = () => {
 	const cook = (output: Item) => {
 		const o = oven()
 		if (o) {
-			addItem({ ...output })
-			ecs.update(o, { inventory: range(0, o.inventorySize, () => null) })
+			addItemToPlayer({ ...output })
+			for (let i = 0; i < o.inventorySize; i++) {
+				delete o.inventory[i]
+			}
 		}
 	}
 	return (
 		<Modal open={oven()}>
 			<Show when={oven()}>
 				{(ovenEntity) => {
-					const ovenInventory = ui.sync(() => ovenEntity().inventory)
-					const addToOven = addToInventory(ovenEntity())
-					const removeFromOven = removeFromInventory(ovenEntity())
+					const addToOven = (item: Item | null) => {
+						const filled = ovenEntity().inventory.filter(Boolean).length
+						if (item && filled < ovenEntity().inventorySize) {
+							addItem(ovenEntity(), { name: item.name, quantity: 1 }, filled)
+							removeItem(player, { name: item.name, quantity: 1 })
+						}
+					}
+					const removeFromOven = (item: Item | null, index: number) => {
+						if (item) {
+							addItem(player, item)
+							removeItem(ovenEntity(), item, index) }
+					}
 					return (
 						<Menu inputs={ovenEntity().menuInputs}>
 							{({ getProps }) => {
@@ -224,20 +130,11 @@ export const OvenUi = () => {
 										<div>
 											<InventoryTitle>Oven</InventoryTitle>
 											<div style={{ 'display': 'flex', 'gap': '1rem', 'place-items': 'center' }}>
-												<For each={ovenInventory()}>
-													{(cauldronSlot, i) => {
-														const props = getProps()
-														const item = ui.sync(() => cauldronSlot)
-														return (
-															<div {...props} onClick={() => removeFromOven(cauldronSlot, i())}>
-																<ItemDisplay
-																	item={item()}
-																	selected={props.selected()}
-																/>
-															</div>
-														)
-													}}
-												</For>
+												<InventorySlots
+													click={removeFromOven}
+													getProps={getProps}
+													entity={ovenEntity()}
+												/>
 												<Show when={output()}>
 													{(output) => {
 														return (
@@ -254,6 +151,7 @@ export const OvenUi = () => {
 												getProps={getProps}
 												click={addToOven}
 												disabled={item => item?.name && !itemsData[item.name].cookable}
+												entity={player}
 											/>
 										</div>
 									</div>

@@ -28,8 +28,14 @@ export enum Interactable {
 	Cook = 'cook',
 	Chop = 'chop',
 	SelectSeed = 'select seed',
+	Open = 'open',
 }
-export type InventoryTypes = 'oven' | 'cuttingBoard'
+export enum InventoryTypes {
+	Oven,
+	Chest,
+	CuttingBoard,
+	Player,
+}
 export type crops = 'carrot' | 'beet' | 'mushroom'
 export interface Door { to: number, direction: direction }
 export interface Entity {
@@ -105,6 +111,7 @@ export interface Entity {
 	inventorySize?: number
 	openInventory?: true
 	inventoryType?: InventoryTypes
+	inventoryId?: string
 	// ! Cooking
 	displayedItem?: Entity
 	// ! Player
@@ -114,6 +121,7 @@ export interface Entity {
 	npcName?: (typeof NPC)[number]
 	// ! Dialog
 	dialog?: Dialog
+	dialogHeight?: number
 	activeDialog?: true
 	currentDialog?: string | string[]
 	dialogContainer?: CSS2DObject

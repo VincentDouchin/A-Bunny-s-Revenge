@@ -4,13 +4,13 @@ import { createNoise2D } from 'simplex-noise'
 import { BoxGeometry, Color, Group, Mesh, MeshStandardMaterial, PlaneGeometry, Vector3 } from 'three'
 import { RoomType } from '../dungeon/dungeonTypes'
 import { enemyBundle } from '../dungeon/enemies'
-import { inventoryBundle } from '../farm/CookingUi'
 import { cauldronBundle } from '../farm/cooking'
 import { cropBundle } from '../farm/farming'
 import { spawnHouse } from '../farm/house'
 import { kitchenApplianceBundle } from '../farm/kitchen'
 import { playerBundle } from './spawnCharacter'
 import { doorBundle } from './spawnDoor'
+import { inventoryBundle } from '@/states/game/inventory'
 import { getRandom, objectValues, range } from '@/utils/mapFunctions'
 import { GroundShader } from '@/shaders/GroundShader'
 import { getRotationFromDirection } from '@/lib/transforms'
@@ -20,7 +20,7 @@ import { type direction, otherDirection } from '@/lib/directions'
 import type { DungeonRessources, FarmRessources } from '@/global/states'
 import { save } from '@/global/save'
 import { assets, ecs } from '@/global/init'
-import { Interactable } from '@/global/entity'
+import { Interactable, InventoryTypes } from '@/global/entity'
 import { instanceMesh } from '@/global/assetLoaders'
 import type { EntityInstance, LayerInstance, Level } from '@/LDTKMap'
 
@@ -95,7 +95,7 @@ const spawnFarmEntities = (wasDungeon: boolean) => {
 		},
 		oven: (position, data) => {
 			ecs.add({
-				...inventoryBundle('oven', 3, Interactable.Cook),
+				...inventoryBundle(InventoryTypes.Oven, 3, 'oven1', Interactable.Cook),
 				...kitchenApplianceBundle('oven', data.direction),
 
 				position,
@@ -135,7 +135,7 @@ const spawnFarmEntities = (wasDungeon: boolean) => {
 		counter: (position, data) => {
 			const counter = ecs.add({ position, ...kitchenApplianceBundle('kitchencounter_straight_B', data.direction) })
 			if (data.cutting_board) {
-				ecs.update(counter, inventoryBundle('cuttingBoard', 1, Interactable.Chop))
+				ecs.update(counter, inventoryBundle(InventoryTypes.CuttingBoard, 1, 'cuttingBoard1', Interactable.Chop))
 				const model = assets.kitchen.cutting_board.scene.clone()
 				model.scale.setScalar(4)
 				ecs.add({

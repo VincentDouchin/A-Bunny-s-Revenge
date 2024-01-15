@@ -40,11 +40,14 @@
           },
           "type": "object"
         },
-        "items": {
-          "items": {
-            "$ref": "#/definitions/Item"
+        "inventories": {
+          "additionalProperties": {
+            "items": {
+              "$ref": "#/definitions/Item"
+            },
+            "type": "array"
           },
-          "type": "array"
+          "type": "object"
         },
         "playerPosition": {
           "items": {
@@ -69,14 +72,25 @@
             }
           },
           "type": "object"
+        },
+        "selectedSeed": {
+          "anyOf": [
+            {
+              "type": "null"
+            },
+            {
+              "$ref": "#/definitions/crops"
+            }
+          ]
         }
       },
       "required": [
         "crops",
-        "items",
         "playerPosition",
         "playerRotation",
-        "quests"
+        "quests",
+        "selectedSeed",
+        "inventories"
       ],
       "type": "object"
     },
@@ -91,6 +105,7 @@
     "items": {
       "enum": [
         "beet",
+        "beet_seeds",
         "carrot",
         "carrot_seeds",
         "carrot_soup",

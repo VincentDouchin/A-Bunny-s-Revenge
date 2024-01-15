@@ -33,7 +33,7 @@ export const talkToNPC = () => {
 					ecs.update(npc, { currentDialog: nextDialog.value })
 					if (!npc.dialogContainer) {
 						const cssObj = new CSS2DObject(document.createElement('div'))
-						cssObj.position.y = npc.size?.y ?? 4
+						cssObj.position.y = npc.dialogHeight ?? npc.size?.y ?? 4
 						ecs.addComponent(npc, 'dialogContainer', cssObj)
 					}
 				}

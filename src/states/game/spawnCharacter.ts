@@ -1,10 +1,11 @@
 import { RigidBodyType } from '@dimforge/rapier3d-compat'
 import { LinearSRGBColorSpace, Mesh, NearestFilter, Quaternion, Vector3 } from 'three'
+import { inventoryBundle } from './inventory'
 import { Sizes } from '@/constants/sizes'
 import { Animator } from '@/global/animator'
-import { type Entity, Faction } from '@/global/entity'
+import { type Entity, Faction, InventoryTypes } from '@/global/entity'
 import { assets, ecs } from '@/global/init'
-import { menuInputMap, playerInputMap } from '@/global/inputMaps'
+import { playerInputMap } from '@/global/inputMaps'
 import { save } from '@/global/save'
 import type { FarmRessources } from '@/global/states'
 import { modelColliderBundle } from '@/lib/models'
@@ -23,7 +24,7 @@ export const playerBundle = () => {
 	bundle.bodyDesc.setLinearDamping(20)
 	return {
 		...playerInputMap(),
-		...menuInputMap(),
+		...inventoryBundle(InventoryTypes.Player, 24, 'player'),
 		...bundle,
 		animator: new Animator('idle', bundle.model, model.animations),
 		inMap: true,

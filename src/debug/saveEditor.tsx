@@ -16,9 +16,8 @@ export const SaveEditor = () => {
 		if (!document.head.innerHTML.includes(theme))
 			document.head.innerHTML += theme
 		const options: JSONEditorOptions = {
-			theme: 'bootstrap4',
 			schema: saveDataSchema,
-			mode: 'code',
+			mode: 'tree',
 			limitDragging: true,
 			onChangeText: (text: string) => setJson(JSON.parse(text) as SaveData),
 			allowSchemaSuggestions: true,
