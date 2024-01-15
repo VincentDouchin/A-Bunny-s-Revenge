@@ -124,7 +124,7 @@ const buttonsLoader = async (glob: Record<string, any>) => {
 export const loadAssets = async () => ({
 	characters: await typeGlob<characters>(import.meta.glob('@assets/characters/*.glb', { as: 'url' }))(loadGLBAsToon()),
 	// characters: await loadGLBAsToon<characters>(import.meta.glob('@assets/characters/*.glb', { as: 'url' })),
-	models: await typeGlob<models>(import.meta.glob('@assets/kitchen/*.glb', { as: 'url' }))(loadGLBAsToon()),
+	models: await typeGlob<models>(import.meta.glob('@assets/models/*.glb', { as: 'url' }))(loadGLBAsToon()),
 	skybox: await skyboxLoader(import.meta.glob('@assets/skybox/*.png', { eager: true, import: 'default' })),
 	trees: await typeGlob<trees>(import.meta.glob('@assets/trees/*.glb', { as: 'url' }))(loadGLBAsToon({ src: toneMapTreessrc })),
 	rocks: await typeGlob(import.meta.glob('@assets/rocks/*.glb', { as: 'url' }))(loadGLBAsToon()),
