@@ -2,12 +2,10 @@ import type { With } from 'miniplex'
 import { For, Show, createMemo, createSignal } from 'solid-js'
 import { InventoryTitle } from './CookingUi'
 import type { Item } from '@/constants/items'
-import type { Quest, QuestName } from '@/constants/quests'
-import { quests } from '@/constants/quests'
 
 import type { Entity } from '@/global/entity'
 import { assets, ecs, ui } from '@/global/init'
-import { save, updateSave } from '@/global/save'
+import { updateSave } from '@/global/save'
 import { textStroke } from '@/lib/uiManager'
 import { IconButton } from '@/ui/components/Button'
 import type { getProps } from '@/ui/components/Menu'
@@ -102,60 +100,35 @@ export const InventorySlots = (props: {
 export const InventoryUi = ({ player }: FarmUiProps) => {
 	ui.updateSync(() => {
 		if (player?.menuInputs?.get('cancel').justReleased) {
-			ecs.removeComponent(player, 'openInventory')
+			ecs.removeComponent(player, 'menuOpen')
 		}
 	})
-	const [tab, setTab] = createSignal<'inventory' | 'quests'>('inventory')
-	const open = ui.sync(() => player.openInventory)
-	const questsToComplete = ui.sync(() => Object.entries(save.quests) as [QuestName, boolean[]][])
+	// const [tab, setTab] = createSignal<'inventory' | 'quests'>('inventory')
+	const open = ui.sync(() => player.menuOpen)
+
 	return (
 		<Modal open={open()}>
 			<Show when={open()}>
 				<div>
-					<div style={{ display: 'flex', gap: '1rem' }}>
+					{/* <div style={{ display: 'flex', gap: '1rem' }}>
 						<IconButton icon="basket-shopping-solid" onClick={() => setTab('inventory')}></IconButton>
 						<IconButton icon="list-check-solid" onClick={() => setTab('quests')}></IconButton>
-					</div>
-					<InventoryTitle>{tab()}</InventoryTitle>
-					<Show when={tab() === 'inventory'}>
-						<div style={{ 'display': 'grid', 'grid-template-columns': 'repeat(8, 1fr)', 'gap': '1rem' }}>
-							<Menu
-								inputs={player.menuInputs}
-							>
-								{({ getProps }) => {
-									return <InventorySlots getProps={getProps} entity={player} />
-								}}
-							</Menu>
-						</div>
-					</Show>
-					<Show when={tab() === 'quests'}>
-						<For each={questsToComplete()}>
-							{([questName, compltetedSteps]) => {
-								const quest = quests[questName] as Quest
-								return (
-									<div style={{ 'color': 'white', 'background': 'hsl(0, 0%, 0%, 0.3)', 'padding': '1rem', 'border-radius': '1rem' }}>
-										<div style={{ 'font-size': '2rem' }}>{quest.name}</div>
-										<For each={quest.steps}>
-											{(step, i) => {
-												const isCompleted = compltetedSteps[i()]
-												return (
-													<div>
-														{step?.description && <div>{step.description}</div>}
-														{step.items?.map(item => (
-															<div style={{ position: 'relative' }}>
-																<div innerHTML={assets.icons[isCompleted ? 'circle-check-solid' : 'circle-xmark-solid']} style={{ 'position': 'absolute', 'z-index': 1, 'top': '0.5rem', 'left': '0.5rem', 'color': isCompleted ? '#33cc33' : 'red' }}></div>
-																<ItemDisplay item={item} selected={false}></ItemDisplay>
-															</div>
-														))}
-													</div>
-												)
-											}}
-										</For>
-									</div>
-								)
+					</div> */}
+					<InventoryTitle>Inventory</InventoryTitle>
+					{/* <Show when={tab() === 'inventory'}> */}
+					<div style={{ 'display': 'grid', 'grid-template-columns': 'repeat(8, 1fr)', 'gap': '1rem' }}>
+						<Menu
+							inputs={player.menuInputs}
+						>
+							{({ getProps }) => {
+								return <InventorySlots getProps={getProps} entity={player} />
 							}}
-						</For>
-					</Show>
+						</Menu>
+					</div>
+					{/* </Show> */}
+					{/* <Show when={tab() === 'quests'}>
+
+					</Show> */}
 				</div>
 			</Show>
 		</Modal>

@@ -1,7 +1,7 @@
 import { ColliderDesc, RigidBodyDesc, RigidBodyType } from '@dimforge/rapier3d-compat'
 import { between } from 'randomish'
 import { createNoise2D } from 'simplex-noise'
-import { BoxGeometry, Color, Group, Mesh, MeshStandardMaterial, PlaneGeometry, Vector3 } from 'three'
+import { BoxGeometry, Color, Group, Mesh, MeshStandardMaterial, PlaneGeometry, Quaternion, Vector3 } from 'three'
 import { RoomType } from '../dungeon/dungeonTypes'
 import { enemyBundle } from '../dungeon/enemies'
 import { cauldronBundle } from '../farm/cooking'
@@ -20,9 +20,10 @@ import { type direction, otherDirection } from '@/lib/directions'
 import type { DungeonRessources, FarmRessources } from '@/global/states'
 import { save } from '@/global/save'
 import { assets, ecs } from '@/global/init'
-import { Interactable, InventoryTypes } from '@/global/entity'
+import { Interactable, MenuType } from '@/global/entity'
 import { instanceMesh } from '@/global/assetLoaders'
 import type { EntityInstance, LayerInstance, Level } from '@/LDTKMap'
+import { menuInputMap } from '@/global/inputMaps'
 
 export const treeBundle = () => {
 	const model = getRandom(objectValues(assets.trees)).scene.clone()
@@ -57,6 +58,7 @@ interface FieldInstances {
 		dungeon: boolean
 	}
 	house: Record<string, unknown>
+	board: Record<string, unknown>
 	cauldron: Record<string, unknown>
 	planter: Record<string, unknown>
 }
@@ -95,7 +97,7 @@ const spawnFarmEntities = (wasDungeon: boolean) => {
 		},
 		oven: (position, data) => {
 			ecs.add({
-				...inventoryBundle(InventoryTypes.Oven, 3, 'oven1', Interactable.Cook),
+				...inventoryBundle(MenuType.Oven, 3, 'oven1', Interactable.Cook),
 				...kitchenApplianceBundle('oven', data.direction),
 
 				position,
@@ -135,7 +137,7 @@ const spawnFarmEntities = (wasDungeon: boolean) => {
 		counter: (position, data) => {
 			const counter = ecs.add({ position, ...kitchenApplianceBundle('kitchencounter_straight_B', data.direction) })
 			if (data.cutting_board) {
-				ecs.update(counter, inventoryBundle(InventoryTypes.CuttingBoard, 1, 'cuttingBoard1', Interactable.Chop))
+				ecs.update(counter, inventoryBundle(MenuType.CuttingBoard, 1, 'cuttingBoard1', Interactable.Chop))
 				const model = assets.models.cutting_board.scene.clone()
 				model.scale.setScalar(4)
 				ecs.add({
@@ -146,6 +148,22 @@ const spawnFarmEntities = (wasDungeon: boolean) => {
 			}
 		},
 		house: spawnHouse,
+		board: (position) => {
+			const model = assets.models.Bulliten.scene
+			model.scale.setScalar(15)
+			const rotation = new Quaternion().setFromAxisAngle(new Vector3(0, 1, 0), Math.PI)
+			const bundle = modelColliderBundle(model, RigidBodyType.Fixed, false)
+			ecs.add({
+				...bundle,
+				position,
+				model,
+				rotation,
+				inMap: true,
+				interactable: Interactable.BulletinBoard,
+				menuType: MenuType.Quest,
+				...menuInputMap(),
+			})
+		},
 	})
 }
 const spawnGroundAndTrees = (layer: LayerInstance) => {

@@ -72,7 +72,7 @@ export const TouchControls = () => {
 	const openInventory = () => {
 		const p = player()
 		if (p) {
-			addTag(p, 'openInventory')
+			addTag(p, 'menuOpen')
 		}
 	}
 	return (

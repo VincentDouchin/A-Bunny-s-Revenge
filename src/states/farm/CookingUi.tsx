@@ -1,7 +1,7 @@
 import { Show, createMemo } from 'solid-js'
 import { Quaternion, Vector3 } from 'three'
 import { InventorySlots, ItemDisplay } from './InventoryUi'
-import { InventoryTypes, type crops } from '@/global/entity'
+import { MenuType, type crops } from '@/global/entity'
 import { type Item, itemsData } from '@/constants/items'
 
 import { recipes } from '@/constants/recipes'
@@ -12,10 +12,10 @@ import { Modal } from '@/ui/components/Modal'
 import type { FarmUiProps } from '@/ui/types'
 import { addItemToPlayer } from '@/utils/dialogHelpers'
 
-const inventoryQuery = ecs.with('inventory', 'openInventory', 'menuInputs', 'inventorySize', 'inventoryId')
+const inventoryQuery = ecs.with('inventory', 'menuType', 'menuInputs', 'inventorySize', 'inventoryId')
 export const InventoryTitle = (props: { children: string }) => <div style={{ 'font-size': '3rem', 'color': 'white', 'font-family': 'NanoPlus', 'text-transform': 'capitalize' }}>{props.children}</div>
 
-const cuttingBoardQuery = inventoryQuery.with('size').where(e => e.inventoryType === InventoryTypes.CuttingBoard)
+const cuttingBoardQuery = inventoryQuery.with('size').where(e => e.menuType === MenuType.CuttingBoard)
 export const displayOnCuttinBoard = () => {
 	for (const cuttingBoard of cuttingBoardQuery) {
 		const item = cuttingBoard.inventory[0]?.name
@@ -40,7 +40,7 @@ export const displayOnCuttinBoard = () => {
 		}
 	}
 }
-const openCuttingBoardQuery = cuttingBoardQuery.with('openInventory')
+const openCuttingBoardQuery = cuttingBoardQuery.with('menuOpen')
 export const CuttingBoardUi = ({ player }: FarmUiProps) => {
 	const cuttingBoardEntity = ui.sync(() => openCuttingBoardQuery.first)
 
@@ -87,7 +87,7 @@ export const CuttingBoardUi = ({ player }: FarmUiProps) => {
 		</Modal>
 	)
 }
-const ovenQuery = inventoryQuery.with('inventoryType').where(({ inventoryType }) => inventoryType === InventoryTypes.Oven)
+const ovenQuery = inventoryQuery.with('menuOpen').where(e => e.menuType === MenuType.Oven)
 export const OvenUi = ({ player }: FarmUiProps) => {
 	const oven = ui.sync(() => ovenQuery.first)
 	const output = createMemo(() => {

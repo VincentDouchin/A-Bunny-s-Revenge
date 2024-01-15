@@ -3,7 +3,7 @@ import { LinearSRGBColorSpace, Mesh, NearestFilter, Quaternion, Vector3 } from '
 import { inventoryBundle } from './inventory'
 import { Sizes } from '@/constants/sizes'
 import { Animator } from '@/global/animator'
-import { type Entity, Faction, InventoryTypes } from '@/global/entity'
+import { type Entity, Faction, MenuType } from '@/global/entity'
 import { assets, ecs } from '@/global/init'
 import { playerInputMap } from '@/global/inputMaps'
 import { save } from '@/global/save'
@@ -24,7 +24,7 @@ export const playerBundle = () => {
 	bundle.bodyDesc.setLinearDamping(20)
 	return {
 		...playerInputMap(),
-		...inventoryBundle(InventoryTypes.Player, 24, 'player'),
+		...inventoryBundle(MenuType.Player, 24, 'player'),
 		...bundle,
 		animator: new Animator('idle', bundle.model, model.animations),
 		inMap: true,

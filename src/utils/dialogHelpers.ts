@@ -1,7 +1,7 @@
 import type { Query, With } from 'miniplex'
 import { Vector3 } from 'three'
 import { enumerate, range } from './mapFunctions'
-import { type Entity, InventoryTypes } from '@/global/entity'
+import { type Entity, MenuType } from '@/global/entity'
 import { coroutines, ecs } from '@/global/init'
 import { cutSceneState } from '@/global/states'
 import { addTag } from '@/lib/hierarchy'
@@ -35,7 +35,7 @@ export const movePlayerTo = (dest: Vector3) => {
 		}
 	})
 }
-export const playerInventoryQuery = ecs.with('inventoryType', 'inventoryId', 'inventory', 'inventorySize').where(({ inventoryType }) => inventoryType === InventoryTypes.Player)
+export const playerInventoryQuery = ecs.with('menuType', 'inventoryId', 'inventory', 'inventorySize').where(e => e.menuType === MenuType.Player)
 
 export const addItemToPlayer = (item: Item) => {
 	const player = playerInventoryQuery.first

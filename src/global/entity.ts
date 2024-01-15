@@ -29,13 +29,16 @@ export enum Interactable {
 	Chop = 'chop',
 	SelectSeed = 'select seed',
 	Open = 'open',
+	BulletinBoard = 'quests',
 }
-export enum InventoryTypes {
+export enum MenuType {
 	Oven,
 	Chest,
 	CuttingBoard,
 	Player,
+	Quest,
 }
+
 export type crops = 'carrot' | 'beet' | 'mushroom'
 export interface Door { to: number, direction: direction }
 export interface Entity {
@@ -109,8 +112,8 @@ export interface Entity {
 	// ! Inventory
 	inventory?: (Item | null)[]
 	inventorySize?: number
-	openInventory?: true
-	inventoryType?: InventoryTypes
+	menuOpen?: true
+	menuType?: MenuType
 	inventoryId?: string
 	// ! Cooking
 	displayedItem?: Entity

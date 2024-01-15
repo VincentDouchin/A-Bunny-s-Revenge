@@ -6,7 +6,7 @@ import { playerInputMap } from '@/global/inputMaps'
 import { Interactable } from '@/global/entity'
 import { save } from '@/global/save'
 
-const interactionQuery = ecs.with('interactable', 'interactionContainer', 'position').without('openInventory')
+const interactionQuery = ecs.with('interactable', 'interactionContainer', 'position').without('menuOpen')
 export const InteractionUi = () => {
 	const primary = playerInputMap().playerControls.get('primary')
 	const secondary = playerInputMap().playerControls.get('secondary')

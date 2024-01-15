@@ -9,7 +9,7 @@ import { ForQuery } from '@/ui/components/ForQuery'
 import { Menu } from '@/ui/components/Menu'
 import type { FarmUiProps } from '@/ui/types'
 
-const query = ecs.with('openInventory', 'interactionContainer', 'plantableSpot')
+const query = ecs.with('menuOpen', 'interactionContainer', 'plantableSpot')
 const playerMenuInputs = ecs.with('player', 'menuInputs')
 export const SeedUi = ({ player }: FarmUiProps) => {
 	const seeds = ui.sync(() => player.inventory.filter(item => item && itemsData[item.name].seed).filter(Boolean))
@@ -18,7 +18,7 @@ export const SeedUi = ({ player }: FarmUiProps) => {
 		const crop = itemsData[seed.name].seed
 		if (crop) {
 			updateSave(s => s.selectedSeed = crop)
-			ecs.removeComponent(entity, 'openInventory')
+			ecs.removeComponent(entity, 'menuOpen')
 		}
 	}
 	return (

@@ -88,7 +88,7 @@ export const harvestCrop = () => {
 		const { playerControls, animator } = player
 		if (playerControls.get('secondary').justPressed) {
 			for (const spot of touchedPlantablespotQuery) {
-				addTag(spot, 'openInventory')
+				addTag(spot, 'menuOpen')
 			}
 		}
 		if (playerControls.get('primary').justPressed) {

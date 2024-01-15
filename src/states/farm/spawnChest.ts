@@ -2,10 +2,10 @@ import { Quaternion, Vector3 } from 'three'
 import { kitchenApplianceBundle } from './kitchen'
 import { inventoryBundle } from '@/states/game/inventory'
 import { ecs } from '@/global/init'
-import { Interactable, InventoryTypes } from '@/global/entity'
+import { Interactable, MenuType } from '@/global/entity'
 
 export const spawnChest = () => {
-	const bundle = inventoryBundle(InventoryTypes.Chest, 16, 'chest1', Interactable.Open)
+	const bundle = inventoryBundle(MenuType.Chest, 16, 'chest1', Interactable.Open)
 	bundle.inventory.push({ name: 'carrot_seeds', quantity: 10 }, { name: 'beet_seeds', quantity: 10 })
 	ecs.add({
 		...bundle,

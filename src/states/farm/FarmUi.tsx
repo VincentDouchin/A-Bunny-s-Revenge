@@ -1,6 +1,7 @@
 import { Show } from 'solid-js'
 import { StateUi } from '../../ui/components/StateUi'
 import { DialogUi } from '../../ui/DialogUi'
+import { QuestUi } from './QuestUi'
 import { ui } from '@/global/init'
 import { playerInventoryQuery } from '@/utils/dialogHelpers'
 import { InventoryUi } from '@/states/farm/InventoryUi'
@@ -20,7 +21,8 @@ export const FarmUi = () => {
 						<DialogUi />
 						<CuttingBoardUi player={player()} />
 						<OvenUi player={player()} />
-						<SeedUi  player={player()}/>
+						<SeedUi player={player()} />
+						<QuestUi />
 						<ChestUi />
 					</StateUi>
 				)

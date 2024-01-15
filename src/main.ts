@@ -21,9 +21,8 @@ import { generateDungeon } from './states/dungeon/generateDungeon'
 import { killAnimation, killEntities } from './states/dungeon/health'
 import { spawnItems } from './states/dungeon/itemRoom'
 import { displayOnCuttinBoard } from './states/farm/CookingUi'
-import { closeCauldronInventory as closeInventory, openCauldronInventory } from './states/farm/cooking'
 import { harvestCrop, initPlantableSpotsInteractions, interactablePlantableSpot, plantSeed, updateCropsSave } from './states/farm/farming'
-import { closeInventory as closePlayerInventory, disableInventoryState, enableInventoryState, openInventory } from './states/farm/openInventory'
+import { closeMenu, closePlayerInventory, disableInventoryState, enableInventoryState, openMenu, openPlayerInventory } from './states/farm/openInventory'
 import { spawnNPC } from './states/farm/spawnNPC'
 import { talkToNPC } from './states/game/dialog'
 import { bobItems, collectItems } from './states/game/items'
@@ -63,11 +62,11 @@ campState
 	.addSubscriber(...interactablePlantableSpot)
 	.onEnter(spawnFarm, updateCropsSave, initPlantableSpotsInteractions, spawnCharacter, spawnLight, spawnSkyBox, spawnNPC, spawnChest)
 	.onUpdate(collideWithDoorCamp, displayOnCuttinBoard)
-	.onUpdate(runif(canPlayerMove, plantSeed, harvestCrop, openCauldronInventory, openInventory), savePlayerPosition)
+	.onUpdate(runif(canPlayerMove, plantSeed, harvestCrop, openMenu, openPlayerInventory), savePlayerPosition)
 	.onExit(despawnOfType('map'))
 openMenuState
 	.addSubscriber(disableInventoryState)
-	.onUpdate(closePlayerInventory, closeInventory)
+	.onUpdate(closePlayerInventory, closeMenu)
 
 genDungeonState
 	.onEnter(generateDungeon)
