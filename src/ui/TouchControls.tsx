@@ -35,7 +35,7 @@ export const TouchControls = () => {
 					newPos.clampLength(max, max)
 				}
 				setPixelOffset(newPos)
-				const input = newPos.clone().normalize()
+				const input = newPos.clone().normalize().multiplyScalar(newPos.length() / max)
 				const touchController = playerInputs()
 				if (touchController) {
 					touchController.set('left', input.x < 0 ? -input.x : 0)

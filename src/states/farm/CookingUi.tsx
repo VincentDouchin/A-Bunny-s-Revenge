@@ -11,7 +11,6 @@ import { Menu } from '@/ui/components/Menu'
 import { Modal } from '@/ui/components/Modal'
 import type { FarmUiProps } from '@/ui/types'
 import { addItemToPlayer } from '@/utils/dialogHelpers'
-import { range } from '@/utils/mapFunctions'
 
 const inventoryQuery = ecs.with('inventory', 'openInventory', 'menuInputs', 'inventorySize', 'inventoryId')
 export const InventoryTitle = (props: { children: string }) => <div style={{ 'font-size': '3rem', 'color': 'white', 'font-family': 'NanoPlus', 'text-transform': 'capitalize' }}>{props.children}</div>

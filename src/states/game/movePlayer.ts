@@ -1,6 +1,6 @@
 import { Vector3 } from 'three'
 import { params } from '@/global/context'
-import { ecs, time } from '@/global/init'
+import { ecs, inputManager, time } from '@/global/init'
 import { cutSceneState, openMenuState, pausedState } from '@/global/states'
 import { throttle } from '@/lib/state'
 import { updateSave } from '@/global/save'
@@ -15,7 +15,9 @@ export const movePlayer = () => {
 		movementForce.x -= playerControls.get('right').pressed
 		movementForce.z -= playerControls.get('backward').pressed
 		movementForce.z += playerControls.get('forward').pressed
-		movementForce.normalize()
+		if (inputManager.controls === 'keyboard') {
+			movementForce.normalize()
+		}
 	}
 }
 

@@ -1,5 +1,5 @@
 import type { With } from 'miniplex'
-import { For, Show, createEffect, createMemo, createSignal } from 'solid-js'
+import { For, Show, createMemo, createSignal } from 'solid-js'
 import { InventoryTitle } from './CookingUi'
 import type { Item } from '@/constants/items'
 import type { Quest, QuestName } from '@/constants/quests'
