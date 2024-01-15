@@ -4,26 +4,26 @@ import { createNoise2D } from 'simplex-noise'
 import { BoxGeometry, Color, Group, Mesh, MeshStandardMaterial, PlaneGeometry, Quaternion, Vector3 } from 'three'
 import { RoomType } from '../dungeon/dungeonTypes'
 import { enemyBundle } from '../dungeon/enemies'
-import { cauldronBundle } from '../farm/cooking'
 import { cropBundle } from '../farm/farming'
 import { spawnHouse } from '../farm/house'
 import { kitchenApplianceBundle } from '../farm/kitchen'
 import { playerBundle } from './spawnCharacter'
 import { doorBundle } from './spawnDoor'
+import type { EntityInstance, LayerInstance, Level } from '@/LDTKMap'
+import { instanceMesh } from '@/global/assetLoaders'
+import { Interactable, MenuType } from '@/global/entity'
+import { assets, ecs } from '@/global/init'
+import { menuInputMap } from '@/global/inputMaps'
+import { save } from '@/global/save'
+import type { DungeonRessources, FarmRessources } from '@/global/states'
+import type { direction } from '@/lib/directions'
+import { otherDirection } from '@/lib/directions'
+import { modelColliderBundle } from '@/lib/models'
+import type { System } from '@/lib/state'
+import { getRotationFromDirection } from '@/lib/transforms'
+import { GroundShader } from '@/shaders/GroundShader'
 import { inventoryBundle } from '@/states/game/inventory'
 import { getRandom, objectValues, range } from '@/utils/mapFunctions'
-import { GroundShader } from '@/shaders/GroundShader'
-import { getRotationFromDirection } from '@/lib/transforms'
-import type { System } from '@/lib/state'
-import { modelColliderBundle } from '@/lib/models'
-import { type direction, otherDirection } from '@/lib/directions'
-import type { DungeonRessources, FarmRessources } from '@/global/states'
-import { save } from '@/global/save'
-import { assets, ecs } from '@/global/init'
-import { Interactable, MenuType } from '@/global/entity'
-import { instanceMesh } from '@/global/assetLoaders'
-import type { EntityInstance, LayerInstance, Level } from '@/LDTKMap'
-import { menuInputMap } from '@/global/inputMaps'
 
 export const treeBundle = () => {
 	const model = getRandom(objectValues(assets.trees)).scene.clone()
@@ -47,10 +47,10 @@ interface FieldInstances {
 	door: {
 		direction: direction
 	}
-	counter: {
-		direction: direction
-		cutting_board: boolean
-	}
+	// counter: {
+	// 	direction: direction
+	// 	cutting_board: boolean
+	// }
 	oven: {
 		direction: direction
 	}
@@ -93,16 +93,20 @@ const spawnFarmEntities = (wasDungeon: boolean) => {
 			ecs.add({ ...doorBundle(1, data.direction), position, rotation })
 		},
 		cauldron: (position) => {
-			ecs.add({ ...cauldronBundle(), position })
+			ecs.add({
+				...inventoryBundle(MenuType.Oven, 3, 'oven1', Interactable.Cook),
+				...kitchenApplianceBundle('Stove1', 'front', 15),
+				position,
+			})
 		},
 		oven: (position, data) => {
 			ecs.add({
 				...inventoryBundle(MenuType.Oven, 3, 'oven1', Interactable.Cook),
-				...kitchenApplianceBundle('oven', data.direction),
-
+				...kitchenApplianceBundle('StoneOven', data.direction, 15),
 				position,
 			})
 		},
+
 		planter: (position, data) => {
 			const model = new Mesh(
 				new PlaneGeometry(60, 8),
@@ -134,19 +138,19 @@ const spawnFarmEntities = (wasDungeon: boolean) => {
 				}
 			}
 		},
-		counter: (position, data) => {
-			const counter = ecs.add({ position, ...kitchenApplianceBundle('kitchencounter_straight_B', data.direction) })
-			if (data.cutting_board) {
-				ecs.update(counter, inventoryBundle(MenuType.CuttingBoard, 1, 'cuttingBoard1', Interactable.Chop))
-				const model = assets.models.cutting_board.scene.clone()
-				model.scale.setScalar(4)
-				ecs.add({
-					parent: counter,
-					model,
-					position: new Vector3(0, counter.size.y, 0),
-				})
-			}
-		},
+		// counter: (position, data) => {
+		// 	const counter = ecs.add({ position, ...kitchenApplianceBundle('kitchencounter_straight_B', data.direction) })
+		// 	if (data.cutting_board) {
+		// 		ecs.update(counter, inventoryBundle(MenuType.CuttingBoard, 1, 'cuttingBoard1', Interactable.Chop))
+		// 		const model = assets.models.cutting_board.scene.clone()
+		// 		model.scale.setScalar(4)
+		// 		ecs.add({
+		// 			parent: counter,
+		// 			model,
+		// 			position: new Vector3(0, counter.size.y, 0),
+		// 		})
+		// 	}
+		// },
 		house: spawnHouse,
 		board: (position) => {
 			const model = assets.models.Bulliten.scene

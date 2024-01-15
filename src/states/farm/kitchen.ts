@@ -1,5 +1,5 @@
-import { RigidBodyType } from '@dimforge/rapier3d-compat'
 import type { models } from '@assets/assets'
+import { RigidBodyType } from '@dimforge/rapier3d-compat'
 import type { Entity } from '@/global/entity'
 import { assets } from '@/global/init'
 import type { direction } from '@/lib/directions'

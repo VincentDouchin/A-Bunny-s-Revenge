@@ -3,14 +3,14 @@ import { createSignal, onCleanup } from 'solid-js'
 import { render } from 'solid-js/web'
 
 export class UIManager {
-	root: Element
+	root: HTMLElement
 	constructor() {
 		const el = document.createElement('div')
 		el.style.position = 'fixed'
 		el.style.inset = '0'
 		el.style.display = 'grid'
-		// el.style.pointerEvents = 'none'
 		el.style.zIndex = '1'
+		el.classList.add('no-events')
 		document.body.appendChild(el)
 		this.root = el
 	}

@@ -28,6 +28,7 @@ export const initThree = () => {
 	cssRenderer.domElement.style.top = '0'
 	cssRenderer.domElement.style.imageRendering = 'pixelated'
 	cssRenderer.domElement.style.pointerEvents = 'none'
+	cssRenderer.domElement.classList.add('no-events')
 	document.body.appendChild(cssRenderer.domElement)
 	composer.addPass(new RenderPass(scene, camera))
 

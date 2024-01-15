@@ -108,3 +108,9 @@ button.button{
 button.button:hover {
   outline:solid 0.2rem hsl(0, 0%, 100%,0.3);
 }
+.no-events{
+  pointer-events:none;
+}
+*:not(.no-events){
+  pointer-events:auto
+}

@@ -5,12 +5,12 @@
 		"doc": "https://ldtk.io/json",
 		"schema": "https://ldtk.io/files/JSON_SCHEMA.json",
 		"appAuthor": "Sebastien 'deepnight' Benard",
-		"appVersion": "1.4.1",
+		"appVersion": "1.5.2",
 		"url": "https://ldtk.io"
 	},
 	"iid": "3bed8840-8990-11ee-b8dd-a3e6ab2f7048",
-	"jsonVersion": "1.4.1",
-	"appBuildId": 471015,
+	"jsonVersion": "1.5.2",
+	"appBuildId": 473624,
 	"nextUid": 22,
 	"identifierStyle": "Lowercase",
 	"toc": [],
@@ -39,7 +39,7 @@
 	"levelNamePattern": "Level_%idx",
 	"tutorialDesc": null,
 	"customCommands": [],
-	"flags": [],
+	"flags": ["ExportOldTableOfContentData"],
 	"defs": { "layers": [
 		{
 			"__type": "Entities",
@@ -64,13 +64,17 @@
 			"parallaxScaling": true,
 			"requiredTags": [],
 			"excludedTags": [],
+			"autoTilesKilledByOtherLayerUid": null,
+			"uiFilterTags": [],
+			"useAsyncRender": false,
 			"intGridValues": [],
 			"intGridValuesGroups": [],
 			"autoRuleGroups": [],
 			"autoSourceLayerDefUid": null,
 			"tilesetDefUid": null,
 			"tilePivotX": 0,
-			"tilePivotY": 0
+			"tilePivotY": 0,
+			"biomeFieldUid": null
 		},
 		{
 			"__type": "IntGrid",
@@ -95,6 +99,9 @@
 			"parallaxScaling": true,
 			"requiredTags": [],
 			"excludedTags": [],
+			"autoTilesKilledByOtherLayerUid": null,
+			"uiFilterTags": [],
+			"useAsyncRender": false,
 			"intGridValues": [
 				{ "value": 1, "identifier": "Tree", "color": "#265C42", "tile": null, "groupUid": 0 },
 				{ "value": 2, "identifier": "Grass", "color": "#63C74D", "tile": null, "groupUid": 0 }
@@ -104,7 +111,8 @@
 			"autoSourceLayerDefUid": null,
 			"tilesetDefUid": null,
 			"tilePivotX": 0,
-			"tilePivotY": 0
+			"tilePivotY": 0,
+			"biomeFieldUid": null
 		}
 	], "entities": [
 		{
@@ -112,6 +120,7 @@
 			"uid": 3,
 			"tags": [],
 			"exportToToc": false,
+			"allowOutOfBounds": false,
 			"doc": "Door",
 			"width": 16,
 			"height": 16,
@@ -161,6 +170,8 @@
 					"editorTextSuffix": null,
 					"editorTextPrefix": null,
 					"useForSmartColor": false,
+					"exportToToc": false,
+					"searchable": false,
 					"min": null,
 					"max": null,
 					"regex": null,
@@ -182,6 +193,7 @@
 			"uid": 7,
 			"tags": [],
 			"exportToToc": false,
+			"allowOutOfBounds": false,
 			"doc": null,
 			"width": 16,
 			"height": 16,
@@ -216,6 +228,7 @@
 			"uid": 10,
 			"tags": [],
 			"exportToToc": false,
+			"allowOutOfBounds": false,
 			"doc": null,
 			"width": 16,
 			"height": 16,
@@ -250,6 +263,7 @@
 			"uid": 12,
 			"tags": [],
 			"exportToToc": false,
+			"allowOutOfBounds": false,
 			"doc": null,
 			"width": 16,
 			"height": 16,
@@ -299,6 +313,8 @@
 					"editorTextSuffix": null,
 					"editorTextPrefix": null,
 					"useForSmartColor": false,
+					"exportToToc": false,
+					"searchable": false,
 					"min": null,
 					"max": null,
 					"regex": null,
@@ -337,6 +353,8 @@
 					"editorTextSuffix": null,
 					"editorTextPrefix": null,
 					"useForSmartColor": false,
+					"exportToToc": false,
+					"searchable": false,
 					"min": null,
 					"max": null,
 					"regex": null,
@@ -358,6 +376,7 @@
 			"uid": 17,
 			"tags": [],
 			"exportToToc": false,
+			"allowOutOfBounds": false,
 			"doc": null,
 			"width": 16,
 			"height": 16,
@@ -407,6 +426,8 @@
 					"editorTextSuffix": null,
 					"editorTextPrefix": null,
 					"useForSmartColor": false,
+					"exportToToc": false,
+					"searchable": false,
 					"min": null,
 					"max": null,
 					"regex": null,
@@ -428,6 +449,7 @@
 			"uid": 20,
 			"tags": [],
 			"exportToToc": false,
+			"allowOutOfBounds": false,
 			"doc": null,
 			"width": 16,
 			"height": 16,
@@ -462,6 +484,7 @@
 			"uid": 21,
 			"tags": [],
 			"exportToToc": false,
+			"allowOutOfBounds": false,
 			"doc": null,
 			"width": 16,
 			"height": 16,
@@ -541,6 +564,8 @@
 			"editorTextSuffix": null,
 			"editorTextPrefix": null,
 			"useForSmartColor": false,
+			"exportToToc": false,
+			"searchable": false,
 			"min": null,
 			"max": null,
 			"regex": null,
@@ -612,8 +637,6 @@
 							"__tags": [],
 							"__tile": { "tilesetUid": 8, "x": 256, "y": 80, "w": 16, "h": 16 },
 							"__smartColor": "#BE4A2F",
-							"__worldX": 88,
-							"__worldY": 280,
 							"iid": "c31c5f00-8990-11ee-bfc2-252765f1c6b6",
 							"width": 16,
 							"height": 16,
@@ -622,7 +645,9 @@
 							"fieldInstances": [{ "__identifier": "direction", "__type": "LocalEnum.direction", "__value": "left", "__tile": null, "defUid": 5, "realEditorValues": [{
 								"id": "V_String",
 								"params": ["left"]
-							}] }]
+							}] }],
+							"__worldX": 88,
+							"__worldY": 280
 						},
 						{
 							"__identifier": "door",
@@ -631,8 +656,6 @@
 							"__tags": [],
 							"__tile": { "tilesetUid": 8, "x": 256, "y": 80, "w": 16, "h": 16 },
 							"__smartColor": "#BE4A2F",
-							"__worldX": 440,
-							"__worldY": 248,
 							"iid": "c5bbc200-8990-11ee-bfc2-af3561d116e7",
 							"width": 16,
 							"height": 16,
@@ -641,7 +664,9 @@
 							"fieldInstances": [{ "__identifier": "direction", "__type": "LocalEnum.direction", "__value": "right", "__tile": null, "defUid": 5, "realEditorValues": [{
 								"id": "V_String",
 								"params": ["right"]
-							}] }]
+							}] }],
+							"__worldX": 440,
+							"__worldY": 248
 						},
 						{
 							"__identifier": "door",
@@ -650,8 +675,6 @@
 							"__tags": [],
 							"__tile": { "tilesetUid": 8, "x": 256, "y": 80, "w": 16, "h": 16 },
 							"__smartColor": "#BE4A2F",
-							"__worldX": 280,
-							"__worldY": 440,
 							"iid": "c8019350-8990-11ee-bfc2-bd0b4a6515d0",
 							"width": 16,
 							"height": 16,
@@ -660,7 +683,9 @@
 							"fieldInstances": [{ "__identifier": "direction", "__type": "LocalEnum.direction", "__value": "back", "__tile": null, "defUid": 5, "realEditorValues": [{
 								"id": "V_String",
 								"params": ["back"]
-							}] }]
+							}] }],
+							"__worldX": 280,
+							"__worldY": 440
 						},
 						{
 							"__identifier": "door",
@@ -669,8 +694,6 @@
 							"__tags": [],
 							"__tile": { "tilesetUid": 8, "x": 256, "y": 80, "w": 16, "h": 16 },
 							"__smartColor": "#BE4A2F",
-							"__worldX": 216,
-							"__worldY": 72,
 							"iid": "ca17f030-8990-11ee-bfc2-4509240cda8d",
 							"width": 16,
 							"height": 16,
@@ -679,7 +702,9 @@
 							"fieldInstances": [{ "__identifier": "direction", "__type": "LocalEnum.direction", "__value": "front", "__tile": null, "defUid": 5, "realEditorValues": [{
 								"id": "V_String",
 								"params": ["front"]
-							}] }]
+							}] }],
+							"__worldX": 216,
+							"__worldY": 72
 						}
 					]
 				},
@@ -794,8 +819,6 @@
 							"__tags": [],
 							"__tile": { "tilesetUid": 8, "x": 256, "y": 80, "w": 16, "h": 16 },
 							"__smartColor": "#BE4A2F",
-							"__worldX": 968,
-							"__worldY": 72,
 							"iid": "a855aa50-8990-11ee-bfc2-adb1c929fedc",
 							"width": 16,
 							"height": 16,
@@ -804,7 +827,9 @@
 							"fieldInstances": [{ "__identifier": "direction", "__type": "LocalEnum.direction", "__value": "front", "__tile": null, "defUid": 5, "realEditorValues": [{
 								"id": "V_String",
 								"params": ["front"]
-							}] }]
+							}] }],
+							"__worldX": 968,
+							"__worldY": 72
 						},
 						{
 							"__identifier": "house",
@@ -813,244 +838,14 @@
 							"__tags": [],
 							"__tile": null,
 							"__smartColor": "#D77643",
-							"__worldX": 1160,
-							"__worldY": 200,
 							"iid": "b1050600-8990-11ee-bfc2-5dfeb4f035f9",
 							"width": 80,
 							"height": 64,
 							"defUid": 10,
 							"px": [648,200],
-							"fieldInstances": []
-						},
-						{
-							"__identifier": "counter",
-							"__grid": [13,12],
-							"__pivot": [0.5,0.5],
-							"__tags": [],
-							"__tile": null,
-							"__smartColor": "#EAD4AA",
-							"__worldX": 728,
-							"__worldY": 200,
-							"iid": "a9024090-8990-11ee-9729-195b8e8aecde",
-							"width": 16,
-							"height": 16,
-							"defUid": 12,
-							"px": [216,200],
-							"fieldInstances": [
-								{ "__identifier": "direction", "__type": "LocalEnum.direction", "__value": "right", "__tile": null, "defUid": 14, "realEditorValues": [{
-									"id": "V_String",
-									"params": ["right"]
-								}] },
-								{ "__identifier": "cutting_board", "__type": "Bool", "__value": false, "__tile": null, "defUid": 19, "realEditorValues": [] }
-							]
-						},
-						{
-							"__identifier": "counter",
-							"__grid": [13,13],
-							"__pivot": [0.5,0.5],
-							"__tags": [],
-							"__tile": null,
-							"__smartColor": "#EAD4AA",
-							"__worldX": 728,
-							"__worldY": 216,
-							"iid": "a978f730-8990-11ee-9729-ada348b07b74",
-							"width": 16,
-							"height": 16,
-							"defUid": 12,
-							"px": [216,216],
-							"fieldInstances": [
-								{ "__identifier": "direction", "__type": "LocalEnum.direction", "__value": "right", "__tile": null, "defUid": 14, "realEditorValues": [{
-									"id": "V_String",
-									"params": ["right"]
-								}] },
-								{ "__identifier": "cutting_board", "__type": "Bool", "__value": true, "__tile": null, "defUid": 19, "realEditorValues": [{
-									"id": "V_Bool",
-									"params": [ true ]
-								}] }
-							]
-						},
-						{
-							"__identifier": "counter",
-							"__grid": [13,14],
-							"__pivot": [0.5,0.5],
-							"__tags": [],
-							"__tile": null,
-							"__smartColor": "#EAD4AA",
-							"__worldX": 728,
-							"__worldY": 232,
-							"iid": "aa186b80-8990-11ee-9729-631ce185fc5c",
-							"width": 16,
-							"height": 16,
-							"defUid": 12,
-							"px": [216,232],
-							"fieldInstances": [
-								{ "__identifier": "direction", "__type": "LocalEnum.direction", "__value": "right", "__tile": null, "defUid": 14, "realEditorValues": [{
-									"id": "V_String",
-									"params": ["right"]
-								}] },
-								{ "__identifier": "cutting_board", "__type": "Bool", "__value": false, "__tile": null, "defUid": 19, "realEditorValues": [] }
-							]
-						},
-						{
-							"__identifier": "counter",
-							"__grid": [14,11],
-							"__pivot": [0.5,0.5],
-							"__tags": [],
-							"__tile": null,
-							"__smartColor": "#EAD4AA",
-							"__worldX": 744,
-							"__worldY": 184,
-							"iid": "bb213de0-8990-11ee-9729-c1250ef71435",
-							"width": 16,
-							"height": 16,
-							"defUid": 12,
-							"px": [232,184],
-							"fieldInstances": [
-								{ "__identifier": "direction", "__type": "LocalEnum.direction", "__value": "back", "__tile": null, "defUid": 14, "realEditorValues": [] },
-								{ "__identifier": "cutting_board", "__type": "Bool", "__value": false, "__tile": null, "defUid": 19, "realEditorValues": [] }
-							]
-						},
-						{
-							"__identifier": "counter",
-							"__grid": [15,11],
-							"__pivot": [0.5,0.5],
-							"__tags": [],
-							"__tile": null,
-							"__smartColor": "#EAD4AA",
-							"__worldX": 760,
-							"__worldY": 184,
-							"iid": "bb9646d0-8990-11ee-9729-63b9991aecb6",
-							"width": 16,
-							"height": 16,
-							"defUid": 12,
-							"px": [248,184],
-							"fieldInstances": [
-								{ "__identifier": "direction", "__type": "LocalEnum.direction", "__value": "back", "__tile": null, "defUid": 14, "realEditorValues": [] },
-								{ "__identifier": "cutting_board", "__type": "Bool", "__value": true, "__tile": null, "defUid": 19, "realEditorValues": [{
-									"id": "V_Bool",
-									"params": [ true ]
-								}] }
-							]
-						},
-						{
-							"__identifier": "counter",
-							"__grid": [16,11],
-							"__pivot": [0.5,0.5],
-							"__tags": [],
-							"__tile": null,
-							"__smartColor": "#EAD4AA",
-							"__worldX": 776,
-							"__worldY": 184,
-							"iid": "bc07f460-8990-11ee-9729-c193503d7160",
-							"width": 16,
-							"height": 16,
-							"defUid": 12,
-							"px": [264,184],
-							"fieldInstances": [
-								{ "__identifier": "direction", "__type": "LocalEnum.direction", "__value": "back", "__tile": null, "defUid": 14, "realEditorValues": [] },
-								{ "__identifier": "cutting_board", "__type": "Bool", "__value": false, "__tile": null, "defUid": 19, "realEditorValues": [] }
-							]
-						},
-						{
-							"__identifier": "counter",
-							"__grid": [17,12],
-							"__pivot": [0.5,0.5],
-							"__tags": [],
-							"__tile": null,
-							"__smartColor": "#EAD4AA",
-							"__worldX": 792,
-							"__worldY": 200,
-							"iid": "bc870f70-8990-11ee-9729-0f793df62322",
-							"width": 16,
-							"height": 16,
-							"defUid": 12,
-							"px": [280,200],
-							"fieldInstances": [
-								{ "__identifier": "direction", "__type": "LocalEnum.direction", "__value": "left", "__tile": null, "defUid": 14, "realEditorValues": [{
-									"id": "V_String",
-									"params": ["left"]
-								}] },
-								{ "__identifier": "cutting_board", "__type": "Bool", "__value": false, "__tile": null, "defUid": 19, "realEditorValues": [] }
-							]
-						},
-						{
-							"__identifier": "counter",
-							"__grid": [17,14],
-							"__pivot": [0.5,0.5],
-							"__tags": [],
-							"__tile": null,
-							"__smartColor": "#EAD4AA",
-							"__worldX": 792,
-							"__worldY": 232,
-							"iid": "bd6bca20-8990-11ee-9729-bf7dafe1742b",
-							"width": 16,
-							"height": 16,
-							"defUid": 12,
-							"px": [280,232],
-							"fieldInstances": [
-								{ "__identifier": "direction", "__type": "LocalEnum.direction", "__value": "left", "__tile": null, "defUid": 14, "realEditorValues": [{
-									"id": "V_String",
-									"params": ["left"]
-								}] },
-								{ "__identifier": "cutting_board", "__type": "Bool", "__value": false, "__tile": null, "defUid": 19, "realEditorValues": [] }
-							]
-						},
-						{
-							"__identifier": "counter",
-							"__grid": [13,11],
-							"__pivot": [0.5,0.5],
-							"__tags": [],
-							"__tile": null,
-							"__smartColor": "#EAD4AA",
-							"__worldX": 728,
-							"__worldY": 184,
-							"iid": "612fec40-8990-11ee-9729-b93c5f5ace0a",
-							"width": 16,
-							"height": 16,
-							"defUid": 12,
-							"px": [216,184],
-							"fieldInstances": [
-								{ "__identifier": "direction", "__type": "LocalEnum.direction", "__value": "back", "__tile": null, "defUid": 14, "realEditorValues": [] },
-								{ "__identifier": "cutting_board", "__type": "Bool", "__value": false, "__tile": null, "defUid": 19, "realEditorValues": [] }
-							]
-						},
-						{
-							"__identifier": "counter",
-							"__grid": [17,11],
-							"__pivot": [0.5,0.5],
-							"__tags": [],
-							"__tile": null,
-							"__smartColor": "#EAD4AA",
-							"__worldX": 792,
-							"__worldY": 184,
-							"iid": "61daab30-8990-11ee-9729-cba4e6fbf348",
-							"width": 16,
-							"height": 16,
-							"defUid": 12,
-							"px": [280,184],
-							"fieldInstances": [
-								{ "__identifier": "direction", "__type": "LocalEnum.direction", "__value": "back", "__tile": null, "defUid": 14, "realEditorValues": [] },
-								{ "__identifier": "cutting_board", "__type": "Bool", "__value": false, "__tile": null, "defUid": 19, "realEditorValues": [] }
-							]
-						},
-						{
-							"__identifier": "oven",
-							"__grid": [17,13],
-							"__pivot": [0.5,0.5],
-							"__tags": [],
-							"__tile": null,
-							"__smartColor": "#E4A672",
-							"__worldX": 792,
-							"__worldY": 216,
-							"iid": "00ab1a10-8990-11ee-9729-81549c30f3a1",
-							"width": 16,
-							"height": 16,
-							"defUid": 17,
-							"px": [280,216],
-							"fieldInstances": [{ "__identifier": "direction", "__type": "LocalEnum.direction", "__value": "left", "__tile": null, "defUid": 18, "realEditorValues": [{
-								"id": "V_String",
-								"params": ["left"]
-							}] }]
+							"fieldInstances": [],
+							"__worldX": 1160,
+							"__worldY": 200
 						},
 						{
 							"__identifier": "planter",
@@ -1059,14 +854,14 @@
 							"__tags": [],
 							"__tile": null,
 							"__smartColor": "#733E39",
-							"__worldX": 824,
-							"__worldY": 328,
 							"iid": "84d35730-8990-11ee-b6fe-c9ed5bc029a8",
 							"width": 160,
 							"height": 16,
 							"defUid": 20,
 							"px": [312,328],
-							"fieldInstances": []
+							"fieldInstances": [],
+							"__worldX": 824,
+							"__worldY": 328
 						},
 						{
 							"__identifier": "planter",
@@ -1075,14 +870,14 @@
 							"__tags": [],
 							"__tile": null,
 							"__smartColor": "#733E39",
-							"__worldX": 824,
-							"__worldY": 296,
 							"iid": "8fd136c0-8990-11ee-b6fe-876cdd7c0c74",
 							"width": 160,
 							"height": 16,
 							"defUid": 20,
 							"px": [312,296],
-							"fieldInstances": []
+							"fieldInstances": [],
+							"__worldX": 824,
+							"__worldY": 296
 						},
 						{
 							"__identifier": "planter",
@@ -1091,14 +886,14 @@
 							"__tags": [],
 							"__tile": null,
 							"__smartColor": "#733E39",
-							"__worldX": 824,
-							"__worldY": 360,
 							"iid": "91674010-8990-11ee-b6fe-1be06ebf8d61",
 							"width": 160,
 							"height": 16,
 							"defUid": 20,
 							"px": [312,360],
-							"fieldInstances": []
+							"fieldInstances": [],
+							"__worldX": 824,
+							"__worldY": 360
 						},
 						{
 							"__identifier": "planter",
@@ -1107,14 +902,14 @@
 							"__tags": [],
 							"__tile": null,
 							"__smartColor": "#733E39",
-							"__worldX": 1032,
-							"__worldY": 360,
 							"iid": "94036ec0-8990-11ee-b6fe-b7a4c3b6b6c1",
 							"width": 160,
 							"height": 16,
 							"defUid": 20,
 							"px": [520,360],
-							"fieldInstances": []
+							"fieldInstances": [],
+							"__worldX": 1032,
+							"__worldY": 360
 						},
 						{
 							"__identifier": "planter",
@@ -1123,14 +918,14 @@
 							"__tags": [],
 							"__tile": null,
 							"__smartColor": "#733E39",
-							"__worldX": 1032,
-							"__worldY": 328,
 							"iid": "95ca7320-8990-11ee-b6fe-3b982680865a",
 							"width": 160,
 							"height": 16,
 							"defUid": 20,
 							"px": [520,328],
-							"fieldInstances": []
+							"fieldInstances": [],
+							"__worldX": 1032,
+							"__worldY": 328
 						},
 						{
 							"__identifier": "planter",
@@ -1139,14 +934,14 @@
 							"__tags": [],
 							"__tile": null,
 							"__smartColor": "#733E39",
-							"__worldX": 1032,
-							"__worldY": 296,
 							"iid": "973b4130-8990-11ee-b6fe-ef6728cbe4b1",
 							"width": 160,
 							"height": 16,
 							"defUid": 20,
 							"px": [520,296],
-							"fieldInstances": []
+							"fieldInstances": [],
+							"__worldX": 1032,
+							"__worldY": 296
 						},
 						{
 							"__identifier": "board",
@@ -1155,14 +950,49 @@
 							"__tags": [],
 							"__tile": null,
 							"__smartColor": "#FEAE34",
-							"__worldX": 888,
-							"__worldY": 152,
 							"iid": "97d02250-b0a0-11ee-a6f5-7730fca0036a",
 							"width": 16,
 							"height": 16,
 							"defUid": 21,
 							"px": [376,152],
-							"fieldInstances": []
+							"fieldInstances": [],
+							"__worldX": 888,
+							"__worldY": 152
+						},
+						{
+							"__identifier": "oven",
+							"__grid": [16,10],
+							"__pivot": [0.5,0.5],
+							"__tags": [],
+							"__tile": null,
+							"__smartColor": "#E4A672",
+							"iid": "aa261050-b0a0-11ee-b551-0f56e133754a",
+							"width": 16,
+							"height": 16,
+							"defUid": 17,
+							"px": [264,168],
+							"fieldInstances": [{ "__identifier": "direction", "__type": "LocalEnum.direction", "__value": "back", "__tile": null, "defUid": 18, "realEditorValues": [{
+								"id": "V_String",
+								"params": ["back"]
+							}] }],
+							"__worldX": 776,
+							"__worldY": 168
+						},
+						{
+							"__identifier": "cauldron",
+							"__grid": [14,12],
+							"__pivot": [0.5,0.5],
+							"__tags": [],
+							"__tile": { "tilesetUid": 8, "x": 224, "y": 256, "w": 16, "h": 16 },
+							"__smartColor": "#181425",
+							"iid": "30d3c160-b0a0-11ee-b551-e78bf7cc7329",
+							"width": 16,
+							"height": 16,
+							"defUid": 7,
+							"px": [232,200],
+							"fieldInstances": [],
+							"__worldX": 744,
+							"__worldY": 200
 						}
 					]
 				},
@@ -1309,8 +1139,6 @@
 							"__tags": [],
 							"__tile": { "tilesetUid": 8, "x": 256, "y": 80, "w": 16, "h": 16 },
 							"__smartColor": "#BE4A2F",
-							"__worldX": -664,
-							"__worldY": 296,
 							"iid": "4702d2e0-8990-11ee-be47-dd1e4e3e66b1",
 							"width": 16,
 							"height": 16,
@@ -1319,7 +1147,9 @@
 							"fieldInstances": [{ "__identifier": "direction", "__type": "LocalEnum.direction", "__value": "left", "__tile": null, "defUid": 5, "realEditorValues": [{
 								"id": "V_String",
 								"params": ["left"]
-							}] }]
+							}] }],
+							"__worldX": -664,
+							"__worldY": 296
 						},
 						{
 							"__identifier": "door",
@@ -1328,8 +1158,6 @@
 							"__tags": [],
 							"__tile": { "tilesetUid": 8, "x": 256, "y": 80, "w": 16, "h": 16 },
 							"__smartColor": "#BE4A2F",
-							"__worldX": -408,
-							"__worldY": 72,
 							"iid": "4986e5b0-8990-11ee-be47-7dad2167a00f",
 							"width": 16,
 							"height": 16,
@@ -1338,7 +1166,9 @@
 							"fieldInstances": [{ "__identifier": "direction", "__type": "LocalEnum.direction", "__value": "front", "__tile": null, "defUid": 5, "realEditorValues": [{
 								"id": "V_String",
 								"params": ["front"]
-							}] }]
+							}] }],
+							"__worldX": -408,
+							"__worldY": 72
 						},
 						{
 							"__identifier": "door",
@@ -1347,8 +1177,6 @@
 							"__tags": [],
 							"__tile": { "tilesetUid": 8, "x": 256, "y": 80, "w": 16, "h": 16 },
 							"__smartColor": "#BE4A2F",
-							"__worldX": -200,
-							"__worldY": 440,
 							"iid": "4be5e450-8990-11ee-be47-d78422b45723",
 							"width": 16,
 							"height": 16,
@@ -1357,7 +1185,9 @@
 							"fieldInstances": [{ "__identifier": "direction", "__type": "LocalEnum.direction", "__value": "back", "__tile": null, "defUid": 5, "realEditorValues": [{
 								"id": "V_String",
 								"params": ["back"]
-							}] }]
+							}] }],
+							"__worldX": -200,
+							"__worldY": 440
 						},
 						{
 							"__identifier": "door",
@@ -1366,8 +1196,6 @@
 							"__tags": [],
 							"__tile": { "tilesetUid": 8, "x": 256, "y": 80, "w": 16, "h": 16 },
 							"__smartColor": "#BE4A2F",
-							"__worldX": -72,
-							"__worldY": 200,
 							"iid": "4eeff000-8990-11ee-be47-cb3ccacd9613",
 							"width": 16,
 							"height": 16,
@@ -1376,7 +1204,9 @@
 							"fieldInstances": [{ "__identifier": "direction", "__type": "LocalEnum.direction", "__value": "right", "__tile": null, "defUid": 5, "realEditorValues": [{
 								"id": "V_String",
 								"params": ["right"]
-							}] }]
+							}] }],
+							"__worldX": -72,
+							"__worldY": 200
 						}
 					]
 				},

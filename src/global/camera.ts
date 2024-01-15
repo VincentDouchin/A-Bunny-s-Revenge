@@ -17,7 +17,7 @@ const cameraTargetQuery = ecs.with('cameratarget', 'worldPosition')
 export const moveCamera = () => {
 	for (const { position, camera } of cameraQuery) {
 		for (const { worldPosition } of cameraTargetQuery) {
-			camera.lookAt(worldPosition)
+			camera.lookAt(new Vector3(0, 0, 10).add(worldPosition))
 			position.x = worldPosition.x + params.cameraOffsetX
 			position.y = worldPosition.y + params.cameraOffsetY
 			position.z = worldPosition.z + params.cameraOffsetZ

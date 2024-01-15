@@ -7,6 +7,7 @@ import { Interactable, MenuType } from '@/global/entity'
 export const spawnChest = () => {
 	const bundle = inventoryBundle(MenuType.Chest, 16, 'chest1', Interactable.Open)
 	bundle.inventory.push({ name: 'carrot_seeds', quantity: 10 }, { name: 'beet_seeds', quantity: 10 })
+
 	ecs.add({
 		...bundle,
 		...kitchenApplianceBundle('Chest', 'front', 10),

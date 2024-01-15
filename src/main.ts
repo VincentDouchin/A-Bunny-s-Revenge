@@ -13,7 +13,6 @@ import { addToScene } from './lib/registerComponents'
 import { runIf } from './lib/state'
 import { runif } from './lib/systemset'
 import { transformsPlugin } from './lib/transforms'
-import { uiPlugin } from './lib/uiPlugin'
 import { startTweens, updateTweens } from './lib/updateTween'
 import { playerAttack } from './states/dungeon/battle'
 import { enemyAttackPlayer } from './states/dungeon/enemies'
@@ -42,7 +41,7 @@ import { spawnChest } from './states/farm/spawnChest'
 registerSW({ immediate: true, onNeedRefresh: () => window.location.reload() })
 
 coreState
-	.addPlugins(hierarchyPlugin, physicsPlugin, transformsPlugin, addToScene('camera', 'light', 'mesh', 'model', 'dialogContainer', 'batchRenderer', 'emitter', 'interactionContainer'), updateModels, uiPlugin, particlesPlugin)
+	.addPlugins(hierarchyPlugin, physicsPlugin, transformsPlugin, addToScene('camera', 'light', 'mesh', 'model', 'dialogContainer', 'batchRenderer', 'emitter', 'interactionContainer'), updateModels, particlesPlugin)
 	.addSubscriber(...target, startTweens, addDebugCollider)
 	.onEnter(initThree, initCamera, ui.render(UI))
 	.onPreUpdate(coroutines.tick, moveCamera)
