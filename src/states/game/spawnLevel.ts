@@ -136,7 +136,7 @@ const spawnFarmEntities = (wasDungeon: boolean) => {
 			const counter = ecs.add({ position, ...kitchenApplianceBundle('kitchencounter_straight_B', data.direction) })
 			if (data.cutting_board) {
 				ecs.update(counter, inventoryBundle(InventoryTypes.CuttingBoard, 1, 'cuttingBoard1', Interactable.Chop))
-				const model = assets.kitchen.cutting_board.scene.clone()
+				const model = assets.models.cutting_board.scene.clone()
 				model.scale.setScalar(4)
 				ecs.add({
 					parent: counter,

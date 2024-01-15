@@ -3,7 +3,7 @@ import toneMapTreessrc from '@assets/_singles/tonemap-trees.png'
 import type { ColorRepresentation, Material } from 'three'
 import { Mesh, MeshStandardMaterial, NearestFilter, TextureLoader } from 'three'
 import type { GLTF } from 'three/examples/jsm/loaders/GLTFLoader'
-import type { characters, items, kitchen, particles, trees } from '@assets/assets'
+import type { characters, items, models, particles, trees } from '@assets/assets'
 import type { stringCaster } from './assetLoaders'
 import { getExtension, getFileName, loadGLB, loadImage, textureLoader } from './assetLoaders'
 import type { crops } from './entity'
@@ -124,7 +124,7 @@ const buttonsLoader = async (glob: Record<string, any>) => {
 export const loadAssets = async () => ({
 	characters: await typeGlob<characters>(import.meta.glob('@assets/characters/*.glb', { as: 'url' }))(loadGLBAsToon()),
 	// characters: await loadGLBAsToon<characters>(import.meta.glob('@assets/characters/*.glb', { as: 'url' })),
-	kitchen: await typeGlob<kitchen>(import.meta.glob('@assets/kitchen/*.glb', { as: 'url' }))(loadGLBAsToon()),
+	models: await typeGlob<models>(import.meta.glob('@assets/kitchen/*.glb', { as: 'url' }))(loadGLBAsToon()),
 	skybox: await skyboxLoader(import.meta.glob('@assets/skybox/*.png', { eager: true, import: 'default' })),
 	trees: await typeGlob<trees>(import.meta.glob('@assets/trees/*.glb', { as: 'url' }))(loadGLBAsToon({ src: toneMapTreessrc })),
 	rocks: await typeGlob(import.meta.glob('@assets/rocks/*.glb', { as: 'url' }))(loadGLBAsToon()),
