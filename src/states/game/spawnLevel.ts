@@ -1,7 +1,7 @@
 import { ColliderDesc, RigidBodyDesc, RigidBodyType } from '@dimforge/rapier3d-compat'
 import { between } from 'randomish'
 import { createNoise2D } from 'simplex-noise'
-import { BoxGeometry, Color, Group, Mesh, MeshStandardMaterial, PlaneGeometry, Quaternion, Vector3 } from 'three'
+import { BoxGeometry, Color, Group, Mesh, PlaneGeometry, PointLight, Quaternion, Vector3 } from 'three'
 import { RoomType } from '../dungeon/dungeonTypes'
 import { enemyBundle } from '../dungeon/enemies'
 import { cropBundle } from '../farm/farming'
@@ -21,7 +21,7 @@ import { otherDirection } from '@/lib/directions'
 import { modelColliderBundle } from '@/lib/models'
 import type { System } from '@/lib/state'
 import { getRotationFromDirection } from '@/lib/transforms'
-import { GroundShader } from '@/shaders/GroundShader'
+import { GroundShader, GroundShader2 } from '@/shaders/GroundShader'
 import { inventoryBundle } from '@/states/game/inventory'
 import { getRandom, objectValues, range } from '@/utils/mapFunctions'
 
@@ -58,6 +58,7 @@ interface FieldInstances {
 		dungeon: boolean
 	}
 	house: Record<string, unknown>
+	lamp: Record<string, unknown>
 	board: Record<string, unknown>
 	cauldron: Record<string, unknown>
 	planter: Record<string, unknown>
@@ -110,8 +111,7 @@ const spawnFarmEntities = (wasDungeon: boolean) => {
 		planter: (position, data) => {
 			const model = new Mesh(
 				new PlaneGeometry(60, 8),
-				new MeshStandardMaterial({ color: 0x996633 }),
-				// new PlanterMaterial({ color: 0x996633, size: new Vector2(60, 8) }),
+				new GroundShader({ color: 0x996633 }),
 			)
 			model.rotation.x = -Math.PI / 2
 			model.position.y = 1
@@ -168,6 +168,20 @@ const spawnFarmEntities = (wasDungeon: boolean) => {
 				...menuInputMap(),
 			})
 		},
+		lamp: (position) => {
+			const model = assets.models.Lamp.scene
+			model.scale.setScalar(15)
+			model.traverse((node) => {
+				if (node.name === 'light') {
+					const light = new PointLight(0xFFFFFF, 2, 30, 0.01)
+					light.castShadow = true
+					node.add(light)
+					console.log(light)
+				}
+				node.castShadow = false
+			})
+			ecs.add({ model, position })
+		},
 	})
 }
 const spawnGroundAndTrees = (layer: LayerInstance) => {
@@ -176,12 +190,15 @@ const spawnGroundAndTrees = (layer: LayerInstance) => {
 	const h = layer.__cHei * SCALE
 	const groundMesh = new Mesh(
 		new BoxGeometry(w, 1, h),
-		new GroundShader(new Color(0x26854C)),
+		// groundShader(),
+		new GroundShader2({ color: new Color(0x26854C) }),
+		// new GroundShader(new Color(0x26854C)),
 	)
+
+	// setTimeout(() => groundMesh.material.shader!.uniforms.is_ground.value = 1, 1000)
 	groundMesh.receiveShadow = true
 	ecs.add({
 		inMap: true,
-		mesh: groundMesh,
 		position: new Vector3(),
 		...modelColliderBundle(groundMesh, RigidBodyType.Fixed),
 	})

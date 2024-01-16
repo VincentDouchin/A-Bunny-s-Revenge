@@ -2,7 +2,7 @@ import { AmbientLight, DirectionalLight, Vector3 } from 'three'
 import { ecs } from '@/global/init'
 
 export const spawnLight = () => {
-	const light = new DirectionalLight(0xFFFFFF, 0.5)
+	const light = new DirectionalLight(0xFFFFFF, 0.3)
 	light.lookAt(new Vector3(0, 0, 0))
 	const size = 1024
 	light.shadow.mapSize.set(size * 8, size * 8)
@@ -20,7 +20,7 @@ export const spawnLight = () => {
 	})
 	ecs.add({
 		inMap: true,
-		light: new AmbientLight(0xFFFFFF, 4),
+		light: new AmbientLight(0xFFFFFF, 1),
 		position: new Vector3(),
 	})
 }

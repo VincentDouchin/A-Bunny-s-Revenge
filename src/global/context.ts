@@ -15,7 +15,7 @@ interface Params {
 }
 
 export const params: Params = {
-	renderWidth: 240,
+	renderWidth: 280,
 	cameraOffsetX: 0,
 	cameraOffsetY: 50,
 	cameraOffsetZ: -75,

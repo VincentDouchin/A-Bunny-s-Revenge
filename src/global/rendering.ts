@@ -1,12 +1,10 @@
 import { BasicShadowMap, LinearSRGBColorSpace, Scene, WebGLRenderer } from 'three'
 import { EffectComposer } from 'three/examples/jsm/postprocessing/EffectComposer'
 import { RenderPass } from 'three/examples/jsm/postprocessing/RenderPass'
-import { ShaderPass } from 'three/examples/jsm/postprocessing/ShaderPass'
 import { CSS2DRenderer } from 'three/examples/jsm/renderers/CSS2DRenderer'
 import { camera } from './camera'
 import { params } from './context'
 import { ecs } from './init'
-import { VignetteShader } from '@/shaders/VignetteShader'
 
 export const scene = new Scene()
 export const renderer = new WebGLRenderer({ alpha: true })
@@ -32,7 +30,7 @@ export const initThree = () => {
 	document.body.appendChild(cssRenderer.domElement)
 	composer.addPass(new RenderPass(scene, camera))
 
-	composer.addPass(new ShaderPass(VignetteShader()))
+	// composer.addPass(new ShaderPass(VignetteShader()))
 	ecs.add({ scene })
 }
 export const rendererQuery = ecs.with('renderer')

@@ -1,5 +1,5 @@
 import { RigidBodyType } from '@dimforge/rapier3d-compat'
-import { LinearSRGBColorSpace, Mesh, NearestFilter, Quaternion, Vector3 } from 'three'
+import { LinearSRGBColorSpace, Mesh, NearestFilter, PointLight, Quaternion, Vector3 } from 'three'
 import { inventoryBundle } from './inventory'
 import { Sizes } from '@/constants/sizes'
 import { Animator } from '@/global/animator'
@@ -22,6 +22,9 @@ export const playerBundle = () => {
 	})
 	const bundle = modelColliderBundle(model.scene, RigidBodyType.Dynamic, false, Sizes.character)
 	bundle.bodyDesc.setLinearDamping(20)
+	// const light = new PointLight(0xFFFFFF, 3, 20, 0.01)
+	// light.castShadow = true
+	// light.position.set(0, 5, 10)
 	return {
 		...playerInputMap(),
 		...inventoryBundle(MenuType.Player, 24, 'player'),
@@ -31,6 +34,7 @@ export const playerBundle = () => {
 		cameratarget: true,
 		faction: Faction.Player,
 		sensor: true,
+		// light,
 		player: true,
 		movementForce: new Vector3(),
 		speed: 300,
