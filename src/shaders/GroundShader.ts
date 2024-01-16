@@ -69,7 +69,7 @@ import gradient from '@/shaders/glsl/lib/gradient.glsl?raw'
 export class GroundShader extends MeshStandardMaterial {
 	shader?: Shader
 
-	constructor(args: { color?: ColorRepresentation, map?: Texture }) {
+	constructor(args: { color?: ColorRepresentation, map?: Texture | null }) {
 		super(args)
 	}
 

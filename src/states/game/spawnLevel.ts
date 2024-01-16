@@ -176,7 +176,6 @@ const spawnFarmEntities = (wasDungeon: boolean) => {
 					const light = new PointLight(0xFFFFFF, 2, 30, 0.01)
 					light.castShadow = true
 					node.add(light)
-					console.log(light)
 				}
 				node.castShadow = false
 			})

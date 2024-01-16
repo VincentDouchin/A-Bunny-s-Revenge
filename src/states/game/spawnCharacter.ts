@@ -1,5 +1,5 @@
 import { RigidBodyType } from '@dimforge/rapier3d-compat'
-import { LinearSRGBColorSpace, Mesh, NearestFilter, PointLight, Quaternion, Vector3 } from 'three'
+import { LinearSRGBColorSpace, Mesh, NearestFilter, Quaternion, Vector3 } from 'three'
 import { inventoryBundle } from './inventory'
 import { Sizes } from '@/constants/sizes'
 import { Animator } from '@/global/animator'
