@@ -29,9 +29,9 @@ export const playerAttack = () => {
 						.onComplete(() => ecs.removeComponent(enemy, 'tween'))
 					enemy.model.traverse((node) => {
 						if (node instanceof Mesh) {
-							tween.onUpdate(({ color }) => {
-								node.material.shader.uniforms.colorAdd.value.r = color
-							})
+							// tween.onUpdate(({ color }) => {
+							// node.material.shader.uniforms.colorAdd.value.r = color
+							// })
 						}
 					})
 					ecs.update(enemy, { tween })

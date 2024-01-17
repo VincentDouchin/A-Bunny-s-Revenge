@@ -22,9 +22,6 @@ export const playerBundle = () => {
 	})
 	const bundle = modelColliderBundle(model.scene, RigidBodyType.Dynamic, false, Sizes.character)
 	bundle.bodyDesc.setLinearDamping(20)
-	// const light = new PointLight(0xFFFFFF, 3, 20, 0.01)
-	// light.castShadow = true
-	// light.position.set(0, 5, 10)
 	return {
 		...playerInputMap(),
 		...inventoryBundle(MenuType.Player, 24, 'player'),
@@ -34,7 +31,6 @@ export const playerBundle = () => {
 		cameratarget: true,
 		faction: Faction.Player,
 		sensor: true,
-		// light,
 		player: true,
 		movementForce: new Vector3(),
 		speed: 300,

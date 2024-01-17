@@ -17,7 +17,7 @@ export const talkToNPC = () => {
 	for (const player of playerQuery) {
 		if (player.playerControls.get('primary').justPressed) {
 			for (const npc of dialogQuery) {
-				if (player.worldPosition.distanceTo(npc.worldPosition) < 10) {
+				if (npc.interactionContainer) {
 					addTag(npc, 'activeDialog')
 				}
 			}

@@ -179,7 +179,7 @@ const spawnFarmEntities = (wasDungeon: boolean) => {
 				}
 				node.castShadow = false
 			})
-			ecs.add({ model, position })
+			ecs.add({ model, position, inMap: true })
 		},
 	})
 }
