@@ -1,5 +1,4 @@
 import { registerSW } from 'virtual:pwa-register'
-import { addDebugCollider } from './debug/debugCollider'
 import { playAnimations } from './global/animations'
 import { initCamera, moveCamera } from './global/camera'
 import { coroutines, inputManager, time, ui } from './global/init'
@@ -37,12 +36,14 @@ import { showInteraction, touchItem } from './states/game/touchItem'
 import { setupGame } from './states/setup/setupGame'
 import { UI } from './ui/UI'
 import { spawnChest } from './states/farm/spawnChest'
+import { debugPlugin } from './debug/debugPlugin'
 
 registerSW({ immediate: true, onNeedRefresh: () => window.location.reload() })
 
 coreState
+	.addPlugins(debugPlugin)
 	.addPlugins(hierarchyPlugin, physicsPlugin, transformsPlugin, addToScene('camera', 'light', 'mesh', 'model', 'dialogContainer', 'batchRenderer', 'emitter', 'interactionContainer'), updateModels, particlesPlugin)
-	.addSubscriber(...target, startTweens, addDebugCollider)
+	.addSubscriber(...target, startTweens)
 	.onEnter(initThree, initCamera, ui.render(UI))
 	.onPreUpdate(coroutines.tick, moveCamera)
 	.onUpdate(runIf(() => !pausedState.enabled, playAnimations, () => time.tick()), updateTweens, inputManager.update, ui.update, updateParticles)

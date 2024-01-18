@@ -137,6 +137,8 @@ export interface Entity {
 	emitter?: ParticleEmitter<Object3DEventMap>
 	// ! Stats
 	stats?: Stat
+	// ! Level Editor
+	entityId?: string
 }
 export type Bundle<C extends keyof Entity> = () => With<Entity, C>
 

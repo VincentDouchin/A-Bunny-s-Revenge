@@ -1,18 +1,19 @@
 import { Show, createSignal } from 'solid-js'
 import { SaveEditor } from './saveEditor'
+import { LevelEditor } from './LevelEditor'
 import { params } from '@/global/context'
 import { composer, renderer } from '@/global/rendering'
 import { campState } from '@/global/states'
 import { resetSave, updateSave } from '@/global/save'
 
+export const updatePixelation = (e: Event) => {
+	const target = e.target as HTMLInputElement
+	const val = target.valueAsNumber
+	const ratio = window.innerHeight / window.innerWidth
+	renderer.setSize(val, val * ratio)
+	composer.setSize(val, val * ratio)
+}
 export const DebugUi = () => {
-	const updatePixelation = (e: Event) => {
-		const target = e.target as HTMLInputElement
-		const val = target.valueAsNumber
-		const ratio = window.innerHeight / window.innerWidth
-		renderer.setSize(val, val * ratio)
-		composer.setSize(val, val * ratio)
-	}
 	const [showUi, setShowUi] = createSignal(false)
 	const growCrops = () => {
 		campState.enable({ previousState: 'dungeon' })
@@ -115,6 +116,7 @@ export const DebugUi = () => {
 				</div>
 				<SaveEditor />
 			</Show>
+			<LevelEditor />
 		</div>
 	)
 }
