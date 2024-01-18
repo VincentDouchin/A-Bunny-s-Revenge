@@ -4,15 +4,16 @@ import { Faction } from '@/global/entity'
 import { ecs, world } from '@/global/init'
 import { impact } from '@/particles/impact'
 
-const playerQuery = ecs.with('playerControls', 'sensorCollider', 'position')
+const playerQuery = ecs.with('playerControls', 'sensorCollider', 'position', 'stats')
 const enemiesQuery = ecs.with('collider', 'faction', 'model', 'body', 'position', 'currentHealth').without('tween', 'dying').where(({ faction }) => faction === Faction.Enemy)
 export const playerAttack = () => {
-	for (const { playerControls, sensorCollider, position } of playerQuery) {
+	for (const { playerControls, sensorCollider, position, stats } of playerQuery) {
 		if (playerControls.get('primary').justPressed) {
 			for (const enemy of enemiesQuery) {
 				if (world.intersectionPair(sensorCollider, enemy.collider)) {
 					// ! damage
-					enemy.currentHealth--
+
+					enemy.currentHealth -= stats.get('strength')
 					// ! animations
 					if (enemy.currentHealth > 0) {
 						enemy.animator?.playOnce('HitReact')

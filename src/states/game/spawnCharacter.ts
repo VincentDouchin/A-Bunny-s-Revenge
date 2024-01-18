@@ -10,6 +10,7 @@ import { save } from '@/global/save'
 import type { FarmRessources } from '@/global/states'
 import { modelColliderBundle } from '@/lib/models'
 import type { System } from '@/lib/state'
+import { Stat } from '@/lib/stats'
 
 export const playerBundle = () => {
 	const model = assets.characters.BunnydAnim
@@ -34,6 +35,7 @@ export const playerBundle = () => {
 		player: true,
 		movementForce: new Vector3(),
 		speed: 300,
+		stats: new Stat().set('strength', 1),
 	} as const satisfies Entity
 }
 

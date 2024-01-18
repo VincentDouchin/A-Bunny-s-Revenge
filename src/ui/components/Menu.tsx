@@ -52,11 +52,12 @@ interface MenuProps {
 }
 export type getProps = (first?: boolean) => {
 	ref: (el: HTMLElement) => void
-	onMouseEnter: () => void
+	onPointerDown: () => void
 	selected: Accessor<boolean>
 }
 export interface MenuItemProps {
 	getProps: getProps
+	selected: Accessor<any>
 }
 
 export function Menu(props: MenuProps) {
@@ -103,9 +104,9 @@ export function Menu(props: MenuProps) {
 				refs.set(id, el)
 				inverseRefs.set(el, id)
 			},
-			onMouseEnter: () => setSelected(() => id),
+			onPointerDown: () => setSelected(() => id),
 			selected: isSelected,
 		}
 	}
-	return <props.children getProps={getProps}></props.children>
+	return <props.children getProps={getProps} selected={selected}></props.children>
 }

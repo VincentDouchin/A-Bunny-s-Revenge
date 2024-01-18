@@ -33,7 +33,7 @@ export const QuestUi = () => {
 												{step.items?.map(item => (
 													<div style={{ position: 'relative' }}>
 														<div innerHTML={assets.icons[isCompleted ? 'circle-check-solid' : 'circle-xmark-solid']} style={{ 'position': 'absolute', 'z-index': 1, 'top': '0.5rem', 'left': '0.5rem', 'color': isCompleted ? '#33cc33' : 'red' }}></div>
-														<ItemDisplay item={item} selected={false}></ItemDisplay>
+														<ItemDisplay item={item} selected={() => false}></ItemDisplay>
 													</div>
 												))}
 											</div>

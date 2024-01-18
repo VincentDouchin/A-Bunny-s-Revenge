@@ -37,7 +37,7 @@ export const SeedUi = ({ player }: FarmUiProps) => {
 														const props = getProps(i() === 0)
 														return (
 															<div {...props} onClick={() => chooseSeed(seed, entity)}>
-																<ItemDisplay item={seed} selected={props.selected()}></ItemDisplay>
+																<ItemDisplay item={seed} selected={props.selected}></ItemDisplay>
 															</div>
 														)
 													}}

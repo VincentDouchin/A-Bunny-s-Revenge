@@ -138,7 +138,7 @@ export const OvenUi = ({ player }: FarmUiProps) => {
 													{(output) => {
 														return (
 															<div {...outputProps} onClick={() => cook(output())}>
-																<ItemDisplay item={output()} selected={outputProps.selected()} />
+																<ItemDisplay item={output()} selected={outputProps.selected} />
 															</div>
 														)
 													}}

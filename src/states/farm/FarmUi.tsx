@@ -10,8 +10,9 @@ import { SeedUi } from '@/states/farm/SeedUi'
 import { ChestUi } from '@/states/farm/ChestUi'
 import { campState } from '@/global/states'
 
+const playerQuery = playerInventoryQuery.with('playerControls')
 export const FarmUi = () => {
-	const player = ui.sync(() => playerInventoryQuery.first)
+	const player = ui.sync(() => playerQuery.first)
 	return (
 		<Show when={player()}>
 			{(player) => {
