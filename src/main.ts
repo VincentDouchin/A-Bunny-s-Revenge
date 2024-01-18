@@ -44,7 +44,7 @@ coreState
 	.addPlugins(debugPlugin)
 	.addPlugins(hierarchyPlugin, physicsPlugin, transformsPlugin, addToScene('camera', 'light', 'mesh', 'model', 'dialogContainer', 'batchRenderer', 'emitter', 'interactionContainer'), updateModels, particlesPlugin)
 	.addSubscriber(...target, startTweens)
-	.onEnter(initThree, initCamera, ui.render(UI))
+	.onEnter(initCamera, initThree, ui.render(UI))
 	.onPreUpdate(coroutines.tick, moveCamera)
 	.onUpdate(runIf(() => !pausedState.enabled, playAnimations, () => time.tick()), updateTweens, inputManager.update, ui.update, updateParticles)
 	.onPostUpdate(updateControls, render)

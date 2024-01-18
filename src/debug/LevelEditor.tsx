@@ -2,35 +2,49 @@ import type { models } from '@assets/assets'
 import { get, set } from 'idb-keyval'
 import type { With } from 'miniplex'
 import { For, Show, createEffect, createMemo, createSignal, onCleanup, onMount } from 'solid-js'
-import { Object3D, Quaternion, Raycaster, Vector2 } from 'three'
+import { Object3D, PerspectiveCamera, Quaternion, Raycaster, Vector2, Vector3 } from 'three'
 import { TransformControls } from 'three/examples/jsm/controls/TransformControls'
 import { generateUUID } from 'three/src/math/MathUtils'
+import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls'
 import { type PlacableProp, props } from './props'
 import { composer, renderer, scene } from '@/global/rendering'
-import { assets, ecs } from '@/global/init'
+import { assets, ecs, ui } from '@/global/init'
 import type { Entity } from '@/global/entity'
-import { camera } from '@/global/camera'
+import { params } from '@/global/context'
 
 export type LevelData = Record<string, {
 	model: models
 	scale: number
 	position: [number, number, number]
 	rotation: [number, number, number, number]
+	map: string
 }>
 const addedEntitiesQuery = ecs.with('entityId', 'model', 'group', 'position', 'rotation')
+const mapQuery = ecs.with('map')
+const cameraQuery = ecs.with('mainCamera', 'camera')
 export const LevelEditor = () => {
 	const [open, setOpen] = createSignal(false)
-
+	const map = ui.sync(() => mapQuery.first?.map)
 	return (
 		<div>
 			<button onClick={() => setOpen(!open())}>Level editor</button>
-			<Show when={open()}>
-				{(_open) => {
+			<Show when={open() && map()}>
+				{(map) => {
 					onMount(() => {
 						const val = window.innerWidth
 						const ratio = window.innerHeight / window.innerWidth
 						renderer.setSize(val, val * ratio)
 						composer.setSize(val, val * ratio)
+						// const camera = new PerspectiveCamera(params.fov, window.innerWidth / window.innerHeight, 0.1, 100000)
+						// scene.add(camera)
+						// console.log(camera)
+						// ecs.add({ camera, mainCamera: true })
+						// const controls = new OrbitControls(camera, renderer.domElement)
+						// ui.updateSync(() => {
+						// 	controls.update()
+						// 	camera.lo
+						// 	camera.updateProjectionMatrix()
+						// })
 					})
 					const [selectedProp, setSelectedProp] = createSignal<PlacableProp | null>(null)
 					const [selectedEntity, setSelectedEntity] = createSignal<With<Entity, 'entityId' | 'model' | 'position' | 'rotation'> | null>(null)
@@ -39,6 +53,8 @@ export const LevelEditor = () => {
 						setLevelData(await get('levelData') ?? {})
 					})
 					const clickListener = (event: MouseEvent) => {
+						const camera = cameraQuery.first?.camera
+						if (!camera) return
 						const selected = selectedProp()
 						const pointer = new Vector2()
 						pointer.x = (event.clientX / window.innerWidth) * 2 - 1
@@ -53,15 +69,18 @@ export const LevelEditor = () => {
 								position: intersects[0].point,
 								entityId: generateUUID(),
 								rotation: new Quaternion(),
+								inMap: true,
 							})
 							levelData()[placed.entityId] = {
 								model: selected.models[0],
 								scale: 1,
 								position: placed.position.toArray(),
 								rotation: placed.rotation.toJSON(),
+								map: map(),
 							}
 							set('levelData', levelData())
 							setSelectedEntity(placed)
+							setSelectedProp(null)
 						} else {
 							for (const addedEntity of addedEntitiesQuery) {
 								addedEntity.model.traverse((x) => {
@@ -97,6 +116,7 @@ export const LevelEditor = () => {
 											setLevelData({ ...levelData(), [entity().entityId]: { ...entityData(), ...newEntity } })
 											set('levelData', levelData())
 										}
+										const camera = cameraQuery.first!.camera
 										const transform = new TransformControls(camera, renderer.domElement)
 										const dummy = new Object3D()
 										scene.add(dummy)

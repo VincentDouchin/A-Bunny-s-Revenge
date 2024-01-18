@@ -96,7 +96,7 @@ export interface Entity {
 	plantableSpot?: string
 	planted?: With<Entity, 'crop'>
 	// ! Game
-	map?: true
+	map?: string
 	interacting?: true
 	interactable?: Interactable
 	interactableSecondary?: Interactable

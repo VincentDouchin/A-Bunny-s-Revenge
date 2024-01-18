@@ -226,8 +226,8 @@ const spawnGroundAndTrees = (layer: LayerInstance) => {
 
 export const spawnFarm: System<FarmRessources> = ({ previousState }) => {
 	const level = assets.levels.levels.find(l => l.identifier === 'farm')!
+	ecs.add({ map: 'farm' })
 	for (const layer of level.layerInstances!) {
-		ecs.add({ map: true })
 		switch (layer.__type) {
 			case 'IntGrid': {
 				if (layer.__identifier === 'ground') {
@@ -241,8 +241,8 @@ export const spawnFarm: System<FarmRessources> = ({ previousState }) => {
 	}
 }
 export const spawnDungeon: System<DungeonRessources> = ({ dungeon, direction, roomIndex }) => {
-	ecs.add({ map: true })
 	const room = dungeon.rooms[roomIndex]
+	ecs.add({ map: room.plan.iid })
 	if (room.type === RoomType.Entrance) {
 		for (const _ in range(0, 5)) {
 			ecs.add({
