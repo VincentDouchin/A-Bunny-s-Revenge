@@ -8,14 +8,13 @@ import type { Entity } from '@/global/entity'
 import { assets, ecs, ui } from '@/global/init'
 import { updateSave } from '@/global/save'
 import { ModType } from '@/lib/stats'
+import { InputIcon } from '@/ui/InputIcon'
 import type { getProps } from '@/ui/components/Menu'
 import { Menu } from '@/ui/components/Menu'
 import { Modal } from '@/ui/components/Modal'
 import type { FarmUiProps } from '@/ui/types'
-import { range } from '@/utils/mapFunctions'
-import { IconButton } from '@/ui/components/Button'
-import { InputIcon } from '@/ui/InputIcon'
 import { removeItemFromPlayer } from '@/utils/dialogHelpers'
+import { range } from '@/utils/mapFunctions'
 
 export const ItemDisplay = (props: { item: Item | null, selected: Accessor<boolean>, disabled?: boolean }) => {
 	const isDisabled = createMemo(() => props.disabled ?? false)
