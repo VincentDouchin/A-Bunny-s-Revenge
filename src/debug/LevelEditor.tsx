@@ -34,9 +34,22 @@ const cameraQuery = ecs.with('mainCamera', 'camera')
 export const LevelEditor = () => {
 	const [open, setOpen] = createSignal(false)
 	const map = ui.sync(() => mapQuery.first?.map)
+	const download = async () => {
+		const levelData = await get('levelData')
+		const colliderData = await get('colliderData')
+		const data = { levelData, colliderData }
+		const blob = new Blob([JSON.stringify(data)], { type: 'application/json' })
+		const a = document.createElement('a')
+		a.download = 'data.json'
+		a.href = URL.createObjectURL(blob)
+		document.body.appendChild(a)
+		a.click()
+		document.body.removeChild(a)
+	}
 	return (
 		<div>
 			<button onClick={() => setOpen(!open())}>Level editor</button>
+			<button onClick={download}>Download</button>
 			<Show when={open() && map()}>
 				{(map) => {
 					const [selectedProp, setSelectedProp] = createSignal<PlacableProp | null>(null)

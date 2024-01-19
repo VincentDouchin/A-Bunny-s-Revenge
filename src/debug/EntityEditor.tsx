@@ -1,16 +1,17 @@
 import type { With } from 'miniplex'
 import type { Accessor, Setter } from 'solid-js'
-import { For, Show, createEffect, createMemo, createSignal, onCleanup, onMount } from 'solid-js'
+import { For, Show, createEffect, createMemo, createSignal, onCleanup } from 'solid-js'
 
+import { ColliderDesc, RigidBodyDesc, RigidBodyType } from '@dimforge/rapier3d-compat'
 import { set } from 'idb-keyval'
 import { Box3, Euler, Object3D, Quaternion, Vector3 } from 'three'
 import { TransformControls } from 'three/examples/jsm/controls/TransformControls'
-import { ColliderDesc, RigidBodyDesc, RigidBodyType } from '@dimforge/rapier3d-compat'
 import type { CollidersData, LevelData } from './LevelEditor'
 import { props } from './props'
 import { cameraQuery, renderer, scene } from '@/global/rendering'
 import { assets, ecs } from '@/global/init'
 import type { Entity } from '@/global/entity'
+import { thumbnail } from '@/lib/thumbnail'
 
 export const EntityEditor = ({ entity, levelData, setLevelData, setSelectedEntity, colliderData, setColliderData }: {
 	entity: Accessor<NonNullable<With<Entity, 'entityId' | 'position' | 'rotation' | 'model'>>>
@@ -26,7 +27,7 @@ export const EntityEditor = ({ entity, levelData, setLevelData, setSelectedEntit
 		setLevelData({ ...levelData, [entity().entityId]: { ...entityData(), ...newEntity } })
 		set('levelData', levelData())
 	}
-
+	thumbnail(200, 200)(assets.models[entityData().model].scene)
 	const camera = cameraQuery.first!.camera
 	const transform = new TransformControls(camera, renderer.domElement)
 	const dummy = new Object3D()
@@ -88,11 +89,14 @@ export const EntityEditor = ({ entity, levelData, setLevelData, setSelectedEntit
 	const colliderTransformListener = () => {
 		const box = entity().debugColliderMesh
 		if (box) {
+			const size = new Vector3()
+			new Box3().setFromObject(box).getSize(size)
 			setColliderData({
 				...colliderData(),
 				[entityData().model]: {
 					...modelCollider(),
 					offset: box.position.clone().toArray(),
+					size: size.toArray(),
 				},
 			})
 		}
