@@ -11,7 +11,6 @@ import { props } from './props'
 import { cameraQuery, renderer, scene } from '@/global/rendering'
 import { assets, ecs } from '@/global/init'
 import type { Entity } from '@/global/entity'
-import { thumbnail } from '@/lib/thumbnail'
 
 export const EntityEditor = ({ entity, levelData, setLevelData, setSelectedEntity, colliderData, setColliderData }: {
 	entity: Accessor<NonNullable<With<Entity, 'entityId' | 'position' | 'rotation' | 'model'>>>
@@ -27,7 +26,6 @@ export const EntityEditor = ({ entity, levelData, setLevelData, setSelectedEntit
 		setLevelData({ ...levelData, [entity().entityId]: { ...entityData(), ...newEntity } })
 		set('levelData', levelData())
 	}
-	thumbnail(200, 200)(assets.models[entityData().model].scene)
 	const camera = cameraQuery.first!.camera
 	const transform = new TransformControls(camera, renderer.domElement)
 	const dummy = new Object3D()
