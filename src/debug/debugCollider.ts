@@ -10,7 +10,8 @@ const addDebugCollider = () => debugColliderQuery.onEntityAdded.subscribe((entit
 	)
 	const collider = entity.collider.translation()
 	const posC = new Vector3(collider.x, collider.y, collider.z).roundToZero()
-	box.position.set(...entity.worldPosition.sub(posC).toArray())
+	box.position.set(...posC.sub(entity.worldPosition).toArray())
+
 	ecs.addComponent(entity, 'debugColliderMesh', box)
 })
 const removeDebugCollider = () => ecs.with('debugColliderMesh', 'group').without('debugCollider').onEntityAdded.subscribe((e) => {

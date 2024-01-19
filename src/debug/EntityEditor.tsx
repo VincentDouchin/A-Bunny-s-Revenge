@@ -1,6 +1,6 @@
 import type { With } from 'miniplex'
 import type { Accessor, Setter } from 'solid-js'
-import { For, Show, createEffect, createMemo, createSignal, onCleanup } from 'solid-js'
+import { For, Show, createEffect, createMemo, createSignal, onCleanup, onMount } from 'solid-js'
 
 import { set } from 'idb-keyval'
 import { Box3, Euler, Object3D, Quaternion, Vector3 } from 'three'
@@ -32,50 +32,24 @@ export const EntityEditor = ({ entity, levelData, setLevelData, setSelectedEntit
 	const dummy = new Object3D()
 	scene.add(dummy)
 	transform.attach(dummy)
-	scene.add(dummy)
+
 	entity().group?.getWorldPosition(dummy.position)
 	dummy.rotation.setFromQuaternion(entity().rotation)
 	const [editingCollider, setEditingCollider] = createSignal(false)
-	createEffect(() => {
-		if (editingCollider()) {
-			ecs.update(entity(), 'debugCollider', true)
-			const box = entity().debugColliderMesh
-			if (box) {
-				transform.attach(box)
-			}
-		} else {
-			transform.attach(dummy)
-			ecs.removeComponent(entity(), 'debugCollider')
-		}
-	})
-	const transformListener = () => {
-		if (editingCollider()) {
-			const size = new Vector3()
-			new Box3().setFromObject(entity().debugColliderMesh!).getSize(size)
-			setColliderData({
-				...colliderData(),
-				[entityData().model]: {
-					...modelCollider(),
-					size: size.toArray(),
-					offset: entity().debugColliderMesh!.position.clone().multiply(new Vector3(1, 1, -1)).toArray(),
-				},
-			})
 
-			set('colliderData', colliderData())
-		} else {
-			entity().position.set(dummy.position.x, dummy.position.y, dummy.position.z)
-			entity().rotation.setFromEuler(dummy.rotation)
-			updateEntity({ position: entity().position.toArray(), rotation: entity().rotation.toJSON() })
-		}
+	const transformListener = () => {
+		entity().position.set(dummy.position.x, dummy.position.y, dummy.position.z)
+		entity().rotation.setFromEuler(dummy.rotation)
+		updateEntity({ position: entity().position.toArray(), rotation: entity().rotation.toJSON() })
 	}
+
 	transform.addEventListener('change', transformListener)
 
 	scene.add(transform)
 	onCleanup(() => {
-		dummy.removeFromParent()
-		transform.removeFromParent()
-		transform.dispose()
 		transform.removeEventListener('change', transformListener)
+		dummy.removeFromParent()
+		transform.detach()
 	})
 
 	createEffect(() => {
@@ -106,15 +80,36 @@ export const EntityEditor = ({ entity, levelData, setLevelData, setSelectedEntit
 	})
 
 	const deleteSelected = () => {
+		setSelectedEntity(null)
 		ecs.remove(entity())
 		delete levelData()[entity().entityId]
 		set('levelData', levelData())
-		setSelectedEntity(null)
 	}
+	const colliderTransformListener = () => {
+		const box = entity().debugColliderMesh
+		if (box) {
+			setColliderData({
+				...colliderData(),
+				[entityData().model]: {
+					...modelCollider(),
+					offset: box.position.clone().toArray(),
+				},
+			})
+		}
 
+		set('colliderData', colliderData())
+	}
+	createEffect(() => {
+		if (editingCollider()) {
+			transform.detach()
+		} else {
+			transform.attach(dummy)
+		}
+	})
 	return (
 		<div>
-			<For each={['translate', 'rotate', 'scale'] as const}>
+			PROP
+			<For each={['translate', 'rotate'] as const}>
 				{mode => (
 					<button onClick={() => transform.mode = mode}>
 						{mode}
@@ -196,20 +191,6 @@ export const EntityEditor = ({ entity, levelData, setLevelData, setSelectedEntit
 				</input>
 
 			</div>
-			<div>
-				collider type
-				<select onChange={e => setColliderData({
-					...colliderData(),
-					[entityData().model]: {
-						...modelCollider(),
-						type: Number(e.target.value),
-					},
-				})}
-				>
-					<option value={RigidBodyType.Fixed}>Fixed</option>
-					<option value={RigidBodyType.Dynamic}>Dynamic</option>
-				</select>
-			</div>
 
 			<Show when={entityData()}>
 				{(data) => {
@@ -226,6 +207,53 @@ export const EntityEditor = ({ entity, levelData, setLevelData, setSelectedEntit
 								}}
 							</For>
 						</div>
+					)
+				}}
+			</Show>
+
+			<Show when={editingCollider() && entity() && entityData()}>
+				{(_) => {
+					const colliderTransform = new TransformControls(camera, renderer.domElement)
+					ecs.update(entity(), 'debugCollider', true)
+					const box = entity().debugColliderMesh
+
+					if (box) {
+						scene.add(colliderTransform)
+						colliderTransform.attach(box)
+						colliderTransform.addEventListener('change', colliderTransformListener)
+					}
+					const ent = entity()
+					onCleanup(() => {
+						ecs.removeComponent(ent, 'debugCollider')
+						colliderTransform.removeEventListener('change', colliderTransformListener)
+						colliderTransform.detach()
+					})
+					return (
+						<div>
+							COLLIDER
+							<For each={['translate', 'scale'] as const}>
+								{mode => (
+									<button onClick={() => colliderTransform.mode = mode}>
+										{mode}
+									</button>
+								)}
+							</For>
+							<div>
+								collider type
+								<select onChange={e => setColliderData({
+									...colliderData(),
+									[entityData().model]: {
+										...modelCollider(),
+										type: Number(e.target.value),
+									},
+								})}
+								>
+									<option value={RigidBodyType.Fixed}>Fixed</option>
+									<option value={RigidBodyType.Dynamic}>Dynamic</option>
+								</select>
+							</div>
+						</div>
+
 					)
 				}}
 			</Show>
