@@ -23,7 +23,7 @@ export const EntityEditor = ({ entity, levelData, setLevelData, setSelectedEntit
 	const entityData = createMemo(() => levelData()[entity().entityId])
 	const modelCollider = createMemo(() => colliderData()[entityData().model])
 	const updateEntity = (newEntity: Partial<LevelData[string]>) => {
-		setLevelData({ ...levelData, [entity().entityId]: { ...entityData(), ...newEntity } })
+		setLevelData({ ...levelData(), [entity().entityId]: { ...entityData(), ...newEntity } })
 		set('levelData', levelData())
 	}
 	const camera = cameraQuery.first!.camera

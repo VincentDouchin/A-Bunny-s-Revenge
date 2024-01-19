@@ -108,7 +108,7 @@ export const LevelEditor = () => {
 								inMap: true,
 							})
 							setLevelData({
-								...levelData,
+								...levelData(),
 								[placed.entityId]: {
 									model: selected.models[0],
 									scale: 1,
@@ -117,6 +117,7 @@ export const LevelEditor = () => {
 									map: map(),
 								},
 							})
+							console.log(levelData())
 							set('levelData', levelData())
 							setSelectedEntity(placed)
 							setSelectedProp(null)
