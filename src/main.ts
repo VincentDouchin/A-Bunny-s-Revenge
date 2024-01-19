@@ -1,4 +1,4 @@
-import { registerSW } from 'virtual:pwa-register'
+import { debugPlugin } from './debug/debugPlugin'
 import { playAnimations } from './global/animations'
 import { initCamera, moveCamera } from './global/camera'
 import { coroutines, inputManager, time, ui } from './global/init'
@@ -21,6 +21,7 @@ import { spawnItems } from './states/dungeon/itemRoom'
 import { displayOnCuttinBoard } from './states/farm/CookingUi'
 import { harvestCrop, initPlantableSpotsInteractions, interactablePlantableSpot, plantSeed, updateCropsSave } from './states/farm/farming'
 import { closeMenu, closePlayerInventory, disableInventoryState, enableInventoryState, openMenu, openPlayerInventory } from './states/farm/openInventory'
+import { spawnChest } from './states/farm/spawnChest'
 import { spawnNPC } from './states/farm/spawnNPC'
 import { talkToNPC } from './states/game/dialog'
 import { bobItems, collectItems } from './states/game/items'
@@ -35,14 +36,10 @@ import { spawnLight } from './states/game/spawnLights'
 import { showInteraction, touchItem } from './states/game/touchItem'
 import { setupGame } from './states/setup/setupGame'
 import { UI } from './ui/UI'
-import { spawnChest } from './states/farm/spawnChest'
-import { debugPlugin } from './debug/debugPlugin'
-
-registerSW({ immediate: true, onNeedRefresh: () => window.location.reload() })
 
 coreState
 	.addPlugins(debugPlugin)
-	.addPlugins(hierarchyPlugin, physicsPlugin, transformsPlugin, addToScene('camera', 'light', 'mesh', 'model', 'dialogContainer', 'batchRenderer', 'emitter', 'interactionContainer'), updateModels, particlesPlugin)
+	.addPlugins(hierarchyPlugin, physicsPlugin, transformsPlugin, addToScene('camera', 'light', 'mesh', 'model', 'dialogContainer', 'batchRenderer', 'emitter', 'interactionContainer', 'debugColliderMesh'), updateModels, particlesPlugin)
 	.addSubscriber(...target, startTweens)
 	.onEnter(initCamera, initThree, ui.render(UI))
 	.onPreUpdate(coroutines.tick, moveCamera)

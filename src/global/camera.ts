@@ -3,9 +3,6 @@ import { params } from './context'
 import { ecs } from './init'
 
 export const camera = new PerspectiveCamera(params.fov, window.innerWidth / window.innerHeight, 0.1, 100000)
-// const aspect = window.innerWidth / window.innerHeight
-// const CAMERA_SIZE = 20
-// export const camera = new OrthographicCamera(-CAMERA_SIZE * aspect, CAMERA_SIZE * aspect, CAMERA_SIZE, -CAMERA_SIZE, 0.1, 100000)
 
 export const initCamera = () => {
 	camera.zoom = window.innerWidth / window.innerHeight / params.zoom

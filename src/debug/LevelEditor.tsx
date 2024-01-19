@@ -1,11 +1,12 @@
 import type { models } from '@assets/assets'
+import type { RigidBodyType } from '@dimforge/rapier3d-compat'
 import { get, set } from 'idb-keyval'
 import type { With } from 'miniplex'
 import { For, Show, createEffect, createMemo, createSignal, onCleanup, onMount } from 'solid-js'
-import { Object3D, Quaternion, Raycaster, Vector2 } from 'three'
+import { Quaternion, Raycaster, Vector2 } from 'three'
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls'
-import { TransformControls } from 'three/examples/jsm/controls/TransformControls'
 import { generateUUID } from 'three/src/math/MathUtils'
+import { EntityEditor } from './EntityEditor'
 import { type PlacableProp, props } from './props'
 import { composer, renderer, scene } from '@/global/rendering'
 import { assets, ecs, ui } from '@/global/init'
@@ -20,6 +21,13 @@ export type LevelData = Record<string, {
 	rotation: [number, number, number, number]
 	map: string
 }>
+export type CollidersData = Partial<Record<models, {
+	type: RigidBodyType
+	size?: [number, number, number]
+	sensor: boolean
+	offset: [number, number, number]
+} >>
+
 const addedEntitiesQuery = ecs.with('entityId', 'model', 'group', 'position', 'rotation')
 const mapQuery = ecs.with('map')
 const cameraQuery = ecs.with('mainCamera', 'camera')
@@ -33,18 +41,21 @@ export const LevelEditor = () => {
 				{(map) => {
 					const [selectedProp, setSelectedProp] = createSignal<PlacableProp | null>(null)
 					const [selectedEntity, setSelectedEntity] = createSignal<With<Entity, 'entityId' | 'model' | 'position' | 'rotation'> | null>(null)
-					onMount(() => {
+					const [levelData, setLevelData] = createSignal<LevelData>({})
+					const [colliderData, setColliderData] = createSignal<CollidersData>({})
+					onMount(async () => {
 						const val = window.innerWidth
 						const ratio = window.innerHeight / window.innerWidth
 						renderer.setSize(val, val * ratio)
 						composer.setSize(val, val * ratio)
 						const group = camera.parent!
+						const proj = camera.projectionMatrix.clone().toArray()
 						camera.removeFromParent()
 						camera.position.set(...group.position.toArray())
 						const controls = new OrbitControls(camera, renderer.domElement)
-						ui.updateSync(() => {
-							controls.update()
-						})
+						controls.update()
+						camera.projectionMatrix.set(...proj)
+						ui.updateSync(() => controls.update())
 						createEffect(() => {
 							if (selectedEntity()) {
 								controls.enabled = false
@@ -58,14 +69,12 @@ export const LevelEditor = () => {
 							const ratio = window.innerHeight / window.innerWidth
 							renderer.setSize(val, val * ratio)
 							composer.setSize(val, val * ratio)
-							camera.zoom = window.innerWidth / window.innerHeight / params.zoom
+							controls.dispose()
 						})
+						setLevelData(await get('levelData') ?? {})
+						setColliderData(await get('colliderData') ?? {})
 					})
 
-					const [levelData, setLevelData] = createSignal<LevelData>({})
-					onMount(async () => {
-						setLevelData(await get('levelData') ?? {})
-					})
 					const clickListener = (event: MouseEvent) => {
 						const camera = cameraQuery.first?.camera
 						if (!camera) return
@@ -123,85 +132,16 @@ export const LevelEditor = () => {
 						<div style={{ 'position': 'fixed', 'top': 0, 'right': 0, 'display': 'grid', 'grid-template-columns': 'auto auto' }}>
 							<div>
 								<Show when={selectedEntity()}>
-									{(entity) => {
-										const entityData = createMemo(() => levelData()[entity().entityId])
-
-										const updateEntity = (newEntity: Partial<LevelData[string]>) => {
-											setLevelData({ ...levelData(), [entity().entityId]: { ...entityData(), ...newEntity } })
-											set('levelData', levelData())
-										}
-										const camera = cameraQuery.first!.camera
-										const transform = new TransformControls(camera, renderer.domElement)
-										const dummy = new Object3D()
-										scene.add(dummy)
-										transform.attach(dummy)
-										scene.add(dummy)
-										entity().group?.getWorldPosition(dummy.position)
-										dummy.rotation.setFromQuaternion(entity().rotation)
-										const transformListener = () => {
-											entity().position.set(dummy.position.x, dummy.position.y, dummy.position.z)
-											entity().rotation.set(...new Quaternion().setFromEuler(dummy.rotation).toJSON())
-											updateEntity({ position: entity().position.toArray(), rotation: entity().rotation.toJSON() })
-										}
-										transform.addEventListener('change', transformListener)
-
-										scene.add(transform)
-										onCleanup(() => {
-											dummy.removeFromParent()
-											transform.removeFromParent()
-											transform.dispose()
-											transform.removeEventListener('change', transformListener)
-										})
-
-										createEffect(() => {
-											ecs.removeComponent(entity(), 'model')
-											const model = assets.models[entityData().model].scene.clone()
-											model.scale.setScalar(entityData().scale)
-											ecs.addComponent(entity(), 'model', model)
-										}, entityData())
-
-										const deleteSelected = () => {
-											ecs.remove(entity())
-											delete levelData()[entity().entityId]
-											set('levelData', levelData())
-											setSelectedEntity(null)
-										}
-										return (
-											<div>
-												<For each={['translate', 'rotate'] as const}>
-													{mode => (
-														<button onClick={() => transform.mode = mode}>
-															{mode}
-														</button>
-													)}
-												</For>
-												<div>{entity().entityId}</div>
-												<button onClick={deleteSelected}>Delete entity</button>
-												<div>
-													scale
-													<input type="number" value={entityData().scale} onChange={e => updateEntity({ scale: e.target.valueAsNumber })}></input>
-												</div>
-												<Show when={entityData()}>
-													{(data) => {
-														const models = createMemo(() => props.find(x => x.models.includes(data().model))!.models)
-														return (
-															<div style={{ position: 'fixed', bottom: 0, left: 0 }}>
-																<For each={models()}>
-																	{(model) => {
-																		return (
-																			<button onClick={() => updateEntity({ model })}>
-																				{model}
-																			</button>
-																		)
-																	}}
-																</For>
-															</div>
-														)
-													}}
-												</Show>
-											</div>
-										)
-									}}
+									{entity => (
+										<EntityEditor
+											entity={entity}
+											levelData={levelData}
+											setLevelData={setLevelData}
+											setSelectedEntity={setSelectedEntity}
+											colliderData={colliderData}
+											setColliderData={setColliderData}
+										/>
+									)}
 								</Show>
 							</div>
 							<div>
