@@ -107,13 +107,16 @@ export const LevelEditor = () => {
 								rotation: new Quaternion(),
 								inMap: true,
 							})
-							levelData()[placed.entityId] = {
-								model: selected.models[0],
-								scale: 1,
-								position: placed.position.toArray(),
-								rotation: placed.rotation.toJSON(),
-								map: map(),
-							}
+							setLevelData({
+								...levelData,
+								[placed.entityId]: {
+									model: selected.models[0],
+									scale: 1,
+									position: placed.position.toArray(),
+									rotation: placed.rotation.toJSON(),
+									map: map(),
+								},
+							})
 							set('levelData', levelData())
 							setSelectedEntity(placed)
 							setSelectedProp(null)

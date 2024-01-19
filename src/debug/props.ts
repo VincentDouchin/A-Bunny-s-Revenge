@@ -1,11 +1,13 @@
 import type { models } from '@assets/assets'
+import type { LevelData } from './LevelEditor'
 import { type Entity, Interactable, MenuType } from '@/global/entity'
 import { menuInputMap } from '@/global/inputMaps'
+import { inventoryBundle } from '@/states/game/inventory'
 
 export interface PlacableProp {
 	name: string
 	models: models[]
-	bundle?: () => Entity
+	bundle?: (id: string, data: LevelData[string]) => Entity
 }
 
 export const props: PlacableProp[] = [
@@ -24,6 +26,20 @@ export const props: PlacableProp[] = [
 			interactable: Interactable.BulletinBoard,
 			menuType: MenuType.Quest,
 			...menuInputMap(),
+		}),
+	},
+	{
+		name: 'oven',
+		models: ['StoneOven'],
+		bundle: id => ({
+			...inventoryBundle(MenuType.Oven, 3, id, Interactable.Cook),
+		}),
+	},
+	{
+		name: 'stove',
+		models: ['Stove1'],
+		bundle: id => ({
+			...inventoryBundle(MenuType.Oven, 3, id, Interactable.Cook),
 		}),
 	},
 ]

@@ -41,7 +41,7 @@ const spawnLevelData = () => ecs.with('map').onEntityAdded.subscribe(async (e) =
 			const position = new Vector3().fromArray(data.position)
 			const rotation = new Quaternion().set(...data.rotation)
 			const bundleFn = props.find(p => p.models.includes(data.model))?.bundle
-			const bundle = bundleFn ? bundleFn() : {}
+			const bundle = bundleFn ? bundleFn(entityId, data) : {}
 
 			ecs.add({
 				...bundle,
