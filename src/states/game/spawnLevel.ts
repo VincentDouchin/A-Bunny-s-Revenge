@@ -138,19 +138,6 @@ const spawnFarmEntities = (wasDungeon: boolean) => {
 				}
 			}
 		},
-		// counter: (position, data) => {
-		// 	const counter = ecs.add({ position, ...kitchenApplianceBundle('kitchencounter_straight_B', data.direction) })
-		// 	if (data.cutting_board) {
-		// 		ecs.update(counter, inventoryBundle(MenuType.CuttingBoard, 1, 'cuttingBoard1', Interactable.Chop))
-		// 		const model = assets.models.cutting_board.scene.clone()
-		// 		model.scale.setScalar(4)
-		// 		ecs.add({
-		// 			parent: counter,
-		// 			model,
-		// 			position: new Vector3(0, counter.size.y, 0),
-		// 		})
-		// 	}
-		// },
 		house: spawnHouse,
 		board: (position) => {
 			const model = assets.models.Bulliten.scene
@@ -172,7 +159,7 @@ const spawnFarmEntities = (wasDungeon: boolean) => {
 			const model = assets.models.Lamp.scene
 			model.scale.setScalar(15)
 			model.traverse((node) => {
-				if (node.name === 'light') {
+				if (node.name.includes('light')) {
 					const light = new PointLight(0xFFFFFF, 2, 30, 0.01)
 					light.castShadow = true
 					node.add(light)
@@ -189,12 +176,9 @@ const spawnGroundAndTrees = (layer: LayerInstance) => {
 	const h = layer.__cHei * SCALE
 	const groundMesh = new Mesh(
 		new BoxGeometry(w, 1, h),
-		// groundShader(),
 		new GroundShader2({ color: new Color(0x26854C) }),
-		// new GroundShader(new Color(0x26854C)),
 	)
 
-	// setTimeout(() => groundMesh.material.shader!.uniforms.is_ground.value = 1, 1000)
 	groundMesh.receiveShadow = true
 	ecs.add({
 		inMap: true,
