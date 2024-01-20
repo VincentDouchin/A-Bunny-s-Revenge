@@ -1,6 +1,6 @@
 import type { models } from '@assets/assets'
 import type { RigidBodyType } from '@dimforge/rapier3d-compat'
-import { get, set } from 'idb-keyval'
+import { set } from 'idb-keyval'
 import type { With } from 'miniplex'
 import { For, Show, createEffect, createMemo, createSignal, onCleanup, onMount } from 'solid-js'
 import { Quaternion, Raycaster, Vector2 } from 'three'
@@ -9,10 +9,11 @@ import { generateUUID } from 'three/src/math/MathUtils'
 import { EntityEditor } from './EntityEditor'
 import { type PlacableProp, props } from './props'
 import { composer, renderer, scene } from '@/global/rendering'
-import { assets, ecs, ui } from '@/global/init'
+import { assets, ecs, levelsData, ui } from '@/global/init'
 import type { Entity } from '@/global/entity'
 import { params } from '@/global/context'
 import { camera } from '@/global/camera'
+import { loadLevelData } from '@/global/assets'
 
 export type LevelData = Record<string, {
 	model: models
@@ -35,9 +36,7 @@ export const LevelEditor = () => {
 	const [open, setOpen] = createSignal(false)
 	const map = ui.sync(() => mapQuery.first?.map)
 	const download = async () => {
-		const levelData = await get('levelData')
-		const colliderData = await get('colliderData')
-		const data = { levelData, colliderData }
+		const data = await loadLevelData()
 		const blob = new Blob([JSON.stringify(data)], { type: 'application/json' })
 		const a = document.createElement('a')
 		a.download = 'data.json'
@@ -54,6 +53,7 @@ export const LevelEditor = () => {
 				{(map) => {
 					const [selectedProp, setSelectedProp] = createSignal<PlacableProp | null>(null)
 					const [selectedEntity, setSelectedEntity] = createSignal<With<Entity, 'entityId' | 'model' | 'position' | 'rotation'> | null>(null)
+
 					const [levelData, setLevelData] = createSignal<LevelData>({})
 					const [colliderData, setColliderData] = createSignal<CollidersData>({})
 					onMount(async () => {
@@ -84,10 +84,18 @@ export const LevelEditor = () => {
 							composer.setSize(val, val * ratio)
 							controls.dispose()
 						})
-						setLevelData(await get('levelData') ?? {})
-						setColliderData(await get('colliderData') ?? {})
+						const data = await loadLevelData()
+						setLevelData(data.levelData)
+						setColliderData(data.colliderData)
 					})
-
+					createEffect(() => {
+						Object.assign(levelsData.levelData, levelData())
+						set('levelData', levelData())
+					})
+					createEffect(() => {
+						Object.assign(levelsData.colliderData, colliderData())
+						set('colliderData', colliderData())
+					})
 					const clickListener = (event: MouseEvent) => {
 						const camera = cameraQuery.first?.camera
 						if (!camera) return
@@ -117,16 +125,19 @@ export const LevelEditor = () => {
 									map: map(),
 								},
 							})
-							set('levelData', levelData())
 							setSelectedEntity(placed)
 							setSelectedProp(null)
 						} else {
+							let hasSelected = false
 							for (const addedEntity of addedEntitiesQuery) {
-								addedEntity.model.traverse((x) => {
-									if (intersects.some(int => int.object === x)) {
-										setSelectedEntity(addedEntity)
-									}
-								})
+								if (!hasSelected) {
+									addedEntity.model.traverse((x) => {
+										if (intersects.some(int => int.object === x)) {
+											setSelectedEntity(addedEntity)
+											hasSelected = true
+										}
+									})
+								}
 							}
 						}
 					}

@@ -1,9 +1,8 @@
 import type { With } from 'miniplex'
 import type { Accessor, Setter } from 'solid-js'
-import { For, Show, createEffect, createMemo, createSignal, onCleanup } from 'solid-js'
+import { For, Show, createEffect, createMemo, createSignal, onCleanup, onMount } from 'solid-js'
 
 import { ColliderDesc, RigidBodyDesc, RigidBodyType } from '@dimforge/rapier3d-compat'
-import { set } from 'idb-keyval'
 import { Box3, Euler, Object3D, Quaternion, Vector3 } from 'three'
 import { TransformControls } from 'three/examples/jsm/controls/TransformControls'
 import type { CollidersData, LevelData } from './LevelEditor'
@@ -24,7 +23,6 @@ export const EntityEditor = ({ entity, levelData, setLevelData, setSelectedEntit
 	const modelCollider = createMemo(() => colliderData()[entityData().model])
 	const updateEntity = (newEntity: Partial<LevelData[string]>) => {
 		setLevelData({ ...levelData(), [entity().entityId]: { ...entityData(), ...newEntity } })
-		set('levelData', levelData())
 	}
 	const camera = cameraQuery.first!.camera
 	const transform = new TransformControls(camera, renderer.domElement)
@@ -42,11 +40,11 @@ export const EntityEditor = ({ entity, levelData, setLevelData, setSelectedEntit
 		updateEntity({ position: entity().position.toArray(), rotation: entity().rotation.toJSON() })
 	}
 
-	transform.addEventListener('change', transformListener)
+	transform.addEventListener('objectChange', transformListener)
 
 	scene.add(transform)
 	onCleanup(() => {
-		transform.removeEventListener('change', transformListener)
+		transform.removeEventListener('objectChange', transformListener)
 		dummy.removeFromParent()
 		transform.detach()
 	})
@@ -82,7 +80,6 @@ export const EntityEditor = ({ entity, levelData, setLevelData, setSelectedEntit
 		setSelectedEntity(null)
 		ecs.remove(entityRef)
 		delete levelData()[entityRef.entityId]
-		set('levelData', levelData())
 	}
 	const colliderTransformListener = () => {
 		const box = entity().debugColliderMesh
@@ -98,8 +95,6 @@ export const EntityEditor = ({ entity, levelData, setLevelData, setSelectedEntit
 				},
 			})
 		}
-
-		set('colliderData', colliderData())
 	}
 	createEffect(() => {
 		if (editingCollider()) {
@@ -178,7 +173,6 @@ export const EntityEditor = ({ entity, levelData, setLevelData, setSelectedEntit
 								},
 							})
 						}
-						set('colliderData', colliderData())
 					}}
 				>
 				</input>
@@ -216,19 +210,20 @@ export const EntityEditor = ({ entity, levelData, setLevelData, setSelectedEntit
 			<Show when={editingCollider() && entity() && entityData()}>
 				{(_) => {
 					const colliderTransform = new TransformControls(camera, renderer.domElement)
-					ecs.update(entity(), 'debugCollider', true)
-					const box = entity().debugColliderMesh
-
-					if (box) {
-						scene.add(colliderTransform)
-						colliderTransform.attach(box)
-						colliderTransform.addEventListener('change', colliderTransformListener)
-					}
-					const ent = entity()
-					onCleanup(() => {
-						ecs.removeComponent(ent, 'debugCollider')
-						colliderTransform.removeEventListener('change', colliderTransformListener)
-						colliderTransform.detach()
+					onMount(() => {
+						ecs.update(entity(), 'debugCollider', true)
+						const box = entity().debugColliderMesh
+						if (box) {
+							scene.add(colliderTransform)
+							colliderTransform.attach(box)
+							colliderTransform.addEventListener('objectChange', colliderTransformListener)
+						}
+						const ent = entity()
+						onCleanup(() => {
+							ecs.removeComponent(ent, 'debugCollider')
+							colliderTransform.removeEventListener('objectChange', colliderTransformListener)
+							colliderTransform.detach()
+						})
 					})
 					return (
 						<div>

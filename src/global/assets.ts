@@ -3,6 +3,8 @@ import type { characters, items, models, particles, trees } from '@assets/assets
 import type { ColorRepresentation, Material } from 'three'
 import { Mesh, MeshStandardMaterial, NearestFilter, TextureLoader } from 'three'
 import type { GLTF } from 'three/examples/jsm/loaders/GLTFLoader'
+import data from '@assets/levels/data.json'
+import { get } from 'idb-keyval'
 import type { stringCaster } from './assetLoaders'
 import { getExtension, getFileName, loadGLB, loadImage, textureLoader } from './assetLoaders'
 import type { crops } from './entity'
@@ -11,6 +13,7 @@ import { getScreenBuffer } from '@/utils/buffer'
 import { GroundShader } from '@/shaders/GroundShader'
 import { keys } from '@/constants/keys'
 import type { LDTKMap } from '@/LDTKMap'
+import type { CollidersData, LevelData } from '@/debug/LevelEditor'
 
 type Glob = Record<string, () => Promise<any>>
 type GlobEager<T = string> = Record<string, T>
@@ -117,6 +120,14 @@ const buttonsLoader = async (glob: Record<string, any>) => {
 	return (key: string) => {
 		return getImg(frames[keys[key]].frame)
 	}
+}
+
+export const loadLevelData = async () => {
+	const levelData = data.levelData as unknown as LevelData
+	const colliderData = data.colliderData as unknown as CollidersData
+	Object.assign(levelData, await get('levelData'))
+	Object.assign(colliderData, await get('colliderData'))
+	return { levelData, colliderData }
 }
 
 export const loadAssets = async () => ({

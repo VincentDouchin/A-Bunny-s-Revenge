@@ -30,7 +30,7 @@ export const props: PlacableProp[] = [
 	},
 	{
 		name: 'oven',
-		models: ['StoneOven'],
+		models: ['StoneOven', 'BunnyOvenPacked'],
 		bundle: id => ({
 			...inventoryBundle(MenuType.Oven, 3, id, Interactable.Cook),
 		}),

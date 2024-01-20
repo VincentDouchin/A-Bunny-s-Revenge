@@ -1,6 +1,6 @@
 import { World as RapierWrold, init } from '@dimforge/rapier3d-compat'
 import { World as MiniplexWorld } from 'miniplex'
-import { loadAssets } from './assets'
+import { loadAssets, loadLevelData } from './assets'
 import type { Entity } from './entity'
 import { Time } from '@/lib/time'
 import { UIManager } from '@/lib/uiManager'
@@ -15,3 +15,4 @@ export const ecs = new MiniplexWorld<Entity>()
 export const ui = new UIManager()
 export const coroutines = new CoroutinesManager()
 export const inputManager = new InputManager()
+export const levelsData = await loadLevelData()
