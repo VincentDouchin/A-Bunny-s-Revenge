@@ -866,57 +866,6 @@
 							"__worldY": 296
 						},
 						{
-							"__identifier": "board",
-							"__grid": [23,9],
-							"__pivot": [0.5,0.5],
-							"__tags": [],
-							"__tile": null,
-							"__smartColor": "#FEAE34",
-							"iid": "97d02250-b0a0-11ee-a6f5-7730fca0036a",
-							"width": 16,
-							"height": 16,
-							"defUid": 21,
-							"px": [376,152],
-							"fieldInstances": [],
-							"__worldX": 888,
-							"__worldY": 152
-						},
-						{
-							"__identifier": "oven",
-							"__grid": [16,10],
-							"__pivot": [0.5,0.5],
-							"__tags": [],
-							"__tile": null,
-							"__smartColor": "#E4A672",
-							"iid": "aa261050-b0a0-11ee-b551-0f56e133754a",
-							"width": 16,
-							"height": 16,
-							"defUid": 17,
-							"px": [264,168],
-							"fieldInstances": [{ "__identifier": "direction", "__type": "LocalEnum.direction", "__value": "back", "__tile": null, "defUid": 18, "realEditorValues": [{
-								"id": "V_String",
-								"params": ["back"]
-							}] }],
-							"__worldX": 776,
-							"__worldY": 168
-						},
-						{
-							"__identifier": "cauldron",
-							"__grid": [14,12],
-							"__pivot": [0.5,0.5],
-							"__tags": [],
-							"__tile": { "tilesetUid": 8, "x": 224, "y": 256, "w": 16, "h": 16 },
-							"__smartColor": "#181425",
-							"iid": "30d3c160-b0a0-11ee-b551-e78bf7cc7329",
-							"width": 16,
-							"height": 16,
-							"defUid": 7,
-							"px": [232,200],
-							"fieldInstances": [],
-							"__worldX": 744,
-							"__worldY": 200
-						},
-						{
 							"__identifier": "lamp",
 							"__grid": [30,9],
 							"__pivot": [0.5,0.5],

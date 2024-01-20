@@ -117,7 +117,6 @@ export const LevelEditor = () => {
 									map: map(),
 								},
 							})
-							console.log(levelData())
 							set('levelData', levelData())
 							setSelectedEntity(placed)
 							setSelectedProp(null)

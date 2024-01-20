@@ -77,11 +77,11 @@ export const EntityEditor = ({ entity, levelData, setLevelData, setSelectedEntit
 		}
 		ecs.addComponent(entity(), 'model', model)
 	})
-
+	const entityRef = entity()
 	const deleteSelected = () => {
 		setSelectedEntity(null)
-		ecs.remove(entity())
-		delete levelData()[entity().entityId]
+		ecs.remove(entityRef)
+		delete levelData()[entityRef.entityId]
 		set('levelData', levelData())
 	}
 	const colliderTransformListener = () => {

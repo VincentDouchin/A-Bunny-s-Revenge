@@ -42,4 +42,8 @@ export const props: PlacableProp[] = [
 			...inventoryBundle(MenuType.Oven, 3, id, Interactable.Cook),
 		}),
 	},
+	{
+		name: 'sign',
+		models: ['WoodenSign', 'WoodenSign2'],
+	},
 ]
