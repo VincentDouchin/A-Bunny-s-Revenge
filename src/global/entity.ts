@@ -81,8 +81,6 @@ export interface Entity {
 	colliderDesc?: ColliderDesc
 	collider?: Collider
 	size?: Vector3
-	debugCollider?: true
-	debugColliderMesh?: Mesh
 	// ! Animations
 	animator?: Animator<any>
 	template?: () => JSXElement

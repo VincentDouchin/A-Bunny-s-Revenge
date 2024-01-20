@@ -3,7 +3,7 @@ import type { Accessor, Setter } from 'solid-js'
 import { For, Show, createEffect, createMemo, createSignal, onCleanup, onMount } from 'solid-js'
 
 import { ColliderDesc, RigidBodyDesc, RigidBodyType } from '@dimforge/rapier3d-compat'
-import { Box3, Euler, Object3D, Quaternion, Vector3 } from 'three'
+import { Box3, BoxGeometry, Euler, Mesh, MeshBasicMaterial, Object3D, Quaternion, Vector3 } from 'three'
 import { TransformControls } from 'three/examples/jsm/controls/TransformControls'
 import { set } from 'idb-keyval'
 import type { CollidersData, LevelData } from './LevelEditor'
@@ -86,20 +86,17 @@ export const EntityEditor = ({ entity, levelData, setLevelData, setSelectedEntit
 		setLevelData(newdata)
 		set('levelData', newdata)
 	}
-	const colliderTransformListener = () => {
-		const box = entity().debugColliderMesh
-		if (box) {
-			const size = new Vector3()
-			new Box3().setFromObject(box).getSize(size)
-			setColliderData({
-				...colliderData(),
-				[entityData().model]: {
-					...modelCollider(),
-					offset: box.position.clone().toArray(),
-					size: size.toArray(),
-				},
-			})
-		}
+	const colliderTransformListener = (box: Mesh) => () => {
+		const size = new Vector3()
+		new Box3().setFromObject(box).getSize(size)
+		setColliderData({
+			...colliderData(),
+			[entityData().model]: {
+				...modelCollider(),
+				offset: box.position.clone().toArray(),
+				size: size.toArray(),
+			},
+		})
 	}
 	createEffect(() => {
 		if (editingCollider()) {
@@ -216,17 +213,21 @@ export const EntityEditor = ({ entity, levelData, setLevelData, setSelectedEntit
 				{(_) => {
 					const colliderTransform = new TransformControls(camera, renderer.domElement)
 					onMount(() => {
-						ecs.update(entity(), 'debugCollider', true)
-						const box = entity().debugColliderMesh
-						if (box) {
-							scene.add(colliderTransform)
-							colliderTransform.attach(box)
-							colliderTransform.addEventListener('objectChange', colliderTransformListener)
-						}
-						const ent = entity()
+						const size = entity().size!
+						const box = new Mesh(
+							new BoxGeometry(size.x, size.y, size.z),
+							new MeshBasicMaterial({ color: `red`, opacity: 0.5, transparent: true }),
+						)
+
+						box.position.set(...modelCollider()!.offset)
+						scene.add(colliderTransform)
+						entity().group!.add(box)
+						colliderTransform.attach(box)
+						const listener = colliderTransformListener(box)
+						colliderTransform.addEventListener('objectChange', listener)
 						onCleanup(() => {
-							ecs.removeComponent(ent, 'debugCollider')
-							colliderTransform.removeEventListener('objectChange', colliderTransformListener)
+							box.removeFromParent()
+							colliderTransform.removeEventListener('objectChange', listener)
 							colliderTransform.detach()
 						})
 					})

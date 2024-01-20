@@ -4,7 +4,6 @@ import { Box3, Quaternion, Vector3 } from 'three'
 import type { models } from '@assets/assets'
 import { ColliderDesc, RigidBodyDesc } from '@dimforge/rapier3d-compat'
 import type { CollidersData } from './LevelEditor'
-import { updateDebugColliders } from './debugCollider'
 import { props } from './props'
 import type { State } from '@/lib/state'
 import { assets, ecs, levelsData } from '@/global/init'
@@ -57,5 +56,5 @@ const spawnLevelData = () => ecs.with('map').onEntityAdded.subscribe(async (e) =
 
 export const debugPlugin = (state: State) => {
 	state
-		.addSubscriber(...updateDebugColliders, spawnLevelData)
+		.addSubscriber(spawnLevelData)
 }
