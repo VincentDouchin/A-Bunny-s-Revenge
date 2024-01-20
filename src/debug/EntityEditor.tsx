@@ -5,6 +5,7 @@ import { For, Show, createEffect, createMemo, createSignal, onCleanup, onMount }
 import { ColliderDesc, RigidBodyDesc, RigidBodyType } from '@dimforge/rapier3d-compat'
 import { Box3, Euler, Object3D, Quaternion, Vector3 } from 'three'
 import { TransformControls } from 'three/examples/jsm/controls/TransformControls'
+import { set } from 'idb-keyval'
 import type { CollidersData, LevelData } from './LevelEditor'
 import { props } from './props'
 import { cameraQuery, renderer, scene } from '@/global/rendering'
@@ -79,7 +80,11 @@ export const EntityEditor = ({ entity, levelData, setLevelData, setSelectedEntit
 	const deleteSelected = () => {
 		setSelectedEntity(null)
 		ecs.remove(entityRef)
-		delete levelData()[entityRef.entityId]
+		const newdata = Object.entries(levelData()).reduce((acc, [key, val]) => {
+			return key === entityRef.entityId ? acc : { ...acc, [key]: val }
+		}, {})
+		setLevelData(newdata)
+		set('levelData', newdata)
 	}
 	const colliderTransformListener = () => {
 		const box = entity().debugColliderMesh
