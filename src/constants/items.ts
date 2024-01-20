@@ -44,5 +44,13 @@ export const itemsData: Record<items, ItemData> = {
 		name: 'Beet seed',
 		seed: 'beet',
 	},
+	honey: {
+		name: 'Honey',
+		cookable: true,
+	},
+	honey_glazed_carrot: {
+		name: 'Honey glazed carrot',
+		meal: [createModifier('strength', 2, ModStage.Base, ModType.Percent)],
+	},
 
 }

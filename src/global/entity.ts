@@ -15,6 +15,7 @@ import type { direction } from '@/lib/directions'
 import type { MenuInputMap, PlayerInputMap } from '@/global/inputMaps'
 import type { Item } from '@/constants/items'
 import type { NPC } from '@/constants/NPC'
+import type { Drop } from '@/constants/enemies'
 
 export type Dialog = Generator<string | string[] | void | false, void, number | void>
 export enum Faction {
@@ -131,6 +132,8 @@ export interface Entity {
 	currentHealth?: number
 	maxHealth?: number
 	dying?: true
+	// ! Enemies
+	drops?: Drop[]
 	// ! Particles
 	emitter?: ParticleEmitter<Object3DEventMap>
 	// ! Stats
@@ -138,6 +141,7 @@ export interface Entity {
 	// ! Level Editor
 	entityId?: string
 }
+
 export type Bundle<C extends keyof Entity> = () => With<Entity, C>
 
 type KeysOfType<T, U> = {

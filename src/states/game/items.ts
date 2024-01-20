@@ -1,10 +1,36 @@
+import type { items } from '@assets/assets'
+import { ColliderDesc, RigidBodyDesc } from '@dimforge/rapier3d-compat'
 import { Easing, Tween } from '@tweenjs/tween.js'
-import { Vector3 } from 'three'
-import { ecs, world } from '@/global/init'
-import { TweenGroup } from '@/lib/tweenGroup'
+import { AdditiveBlending, CanvasTexture, Mesh, MeshBasicMaterial, NearestFilter, SphereGeometry, Sprite, SpriteMaterial, Vector3 } from 'three'
+import type { Entity } from '@/global/entity'
+import { assets, ecs, world } from '@/global/init'
 import { addItem } from '@/global/save'
+import { TweenGroup } from '@/lib/tweenGroup'
 
-const itemsQuery = ecs.with('item', 'rotation', 'position', 'model', 'collider', 'itemLabel')
+const itemsQuery = ecs.with('item', 'position', 'model', 'collider', 'itemLabel')
+
+export const itemBundle = (item: items) => {
+	const map = new CanvasTexture(assets.items[item])
+	map.minFilter = NearestFilter
+	map.magFilter = NearestFilter
+	const sprite = new Sprite(new SpriteMaterial({ map }))
+	sprite.scale.setScalar(5)
+	sprite.position.setY(2.5)
+	const shadow = new Mesh(new SphereGeometry(0.3), new MeshBasicMaterial({
+		color: 0x000000,
+		transparent: true,
+		blending: AdditiveBlending,
+	}))
+	shadow.castShadow = true
+	sprite.add(shadow)
+	return {
+		bodyDesc: RigidBodyDesc.fixed(),
+		colliderDesc: ColliderDesc.cuboid(5, 5, 5).setSensor(true),
+		model: sprite,
+		item: true,
+		itemLabel: item,
+	} as const satisfies Entity
+}
 export const bobItems = () => itemsQuery.onEntityAdded.subscribe((entity) => {
 	const tween	= new Tween(entity.model.position).to({ y: 2 }, 2000).repeat(Number.POSITIVE_INFINITY).yoyo(true).easing(Easing.Quadratic.InOut)
 

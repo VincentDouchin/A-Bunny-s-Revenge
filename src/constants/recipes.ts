@@ -18,4 +18,9 @@ export const recipes: Array<Recipe> = [
 		output: { name: 'roasted_carrot', quantity: 3 },
 		processor: 'oven',
 	},
+	{
+		input: ['carrot', 'honey', 'honey'],
+		output: { name: 'honey_glazed_carrot', quantity: 1 },
+		processor: 'oven',
+	},
 ]

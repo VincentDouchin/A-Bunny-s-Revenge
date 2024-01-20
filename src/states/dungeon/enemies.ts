@@ -22,6 +22,7 @@ export const enemyBundle = (name: keyof typeof enemies) => {
 		faction: Faction.Enemy,
 		movementForce: new Vector3(),
 		speed: 100,
+		drops: enemy.drops,
 	} as const satisfies Entity
 }
 const entities = ecs.with('faction', 'position', 'rotation', 'body', 'collider', 'movementForce')

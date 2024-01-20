@@ -31,6 +31,7 @@ export class Stat {
 
 	set(name: StatNames, value: number) {
 		this.#initialValues.set(name, value)
+		this.calculate(name)
 		return this
 	}
 

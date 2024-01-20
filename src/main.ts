@@ -13,7 +13,7 @@ import { runIf } from './lib/state'
 import { runif } from './lib/systemset'
 import { transformsPlugin } from './lib/transforms'
 import { startTweens, updateTweens } from './lib/updateTween'
-import { playerAttack } from './states/dungeon/battle'
+import { playerAttack, spawnDrops } from './states/dungeon/battle'
 import { enemyAttackPlayer } from './states/dungeon/enemies'
 import { generateDungeon } from './states/dungeon/generateDungeon'
 import { killAnimation, killEntities } from './states/dungeon/health'
@@ -68,6 +68,7 @@ openMenuState
 genDungeonState
 	.onEnter(generateDungeon)
 dungeonState
+	.addSubscriber(spawnDrops)
 	.onEnter(spawnDungeon, spawnLight, spawnSkyBox, spawnItems)
 	.onUpdate(runIf(canPlayerMove, allowDoorCollision, collideWithDoor, enemyAttackPlayer, harvestCrop, playerAttack, killEntities))
 	.onExit(despawnOfType('map'))

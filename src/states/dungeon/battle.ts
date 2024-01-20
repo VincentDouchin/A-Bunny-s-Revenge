@@ -1,11 +1,12 @@
 import { Tween } from '@tweenjs/tween.js'
-import { Mesh } from 'three'
+import { itemBundle } from '../game/items'
 import { Faction } from '@/global/entity'
 import { ecs, world } from '@/global/init'
+import { spawnDamageNumber } from '@/particles/damageNumber'
 import { impact } from '@/particles/impact'
 
 const playerQuery = ecs.with('playerControls', 'sensorCollider', 'position', 'stats')
-const enemiesQuery = ecs.with('collider', 'faction', 'model', 'body', 'position', 'currentHealth').without('tween', 'dying').where(({ faction }) => faction === Faction.Enemy)
+const enemiesQuery = ecs.with('collider', 'faction', 'model', 'body', 'position', 'currentHealth', 'size').without('tween', 'dying').where(({ faction }) => faction === Faction.Enemy)
 export const playerAttack = () => {
 	for (const { playerControls, sensorCollider, position, stats } of playerQuery) {
 		if (playerControls.get('primary').justPressed) {
@@ -21,6 +22,8 @@ export const playerAttack = () => {
 					const emitter = impact().emitter
 					emitter.position.y = 5
 					ecs.update(enemy, { emitter })
+
+					spawnDamageNumber(stats.get('strength'), enemy)
 					// ! knockback
 					const force = position.clone().sub(enemy.position).normalize().multiplyScalar(-50000)
 					enemy.body.applyImpulse(force, true)
@@ -28,16 +31,16 @@ export const playerAttack = () => {
 					const tween = new Tween({ color: 1 })
 						.to({ color: 0 }, 200)
 						.onComplete(() => ecs.removeComponent(enemy, 'tween'))
-					enemy.model.traverse((node) => {
-						if (node instanceof Mesh) {
-							// tween.onUpdate(({ color }) => {
-							// node.material.shader.uniforms.colorAdd.value.r = color
-							// })
-						}
-					})
 					ecs.update(enemy, { tween })
 				}
 			}
 		}
 	}
 }
+export const spawnDrops = () => ecs.with('drops', 'position').onEntityRemoved.subscribe((e) => {
+	for (const drop of e.drops) {
+		for (let i = 0; i < drop.quantity(); i++) {
+			ecs.add({ ...itemBundle(drop.item), position: e.position.clone() })
+		}
+	}
+})
