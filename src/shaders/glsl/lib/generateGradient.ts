@@ -1,10 +1,7 @@
 const existingData = localStorage.getItem('toonGradient')
 const { colors, stops } = existingData
 	? JSON.parse(existingData) as any
-	: {
-			colors: [0.5, 1.0, 1.3, 2],
-			stops: [0.1, 0.5, 1.0, 2.0],
-		}
+	: { colors: [0.5, 1.5, 1.7, 2.5], stops: [0.1, 0.5, 1.0, 2.0] }
 
 const glslFloat = (nb: number) => Number.isInteger(nb) ? `${nb}.` : String(nb)
 export const gradient = /* glsl */`
