@@ -9,7 +9,7 @@ import type { Entity } from '@/global/entity'
 
 export const spawnDamageNumber = (amount: number, enemy: With<Entity, 'position' | 'size'>) => {
 	const el = document.createElement('div')
-	el.textContent = String(amount)
+	el.textContent = String(Math.round(amount))
 	el.style.color = 'red'
 	const mesh = new CSS2DObject(el)
 	const y = enemy.size.y

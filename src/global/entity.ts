@@ -130,14 +130,14 @@ export interface Entity {
 	dialogContainer?: CSS2DObject
 	// ! Health
 	currentHealth?: number
-	maxHealth?: number
+	maxHealth?: Stat
 	dying?: true
 	// ! Enemies
 	drops?: Drop[]
 	// ! Particles
 	emitter?: ParticleEmitter<Object3DEventMap>
 	// ! Stats
-	stats?: Stat
+	strength?: Stat
 	// ! Level Editor
 	entityId?: string
 }

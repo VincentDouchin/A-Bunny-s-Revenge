@@ -1,5 +1,6 @@
 import { RigidBodyType } from '@dimforge/rapier3d-compat'
 import { LinearSRGBColorSpace, Mesh, NearestFilter, Quaternion, Vector3 } from 'three'
+import { healthBundle } from '../dungeon/health'
 import { inventoryBundle } from './inventory'
 import { Sizes } from '@/constants/sizes'
 import { Animator } from '@/global/animator'
@@ -10,7 +11,7 @@ import { save } from '@/global/save'
 import type { FarmRessources } from '@/global/states'
 import { modelColliderBundle } from '@/lib/models'
 import type { System } from '@/lib/state'
-import { Stat } from '@/lib/stats'
+import { Stat, addModifier } from '@/lib/stats'
 
 export const playerBundle = () => {
 	const model = assets.characters.BunnydAnim
@@ -23,7 +24,8 @@ export const playerBundle = () => {
 	})
 	const bundle = modelColliderBundle(model.scene, RigidBodyType.Dynamic, false, Sizes.character)
 	bundle.bodyDesc.setLinearDamping(20)
-	return {
+
+	const player = {
 		...playerInputMap(),
 		...inventoryBundle(MenuType.Player, 24, 'player'),
 		...bundle,
@@ -35,8 +37,13 @@ export const playerBundle = () => {
 		player: true,
 		movementForce: new Vector3(),
 		speed: 300,
-		stats: new Stat().set('strength', 1),
+		strength: new Stat(1),
+		...healthBundle(5),
 	} as const satisfies Entity
+	for (const mod of save.modifiers) {
+		addModifier(mod, player)
+	}
+	return player
 }
 
 export const spawnCharacter: System<FarmRessources> = ({ previousState }) => {

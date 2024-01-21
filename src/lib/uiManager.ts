@@ -26,6 +26,7 @@ export class UIManager {
 		const refetch = () => setState(() => data())
 		this.listeners.add(refetch)
 		onCleanup(() => this.listeners.delete(refetch))
+
 		return state
 	}
 

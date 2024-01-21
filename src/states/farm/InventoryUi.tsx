@@ -7,7 +7,8 @@ import { type Item, itemsData } from '@/constants/items'
 import type { Entity } from '@/global/entity'
 import { assets, ecs, ui } from '@/global/init'
 import { updateSave } from '@/global/save'
-import { ModType } from '@/lib/stats'
+import type { Modifier } from '@/lib/stats'
+import { ModType, addModifier } from '@/lib/stats'
 import { InputIcon } from '@/ui/InputIcon'
 import type { getProps } from '@/ui/components/Menu'
 import { Menu } from '@/ui/components/Menu'
@@ -129,29 +130,22 @@ export const InventoryUi = ({ player }: FarmUiProps) => {
 		return name ? itemsData[name] : null
 	})
 	const meal = createMemo(() => item()?.meal)
-	const consumeMeal = () => {
-		const item = selectedItem()
+	const consumeMeal = (item: Item, mods: Modifier<'maxHealth' | 'strength'>[]) => {
 		if (item) {
 			removeItemFromPlayer({ name: item.name, quantity: 1 })
-		}
-	}
-	ui.updateSync(() => {
-		if (item()?.meal) {
-			if (player.playerControls.get('secondary').justPressed) {
-				consumeMeal()
+			for (const mod of mods) {
+				updateSave(s => s.modifiers.push(mod))
+				addModifier(mod, player)
 			}
 		}
-	})
+	}
+
 	return (
 		<Modal open={open()}>
 			<Show when={open()}>
 				<div>
-					{/* <div style={{ display: 'flex', gap: '1rem' }}>
-						<IconButton icon="basket-shopping-solid" onClick={() => setTab('inventory')}></IconButton>
-						<IconButton icon="list-check-solid" onClick={() => setTab('quests')}></IconButton>
-					</div> */}
+
 					<InventoryTitle>Inventory</InventoryTitle>
-					{/* <Show when={tab() === 'inventory'}> */}
 					<div style={{ 'display': 'grid', 'grid-template-columns': 'auto 15rem', 'gap': '1rem' }}>
 						<div style={{ 'display': 'grid', 'grid-template-columns': 'repeat(8, 1fr)', 'gap': '1rem' }}>
 							<Menu
@@ -171,42 +165,54 @@ export const InventoryUi = ({ player }: FarmUiProps) => {
 							</Menu>
 						</div>
 						<div style={{ 'background': 'hsl(0,0%,100%,0.5)', 'padding': '1rem', 'border-radius': '1rem' }}>
-							<div style={{ 'color': 'white', 'text-align': 'center', 'font-size': '1.5rem' }}>
-								{item()?.name}
-							</div>
-							<Show when={meal()}>
-								{mods => (
-									<div style={{ 'color': 'white', 'padding': '1rem', 'font-size': '1.3rem' }}>
-										<button
-											onClick={consumeMeal}
-											class="button"
-											style={{ 'font-size': '1rem', 'width': '3rem', 'display': 'flex', 'gap': '0.5rem', 'margin': '0 auto' }}
-										>
-											<InputIcon input={player.playerControls.get('secondary')}></InputIcon>
-											Eat
-										</button>
-										<For each={mods()}>
-											{mod => (
-												<div>
-													{Math.sign(mod.value) > 0 && <span>+</span>}
-													<span>{mod.value}</span>
-													{mod.type === ModType.Percent && <span>%</span>}
-													<span>
-														{' '}
-														{mod.name}
-													</span>
-												</div>
-											)}
-										</For>
-									</div>
-								)}
+							<Show when={selectedItem()}>
+								{(item) => {
+									const data = createMemo(() => itemsData[item().name])
+
+									return (
+										<>
+											<div style={{ 'color': 'white', 'text-align': 'center', 'font-size': '1.5rem' }}>
+												{data().name}
+											</div>
+											<Show when={meal()}>
+												{(mods) => {
+													ui.updateSync(() => {
+														if (player.playerControls.get('secondary').justPressed) {
+															consumeMeal(item(), mods())
+														}
+													})
+													return (
+														<div style={{ 'color': 'white', 'padding': '1rem', 'font-size': '1.3rem' }}>
+															<button
+																onClick={() => consumeMeal(item(), mods())}
+																class="button"
+																style={{ 'font-size': '1rem', 'width': '3rem', 'display': 'flex', 'gap': '0.5rem', 'margin': '0 auto' }}
+															>
+																<InputIcon input={player.playerControls.get('secondary')}></InputIcon>
+																Eat
+															</button>
+															<For each={mods()}>
+																{mod => (
+																	<div>
+																		{Math.sign(mod.value) > 0 && <span>+</span>}
+																		<span>{mod.value}</span>
+																		{mod.type === ModType.Percent && <span>%</span>}
+																		<span>
+																			{' '}
+																			{mod.name}
+																		</span>
+																	</div>
+																)}
+															</For>
+														</div>
+													) }}
+											</Show>
+										</>
+									)
+								}}
 							</Show>
 						</div>
 					</div>
-					{/* </Show> */}
-					{/* <Show when={tab() === 'quests'}>
-
-					</Show> */}
 				</div>
 			</Show>
 		</Modal>

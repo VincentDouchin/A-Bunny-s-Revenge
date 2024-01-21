@@ -1,3 +1,6 @@
+import type { With } from 'miniplex'
+import type { ComponentsOfType, Entity } from '@/global/entity'
+
 export enum ModStage {
 	Base,
 	Add,
@@ -8,43 +11,44 @@ export enum ModType {
 	Percent,
 }
 
-export type StatNames = 'strength'
-export interface Modifier {
+export interface Modifier<S extends ComponentsOfType<Stat> > {
 	value: number
 	stage: ModStage
 	type: ModType
-	name: StatNames
+	name: S
+	stackable: boolean
 }
 
-export const createModifier = (name: StatNames, value: number, stage: ModStage, type: ModType): Modifier => ({
+export const createModifier = <S extends ComponentsOfType<Stat>>(name: S, value: number, stage: ModStage, type: ModType, stackable: boolean): Modifier<S> => ({
 	value,
 	stage,
 	type,
 	name,
+	stackable,
 })
 
 export class Stat {
-	#initialValues = new Map<StatNames, number>()
-	#lastValues = new Map<StatNames, number>()
+	#initialValue: number
+	#lastValue: number
+	#modifiers: Modifier<any>[] = []
 
-	#modifiers: Modifier[] = []
-
-	set(name: StatNames, value: number) {
-		this.#initialValues.set(name, value)
-		this.calculate(name)
+	constructor(value: number) {
+		this.#initialValue = value
+		this.#lastValue = value
+		this.calculate()
 		return this
 	}
 
-	addModifier(modifier: Modifier) {
-		if (!this.#modifiers.includes(modifier)) {
+	addModifier(modifier: Modifier<any>) {
+		if (modifier.stackable || !this.#modifiers.includes(modifier)) {
 			this.#modifiers.push(modifier)
 		}
-		this.calculate(modifier.name)
+		this.calculate()
 		return this
 	}
 
-	calculate(name: StatNames) {
-		let value = this.#initialValues.get(name) ?? 0
+	calculate() {
+		let value = this.#initialValue
 		for (const stage of [ModStage.Base, ModStage.Add, ModStage.Total]) {
 			const toAdd = this.#modifiers.filter(mod => mod.stage === stage && mod.type === ModType.Add)
 			for (const add of toAdd) {
@@ -52,13 +56,24 @@ export class Stat {
 			}
 			const toMultiply = this.#modifiers.filter(mod => mod.stage === stage && mod.type === ModType.Percent)
 			for (const mul of toMultiply) {
-				value *= mul.value / 100
+				value *= 1 + mul.value / 100
 			}
 		}
-		this.#lastValues.set(name, value)
+		this.#lastValue = value
 	}
 
-	get(name: StatNames) {
-		return this.#lastValues.get(name) ?? 0
+	get value() {
+		return this.#lastValue
+	}
+}
+
+export const addModifier = <S extends ComponentsOfType<Stat>>(mod: Modifier<S>, entity: With<Entity, S>) => {
+	if (mod.name === 'maxHealth' && entity.currentHealth && entity.maxHealth) {
+		const old = entity.maxHealth.value
+		entity.maxHealth.addModifier(mod)
+		const diff = entity.maxHealth.value - old
+		entity.currentHealth += diff
+	} else {
+		entity[mod.name]?.addModifier(mod)
 	}
 }

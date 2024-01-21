@@ -267,6 +267,7 @@ export const spawnDungeon: System<DungeonRessources> = ({ dungeon, direction, ro
 								...playerBundle(),
 								position: position.clone(),
 								ignoreDoor: doorData.direction,
+
 							})
 						}
 					}

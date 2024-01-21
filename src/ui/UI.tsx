@@ -1,4 +1,4 @@
-import { FarmUi } from '../states/farm/FarmUi'
+import { PlayerUi } from '../states/farm/FarmUi'
 import { InteractionUi } from './Interactions'
 import { PauseUI } from './PauseUI'
 import { TouchControls } from './TouchControls'
@@ -10,6 +10,6 @@ export const UI = () => (
 		<InteractionUi />
 		<TouchControls />
 		<PauseUI />
-		<FarmUi />
+		<PlayerUi />
 	</>
 )

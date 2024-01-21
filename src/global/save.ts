@@ -5,6 +5,7 @@ import { context } from './context'
 import type { Entity, crops } from './entity'
 import type { QuestName } from '@/constants/quests'
 import type { Item } from '@/constants/items'
+import type { Modifier } from '@/lib/stats'
 
 export interface SaveData {
 	crops: Record<string, { stage: number, name: crops }>
@@ -13,6 +14,7 @@ export interface SaveData {
 	quests: Partial<Record<QuestName, Array<boolean>>>
 	selectedSeed: null | crops
 	inventories: Record<string, Item[]>
+	modifiers: Modifier<any>[]
 }
 
 const blankSave = (): SaveData => ({
@@ -22,6 +24,7 @@ const blankSave = (): SaveData => ({
 	quests: {},
 	selectedSeed: null,
 	inventories: {},
+	modifiers: [],
 })
 
 export const save: Readonly<SaveData> = blankSave()

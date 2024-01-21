@@ -1,4 +1,4 @@
-import { Show, createSignal } from 'solid-js'
+import { Show, createSignal, onCleanup, onMount } from 'solid-js'
 import { SaveEditor } from './saveEditor'
 import { LevelEditor } from './LevelEditor'
 import { params } from '@/global/context'
@@ -29,9 +29,21 @@ export const DebugUi = () => {
 		await resetSave()
 		window.location.reload()
 	}
+	const showUiListener = (e: KeyboardEvent) => {
+		if (e.code === 'F1') {
+			e.preventDefault()
+			setShowUi(!showUi())
+		}
+	}
+	onMount(() => {
+		document.addEventListener('keydown', showUiListener)
+	})
+	onCleanup(() => {
+		document.removeEventListener('keydown', showUiListener)
+	})
 	return (
 		<div style={{ position: 'absolute', color: 'white' }}>
-			<button onClick={() => setShowUi(!showUi())}>{showUi() ? 'Hide debug Ui' : 'Show debug ui'}</button>
+			{/* <button onClick={() => setShowUi(!showUi())}>{showUi() ? 'Hide debug Ui' : 'Show debug ui'}</button> */}
 			<Show when={showUi()}>
 				<div>
 					Render width

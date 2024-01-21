@@ -109,6 +109,7 @@ export const harvestCrop = () => {
 						position: spot.worldPosition.clone().add(new Vector3(0, bundle.size.y + 2, 0)),
 						inMap: true,
 						itemLabel: spot.planted.crop.name,
+						popItem: true,
 					})
 					removeEntityRef(spot, 'planted')
 				}

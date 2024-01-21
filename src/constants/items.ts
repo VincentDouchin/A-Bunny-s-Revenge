@@ -11,7 +11,7 @@ export type ItemTags = 'choppable' | 'cookable'
 export type ItemData = Partial<Record<ItemTags, true>> & {
 	name: string
 	seed?: crops
-	meal?: Modifier[]
+	meal?: Modifier<any>[]
 }
 
 export const itemsData: Record<items, ItemData> = {
@@ -26,7 +26,7 @@ export const itemsData: Record<items, ItemData> = {
 	},
 	roasted_carrot: {
 		name: 'Roasted carrot',
-		meal: [createModifier('strength', 1, ModStage.Base, ModType.Percent)],
+		meal: [createModifier('strength', 1, ModStage.Base, ModType.Percent, true)],
 	},
 	mushroom: {
 		name: 'Mushroom',
@@ -50,7 +50,7 @@ export const itemsData: Record<items, ItemData> = {
 	},
 	honey_glazed_carrot: {
 		name: 'Honey glazed carrot',
-		meal: [createModifier('strength', 2, ModStage.Base, ModType.Percent)],
+		meal: [createModifier('strength', 2, ModStage.Base, ModType.Percent, true), createModifier('maxHealth', 1, ModStage.Total, ModType.Add, true)],
 	},
 
 }

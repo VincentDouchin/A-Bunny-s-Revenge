@@ -45,10 +45,20 @@ export const LevelEditor = () => {
 		a.click()
 		document.body.removeChild(a)
 	}
+	const showUiListener = (e: KeyboardEvent) => {
+		if (e.code === 'F2') {
+			e.preventDefault()
+			setOpen(!open())
+		}
+	}
+	onMount(() => {
+		document.addEventListener('keydown', showUiListener)
+	})
+	onCleanup(() => {
+		document.removeEventListener('keydown', showUiListener)
+	})
 	return (
 		<div>
-			<button onClick={() => setOpen(!open())}>Level editor</button>
-			<button onClick={download}>Download</button>
 			<Show when={open() && map()}>
 				{(map) => {
 					const [selectedProp, setSelectedProp] = createSignal<PlacableProp | null>(null)
@@ -156,40 +166,44 @@ export const LevelEditor = () => {
 					})
 
 					return (
-						<div style={{ 'position': 'fixed', 'top': 0, 'right': 0, 'display': 'grid', 'grid-template-columns': 'auto auto' }}>
-							<div>
-								<Show when={selectedEntity()}>
-									{entity => (
-										<EntityEditor
-											entity={entity}
-											levelData={levelData}
-											setLevelData={setLevelData}
-											setSelectedEntity={setSelectedEntity}
-											colliderData={colliderData}
-											setColliderData={setColliderData}
-										/>
-									)}
-								</Show>
-							</div>
-							<div>
-								<For each={props}>
-									{(prop) => {
-										const isSelected = createMemo(() => selectedProp() === prop)
-										return (
-											<div style={{ display: 'grid' }}>
-												<button
-													style={isSelected() ? { background: 'black', color: 'white' } : {}}
-													onClick={() => setSelectedProp(isSelected() ? null : prop)}
-												>
-													{prop.name}
-												</button>
-											</div>
-										)
-									}}
-								</For>
-							</div>
+						<>
+							<button onClick={download}>Download</button>
 
-						</div>
+							<div style={{ 'position': 'fixed', 'top': 0, 'right': 0, 'display': 'grid', 'grid-template-columns': 'auto auto' }}>
+								<div>
+									<Show when={selectedEntity()}>
+										{entity => (
+											<EntityEditor
+												entity={entity}
+												levelData={levelData}
+												setLevelData={setLevelData}
+												setSelectedEntity={setSelectedEntity}
+												colliderData={colliderData}
+												setColliderData={setColliderData}
+											/>
+										)}
+									</Show>
+								</div>
+								<div>
+									<For each={props}>
+										{(prop) => {
+											const isSelected = createMemo(() => selectedProp() === prop)
+											return (
+												<div style={{ display: 'grid' }}>
+													<button
+														style={isSelected() ? { background: 'black', color: 'white' } : {}}
+														onClick={() => setSelectedProp(isSelected() ? null : prop)}
+													>
+														{prop.name}
+													</button>
+												</div>
+											)
+										}}
+									</For>
+								</div>
+
+							</div>
+						</>
 					)
 				}}
 			</Show>

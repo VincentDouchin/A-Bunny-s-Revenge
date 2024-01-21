@@ -3,10 +3,11 @@ import { Mesh } from 'three'
 import type { Entity } from '@/global/entity'
 import { ecs } from '@/global/init'
 import { addTag } from '@/lib/hierarchy'
+import { Stat } from '@/lib/stats'
 
 export const healthBundle = (health: number) => ({
 	currentHealth: health,
-	maxHealth: health,
+	maxHealth: new Stat(health),
 } as const satisfies Entity)
 
 const healthQuery = ecs.with('currentHealth', 'maxHealth')
