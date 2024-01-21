@@ -64,7 +64,7 @@ import noise from '@/shaders/glsl/lib/cnoise.glsl?raw'
 // 		})
 // 	}
 // }
-import gradient from '@/shaders/glsl/lib/gradient.glsl?raw'
+import { gradient } from '@/shaders/glsl/lib/generateGradient'
 
 export class GroundShader extends MeshStandardMaterial {
 	shader?: Shader

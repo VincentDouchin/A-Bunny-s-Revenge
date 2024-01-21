@@ -18,6 +18,47 @@
       ],
       "type": "object"
     },
+    "ModStage": {
+      "enum": [
+        0,
+        1,
+        2
+      ],
+      "type": "number"
+    },
+    "ModType": {
+      "enum": [
+        0,
+        1
+      ],
+      "type": "number"
+    },
+    "Modifier<any>": {
+      "additionalProperties": false,
+      "properties": {
+        "name": {},
+        "stackable": {
+          "type": "boolean"
+        },
+        "stage": {
+          "$ref": "#/definitions/ModStage"
+        },
+        "type": {
+          "$ref": "#/definitions/ModType"
+        },
+        "value": {
+          "type": "number"
+        }
+      },
+      "required": [
+        "value",
+        "stage",
+        "type",
+        "name",
+        "stackable"
+      ],
+      "type": "object"
+    },
     "SaveData": {
       "additionalProperties": false,
       "properties": {
@@ -48,6 +89,12 @@
             "type": "array"
           },
           "type": "object"
+        },
+        "modifiers": {
+          "items": {
+            "$ref": "#/definitions/Modifier%3Cany%3E"
+          },
+          "type": "array"
         },
         "playerPosition": {
           "items": {
@@ -90,7 +137,8 @@
         "playerRotation",
         "quests",
         "selectedSeed",
-        "inventories"
+        "inventories",
+        "modifiers"
       ],
       "type": "object"
     },

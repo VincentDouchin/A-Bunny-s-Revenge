@@ -1,6 +1,7 @@
 import { Show, createSignal, onCleanup, onMount } from 'solid-js'
 import { SaveEditor } from './saveEditor'
 import { LevelEditor } from './LevelEditor'
+import { ToonEditor } from './toonEditor'
 import { params } from '@/global/context'
 import { composer, renderer } from '@/global/rendering'
 import { campState } from '@/global/states'
@@ -126,6 +127,7 @@ export const DebugUi = () => {
 				<div>
 					<button onClick={reset}>Reset Save</button>
 				</div>
+				<ToonEditor />
 				<SaveEditor />
 			</Show>
 			<LevelEditor />
