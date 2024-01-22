@@ -11,7 +11,7 @@ export const ToonEditor = () => {
 
 	const data: ToonValues = existingData
 		? JSON.parse(existingData) as ToonValues
-		: { colors: [0.5, 1.5, 1.7, 2.5], stops: [0.1, 0.5, 1.0, 2.0] } as const
+		: { colors: [0.5, 1.5, 1.7, 2.5], stops: [0.1, 0.5, 1.0, 2.0] }
 	const save = () => {
 		localStorage.setItem('toonGradient', JSON.stringify(data))
 		window.location.reload()

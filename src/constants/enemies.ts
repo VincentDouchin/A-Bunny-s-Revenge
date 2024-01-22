@@ -9,7 +9,9 @@ interface Enemy {
 	scale: number
 	drops: Drop[]
 }
-export const enemies = {
+const enemyNames = ['Armabee', 'Armabee_Evolved'] as const satisfies readonly characters[]
+export type enemies = (typeof enemyNames)[number]
+export const enemyData: Record<enemies, Enemy> = {
 	Armabee: {
 		health: 3,
 		scale: 4,
@@ -20,4 +22,4 @@ export const enemies = {
 		scale: 5,
 		drops: [],
 	},
-} as const satisfies Partial<Record<characters, Enemy>>
+}

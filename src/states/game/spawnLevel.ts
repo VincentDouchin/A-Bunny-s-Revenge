@@ -1,10 +1,9 @@
-import { ColliderDesc, RigidBodyDesc, RigidBodyType } from '@dimforge/rapier3d-compat'
+import { RigidBodyType } from '@dimforge/rapier3d-compat'
 import { between } from 'randomish'
 import { createNoise2D } from 'simplex-noise'
-import { BoxGeometry, Color, Group, Mesh, PlaneGeometry, PointLight, Quaternion, Vector3 } from 'three'
+import { BoxGeometry, Mesh, PointLight, Quaternion, Vector3 } from 'three'
 import { RoomType } from '../dungeon/dungeonTypes'
 import { enemyBundle } from '../dungeon/enemies'
-import { cropBundle } from '../farm/farming'
 import { spawnHouse } from '../farm/house'
 import { kitchenApplianceBundle } from '../farm/kitchen'
 import { playerBundle } from './spawnCharacter'
@@ -14,14 +13,13 @@ import { instanceMesh } from '@/global/assetLoaders'
 import { Interactable, MenuType } from '@/global/entity'
 import { assets, ecs } from '@/global/init'
 import { menuInputMap } from '@/global/inputMaps'
-import { save } from '@/global/save'
 import type { DungeonRessources, FarmRessources } from '@/global/states'
 import type { direction } from '@/lib/directions'
 import { otherDirection } from '@/lib/directions'
 import { modelColliderBundle } from '@/lib/models'
 import type { System } from '@/lib/state'
 import { getRotationFromDirection } from '@/lib/transforms'
-import { GroundShader, GroundShader2 } from '@/shaders/GroundShader'
+import { GroundShader2 } from '@/shaders/GroundShader'
 import { inventoryBundle } from '@/states/game/inventory'
 import { getRandom, objectValues, range } from '@/utils/mapFunctions'
 
@@ -87,7 +85,7 @@ export const spawnLDTKEntities = (constructors: { [key in keyof FieldInstances]?
 	}
 }
 
-const spawnFarmEntities = (wasDungeon: boolean) => {
+const spawnFarmEntities = (_wasDungeon: boolean) => {
 	return spawnLDTKEntities({
 		door: (position, data) => {
 			const rotation = getRotationFromDirection(data.direction)
@@ -107,37 +105,7 @@ const spawnFarmEntities = (wasDungeon: boolean) => {
 				position,
 			})
 		},
-
-		planter: (position, data) => {
-			const model = new Mesh(
-				new PlaneGeometry(60, 8),
-				new GroundShader({ color: 0x996633 }),
-			)
-			model.rotation.x = -Math.PI / 2
-			model.position.y = 1
-			model.receiveShadow = true
-			const planter = ecs.add({ position, model, inMap: true })
-			for (let i = 0; i < 50; i += 10) {
-				const key = data.id + i
-				const crop = save.crops[key]
-				const spot = ecs.add({
-					position: new Vector3(i - 20, 2),
-					group: new Group(),
-					parent: planter,
-					bodyDesc: RigidBodyDesc.fixed(),
-					colliderDesc: ColliderDesc.cuboid(3, 3, 3).setSensor(true),
-					plantableSpot: key,
-				})
-				if (crop) {
-					const planted = ecs.add({
-						parent: spot,
-						position: new Vector3(),
-						...cropBundle(wasDungeon, crop),
-					})
-					ecs.update(spot, { planted })
-				}
-			}
-		},
+		planter: () => {},
 		house: spawnHouse,
 		board: (position) => {
 			const model = assets.models.Bulliten.scene
@@ -176,7 +144,7 @@ const spawnGroundAndTrees = (layer: LayerInstance) => {
 	const h = layer.__cHei * SCALE
 	const groundMesh = new Mesh(
 		new BoxGeometry(w, 1, h),
-		new GroundShader2({ color: new Color(0x26854C) }),
+		new GroundShader2({ color: 0x26854C }),
 	)
 
 	groundMesh.receiveShadow = true
