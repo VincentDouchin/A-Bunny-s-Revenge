@@ -20,10 +20,12 @@ const getBoundingBox = (modelName: models, model: Object3D<Object3DEventMap>, co
 			const boxSize = new Box3().setFromObject(model)
 			boxSize.getSize(size)
 		}
-		return {
-			bodyDesc: new RigidBodyDesc(collider.type).lockRotations(),
-			colliderDesc: ColliderDesc.cuboid(size.x / 2, size.y / 2, size.z / 2).setTranslation(...collider.offset).setSensor(collider.sensor),
-			size,
+		if (collider.offset) {
+			return {
+				bodyDesc: new RigidBodyDesc(collider.type).lockRotations(),
+				colliderDesc: ColliderDesc.cuboid(size.x / 2, size.y / 2, size.z / 2).setTranslation(...collider.offset).setSensor(collider.sensor),
+				size,
+			}
 		}
 	}
 	return {}

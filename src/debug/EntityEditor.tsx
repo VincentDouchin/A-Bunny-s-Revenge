@@ -26,18 +26,7 @@ export const EntityEditor = ({ entity, levelData, setLevelData, setSelectedEntit
 	}
 	const [scale, setScale] = createSignal(entityData().scale)
 	const [defaultScale, setDefaultScale] = createSignal(Boolean(colliderData()[entityData().model]?.scale))
-	onMount(() => {
-		if (!modelCollider()) {
-			setColliderData({
-				...colliderData(),
-				[entityData().model]: {
-					scale: 1,
-					offset: [0, 0, 0],
-					type: RigidBodyType.Fixed,
-				},
-			})
-		}
-	})
+
 	const updateScale = (newScale: number) => {
 		setScale(newScale)
 		if (defaultScale()) {
@@ -94,7 +83,7 @@ export const EntityEditor = ({ entity, levelData, setLevelData, setSelectedEntit
 		ecs.removeComponent(entity(), 'collider')
 		ecs.removeComponent(entity(), 'colliderDesc')
 		ecs.removeComponent(entity(), 'size')
-		if (collider) {
+		if (collider?.offset !== undefined) {
 			const size = new Vector3()
 			if (collider.size) {
 				size.set(...collider.size)
