@@ -3,7 +3,7 @@ import { SaveEditor } from './saveEditor'
 import { LevelEditor } from './LevelEditor'
 import { ToonEditor } from './toonEditor'
 import { params } from '@/global/context'
-import { composer, renderer } from '@/global/rendering'
+import { renderer } from '@/global/rendering'
 import { campState } from '@/global/states'
 import { resetSave, updateSave } from '@/global/save'
 
@@ -12,7 +12,6 @@ export const updatePixelation = (e: Event) => {
 	const val = target.valueAsNumber
 	const ratio = window.innerHeight / window.innerWidth
 	renderer.setSize(val, val * ratio)
-	composer.setSize(val, val * ratio)
 }
 export const DebugUi = () => {
 	const [showUi, setShowUi] = createSignal(false)

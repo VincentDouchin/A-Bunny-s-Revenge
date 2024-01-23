@@ -8,7 +8,7 @@ import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls'
 import { generateUUID } from 'three/src/math/MathUtils'
 import { EntityEditor } from './EntityEditor'
 import { type PlacableProp, props } from './props'
-import { composer, renderer, scene } from '@/global/rendering'
+import { renderer, scene } from '@/global/rendering'
 import { assets, ecs, levelsData, ui } from '@/global/init'
 import type { Entity } from '@/global/entity'
 import { params } from '@/global/context'
@@ -80,7 +80,6 @@ export const LevelEditor = () => {
 						const val = window.innerWidth
 						const ratio = window.innerHeight / window.innerWidth
 						renderer.setSize(val, val * ratio)
-						composer.setSize(val, val * ratio)
 						const group = camera.parent!
 						const proj = camera.projectionMatrix.clone().toArray()
 						camera.removeFromParent()
@@ -101,7 +100,6 @@ export const LevelEditor = () => {
 							const val = params.renderWidth
 							const ratio = window.innerHeight / window.innerWidth
 							renderer.setSize(val, val * ratio)
-							composer.setSize(val, val * ratio)
 							controls.dispose()
 						})
 						const data = await loadLevelData()
