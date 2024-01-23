@@ -1,5 +1,4 @@
 import { BasicShadowMap, DepthTexture, LinearSRGBColorSpace, NearestFilter, RGBAFormat, Scene, ShaderMaterial, UnsignedInt248Type, WebGLRenderTarget, WebGLRenderer } from 'three'
-import { EffectComposer } from 'three/examples/jsm/postprocessing/EffectComposer'
 import { FullScreenQuad } from 'three/examples/jsm/postprocessing/Pass'
 import { CSS2DRenderer } from 'three/examples/jsm/renderers/CSS2DRenderer'
 import { camera } from './camera'
@@ -30,7 +29,6 @@ target.stencilBuffer = false
 target.depthBuffer = true
 target.depthTexture = new DepthTexture(width, height)
 target.depthTexture.type = UnsignedInt248Type
-export const composer = new EffectComposer(renderer, target)
 const depthQuad = new FullScreenQuad(new ShaderMaterial(getDepthShader(target)))
 const sobelQuad = new FullScreenQuad(new ShaderMaterial(getSobelShader(width, height, target, depthTarget)))
 
@@ -41,7 +39,6 @@ export const initThree = () => {
 	document.body.appendChild(renderer.domElement)
 	renderer.outputColorSpace = LinearSRGBColorSpace
 	renderer.setSize(width, width * ratio)
-	composer.setSize(width, width * ratio)
 	cssRenderer.setSize(window.innerWidth, window.innerHeight)
 	cssRenderer.domElement.style.position = 'fixed'
 	cssRenderer.domElement.style.left = '0'
