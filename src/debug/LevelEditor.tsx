@@ -27,6 +27,7 @@ export type CollidersData = Partial<Record<models, {
 	size?: [number, number, number]
 	sensor: boolean
 	offset: [number, number, number]
+	scale: number | null
 } >>
 
 const addedEntitiesQuery = ecs.with('entityId', 'model', 'group', 'position', 'rotation')
@@ -63,9 +64,18 @@ export const LevelEditor = () => {
 				{(map) => {
 					const [selectedProp, setSelectedProp] = createSignal<PlacableProp | null>(null)
 					const [selectedEntity, setSelectedEntity] = createSignal<With<Entity, 'entityId' | 'model' | 'position' | 'rotation'> | null>(null)
-
+					const [selectedModel, setSelectedModel] = createSignal<null | models>(null)
 					const [levelData, setLevelData] = createSignal<LevelData>({})
 					const [colliderData, setColliderData] = createSignal<CollidersData>({})
+
+					createEffect(() => {
+						const prop = selectedProp()
+						if (prop) {
+							setSelectedModel(prop.models[0])
+						} else {
+							setSelectedModel(null)
+						}
+					})
 					onMount(async () => {
 						const val = window.innerWidth
 						const ratio = window.innerHeight / window.innerWidth
@@ -110,6 +120,7 @@ export const LevelEditor = () => {
 						const camera = cameraQuery.first?.camera
 						if (!camera) return
 						const selected = selectedProp()
+						const model = selectedModel()
 						const pointer = new Vector2()
 						pointer.x = (event.clientX / window.innerWidth) * 2 - 1
 						pointer.y = -(event.clientY / window.innerHeight) * 2 + 1
@@ -117,10 +128,11 @@ export const LevelEditor = () => {
 						raycaster.setFromCamera(pointer, camera)
 
 						const intersects = raycaster.intersectObjects(scene.children)
-						if (selected) {
+						if (selected && model) {
+							const position = intersects.filter(x => x.object.type !== 'TransformControlsPlane')[0].point
 							const placed = ecs.add({
-								model: assets.models[selected.models[0]].scene.clone(),
-								position: intersects[0].point,
+								model: assets.models[model].scene.clone(),
+								position,
 								entityId: generateUUID(),
 								rotation: new Quaternion(),
 								inMap: true,
@@ -128,8 +140,8 @@ export const LevelEditor = () => {
 							setLevelData({
 								...levelData(),
 								[placed.entityId]: {
-									model: selected.models[0],
-									scale: 1,
+									model,
+									scale: colliderData()[model]?.scale ?? 1,
 									position: placed.position.toArray(),
 									rotation: placed.rotation.toJSON(),
 									map: map(),
@@ -184,6 +196,28 @@ export const LevelEditor = () => {
 										)}
 									</Show>
 								</div>
+								{/* //! Selected Model */}
+								<Show when={selectedProp()}>
+									{(data) => {
+										const models = createMemo(() => data().models)
+										return (
+											<div style={{ position: 'fixed', bottom: 0, left: 0 }}>
+												<For each={models()}>
+													{(model) => {
+														return (
+															<button
+																classList={{ selected: model === selectedModel() }}
+																onClick={() => setSelectedModel(model)}
+															>
+																{model}
+															</button>
+														)
+													}}
+												</For>
+											</div>
+										)
+									}}
+								</Show>
 								<div>
 									<For each={props}>
 										{(prop) => {
@@ -191,7 +225,7 @@ export const LevelEditor = () => {
 											return (
 												<div style={{ display: 'grid' }}>
 													<button
-														style={isSelected() ? { background: 'black', color: 'white' } : {}}
+														classList={{ selected: isSelected() }}
 														onClick={() => setSelectedProp(isSelected() ? null : prop)}
 													>
 														{prop.name}

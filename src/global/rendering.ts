@@ -1,19 +1,43 @@
-import { BasicShadowMap, LinearSRGBColorSpace, Scene, WebGLRenderer } from 'three'
+import { BasicShadowMap, DepthTexture, LinearSRGBColorSpace, NearestFilter, RGBAFormat, Scene, ShaderMaterial, UnsignedInt248Type, UnsignedShortType, Vector2, WebGLRenderTarget, WebGLRenderer } from 'three'
 import { EffectComposer } from 'three/examples/jsm/postprocessing/EffectComposer'
+import { FullScreenQuad } from 'three/examples/jsm/postprocessing/Pass'
 import { RenderPass } from 'three/examples/jsm/postprocessing/RenderPass'
+import { ShaderPass } from 'three/examples/jsm/postprocessing/ShaderPass'
 import { CSS2DRenderer } from 'three/examples/jsm/renderers/CSS2DRenderer'
 import { camera } from './camera'
 import { params } from './context'
 import { ecs } from './init'
+import { getDepthShader, getSobelShader } from '@/shaders/EdgePass'
 
 export const scene = new Scene()
-export const renderer = new WebGLRenderer({ alpha: true })
-export const composer = new EffectComposer(renderer)
+export const renderer = new WebGLRenderer({ alpha: false })
 export const cssRenderer = new CSS2DRenderer()
+const ratio = window.innerHeight / window.innerWidth
+const width = params.renderWidth
+// const width = window.innerWidth
+// const height = window.innerHeight
+const height = Math.round(width * ratio)
+
+const target = new WebGLRenderTarget(width, height)
+const depthTarget = new WebGLRenderTarget(width, height)
+depthTarget.texture.format = RGBAFormat
+depthTarget.texture.magFilter = NearestFilter
+depthTarget.texture.minFilter = NearestFilter
+depthTarget.texture.generateMipmaps = false
+target.texture.format = RGBAFormat
+target.texture.minFilter = NearestFilter
+target.texture.magFilter = NearestFilter
+target.texture.generateMipmaps = false
+target.stencilBuffer = false
+target.depthBuffer = true
+target.depthTexture = new DepthTexture(width, height)
+target.depthTexture.type = UnsignedInt248Type
+export const composer = new EffectComposer(renderer, target)
+const depthQuad = new FullScreenQuad(new ShaderMaterial(getDepthShader(target)))
+const sobelQuad = new FullScreenQuad(new ShaderMaterial(getSobelShader(width, height, target, depthTarget)))
+
 export const initThree = () => {
 	renderer.clear()
-	const ratio = window.innerHeight / window.innerWidth
-	const width = params.renderWidth
 	renderer.shadowMap.enabled = true
 	renderer.shadowMap.type = BasicShadowMap
 	document.body.appendChild(renderer.domElement)
@@ -28,9 +52,6 @@ export const initThree = () => {
 	cssRenderer.domElement.style.pointerEvents = 'none'
 	cssRenderer.domElement.classList.add('no-events')
 	document.body.appendChild(cssRenderer.domElement)
-	composer.addPass(new RenderPass(scene, camera))
-
-	// composer.addPass(new ShaderPass(VignetteShader()))
 	ecs.add({ scene })
 }
 export const rendererQuery = ecs.with('renderer')
@@ -38,7 +59,12 @@ export const sceneQuery = ecs.with('scene')
 export const cameraQuery = ecs.with('camera')
 
 export const render = () => {
-	composer.render()
+	renderer.setRenderTarget(target)
+	renderer.render(scene, camera)
+	renderer.setRenderTarget(depthTarget)
+	depthQuad.render(renderer)
+	renderer.setRenderTarget(null)
+	sobelQuad.render(renderer)
 	cssRenderer.render(scene, camera)
 }
 

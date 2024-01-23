@@ -3,11 +3,10 @@ import type { Accessor, Setter } from 'solid-js'
 import { For, Show, createEffect, createMemo, createSignal, onCleanup, onMount } from 'solid-js'
 
 import { ColliderDesc, RigidBodyDesc, RigidBodyType } from '@dimforge/rapier3d-compat'
+import { set } from 'idb-keyval'
 import { Box3, BoxGeometry, Euler, Mesh, MeshBasicMaterial, Object3D, Quaternion, Vector3 } from 'three'
 import { TransformControls } from 'three/examples/jsm/controls/TransformControls'
-import { set } from 'idb-keyval'
 import type { CollidersData, LevelData } from './LevelEditor'
-import { props } from './props'
 import { cameraQuery, renderer, scene } from '@/global/rendering'
 import { assets, ecs } from '@/global/init'
 import type { Entity } from '@/global/entity'
@@ -24,6 +23,41 @@ export const EntityEditor = ({ entity, levelData, setLevelData, setSelectedEntit
 	const modelCollider = createMemo(() => colliderData()[entityData().model])
 	const updateEntity = (newEntity: Partial<LevelData[string]>) => {
 		setLevelData({ ...levelData(), [entity().entityId]: { ...entityData(), ...newEntity } })
+	}
+	const [scale, setScale] = createSignal(entityData().scale)
+	const [defaultScale, setDefaultScale] = createSignal(Boolean(colliderData()[entityData().model]?.scale))
+	onMount(() => {
+		if (!modelCollider()) {
+			setColliderData({
+				...colliderData(),
+				[entityData().model]: {
+					scale: 1,
+					offset: [0, 0, 0],
+					type: RigidBodyType.Fixed,
+				},
+			})
+		}
+	})
+	const updateScale = (newScale: number) => {
+		setScale(newScale)
+		if (defaultScale()) {
+			setColliderData({
+				...colliderData(),
+				[entityData().model]: {
+					...modelCollider(),
+					scale: newScale,
+				},
+			})
+		} else {
+			setColliderData({
+				...colliderData(),
+				[entityData().model]: {
+					...modelCollider(),
+					scale: null,
+				},
+			})
+		}
+		updateEntity({ scale: scale() })
 	}
 	const camera = cameraQuery.first!.camera
 	const transform = new TransformControls(camera, renderer.domElement)
@@ -95,6 +129,7 @@ export const EntityEditor = ({ entity, levelData, setLevelData, setSelectedEntit
 				...modelCollider(),
 				offset: box.position.clone().toArray(),
 				size: size.toArray(),
+				scale: scale(),
 			},
 		})
 	}
@@ -119,7 +154,9 @@ export const EntityEditor = ({ entity, levelData, setLevelData, setSelectedEntit
 			<button onClick={deleteSelected}>Delete entity</button>
 			<div>
 				scale
-				<input type="number" value={entityData().scale} onChange={e => updateEntity({ scale: e.target.valueAsNumber })}></input>
+				<input type="number" value={scale()} onChange={e => updateScale(e.target.valueAsNumber)} style={{ width: '50px' }}></input>
+				<input type="checkbox" checked={defaultScale()} onChange={e => setDefaultScale(e.target.checked)}></input>
+				default scale
 			</div>
 			<For each={['x', 'y', 'z'] as const}>
 				{(axis, i) => (
@@ -189,25 +226,6 @@ export const EntityEditor = ({ entity, levelData, setLevelData, setSelectedEntit
 				</input>
 
 			</div>
-
-			<Show when={entityData()}>
-				{(data) => {
-					const models = createMemo(() => props.find(x => x.models.includes(data().model))!.models)
-					return (
-						<div style={{ position: 'fixed', bottom: 0, left: 0 }}>
-							<For each={models()}>
-								{(model) => {
-									return (
-										<button onClick={() => updateEntity({ model })}>
-											{model}
-										</button>
-									)
-								}}
-							</For>
-						</div>
-					)
-				}}
-			</Show>
 
 			<Show when={editingCollider() && entity() && entityData()}>
 				{(_) => {

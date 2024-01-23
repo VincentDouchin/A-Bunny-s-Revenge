@@ -2,7 +2,7 @@ import { PerspectiveCamera, Vector3 } from 'three'
 import { params } from './context'
 import { ecs } from './init'
 
-export const camera = new PerspectiveCamera(params.fov, window.innerWidth / window.innerHeight, 0.1, 100000)
+export const camera = new PerspectiveCamera(params.fov, window.innerWidth / window.innerHeight, 0.1, 1000)
 
 export const initCamera = () => {
 	camera.zoom = window.innerWidth / window.innerHeight / params.zoom

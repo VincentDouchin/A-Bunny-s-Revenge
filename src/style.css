@@ -114,3 +114,8 @@ button.button:hover {
 *:not(.no-events){
   pointer-events:auto
 }
+
+button.selected{
+  background:black;
+  color:white;
+}
