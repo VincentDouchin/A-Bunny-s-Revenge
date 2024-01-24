@@ -122,7 +122,7 @@ export const getSobelShader = (x: number, y: number, diffuseTarget: WebGLRenderT
 		// magnitute of the total gradient
 
 			float G = sqrt(( valueGx * valueGx ) + ( valueGy * valueGy )) ;
-			gl_FragColor.rgb =  vec3(clamp(step(G * 5.0,0.2)+0.7,0.0,1.0) ) * texture2D(tDiffuse,vUv).rgb;
+			gl_FragColor.rgb =  vec3(clamp(step(G * 5.0,0.15)+0.7,0.0,1.0) ) * texture2D(tDiffuse,vUv).rgb;
 			gl_FragColor.a = 1.0;
 
 		}`,
