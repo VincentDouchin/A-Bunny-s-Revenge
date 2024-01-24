@@ -28,7 +28,6 @@ target.texture.generateMipmaps = false
 target.stencilBuffer = false
 target.depthBuffer = true
 target.depthTexture = new DepthTexture(width, height)
-target.depthTexture.type = UnsignedInt248Type
 const depthQuad = new FullScreenQuad(new ShaderMaterial(getDepthShader(target)))
 const sobelQuad = new FullScreenQuad(new ShaderMaterial(getSobelShader(width, height, target, depthTarget)))
 
