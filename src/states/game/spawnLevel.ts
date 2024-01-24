@@ -19,7 +19,7 @@ import { otherDirection } from '@/lib/directions'
 import { modelColliderBundle } from '@/lib/models'
 import type { System } from '@/lib/state'
 import { getRotationFromDirection } from '@/lib/transforms'
-import { GroundShader2 } from '@/shaders/GroundShader'
+import { GroundMaterial } from '@/shaders/GroundShader'
 import { inventoryBundle } from '@/states/game/inventory'
 import { getRandom, objectValues, range } from '@/utils/mapFunctions'
 
@@ -144,7 +144,7 @@ const spawnGroundAndTrees = (layer: LayerInstance) => {
 	const h = layer.__cHei * SCALE
 	const groundMesh = new Mesh(
 		new BoxGeometry(w, 1, h),
-		new GroundShader2({ color: 0x26854C }),
+		new GroundMaterial({ color: 0x26854C }),
 	)
 
 	groundMesh.receiveShadow = true
@@ -163,11 +163,11 @@ const spawnGroundAndTrees = (layer: LayerInstance) => {
 			const position = new Vector3(
 				-x + layer.__cWid / 2 + noise(x, y),
 				0,
-				y - layer.__cHei / 2 + noise(y, x),
+				-y + layer.__cHei / 2 + noise(y, x),
 			).multiplyScalar(SCALE)
 			const tree = trees[Math.floor(trees.length * Math.abs(Math.sin((x + y) * 50 * (x - y))))]
 			const smol = layer.intGridCsv[x + (y - 1) * layer.__cWid] === GroundType.Grass
-			tree.addAt(position, smol ? between(5, 8) : between(8, 10))
+			tree.addAt(position, smol ? between(2, 3) : between(3, 4))
 		}
 	}
 	trees.forEach((t) => {

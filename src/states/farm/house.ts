@@ -5,16 +5,16 @@ import { dialogs } from '@/constants/dialogs'
 import { Interactable } from '@/global/entity'
 import { ecs } from '@/global/init'
 import { modelColliderBundle } from '@/lib/models'
-import { GroundShader } from '@/shaders/GroundShader'
+import { ToonMaterial } from '@/shaders/GroundShader'
 
 export const spawnHouse = (position: Vector3) => {
 	const houseModel = new Mesh(
 		new BoxGeometry(30, 20, 30),
-		new GroundShader({ color: 0x944F00 }),
+		new ToonMaterial({ color: 0x944F00 }),
 	)
 	const doorModel = new Mesh(
 		new BoxGeometry(10, 15, 2),
-		new GroundShader({ color: 0x753F00 }),
+		new ToonMaterial({ color: 0x753F00 }),
 	)
 	houseModel.position.setY(10)
 	doorModel.position.setY(15 / 2)

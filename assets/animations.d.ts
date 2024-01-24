@@ -2,9 +2,9 @@ interface Animations {
 
 	Armabee_Evolved: `Death` | `Fast_Flying` | `Flying_Idle` | `Headbutt` | `HitReact` | `No` | `Punch` | `Yes`
 
-	Armabee: `Death` | `Fast_Flying` | `Flying_Idle` | `Headbutt` | `HitReact` | `No` | `Punch` | `Yes`
-
 	BunnydAnim: `idle` | `picking_vegetables` | `run` | `T_Pose`
+
+	Armabee: `Death` | `Fast_Flying` | `Flying_Idle` | `Headbutt` | `HitReact` | `No` | `Punch` | `Yes`
 
 	BunnyOvenPacked: `OvenOpening` | `Static` | `Door|OvenOpening` | `Door|Static` | `Body|OvenOpening`
 

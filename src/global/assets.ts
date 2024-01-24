@@ -1,19 +1,19 @@
-import toneMapDefaultsrc from '@assets/_singles/tonemap-default.png'
 import type { characters, items, models, particles, trees } from '@assets/assets'
-import type { ColorRepresentation, Material } from 'three'
-import { Mesh, MeshStandardMaterial, NearestFilter, TextureLoader } from 'three'
-import type { GLTF } from 'three/examples/jsm/loaders/GLTFLoader'
 import data from '@assets/levels/data.json'
 import { get } from 'idb-keyval'
+import type { ColorRepresentation, Material } from 'three'
+import { CanvasTexture, Mesh, MeshStandardMaterial, NearestFilter, SRGBColorSpace, TextureLoader } from 'three'
+
+import type { GLTF } from 'three/examples/jsm/loaders/GLTFLoader'
 import type { stringCaster } from './assetLoaders'
 import { getExtension, getFileName, loadGLB, loadImage, textureLoader } from './assetLoaders'
 import type { crops } from './entity'
 import { asyncMapValues, entries, groupByObject, mapKeys, mapValues } from '@/utils/mapFunctions'
 import { getScreenBuffer } from '@/utils/buffer'
-import { GroundShader } from '@/shaders/GroundShader'
+import { ToonMaterial } from '@/shaders/GroundShader'
+import type { CollidersData, LevelData } from '@/debug/LevelEditor'
 import { keys } from '@/constants/keys'
 import type { LDTKMap } from '@/LDTKMap'
-import type { CollidersData, LevelData } from '@/debug/LevelEditor'
 
 type Glob = Record<string, () => Promise<any>>
 type GlobEager<T = string> = Record<string, T>
@@ -31,18 +31,31 @@ const typeGlobEager = <K extends string>(glob: GlobEager) => <F extends (glob: G
 	return fn(glob) as Record<K, ReturnType<F>[string]>
 }
 
-const loadGLBAsToon = (options?: { src?: string, color?: ColorRepresentation, material?: (node: Mesh) => Material }) => async (glob: Glob) => {
-	const glbs = await asyncMapValues(glob, async f => loadGLB(await f()))
-	const toons = mapValues(glbs, (glb) => {
+const loadGLBAsToon = (options?: { src?: string, color?: ColorRepresentation, material?: (node: Mesh<any, MeshStandardMaterial>, map?: CanvasTexture) => Material }) => async (glob: Glob) => {
+	const loaded = await asyncMapValues(glob, async (f) => {
+		const path = await f()
+		const ext = getExtension(path)
+		if (ext === 'glb') {
+			return await loadGLB(path)
+		} else {
+			const texture = new CanvasTexture(await loadImage(path))
+			texture.colorSpace = SRGBColorSpace
+			return texture
+		}
+	})
+	const { glb, png } = groupByObject(loaded, key => getExtension(key)) as { glb: Record<string, GLTF>, png: Record<string, CanvasTexture> }
+	const toons = mapValues(glb, (glb, key) => {
 		glb.scene.traverse((node) => {
+			const map = png ? entries(png).find(([mapName]) => key.includes(getFileName(mapName)))?.[1] : undefined
+
 			if (node instanceof Mesh) {
 				if (node.material instanceof MeshStandardMaterial) {
 					node.material = options?.material
-						? options?.material(node)
-						: new GroundShader({ color: options?.color ?? node.material.color, map: node.material.map })
-					node.castShadow = true
-					node.receiveShadow = false
+						? options?.material(node, map)
+						: new ToonMaterial({ color: options?.color ?? node.material.color, map: map ?? node.material.map })
 				}
+				node.castShadow = true
+				node.receiveShadow = false
 			}
 		})
 		return glb
@@ -58,8 +71,8 @@ const skyboxLoader = async (glob: GlobEager) => {
 		return loader.loadAsync(path)
 	}))
 }
-const cropsLoader = async <K extends string>(glob: Glob, src: string) => {
-	const models = await typeGlob<crops>(glob)(loadGLBAsToon({ src }))
+const cropsLoader = async <K extends string>(glob: Glob) => {
+	const models = await typeGlob<crops>(glob)(loadGLBAsToon())
 	const grouped = groupByObject(models, key => key.split('_')[0].toLowerCase() as K)
 	return mapValues(grouped, (group) => {
 		let crop: GLTF | null = null
@@ -130,15 +143,22 @@ export const loadLevelData = async () => {
 	return { levelData, colliderData }
 }
 
+const overrideRockColor = (node: Mesh<any, MeshStandardMaterial>, map?: CanvasTexture) => {
+	let color: ColorRepresentation | undefined = node.material?.color
+	if (node.name.includes('Rock_')) {
+		color = node.material.name === 'Green' ? 0x5AB552 : 0xB0A7B8
+	}
+	return new ToonMaterial({ color, map: map ?? node.material?.map })
+}
+
 export const loadAssets = async () => ({
 	characters: await typeGlob<characters>(import.meta.glob('@assets/characters/*.glb', { as: 'url' }))(loadGLBAsToon()),
 	// characters: await loadGLBAsToon<characters>(import.meta.glob('@assets/characters/*.glb', { as: 'url' })),
-	models: await typeGlob<models>(import.meta.glob('@assets/models/*.glb', { as: 'url' }))(loadGLBAsToon()),
+	models: await typeGlob<models>(import.meta.glob('@assets/models/*.*', { as: 'url' }))(loadGLBAsToon({ material: overrideRockColor })),
 	skybox: await skyboxLoader(import.meta.glob('@assets/skybox/*.png', { eager: true, import: 'default' })),
-	trees: await typeGlob<trees>(import.meta.glob('@assets/trees/*.glb', { as: 'url' }))(loadGLBAsToon()),
-	rocks: await typeGlob(import.meta.glob('@assets/rocks/*.glb', { as: 'url' }))(loadGLBAsToon()),
-	grass: await typeGlob(import.meta.glob('@assets/grass/*.glb', { as: 'url' }))(loadGLBAsToon({ color: 0x26854C })),
-	crops: await cropsLoader<'carrot' | 'mushroom' | 'beet'>(import.meta.glob('@assets/crops/*.glb', { as: 'url' }), toneMapDefaultsrc),
+	trees: await typeGlob<trees>(import.meta.glob('@assets/trees/*.*', { as: 'url' }))(loadGLBAsToon()),
+	grass: await typeGlob(import.meta.glob('@assets/grass/*.glb', { as: 'url' }))(loadGLBAsToon()),
+	crops: await cropsLoader<'carrot' | 'mushroom' | 'beet'>(import.meta.glob('@assets/crops/*.glb', { as: 'url' })),
 	items: await typeGlob<items>(import.meta.glob('@assets/items/*.png', { eager: true, import: 'default' }))(itemsLoader),
 	particles: await typeGlob<particles>(import.meta.glob('@assets/particles/*.png', { eager: true, import: 'default' }))(texturesLoader),
 	fonts: await fontLoader(import.meta.glob('@assets/fonts/*.ttf', { eager: true, import: 'default' })),

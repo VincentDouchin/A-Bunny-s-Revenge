@@ -1,4 +1,4 @@
-import { DynamicDrawUsage, Group, InstancedMesh, Mesh, Object3D, TextureLoader, Vector3 } from 'three'
+import { DynamicDrawUsage, Group, InstancedMesh, Matrix4, Mesh, TextureLoader, Vector3 } from 'three'
 
 import { DRACOLoader } from 'three/examples/jsm/loaders/DRACOLoader'
 import type { GLTF } from 'three/examples/jsm/loaders/GLTFLoader'
@@ -38,8 +38,6 @@ interface InstanceParams {
 
 export const instanceMesh = (obj: GLTF) => {
 	const intanceParams: InstanceParams[] = []
-	const rotation = new Vector3()
-	const scale = new Vector3(1, 1, 1)
 	const meshes: InstancedMesh[] = []
 	const group = new Group()
 	const addAt = (position: Vector3, scale = 1, opacity = 1) => {
@@ -47,12 +45,6 @@ export const instanceMesh = (obj: GLTF) => {
 	}
 	const process = () => {
 		obj.scene.traverse((node) => {
-			scale.x *= node.scale.x
-			scale.y *= node.scale.y
-			scale.z *= node.scale.z
-			rotation.x += node.rotation.x
-			rotation.y += node.rotation.y
-			rotation.z += node.rotation.z
 			if (node instanceof Mesh) {
 				const mesh = new InstancedMesh(node.geometry.clone(), node.material.clone(), intanceParams.length)
 
@@ -61,18 +53,14 @@ export const instanceMesh = (obj: GLTF) => {
 			}
 		})
 		for (const mesh of meshes) {
-			mesh.rotation.set(rotation.x, rotation.y, rotation.z)
 			mesh.castShadow = true
 			group.add(mesh)
 			for (let i = 0; i < intanceParams.length; i++) {
 				const params = intanceParams[i]
-				const o = new Object3D()
-				const position = params.position
-				o.position.set(position.x, position.z, position.y)
-				o.scale.set(scale.x, scale.y, scale.z)
-				o.scale.multiplyScalar(params.scale)
-				o.updateMatrix()
-				mesh.setMatrixAt(i, o.matrix)
+				const matrix = new Matrix4()
+				matrix.setPosition(params.position)
+				matrix.scale(new Vector3().setScalar(params.scale))
+				mesh.setMatrixAt(i, matrix)
 			}
 		}
 
