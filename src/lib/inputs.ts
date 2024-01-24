@@ -54,9 +54,11 @@ export class InputManager {
 		window.addEventListener('touchstart', () => {
 			this.controls = 'touch'
 		})
-		navigator.keyboard.getLayoutMap().then((map) => {
-			this.layoutMap = map
-		})
+		if (navigator.keyboard) {
+			navigator.keyboard.getLayoutMap().then((map) => {
+				this.layoutMap = map
+			})
+		}
 	}
 
 	getKeyName(input: Input) {

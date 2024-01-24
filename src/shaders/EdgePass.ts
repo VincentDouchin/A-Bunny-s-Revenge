@@ -19,7 +19,7 @@ export const getDepthShader = (target: WebGLRenderTarget): Shader => ({
 
 		}`,
 	fragmentShader: /* glsl */`
-
+		precision highp sampler2D;
 		uniform sampler2D tDepth;
 		uniform sampler2D tDiffuse;
 		uniform float cameraNear;
@@ -64,7 +64,7 @@ export const getSobelShader = (x: number, y: number, diffuseTarget: WebGLRenderT
 		}`,
 
 	fragmentShader: /* glsl */`
-
+		precision highp sampler2D;
 		uniform sampler2D tDepth;
 		uniform sampler2D tDiffuse;
 		uniform float cameraNear;
