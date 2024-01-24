@@ -16,6 +16,7 @@ export const itemBundle = (item: items) => {
 	const sprite = new Sprite(new SpriteMaterial({ map }))
 	sprite.scale.setScalar(5)
 	sprite.position.setY(2.5)
+	sprite.material.depthWrite = false
 	const shadow = new Mesh(new SphereGeometry(0.3), new MeshBasicMaterial({
 		color: 0x000000,
 		transparent: true,

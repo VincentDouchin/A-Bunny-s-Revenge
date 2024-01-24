@@ -10,10 +10,12 @@ import { getRotationFromDirection } from '@/lib/transforms'
 
 const getDoorLayer = (opacity: number) => {
 	const sizeFactor = (3 - opacity) / 3
-	return new Mesh(
+	const mesh = new Mesh(
 		new PlaneGeometry(20 * sizeFactor, 30 * sizeFactor),
 		new MeshBasicMaterial({ color: 0x000000, opacity: opacity / 3, transparent: true, side: DoubleSide }),
 	)
+	mesh.material.depthWrite = false
+	return mesh
 }
 const doorGroup = () => {
 	const group = new Group()
