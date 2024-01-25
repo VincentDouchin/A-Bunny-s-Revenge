@@ -5,10 +5,9 @@ import type { models } from '@assets/assets'
 import { ColliderDesc, RigidBodyDesc } from '@dimforge/rapier3d-compat'
 import type { CollidersData } from './LevelEditor'
 import { props } from './props'
-import type { Entity } from '@/global/entity'
-import { assets, ecs, levelsData } from '@/global/init'
 import type { State } from '@/lib/state'
-import { itemBundle } from '@/states/game/items'
+import { assets, ecs, levelsData } from '@/global/init'
+import type { Entity } from '@/global/entity'
 
 const getBoundingBox = (modelName: models, model: Object3D<Object3DEventMap>, colliderData: CollidersData): Entity => {
 	const collider = colliderData[modelName]

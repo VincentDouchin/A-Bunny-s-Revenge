@@ -1,5 +1,4 @@
 import { PlayerUi } from '../states/farm/FarmUi'
-import { InteractionUi } from './Interactions'
 import { PauseUI } from './PauseUI'
 import { TouchControls } from './TouchControls'
 import { DebugUi } from '@/debug/debugUi'
