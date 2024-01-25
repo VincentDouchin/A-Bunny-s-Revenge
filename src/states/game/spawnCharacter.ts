@@ -45,10 +45,6 @@ export const playerBundle = () => {
 			running: ['idle'],
 			picking: ['idle'],
 		}),
-		// state: 'idle',
-		// stateMachine: new StateMachine<'idle' | 'running' | 'picking'>('idle')
-		// 	.addTransition('idle', ['running'])
-		// 	.addTransition('running', ['idle']),
 	} as const satisfies Entity
 	for (const mod of save.modifiers) {
 		addModifier(mod, player)

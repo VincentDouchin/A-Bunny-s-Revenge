@@ -2,6 +2,7 @@ import { RigidBodyType } from '@dimforge/rapier3d-compat'
 import { Easing, Tween } from '@tweenjs/tween.js'
 import type { With } from 'miniplex'
 import { Vector3 } from 'three'
+import { itemBundle } from '../game/items'
 import { Sizes } from '@/constants/sizes'
 import { type Entity, Interactable, type crops } from '@/global/entity'
 import { assets, ecs } from '@/global/init'
@@ -111,15 +112,16 @@ export const harvestCrop = () => {
 					if (stateMachine.enter('picking', player)) {
 						const model = assets.crops[spot.planted.crop.name].crop.scene.clone()
 						model.scale.setScalar(8)
-						const bundle = modelColliderBundle(model, RigidBodyType.Fixed, true)
+						// const bundle = modelColliderBundle(model, RigidBodyType.Fixed, true)
+						const bundle = itemBundle(spot.planted.crop.name, model)
 						ecs.add({
 							...bundle,
-							model,
-							item: true,
-							position: spot.worldPosition.clone().add(new Vector3(0, bundle.size.y + 2, 0)),
-							inMap: true,
-							itemLabel: spot.planted.crop.name,
-							popItem: true,
+							// model,
+							// item: true,
+							position: spot.worldPosition.clone().add(new Vector3(0, bundle.size.y + 5, 0)),
+							// inMap: true,
+							// itemLabel: spot.planted.crop.name,
+							// popItem: true,
 						})
 						removeEntityRef(spot, 'planted')
 					}

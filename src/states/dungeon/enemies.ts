@@ -25,17 +25,13 @@ export const enemyBundle = (name: enemies) => {
 		movementForce: new Vector3(),
 		speed: 100,
 		drops: enemy.drops,
-		...stateBundle<'dying' | 'idle' | 'running' | 'hit'>('idle', {
-			idle: ['running'],
-			running: ['idle'],
-			dying: [],
-			hit: ['dying'],
+		...stateBundle<'dying' | 'idle' | 'running' | 'hit' | 'dead'>('idle', {
+			idle: ['running', 'hit'],
+			running: ['idle', 'hit'],
+			dying: ['dead'],
+			hit: ['dying', 'idle'],
+			dead: [],
 		}),
-		// state: 'idle',
-		// stateMachine: new StateMachine<'idle' | 'running' | 'dying' | 'hit'>('idle')
-		// 	.addTransition('idle', ['hit', 'dying', 'running'])
-		// 	.addTransition('running', ['idle', 'hit', 'dying'])
-		// 	.addTransition('hit', ['dying']),
 	} as const satisfies Entity
 }
 const entities = ecs.with('faction', 'position', 'rotation', 'body', 'collider', 'movementForce')

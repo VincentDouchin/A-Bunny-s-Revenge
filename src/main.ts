@@ -24,10 +24,10 @@ import { closeMenu, closePlayerInventory, disableInventoryState, enableInventory
 import { spawnChest } from './states/farm/spawnChest'
 import { spawnNPC } from './states/farm/spawnNPC'
 import { talkToNPC } from './states/game/dialog'
-import { bobItems, collectItems } from './states/game/items'
+import { bobItems, collectItems, popItems } from './states/game/items'
 import { applyMove, canPlayerMove, movePlayer, savePlayerPosition } from './states/game/movePlayer'
 import { pauseGame } from './states/game/pauseGame'
-import { pandaFSM, playerFSM } from './states/game/playerFSM'
+import { beeFSM, pandaFSM, playerFSM } from './states/game/playerFSM'
 import { target } from './states/game/sensor'
 import { spawnCharacter } from './states/game/spawnCharacter'
 import { allowDoorCollision, collideWithDoor, collideWithDoorCamp } from './states/game/spawnDoor'
@@ -52,7 +52,7 @@ setupState
 	.enable()
 gameState
 	.onEnter()
-	.addSubscriber(bobItems, enableInventoryState, killAnimation, ...showInteraction, ...playerFSM, ...pandaFSM)
+	.addSubscriber(bobItems, enableInventoryState, killAnimation, ...showInteraction, ...playerFSM, ...pandaFSM, ...beeFSM, popItems)
 	.onUpdate(runIf(canPlayerMove, movePlayer), runIf(() => !pausedState.enabled, applyMove))
 	.onUpdate(collectItems, touchItem, talkToNPC, runIf(() => !openMenuState.enabled, pauseGame))
 	.enable()

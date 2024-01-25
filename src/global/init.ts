@@ -8,7 +8,7 @@ import { CoroutinesManager } from '@/lib/coroutines'
 import { InputManager } from '@/lib/inputs'
 
 await init()
-export const world = new RapierWrold({ x: 0, y: -9.81, z: 0 })
+export const world = new RapierWrold({ x: 0, y: -9.81 * 10, z: 0 })
 export const assets = await loadAssets()
 export const time = new Time()
 export const ecs = new MiniplexWorld<Entity>()

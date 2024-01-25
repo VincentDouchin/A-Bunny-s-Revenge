@@ -145,10 +145,10 @@ export interface Entity {
 	// ! Level Editor
 	entityId?: string
 	// ! FSM
-	stateMachine?: StateMachine<any>
+	stateMachine?: StateMachine<states>
 	state?: states
 }
-export type states = 'idle' | 'running' | 'picking' | 'dying' | 'hit' | 'hello'
+export type states = 'idle' | 'running' | 'picking' | 'dying' | 'hit' | 'hello' | 'dead'
 export type Bundle<C extends keyof Entity> = () => With<Entity, C>
 
 type KeysOfType<T, U> = {

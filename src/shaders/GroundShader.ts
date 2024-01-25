@@ -38,11 +38,8 @@ type ExtractUniforms<T extends MaterialExtension<any>[]> = T extends MaterialExt
 	? ExcludeEmpty<U>
 	: never
 export const extendMaterial = <M extends Constructor<Material>, E extends MaterialExtension<any>[]>(Base: M, extensions: E, options?: { debug: boolean }) => {
-	return class extends (Base as Constructor<Material>) {
+	return class extends Base {
 		uniforms = {} as ExtractUniforms<E>
-		constructor(...args: ConstructorParameters<M>) {
-			super(...args)
-		}
 
 		customProgramCacheKey() {
 			return extensions.map(ext => ext.key).join('-')
@@ -92,8 +89,11 @@ export const override = (variable: string, part: string) => (shader: string) => 
 export const replace = (toReplace: string, part: string) => (shader: string) => {
 	return shader.replace(toReplace, part)
 }
+export const addUniform = (name: string, type: 'vec2' | 'vec3' | 'vec4' | 'float' | 'int' | 'bool') => (shader: string) => {
+	return importLib(`uniform ${type} ${name};`)(shader)
+}
 export const remove = (toRemove: string) => (shader: string) => shader.replace(toRemove, '')
-const toonExtension = new MaterialExtension({}).frag(
+const toonExtension = new MaterialExtension({ }).frag(
 	override('vec4 diffuseColor ', 'vec4(1.)'),
 	importLib(gradient),
 	replaceInclude('map_fragment', ''),
@@ -106,7 +106,7 @@ const toonExtension = new MaterialExtension({}).frag(
 	color.rgb *= diffuse;
 	float max_light = max(outgoingLight.z,max(outgoingLight.x,outgoingLight.y)) * 3.;
 	vec3 outgoingLight2 = colorRamp(color.xyz, max_light);
-	gl_FragColor = vec4(  outgoingLight2  , diffuseColor.a );`),
+	gl_FragColor = vec4(  outgoingLight2  , opacity);`),
 )
 const groundExtension = new MaterialExtension({ topColor: new Color(0x5AB552) }).defines('USE_UV').frag(
 	importLib(noise),

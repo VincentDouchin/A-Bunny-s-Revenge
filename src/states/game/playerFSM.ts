@@ -24,3 +24,10 @@ export const pandaFSM = setupAnimations('pandaAnimator', {
 	idle: e => e.pandaAnimator.playAnimation('Idle'),
 	hello: e => e.pandaAnimator.playOnce('Wave').then(() => e.stateMachine.enter('idle', e)),
 })
+
+export const beeFSM = setupAnimations('beeAnimator', {
+	idle: e => e.beeAnimator.playAnimation('Flying_Idle'),
+	running: e => e.beeAnimator.playAnimation('Fast_Flying'),
+	hit: e => e.beeAnimator.playOnce('HitReact').then(() => e.stateMachine.enter('idle', e)),
+	dying: e => e.beeAnimator.playClamped('Death').then(() => e.stateMachine.enter('dead', e)),
+})

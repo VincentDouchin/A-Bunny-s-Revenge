@@ -6,32 +6,29 @@ import { spawnDamageNumber } from '@/particles/damageNumber'
 import { impact } from '@/particles/impact'
 
 const playerQuery = ecs.with('playerControls', 'sensorCollider', 'position', 'strength')
-const enemiesQuery = ecs.with('collider', 'faction', 'model', 'body', 'position', 'currentHealth', 'size').without('tween', 'dying').where(({ faction }) => faction === Faction.Enemy)
+const enemiesQuery = ecs.with('collider', 'faction', 'model', 'body', 'position', 'currentHealth', 'size', 'stateMachine').without('tween').where(({ faction }) => faction === Faction.Enemy)
 export const playerAttack = () => {
 	for (const { playerControls, sensorCollider, position, strength } of playerQuery) {
 		if (playerControls.get('primary').justPressed) {
 			for (const enemy of enemiesQuery) {
 				if (world.intersectionPair(sensorCollider, enemy.collider)) {
-					// ! damage
+					if (enemy.stateMachine.enter('hit', enemy)) {
+						// ! damage
+						enemy.currentHealth -= strength.value
+						const emitter = impact().emitter
+						emitter.position.y = 5
+						ecs.update(enemy, { emitter })
 
-					enemy.currentHealth -= strength.value
-					// ! animations
-					if (enemy.currentHealth > 0) {
-						enemy.animator?.playOnce('HitReact')
+						spawnDamageNumber(strength.value, enemy)
+						// ! knockback
+						const force = position.clone().sub(enemy.position).normalize().multiplyScalar(-50000)
+						enemy.body.applyImpulse(force, true)
+						// ! damage flash
+						const tween = new Tween({ color: 1 })
+							.to({ color: 0 }, 200)
+							.onComplete(() => ecs.removeComponent(enemy, 'tween'))
+						ecs.update(enemy, { tween })
 					}
-					const emitter = impact().emitter
-					emitter.position.y = 5
-					ecs.update(enemy, { emitter })
-
-					spawnDamageNumber(strength.value, enemy)
-					// ! knockback
-					const force = position.clone().sub(enemy.position).normalize().multiplyScalar(-50000)
-					enemy.body.applyImpulse(force, true)
-					// ! damage flash
-					const tween = new Tween({ color: 1 })
-						.to({ color: 0 }, 200)
-						.onComplete(() => ecs.removeComponent(enemy, 'tween'))
-					ecs.update(enemy, { tween })
 				}
 			}
 		}

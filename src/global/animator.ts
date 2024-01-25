@@ -36,6 +36,21 @@ export class Animator<K extends string> extends AnimationMixer {
 		})
 	}
 
+	playClamped(animation: K) {
+		const action = this.#getAction(animation)!
+		action.reset()
+		action.setLoop(LoopOnce, 1)
+		action.clampWhenFinished = true
+		this.#play(animation)
+		return new Promise<void>((resolve) => {
+			const finishListener = () => {
+				resolve()
+				this.removeEventListener('finished', finishListener)
+			}
+			this.addEventListener('finished', finishListener)
+		})
+	}
+
 	playAnimation(animation: K) {
 		if (animation !== this.#current) {
 			this.#play(animation)

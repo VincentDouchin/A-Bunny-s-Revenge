@@ -2,38 +2,37 @@ import { Tween } from '@tweenjs/tween.js'
 import { Mesh } from 'three'
 import type { Entity } from '@/global/entity'
 import { ecs } from '@/global/init'
-import { addTag } from '@/lib/hierarchy'
 import { Stat } from '@/lib/stats'
+import { ToonMaterial } from '@/shaders/GroundShader'
 
 export const healthBundle = (health: number) => ({
 	currentHealth: health,
 	maxHealth: new Stat(health),
 } as const satisfies Entity)
 
-const healthQuery = ecs.with('currentHealth', 'maxHealth')
-const needToDieQuery = healthQuery.without('dying')
-const dyingQuery = ecs.with('dying', 'animator', 'model')
+const healthQuery = ecs.with('currentHealth', 'maxHealth', 'stateMachine')
 export const killEntities = () => {
-	for (const entity of needToDieQuery) {
+	for (const entity of healthQuery) {
 		if (entity.currentHealth <= 0) {
-			addTag(entity, 'dying')
+			entity.stateMachine.enter('dying', entity)
 		}
 	}
 }
-export const killAnimation = () => dyingQuery.onEntityAdded.subscribe((entity) => {
-	ecs.removeComponent(entity, 'movementForce')
-	ecs.removeComponent(entity, 'body')
-	entity.animator.playOnce('Death', false)?.then(() => {
-		const tween = new Tween({ opacity: 1 }).to({ opacity: 0 }, 500)
-			.onComplete(() => {
-				ecs.remove(entity)
-			})
-		entity.model.traverse((node) => {
-			if (node instanceof Mesh && node.material) {
-				node.material.transparent = true
-				tween.onUpdate(({ opacity }) => node.material.opacity = opacity)
+const deadEntities = ecs.with('state', 'body', 'movementForce', 'model').where(e => e.state === 'dead')
+export const killAnimation = () => deadEntities.onEntityAdded.subscribe((e) => {
+	ecs.removeComponent(e, 'body')
+	const tween = new Tween([1]).to([0])
+	e.model.traverse((node) => {
+		if (node instanceof Mesh) {
+			node.castShadow = false
+			const mat = node.material as InstanceType<typeof ToonMaterial>
+			if (mat instanceof ToonMaterial) {
+				mat.transparent = true
+				mat.depthWrite = false
+				tween.onUpdate(([val]) => mat.opacity = val)
 			}
-		})
-		ecs.update(entity, { tween })
+		}
 	})
+	tween.onComplete(() => ecs.remove(e))
+	ecs.update(e, { tween })
 })

@@ -1,40 +1,48 @@
 import type { items } from '@assets/assets'
-import { ColliderDesc, RigidBodyDesc } from '@dimforge/rapier3d-compat'
+import { ColliderDesc, RigidBodyDesc, RigidBodyType } from '@dimforge/rapier3d-compat'
 import { Easing, Tween } from '@tweenjs/tween.js'
+import type { Object3D, Object3DEventMap } from 'three'
 import { AdditiveBlending, CanvasTexture, Mesh, MeshBasicMaterial, NearestFilter, SphereGeometry, Sprite, SpriteMaterial, Vector3 } from 'three'
 import type { Entity } from '@/global/entity'
 import { assets, ecs, world } from '@/global/init'
 import { addItem } from '@/global/save'
 import { TweenGroup } from '@/lib/tweenGroup'
+import { modelColliderBundle } from '@/lib/models'
 
 const itemsQuery = ecs.with('item', 'position', 'model', 'collider', 'itemLabel')
 
-export const itemBundle = (item: items) => {
-	const map = new CanvasTexture(assets.items[item])
-	map.minFilter = NearestFilter
-	map.magFilter = NearestFilter
-	const sprite = new Sprite(new SpriteMaterial({ map }))
-	sprite.scale.setScalar(5)
-	sprite.position.setY(2.5)
-	sprite.material.depthWrite = false
-	const shadow = new Mesh(new SphereGeometry(0.3), new MeshBasicMaterial({
-		color: 0x000000,
-		transparent: true,
-		blending: AdditiveBlending,
-	}))
-	shadow.castShadow = true
-	sprite.add(shadow)
+export const itemBundle = (item: items, model?: Object3D<Object3DEventMap>) => {
+	const bundle = model
+		? modelColliderBundle(model, RigidBodyType.Dynamic, true)
+		: {
+				bodyDesc: RigidBodyDesc.dynamic().lockRotations(),
+				colliderDesc: ColliderDesc.cuboid(1, 1, 1).setSensor(true),
+				size: new Vector3(1, 1, 1),
+			}
+	if (!model) {
+		const map = new CanvasTexture(assets.items[item])
+		map.minFilter = NearestFilter
+		map.magFilter = NearestFilter
+		model = new Sprite(new SpriteMaterial({ map, depthWrite: false }))
+		model.scale.setScalar(5)
+		model.position.setY(2.5)
+		const shadow = new Mesh(
+			new SphereGeometry(0.3),
+			new MeshBasicMaterial({ color: 0x000000, transparent: true, blending: AdditiveBlending }),
+		)
+		shadow.castShadow = true
+		model.add(shadow)
+	}
+
 	return {
-		bodyDesc: RigidBodyDesc.fixed(),
-		colliderDesc: ColliderDesc.cuboid(5, 5, 5).setSensor(true),
-		model: sprite,
+		...bundle,
+		model,
 		item: true,
 		itemLabel: item,
 	} as const satisfies Entity
 }
 export const bobItems = () => itemsQuery.onEntityAdded.subscribe((entity) => {
-	const tween	= new Tween(entity.model.position).to({ y: 2 }, 2000).repeat(Number.POSITIVE_INFINITY).yoyo(true).easing(Easing.Quadratic.InOut)
-
+	const tween	= new Tween(entity.model.position).to({ y: 5 }, 2000).repeat(Number.POSITIVE_INFINITY).yoyo(true).easing(Easing.Quadratic.InOut)
 	ecs.update(entity, { tween })
 })
 
@@ -57,3 +65,14 @@ export const collectItems = () => {
 		}
 	}
 }
+
+export const popItems = () => ecs.with('body', 'item', 'collider').onEntityAdded.subscribe((e) => {
+	const force = new Vector3().randomDirection()
+	force.y = Math.abs(force.y) * 300
+	force.x = force.x * 100
+	force.z = force.z * 100
+	world.createCollider(ColliderDesc.ball(0.01).setTranslation(0, e.size ? -e.size.y : 0, 0), e.body)
+	e.body.setLinearDamping(1)
+	e.body.setAdditionalMass(2, true)
+	e.body.applyImpulse(force, true)
+})
