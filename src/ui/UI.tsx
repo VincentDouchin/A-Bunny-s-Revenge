@@ -7,7 +7,6 @@ import { DebugUi } from '@/debug/debugUi'
 export const UI = () => (
 	<>
 		<DebugUi />
-		<InteractionUi />
 		<TouchControls />
 		<PauseUI />
 		<PlayerUi />

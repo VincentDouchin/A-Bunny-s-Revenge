@@ -56,15 +56,7 @@ const spawnLevelData = () => ecs.with('map').onEntityAdded.subscribe(async (e) =
 		}
 	}
 })
-const query = ecs.with('playerControls')
 export const debugPlugin = (state: State) => {
 	state
 		.addSubscriber(spawnLevelData)
-		.onUpdate(() => {
-			for (const player of query) {
-				if (player.playerControls.get('secondary').justPressed) {
-					ecs.add({ ...itemBundle('honey_glazed_carrot'), position: new Vector3(0, 5, 0) })
-				}
-			}
-		})
 }

@@ -148,10 +148,11 @@ const spawnGroundAndTrees = (layer: LayerInstance) => {
 	)
 
 	groundMesh.receiveShadow = true
+	const bundle = modelColliderBundle(groundMesh, RigidBodyType.Fixed)
 	ecs.add({
 		inMap: true,
 		position: new Vector3(),
-		...modelColliderBundle(groundMesh, RigidBodyType.Fixed),
+		...bundle,
 	})
 	const trees = Object.values(assets.trees).map(instanceMesh)
 	const noise = createNoise2D(() => 0)
@@ -196,7 +197,7 @@ export const spawnDungeon: System<DungeonRessources> = ({ dungeon, direction, ro
 	const room = dungeon.rooms[roomIndex]
 	ecs.add({ map: room.plan.iid })
 	if (room.type === RoomType.Entrance) {
-		for (const _ in range(0, 5)) {
+		for (const _ in range(0, 3)) {
 			ecs.add({
 				...enemyBundle('Armabee'),
 				position: new Vector3(between(-10, 10), 0, between(-10, 10)),

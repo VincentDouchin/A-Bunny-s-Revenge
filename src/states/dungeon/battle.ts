@@ -1,4 +1,5 @@
 import { Tween } from '@tweenjs/tween.js'
+import { Vector3 } from 'three'
 import { itemBundle } from '../game/items'
 import { Faction } from '@/global/entity'
 import { ecs, world } from '@/global/init'
@@ -37,7 +38,7 @@ export const playerAttack = () => {
 export const spawnDrops = () => ecs.with('drops', 'position').onEntityRemoved.subscribe((e) => {
 	for (const drop of e.drops) {
 		for (let i = 0; i < drop.quantity(); i++) {
-			ecs.add({ ...itemBundle(drop.item), position: e.position.clone() })
+			ecs.add({ ...itemBundle(drop.item), position: e.position.clone().add(new Vector3(0, 5, 0)) })
 		}
 	}
 })

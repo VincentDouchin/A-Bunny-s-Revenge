@@ -19,6 +19,7 @@ export const playerFSM = setupAnimations('playerAnimator', {
 	idle: e => e.playerAnimator.playAnimation('idle'),
 	picking: e => e.playerAnimator.playOnce('picking_vegetables').then(() => e.stateMachine.enter('idle', e)),
 	running: e => e.playerAnimator.playAnimation('run'),
+
 })
 export const pandaFSM = setupAnimations('pandaAnimator', {
 	idle: e => e.pandaAnimator.playAnimation('Idle'),
@@ -30,4 +31,8 @@ export const beeFSM = setupAnimations('beeAnimator', {
 	running: e => e.beeAnimator.playAnimation('Fast_Flying'),
 	hit: e => e.beeAnimator.playOnce('HitReact').then(() => e.stateMachine.enter('idle', e)),
 	dying: e => e.beeAnimator.playClamped('Death').then(() => e.stateMachine.enter('dead', e)),
+	attacking: e => e.beeAnimator.playClamped('Headbutt').then(() => e.stateMachine.enter('attackCooldown', e)),
+	waitingAttack: e => setTimeout(() => e.stateMachine.enter('attacking', e), 400),
+	attackCooldown: e => setTimeout(() => e.stateMachine.enter('idle', e), 1000)
+	,
 })

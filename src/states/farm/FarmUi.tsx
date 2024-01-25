@@ -10,6 +10,7 @@ import { CuttingBoardUi, OvenUi } from '@/states/farm/CookingUi'
 import { SeedUi } from '@/states/farm/SeedUi'
 import { ChestUi } from '@/states/farm/ChestUi'
 import { campState, dungeonState } from '@/global/states'
+import { InteractionUi } from '@/ui/Interactions'
 
 const playerQuery = playerInventoryQuery.with('playerControls', 'maxHealth', 'currentHealth', 'maxHealth', 'currentHealth', 'strength')
 export const PlayerUi = () => {
@@ -28,6 +29,7 @@ export const PlayerUi = () => {
 							<QuestUi />
 							<ChestUi />
 							<HealthUi player={player()}></HealthUi>
+							<InteractionUi player={player()} />
 						</StateUi>
 						<StateUi state={dungeonState}>
 							<HealthUi player={player()}></HealthUi>

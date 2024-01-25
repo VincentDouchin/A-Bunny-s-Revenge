@@ -3,16 +3,17 @@ import { Easing, Tween } from '@tweenjs/tween.js'
 import type { With } from 'miniplex'
 import { Vector3 } from 'three'
 import { itemBundle } from '../game/items'
+import { itemsData } from '@/constants/items'
 import { Sizes } from '@/constants/sizes'
 import { type Entity, Interactable, type crops } from '@/global/entity'
 import { assets, ecs } from '@/global/init'
-import { save, updateSave } from '@/global/save'
+import { removeItem, save, updateSave } from '@/global/save'
+import type { FarmRessources } from '@/global/states'
 import { addTag, removeEntityRef } from '@/lib/hierarchy'
 import { modelColliderBundle } from '@/lib/models'
 import type { System } from '@/lib/state'
-import type { FarmRessources } from '@/global/states'
 
-const playerQuery = ecs.with('playerControls', 'sensorCollider', 'movementForce', 'stateMachine')
+const playerQuery = ecs.with('playerControls', 'sensorCollider', 'movementForce', 'stateMachine', 'inventory', 'inventoryId', 'inventorySize')
 const plantedSpotQuery = ecs.with('plantableSpot', 'worldPosition', 'planted')
 
 export const updateCropsSave = () => {
@@ -62,16 +63,19 @@ export const growCrops: System<FarmRessources> = (ressources) => {
 const plantableSpotsQuery = ecs.with('plantableSpot').without('planted')
 
 export const plantSeed = () => {
-	for (const { playerControls } of playerQuery) {
+	for (const player of playerQuery) {
+		const { playerControls, inventory } = player
 		if (playerControls.get('primary').justPressed) {
 			for (const spot of plantableSpotsQuery) {
-				if (spot.interactionContainer && save.selectedSeed) {
+				const seed = inventory.filter(Boolean).find(item => itemsData[item.name].seed === save.selectedSeed && item.quantity > 0)
+				if (spot.interactionContainer && save.selectedSeed && seed) {
 					if (save.crops[spot.plantableSpot] === undefined) {
 						const planted = ecs.add({
 							...cropBundle(false, { name: save.selectedSeed, stage: 0 }),
 							parent: spot,
 							position: new Vector3(),
 						})
+						removeItem(player, { name: seed.name, quantity: 1 })
 						ecs.addComponent(spot, 'planted', planted)
 					}
 				}
@@ -82,7 +86,7 @@ export const plantSeed = () => {
 
 export const initPlantableSpotsInteractions = () => {
 	for (const spot of plantableSpotsQuery) {
-		ecs.update(spot, { interactable: Interactable.Plant, interactableSecondary: Interactable.SelectSeed })
+		ecs.update(spot, { interactable: Interactable.Plant })
 	}
 }
 export const interactablePlantableSpot = [
@@ -91,7 +95,7 @@ export const interactablePlantableSpot = [
 		updateCropsSave()
 	}),
 	() => plantableSpotsQuery.onEntityAdded.subscribe((entity) => {
-		ecs.update(entity, { interactable: Interactable.Plant, interactableSecondary: Interactable.SelectSeed })
+		ecs.update(entity, { interactable: Interactable.Plant })
 		updateCropsSave()
 	}),
 ]
@@ -103,7 +107,9 @@ export const harvestCrop = () => {
 		const { playerControls, stateMachine } = player
 		if (playerControls.get('secondary').justPressed) {
 			for (const spot of touchedPlantablespotQuery) {
-				addTag(spot, 'menuOpen')
+				if (save.inventories.player.some(item => itemsData[item.name].seed)) {
+					addTag(spot, 'menuOpen')
+				}
 			}
 		}
 		if (playerControls.get('primary').justPressed) {
@@ -112,16 +118,10 @@ export const harvestCrop = () => {
 					if (stateMachine.enter('picking', player)) {
 						const model = assets.crops[spot.planted.crop.name].crop.scene.clone()
 						model.scale.setScalar(8)
-						// const bundle = modelColliderBundle(model, RigidBodyType.Fixed, true)
 						const bundle = itemBundle(spot.planted.crop.name, model)
 						ecs.add({
 							...bundle,
-							// model,
-							// item: true,
 							position: spot.worldPosition.clone().add(new Vector3(0, bundle.size.y + 5, 0)),
-							// inMap: true,
-							// itemLabel: spot.planted.crop.name,
-							// popItem: true,
 						})
 						removeEntityRef(spot, 'planted')
 					}

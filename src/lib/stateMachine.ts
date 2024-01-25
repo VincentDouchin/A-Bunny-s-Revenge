@@ -10,6 +10,7 @@ export class StateMachine<S extends states> {
 	}
 
 	enter(newState: S, entity: Entity) {
+		if (this.#state === newState) return true
 		if (!(newState in this.transitions) || this.transitions[this.#state]?.includes(newState)) {
 			ecs.update(entity, { state: newState })
 			this.#state = newState

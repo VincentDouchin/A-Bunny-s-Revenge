@@ -15,7 +15,7 @@ export const itemBundle = (item: items, model?: Object3D<Object3DEventMap>) => {
 	const bundle = model
 		? modelColliderBundle(model, RigidBodyType.Dynamic, true)
 		: {
-				bodyDesc: RigidBodyDesc.dynamic().lockRotations(),
+				bodyDesc: RigidBodyDesc.dynamic().lockRotations().setCcdEnabled(true),
 				colliderDesc: ColliderDesc.cuboid(1, 1, 1).setSensor(true),
 				size: new Vector3(1, 1, 1),
 			}
@@ -28,7 +28,7 @@ export const itemBundle = (item: items, model?: Object3D<Object3DEventMap>) => {
 		model.position.setY(2.5)
 		const shadow = new Mesh(
 			new SphereGeometry(0.3),
-			new MeshBasicMaterial({ color: 0x000000, transparent: true, blending: AdditiveBlending }),
+			new MeshBasicMaterial({ color: 0x000000, transparent: true, blending: AdditiveBlending, depthWrite: false }),
 		)
 		shadow.castShadow = true
 		model.add(shadow)
@@ -68,10 +68,10 @@ export const collectItems = () => {
 
 export const popItems = () => ecs.with('body', 'item', 'collider').onEntityAdded.subscribe((e) => {
 	const force = new Vector3().randomDirection()
-	force.y = Math.abs(force.y) * 300
+	force.y = 300
 	force.x = force.x * 100
 	force.z = force.z * 100
-	world.createCollider(ColliderDesc.ball(0.01).setTranslation(0, e.size ? -e.size.y : 0, 0), e.body)
+	world.createCollider(ColliderDesc.ball(0.01).setTranslation(0, e.size ? -e.size.y : 1, 0), e.body)
 	e.body.setLinearDamping(1)
 	e.body.setAdditionalMass(2, true)
 	e.body.applyImpulse(force, true)

@@ -7,7 +7,7 @@ import { Animator } from '@/global/animator'
 import { type Entity, Faction, MenuType } from '@/global/entity'
 import { assets, ecs } from '@/global/init'
 import { playerInputMap } from '@/global/inputMaps'
-import { save } from '@/global/save'
+import { save, updateSave } from '@/global/save'
 import type { FarmRessources } from '@/global/states'
 import { modelColliderBundle } from '@/lib/models'
 import type { System } from '@/lib/state'
@@ -25,7 +25,6 @@ export const playerBundle = () => {
 	})
 	const bundle = modelColliderBundle(model.scene, RigidBodyType.Dynamic, false, Sizes.character)
 	bundle.bodyDesc.setLinearDamping(20)
-
 	const player = {
 		...playerInputMap(),
 		...inventoryBundle(MenuType.Player, 24, 'player'),
@@ -56,7 +55,9 @@ export const spawnCharacter: System<FarmRessources> = ({ previousState }) => {
 	const [position, rotation] = previousState === 'dungeon'
 		? [new Vector3(), new Quaternion()]
 		: [new Vector3().fromArray(save.playerPosition), new Quaternion().fromArray(save.playerRotation)]
-
+	if (previousState === 'dungeon') {
+		updateSave(s => s.modifiers = [])
+	}
 	ecs.add({
 		...playerBundle(),
 		position,

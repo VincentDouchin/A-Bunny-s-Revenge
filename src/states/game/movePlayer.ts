@@ -24,11 +24,11 @@ export const movePlayer = () => {
 export const applyMove = () => {
 	for (const entity of movementQuery) {
 		const { body, rotation, stateMachine, movementForce, speed, state } = entity
-		if (state === 'idle' || state === 'running') {
-			const force = movementForce.clone().multiplyScalar(speed * params.speedUp * time.delta)
-			const moving = force.length() > 0
+		const force = movementForce.clone().multiplyScalar(speed * params.speedUp * time.delta)
+		const moving = force.length() > 0
+		moving && rotation.setFromAxisAngle(new Vector3(0, 1, 0), Math.atan2(force.x, force.z))
+		if (state !== 'picking' && state !== 'waitingAttack') {
 			if (moving) {
-				rotation.setFromAxisAngle(new Vector3(0, 1, 0), Math.atan2(force.x, force.z))
 				stateMachine.enter('running', entity)
 			} else {
 				stateMachine.enter('idle', entity)

@@ -102,7 +102,6 @@ export interface Entity {
 	map?: string
 	interacting?: true
 	interactable?: Interactable
-	interactableSecondary?: Interactable
 	interactionContainer?: CSS2DObject
 	outline?: With<Entity, 'model'>
 	// ! Camp
@@ -148,7 +147,7 @@ export interface Entity {
 	stateMachine?: StateMachine<states>
 	state?: states
 }
-export type states = 'idle' | 'running' | 'picking' | 'dying' | 'hit' | 'hello' | 'dead'
+export type states = 'idle' | 'running' | 'picking' | 'dying' | 'hit' | 'hello' | 'dead' | 'waitingAttack' | 'attacking' | 'attackCooldown'
 export type Bundle<C extends keyof Entity> = () => With<Entity, C>
 
 type KeysOfType<T, U> = {
