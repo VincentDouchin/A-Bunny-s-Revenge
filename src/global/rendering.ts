@@ -8,6 +8,7 @@ import { getDepthShader, getSobelShader } from '@/shaders/EdgePass'
 
 export const scene = new Scene()
 export const renderer = new WebGLRenderer({ alpha: false })
+renderer.setPixelRatio(1)
 export const cssRenderer = new CSS2DRenderer()
 const ratio = window.innerHeight / window.innerWidth
 const width = params.renderWidth
