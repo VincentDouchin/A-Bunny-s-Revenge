@@ -6,11 +6,11 @@ import { Vector2 } from 'three'
 import { getInteractables } from './Interactions'
 import { addTag } from '@/lib/hierarchy'
 import { pausedState } from '@/global/states'
-import type { Entity } from '@/global/entity'
 import { ecs, ui } from '@/global/init'
+import type { Entity } from '@/global/entity'
 
 export const TouchControls = ({ player }: { player: With<Entity, 'playerControls' | 'inventory'> }) => {
-	const playerInputs = createMemo(() => player.playerControls.touchController)
+	const playerInputs = () => player.playerControls.touchController
 	const [pixelOffset, setPixelOffset] = createSignal(new Vector2(0, 0))
 	const centerPostion = createMemo(() => `translate(calc(-50% + ${pixelOffset().x}px),calc(-50% + ${pixelOffset().y}px) )`)
 	const [container, setContainer] = createSignal<null | HTMLDivElement>(null)

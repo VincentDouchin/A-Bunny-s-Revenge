@@ -1,4 +1,4 @@
-import { PlayerUi } from '../states/farm/FarmUi'
+import { PlayerUi } from '../states/farm/PlayerUi'
 import { PauseUI } from './PauseUI'
 import { DebugUi } from '@/debug/debugUi'
 
