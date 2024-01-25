@@ -15,7 +15,7 @@ export const enemyData: Record<enemies, Enemy> = {
 	Armabee: {
 		health: 3,
 		scale: 4,
-		drops: [{ item: 'honey', quantity: () => 4 }],
+		drops: [{ item: 'honey', quantity: () => Math.random() < 0.5 ? 1 : 0 }],
 	},
 	Armabee_Evolved: {
 		health: 5,
