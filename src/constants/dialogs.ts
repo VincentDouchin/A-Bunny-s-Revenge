@@ -5,7 +5,10 @@ import { addItemToPlayer, addQuest, canCompleteQuest, completeQuest, enterHouse,
 export const dialogs = {
 	*Panda() {
 		while (true) {
-			pandaQuery.first?.animator.playOnce('Wave')
+			const panda = pandaQuery.first
+			if (panda) {
+				panda.stateMachine.enter('hello', panda)
+			}
 			yield 'hello'
 			yield 'What a beautiful day we\'re having!'
 			yield false

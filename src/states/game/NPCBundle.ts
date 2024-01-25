@@ -5,6 +5,7 @@ import { Animator } from '@/global/animator'
 import { type Entity, Interactable } from '@/global/entity'
 import { assets } from '@/global/init'
 import { modelColliderBundle } from '@/lib/models'
+import { stateBundle } from '@/lib/stateMachine'
 
 export const NPCBundle = (character: 'Panda') => {
 	const model = assets.characters[character]
@@ -13,12 +14,13 @@ export const NPCBundle = (character: 'Panda') => {
 
 	return {
 		...bundle,
-		animator: new Animator('Idle', bundle.model, model.animations),
+		pandaAnimator: new Animator(bundle.model, model.animations),
 		inMap: true,
 		npc: true,
 		npcName: 'Panda',
 		rotation: new Quaternion().setFromAxisAngle(new Vector3(0, 1, 0), Math.PI),
 		interactable: Interactable.Talk,
+		...stateBundle<'idle' | 'hello'>('idle', { idle: ['hello'], hello: ['idle'] }),
 
 	} as const satisfies Entity
 }

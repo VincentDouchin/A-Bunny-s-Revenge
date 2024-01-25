@@ -16,6 +16,7 @@ import type { MenuInputMap, PlayerInputMap } from '@/global/inputMaps'
 import type { Item } from '@/constants/items'
 import type { NPC } from '@/constants/NPC'
 import type { Drop } from '@/constants/enemies'
+import type { StateMachine } from '@/lib/stateMachine'
 
 export type Dialog = Generator<string | string[] | void | false, void, number | void>
 export enum Faction {
@@ -84,7 +85,9 @@ export interface Entity {
 	collider?: Collider
 	size?: Vector3
 	// ! Animations
-	animator?: Animator<any>
+	playerAnimator?: Animator<Animations['BunnydAnim']>
+	beeAnimator?: Animator<Animations['Armabee']>
+	pandaAnimator?: Animator<Animations['Panda']>
 	template?: () => JSXElement
 	el?: HTMLElement
 	cssObject?: true
@@ -132,7 +135,7 @@ export interface Entity {
 	// ! Health
 	currentHealth?: number
 	maxHealth?: Stat
-	dying?: true
+
 	// ! Enemies
 	drops?: Drop[]
 	// ! Particles
@@ -141,8 +144,11 @@ export interface Entity {
 	strength?: Stat
 	// ! Level Editor
 	entityId?: string
+	// ! FSM
+	stateMachine?: StateMachine<any>
+	state?: states
 }
-
+export type states = 'idle' | 'running' | 'picking' | 'dying' | 'hit' | 'hello'
 export type Bundle<C extends keyof Entity> = () => With<Entity, C>
 
 type KeysOfType<T, U> = {

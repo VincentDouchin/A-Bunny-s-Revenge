@@ -1,0 +1,26 @@
+import type { With } from 'miniplex'
+import type { Animator } from '@/global/animator'
+import type { ComponentsOfType, Entity, states } from '@/global/entity'
+import { ecs } from '@/global/init'
+import { entries } from '@/utils/mapFunctions'
+
+const setupAnimations = <A extends ComponentsOfType<Animator<any>>>(key: A, transitions: Partial<Record<states, (e: With<With<Entity, A>, | 'stateMachine'>) => void>>) => {
+	const query = ecs.with(key).with('stateMachine').with('state')
+	const subscribers = []
+	for (const [state, fn] of entries(transitions)) {
+		if (fn) {
+			subscribers.push(() => query.where(e => e.state === state).onEntityAdded.subscribe(fn))
+		}
+	}
+	return subscribers
+}
+
+export const playerFSM = setupAnimations('playerAnimator', {
+	idle: e => e.playerAnimator.playAnimation('idle'),
+	picking: e => e.playerAnimator.playOnce('picking_vegetables').then(() => e.stateMachine.enter('idle', e)),
+	running: e => e.playerAnimator.playAnimation('run'),
+})
+export const pandaFSM = setupAnimations('pandaAnimator', {
+	idle: e => e.pandaAnimator.playAnimation('Idle'),
+	hello: e => e.pandaAnimator.playOnce('Wave').then(() => e.stateMachine.enter('idle', e)),
+})

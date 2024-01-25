@@ -8,8 +8,10 @@ import { assets, ecs } from '@/global/init'
 import { save, updateSave } from '@/global/save'
 import { addTag, removeEntityRef } from '@/lib/hierarchy'
 import { modelColliderBundle } from '@/lib/models'
+import type { System } from '@/lib/state'
+import type { FarmRessources } from '@/global/states'
 
-const playerQuery = ecs.with('playerControls', 'sensorCollider', 'animator', 'movementForce')
+const playerQuery = ecs.with('playerControls', 'sensorCollider', 'movementForce', 'stateMachine')
 const plantedSpotQuery = ecs.with('plantableSpot', 'worldPosition', 'planted')
 
 export const updateCropsSave = () => {
@@ -45,6 +47,15 @@ export const cropBundle = (grow: boolean, crop: { name: crops, stage: number }) 
 		bundle.interactable = Interactable.Harvest
 	}
 	return bundle
+}
+export const growCrops: System<FarmRessources> = (ressources) => {
+	if (ressources.previousState === 'dungeon') {
+		updateSave((s) => {
+			for (const crop of Object.values(s.crops)) {
+				crop.stage = Math.min(maxStage(crop.name), crop.stage + 1)
+			}
+		})
+	}
 }
 
 const plantableSpotsQuery = ecs.with('plantableSpot').without('planted')
@@ -88,7 +99,7 @@ const touchedPlantablespotQuery = plantableSpotsQuery.with('interactionContainer
 
 export const harvestCrop = () => {
 	for (const player of playerQuery) {
-		const { playerControls, animator } = player
+		const { playerControls, stateMachine } = player
 		if (playerControls.get('secondary').justPressed) {
 			for (const spot of touchedPlantablespotQuery) {
 				addTag(spot, 'menuOpen')
@@ -97,24 +108,21 @@ export const harvestCrop = () => {
 		if (playerControls.get('primary').justPressed) {
 			for (const spot of plantedSpotQuery) {
 				if (spot.planted.interactionContainer && maxStage(spot.planted.crop.name) === spot.planted.crop.stage) {
-					const movementForce = player.movementForce
-					ecs.removeComponent(player, 'movementForce')
-					animator.playOnce('picking_vegetables', false)?.then(() => {
-						ecs.update(player, { movementForce })
-					})
-					const model = assets.crops[spot.planted.crop.name].crop.scene.clone()
-					model.scale.setScalar(8)
-					const bundle = modelColliderBundle(model, RigidBodyType.Fixed, true)
-					ecs.add({
-						...bundle,
-						model,
-						item: true,
-						position: spot.worldPosition.clone().add(new Vector3(0, bundle.size.y + 2, 0)),
-						inMap: true,
-						itemLabel: spot.planted.crop.name,
-						popItem: true,
-					})
-					removeEntityRef(spot, 'planted')
+					if (stateMachine.enter('picking', player)) {
+						const model = assets.crops[spot.planted.crop.name].crop.scene.clone()
+						model.scale.setScalar(8)
+						const bundle = modelColliderBundle(model, RigidBodyType.Fixed, true)
+						ecs.add({
+							...bundle,
+							model,
+							item: true,
+							position: spot.worldPosition.clone().add(new Vector3(0, bundle.size.y + 2, 0)),
+							inMap: true,
+							itemLabel: spot.planted.crop.name,
+							popItem: true,
+						})
+						removeEntityRef(spot, 'planted')
+					}
 				}
 			}
 		}

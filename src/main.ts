@@ -1,5 +1,5 @@
 import { debugPlugin } from './debug/debugPlugin'
-import { playAnimations } from './global/animations'
+import { updateAnimations } from './global/animations'
 import { initCamera, moveCamera } from './global/camera'
 import { coroutines, inputManager, time, ui } from './global/init'
 import { initThree, render, updateControls } from './global/rendering'
@@ -19,7 +19,7 @@ import { generateDungeon } from './states/dungeon/generateDungeon'
 import { killAnimation, killEntities } from './states/dungeon/health'
 import { spawnItems } from './states/dungeon/itemRoom'
 import { displayOnCuttinBoard } from './states/farm/CookingUi'
-import { harvestCrop, initPlantableSpotsInteractions, interactablePlantableSpot, plantSeed, updateCropsSave } from './states/farm/farming'
+import { growCrops, harvestCrop, initPlantableSpotsInteractions, interactablePlantableSpot, plantSeed, updateCropsSave } from './states/farm/farming'
 import { closeMenu, closePlayerInventory, disableInventoryState, enableInventoryState, openMenu, openPlayerInventory } from './states/farm/openInventory'
 import { spawnChest } from './states/farm/spawnChest'
 import { spawnNPC } from './states/farm/spawnNPC'
@@ -27,6 +27,7 @@ import { talkToNPC } from './states/game/dialog'
 import { bobItems, collectItems } from './states/game/items'
 import { applyMove, canPlayerMove, movePlayer, savePlayerPosition } from './states/game/movePlayer'
 import { pauseGame } from './states/game/pauseGame'
+import { pandaFSM, playerFSM } from './states/game/playerFSM'
 import { target } from './states/game/sensor'
 import { spawnCharacter } from './states/game/spawnCharacter'
 import { allowDoorCollision, collideWithDoor, collideWithDoorCamp } from './states/game/spawnDoor'
@@ -43,7 +44,7 @@ coreState
 	.addSubscriber(...target, startTweens)
 	.onEnter(initCamera, initThree, ui.render(UI))
 	.onPreUpdate(coroutines.tick, moveCamera)
-	.onUpdate(runIf(() => !pausedState.enabled, playAnimations, () => time.tick()), updateTweens, inputManager.update, ui.update, updateParticles)
+	.onUpdate(runIf(() => !pausedState.enabled, updateAnimations('beeAnimator', 'playerAnimator', 'pandaAnimator'), () => time.tick()), updateTweens, inputManager.update, ui.update, updateParticles)
 	.onPostUpdate(updateControls, render)
 	.enable()
 setupState
@@ -51,13 +52,13 @@ setupState
 	.enable()
 gameState
 	.onEnter()
-	.addSubscriber(bobItems, enableInventoryState, killAnimation, ...showInteraction)
+	.addSubscriber(bobItems, enableInventoryState, killAnimation, ...showInteraction, ...playerFSM, ...pandaFSM)
 	.onUpdate(runIf(canPlayerMove, movePlayer), runIf(() => !pausedState.enabled, applyMove))
 	.onUpdate(collectItems, touchItem, talkToNPC, runIf(() => !openMenuState.enabled, pauseGame))
 	.enable()
 campState
 	.addSubscriber(...interactablePlantableSpot)
-	.onEnter(spawnFarm, updateCropsSave, initPlantableSpotsInteractions, spawnCharacter, spawnLight, spawnSkyBox, spawnNPC, spawnChest)
+	.onEnter(growCrops, spawnFarm, updateCropsSave, initPlantableSpotsInteractions, spawnCharacter, spawnLight, spawnSkyBox, spawnNPC, spawnChest)
 	.onUpdate(collideWithDoorCamp, displayOnCuttinBoard)
 	.onUpdate(runif(canPlayerMove, plantSeed, harvestCrop, openMenu, openPlayerInventory), savePlayerPosition)
 	.onExit(despawnOfType('map'))

@@ -14,7 +14,7 @@ import type { Item } from '@/constants/items'
 const playerQuery = ecs.with('player', 'position', 'collider', 'movementForce')
 const houseQuery = ecs.with('npcName', 'position', 'collider').where(({ npcName }) => npcName === 'Grandma')
 const doorQuery = ecs.with('npcName', 'worldPosition', 'collider').where(({ npcName }) => npcName === 'door')
-export const pandaQuery = ecs.with('animator', 'npcName').where(({ npcName }) => npcName === 'Panda')
+export const pandaQuery = ecs.with('stateMachine', 'npcName').where(({ npcName }) => npcName === 'Panda')
 const setSensor = <T extends With<Entity, 'collider'>>(query: Query<T>, sensor: boolean) => {
 	for (const { collider } of query) {
 		collider.setSensor(sensor)

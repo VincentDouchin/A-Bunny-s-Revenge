@@ -5,8 +5,8 @@ import { cutSceneState, openMenuState, pausedState } from '@/global/states'
 import { throttle } from '@/lib/state'
 import { updateSave } from '@/global/save'
 
-const movementQuery = ecs.with('body', 'rotation', 'movementForce', 'speed')
-const playerQuery = movementQuery.with('playerControls', 'animator', 'position')
+const movementQuery = ecs.with('body', 'rotation', 'movementForce', 'speed', 'stateMachine', 'state')
+const playerQuery = movementQuery.with('playerControls', 'position')
 
 export const movePlayer = () => {
 	for (const { playerControls, movementForce } of playerQuery) {
@@ -22,21 +22,20 @@ export const movePlayer = () => {
 }
 
 export const applyMove = () => {
-	for (const { body, rotation, animator, movementForce, speed } of movementQuery) {
-		const force = movementForce.clone().multiplyScalar(speed * params.speedUp * time.delta)
-		const moving = force.length() > 0
-		if (moving) {
-			rotation.setFromAxisAngle(new Vector3(0, 1, 0), Math.atan2(force.x, force.z))
-			if (animator?.has('run')) {
-				animator?.playAnimation('run')
+	for (const entity of movementQuery) {
+		const { body, rotation, stateMachine, movementForce, speed, state } = entity
+		if (state === 'idle' || state === 'running') {
+			const force = movementForce.clone().multiplyScalar(speed * params.speedUp * time.delta)
+			const moving = force.length() > 0
+			if (moving) {
+				rotation.setFromAxisAngle(new Vector3(0, 1, 0), Math.atan2(force.x, force.z))
+				stateMachine.enter('running', entity)
+			} else {
+				stateMachine.enter('idle', entity)
 			}
-		} else {
-			if (animator?.has('idle')) {
-				animator?.playAnimation('idle')
-			}
-		}
 
-		body.applyImpulse(force, true)
+			body.applyImpulse(force, true)
+		}
 	}
 }
 export const canPlayerMove = () => !openMenuState.enabled && !cutSceneState.enabled && !pausedState.enabled

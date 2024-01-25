@@ -1,69 +1,44 @@
 import type { AnimationAction, AnimationClip, Object3D, Object3DEventMap } from 'three'
 import { AnimationMixer, LoopOnce } from 'three'
 
-interface Animation<T extends string> extends AnimationClip {
-	name: T
-}
 export class Animator<K extends string> extends AnimationMixer {
 	#current?: K
 	action?: AnimationAction
-	#clips: AnimationClip[]
-	constructor(current: K, scene: Object3D<Object3DEventMap>, animations: Animation<K>[]) {
+	#animationClips: AnimationClip[]
+	constructor(scene: Object3D<Object3DEventMap>, animations: AnimationClip[]) {
 		super(scene)
-		this.#clips = animations
-		this.playAnimation(current)
+		this.#animationClips = animations
 	}
 
 	#getAction(animation?: K) {
-		const clip = this.#clips.find(clip => clip.name === animation)
+		const clip = this.#animationClips.find(clip => clip.name === animation)
 		if (clip) {
 			return this.clipAction(clip)
 		}
 	}
 
-	has(...animations: K[]): this is Animator<K> {
-		return animations.every(a => this.#clips.some(clip => clip.name === a))
+	#play(animation: K) {
+		const action = this.#getAction(animation)!
+		this.action?.fadeOut(0.2)
+		action.reset().fadeIn(0.2).play()
+		this.action = action
+		this.#current = animation
 	}
 
-	play(animation: K) {
-		const action = this.#getAction(animation)
-		if (action) {
-			this.action?.fadeOut(0.2)
-			action.reset().fadeIn(0.2).play()
-			this.action = action
-			this.#current = animation
-		} else {
-			console.warn(`animation ${animation} not found`)
-		}
-	}
-
-	playOnce(animation: K, reset = true) {
-		if (animation === this.#current) return
+	playOnce(animation: K) {
+		const action = this.#getAction(animation)!
+		action.reset()
+		action.setLoop(LoopOnce, 1)
+		action.fadeOut(0.2)
+		this.#play(animation)
 		return new Promise<void>((resolve) => {
-			const current = this.#current
-			const action = this.#getAction(animation)
-			if (action && current) {
-				this.play(animation)
-				if (reset) {
-					setTimeout(() => {
-						this.play(current)
-					}, (action.getClip().duration - 0.2) * 1000)
-				} else {
-					action.setLoop(LoopOnce, 1)
-					action.clampWhenFinished = true
-					this.addEventListener('finished', () => {
-						resolve()
-					})
-				}
-			} else {
-				resolve()
-			}
+			setTimeout(resolve, (action.getClip().duration - 0.2) * 1000)
 		})
 	}
 
 	playAnimation(animation: K) {
 		if (animation !== this.#current) {
-			this.play(animation)
+			this.#play(animation)
 		}
 	}
 }

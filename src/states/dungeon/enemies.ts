@@ -4,10 +4,11 @@ import { healthBundle } from './health'
 import type { enemies } from '@/constants/enemies'
 import { enemyData } from '@/constants/enemies'
 import { Sizes } from '@/constants/sizes'
+import { Animator } from '@/global/animator'
 import { type Entity, Faction } from '@/global/entity'
 import { assets, ecs } from '@/global/init'
 import { modelColliderBundle } from '@/lib/models'
-import { Animator } from '@/global/animator'
+import { stateBundle } from '@/lib/stateMachine'
 
 export const enemyBundle = (name: enemies) => {
 	const enemy = enemyData[name]
@@ -17,13 +18,24 @@ export const enemyBundle = (name: enemies) => {
 	bundle.bodyDesc.setLinearDamping(20)
 	return {
 		...bundle,
-		animator: new Animator('Flying_Idle', bundle.model, model.animations),
+		beeAnimator: new Animator(bundle.model, model.animations),
 		...healthBundle(enemy.health),
 		inMap: true,
 		faction: Faction.Enemy,
 		movementForce: new Vector3(),
 		speed: 100,
 		drops: enemy.drops,
+		...stateBundle<'dying' | 'idle' | 'running' | 'hit'>('idle', {
+			idle: ['running'],
+			running: ['idle'],
+			dying: [],
+			hit: ['dying'],
+		}),
+		// state: 'idle',
+		// stateMachine: new StateMachine<'idle' | 'running' | 'dying' | 'hit'>('idle')
+		// 	.addTransition('idle', ['hit', 'dying', 'running'])
+		// 	.addTransition('running', ['idle', 'hit', 'dying'])
+		// 	.addTransition('hit', ['dying']),
 	} as const satisfies Entity
 }
 const entities = ecs.with('faction', 'position', 'rotation', 'body', 'collider', 'movementForce')

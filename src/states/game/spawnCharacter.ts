@@ -11,6 +11,7 @@ import { save } from '@/global/save'
 import type { FarmRessources } from '@/global/states'
 import { modelColliderBundle } from '@/lib/models'
 import type { System } from '@/lib/state'
+import { stateBundle } from '@/lib/stateMachine'
 import { Stat, addModifier } from '@/lib/stats'
 
 export const playerBundle = () => {
@@ -29,7 +30,7 @@ export const playerBundle = () => {
 		...playerInputMap(),
 		...inventoryBundle(MenuType.Player, 24, 'player'),
 		...bundle,
-		animator: new Animator('idle', bundle.model, model.animations),
+		playerAnimator: new Animator(bundle.model, model.animations),
 		inMap: true,
 		cameratarget: true,
 		faction: Faction.Player,
@@ -39,6 +40,15 @@ export const playerBundle = () => {
 		speed: 300,
 		strength: new Stat(1),
 		...healthBundle(5),
+		...stateBundle<'idle' | 'running' | 'picking'>('idle', {
+			idle: ['running', 'picking'],
+			running: ['idle'],
+			picking: ['idle'],
+		}),
+		// state: 'idle',
+		// stateMachine: new StateMachine<'idle' | 'running' | 'picking'>('idle')
+		// 	.addTransition('idle', ['running'])
+		// 	.addTransition('running', ['idle']),
 	} as const satisfies Entity
 	for (const mod of save.modifiers) {
 		addModifier(mod, player)
