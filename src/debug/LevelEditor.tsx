@@ -21,7 +21,7 @@ export type LevelData = Record<string, {
 	position: [number, number, number]
 	rotation: [number, number, number, number]
 	map: string
-}>
+} | null>
 export type CollidersData = Partial<Record<models, {
 	type: RigidBodyType
 	size?: [number, number, number]
@@ -169,10 +169,12 @@ export const LevelEditor = () => {
 					onMount(() => {
 						renderer.domElement.addEventListener('click', clickListener)
 						renderer.domElement.addEventListener('contextmenu', unSelect)
+						params.pixelation = false
 					})
 					onCleanup(() => {
 						renderer.domElement.removeEventListener('click', clickListener)
 						renderer.domElement.removeEventListener('contextmenu', unSelect)
+						params.pixelation = true
 					})
 
 					return (

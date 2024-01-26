@@ -11,10 +11,12 @@ interface Params {
 	fov: number
 	speedUp: number
 	dialogSpeed: number
+	pixelation: boolean
 
 }
 
 export const params: Params = {
+	pixelation: true,
 	renderWidth: 360,
 	cameraOffsetX: 0,
 	cameraOffsetY: 50,

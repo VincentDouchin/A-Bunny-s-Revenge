@@ -54,12 +54,16 @@ export const sceneQuery = ecs.with('scene')
 export const cameraQuery = ecs.with('camera')
 
 export const render = () => {
-	renderer.setRenderTarget(target)
 	renderer.render(scene, camera)
-	renderer.setRenderTarget(depthTarget)
-	depthQuad.render(renderer)
-	renderer.setRenderTarget(null)
-	sobelQuad.render(renderer)
+	if (params.pixelation) {
+		renderer.setRenderTarget(depthTarget)
+		depthQuad.render(renderer)
+		renderer.setRenderTarget(null)
+		sobelQuad.render(renderer)
+		renderer.setRenderTarget(target)
+	} else {
+		renderer.setRenderTarget(null)
+	}
 	cssRenderer.render(scene, camera)
 }
 

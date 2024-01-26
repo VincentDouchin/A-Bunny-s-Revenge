@@ -39,7 +39,7 @@ export const PlayerUi = () => {
 							<QuestUi />
 							<ChestUi />
 							<HealthUi player={player}></HealthUi>
-							<Show when={!showTouch}>
+							<Show when={!showTouch()}>
 								<InteractionUi player={player} />
 							</Show>
 						</StateUi>

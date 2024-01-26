@@ -34,7 +34,7 @@ const getBoundingBox = (modelName: models, model: Object3D<Object3DEventMap>, co
 const spawnLevelData = () => ecs.with('map').onEntityAdded.subscribe(async (e) => {
 	const { levelData, colliderData } = levelsData
 	for (const [entityId, entityData] of Object.entries(levelData ?? {})) {
-		if (entityData.map === e.map) {
+		if (entityData?.map === e.map) {
 			const model = assets.models[entityData.model].scene.clone()
 			model.scale.setScalar(entityData.scale)
 			const position = new Vector3().fromArray(entityData.position)
