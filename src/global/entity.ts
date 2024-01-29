@@ -11,12 +11,11 @@ import type { CSS2DObject } from 'three/examples/jsm/renderers/CSS2DRenderer'
 import type { Animator } from './animator'
 import type { TweenGroup } from '@/lib/tweenGroup'
 import type { Stat } from '@/lib/stats'
+import type { StateMachine } from '@/lib/stateMachine'
 import type { direction } from '@/lib/directions'
 import type { MenuInputMap, PlayerInputMap } from '@/global/inputMaps'
 import type { Item } from '@/constants/items'
 import type { NPC } from '@/constants/NPC'
-import type { Drop } from '@/constants/enemies'
-import type { StateMachine } from '@/lib/stateMachine'
 
 export type Dialog = Generator<string | string[] | void | false, void, number | void>
 export enum Faction {
@@ -41,8 +40,9 @@ export enum MenuType {
 	Player,
 	Quest,
 }
+export const cropNames = ['carrot', 'beet', 'mushroom', 'tomato', 'lettuce'] as const
 
-export type crops = 'carrot' | 'beet' | 'mushroom' | 'tomato' | 'lettuce'
+export type crops = (typeof cropNames)[number]
 export interface Door { to: number, direction: direction }
 export interface Entity {
 	// ! Tween
@@ -137,7 +137,7 @@ export interface Entity {
 	maxHealth?: Stat
 
 	// ! Enemies
-	drops?: Drop[]
+	drops?: Item[]
 	// ! Particles
 	emitter?: ParticleEmitter<Object3DEventMap>
 	// ! Stats

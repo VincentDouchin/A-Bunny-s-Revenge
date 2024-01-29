@@ -37,8 +37,8 @@ export const playerAttack = () => {
 }
 export const spawnDrops = () => ecs.with('drops', 'position').onEntityRemoved.subscribe((e) => {
 	for (const drop of e.drops) {
-		for (let i = 0; i < drop.quantity(); i++) {
-			ecs.add({ ...itemBundle(drop.item), position: e.position.clone().add(new Vector3(0, 5, 0)) })
+		for (let i = 0; i < drop.quantity; i++) {
+			ecs.add({ ...itemBundle(drop.name), position: e.position.clone().add(new Vector3(0, 5, 0)) })
 		}
 	}
 })
