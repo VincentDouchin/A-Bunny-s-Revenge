@@ -1,52 +1,52 @@
 interface Animations {
 
+	Snailo_A: `Move` | `Idle` | `Attack` | `Damage` | `Die`
+
 	Snailo_D: `Move` | `Idle` | `Attack` | `Damage` | `Die`
 
 	Snailo_C: `Move` | `Idle` | `Attack` | `Damage` | `Die`
 
-	Snailo_B: `Move` | `Idle` | `Attack` | `Damage` | `Die`
-
-	Snailo_A: `Move` | `Idle` | `Attack` | `Damage` | `Die`
-
 	Shaga_C: `Move` | `Idle` | `Attack` | `Damage` | `Die`
 
-	Shaga_A: `Move` | `Idle` | `Attack` | `Damage` | `Die`
+	Snailo_B: `Move` | `Idle` | `Attack` | `Damage` | `Die`
 
 	Shaga_B: `Move` | `Idle` | `Attack` | `Damage` | `Die`
 
 	Racco_C: `Move` | `Idle` | `Attack` | `Damage` | `Die`
 
-	Racco_A: `Move` | `Idle` | `Attack` | `Damage` | `Die`
+	Racco_B: `Move` | `Idle` | `Attack` | `Damage` | `Die`
+
+	Shaga_A: `Move` | `Idle` | `Attack` | `Damage` | `Die`
 
 	Porin_E: `Move` | `Idle` | `Attack` | `Damage` | `Die`
 
 	Porin_D: `Move` | `Idle` | `Attack` | `Damage` | `Die`
 
-	Porin_C: `Move` | `Idle` | `Attack` | `Damage` | `Die`
-
 	Porin_B: `Move` | `Idle` | `Attack` | `Damage` | `Die`
 
-	Racco_B: `Move` | `Idle` | `Attack` | `Damage` | `Die`
+	Racco_A: `Move` | `Idle` | `Attack` | `Damage` | `Die`
 
 	Porin_A: `Move` | `Idle` | `Attack` | `Damage` | `Die`
+
+	Porin_C: `Move` | `Idle` | `Attack` | `Damage` | `Die`
 
 	Platopo_C: `Walk` | `Idle` | `Attack` | `Damage` | `Die`
 
 	Platopo_B: `Walk` | `Idle` | `Attack` | `Damage` | `Die`
 
-	Platopo_A: `Walk` | `Idle` | `Attack` | `Damage` | `Die`
+	Forest_Butterfly_D: `Move` | `Idle` | `Attack` | `Damage` | `Die`
 
 	Forest_Butterfly_C: `Move` | `Idle` | `Attack` | `Damage` | `Die`
 
-	Forest_Butterfly_B: `Move` | `Idle` | `Attack` | `Damage` | `Die`
+	Platopo_A: `Walk` | `Idle` | `Attack` | `Damage` | `Die`
 
-	Forest_Butterfly_D: `Move` | `Idle` | `Attack` | `Damage` | `Die`
+	Forest_Butterfly_B: `Move` | `Idle` | `Attack` | `Damage` | `Die`
 
 	Forest_Butterfly_A: `Move` | `Idle` | `Attack` | `Damage` | `Die`
 
-	Armabee_Evolved: `Death` | `Fast_Flying` | `Flying_Idle` | `Headbutt` | `HitReact` | `No` | `Punch` | `Yes`
-
 	Armabee: `Death` | `Fast_Flying` | `Flying_Idle` | `Headbutt` | `HitReact` | `No` | `Punch` | `Yes`
+
+	Armabee_Evolved: `Death` | `Fast_Flying` | `Flying_Idle` | `Headbutt` | `HitReact` | `No` | `Punch` | `Yes`
 
 	SampleScene: `Move` | `Idle` | `Attack` | `Damage` | `Die`
 
