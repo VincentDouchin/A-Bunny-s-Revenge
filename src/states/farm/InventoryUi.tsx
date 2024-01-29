@@ -2,13 +2,14 @@ import type { With } from 'miniplex'
 import type { Accessor, Setter } from 'solid-js'
 import { For, Show, createEffect, createMemo, createSignal } from 'solid-js'
 import { InventoryTitle } from './CookingUi'
+import { MealBuffs } from './RecipesUi'
 import { type Item, itemsData } from '@/constants/items'
 
 import type { Entity } from '@/global/entity'
 import { assets, ecs, ui } from '@/global/init'
 import { updateSave } from '@/global/save'
 import type { Modifier } from '@/lib/stats'
-import { ModType, addModifier } from '@/lib/stats'
+import { addModifier } from '@/lib/stats'
 import { InputIcon } from '@/ui/InputIcon'
 import type { getProps } from '@/ui/components/Menu'
 import { Menu } from '@/ui/components/Menu'
@@ -17,24 +18,24 @@ import type { FarmUiProps } from '@/ui/types'
 import { removeItemFromPlayer } from '@/utils/dialogHelpers'
 import { range } from '@/utils/mapFunctions'
 
-export const ItemDisplay = (props: { item: Item | null, selected: Accessor<boolean>, disabled?: boolean }) => {
+export const ItemDisplay = (props: { item: Item | null, selected?: Accessor<boolean>, disabled?: boolean }) => {
 	const isDisabled = createMemo(() => props.disabled ?? false)
 	const disabledStyles = createMemo(() => {
 		return isDisabled()
 			? { opacity: '50%' }
 			: {}
 	})
-
+	const isSelected = createMemo(() => props.selected && props.selected())
 	const quantity = createMemo(() => props.item?.quantity)
 	return (
-		<div style={{ 'border-radius': '1rem', 'background': 'hsla(0 0% 100% / 50%)', 'width': '5rem', 'height': '5rem', 'display': 'grid', 'place-items': 'center', 'position': 'relative', 'border': props.selected() ? 'solid 0.2rem white' : '' }}>
+		<div style={{ 'border-radius': '1rem', 'background': 'hsla(0 0% 100% / 50%)', 'width': '5rem', 'height': '5rem', 'display': 'grid', 'place-items': 'center', 'position': 'relative', 'border': isSelected() ? 'solid 0.2rem white' : '' }}>
 			<Show when={props.item?.name && itemsData[props.item.name]}>
 				{(item) => {
 					return (
 						<>
 							<img src={assets.items[props.item!.name].src} style={{ width: '80%', ...disabledStyles() }}></img>
 							<div style={{ 'color': 'white', 'position': 'absolute', 'width': '1rem', 'bottom': '0.5rem', 'right': '0.5rem', 'text-align': 'center' }}>{quantity()}</div>
-							<Show when={props.selected()}>
+							<Show when={isSelected()}>
 								<div style={{ 'color': 'white', 'position': 'absolute', 'top': '100%', 'font-size': '1.5rem', 'z-index': 2, 'white-space': 'nowrap' }}>{item().name}</div>
 							</Show>
 						</>
@@ -191,19 +192,7 @@ export const InventoryUi = ({ player }: FarmUiProps) => {
 																<InputIcon input={player.playerControls.get('secondary')}></InputIcon>
 																Eat
 															</button>
-															<For each={mods()}>
-																{mod => (
-																	<div>
-																		{Math.sign(mod.value) > 0 && <span>+</span>}
-																		<span>{mod.value}</span>
-																		{mod.type === ModType.Percent && <span>%</span>}
-																		<span>
-																			{' '}
-																			{mod.name}
-																		</span>
-																	</div>
-																)}
-															</For>
+															<MealBuffs meals={mods} />
 														</div>
 													) }}
 											</Show>

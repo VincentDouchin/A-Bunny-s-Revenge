@@ -36,13 +36,13 @@ export enum Interactable {
 }
 export enum MenuType {
 	Oven,
+	Cauldron,
 	Chest,
-	CuttingBoard,
 	Player,
 	Quest,
 }
 
-export type crops = 'carrot' | 'beet' | 'mushroom'
+export type crops = 'carrot' | 'beet' | 'mushroom' | 'tomato' | 'lettuce'
 export interface Door { to: number, direction: direction }
 export interface Entity {
 	// ! Tween
@@ -87,6 +87,7 @@ export interface Entity {
 	// ! Animations
 	playerAnimator?: Animator<Animations['BunnydAnim']>
 	beeAnimator?: Animator<Animations['Armabee']>
+	shagaAnimator?: Animator<Animations['Shaga_A']>
 	pandaAnimator?: Animator<Animations['Panda']>
 	template?: () => JSXElement
 	el?: HTMLElement

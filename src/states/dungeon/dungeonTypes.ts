@@ -1,14 +1,7 @@
-import type { Vec2 } from 'three'
-import type { characters } from '@assets/assets'
 import type { Level } from '@/LDTKMap'
+import type { enemy } from '@/constants/enemies'
 import type { Entity } from '@/global/entity'
 
-export interface Enemy {
-	name: characters
-	position: Vec2
-	currentHealth: number
-	maxHealth: number
-}
 export enum RoomType {
 	Battle,
 	Boss,
@@ -17,7 +10,7 @@ export enum RoomType {
 }
 export interface Room {
 	plan: Level
-	enemies: Enemy[]
+	enemies: enemy[]
 	doors: NonNullable<Entity['door']>[]
 	type: RoomType
 }

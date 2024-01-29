@@ -1,18 +1,18 @@
 import { Show, createMemo } from 'solid-js'
-import { StateUi } from '../../ui/components/StateUi'
 import { DialogUi } from '../../ui/DialogUi'
+import { StateUi } from '../../ui/components/StateUi'
 import { HealthUi } from '../dungeon/HealthUi'
 import { QuestUi } from './QuestUi'
+import { RecipesUi } from './RecipesUi'
 import { inputManager, ui } from '@/global/init'
-import { playerInventoryQuery } from '@/utils/dialogHelpers'
-import { InventoryUi } from '@/states/farm/InventoryUi'
-import { CuttingBoardUi, OvenUi } from '@/states/farm/CookingUi'
-import { SeedUi } from '@/states/farm/SeedUi'
-import { ChestUi } from '@/states/farm/ChestUi'
 import { campState, dungeonState, openMenuState, pausedState } from '@/global/states'
+import { ChestUi } from '@/states/farm/ChestUi'
+import { InventoryUi } from '@/states/farm/InventoryUi'
+import { SeedUi } from '@/states/farm/SeedUi'
 import { InteractionUi } from '@/ui/Interactions'
 import { TouchControls } from '@/ui/TouchControls'
 import { ForQuery } from '@/ui/components/ForQuery'
+import { playerInventoryQuery } from '@/utils/dialogHelpers'
 
 const playerQuery = playerInventoryQuery.with('playerControls', 'maxHealth', 'currentHealth', 'maxHealth', 'currentHealth', 'strength')
 export const PlayerUi = () => {
@@ -31,10 +31,9 @@ export const PlayerUi = () => {
 							<TouchControls player={player} />
 						</Show>
 						<StateUi state={campState}>
+							<RecipesUi player={player} />
 							<InventoryUi player={player} />
 							<DialogUi />
-							<CuttingBoardUi player={player} />
-							<OvenUi player={player} />
 							<SeedUi player={player} />
 							<QuestUi />
 							<ChestUi />

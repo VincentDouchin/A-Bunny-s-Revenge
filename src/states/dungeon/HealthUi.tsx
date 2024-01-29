@@ -5,8 +5,8 @@ import { ui } from '@/global/init'
 
 export const HealthUi = (props: { player: With<Entity, 'maxHealth' | 'currentHealth'> }) => {
 	const health = ui.sync(() => props.player.currentHealth / props.player.maxHealth.value)
-	const max = ui.sync(() => props.player.maxHealth.value)
-	const current = ui.sync(() => props.player.currentHealth)
+	const max = ui.sync(() => Math.floor(props.player.maxHealth.value))
+	const current = ui.sync(() => Math.floor(props.player.currentHealth))
 	const healthDisplay = createMemo(() => `${current()} / ${max()}`)
 	return (
 

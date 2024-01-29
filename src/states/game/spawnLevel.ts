@@ -1,18 +1,14 @@
 import { RigidBodyType } from '@dimforge/rapier3d-compat'
 import { between } from 'randomish'
 import { createNoise2D } from 'simplex-noise'
-import { BoxGeometry, Mesh, PointLight, Quaternion, Vector3 } from 'three'
-import { RoomType } from '../dungeon/dungeonTypes'
+import { BoxGeometry, Mesh, Vector3 } from 'three'
 import { enemyBundle } from '../dungeon/enemies'
 import { spawnHouse } from '../farm/house'
-import { kitchenApplianceBundle } from '../farm/kitchen'
 import { playerBundle } from './spawnCharacter'
 import { doorBundle } from './spawnDoor'
 import type { EntityInstance, LayerInstance, Level } from '@/LDTKMap'
 import { instanceMesh } from '@/global/assetLoaders'
-import { Interactable, MenuType } from '@/global/entity'
 import { assets, ecs } from '@/global/init'
-import { menuInputMap } from '@/global/inputMaps'
 import type { DungeonRessources, FarmRessources } from '@/global/states'
 import type { direction } from '@/lib/directions'
 import { otherDirection } from '@/lib/directions'
@@ -20,8 +16,7 @@ import { modelColliderBundle } from '@/lib/models'
 import type { System } from '@/lib/state'
 import { getRotationFromDirection } from '@/lib/transforms'
 import { GroundMaterial } from '@/shaders/GroundShader'
-import { inventoryBundle } from '@/states/game/inventory'
-import { getRandom, objectValues, range } from '@/utils/mapFunctions'
+import { getRandom, objectValues } from '@/utils/mapFunctions'
 
 export const treeBundle = () => {
 	const model = getRandom(objectValues(assets.trees)).scene.clone()
@@ -45,21 +40,10 @@ interface FieldInstances {
 	door: {
 		direction: direction
 	}
-	// counter: {
-	// 	direction: direction
-	// 	cutting_board: boolean
-	// }
-	oven: {
-		direction: direction
-	}
 	level: {
 		dungeon: boolean
 	}
 	house: Record<string, unknown>
-	lamp: Record<string, unknown>
-	board: Record<string, unknown>
-	cauldron: Record<string, unknown>
-	planter: Record<string, unknown>
 }
 type EntityData<K extends keyof FieldInstances> = FieldInstances[K] & { id: string }
 
@@ -81,7 +65,8 @@ export const spawnLDTKEntities = (constructors: { [key in keyof FieldInstances]?
 		const position = getEntityPosition(entityInstance, layer)
 		const name = entityInstance.__identifier as keyof FieldInstances
 		const data = getFieldIntances(entityInstance)
-		constructors[name]!(position, data as any)
+		const constructor = constructors[name]
+		constructor && constructor(position, data as any)
 	}
 }
 
@@ -91,51 +76,9 @@ const spawnFarmEntities = (_wasDungeon: boolean) => {
 			const rotation = getRotationFromDirection(data.direction)
 			ecs.add({ ...doorBundle(1, data.direction), position, rotation })
 		},
-		cauldron: (position) => {
-			ecs.add({
-				...inventoryBundle(MenuType.Oven, 3, 'oven1', Interactable.Cook),
-				...kitchenApplianceBundle('Stove1', 'front', 15),
-				position,
-			})
-		},
-		oven: (position, data) => {
-			ecs.add({
-				...inventoryBundle(MenuType.Oven, 3, 'oven1', Interactable.Cook),
-				...kitchenApplianceBundle('StoneOven', data.direction, 15),
-				position,
-			})
-		},
-		planter: () => {},
+
 		house: spawnHouse,
-		board: (position) => {
-			const model = assets.models.Bulliten.scene
-			model.scale.setScalar(15)
-			const rotation = new Quaternion().setFromAxisAngle(new Vector3(0, 1, 0), Math.PI)
-			const bundle = modelColliderBundle(model, RigidBodyType.Fixed, false)
-			ecs.add({
-				...bundle,
-				position,
-				model,
-				rotation,
-				inMap: true,
-				interactable: Interactable.BulletinBoard,
-				menuType: MenuType.Quest,
-				...menuInputMap(),
-			})
-		},
-		lamp: (position) => {
-			const model = assets.models.Lamp.scene
-			model.scale.setScalar(15)
-			model.traverse((node) => {
-				if (node.name.includes('light')) {
-					const light = new PointLight(0xFFFFFF, 2, 30, 0.01)
-					light.castShadow = true
-					node.add(light)
-				}
-				node.castShadow = false
-			})
-			ecs.add({ model, position, inMap: true })
-		},
+
 	})
 }
 const spawnGroundAndTrees = (layer: LayerInstance) => {
@@ -196,22 +139,14 @@ export const spawnFarm: System<FarmRessources> = ({ previousState }) => {
 export const spawnDungeon: System<DungeonRessources> = ({ dungeon, direction, roomIndex }) => {
 	const room = dungeon.rooms[roomIndex]
 	ecs.add({ map: room.plan.iid })
-	if (room.type === RoomType.Entrance) {
-		for (const _ in range(0, 3)) {
-			ecs.add({
-				...enemyBundle('Armabee'),
-				position: new Vector3(between(-10, 10), 0, between(-10, 10)),
-			})
-		}
-	}
-	if (room.type === RoomType.Boss) {
-		const model = assets.characters.Armabee_Evolved.scene
-		model.scale.setScalar(4)
+
+	for (const enemy of room.enemies) {
 		ecs.add({
-			...enemyBundle('Armabee_Evolved'),
-			position: new Vector3(),
+			...enemyBundle(enemy),
+			position: new Vector3(between(-10, 10), 0, between(-10, 10)),
 		})
 	}
+
 	for (const layer of room.plan.layerInstances!) {
 		switch (layer.__type) {
 			case 'IntGrid':{

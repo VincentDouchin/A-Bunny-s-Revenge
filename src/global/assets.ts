@@ -71,8 +71,19 @@ const skyboxLoader = async (glob: GlobEager) => {
 		return loader.loadAsync(path)
 	}))
 }
+const cropsColors: Record<string, number> = {
+	LightOrange: 0xF3A833,
+	DarkGreen: 0x5AB552,
+	DarkRed: 0x6B2643,
+	Red: 0xEC273F,
+}
+const overrideCropsColor = (node: Mesh<any, MeshStandardMaterial>) => {
+	const color = node.material.name in cropsColors ? cropsColors[node.material.name] : node.material?.color
+
+	return new ToonMaterial({ color })
+}
 const cropsLoader = async <K extends string>(glob: Glob) => {
-	const models = await typeGlob<crops>(glob)(loadGLBAsToon())
+	const models = await typeGlob<crops>(glob)(loadGLBAsToon({ material: overrideCropsColor }))
 	const grouped = groupByObject(models, key => key.split('_')[0].toLowerCase() as K)
 	return mapValues(grouped, (group) => {
 		let crop: GLTF | null = null
@@ -148,6 +159,7 @@ const overrideRockColor = (node: Mesh<any, MeshStandardMaterial>, map?: CanvasTe
 	if (node.name.includes('Rock_')) {
 		color = node.material.name === 'Green' ? 0x5AB552 : 0xB0A7B8
 	}
+
 	return new ToonMaterial({ color, map: map ?? node.material?.map })
 }
 
@@ -158,7 +170,7 @@ export const loadAssets = async () => ({
 	skybox: await skyboxLoader(import.meta.glob('@assets/skybox/*.png', { eager: true, import: 'default' })),
 	trees: await typeGlob<trees>(import.meta.glob('@assets/trees/*.*', { as: 'url' }))(loadGLBAsToon()),
 	grass: await typeGlob(import.meta.glob('@assets/grass/*.glb', { as: 'url' }))(loadGLBAsToon()),
-	crops: await cropsLoader<'carrot' | 'mushroom' | 'beet'>(import.meta.glob('@assets/crops/*.glb', { as: 'url' })),
+	crops: await cropsLoader<crops>(import.meta.glob('@assets/crops/*.glb', { as: 'url' })),
 	items: await typeGlob<items>(import.meta.glob('@assets/items/*.png', { eager: true, import: 'default' }))(itemsLoader),
 	particles: await typeGlob<particles>(import.meta.glob('@assets/particles/*.png', { eager: true, import: 'default' }))(texturesLoader),
 	fonts: await fontLoader(import.meta.glob('@assets/fonts/*.ttf', { eager: true, import: 'default' })),

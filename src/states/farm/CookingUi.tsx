@@ -1,11 +1,10 @@
 import { Show, createMemo } from 'solid-js'
-import { Quaternion, Vector3 } from 'three'
 import { InventorySlots, ItemDisplay } from './InventoryUi'
-import { MenuType, type crops } from '@/global/entity'
 import { type Item, itemsData } from '@/constants/items'
+import { MenuType } from '@/global/entity'
 
 import { recipes } from '@/constants/recipes'
-import { assets, ecs, ui } from '@/global/init'
+import { ecs, ui } from '@/global/init'
 import { addItem, removeItem } from '@/global/save'
 import { Menu } from '@/ui/components/Menu'
 import { Modal } from '@/ui/components/Modal'
@@ -15,78 +14,6 @@ import { addItemToPlayer } from '@/utils/dialogHelpers'
 const inventoryQuery = ecs.with('inventory', 'menuType', 'menuInputs', 'inventorySize', 'inventoryId')
 export const InventoryTitle = (props: { children: string }) => <div style={{ 'font-size': '3rem', 'color': 'white', 'font-family': 'NanoPlus', 'text-transform': 'capitalize' }}>{props.children}</div>
 
-const cuttingBoardQuery = inventoryQuery.with('size').where(e => e.menuType === MenuType.CuttingBoard)
-export const displayOnCuttinBoard = () => {
-	for (const cuttingBoard of cuttingBoardQuery) {
-		const item = cuttingBoard.inventory[0]?.name
-
-		if (item && !cuttingBoard.displayedItem) {
-			if (itemsData[item].choppable) {
-				const crop = item as crops
-				const model = assets.crops[crop].crop.scene.clone()
-				model.scale.setScalar(10)
-				const displayedItem = ecs.add({
-					parent: cuttingBoard,
-					model,
-					position: new Vector3(-2, cuttingBoard.size.y + 1, 0),
-					rotation: new Quaternion().setFromAxisAngle(new Vector3(0, 0, 1), Math.PI / 2),
-				})
-				ecs.update(cuttingBoard, { displayedItem })
-			}
-		}
-		if (!item && cuttingBoard.displayedItem) {
-			ecs.remove(cuttingBoard.displayedItem)
-			ecs.removeComponent(cuttingBoard, 'displayedItem')
-		}
-	}
-}
-const openCuttingBoardQuery = cuttingBoardQuery.with('menuOpen')
-export const CuttingBoardUi = ({ player }: FarmUiProps) => {
-	const cuttingBoardEntity = ui.sync(() => openCuttingBoardQuery.first)
-
-	return (
-		<Modal open={cuttingBoardEntity()}>
-			<Show when={cuttingBoardEntity()}>
-				{(cuttingBoard) => {
-					const addToCuttingBoard = (item: Item | null) => {
-						const filled = cuttingBoard().inventory.filter(Boolean).length
-						if (item && filled < cuttingBoard().inventorySize)
-							addItem(cuttingBoard(), { name: item.name, quantity: 1 }, filled)
-					}
-					const removeFromCuttingBoard = (item: Item | null, index: number) => item && removeItem(cuttingBoard(), item, index)
-					return (
-						<Menu inputs={cuttingBoard().menuInputs}>
-							{({ getProps }) => {
-								return (
-									<div style={{ display: 'grid', gap: '2rem' }}>
-										<div>
-											<InventoryTitle>Cutting board</InventoryTitle>
-											<div style={{ 'display': 'grid', 'gap': '1rem', 'place-items': 'center' }}>
-												<InventorySlots
-													click={removeFromCuttingBoard}
-													getProps={getProps}
-													entity={cuttingBoard()}
-												/>
-											</div>
-										</div>
-										<div style={{ 'display': 'grid', 'grid-template-columns': 'repeat(8, 1fr)', 'gap': '1rem' }}>
-											<InventorySlots
-												getProps={getProps}
-												click={addToCuttingBoard}
-												disabled={item => item?.name && !itemsData[item.name].choppable}
-												entity={player}
-											/>
-										</div>
-									</div>
-								)
-							}}
-						</Menu>
-					)
-				}}
-			</Show>
-		</Modal>
-	)
-}
 const ovenQuery = inventoryQuery.with('menuOpen').where(e => e.menuType === MenuType.Oven)
 export const OvenUi = ({ player }: FarmUiProps) => {
 	const oven = ui.sync(() => ovenQuery.first)

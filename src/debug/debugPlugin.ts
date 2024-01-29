@@ -55,6 +55,7 @@ const spawnLevelData = () => ecs.with('map').onEntityAdded.subscribe(async (e) =
 		}
 	}
 })
+
 export const debugPlugin = (state: State) => {
 	state
 		.addSubscriber(spawnLevelData)

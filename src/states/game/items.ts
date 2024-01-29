@@ -19,6 +19,7 @@ export const itemBundle = (item: items, model?: Object3D<Object3DEventMap>) => {
 				colliderDesc: ColliderDesc.cuboid(1, 1, 1).setSensor(true),
 				size: new Vector3(1, 1, 1),
 			}
+	bundle.colliderDesc.setMass(8)
 	if (!model) {
 		const map = new CanvasTexture(assets.items[item])
 		map.minFilter = NearestFilter

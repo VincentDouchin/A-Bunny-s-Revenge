@@ -1,10 +1,10 @@
 export type buttons = `texture` | `texture`
-export type characters = `Armabee` | `Armabee_Evolved` | `BunnydAnim` | `Panda`
-export type crops = `Beet_1` | `Beet_2` | `Beet_3` | `Beet_4` | `Beet_Crop` | `Carrot_1` | `Carrot_2` | `Carrot_3` | `Carrot_4` | `Carrot_Crop` | `Mushroom_1` | `Mushroom_2` | `Mushroom_3` | `Mushroom_4` | `Mushroom_Crop`
+export type characters = `Armabee` | `Armabee_Evolved` | `Big_Boar_A` | `Big_Boar_B` | `Big_Boar_C` | `BunnydAnim` | `Forest_Butterfly_A` | `Forest_Butterfly_B` | `Forest_Butterfly_C` | `Forest_Butterfly_D` | `Panda` | `Platopo_A` | `Platopo_B` | `Platopo_C` | `Porin_A` | `Porin_B` | `Porin_C` | `Porin_D` | `Porin_E` | `Racco_A` | `Racco_B` | `Racco_C` | `SampleScene` | `Shaga_A` | `Shaga_B` | `Shaga_C` | `Snailo_A` | `Snailo_B` | `Snailo_C` | `Snailo_D`
+export type crops = `Beet_1` | `Beet_2` | `Beet_3` | `Beet_4` | `Beet_Crop` | `BushBerries_2` | `BushBerries_3` | `BushBerries_4` | `BushBerries_Crop` | `BushBerries_Harvested` | `Carrot_1` | `Carrot_2` | `Carrot_3` | `Carrot_4` | `Carrot_Crop` | `Lettuce_1` | `Lettuce_2` | `Lettuce_3` | `Lettuce_4` | `Lettuce_Crop` | `Mushroom_1` | `Mushroom_2` | `Mushroom_3` | `Mushroom_4` | `Mushroom_Crop` | `Tomato_1` | `Tomato_2` | `Tomato_3` | `Tomato_4` | `Tomato_Crop` | `Wheat_1` | `Wheat_2` | `Wheat_3` | `Wheat_4` | `Wheat_Crop`
 export type fonts = `GrapeSoda` | `NanoPlus`
 export type grass = `SM_Env_Grass_01` | `SM_Env_Grass_02`
 export type icons = `basket-shopping-solid` | `circle-check-solid` | `circle-xmark-solid` | `list-check-solid` | `pause-solid` | `xmark-solid`
-export type items = `beet` | `beet_seeds` | `carrot` | `carrot_seeds` | `carrot_soup` | `honey` | `honey_glazed_carrot` | `mushroom` | `roasted_carrot`
+export type items = `beet` | `beet_seeds` | `carrot` | `carrot_seeds` | `carrot_soup` | `honey` | `honey_glazed_carrot` | `lettuce` | `lettuce_seeds` | `mushroom` | `parsley` | `roasted_carrot` | `tomato` | `tomato_seeds` | `tomato_soup`
 export type levels = `data` | `levels`
 export type models = `Bulliten` | `BunnyOvenPacked` | `cauldron` | `Chest` | `gardenPlot1` | `gardenPlot2` | `gardenPlot3` | `Lamp` | `Lamp2` | `plantedHole` | `Rock_1` | `Rock_2` | `Rock_3` | `Rock_4` | `Rock_5` | `Rock_6` | `Rock_7` | `Rock_Moss_1` | `Rock_Moss_2` | `Rock_Moss_3` | `Rock_Moss_4` | `Rock_Moss_5` | `Rock_Moss_6` | `Rock_Moss_7` | `SM_Env` | `SM_Env` | `SM_Env_Flower_01` | `SM_Env_Flower_02` | `SM_Env_Flower_03` | `SM_Env_Flower_04` | `SM_Env_Flower_05` | `SM_Env_Flower_06` | `SM_Env_Flower_07` | `SM_Env_Flower_08` | `SM_Env_Grass_01` | `SM_Env_Grass_02` | `StoneOven` | `Stove1` | `WoodenSign` | `WoodenSign2` | `WoodLog`
 export type particles = `star_07`

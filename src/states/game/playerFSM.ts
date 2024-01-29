@@ -36,3 +36,13 @@ export const beeFSM = setupAnimations('beeAnimator', {
 	attackCooldown: e => setTimeout(() => e.stateMachine.enter('idle', e), 1000)
 	,
 })
+export const shagaFSM = setupAnimations('shagaAnimator', {
+	idle: e => e.shagaAnimator.playAnimation('Idle'),
+	running: e => e.shagaAnimator.playAnimation('Move'),
+	hit: e => e.shagaAnimator.playOnce('Damage').then(() => e.stateMachine.enter('idle', e)),
+	dying: e => e.shagaAnimator.playClamped('Die').then(() => e.stateMachine.enter('dead', e)),
+	attacking: e => e.shagaAnimator.playClamped('Attack').then(() => e.stateMachine.enter('attackCooldown', e)),
+	waitingAttack: e => setTimeout(() => e.stateMachine.enter('attacking', e), 400),
+	attackCooldown: e => setTimeout(() => e.stateMachine.enter('idle', e), 1000),
+
+})

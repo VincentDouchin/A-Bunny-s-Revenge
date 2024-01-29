@@ -118,7 +118,7 @@ export const LevelEditor = () => {
 						const camera = cameraQuery.first?.camera
 						if (!camera) return
 						const selected = selectedProp()
-						const model = selectedModel()
+						const propModel = selectedModel()
 						const pointer = new Vector2()
 						pointer.x = (event.clientX / window.innerWidth) * 2 - 1
 						pointer.y = -(event.clientY / window.innerHeight) * 2 + 1
@@ -126,10 +126,13 @@ export const LevelEditor = () => {
 						raycaster.setFromCamera(pointer, camera)
 
 						const intersects = raycaster.intersectObjects(scene.children)
-						if (selected && model) {
+						if (selected && propModel) {
 							const position = intersects.filter(x => x.object.type !== 'TransformControlsPlane')[0].point
+							const scale = colliderData()[propModel]?.scale ?? 1
+							const model = assets.models[propModel].scene.clone()
+							model.scale.setScalar(scale)
 							const placed = ecs.add({
-								model: assets.models[model].scene.clone(),
+								model,
 								position,
 								entityId: generateUUID(),
 								rotation: new Quaternion(),
@@ -138,15 +141,17 @@ export const LevelEditor = () => {
 							setLevelData({
 								...levelData(),
 								[placed.entityId]: {
-									model,
-									scale: colliderData()[model]?.scale ?? 1,
+									model: propModel,
+									scale,
 									position: placed.position.toArray(),
 									rotation: placed.rotation.toJSON(),
 									map: map(),
 								},
 							})
-							setSelectedEntity(placed)
-							setSelectedProp(null)
+							if (!event.ctrlKey) {
+								setSelectedEntity(placed)
+								setSelectedProp(null)
+							}
 						} else {
 							let hasSelected = false
 							for (const addedEntity of addedEntitiesQuery) {
@@ -234,6 +239,7 @@ export const LevelEditor = () => {
 											)
 										}}
 									</For>
+									<span>press ctrl to keep placing props</span>
 								</div>
 
 							</div>

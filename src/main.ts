@@ -18,7 +18,6 @@ import { enemyAttackPlayer } from './states/dungeon/enemies'
 import { generateDungeon } from './states/dungeon/generateDungeon'
 import { killAnimation, killEntities } from './states/dungeon/health'
 import { spawnItems } from './states/dungeon/itemRoom'
-import { displayOnCuttinBoard } from './states/farm/CookingUi'
 import { growCrops, harvestCrop, initPlantableSpotsInteractions, interactablePlantableSpot, plantSeed, updateCropsSave } from './states/farm/farming'
 import { closeMenu, closePlayerInventory, disableInventoryState, enableInventoryState, openMenu, openPlayerInventory } from './states/farm/openInventory'
 import { spawnChest } from './states/farm/spawnChest'
@@ -27,7 +26,7 @@ import { talkToNPC } from './states/game/dialog'
 import { bobItems, collectItems, popItems } from './states/game/items'
 import { applyMove, canPlayerMove, movePlayer, savePlayerPosition } from './states/game/movePlayer'
 import { pauseGame } from './states/game/pauseGame'
-import { beeFSM, pandaFSM, playerFSM } from './states/game/playerFSM'
+import { beeFSM, pandaFSM, playerFSM, shagaFSM } from './states/game/playerFSM'
 import { target } from './states/game/sensor'
 import { spawnCharacter } from './states/game/spawnCharacter'
 import { allowDoorCollision, collideWithDoor, collideWithDoorCamp } from './states/game/spawnDoor'
@@ -44,7 +43,7 @@ coreState
 	.addSubscriber(...target, startTweens)
 	.onEnter(initCamera, initThree, ui.render(UI))
 	.onPreUpdate(coroutines.tick, moveCamera)
-	.onUpdate(runIf(() => !pausedState.enabled, updateAnimations('beeAnimator', 'playerAnimator', 'pandaAnimator'), () => time.tick()), updateTweens, inputManager.update, ui.update, updateParticles)
+	.onUpdate(runIf(() => !pausedState.enabled, updateAnimations('beeAnimator', 'playerAnimator', 'pandaAnimator', 'shagaAnimator'), () => time.tick()), updateTweens, inputManager.update, ui.update, updateParticles)
 	.onPostUpdate(updateControls, render)
 	.enable()
 setupState
@@ -52,14 +51,14 @@ setupState
 	.enable()
 gameState
 	.onEnter()
-	.addSubscriber(bobItems, enableInventoryState, killAnimation, ...showInteraction, ...playerFSM, ...pandaFSM, ...beeFSM, popItems)
+	.addSubscriber(bobItems, enableInventoryState, killAnimation, ...showInteraction, ...playerFSM, ...pandaFSM, ...beeFSM, ...shagaFSM, popItems)
 	.onUpdate(runIf(canPlayerMove, movePlayer), runIf(() => !pausedState.enabled, applyMove))
 	.onUpdate(collectItems, touchItem, talkToNPC, runIf(() => !openMenuState.enabled, pauseGame))
 	.enable()
 campState
 	.addSubscriber(...interactablePlantableSpot)
 	.onEnter(growCrops, spawnFarm, updateCropsSave, initPlantableSpotsInteractions, spawnCharacter, spawnLight, spawnSkyBox, spawnNPC, spawnChest)
-	.onUpdate(collideWithDoorCamp, displayOnCuttinBoard)
+	.onUpdate(collideWithDoorCamp)
 	.onUpdate(runif(canPlayerMove, plantSeed, harvestCrop, openMenu, openPlayerInventory), savePlayerPosition)
 	.onExit(despawnOfType('map'))
 openMenuState

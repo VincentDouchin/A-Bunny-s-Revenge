@@ -1,26 +1,31 @@
-import type { items } from '@assets/assets'
 import type { Item } from './items'
+import { MenuType } from '@/global/entity'
 
-interface Recipe {
-	input: items[]
+export interface Recipe {
+	input: Item[]
 	output: Item
-	processor: 'oven' | 'cutting_board' | 'cauldron'
+	processor: MenuType
 }
 
 export const recipes: Array<Recipe> = [
 	{
-		input: ['carrot', 'carrot', 'carrot', 'carrot'],
+		input: [{ name: 'carrot', quantity: 3 }],
 		output: { name: 'carrot_soup', quantity: 1 },
-		processor: 'cauldron',
+		processor: MenuType.Cauldron,
 	},
 	{
-		input: ['carrot', 'carrot', 'carrot'],
+		input: [{ name: 'tomato', quantity: 3 }, { name: 'parsley', quantity: 1 }],
+		output: { name: 'tomato_soup', quantity: 1 },
+		processor: MenuType.Cauldron,
+	},
+	{
+		input: [{ name: 'carrot', quantity: 3 }],
 		output: { name: 'roasted_carrot', quantity: 3 },
-		processor: 'oven',
+		processor: MenuType.Oven,
 	},
 	{
-		input: ['carrot', 'honey', 'honey'],
+		input: [{ name: 'carrot', quantity: 1 }, { name: 'honey', quantity: 2 }],
 		output: { name: 'honey_glazed_carrot', quantity: 1 },
-		processor: 'oven',
+		processor: MenuType.Oven,
 	},
 ]

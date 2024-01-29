@@ -146,7 +146,9 @@
       "enum": [
         "carrot",
         "beet",
-        "mushroom"
+        "mushroom",
+        "tomato",
+        "lettuce"
       ],
       "type": "string"
     },
@@ -159,8 +161,14 @@
         "carrot_soup",
         "honey",
         "honey_glazed_carrot",
+        "lettuce",
+        "lettuce_seeds",
         "mushroom",
-        "roasted_carrot"
+        "parsley",
+        "roasted_carrot",
+        "tomato",
+        "tomato_seeds",
+        "tomato_soup"
       ],
       "type": "string"
     }
