@@ -42,7 +42,7 @@ export const enemyData: Record<enemy, Enemy> = {
 	Big_Boar_A: {
 		health: 3,
 		scale: 1.5,
-		drops: () => [],
+		drops: () => [{ name: 'ham', quantity: 1 }],
 		animator: 'shagaAnimator',
 	},
 	Snailo_A: {

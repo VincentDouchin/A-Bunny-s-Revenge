@@ -85,5 +85,20 @@ export const itemsData: Record<items, ItemData> = {
 	parsley: {
 		name: 'Parsley',
 	},
+	beetroot_salad: {
+		name: 'Beetroot Salad',
+		meal: [
+			createModifier('strength', 2, ModStage.Base, ModType.Add, false),
+		],
+	},
+	ham: {
+		name: 'Ham',
+	},
+	ham_honey: {
+		name: 'Honey Ham',
+		meal: [
+			createModifier('maxHealth', 3, ModStage.Base, ModType.Add, true),
+		],
+	},
 
 }
