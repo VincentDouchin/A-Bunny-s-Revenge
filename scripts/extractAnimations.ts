@@ -19,7 +19,7 @@ const launchScript = async (filePath?: string) => {
 				'draco3d.decoder': await draco3d.createDecoderModule(), // Optional.
 				'draco3d.encoder': await draco3d.createEncoderModule(), // Optional.
 			})
-		await Promise.all(Array.from(glbs.values()).map(async (path) => {
+		await Promise.all(Array.from(glbs.values()).sort().map(async (path) => {
 			// Read from URL.
 			const glb = await io.read(path)
 			const root = glb.getRoot()

@@ -43,7 +43,6 @@ export enum MenuType {
 export const cropNames = ['carrot', 'beet', 'mushroom', 'tomato', 'lettuce'] as const
 
 export type crops = (typeof cropNames)[number]
-export interface Door { to: number, direction: direction }
 export interface Entity {
 	// ! Tween
 	tween?: Tween<any> | TweenGroup
@@ -106,7 +105,7 @@ export interface Entity {
 	interactionContainer?: CSS2DObject
 	outline?: With<Entity, 'model'>
 	// ! Camp
-	door?: Door
+	door?: direction
 	// ! Dungeon
 	faction?: Faction
 	ignoreDoor?: direction

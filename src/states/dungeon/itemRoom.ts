@@ -9,8 +9,8 @@ import { getRandom } from '@/utils/mapFunctions'
 import { Sizes } from '@/constants/sizes'
 import { Interactable } from '@/global/entity'
 
-export const spawnItems: System<DungeonRessources> = ({ dungeon, roomIndex }) => {
-	if (dungeon.rooms[roomIndex].type === RoomType.Item) {
+export const spawnItems: System<DungeonRessources> = ({ dungeon }) => {
+	if (dungeon.type === RoomType.Item) {
 		for (let i = 0; i < 8; i++) {
 			const model = getRandom(assets.crops.mushroom.stages).scene.clone()
 			model.scale.multiplyScalar(10)

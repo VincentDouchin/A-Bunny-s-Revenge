@@ -1,6 +1,6 @@
 import type { Level } from '@/LDTKMap'
 import type { enemy } from '@/constants/enemies'
-import type { Entity } from '@/global/entity'
+import type { direction } from '@/lib/directions'
 
 export enum RoomType {
 	Battle,
@@ -11,9 +11,6 @@ export enum RoomType {
 export interface Room {
 	plan: Level
 	enemies: enemy[]
-	doors: NonNullable<Entity['door']>[]
+	doors: Partial<Record<direction, Room | null>>
 	type: RoomType
-}
-export interface Dungeon {
-	rooms: Room[]
 }

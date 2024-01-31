@@ -1,5 +1,5 @@
 export type System<R> = (ressources: R) => void
-export type Subscriber<R> = (ressources: R) => (ressources: R) => void
+export type Subscriber<R> = (ressources: R) => () => void
 
 export class StateMananger {
 	states = new Map<State<any>, any>()

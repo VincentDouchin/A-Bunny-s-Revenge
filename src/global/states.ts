@@ -1,5 +1,5 @@
 import { StateMananger } from './../lib/state'
-import type { Dungeon } from '@/states/dungeon/dungeonTypes'
+import type { Room } from '@/states/dungeon/dungeonTypes'
 import type { direction } from '@/lib/directions'
 
 export const app = new StateMananger()
@@ -15,9 +15,8 @@ export const cutSceneState = app.create()
 export const genDungeonState = app.create()
 export const pausedState = app.create()
 export interface DungeonRessources {
-	dungeon: Dungeon
+	dungeon: Room
 	direction: direction
-	roomIndex: number
 }
 
 export const dungeonState = app.create<DungeonRessources>()

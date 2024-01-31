@@ -1,12 +1,13 @@
 import { getFieldIntances } from '../game/spawnLevel'
-import type { Dungeon, Room } from './dungeonTypes'
+import type { Room } from './dungeonTypes'
 import { RoomType } from './dungeonTypes'
+import type { Level } from '@/LDTKMap'
 import type { enemy } from '@/constants/enemies'
 import { enemyGroups } from '@/constants/enemies'
-import { assets } from '@/global/init'
+import { assets, levelsData } from '@/global/init'
 import { dungeonState } from '@/global/states'
 import type { direction } from '@/lib/directions'
-import { directions, otherDirection } from '@/lib/directions'
+import { otherDirection } from '@/lib/directions'
 import { getRandom } from '@/utils/mapFunctions'
 
 const getRoomType = (index: number, max: number): RoomType => {
@@ -27,28 +28,41 @@ const getEnemies = (type: RoomType): enemy[] => {
 		}
 	}
 }
+const getProps = (level: Level) => Object.values(levelsData.levelData).filter(prop => prop?.map === level.iid).filter(Boolean)
+const getConnectingLevels = (levels: Level[], direction: direction) => {
+	return levels.filter(level => getProps(level).some(prop => prop.data?.direction === direction))
+}
+const getOtherDirections = (level: Level, direction: direction): direction[] => getProps(level).filter(prop => prop.data?.direction && prop.data.direction !== direction).map(prop => prop.data.direction)
 
-export const createDungeon = (roomsAmount: number): Dungeon => {
-	const rooms: Room[] = []
-	const levels = assets.levels.levels.filter(l => getFieldIntances<'level'>(l).dungeon)
-	let lastDirection: direction = 'front'
-	for (let i = 0; i < roomsAmount; i++) {
-		const type = getRoomType(i, roomsAmount)
-		const newDirection = getRandom(directions.filter(d => d !== otherDirection[lastDirection]))
-
-		const room: Room = {
-			plan: getRandom(levels),
-			enemies: getEnemies(type),
-			doors: [{ to: i - 1, direction: otherDirection[lastDirection] }, { to: i + 1, direction: newDirection }],
-			type,
+export const createDungeon = (roomsAmount: number): Room => {
+	const dungeons = assets.levels.levels.filter((level) => {
+		const fields = getFieldIntances<'level'>(level)
+		return fields.dungeon
+	})
+	let roomsCreated = 0
+	const createRoom = (enteringFrom: direction, last: null | Room = null): Room => {
+		const type = getRoomType(roomsCreated, roomsAmount)
+		roomsCreated++
+		const level = getRandom(getConnectingLevels(dungeons, enteringFrom))
+		const doorsDirections = getOtherDirections(level, enteringFrom)
+		const enemies = getEnemies(type)
+		const doors: Room['doors'] = { [enteringFrom]: last }
+		const room = { plan: level, type, doors, enemies }
+		for (let i = 0; i < 1; i++) {
+			const doorDirection = doorsDirections[i]
+			if (roomsCreated >= roomsAmount) {
+				doors[doorDirection] = null
+			} else {
+				doors[doorDirection] = createRoom(otherDirection[doorDirection], room)
+			}
 		}
-		lastDirection = newDirection
-		rooms.push(room)
+
+		return room
 	}
-	return { rooms }
+	return createRoom('south')
 }
 
 export const generateDungeon = () => {
 	const dungeon = createDungeon(3)
-	dungeonState.enable({ dungeon, direction: 'front', roomIndex: 0 })
+	dungeonState.enable({ dungeon, direction: 'south' })
 }

@@ -43,7 +43,6 @@ export const DebugUi = () => {
 	})
 	return (
 		<div style={{ position: 'absolute', color: 'white' }}>
-			{/* <button onClick={() => setShowUi(!showUi())}>{showUi() ? 'Hide debug Ui' : 'Show debug ui'}</button> */}
 			<Show when={showUi()}>
 				<div>
 					Render width

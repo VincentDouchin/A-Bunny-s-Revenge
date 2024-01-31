@@ -18,9 +18,8 @@ import { enemyAttackPlayer } from './states/dungeon/enemies'
 import { generateDungeon } from './states/dungeon/generateDungeon'
 import { killAnimation, killEntities } from './states/dungeon/health'
 import { spawnItems } from './states/dungeon/itemRoom'
-import { growCrops, harvestCrop, initPlantableSpotsInteractions, interactablePlantableSpot, plantSeed, updateCropsSave } from './states/farm/farming'
+import { harvestCrop, initPlantableSpotsInteractions, interactablePlantableSpot, plantSeed, updateCropsSave } from './states/farm/farming'
 import { closeMenu, closePlayerInventory, disableInventoryState, enableInventoryState, openMenu, openPlayerInventory } from './states/farm/openInventory'
-import { spawnChest } from './states/farm/spawnChest'
 import { spawnNPC } from './states/farm/spawnNPC'
 import { talkToNPC } from './states/game/dialog'
 import { bobItems, collectItems, popItems } from './states/game/items'
@@ -31,7 +30,7 @@ import { target } from './states/game/sensor'
 import { spawnCharacter } from './states/game/spawnCharacter'
 import { allowDoorCollision, collideWithDoor, collideWithDoorCamp } from './states/game/spawnDoor'
 import { spawnSkyBox } from './states/game/spawnGround'
-import { spawnDungeon, spawnFarm } from './states/game/spawnLevel'
+import { spawnDungeon, spawnFarm, spawnLevelData } from './states/game/spawnLevel'
 import { spawnLight } from './states/game/spawnLights'
 import { showInteraction, touchItem } from './states/game/touchItem'
 import { setupGame } from './states/setup/setupGame'
@@ -57,7 +56,7 @@ gameState
 	.enable()
 campState
 	.addSubscriber(...interactablePlantableSpot)
-	.onEnter(growCrops, spawnFarm, updateCropsSave, initPlantableSpotsInteractions, spawnCharacter, spawnLight, spawnSkyBox, spawnNPC, spawnChest)
+	.onEnter(spawnFarm, spawnLevelData, updateCropsSave, initPlantableSpotsInteractions, spawnCharacter, spawnLight, spawnSkyBox, spawnNPC)
 	.onUpdate(collideWithDoorCamp)
 	.onUpdate(runif(canPlayerMove, plantSeed, harvestCrop, openMenu, openPlayerInventory), savePlayerPosition)
 	.onExit(despawnOfType('map'))
@@ -69,7 +68,7 @@ genDungeonState
 	.onEnter(generateDungeon)
 dungeonState
 	.addSubscriber(spawnDrops)
-	.onEnter(spawnDungeon, spawnLight, spawnSkyBox, spawnItems)
+	.onEnter(spawnDungeon, spawnLight, spawnSkyBox, spawnItems, spawnLevelData)
 	.onUpdate(runIf(canPlayerMove, allowDoorCollision, collideWithDoor, enemyAttackPlayer, harvestCrop, playerAttack, killEntities))
 	.onExit(despawnOfType('map'))
 pausedState

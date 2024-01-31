@@ -7,10 +7,14 @@ import { set } from 'idb-keyval'
 import { Box3, BoxGeometry, Euler, Mesh, MeshBasicMaterial, Object3D, Quaternion, Vector3 } from 'three'
 import { TransformControls } from 'three/examples/jsm/controls/TransformControls'
 import type { CollidersData, LevelData } from './LevelEditor'
-import { cameraQuery, renderer, scene } from '@/global/rendering'
-import { assets, ecs } from '@/global/init'
-import type { Entity } from '@/global/entity'
+import type { ExtraData } from './props'
+import { getModel } from './props'
 import { getSize } from '@/lib/models'
+import { cameraQuery, renderer, scene } from '@/global/rendering'
+import { ecs } from '@/global/init'
+import type { Entity } from '@/global/entity'
+import type { direction } from '@/lib/directions'
+import { entries } from '@/utils/mapFunctions'
 
 export const EntityEditor = ({ entity, levelData, setLevelData, setSelectedEntity, colliderData, setColliderData }: {
 	entity: Accessor<NonNullable<With<Entity, 'entityId' | 'position' | 'rotation' | 'model'>>>
@@ -79,7 +83,7 @@ export const EntityEditor = ({ entity, levelData, setLevelData, setSelectedEntit
 
 				createEffect(() => {
 					ecs.removeComponent(entity(), 'model')
-					const model = assets.models[entityData().model].scene.clone()
+					const model = getModel(entityData().model)
 					model.scale.setScalar(entityData().scale)
 					const collider = colliderData()[entityData().model]
 					ecs.removeComponent(entity(), 'body')
@@ -131,8 +135,35 @@ export const EntityEditor = ({ entity, levelData, setLevelData, setSelectedEntit
 						transform.attach(dummy)
 					}
 				})
+				const data = createMemo(() => entityData().data)
 				return (
 					<div>
+						<Show when={data()}>
+							{(data) => {
+								return (
+									<For each={entries(data())}>
+										{([key, val]) => {
+											const updateData = (newData: ExtraData[keyof ExtraData]) => updateEntity({ data: { ...data, ...newData } })
+											return (
+												<div>
+													{key === 'direction' && (
+														<select
+															value={val}
+															onChange={e => updateData({ ...data, direction: e.target.value as direction })}
+														>
+															<option value="north">north</option>
+															<option value="south">south</option>
+															<option value="west">west</option>
+															<option value="east">east</option>
+														</select>
+													)}
+												</div>
+											)
+										}}
+									</For>
+								)
+							}}
+						</Show>
 						PROP
 						<For each={['translate', 'rotate'] as const}>
 							{mode => (
@@ -263,6 +294,21 @@ export const EntityEditor = ({ entity, levelData, setLevelData, setSelectedEntit
 												<option value={RigidBodyType.Fixed}>Fixed</option>
 												<option value={RigidBodyType.Dynamic}>Dynamic</option>
 											</select>
+										</div>
+										<div>
+											<input
+												type="checkbox"
+												checked={modelCollider()?.sensor}
+												onChange={e => setColliderData({
+													...colliderData(),
+													[entityData().model]: {
+														...modelCollider(),
+														sensor: e.target.checked,
+													},
+												})}
+											>
+												sensor
+											</input>
 										</div>
 									</div>
 

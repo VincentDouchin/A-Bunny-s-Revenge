@@ -1,11 +1,10 @@
-export const directions = ['front', 'back', 'left', 'right'] as const
-export const directionsXY = ['up', 'down', 'left', 'right'] as const
+export const cardinalDirections = ['north', 'south', 'west', 'east'] as const
 
-export type direction = typeof directions[number]
+export type direction = typeof cardinalDirections[number]
 
 export const otherDirection: Record<direction, direction> = {
-	front: 'back',
-	back: 'front',
-	left: 'right',
-	right: 'left',
+	north: 'south',
+	south: 'north',
+	west: 'east',
+	east: 'west',
 }

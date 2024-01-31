@@ -7,22 +7,33 @@ import { Quaternion, Raycaster, Vector2 } from 'three'
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls'
 import { generateUUID } from 'three/src/math/MathUtils'
 import { EntityEditor } from './EntityEditor'
-import { type PlacableProp, props } from './props'
-import { renderer, scene } from '@/global/rendering'
-import { assets, ecs, levelsData, ui } from '@/global/init'
-import type { Entity } from '@/global/entity'
-import { params } from '@/global/context'
-import { camera } from '@/global/camera'
-import { loadLevelData } from '@/global/assets'
+import type { PlacableProp, customModel } from './props'
+import { getModel, props } from './props'
 
-export type LevelData = Record<string, {
-	model: models
+import { loadLevelData } from '@/global/assets'
+import { camera } from '@/global/camera'
+import { params } from '@/global/context'
+import type { Entity } from '@/global/entity'
+import { assets, ecs, levelsData, ui } from '@/global/init'
+import { renderer, scene } from '@/global/rendering'
+import { campState, dungeonState } from '@/global/states'
+import { spawnGroundAndTrees, spawnLevelData } from '@/states/game/spawnLevel'
+import { spawnLight } from '@/states/game/spawnLights'
+import { spawnCharacter } from '@/states/game/spawnCharacter'
+import type { Level } from '@/LDTKMap'
+
+export interface EntityData<T extends Record<string, any>> {
+	model: models | customModel
 	scale: number
 	position: [number, number, number]
 	rotation: [number, number, number, number]
 	map: string
-} | null>
-export type CollidersData = Partial<Record<models, {
+	data: T
+
+}
+
+export type LevelData = Record<string, EntityData<any> | null>
+export type CollidersData = Partial<Record<models | customModel, {
 	type: RigidBodyType
 	size?: [number, number, number]
 	sensor: boolean
@@ -62,9 +73,9 @@ export const LevelEditor = () => {
 		<div>
 			<Show when={open() && map()}>
 				{(map) => {
-					const [selectedProp, setSelectedProp] = createSignal<PlacableProp | null>(null)
+					const [selectedProp, setSelectedProp] = createSignal<PlacableProp<any> | null>(null)
 					const [selectedEntity, setSelectedEntity] = createSignal<With<Entity, 'entityId' | 'model' | 'position' | 'rotation'> | null>(null)
-					const [selectedModel, setSelectedModel] = createSignal<null | models>(null)
+					const [selectedModel, setSelectedModel] = createSignal<null | models | customModel>(null)
 					const [levelData, setLevelData] = createSignal<LevelData>({})
 					const [colliderData, setColliderData] = createSignal<CollidersData>({})
 
@@ -129,7 +140,7 @@ export const LevelEditor = () => {
 						if (selected && propModel) {
 							const position = intersects.filter(x => x.object.type !== 'TransformControlsPlane')[0].point
 							const scale = colliderData()[propModel]?.scale ?? 1
-							const model = assets.models[propModel].scene.clone()
+							const model = getModel(propModel)
 							model.scale.setScalar(scale)
 							const placed = ecs.add({
 								model,
@@ -146,6 +157,7 @@ export const LevelEditor = () => {
 									position: placed.position.toArray(),
 									rotation: placed.rotation.toJSON(),
 									map: map(),
+									data: selected.data,
 								},
 							})
 							if (!event.ctrlKey) {
@@ -181,9 +193,27 @@ export const LevelEditor = () => {
 						renderer.domElement.removeEventListener('contextmenu', unSelect)
 						params.pixelation = true
 					})
-
+					const switchLevel = (level: Level) => {
+						dungeonState.disable()
+						campState.disable()
+						const ground = level.layerInstances?.find(layer => layer.__identifier === 'ground')
+						if (ground) {
+							ecs.add({ map: level.iid })
+							spawnGroundAndTrees(ground)
+							spawnLight()
+							spawnCharacter({})
+							spawnLevelData({})
+						}
+					}
 					return (
 						<>
+							<div style={{ display: 'grid' }}>
+								<For each={assets.levels.levels}>
+									{(level) => {
+										return <button onClick={() => switchLevel(level)}>{level.iid}</button>
+									}}
+								</For>
+							</div>
 							<button onClick={download}>Download</button>
 
 							<div style={{ 'position': 'fixed', 'top': 0, 'right': 0, 'display': 'grid', 'grid-template-columns': 'auto auto' }}>

@@ -7,10 +7,10 @@ import { ecs, world } from '@/global/init'
 const positionQuery = ecs.with('position', 'group')
 export const getRotationFromDirection = (direction: direction) => {
 	const rotations = {
-		left: 1,
-		right: -1,
-		front: 0,
-		back: 2,
+		west: 1,
+		east: -1,
+		north: 0,
+		south: 2,
 	}
 	const rotation = new Quaternion()
 	rotation.setFromAxisAngle(new Vector3(0, 1, 0), Math.PI / 2 * rotations[direction])

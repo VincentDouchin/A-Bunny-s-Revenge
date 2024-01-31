@@ -8,10 +8,8 @@ import { Sizes } from '@/constants/sizes'
 import { type Entity, Interactable, type crops } from '@/global/entity'
 import { assets, ecs } from '@/global/init'
 import { removeItem, save, updateSave } from '@/global/save'
-import type { FarmRessources } from '@/global/states'
 import { addTag, removeEntityRef } from '@/lib/hierarchy'
 import { modelColliderBundle } from '@/lib/models'
-import type { System } from '@/lib/state'
 
 const playerQuery = ecs.with('playerControls', 'sensorCollider', 'movementForce', 'stateMachine', 'inventory', 'inventoryId', 'inventorySize')
 const plantedSpotQuery = ecs.with('plantableSpot', 'worldPosition', 'planted')
@@ -49,15 +47,6 @@ export const cropBundle = (grow: boolean, crop: { name: crops, stage: number }) 
 		bundle.interactable = Interactable.Harvest
 	}
 	return bundle
-}
-export const growCrops: System<FarmRessources> = (ressources) => {
-	if (ressources.previousState === 'dungeon') {
-		updateSave((s) => {
-			for (const crop of Object.values(s.crops)) {
-				crop.stage = Math.min(maxStage(crop.name), crop.stage + 1)
-			}
-		})
-	}
 }
 
 const plantableSpotsQuery = ecs.with('plantableSpot').without('planted')
