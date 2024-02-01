@@ -74,12 +74,13 @@ const skyboxLoader = async (glob: GlobEager) => {
 const cropsColors: Record<string, number> = {
 	LightOrange: 0xF3A833,
 	DarkGreen: 0x5AB552,
+	Green: 0x26854C,
 	DarkRed: 0x6B2643,
 	Red: 0xEC273F,
+	Rock: 0xB0A7B8,
 }
 const overrideCropsColor = (node: Mesh<any, MeshStandardMaterial>) => {
 	const color = node.material.name in cropsColors ? cropsColors[node.material.name] : node.material?.color
-
 	return new ToonMaterial({ color })
 }
 const cropsLoader = async <K extends string>(glob: Glob) => {
@@ -156,8 +157,8 @@ export const loadLevelData = async () => {
 
 const overrideRockColor = (node: Mesh<any, MeshStandardMaterial>, map?: CanvasTexture) => {
 	let color: ColorRepresentation | undefined = node.material?.color
-	if (node.name.includes('Rock_')) {
-		color = node.material.name === 'Green' ? 0x5AB552 : 0xB0A7B8
+	if (node.material.name in cropsColors) {
+		color = cropsColors[node.material.name]
 	}
 
 	return new ToonMaterial({ color, map: map ?? node.material?.map })

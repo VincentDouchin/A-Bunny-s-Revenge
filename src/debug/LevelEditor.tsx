@@ -24,6 +24,7 @@ import { ToonMaterial } from '@/shaders/GroundShader'
 import { spawnCharacter } from '@/states/game/spawnCharacter'
 import { spawnGroundAndTrees, spawnLevelData } from '@/states/game/spawnLevel'
 import { spawnLight } from '@/states/game/spawnLights'
+import { getRandom } from '@/utils/mapFunctions'
 
 export interface EntityData<T extends Record<string, any>> {
 	model: models | customModel
@@ -77,6 +78,7 @@ export const LevelEditor = () => {
 		<div>
 			<Show when={open() && map()}>
 				{(map) => {
+					const [random, setRandom] = createSignal(false)
 					const [selectedProp, setSelectedProp] = createSignal<PlacableProp<any> | null>(null)
 					const [selectedEntity, setSelectedEntity] = createSignal<With<Entity, 'entityId' | 'model' | 'position' | 'rotation'> | null>(null)
 					const [selectedModel, setSelectedModel] = createSignal<null | models | customModel>(null)
@@ -145,6 +147,7 @@ export const LevelEditor = () => {
 						setLevelData(data.levelData)
 						setColliderData(data.colliderData)
 					})
+
 					createEffect(() => {
 						if (!disableSave()) {
 							Object.assign(levelsData.levelData, levelData())
@@ -161,6 +164,9 @@ export const LevelEditor = () => {
 						const camera = cameraQuery.first?.camera
 						if (!camera) return
 						const selected = selectedProp()
+						if (selected && random()) {
+							setSelectedModel(getRandom(selected.models))
+						}
 						const propModel = selectedModel()
 						const pointer = new Vector2()
 						pointer.x = (event.clientX / window.innerWidth) * 2 - 1
@@ -170,7 +176,8 @@ export const LevelEditor = () => {
 
 						const intersects = raycaster.intersectObjects(scene.children)
 						if (selected && propModel) {
-							const position = intersects.filter(x => x.object.type !== 'TransformControlsPlane')[0].point
+							const position = intersects.find(x => x.point.y === 0.5)?.point
+							if (!position) return
 							const scale = colliderData()[propModel]?.scale ?? 1
 							const model = getModel(propModel)
 							model.scale.setScalar(scale)
@@ -288,6 +295,10 @@ export const LevelEditor = () => {
 														)
 													}}
 												</For>
+												<div style={{ 'display': 'inline-flex', 'place-items': 'center' }}>
+													<input type="checkbox" checked={random()} onChange={e => setRandom(e.target.checked)}></input>
+													random
+												</div>
 											</div>
 										)
 									}}
