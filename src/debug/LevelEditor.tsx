@@ -3,13 +3,16 @@ import type { RigidBodyType } from '@dimforge/rapier3d-compat'
 import { set } from 'idb-keyval'
 import type { With } from 'miniplex'
 import { For, Show, createEffect, createMemo, createSignal, onCleanup, onMount } from 'solid-js'
-import { Quaternion, Raycaster, Vector2 } from 'three'
+import { Mesh, MeshStandardMaterial, Quaternion, Raycaster, Vector2 } from 'three'
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls'
+import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader'
 import { generateUUID } from 'three/src/math/MathUtils'
 import { EntityEditor } from './EntityEditor'
 import type { PlacableProp, customModel } from './props'
 import { getModel, props } from './props'
 
+import type { Level } from '@/LDTKMap'
+import { getFileName } from '@/global/assetLoaders'
 import { loadLevelData } from '@/global/assets'
 import { camera } from '@/global/camera'
 import { params } from '@/global/context'
@@ -17,10 +20,10 @@ import type { Entity } from '@/global/entity'
 import { assets, ecs, levelsData, ui } from '@/global/init'
 import { renderer, scene } from '@/global/rendering'
 import { campState, dungeonState } from '@/global/states'
+import { ToonMaterial } from '@/shaders/GroundShader'
+import { spawnCharacter } from '@/states/game/spawnCharacter'
 import { spawnGroundAndTrees, spawnLevelData } from '@/states/game/spawnLevel'
 import { spawnLight } from '@/states/game/spawnLights'
-import { spawnCharacter } from '@/states/game/spawnCharacter'
-import type { Level } from '@/LDTKMap'
 
 export interface EntityData<T extends Record<string, any>> {
 	model: models | customModel
@@ -29,7 +32,6 @@ export interface EntityData<T extends Record<string, any>> {
 	rotation: [number, number, number, number]
 	map: string
 	data: T
-
 }
 
 export type LevelData = Record<string, EntityData<any> | null>
@@ -45,6 +47,7 @@ const addedEntitiesQuery = ecs.with('entityId', 'model', 'group', 'position', 'r
 const mapQuery = ecs.with('map')
 const cameraQuery = ecs.with('mainCamera', 'camera')
 export const LevelEditor = () => {
+	const [disableSave, setDisableSave] = createSignal(false)
 	const [open, setOpen] = createSignal(false)
 	const map = ui.sync(() => mapQuery.first?.map)
 	const download = async () => {
@@ -69,6 +72,7 @@ export const LevelEditor = () => {
 	onCleanup(() => {
 		document.removeEventListener('keydown', showUiListener)
 	})
+
 	return (
 		<div>
 			<Show when={open() && map()}>
@@ -78,7 +82,32 @@ export const LevelEditor = () => {
 					const [selectedModel, setSelectedModel] = createSignal<null | models | customModel>(null)
 					const [levelData, setLevelData] = createSignal<LevelData>({})
 					const [colliderData, setColliderData] = createSignal<CollidersData>({})
-
+					const uploadModel = () => {
+						setDisableSave(true)
+						const input = document.createElement('input')
+						input.type = 'file'
+						input.accept = '.glb'
+						input.addEventListener('change', async (e) => {
+							const file = (e.target as HTMLInputElement)?.files?.[0]
+							const loader = new GLTFLoader()
+							if (file) {
+								const arrayBuffer = await file?.arrayBuffer()
+								const name = getFileName(file.name) as models
+								const glb = await loader.parseAsync(arrayBuffer, '')
+								glb.scene.traverse((x) => {
+									if (x instanceof Mesh && x.material instanceof MeshStandardMaterial) {
+										x.material = new ToonMaterial({ color: x.material.color, map: x.material.map })
+									}
+								})
+								assets.models[name] = glb
+								setSelectedProp({
+									name,
+									models: [name],
+								})
+							}
+						})
+						input.click()
+					}
 					createEffect(() => {
 						const prop = selectedProp()
 						if (prop) {
@@ -92,12 +121,10 @@ export const LevelEditor = () => {
 						const ratio = window.innerHeight / window.innerWidth
 						renderer.setSize(val, val * ratio)
 						const group = camera.parent!
-						const proj = camera.projectionMatrix.clone().toArray()
 						camera.removeFromParent()
 						camera.position.set(...group.position.toArray())
 						const controls = new OrbitControls(camera, renderer.domElement)
 						controls.update()
-						camera.projectionMatrix.set(...proj)
 						ui.updateSync(() => controls.update())
 						createEffect(() => {
 							if (selectedEntity()) {
@@ -110,6 +137,7 @@ export const LevelEditor = () => {
 							group?.add(camera)
 							const val = params.renderWidth
 							const ratio = window.innerHeight / window.innerWidth
+							camera.position.set(0, 0, 0)
 							renderer.setSize(val, val * ratio)
 							controls.dispose()
 						})
@@ -118,12 +146,16 @@ export const LevelEditor = () => {
 						setColliderData(data.colliderData)
 					})
 					createEffect(() => {
-						Object.assign(levelsData.levelData, levelData())
-						set('levelData', levelData())
+						if (!disableSave()) {
+							Object.assign(levelsData.levelData, levelData())
+							set('levelData', levelData())
+						}
 					})
 					createEffect(() => {
-						Object.assign(levelsData.colliderData, colliderData())
-						set('colliderData', colliderData())
+						if (!disableSave()) {
+							Object.assign(levelsData.colliderData, colliderData())
+							set('colliderData', colliderData())
+						}
 					})
 					const clickListener = (event: MouseEvent) => {
 						const camera = cameraQuery.first?.camera
@@ -277,6 +309,7 @@ export const LevelEditor = () => {
 										}}
 									</For>
 									<span>press ctrl to keep placing props</span>
+									<div><button onClick={uploadModel}>preview model</button></div>
 								</div>
 
 							</div>

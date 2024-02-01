@@ -19,9 +19,7 @@ export const moveCamera = () => {
 			position.y = worldPosition.y + params.cameraOffsetY
 			position.z = worldPosition.z + params.cameraOffsetZ
 			camera.zoom = window.innerWidth / window.innerHeight / params.zoom
-			if (camera instanceof PerspectiveCamera) {
-				camera.fov = params.fov
-			}
+			camera.fov = params.fov
 			camera.updateProjectionMatrix()
 		}
 	}

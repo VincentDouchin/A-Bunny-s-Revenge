@@ -61,7 +61,6 @@ export const spawnGroundAndTrees = (layer: LayerInstance) => {
 				-y + layer.__cHei / 2 + noise(y, x, x),
 			).multiplyScalar(SCALE)
 			const tree = trees[Math.floor(trees.length * Math.abs(Math.sin((x + y) * 50 * (x - y))))]
-			// const smol = layer.intGridCsv[x + (y - 1) * layer.__cWid] === GroundType.Grass
 			tree.addAt(position, 3 + (2 * Math.abs(noise(x, y, x))), 1, new Euler(0, noise(x, y, x), 0))
 		}
 	}

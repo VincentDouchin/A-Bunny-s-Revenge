@@ -4,16 +4,17 @@ import { For, Show, createEffect, createMemo, createSignal, onCleanup, onMount }
 
 import { ColliderDesc, RigidBodyDesc, RigidBodyType } from '@dimforge/rapier3d-compat'
 import { set } from 'idb-keyval'
-import { Box3, BoxGeometry, Euler, Mesh, MeshBasicMaterial, Object3D, Quaternion, Vector3 } from 'three'
+import { Box3, BoxGeometry, CanvasTexture, Euler, Mesh, MeshBasicMaterial, Object3D, Quaternion, Vector3 } from 'three'
 import { TransformControls } from 'three/examples/jsm/controls/TransformControls'
 import type { CollidersData, LevelData } from './LevelEditor'
 import type { ExtraData } from './props'
 import { getModel } from './props'
-import { getSize } from '@/lib/models'
-import { cameraQuery, renderer, scene } from '@/global/rendering'
-import { ecs } from '@/global/init'
 import type { Entity } from '@/global/entity'
+import { ecs } from '@/global/init'
+import { cameraQuery, renderer, scene } from '@/global/rendering'
 import type { direction } from '@/lib/directions'
+import { getSize } from '@/lib/models'
+import { ToonMaterial } from '@/shaders/GroundShader'
 import { entries } from '@/utils/mapFunctions'
 
 export const EntityEditor = ({ entity, levelData, setLevelData, setSelectedEntity, colliderData, setColliderData }: {
@@ -136,6 +137,32 @@ export const EntityEditor = ({ entity, levelData, setLevelData, setSelectedEntit
 					}
 				})
 				const data = createMemo(() => entityData().data)
+				const changeTexture = () => {
+					const input = document.createElement('input')
+					input.type = 'file'
+					input.accept = '.png,.jpg,.jpeg'
+					input.addEventListener('change', async (e) => {
+						const target = e.target as HTMLInputElement
+						const file = target.files?.[0]
+						if (file) {
+							const img = new Image()
+							const reader = new FileReader()
+							reader.onload = (e: ProgressEvent<FileReader>) => {
+								if (e.target?.result) {
+									img.src = e.target?.result as string
+									const text = new CanvasTexture(img)
+									entity().model.traverse((x) => {
+										if (x instanceof Mesh && x.material instanceof ToonMaterial) {
+											x.material.map = text
+										}
+									})
+								}
+							}
+							reader.readAsDataURL(file)
+						}
+					})
+					input.click()
+				}
 				return (
 					<div>
 						<Show when={data()}>
@@ -238,6 +265,7 @@ export const EntityEditor = ({ entity, levelData, setLevelData, setSelectedEntit
 							>
 							</input>
 						</div>
+						<div><button onClick={changeTexture}>test texture</button></div>
 						<div>
 							edit collider
 							<input
