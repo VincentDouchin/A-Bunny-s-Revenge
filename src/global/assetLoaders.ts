@@ -1,3 +1,4 @@
+import type { Euler } from 'three'
 import { DynamicDrawUsage, Group, InstancedMesh, Matrix4, Mesh, TextureLoader, Vector3 } from 'three'
 
 import { DRACOLoader } from 'three/examples/jsm/loaders/DRACOLoader'
@@ -34,14 +35,15 @@ interface InstanceParams {
 	position: Vector3
 	scale: number
 	opacity: number
+	rotation: Euler
 }
 
 export const instanceMesh = (obj: GLTF) => {
 	const intanceParams: InstanceParams[] = []
 	const meshes: InstancedMesh[] = []
 	const group = new Group()
-	const addAt = (position: Vector3, scale = 1, opacity = 1) => {
-		intanceParams.push({ position, scale, opacity })
+	const addAt = (position: Vector3, scale = 1, opacity = 1, rotation: Euler) => {
+		intanceParams.push({ position, scale, opacity, rotation })
 	}
 	const process = () => {
 		obj.scene.traverse((node) => {
@@ -58,6 +60,7 @@ export const instanceMesh = (obj: GLTF) => {
 			for (let i = 0; i < intanceParams.length; i++) {
 				const params = intanceParams[i]
 				const matrix = new Matrix4()
+				matrix.makeRotationFromEuler(params.rotation)
 				matrix.setPosition(params.position)
 				matrix.scale(new Vector3().setScalar(params.scale))
 				mesh.setMatrixAt(i, matrix)

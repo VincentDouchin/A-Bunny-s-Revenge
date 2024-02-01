@@ -1,7 +1,7 @@
 import { RigidBodyType } from '@dimforge/rapier3d-compat'
 import { between } from 'randomish'
 import { createNoise3D } from 'simplex-noise'
-import { BoxGeometry, Mesh, Quaternion, Vector3 } from 'three'
+import { BoxGeometry, Euler, Mesh, Quaternion, Vector3 } from 'three'
 import { enemyBundle } from '../dungeon/enemies'
 import type { EntityInstance, LayerInstance, Level } from '@/LDTKMap'
 import { getModel, props } from '@/debug/props'
@@ -61,8 +61,8 @@ export const spawnGroundAndTrees = (layer: LayerInstance) => {
 				-y + layer.__cHei / 2 + noise(y, x, x),
 			).multiplyScalar(SCALE)
 			const tree = trees[Math.floor(trees.length * Math.abs(Math.sin((x + y) * 50 * (x - y))))]
-			const smol = layer.intGridCsv[x + (y - 1) * layer.__cWid] === GroundType.Grass
-			tree.addAt(position, smol ? between(2, 3) : between(3, 4))
+			// const smol = layer.intGridCsv[x + (y - 1) * layer.__cWid] === GroundType.Grass
+			tree.addAt(position, 3 + (2 * Math.abs(noise(x, y, x))), 1, new Euler(0, noise(x, y, x), 0))
 		}
 	}
 	trees.forEach((t) => {
@@ -73,7 +73,7 @@ export const spawnGroundAndTrees = (layer: LayerInstance) => {
 
 export const spawnFarm: System<FarmRessources> = () => {
 	const level = assets.levels.levels.find(l => l.identifier === 'farm')!
-	ecs.add({ map: 'farm' })
+	ecs.add({ map: level.iid })
 	for (const layer of level.layerInstances!) {
 		switch (layer.__type) {
 			case 'IntGrid': {

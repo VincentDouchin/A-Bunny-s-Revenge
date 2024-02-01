@@ -206,11 +206,18 @@ export const LevelEditor = () => {
 						}
 					}
 					return (
-						<>
+						<div style={{ 'z-index': 2, 'position': 'fixed' }}>
 							<div style={{ display: 'grid' }}>
 								<For each={assets.levels.levels}>
 									{(level) => {
-										return <button onClick={() => switchLevel(level)}>{level.iid}</button>
+										return (
+											<button
+
+												onClick={() => switchLevel(level)}
+											>
+												{level.identifier}
+											</button>
+										)
 									}}
 								</For>
 							</div>
@@ -273,7 +280,7 @@ export const LevelEditor = () => {
 								</div>
 
 							</div>
-						</>
+						</div>
 					)
 				}}
 			</Show>
