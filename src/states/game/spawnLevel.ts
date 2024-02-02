@@ -61,13 +61,27 @@ export const spawnGroundAndTrees = (layer: LayerInstance) => {
 				-y + layer.__cHei / 2 + noise(y, x, x),
 			).multiplyScalar(SCALE)
 			const treeGenerator = trees[Math.floor(trees.length * Math.abs(Math.sin((x + y) * 50 * (x - y))))]
-			treeGenerator.addAt(position, 3 + (2 * Math.abs(noise(x, y, x))), new Euler(0, noise(x, y, x), 0))
+			const instanceHandle = treeGenerator.addAt(position, 3 + (2 * Math.abs(noise(x, y, x))), new Euler(0, noise(x, y, x), 0))
+			ecs.add({ position, tree: true, instanceHandle })
 		}
 	}
 	trees.forEach((t) => {
 		const group = t.process()
 		ecs.add({ group, inMap: true })
 	})
+}
+const playerQuery = ecs.with('player', 'position')
+const treeQuery = ecs.with('tree', 'position', 'instanceHandle')
+export const updateTreeOpacity = () => {
+	for (const player of playerQuery) {
+		for (const tree of treeQuery) {
+			if (tree.position.z < player.position.z) {
+				tree.instanceHandle.setUniform('playerZ', 1)
+			} else {
+				tree.instanceHandle.setUniform('playerZ', 0)
+			}
+		}
+	}
 }
 
 export const spawnFarm: System<FarmRessources> = () => {

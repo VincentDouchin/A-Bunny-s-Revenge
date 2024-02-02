@@ -1,5 +1,5 @@
-import type { IUniform, Material, Shader } from 'three'
-import { Color, MeshStandardMaterial, Uniform } from 'three'
+import type { Material, Shader } from 'three'
+import { Color, MeshPhongMaterial, MeshStandardMaterial, Uniform, Vector2 } from 'three'
 
 import { generateUUID } from 'three/src/math/MathUtils'
 import noise from '@/shaders/glsl/lib/cnoise.glsl?raw'
@@ -31,18 +31,22 @@ export class MaterialExtension<U extends Record<string, any>> {
 		return this
 	}
 }
-type AtLeastOne<T, U = { [K in keyof T]: Pick<T, K> }> = Partial<T> & U[keyof U]
 
-type ExcludeEmpty<T> = T extends AtLeastOne<T> ? T : never
-type ExtractUniforms<T extends MaterialExtension<any>[]> = T extends MaterialExtension<infer U>[]
-	? ExcludeEmpty<U>
-	: never
 export const extendMaterial = <M extends Constructor<Material>, E extends MaterialExtension<any>[]>(Base: M, extensions: E, options?: { debug: boolean }) => {
 	return class extends Base {
-		uniforms = {} as ExtractUniforms<E>
-
+		uniforms = {} as any
 		customProgramCacheKey() {
-			return extensions.map(ext => ext.key).join('-')
+			return Base.name + extensions.map(ext => ext.key).join('-')
+		}
+
+		constructor(...args: any[]) {
+			super(...args)
+			for (const extension of extensions) {
+				for (const [name, value] of Object.entries(extension.uniforms)) {
+					const uniform = new Uniform(value);
+					(<any> this.uniforms[name]) = uniform
+				}
+			}
 		}
 
 		onBeforeCompile(shader: Shader): void {
@@ -50,10 +54,8 @@ export const extendMaterial = <M extends Constructor<Material>, E extends Materi
 			shader.defines ??= {}
 
 			for (const extension of extensions) {
-				for (const [name, value] of Object.entries(extension.uniforms)) {
-					const uniform = new Uniform(value);
-					(<any> this.uniforms[name]) = uniform
-					shader.uniforms[name] = uniform as IUniform
+				for (const name of Object.keys(extension.uniforms)) {
+					shader.uniforms[name] = this.uniforms[name]
 				}
 				for (const fn of extension._vert) {
 					shader.vertexShader = fn(shader.vertexShader)
@@ -68,7 +70,7 @@ export const extendMaterial = <M extends Constructor<Material>, E extends Materi
 			}
 			if (options?.debug) {
 				// eslint-disable-next-line no-console
-				console.log(shader.vertexShader)
+				console.log(shader.fragmentShader)
 			}
 		}
 	}
@@ -125,5 +127,15 @@ const groundExtension = new MaterialExtension({ topColor: new Color(0x5AB552) })
 	`),
 )
 
+const treeExtension = new MaterialExtension({ playerZ: 0, resolution: new Vector2(1, 1) }).frag(
+	addUniform('playerZ', 'float'),
+	addUniform('resolution', 'vec2'),
+	replace('gl_FragColor = vec4(  outgoingLight2  , opacity);', /* glsl */`
+	vec2 view = vViewPosition.xy ;
+	float new_opacity = playerZ == 1. ? smoothstep(10.,15.,abs(length(view))) : opacity;
+	gl_FragColor = vec4(  outgoingLight2  , new_opacity);
+	`),
+)
 export const ToonMaterial = extendMaterial(MeshStandardMaterial, [toonExtension])
 export const GroundMaterial = extendMaterial(MeshStandardMaterial, [toonExtension, groundExtension])
+export const TreeMaterial = extendMaterial(MeshPhongMaterial, [toonExtension, treeExtension])

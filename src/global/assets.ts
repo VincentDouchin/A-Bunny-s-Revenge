@@ -2,16 +2,17 @@ import type { characters, items, models, particles, trees } from '@assets/assets
 import data from '@assets/levels/data.json'
 import { get } from 'idb-keyval'
 import type { ColorRepresentation, Material } from 'three'
-import { CanvasTexture, Mesh, MeshStandardMaterial, NearestFilter, SRGBColorSpace, TextureLoader } from 'three'
+import { CanvasTexture, Mesh, MeshStandardMaterial, NearestFilter, SRGBColorSpace, TextureLoader, Vector2 } from 'three'
 
 import type { GLTF } from 'three/examples/jsm/loaders/GLTFLoader'
 import type { stringCaster } from './assetLoaders'
 import { getExtension, getFileName, loadGLB, loadImage, textureLoader } from './assetLoaders'
+import { params } from './context'
 import type { crops } from './entity'
 import type { LDTKMap } from '@/LDTKMap'
 import { keys } from '@/constants/keys'
 import type { CollidersData, LevelData } from '@/debug/LevelEditor'
-import { ToonMaterial } from '@/shaders/GroundShader'
+import { ToonMaterial, TreeMaterial } from '@/shaders/GroundShader'
 import { getScreenBuffer } from '@/utils/buffer'
 import { asyncMapValues, entries, groupByObject, mapKeys, mapValues } from '@/utils/mapFunctions'
 
@@ -168,7 +169,16 @@ export const loadAssets = async () => ({
 	characters: await typeGlob<characters>(import.meta.glob('@assets/characters/*.glb', { as: 'url' }))(loadGLBAsToon()),
 	models: await typeGlob<models>(import.meta.glob('@assets/models/*.*', { as: 'url' }))(loadGLBAsToon({ material: overrideRockColor })),
 	skybox: await skyboxLoader(import.meta.glob('@assets/skybox/*.png', { eager: true, import: 'default' })),
-	trees: await typeGlob<trees>(import.meta.glob('@assets/trees/*.*', { as: 'url' }))(loadGLBAsToon({})),
+	trees: await typeGlob<trees>(import.meta.glob('@assets/trees/*.*', { as: 'url' }))(loadGLBAsToon({ material: (node) => {
+		const mat = new TreeMaterial({ map: node.material.map, transparent: true })
+		const width = params.renderWidth
+		const ratio = window.innerHeight / window.innerWidth
+		const height = Math.round(width * ratio)
+		const resolution = new Vector2(width, height)
+		mat.uniforms.resolution = resolution
+		return mat
+	},
+	})),
 	grass: await typeGlob(import.meta.glob('@assets/grass/*.glb', { as: 'url' }))(loadGLBAsToon()),
 	crops: await cropsLoader<crops>(import.meta.glob('@assets/crops/*.glb', { as: 'url' })),
 	items: await typeGlob<items>(import.meta.glob('@assets/items/*.png', { eager: true, import: 'default' }))(itemsLoader),

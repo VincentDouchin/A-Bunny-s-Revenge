@@ -30,7 +30,7 @@ import { target } from './states/game/sensor'
 import { spawnCharacter } from './states/game/spawnCharacter'
 import { allowDoorCollision, collideWithDoor, collideWithDoorCamp } from './states/game/spawnDoor'
 import { spawnSkyBox } from './states/game/spawnGround'
-import { spawnDungeon, spawnFarm, spawnLevelData } from './states/game/spawnLevel'
+import { spawnDungeon, spawnFarm, spawnLevelData, updateTreeOpacity } from './states/game/spawnLevel'
 import { spawnLight } from './states/game/spawnLights'
 import { showInteraction, touchItem } from './states/game/touchItem'
 import { setupGame } from './states/setup/setupGame'
@@ -52,7 +52,7 @@ gameState
 	.onEnter()
 	.addSubscriber(bobItems, enableInventoryState, killAnimation, ...showInteraction, ...playerFSM, ...pandaFSM, ...beeFSM, ...shagaFSM, popItems)
 	.onUpdate(runIf(canPlayerMove, movePlayer), runIf(() => !pausedState.enabled, applyMove))
-	.onUpdate(collectItems, touchItem, talkToNPC, runIf(() => !openMenuState.enabled, pauseGame))
+	.onUpdate(collectItems, touchItem, talkToNPC, runIf(() => !openMenuState.enabled, pauseGame), updateTreeOpacity)
 	.enable()
 campState
 	.addSubscriber(...interactablePlantableSpot)

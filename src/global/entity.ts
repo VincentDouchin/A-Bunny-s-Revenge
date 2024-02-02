@@ -9,6 +9,7 @@ import type { OrbitControls } from 'three/examples/jsm/controls/OrbitControls'
 import type { EffectComposer } from 'three/examples/jsm/postprocessing/EffectComposer'
 import type { CSS2DObject } from 'three/examples/jsm/renderers/CSS2DRenderer'
 import type { Animator } from './animator'
+import type { InstanceHandle } from './assetLoaders'
 import type { TweenGroup } from '@/lib/tweenGroup'
 import type { Stat } from '@/lib/stats'
 import type { StateMachine } from '@/lib/stateMachine'
@@ -107,6 +108,7 @@ export interface Entity {
 	// ! Camp
 	door?: direction
 	tree?: true
+	instanceHandle?: InstanceHandle
 	// ! Dungeon
 	faction?: Faction
 	ignoreDoor?: direction

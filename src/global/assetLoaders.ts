@@ -1,6 +1,7 @@
-import type { Euler } from 'three'
-import { DynamicDrawUsage, Group, InstancedMesh, Matrix4, Mesh, TextureLoader, Vector3 } from 'three'
+import type { Euler, Material } from 'three'
+import { DynamicDrawUsage, Group, Matrix4, Mesh, TextureLoader, Vector3 } from 'three'
 
+import { InstancedUniformsMesh } from 'three-instanced-uniforms-mesh'
 import { DRACOLoader } from 'three/examples/jsm/loaders/DRACOLoader'
 import type { GLTF } from 'three/examples/jsm/loaders/GLTFLoader'
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader'
@@ -31,9 +32,14 @@ export const loadImage = (path: string) => new Promise<HTMLImageElement>((resolv
 	img.onload = () => resolve(img)
 })
 
-export const instanceMesh = (obj: GLTF) => {
+export interface InstanceHandle {
+	setMatrix: (fn: (matrix: Matrix4) => void) => void
+	setUniform: (name: string, value: any) => void
+}
+
+export const instanceMesh = <T extends Material>(obj: GLTF) => {
 	const intanceParams: Matrix4[] = []
-	const meshes: InstancedMesh[] = []
+	const meshes: InstancedUniformsMesh<T>[] = []
 	const group = new Group()
 
 	const addAt = (position: Vector3, scale = 1, rotation: Euler) => {
@@ -42,11 +48,25 @@ export const instanceMesh = (obj: GLTF) => {
 		matrix.setPosition(position)
 		matrix.scale(new Vector3().setScalar(scale))
 		intanceParams.push(matrix)
+		const i = intanceParams.length
+		return {
+			setMatrix: (fn: (m: Matrix4) => void) => {
+				fn(matrix)
+				for (const mesh of meshes) {
+					mesh.setMatrixAt(i, matrix)
+				}
+			},
+			setUniform: (name: string, value: any) => {
+				for (const mesh of meshes) {
+					mesh.setUniformAt(name, i, value)
+				}
+			},
+		}
 	}
 	const process = () => {
 		obj.scene.traverse((node) => {
 			if (node instanceof Mesh) {
-				const mesh = new InstancedMesh(node.geometry.clone(), node.material.clone(), intanceParams.length)
+				const mesh = new InstancedUniformsMesh(node.geometry.clone(), node.material.clone(), intanceParams.length)
 				mesh.instanceMatrix.setUsage(DynamicDrawUsage)
 				meshes.push(mesh)
 			}

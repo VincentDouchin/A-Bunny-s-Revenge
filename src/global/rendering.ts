@@ -15,7 +15,6 @@ const width = params.renderWidth
 // const width = window.innerWidth
 // const height = window.innerHeight
 const height = Math.round(width * ratio)
-
 const target = new WebGLRenderTarget(width, height)
 const depthTarget = new WebGLRenderTarget(width, height)
 depthTarget.texture.format = RGBAFormat
