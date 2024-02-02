@@ -60,8 +60,8 @@ export const spawnGroundAndTrees = (layer: LayerInstance) => {
 				0,
 				-y + layer.__cHei / 2 + noise(y, x, x),
 			).multiplyScalar(SCALE)
-			const tree = trees[Math.floor(trees.length * Math.abs(Math.sin((x + y) * 50 * (x - y))))]
-			tree.addAt(position, 3 + (2 * Math.abs(noise(x, y, x))), 1, new Euler(0, noise(x, y, x), 0))
+			const treeGenerator = trees[Math.floor(trees.length * Math.abs(Math.sin((x + y) * 50 * (x - y))))]
+			treeGenerator.addAt(position, 3 + (2 * Math.abs(noise(x, y, x))), new Euler(0, noise(x, y, x), 0))
 		}
 	}
 	trees.forEach((t) => {

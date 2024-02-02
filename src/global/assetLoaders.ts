@@ -31,25 +31,22 @@ export const loadImage = (path: string) => new Promise<HTMLImageElement>((resolv
 	img.onload = () => resolve(img)
 })
 
-interface InstanceParams {
-	position: Vector3
-	scale: number
-	opacity: number
-	rotation: Euler
-}
-
 export const instanceMesh = (obj: GLTF) => {
-	const intanceParams: InstanceParams[] = []
+	const intanceParams: Matrix4[] = []
 	const meshes: InstancedMesh[] = []
 	const group = new Group()
-	const addAt = (position: Vector3, scale = 1, opacity = 1, rotation: Euler) => {
-		intanceParams.push({ position, scale, opacity, rotation })
+
+	const addAt = (position: Vector3, scale = 1, rotation: Euler) => {
+		const matrix = new Matrix4()
+		matrix.makeRotationFromEuler(rotation)
+		matrix.setPosition(position)
+		matrix.scale(new Vector3().setScalar(scale))
+		intanceParams.push(matrix)
 	}
 	const process = () => {
 		obj.scene.traverse((node) => {
 			if (node instanceof Mesh) {
 				const mesh = new InstancedMesh(node.geometry.clone(), node.material.clone(), intanceParams.length)
-
 				mesh.instanceMatrix.setUsage(DynamicDrawUsage)
 				meshes.push(mesh)
 			}
@@ -58,11 +55,7 @@ export const instanceMesh = (obj: GLTF) => {
 			mesh.castShadow = true
 			group.add(mesh)
 			for (let i = 0; i < intanceParams.length; i++) {
-				const params = intanceParams[i]
-				const matrix = new Matrix4()
-				matrix.makeRotationFromEuler(params.rotation)
-				matrix.setPosition(params.position)
-				matrix.scale(new Vector3().setScalar(params.scale))
+				const matrix = intanceParams[i]
 				mesh.setMatrixAt(i, matrix)
 			}
 		}

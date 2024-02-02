@@ -106,6 +106,7 @@ export interface Entity {
 	outline?: With<Entity, 'model'>
 	// ! Camp
 	door?: direction
+	tree?: true
 	// ! Dungeon
 	faction?: Faction
 	ignoreDoor?: direction

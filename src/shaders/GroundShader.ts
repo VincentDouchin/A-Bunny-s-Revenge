@@ -68,7 +68,7 @@ export const extendMaterial = <M extends Constructor<Material>, E extends Materi
 			}
 			if (options?.debug) {
 				// eslint-disable-next-line no-console
-				console.log(shader.fragmentShader)
+				console.log(shader.vertexShader)
 			}
 		}
 	}

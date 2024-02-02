@@ -4,7 +4,7 @@ import { For, Show, createEffect, createMemo, createSignal, onCleanup, onMount }
 
 import { ColliderDesc, RigidBodyDesc, RigidBodyType } from '@dimforge/rapier3d-compat'
 import { set } from 'idb-keyval'
-import { Box3, BoxGeometry, CanvasTexture, Euler, Mesh, MeshBasicMaterial, Object3D, Quaternion, Vector3 } from 'three'
+import { Box3, BoxGeometry, CanvasTexture, Euler, Mesh, MeshBasicMaterial, Object3D, Quaternion, SRGBColorSpace, Vector3 } from 'three'
 import { TransformControls } from 'three/examples/jsm/controls/TransformControls'
 import type { CollidersData, LevelData } from './LevelEditor'
 import type { ExtraData } from './props'
@@ -151,9 +151,11 @@ export const EntityEditor = ({ entity, levelData, setLevelData, setSelectedEntit
 								if (e.target?.result) {
 									img.src = e.target?.result as string
 									const text = new CanvasTexture(img)
+									text.colorSpace = SRGBColorSpace
+									const mat = new ToonMaterial({ map: text })
 									entity().model.traverse((x) => {
-										if (x instanceof Mesh && x.material instanceof ToonMaterial) {
-											x.material.map = text
+										if (x instanceof Mesh) {
+											x.material = mat
 										}
 									})
 								}
