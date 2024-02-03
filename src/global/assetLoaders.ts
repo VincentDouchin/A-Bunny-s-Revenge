@@ -82,5 +82,5 @@ export const instanceMesh = <T extends Material>(obj: GLTF) => {
 
 		return group
 	}
-	return { addAt, process }
+	return { addAt, process, glb: obj }
 }

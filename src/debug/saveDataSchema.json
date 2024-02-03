@@ -155,10 +155,13 @@
     "items": {
       "enum": [
         "beet",
+        "beetroot_salad",
         "beet_seeds",
         "carrot",
         "carrot_seeds",
         "carrot_soup",
+        "ham",
+        "ham_honey",
         "honey",
         "honey_glazed_carrot",
         "lettuce",

@@ -116,6 +116,13 @@ export const EntityEditor = ({ entity, levelData, setLevelData, setSelectedEntit
 					setLevelData(newdata)
 					set('levelData', newdata)
 				}
+				const deleteListener = (e: KeyboardEvent) => {
+					if (e.code === 'Delete') {
+						deleteSelected()
+					}
+				}
+				onMount(() => document.body.addEventListener('keydown', deleteListener))
+				onCleanup(() => document.body.removeEventListener('keydown', deleteListener))
 				const colliderTransformListener = (box: Mesh) => () => {
 					const size = new Vector3()
 					new Box3().setFromObject(box).getSize(size)

@@ -54,3 +54,15 @@ export const modelColliderBundle = (model: Object3D<Object3DEventMap>, type = Ri
 		size,
 	} as const satisfies Entity
 }
+
+export const capsuleColliderBundle = (model: Object3D<Object3DEventMap>, size: Vector3) => {
+	const cloneModel = clone(model)
+	return {
+		model: cloneModel,
+		bodyDesc: RigidBodyDesc.dynamic().lockRotations(),
+		colliderDesc: ColliderDesc.capsule(size.y / 2, size.x / 2).setTranslation(0, size.y / 2 + size.x / 2, 0),
+		rotation: new Quaternion(),
+		size,
+
+	} as const satisfies Entity
+}

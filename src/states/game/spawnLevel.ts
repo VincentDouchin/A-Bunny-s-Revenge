@@ -1,20 +1,21 @@
-import { RigidBodyType } from '@dimforge/rapier3d-compat'
+import { ColliderDesc, RigidBodyDesc, RigidBodyType } from '@dimforge/rapier3d-compat'
 import { between } from 'randomish'
 import { createNoise3D } from 'simplex-noise'
-import { BoxGeometry, Euler, Mesh, Quaternion, Vector3 } from 'three'
+import { BoxGeometry, Euler, Group, Mesh, Quaternion, Vector3 } from 'three'
 import { enemyBundle } from '../dungeon/enemies'
 import type { EntityInstance, LayerInstance, Level } from '@/LDTKMap'
 import { getModel, props } from '@/debug/props'
 import { instanceMesh } from '@/global/assetLoaders'
 import { assets, ecs, levelsData } from '@/global/init'
 import type { DungeonRessources, FarmRessources } from '@/global/states'
-import { getBoundingBox, modelColliderBundle } from '@/lib/models'
+import { getBoundingBox, getSize, modelColliderBundle } from '@/lib/models'
 import type { System } from '@/lib/state'
 import { GroundMaterial } from '@/shaders/GroundShader'
 
 enum GroundType {
 	Tree = 1,
 	Grass = 2,
+	TreeSmall = 3,
 }
 const SCALE = 10
 
@@ -52,7 +53,7 @@ export const spawnGroundAndTrees = (layer: LayerInstance) => {
 	const noise = createNoise3D(() => 0)
 	for (let i = 0; i < layer.intGridCsv.length; i++) {
 		const val = layer.intGridCsv[i]
-		if (val === GroundType.Tree) {
+		if (val === GroundType.Tree || val === GroundType.TreeSmall) {
 			const x = i % layer.__cWid
 			const y = Math.floor(i / layer.__cWid)
 			const position = new Vector3(
@@ -60,9 +61,21 @@ export const spawnGroundAndTrees = (layer: LayerInstance) => {
 				0,
 				-y + layer.__cHei / 2 + noise(y, x, x),
 			).multiplyScalar(SCALE)
+			const size = 3 + ((val === GroundType.TreeSmall ? 1 : 2) * Math.abs(noise(x, y, x)))
 			const treeGenerator = trees[Math.floor(trees.length * Math.abs(Math.sin((x + y) * 50 * (x - y))))]
-			const instanceHandle = treeGenerator.addAt(position, 3 + (2 * Math.abs(noise(x, y, x))), new Euler(0, noise(x, y, x), 0))
-			ecs.add({ position, tree: true, instanceHandle })
+			const instanceHandle = treeGenerator.addAt(position, size, new Euler(0, noise(x, y, x), 0))
+			const treeSize = getSize(treeGenerator.glb.scene).multiplyScalar(size)
+
+			ecs.add({
+				inMap: true,
+				position,
+				tree: true,
+				instanceHandle,
+				group: new Group(),
+				size: treeSize,
+				bodyDesc: RigidBodyDesc.fixed().lockRotations(),
+				colliderDesc: ColliderDesc.cylinder(treeSize.y / 2, treeSize.x / 2),
+			})
 		}
 	}
 	trees.forEach((t) => {

@@ -1,4 +1,3 @@
-import { RigidBodyType } from '@dimforge/rapier3d-compat'
 import { LinearSRGBColorSpace, Mesh, NearestFilter, Quaternion, Vector3 } from 'three'
 import { healthBundle } from '../dungeon/health'
 import { inventoryBundle } from './inventory'
@@ -9,7 +8,7 @@ import { assets, ecs } from '@/global/init'
 import { playerInputMap } from '@/global/inputMaps'
 import { save, updateSave } from '@/global/save'
 import type { FarmRessources } from '@/global/states'
-import { modelColliderBundle } from '@/lib/models'
+import { capsuleColliderBundle } from '@/lib/models'
 import type { System } from '@/lib/state'
 import { stateBundle } from '@/lib/stateMachine'
 import { Stat, addModifier } from '@/lib/stats'
@@ -23,7 +22,7 @@ export const playerBundle = () => {
 			node.material.map.magFilter = NearestFilter
 		}
 	})
-	const bundle = modelColliderBundle(model.scene, RigidBodyType.Dynamic, false, Sizes.character)
+	const bundle = capsuleColliderBundle(model.scene, Sizes.character)
 	bundle.bodyDesc.setLinearDamping(20)
 	const player = {
 		...playerInputMap(),
@@ -36,7 +35,7 @@ export const playerBundle = () => {
 		sensor: true,
 		player: true,
 		movementForce: new Vector3(),
-		speed: 300,
+		speed: 200,
 		strength: new Stat(1),
 		...healthBundle(5),
 		...stateBundle<'idle' | 'running' | 'picking'>('idle', {
