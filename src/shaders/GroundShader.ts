@@ -132,7 +132,7 @@ const treeExtension = new MaterialExtension({ playerZ: 0, resolution: new Vector
 	addUniform('resolution', 'vec2'),
 	replace('gl_FragColor = vec4(  outgoingLight2  , opacity);', /* glsl */`
 	vec2 view = vViewPosition.xy ;
-	float new_opacity = playerZ == 1. ? smoothstep(10.,15.,abs(length(view))) : opacity;
+	float new_opacity = playerZ == 1. ? smoothstep(15.,25.,abs(length(view))) : opacity;
 	gl_FragColor = vec4(  outgoingLight2  , new_opacity);
 	`),
 )

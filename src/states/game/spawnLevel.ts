@@ -65,17 +65,18 @@ export const spawnGroundAndTrees = (layer: LayerInstance) => {
 			const treeGenerator = trees[Math.floor(trees.length * Math.abs(Math.sin((x + y) * 50 * (x - y))))]
 			const instanceHandle = treeGenerator.addAt(position, size, new Euler(0, noise(x, y, x), 0))
 			const treeSize = getSize(treeGenerator.glb.scene).multiplyScalar(size)
-
-			ecs.add({
+			const tree = ecs.add({
 				inMap: true,
 				position,
-				tree: true,
 				instanceHandle,
 				group: new Group(),
 				size: treeSize,
 				bodyDesc: RigidBodyDesc.fixed().lockRotations(),
 				colliderDesc: ColliderDesc.cylinder(treeSize.y / 2, treeSize.x / 2),
 			})
+			if (val === GroundType.TreeSmall) {
+				ecs.update(tree, { tree: true })
+			}
 		}
 	}
 	trees.forEach((t) => {
@@ -83,17 +84,10 @@ export const spawnGroundAndTrees = (layer: LayerInstance) => {
 		ecs.add({ group, inMap: true })
 	})
 }
-const playerQuery = ecs.with('player', 'position')
 const treeQuery = ecs.with('tree', 'position', 'instanceHandle')
 export const updateTreeOpacity = () => {
-	for (const player of playerQuery) {
-		for (const tree of treeQuery) {
-			if (tree.position.z < player.position.z) {
-				tree.instanceHandle.setUniform('playerZ', 1)
-			} else {
-				tree.instanceHandle.setUniform('playerZ', 0)
-			}
-		}
+	for (const tree of treeQuery) {
+		tree.instanceHandle.setUniform('playerZ', 1)
 	}
 }
 

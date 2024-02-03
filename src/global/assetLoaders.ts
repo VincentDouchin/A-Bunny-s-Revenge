@@ -47,8 +47,8 @@ export const instanceMesh = <T extends Material>(obj: GLTF) => {
 		matrix.makeRotationFromEuler(rotation)
 		matrix.setPosition(position)
 		matrix.scale(new Vector3().setScalar(scale))
-		intanceParams.push(matrix)
 		const i = intanceParams.length
+		intanceParams.push(matrix)
 		return {
 			setMatrix: (fn: (m: Matrix4) => void) => {
 				fn(matrix)
