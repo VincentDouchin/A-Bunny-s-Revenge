@@ -2,7 +2,7 @@ import { debugPlugin } from './debug/debugPlugin'
 import { updateAnimations } from './global/animations'
 import { initCamera, moveCamera } from './global/camera'
 import { coroutines, inputManager, time, ui } from './global/init'
-import { initThree, render, updateControls } from './global/rendering'
+import { initThree, preCompileShaders, render, updateControls } from './global/rendering'
 import { app, campState, coreState, dungeonState, gameState, genDungeonState, openMenuState, pausedState, setupState } from './global/states'
 import { despawnOfType, hierarchyPlugin } from './lib/hierarchy'
 import { updateModels } from './lib/modelsProperties'
@@ -39,7 +39,7 @@ import { UI } from './ui/UI'
 coreState
 	.addPlugins(debugPlugin)
 	.addPlugins(hierarchyPlugin, physicsPlugin, transformsPlugin, addToScene('camera', 'light', 'mesh', 'model', 'dialogContainer', 'batchRenderer', 'emitter', 'interactionContainer'), updateModels, particlesPlugin)
-	.addSubscriber(...target, startTweens)
+	.addSubscriber(...target, startTweens, preCompileShaders)
 	.onEnter(initCamera, initThree, ui.render(UI))
 	.onPreUpdate(coroutines.tick, moveCamera)
 	.onUpdate(runIf(() => !pausedState.enabled, updateAnimations('beeAnimator', 'playerAnimator', 'pandaAnimator', 'shagaAnimator'), () => time.tick()), updateTweens, inputManager.update, ui.update, updateParticles)

@@ -72,3 +72,7 @@ export const updateControls = () => {
 		controls.update()
 	}
 }
+
+export const preCompileShaders = () => ecs.with('model').onEntityAdded.subscribe((e) => {
+	renderer.compileAsync(e.model, camera, scene)
+})

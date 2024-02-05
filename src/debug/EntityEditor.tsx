@@ -112,9 +112,11 @@ export const EntityEditor = ({ entity, levelData, setLevelData, setSelectedEntit
 				const deleteSelected = () => {
 					setSelectedEntity(null)
 					ecs.remove(entityRef)
-					const newdata = { ...levelData(), [entityRef.entityId]: null }
-					setLevelData(newdata)
-					set('levelData', newdata)
+					if (entityRef.entityId in levelData) {
+						const newdata = { ...levelData(), [entityRef.entityId]: null }
+						setLevelData(newdata)
+						set('levelData', newdata)
+					}
 				}
 				const deleteListener = (e: KeyboardEvent) => {
 					if (e.code === 'Delete') {

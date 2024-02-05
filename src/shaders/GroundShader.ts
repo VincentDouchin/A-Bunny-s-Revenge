@@ -1,4 +1,4 @@
-import type { Material, Shader } from 'three'
+import type { Material, WebGLProgramParametersWithUniforms } from 'three'
 import { Color, MeshPhongMaterial, MeshStandardMaterial, Uniform, Vector2 } from 'three'
 
 import { generateUUID } from 'three/src/math/MathUtils'
@@ -49,8 +49,7 @@ export const extendMaterial = <M extends Constructor<Material>, E extends Materi
 			}
 		}
 
-		onBeforeCompile(shader: Shader): void {
-			// @ts-expect-error wrong type for shaders
+		onBeforeCompile(shader: WebGLProgramParametersWithUniforms): void {
 			shader.defines ??= {}
 
 			for (const extension of extensions) {
@@ -64,7 +63,6 @@ export const extendMaterial = <M extends Constructor<Material>, E extends Materi
 					shader.fragmentShader = fn(shader.fragmentShader)
 				}
 				for (const [define, value] of Object.entries(extension._defines)) {
-					// @ts-expect-error wrong type for shader
 					shader.defines[define] = value
 				}
 			}

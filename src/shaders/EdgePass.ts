@@ -1,7 +1,7 @@
-import type { Shader, Texture, WebGLRenderTarget } from 'three'
+import type { Texture, WebGLRenderTarget } from 'three'
 import { Uniform, Vector2 } from 'three'
 
-export const getDepthShader = (target: WebGLRenderTarget): Shader => ({
+export const getDepthShader = (target: WebGLRenderTarget) => ({
 	uniforms: {
 		tDepth: new Uniform<Texture>(target.depthTexture),
 		cameraNear: { value: 0.1 },

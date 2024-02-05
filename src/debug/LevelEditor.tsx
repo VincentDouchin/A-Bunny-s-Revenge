@@ -149,14 +149,14 @@ export const LevelEditor = () => {
 					})
 
 					createEffect(() => {
+						Object.assign(levelsData.levelData, levelData())
 						if (!disableSave()) {
-							Object.assign(levelsData.levelData, levelData())
 							set('levelData', levelData())
 						}
 					})
 					createEffect(() => {
+						Object.assign(levelsData.colliderData, colliderData())
 						if (!disableSave()) {
-							Object.assign(levelsData.colliderData, colliderData())
 							set('colliderData', colliderData())
 						}
 					})
