@@ -11,16 +11,33 @@ export const initCamera = () => {
 }
 const cameraQuery = ecs.with('camera', 'position', 'mainCamera')
 const cameraTargetQuery = ecs.with('cameratarget', 'worldPosition')
+const doorsQuery = ecs.with('door', 'position')
 export const moveCamera = () => {
 	for (const { position, camera } of cameraQuery) {
+		const target = new Vector3()
 		for (const { worldPosition } of cameraTargetQuery) {
-			camera.lookAt(new Vector3(0, 0, 20).add(worldPosition))
-			position.x = worldPosition.x + params.cameraOffsetX
-			position.y = worldPosition.y + params.cameraOffsetY
-			position.z = worldPosition.z + params.cameraOffsetZ
-			camera.zoom = window.innerWidth / window.innerHeight / params.zoom
-			camera.fov = params.fov
-			camera.updateProjectionMatrix()
+			target.z = worldPosition.z
+			target.x = worldPosition.x
+			target.y += worldPosition.y
+			for (const door of doorsQuery) {
+				if (door.door === 'north') {
+					target.z = Math.min(worldPosition.z, door.position.z - 20) + 10
+				}
+				if (door.door === 'south') {
+					target.z = Math.max(worldPosition.z, door.position.z + 20) + 10
+				}
+				if (door.door === 'west') {
+					target.x = Math.min(worldPosition.x, door.position.x - 20)
+				}
+				if (door.door === 'east') {
+					target.x = Math.max(worldPosition.x, door.position.x + 20)
+				}
+			}
 		}
+		camera.lookAt(target)
+		position.set(...target.add(new Vector3(params.cameraOffsetX, params.cameraOffsetY, params.cameraOffsetZ)).toArray())
+		camera.zoom = window.innerWidth / window.innerHeight / params.zoom
+		camera.fov = params.fov
+		camera.updateProjectionMatrix()
 	}
 }

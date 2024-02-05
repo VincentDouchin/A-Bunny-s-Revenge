@@ -12,10 +12,10 @@ import type { direction } from '@/lib/directions'
 import { cropBundle } from '@/states/farm/farming'
 import { inventoryBundle } from '@/states/game/inventory'
 import { playerBundle } from '@/states/game/spawnCharacter'
-import { doorGroup } from '@/states/game/spawnDoor'
+import { doorSide } from '@/states/game/spawnDoor'
 
 export const customModels = {
-	door: doorGroup,
+	door: doorSide,
 } as const satisfies Record<string, () => Object3D<Object3DEventMap>>
 export type customModel = keyof typeof customModels
 export const getModel = (key: models | customModel) => {
