@@ -41,6 +41,7 @@ const loadGLBAsToon = (options?: { src?: string, color?: ColorRepresentation, ma
 		} else {
 			const texture = new CanvasTexture(await loadImage(path))
 			texture.colorSpace = SRGBColorSpace
+			texture.flipY = false
 			return texture
 		}
 	})

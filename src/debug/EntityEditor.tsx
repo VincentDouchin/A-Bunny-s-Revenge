@@ -159,6 +159,7 @@ export const EntityEditor = ({ entity, levelData, setLevelData, setSelectedEntit
 									img.src = e.target?.result as string
 									const text = new CanvasTexture(img)
 									text.colorSpace = SRGBColorSpace
+									text.flipY = false
 									const mat = new ToonMaterial({ map: text })
 									entity().model.traverse((x) => {
 										if (x instanceof Mesh) {

@@ -5,6 +5,7 @@ import { BoxGeometry, Euler, Group, Mesh, Quaternion, Vector3 } from 'three'
 import { enemyBundle } from '../dungeon/enemies'
 import type { EntityInstance, LayerInstance, Level } from '@/LDTKMap'
 import { getModel, props } from '@/debug/props'
+import type { InstanceHandle } from '@/global/assetLoaders'
 import { instanceMesh } from '@/global/assetLoaders'
 import { assets, ecs, levelsData } from '@/global/init'
 import type { DungeonRessources, FarmRessources } from '@/global/states'
@@ -50,6 +51,7 @@ export const spawnGroundAndTrees = (layer: LayerInstance) => {
 		...bundle,
 	})
 	const trees = Object.values(assets.trees).map(instanceMesh)
+	const treesInstances: InstanceHandle[] = []
 	const noise = createNoise3D(() => 0)
 	for (let i = 0; i < layer.intGridCsv.length; i++) {
 		const val = layer.intGridCsv[i]
@@ -64,8 +66,11 @@ export const spawnGroundAndTrees = (layer: LayerInstance) => {
 			const size = 3 + ((val === GroundType.TreeSmall ? 1 : 2) * Math.abs(noise(x, y, x)))
 			const treeGenerator = trees[Math.floor(trees.length * Math.abs(Math.sin((x + y) * 50 * (x - y))))]
 			const instanceHandle = treeGenerator.addAt(position, size, new Euler(0, noise(x, y, x), 0))
+			if (val === GroundType.TreeSmall) {
+				treesInstances.push(instanceHandle)
+			}
 			const treeSize = getSize(treeGenerator.glb.scene).multiplyScalar(size)
-			const tree = ecs.add({
+			ecs.add({
 				inMap: true,
 				position,
 				instanceHandle,
@@ -74,15 +79,15 @@ export const spawnGroundAndTrees = (layer: LayerInstance) => {
 				bodyDesc: RigidBodyDesc.fixed().lockRotations(),
 				colliderDesc: ColliderDesc.cylinder(treeSize.y / 2, treeSize.x / 2),
 			})
-			if (val === GroundType.TreeSmall) {
-				ecs.update(tree, { tree: true })
-			}
 		}
 	}
 	trees.forEach((t) => {
 		const group = t.process()
 		ecs.add({ group, inMap: true })
 	})
+	for (const treesInstance of treesInstances) {
+		treesInstance.setUniform('playerZ', 1)
+	}
 }
 const treeQuery = ecs.with('tree', 'position', 'instanceHandle')
 export const updateTreeOpacity = () => {
