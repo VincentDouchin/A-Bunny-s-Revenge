@@ -1,5 +1,5 @@
 import type { Material, WebGLProgramParametersWithUniforms } from 'three'
-import { Color, MeshPhongMaterial, MeshStandardMaterial, Uniform, Vector2 } from 'three'
+import { Color, MeshPhongMaterial, MeshStandardMaterial, Uniform } from 'three'
 
 import { generateUUID } from 'three/src/math/MathUtils'
 import noise from '@/shaders/glsl/lib/cnoise.glsl?raw'
@@ -125,15 +125,21 @@ const groundExtension = new MaterialExtension({ topColor: new Color(0x5AB552) })
 	`),
 )
 
-const treeExtension = new MaterialExtension({ playerZ: 0, resolution: new Vector2(1, 1) }).frag(
+const treeExtension = new MaterialExtension({ playerZ: 0 }).frag(
 	addUniform('playerZ', 'float'),
-	addUniform('resolution', 'vec2'),
 	replace('gl_FragColor = vec4(  outgoingLight2  , opacity);', /* glsl */`
 	vec2 view = vViewPosition.xy ;
 	float new_opacity = playerZ == 1. ? smoothstep(15.,25.,abs(length(view))) : opacity;
 	gl_FragColor = vec4(  outgoingLight2  , new_opacity);
 	`),
 )
+const characterExtension = new MaterialExtension({ flash: 0 }).frag(
+	addUniform('flash', 'float'),
+	override('gl_FragColor', `
+	vec4(  outgoingLight2 + vec3(flash)  , opacity);;
+	`),
+)
+export const CharacterMaterial = extendMaterial(MeshStandardMaterial, [toonExtension, characterExtension])
 export const ToonMaterial = extendMaterial(MeshStandardMaterial, [toonExtension])
 export const GroundMaterial = extendMaterial(MeshStandardMaterial, [toonExtension, groundExtension])
 export const TreeMaterial = extendMaterial(MeshPhongMaterial, [toonExtension, treeExtension])

@@ -12,7 +12,7 @@ import type { crops } from './entity'
 import type { LDTKMap } from '@/LDTKMap'
 import { keys } from '@/constants/keys'
 import type { CollidersData, LevelData } from '@/debug/LevelEditor'
-import { ToonMaterial, TreeMaterial } from '@/shaders/GroundShader'
+import { CharacterMaterial, ToonMaterial, TreeMaterial } from '@/shaders/GroundShader'
 import { getScreenBuffer } from '@/utils/buffer'
 import { asyncMapValues, entries, groupByObject, mapKeys, mapValues } from '@/utils/mapFunctions'
 
@@ -167,7 +167,7 @@ const overrideRockColor = (node: Mesh<any, MeshStandardMaterial>, map?: CanvasTe
 }
 
 export const loadAssets = async () => ({
-	characters: await typeGlob<characters>(import.meta.glob('@assets/characters/*.glb', { as: 'url' }))(loadGLBAsToon()),
+	characters: await typeGlob<characters>(import.meta.glob('@assets/characters/*.glb', { as: 'url' }))(loadGLBAsToon({ material: node => new CharacterMaterial({ map: node.material.map }) })),
 	models: await typeGlob<models>(import.meta.glob('@assets/models/*.*', { as: 'url' }))(loadGLBAsToon({ material: overrideRockColor })),
 	skybox: await skyboxLoader(import.meta.glob('@assets/skybox/*.png', { eager: true, import: 'default' })),
 	trees: await typeGlob<trees>(import.meta.glob('@assets/trees/*.*', { as: 'url' }))(loadGLBAsToon({ material: (node) => {
