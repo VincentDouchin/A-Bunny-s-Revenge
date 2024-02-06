@@ -29,7 +29,7 @@ export const doorGroup = () => {
 }
 export const doorSide = () => {
 	const mesh = new Mesh(
-		new PlaneGeometry(80, 80),
+		new PlaneGeometry(120, 80),
 		new ShaderMaterial({
 			side: DoubleSide,
 			transparent: true,
@@ -43,11 +43,11 @@ export const doorSide = () => {
 		}),
 	)
 	mesh.material.depthWrite = false
-	mesh.rotateX(-Math.PI / 2)
+	mesh.rotateX(-Math.PI / 2 - Math.PI / 180 * 10)
 	mesh.rotateZ(-Math.PI / 2)
 	mesh.position.z = 10
 	mesh.position.y = 15
-	mesh.renderOrder = 2
+	mesh.renderOrder = -1
 	return mesh
 }
 const doorQuery = ecs.with('collider', 'door')
