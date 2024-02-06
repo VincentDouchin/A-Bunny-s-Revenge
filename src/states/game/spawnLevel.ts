@@ -12,6 +12,7 @@ import type { DungeonRessources, FarmRessources } from '@/global/states'
 import { getBoundingBox, getSize, modelColliderBundle } from '@/lib/models'
 import type { System } from '@/lib/state'
 import { GroundMaterial } from '@/shaders/GroundShader'
+import type { Entity } from '@/global/entity'
 
 enum GroundType {
 	Tree = 1,
@@ -139,17 +140,20 @@ export const spawnLevelData: System<FarmRessources | DungeonRessources> = (resso
 				const position = new Vector3().fromArray(entityData.position)
 				const rotation = new Quaternion().set(...entityData.rotation)
 				const bundleFn = props.find(p => p.models.includes(entityData.model))?.bundle
-				const bundle = bundleFn ? bundleFn(entityId, entityData, ressources) : {}
-				ecs.add({
+				const entity = {
 					rotation,
 					position,
-					...bundle,
 					...getBoundingBox(entityData.model, model, colliderData),
 					entityId,
 					model,
 					inMap: true,
 
-				})
+				} as const satisfies Entity
+				if (bundleFn) {
+					ecs.add(bundleFn(entity, entityData, ressources))
+				} else {
+					ecs.add(entity)
+				}
 			}
 		}
 	}

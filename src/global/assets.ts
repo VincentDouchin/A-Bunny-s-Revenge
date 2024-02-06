@@ -45,10 +45,10 @@ const loadGLBAsToon = (options?: { src?: string, color?: ColorRepresentation, ma
 			return texture
 		}
 	})
-	const { glb, png } = groupByObject(loaded, key => getExtension(key)) as { glb: Record<string, GLTF>, png: Record<string, CanvasTexture> }
+	const { glb, webp } = groupByObject(loaded, key => getExtension(key)) as { glb: Record<string, GLTF>, webp: Record<string, CanvasTexture> }
 	const toons = mapValues(glb, (glb, key) => {
 		glb.scene.traverse((node) => {
-			const map = png ? entries(png).find(([mapName]) => key.includes(getFileName(mapName)))?.[1] : undefined
+			const map = webp ? entries(webp).find(([mapName]) => key.includes(getFileName(mapName)))?.[1] : undefined
 
 			if (node instanceof Mesh) {
 				if (node.material instanceof MeshStandardMaterial) {

@@ -1,8 +1,10 @@
 import type { models } from '@assets/assets'
 import { ColliderDesc, RigidBodyDesc } from '@dimforge/rapier3d-compat'
+import type { With } from 'miniplex'
 import type { Object3D, Object3DEventMap } from 'three'
-import { Vector3 } from 'three'
+import { PointLight, Vector3 } from 'three'
 import type { EntityData } from './LevelEditor'
+import { dialogs } from '@/constants/dialogs'
 import { type Entity, Interactable, MenuType } from '@/global/entity'
 import { assets, ecs } from '@/global/init'
 import { menuInputMap } from '@/global/inputMaps'
@@ -32,7 +34,7 @@ export interface ExtraData {
 	}
 }
 
-type BundleFn<E extends EntityData<any>> = (id: string, data: NonNullable<E>, ressources: FarmRessources | DungeonRessources) => Entity
+type BundleFn<E extends EntityData<any>> = (entity: With<Entity, 'entityId' | 'model' | 'position' | 'rotation'>, data: NonNullable<E>, ressources: FarmRessources | DungeonRessources) => Entity
 
 export interface PlacableProp<N extends string> {
 	name: N
@@ -40,7 +42,7 @@ export interface PlacableProp<N extends string> {
 	data?: N extends keyof ExtraData ? ExtraData[N] : undefined
 	bundle?: BundleFn<EntityData<N extends keyof ExtraData ? NonNullable<ExtraData[N]> : never>>
 }
-type propNames = 'log' | 'door' | 'rock' | 'board' | 'oven' | 'cauldron' | 'stove' | 'Flower/plants' | 'sign' | 'plots' | 'bush' | 'fence'
+type propNames = 'log' | 'door' | 'rock' | 'board' | 'oven' | 'cauldron' | 'stove' | 'Flower/plants' | 'sign' | 'plots' | 'bush' | 'fence' | 'house' | 'mushrooms'
 export const props: PlacableProp<propNames>[] = [
 	{
 		name: 'log',
@@ -57,7 +59,8 @@ export const props: PlacableProp<propNames>[] = [
 	{
 		name: 'board',
 		models: ['Bulliten'],
-		bundle: () => ({
+		bundle: entity => ({
+			...entity,
 			interactable: Interactable.BulletinBoard,
 			menuType: MenuType.Quest,
 			...menuInputMap(),
@@ -66,23 +69,32 @@ export const props: PlacableProp<propNames>[] = [
 	{
 		name: 'oven',
 		models: ['StoneOven', 'BunnyOvenPacked'],
-		bundle: id => ({
-			...inventoryBundle(MenuType.Oven, 3, id, Interactable.Cook),
+		bundle: entity => ({
+			...entity,
+			...inventoryBundle(MenuType.Oven, 3, entity.entityId, Interactable.Cook),
 		}),
 	},
 	{
 		name: 'cauldron',
 		models: ['cauldron'],
-		bundle: id => ({
-			...inventoryBundle(MenuType.Cauldron, 0, id, Interactable.Cook),
+		bundle: entity => ({
+			...entity,
+			...inventoryBundle(MenuType.Cauldron, 3, entity.entityId, Interactable.Cook),
 		}),
 	},
 	{
 		name: 'stove',
 		models: ['Stove1'],
-		bundle: id => ({
-			...inventoryBundle(MenuType.Oven, 3, id, Interactable.Cook),
+		bundle: entity => ({
+			...entity,
+			...inventoryBundle(MenuType.Oven, 3, entity.entityId, Interactable.Cook),
 		}),
+		// bundle: entity => ({
+		// 	...entity,
+		// 	...menuInputMap(),
+		// 	menuType: MenuType.Oven,
+		// 	interactable: Interactable.Cook,
+		// }),
 	},
 	{
 		name: 'sign',
@@ -95,16 +107,17 @@ export const props: PlacableProp<propNames>[] = [
 	{
 		name: 'plots',
 		models: ['gardenPlot1', 'gardenPlot2', 'gardenPlot3'],
-		bundle: (id, _, ressources) => {
-			const crop = save.crops[id]
-			const entity: Entity = {
-				plantableSpot: id,
+		bundle: (entity, _, ressources) => {
+			const crop = save.crops[entity.entityId]
+			const newEntity: Entity = {
+				...entity,
+				plantableSpot: entity.entityId,
 				bodyDesc: RigidBodyDesc.fixed(),
 				colliderDesc: ColliderDesc.cuboid(3, 3, 3).setSensor(true),
 			}
 			if (crop) {
 				const grow = 'previousState' in ressources && ressources.previousState === 'dungeon'
-				entity.withChildren = (parent) => {
+				newEntity.withChildren = (parent) => {
 					const planted = ecs.add({
 						parent,
 						...cropBundle(grow, crop),
@@ -116,7 +129,7 @@ export const props: PlacableProp<propNames>[] = [
 					ecs.update(parent, { planted })
 				}
 			}
-			return entity
+			return newEntity
 		},
 	},
 	{
@@ -127,7 +140,7 @@ export const props: PlacableProp<propNames>[] = [
 		name: 'door',
 		data: { direction: 'north' },
 		models: ['door'],
-		bundle: (_id, data, ressources) => {
+		bundle: (entity, data, ressources) => {
 			if ('dungeon' in ressources) {
 				if (data.data.direction === ressources.direction) {
 					ecs.add({
@@ -137,7 +150,43 @@ export const props: PlacableProp<propNames>[] = [
 					})
 				}
 			}
-			return { door: data.data.direction }
+			return { door: data.data.direction, ...entity }
 		},
+	},
+	{
+		name: 'house',
+		models: ['House'],
+		bundle: (entity) => {
+			entity.model.traverse((node) => {
+				if (node.name === 'door') {
+					node.removeFromParent()
+					node.scale.set(...entity.model.scale.clone().toArray())
+					const position = node.position.clone().multiply(entity.model.scale)
+					node.position.setScalar(0)
+					entity.withChildren = (parent) => {
+						ecs.add({
+							parent,
+							npcName: 'door',
+							position,
+							model: node,
+							dialog: dialogs.GrandmasDoor(),
+							interactable: Interactable.Enter,
+							bodyDesc: RigidBodyDesc.fixed().lockRotations(),
+							colliderDesc: ColliderDesc.cuboid(5, 7, 1).setSensor(false),
+						})
+					}
+				}
+			})
+			return {
+				...entity,
+				dialogHeight: 4,
+				npcName: 'Grandma',
+				dialog: dialogs.GrandmasHouse(),
+			}
+		},
+	},
+	{
+		name: 'mushrooms',
+		models: ['Shroom1', 'Shroom2', 'Shroom3', 'Shroom4'],
 	},
 ]

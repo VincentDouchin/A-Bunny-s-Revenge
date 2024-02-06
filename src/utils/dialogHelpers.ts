@@ -64,7 +64,7 @@ export const leaveHouse = () => {
 	const house = houseQuery.first
 	const door = doorQuery.first
 	if (house && door) {
-		movePlayerTo(new Vector3(0, 0, -10).add(door.worldPosition)).then(() => {
+		movePlayerTo(new Vector3(0, 0, -30).add(house.position)).then(() => {
 			cutSceneState.disable()
 			setSensor(houseQuery, false)
 			setSensor(doorQuery, false)
