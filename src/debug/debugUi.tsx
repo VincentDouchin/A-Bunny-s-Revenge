@@ -1,12 +1,17 @@
-import { Show, createSignal, onCleanup, onMount } from 'solid-js'
-import { SaveEditor } from './saveEditor'
+import { For, Show, createSignal, onCleanup, onMount } from 'solid-js'
+import { Color, Mesh } from 'three'
 import { LevelEditor } from './LevelEditor'
+import { SaveEditor } from './saveEditor'
 import { ToonEditor } from './toonEditor'
 import { params } from '@/global/context'
+import { ecs } from '@/global/init'
 import { renderer } from '@/global/rendering'
-import { campState } from '@/global/states'
 import { resetSave, updateSave } from '@/global/save'
+import { campState } from '@/global/states'
+import { entries } from '@/utils/mapFunctions'
+import { useLocalStorage } from '@/utils/useLocalStorage'
 
+const groundQuery = ecs.with('ground', 'model')
 export const updatePixelation = (e: Event) => {
 	const target = e.target as HTMLInputElement
 	const val = target.valueAsNumber
@@ -33,6 +38,20 @@ export const DebugUi = () => {
 		if (e.code === 'F1') {
 			e.preventDefault()
 			setShowUi(!showUi())
+		}
+	}
+	const [groundColors, setGroundColor, resetGroundColors] = useLocalStorage('groundColor', {
+		topColor: '#5AB552',
+		pathColor: '#856342',
+		pathColor2: '#A26D3F',
+		grassColor: '#26854C',
+	})
+	const updateGroundColor = (key: string, value: string) => {
+		setGroundColor({ ...groundColors, [key]: value })
+		for (const ground of groundQuery) {
+			if (ground.model instanceof Mesh && ground.model.material) {
+				(ground.model.material as any).uniforms[key].value = new Color(value)
+			}
 		}
 	}
 	onMount(() => {
@@ -124,6 +143,27 @@ export const DebugUi = () => {
 				</div>
 				<div>
 					<button onClick={reset}>Reset Save</button>
+				</div>
+				<div>
+					<For each={entries(groundColors)}>
+						{([name, color]) => {
+							return (
+								<div>
+									{name}
+									<input type="color" value={color} onChange={e => updateGroundColor(name, e.target.value)}></input>
+									{color}
+								</div>
+							)
+						}}
+					</For>
+					<div>
+						<button onClick={() => {
+							resetGroundColors()
+							window.location.reload() }}
+						>
+							reset ground colors
+						</button>
+					</div>
 				</div>
 				<ToonEditor />
 				<SaveEditor />

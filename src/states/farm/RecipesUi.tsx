@@ -3,19 +3,20 @@ import type { Accessor } from 'solid-js'
 import { For, Show, createEffect, createMemo, createSignal } from 'solid-js'
 import { InventoryTitle } from './CookingUi'
 import { ItemDisplay } from './InventoryUi'
+import { itemsData } from '@/constants/items'
+import type { Recipe } from '@/constants/recipes'
+import { recipes } from '@/constants/recipes'
 import type { Entity } from '@/global/entity'
 import { MenuType } from '@/global/entity'
 import { assets, ecs, ui } from '@/global/init'
-import { Modal } from '@/ui/components/Modal'
-import type { Recipe } from '@/constants/recipes'
-import { recipes } from '@/constants/recipes'
-import { itemsData } from '@/constants/items'
-import { Menu } from '@/ui/components/Menu'
+import { removeItem } from '@/global/save'
 import { ModType, type Modifier } from '@/lib/stats'
 import { InputIcon } from '@/ui/InputIcon'
-import { addItem, removeItem } from '@/global/save'
+import { Menu } from '@/ui/components/Menu'
+import { Modal } from '@/ui/components/Modal'
+import { range } from '@/utils/mapFunctions'
 
-const recipeQuery = ecs.with('menuType', 'menuOpen', 'menuInputs').where(({ menuType }) => [MenuType.Oven, MenuType.Cauldron].includes(menuType))
+const recipeQuery = ecs.with('menuType', 'menuOpen', 'menuInputs', 'recipesQueued').where(({ menuType }) => [MenuType.Oven, MenuType.Cauldron].includes(menuType))
 const getMenuName = (menuType: MenuType) => {
 	switch (menuType) {
 		case MenuType.Oven :return 'Oven'
@@ -46,34 +47,54 @@ export const RecipesUi = ({ player }: { player: With<Entity, 'inventory' | 'play
 		<Modal open={recipeEntity()}>
 			<Show when={recipeEntity()}>
 				{(entity) => {
+					const recipeQueued = ui.sync(() => recipeEntity()?.recipesQueued ?? [])
 					const recipesFiltered = createMemo(() => recipes.filter(recipe => recipe.processor === entity().menuType))
 					const [selectedRecipe, setSelectedRecipe] = createSignal<null | Recipe>(null)
 
 					return (
 						<div>
 							<InventoryTitle>{getMenuName(entity().menuType)}</InventoryTitle>
-							<div style={{ display: 'flex', gap: '2rem' }}>
-								<div style={{ display: 'grid', gap: '1rem' }}>
+							<div style={{ 'display': 'flex', 'gap': '2rem', 'min-height': '20rem' }}>
+
+								<div>
 									<Menu inputs={entity().menuInputs}>
 										{({ getProps }) => {
 											return (
-												<For each={recipesFiltered()}>
-													{(recipe, i) => {
-														const props = getProps(i() === 0)
-														createEffect(() => {
-															if (props.selected()) {
-																setSelectedRecipe(recipe)
-															}
-														})
-														return (
-															<div style={{ color: 'white' }}>
-																<div {...props} style={{ 'display': 'grid', 'grid-template-columns': 'auto 1fr', 'gap': '0.5rem', 'align-items': 'center' }}>
-																	<ItemDisplay selected={props.selected} item={recipe.output} />
-																</div>
-															</div>
-														)
-													}}
-												</For>
+												<div style={{ display: 'grid', gap: '1rem' }}>
+													<div style={{ 'display': 'flex', 'gap': '0.5rem', 'background': 'hsl(0,0%,100%,0.3)', 'padding': '0.5rem', 'border-radius': '1rem', 'width': 'fit-content', 'place-self': 'center' }}>
+														<For each={range(0, 4, i => i)}>
+															{(i) => {
+																const props = getProps()
+																return (
+																	<div style={{ color: 'white' }}>
+																		<div {...props} style={{ 'display': 'grid', 'align-items': 'center' }}>
+																			<ItemDisplay selected={props.selected} item={recipeQueued()[i]?.output} />
+																		</div>
+																	</div>
+																)
+															}}
+														</For>
+													</div>
+													<div style={{ 'display': 'grid', 'gap': '1rem', 'grid-template-columns': '1fr 1fr 1fr 1fr 1fr', 'height': 'fit-content' }}>
+														<For each={recipesFiltered()}>
+															{(recipe, i) => {
+																const props = getProps(i() === 0)
+																createEffect(() => {
+																	if (props.selected()) {
+																		setSelectedRecipe(recipe)
+																	}
+																})
+																return (
+																	<div style={{ color: 'white' }}>
+																		<div {...props} style={{ 'display': 'grid', 'align-items': 'center' }}>
+																			<ItemDisplay selected={props.selected} item={recipe.output} />
+																		</div>
+																	</div>
+																)
+															}}
+														</For>
+													</div>
+												</div>
 											)
 										}}
 									</Menu>
@@ -87,10 +108,12 @@ export const RecipesUi = ({ player }: { player: With<Entity, 'inventory' | 'play
 												if (recipe().input.every(input => player.inventory.some((item) => {
 													return item?.name === input.name && item.quantity >= input.quantity
 												}))) {
-													for (const input of recipe().input) {
-														removeItem(player, input)
+													if (recipeQueued().length < 4) {
+														for (const input of recipe().input) {
+															removeItem(player, input)
+														}
+														recipeEntity()?.recipesQueued.push(recipe())
 													}
-													addItem(player, recipe().output)
 												}
 											}
 											ui.updateSync(() => {

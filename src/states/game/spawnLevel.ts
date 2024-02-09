@@ -1,75 +1,49 @@
 import { ColliderDesc, RigidBodyDesc, RigidBodyType } from '@dimforge/rapier3d-compat'
 import { between } from 'randomish'
-import { createNoise3D } from 'simplex-noise'
+import { createNoise2D, createNoise3D } from 'simplex-noise'
+import type { Vector4 } from 'three'
 import { BoxGeometry, Euler, Group, Mesh, Quaternion, Vector3 } from 'three'
 import { enemyBundle } from '../dungeon/enemies'
-import type { EntityInstance, LayerInstance, Level } from '@/LDTKMap'
+import { spawnLight } from './spawnLights'
+import type { Level } from '@/debug/LevelEditor'
 import { getModel, props } from '@/debug/props'
 import type { InstanceHandle } from '@/global/assetLoaders'
-import { instanceMesh } from '@/global/assetLoaders'
+import { canvasToArray, instanceMesh } from '@/global/assetLoaders'
+import type { Entity } from '@/global/entity'
 import { assets, ecs, levelsData } from '@/global/init'
 import type { DungeonRessources, FarmRessources } from '@/global/states'
 import { getBoundingBox, getSize, modelColliderBundle } from '@/lib/models'
 import type { System } from '@/lib/state'
 import { GroundMaterial } from '@/shaders/GroundShader'
-import type { Entity } from '@/global/entity'
 
-enum GroundType {
-	Tree = 1,
-	Grass = 2,
-	TreeSmall = 3,
-}
 const SCALE = 10
 
-interface FieldInstances {
-
-	level: {
-		dungeon: boolean
+const spawnFromCanvas = (image: HTMLCanvasElement, scale: number, fn: (val: Vector4, x: number, y: number) => void) => {
+	const grid = canvasToArray(image)
+	for (let i = 0; i < grid.length; i += scale) {
+		const treeRow = grid[i]
+		for (let j = 0; j < treeRow.length; j += scale) {
+			const val = treeRow[j]
+			fn(val, j, i)
+		}
 	}
 }
-type EntityData<K extends keyof FieldInstances> = FieldInstances[K] & { id: string }
 
-export const getFieldIntances = <Name extends keyof FieldInstances>(entity: EntityInstance | Level) => {
-	return entity.fieldInstances.reduce((acc, v) => {
-		return { ...acc, [v.__identifier]: v.__value }
-	}, { id: entity.iid } as EntityData<Name>)
-}
-
-export const spawnGroundAndTrees = (layer: LayerInstance) => {
-	// ! Ground
-	const w = layer.__cWid * SCALE
-	const h = layer.__cHei * SCALE
-	const groundMesh = new Mesh(
-		new BoxGeometry(w, 1, h),
-		new GroundMaterial({ color: 0x26854C }),
-	)
-
-	groundMesh.receiveShadow = true
-	const bundle = modelColliderBundle(groundMesh, RigidBodyType.Fixed)
-	ecs.add({
-		inMap: true,
-		position: new Vector3(),
-		...bundle,
-	})
+export const spawnTrees = (level: Level) => {
 	const trees = Object.values(assets.trees).map(instanceMesh)
 	const treesInstances: InstanceHandle[] = []
 	const noise = createNoise3D(() => 0)
-	for (let i = 0; i < layer.intGridCsv.length; i++) {
-		const val = layer.intGridCsv[i]
-		if (val === GroundType.Tree || val === GroundType.TreeSmall) {
-			const x = i % layer.__cWid
-			const y = Math.floor(i / layer.__cWid)
+	spawnFromCanvas(level.trees, SCALE, (val, x, y) => {
+		if (val.x === 255 || val.y === 255) {
 			const position = new Vector3(
-				-x + layer.__cWid / 2 + noise(x, y, y),
+				(level.trees.width / 2 - x) / SCALE + noise(x, y, y),
 				0,
-				-y + layer.__cHei / 2 + noise(y, x, x),
+				(level.trees.height / 2 - y) / SCALE + noise(y, x, x),
 			).multiplyScalar(SCALE)
-			const size = 3 + ((val === GroundType.TreeSmall ? 1 : 2) * Math.abs(noise(x, y, x)))
+			const size = 3 + (1 * Math.abs(noise(x, y, x)))
 			const treeGenerator = trees[Math.floor(trees.length * Math.abs(Math.sin((x + y) * 50 * (x - y))))]
 			const instanceHandle = treeGenerator.addAt(position, size, new Euler(0, noise(x, y, x), 0))
-			if (val === GroundType.TreeSmall) {
-				treesInstances.push(instanceHandle)
-			}
+			if (val.x === 255) treesInstances.push(instanceHandle)
 			const treeSize = getSize(treeGenerator.glb.scene).multiplyScalar(size)
 			ecs.add({
 				inMap: true,
@@ -79,54 +53,97 @@ export const spawnGroundAndTrees = (layer: LayerInstance) => {
 				size: treeSize,
 				bodyDesc: RigidBodyDesc.fixed().lockRotations(),
 				colliderDesc: ColliderDesc.cylinder(treeSize.y / 2, treeSize.x / 2),
+				tree: true,
 			})
 		}
-	}
+	})
 	trees.forEach((t) => {
 		const group = t.process()
-		ecs.add({ group, inMap: true })
+		ecs.add({ group, inMap: true, tree: true })
 	})
 	for (const treesInstance of treesInstances) {
 		treesInstance.setUniform('playerZ', 1)
 	}
 }
-const treeQuery = ecs.with('tree', 'position', 'instanceHandle')
-export const updateTreeOpacity = () => {
-	for (const tree of treeQuery) {
-		tree.instanceHandle.setUniform('playerZ', 1)
-	}
+export const spawnGrass = (level: Level) => {
+	const grass = Object.entries(assets.models).filter(([name]) => name.includes('Grass')).map(x => instanceMesh(x[1]))
+	const flowers = Object.entries(assets.models).filter(([name]) => name.includes('Flower')).map(x => instanceMesh(x[1]))
+	const noise = createNoise2D(() => 0)
+	const noise2 = createNoise2D(() => 100)
+	const noiseX = createNoise2D(() => 200)
+	const noiseY = createNoise2D(() => 300)
+	const noiseFlower = createNoise2D(() => 400)
+	const noiseFlower2 = createNoise2D(() => 500)
+	spawnFromCanvas(level.grass, 5, (val, x, y) => {
+		if (val.x !== 255) return
+		const n = noise(x / level.size.x * 10, y / level.size.y * 10)
+		const n2 = noise2(x / level.size.x * 10, y / level.size.y * 10)
+		const nX = noiseX(x / level.size.x * 10, y / level.size.y * 10)
+		const nY = noiseY(x / level.size.x * 10, y / level.size.y * 10)
+		const nF = noiseFlower(x / level.size.x * 100, y / level.size.y * 100)
+		const nF2 = noiseFlower2(x / level.size.x * 10, y / level.size.y * 10)
+		if (n2 < 0.7 && (n < 0 || n2 < 0)) return
+		const position = new Vector3(
+			(level.grass.width / 2 - x) / SCALE + nX,
+			0.1,
+			(level.grass.height / 2 - y) / SCALE + nY,
+		).multiplyScalar(SCALE)
+		const isFlower = nF > 0.8
+		const size = 1
+		const grassGenerator = isFlower
+			? flowers[Math.floor(flowers.length * Math.abs(nF2))]
+			: grass[Math.floor(grass.length * Math.abs(nF2))]
+		const instanceHandle = grassGenerator.addAt(position, size, new Euler(0, noise(x, y), 0))
+		ecs.add({
+			inMap: true,
+			position,
+			instanceHandle,
+			grass: true,
+		})
+	})
+	grass.forEach((t) => {
+		const group = t.process()
+		ecs.add({ group, inMap: true, grass: true })
+	})
+	flowers.forEach((t) => {
+		const group = t.process()
+		ecs.add({ group, inMap: true, grass: true })
+	})
+}
+export const spawnGroundAndTrees = (level: Level) => {
+	// ! Ground
+	const groundMesh = new Mesh(
+		new BoxGeometry(level.size.x, 1, level.size.y),
+		new (GroundMaterial(level.path, level.size.x, level.size.y))({ }),
+	)
+	spawnLight(level.size)
+
+	groundMesh.receiveShadow = true
+	const bundle = modelColliderBundle(groundMesh, RigidBodyType.Fixed)
+	ecs.add({
+		inMap: true,
+		position: new Vector3(),
+		ground: true,
+		...bundle,
+	})
+	spawnTrees(level)
+	spawnGrass(level)
 }
 
 export const spawnFarm: System<FarmRessources> = () => {
-	const level = assets.levels.levels.find(l => l.identifier === 'farm')!
-	ecs.add({ map: level.iid })
-	for (const layer of level.layerInstances!) {
-		switch (layer.__type) {
-			case 'IntGrid': {
-				if (layer.__identifier === 'ground') {
-					spawnGroundAndTrees(layer)
-				}
-			}; break
-		}
-	}
+	const level = levelsData.levels.find(level => level.farm)!
+	ecs.add({ map: level.id })
+	spawnGroundAndTrees(level)
 }
 export const spawnDungeon: System<DungeonRessources> = ({ dungeon }) => {
-	ecs.add({ map: dungeon.plan.iid })
+	ecs.add({ map: dungeon.plan.id })
 	for (const enemy of dungeon.enemies) {
 		ecs.add({
 			...enemyBundle(enemy),
 			position: new Vector3(between(-10, 10), 0, between(-10, 10)),
 		})
 	}
-	for (const layer of dungeon.plan.layerInstances!) {
-		switch (layer.__type) {
-			case 'IntGrid':{
-				if (layer.__identifier === 'ground') {
-					spawnGroundAndTrees(layer)
-				}
-			};break
-		}
-	}
+	spawnGroundAndTrees(dungeon.plan)
 }
 
 const mapQuery = ecs.with('map')

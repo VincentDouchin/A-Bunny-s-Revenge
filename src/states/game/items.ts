@@ -68,7 +68,7 @@ export const collectItems = () => {
 }
 
 export const popItems = () => ecs.with('body', 'item', 'collider').onEntityAdded.subscribe((e) => {
-	const force = new Vector3().randomDirection()
+	const force = e.popDirection ?? new Vector3().randomDirection()
 	force.y = 300
 	force.x = force.x * 100
 	force.z = force.z * 100

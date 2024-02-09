@@ -1,19 +1,20 @@
 import { PerspectiveCamera, Vector3 } from 'three'
 import { params } from './context'
-import { ecs } from './init'
+import { ecs, time } from './init'
+import { debugState } from '@/debug/debugState'
 
 export const camera = new PerspectiveCamera(params.fov, window.innerWidth / window.innerHeight, 0.1, 1000)
 
 export const initCamera = () => {
 	camera.zoom = window.innerWidth / window.innerHeight / params.zoom
 	camera.updateProjectionMatrix()
-	ecs.add({ camera, position: new Vector3(), mainCamera: true })
+	ecs.add({ camera, position: new Vector3(), mainCamera: true, cameraLookat: new Vector3() })
 }
-const cameraQuery = ecs.with('camera', 'position', 'mainCamera')
+const cameraQuery = ecs.with('camera', 'position', 'mainCamera', 'cameraLookat')
 const cameraTargetQuery = ecs.with('cameratarget', 'worldPosition')
 const doorsQuery = ecs.with('door', 'position')
 export const moveCamera = () => {
-	for (const { position, camera } of cameraQuery) {
+	for (const { position, camera, cameraLookat } of cameraQuery) {
 		const target = new Vector3()
 		for (const { worldPosition } of cameraTargetQuery) {
 			target.z = worldPosition.z
@@ -34,10 +35,19 @@ export const moveCamera = () => {
 				}
 			}
 		}
-		camera.lookAt(target)
-		position.set(...target.add(new Vector3(params.cameraOffsetX, params.cameraOffsetY, params.cameraOffsetZ)).toArray())
-		camera.zoom = window.innerWidth / window.innerHeight / params.zoom
-		camera.fov = params.fov
-		camera.updateProjectionMatrix()
+		if (!debugState.enabled) {
+			cameraLookat.lerp(target, time.delta / 1000 * 5)
+			camera.lookAt(cameraLookat)
+			position.set(...cameraLookat.clone().add(new Vector3(params.cameraOffsetX, params.cameraOffsetY, params.cameraOffsetZ)).toArray())
+			camera.zoom = window.innerWidth / window.innerHeight / params.zoom
+			camera.fov = params.fov
+		}
 	}
 }
+
+export const initializeCameraPosition = () => ecs.with('initialCameratarget', 'position').onEntityAdded.subscribe((e) => {
+	for (const camera of cameraQuery) {
+		camera.cameraLookat.set(...e.position.toArray())
+		ecs.removeComponent(e, 'initialCameratarget')
+	}
+})

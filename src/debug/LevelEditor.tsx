@@ -1,9 +1,10 @@
 import type { models } from '@assets/assets'
 import type { RigidBodyType } from '@dimforge/rapier3d-compat'
-import { set } from 'idb-keyval'
+import { get, set } from 'idb-keyval'
 import type { With } from 'miniplex'
 import { For, Show, createEffect, createMemo, createSignal, onCleanup, onMount } from 'solid-js'
-import { Mesh, MeshStandardMaterial, Quaternion, Raycaster, Vector2 } from 'three'
+import type { Vec2 } from 'three'
+import { Mesh, MeshStandardMaterial, Quaternion, Raycaster, Vector2, Vector3 } from 'three'
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls'
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader'
 import { generateUUID } from 'three/src/math/MathUtils'
@@ -11,7 +12,8 @@ import { EntityEditor } from './EntityEditor'
 import type { PlacableProp, customModel } from './props'
 import { getModel, props } from './props'
 
-import type { Level } from '@/LDTKMap'
+import { MapEditor } from './MapEditor'
+import { debugState } from './debugState'
 import { getFileName } from '@/global/assetLoaders'
 import { loadLevelData } from '@/global/assets'
 import { camera } from '@/global/camera'
@@ -21,9 +23,9 @@ import { assets, ecs, levelsData, ui } from '@/global/init'
 import { renderer, scene } from '@/global/rendering'
 import { campState, dungeonState } from '@/global/states'
 import { ToonMaterial } from '@/shaders/GroundShader'
-import { spawnCharacter } from '@/states/game/spawnCharacter'
+import { playerBundle } from '@/states/game/spawnCharacter'
 import { spawnGroundAndTrees, spawnLevelData } from '@/states/game/spawnLevel'
-import { spawnLight } from '@/states/game/spawnLights'
+import { getScreenBuffer } from '@/utils/buffer'
 import { getRandom } from '@/utils/mapFunctions'
 
 export interface EntityData<T extends Record<string, any>> {
@@ -43,16 +45,31 @@ export type CollidersData = Partial<Record<models | customModel, {
 	offset: [number, number, number]
 	scale: number | null
 } >>
+export type LevelImage = { [k in keyof Level]: Level[k] extends HTMLCanvasElement ? k : never }[keyof Level]
 
+export type RawLevel = { [k in keyof Level]: Level[k] extends HTMLCanvasElement ? string : Level[k] }
+
+export interface Level {
+	path: HTMLCanvasElement
+	trees: HTMLCanvasElement
+	grass: HTMLCanvasElement
+	farm: boolean
+	dungeon: boolean
+	id: string
+	name: string
+	size: { x: number, y: number }
+}
 const addedEntitiesQuery = ecs.with('entityId', 'model', 'group', 'position', 'rotation')
 const mapQuery = ecs.with('map')
 const cameraQuery = ecs.with('mainCamera', 'camera')
 export const LevelEditor = () => {
-	const [disableSave, setDisableSave] = createSignal(false)
+	const [disableSave, setDisableSave] = createSignal(false, { equals: false })
 	const [open, setOpen] = createSignal(false)
 	const map = ui.sync(() => mapQuery.first?.map)
 	const download = async () => {
 		const data = await loadLevelData()
+		// @ts-expect-error okok
+		data.levels = await get('levels')
 		const blob = new Blob([JSON.stringify(data)], { type: 'application/json' })
 		const a = document.createElement('a')
 		a.download = 'data.json'
@@ -61,6 +78,7 @@ export const LevelEditor = () => {
 		a.click()
 		document.body.removeChild(a)
 	}
+
 	const showUiListener = (e: KeyboardEvent) => {
 		if (e.code === 'F2') {
 			e.preventDefault()
@@ -78,12 +96,75 @@ export const LevelEditor = () => {
 		<div>
 			<Show when={open() && map()}>
 				{(map) => {
+					const [draw, setDraw] = createSignal(false)
 					const [random, setRandom] = createSignal(false)
 					const [selectedProp, setSelectedProp] = createSignal<PlacableProp<any> | null>(null)
 					const [selectedEntity, setSelectedEntity] = createSignal<With<Entity, 'entityId' | 'model' | 'position' | 'rotation'> | null>(null)
 					const [selectedModel, setSelectedModel] = createSignal<null | models | customModel>(null)
-					const [levelData, setLevelData] = createSignal<LevelData>({})
-					const [colliderData, setColliderData] = createSignal<CollidersData>({})
+					const [levelData, setLevelData] = createSignal<LevelData>(levelsData.levelData)
+					const [colliderData, setColliderData] = createSignal<CollidersData>(levelsData.colliderData)
+					// ! LEVELS
+					const [activeLevel, setActiveLevel] = createSignal<Level>(levelsData.levels.find(x => x.id === map())!)
+					const [levels, setLevels] = createSignal<Level[]>(levelsData.levels)
+					const newLevel = () => {
+						const id = generateUUID()
+						setLevels(x => [...x, {
+							path: getScreenBuffer(100, 100).canvas,
+							trees: getScreenBuffer(100, 100).canvas,
+							grass: getScreenBuffer(100, 100).canvas,
+							size: { x: 100, y: 100 },
+							farm: false,
+							dungeon: false,
+							name: `level n°${x.length + 1}`,
+							id,
+						}])
+						setActiveLevel(levels().at(-1)!)
+					}
+					createEffect(() => {
+						Object.assign(levelsData.levels, levels())
+						if (!disableSave()) {
+							const rawLevels: RawLevel[] = levels().map(level => ({
+								...level,
+								path: level.path.toDataURL(),
+								trees: level.trees.toDataURL(),
+								grass: level.grass.toDataURL(),
+							}))
+							set('levels', rawLevels)
+						}
+					})
+					const deleteLevel = (level: Level) => {
+						// eslint-disable-next-line no-alert
+						if (confirm('delete level?')) {
+							setLevels(x => x.filter(y => y !== level))
+						}
+					}
+					const updateLevel = (level: Level) => (newLevel: Partial<Level>) => {
+						Object.assign(level, newLevel)
+						setActiveLevel(level)
+						setLevels(x => x.map(l => l === level ? { ...l, ...newLevel } : l))
+					}
+					const switchLevel = (level: Level) => {
+						setActiveLevel(level)
+						dungeonState.disable()
+						campState.disable()
+
+						ecs.add({ map: level.id })
+						spawnGroundAndTrees(level)
+						spawnLevelData({})
+						ecs.add({ ...playerBundle(), position: new Vector3() })
+					}
+					const updateLevelSize = (size: Vec2) => {
+						const newLevel: Level = activeLevel()
+						newLevel.size = size
+						for (const canvas of ['path', 'trees', 'grass'] as LevelImage[]) {
+							const buffer = getScreenBuffer(size.x, size.y, true)
+							buffer.drawImage(activeLevel()[canvas], 0, 0, size.x, size.y)
+							newLevel[canvas] = buffer.canvas
+						}
+						updateLevel(activeLevel())(newLevel)
+						switchLevel(newLevel)
+					}
+
 					const uploadModel = () => {
 						setDisableSave(true)
 						const input = document.createElement('input')
@@ -119,6 +200,7 @@ export const LevelEditor = () => {
 						}
 					})
 					onMount(async () => {
+						debugState.enable()
 						const val = window.innerWidth
 						const ratio = window.innerHeight / window.innerWidth
 						renderer.setSize(val, val * ratio)
@@ -126,7 +208,11 @@ export const LevelEditor = () => {
 						camera.removeFromParent()
 						camera.position.set(...group.position.toArray())
 						const controls = new OrbitControls(camera, renderer.domElement)
+						createEffect(() => {
+							controls.enabled = !draw()
+						})
 						controls.update()
+
 						ui.updateSync(() => controls.update())
 						createEffect(() => {
 							if (selectedEntity()) {
@@ -136,6 +222,7 @@ export const LevelEditor = () => {
 							}
 						})
 						onCleanup(() => {
+							debugState.disable()
 							group?.add(camera)
 							const val = params.renderWidth
 							const ratio = window.innerHeight / window.innerWidth
@@ -143,9 +230,6 @@ export const LevelEditor = () => {
 							renderer.setSize(val, val * ratio)
 							controls.dispose()
 						})
-						const data = await loadLevelData()
-						setLevelData(data.levelData)
-						setColliderData(data.colliderData)
 					})
 
 					createEffect(() => {
@@ -160,6 +244,7 @@ export const LevelEditor = () => {
 							set('colliderData', colliderData())
 						}
 					})
+
 					const clickListener = (event: MouseEvent) => {
 						const camera = cameraQuery.first?.camera
 						if (!camera) return
@@ -175,44 +260,53 @@ export const LevelEditor = () => {
 						raycaster.setFromCamera(pointer, camera)
 
 						const intersects = raycaster.intersectObjects(scene.children)
-						if (selected && propModel) {
-							const position = intersects.find(x => x.point.y === 0.5)?.point
-							if (!position) return
-							const scale = colliderData()[propModel]?.scale ?? 1
-							const model = getModel(propModel)
-							model.scale.setScalar(scale)
-							const placed = ecs.add({
-								model,
-								position,
-								entityId: generateUUID(),
-								rotation: new Quaternion(),
-								inMap: true,
-							})
-							setLevelData({
-								...levelData(),
-								[placed.entityId]: {
-									model: propModel,
-									scale,
-									position: placed.position.toArray(),
-									rotation: placed.rotation.toJSON(),
-									map: map(),
-									data: selected.data,
-								},
-							})
-							if (!event.ctrlKey) {
-								setSelectedEntity(placed)
-								setSelectedProp(null)
-							}
-						} else {
-							let hasSelected = false
-							for (const addedEntity of addedEntitiesQuery) {
-								if (!hasSelected) {
+						if (!draw()) {
+							if (selected && propModel) {
+								const position = intersects.find(x => x.point.y === 0.5)?.point
+								if (!position) return
+								const scale = colliderData()[propModel]?.scale ?? 1
+								const model = getModel(propModel)
+								model.scale.setScalar(scale)
+								const placed = ecs.add({
+									model,
+									position,
+									entityId: generateUUID(),
+									rotation: new Quaternion(),
+									inMap: true,
+								})
+								setLevelData({
+									...levelData(),
+									[placed.entityId]: {
+										model: propModel,
+										scale,
+										position: placed.position.toArray(),
+										rotation: placed.rotation.toJSON(),
+										map: map(),
+										data: selected.data,
+									},
+								})
+								if (!event.ctrlKey) {
+									setSelectedEntity(null)
+									setSelectedEntity(placed)
+									setSelectedProp(null)
+								}
+							} else {
+								let selected: Entity | null = null
+								let distance = Number.POSITIVE_INFINITY
+								for (const addedEntity of addedEntitiesQuery) {
+									if (addedEntity === selectedEntity()) {
+										return
+									}
 									addedEntity.model.traverse((x) => {
-										if (intersects.some(int => int.object === x)) {
-											setSelectedEntity(addedEntity)
-											hasSelected = true
+										const collision = intersects.find(int => int.object === x)
+										if (collision && collision.distance < distance) {
+											selected = addedEntity
+											distance = collision.distance
 										}
 									})
+								}
+								if (selected) {
+									setSelectedEntity(selected)
 								}
 							}
 						}
@@ -232,35 +326,49 @@ export const LevelEditor = () => {
 						renderer.domElement.removeEventListener('contextmenu', unSelect)
 						params.pixelation = true
 					})
-					const switchLevel = (level: Level) => {
-						dungeonState.disable()
-						campState.disable()
-						const ground = level.layerInstances?.find(layer => layer.__identifier === 'ground')
-						if (ground) {
-							ecs.add({ map: level.iid })
-							spawnGroundAndTrees(ground)
-							spawnLight()
-							spawnCharacter({})
-							spawnLevelData({})
-						}
-					}
+					const update = createMemo(() => updateLevel(activeLevel()))
+
 					return (
 						<div style={{ 'z-index': 2, 'position': 'fixed' }}>
 							<div style={{ display: 'grid' }}>
-								<For each={assets.levels.levels}>
+								<For each={levels()}>
 									{(level) => {
 										return (
-											<button
-
-												onClick={() => switchLevel(level)}
-											>
-												{level.identifier}
-											</button>
+											<div>
+												<button
+													onClick={() => switchLevel(level)}
+												>
+													{level.name}
+												</button>
+												<button onClick={() => deleteLevel(level)}>X</button>
+											</div>
 										)
 									}}
 								</For>
 							</div>
+							<button onClick={newLevel}>New level</button>
 							<button onClick={download}>Download</button>
+
+							<div>
+								<input type="text" value={activeLevel().name} onChange={e => update()({ name: e.target.value })} />
+								<div>
+									farm
+									<input type="checkbox" checked={activeLevel().farm} onChange={e => update()({ farm: e.target.checked })}></input>
+								</div>
+								<div>
+									dungeon
+									<input type="checkbox" checked={activeLevel().dungeon} onChange={e => update()({ dungeon: e.target.checked })}></input>
+								</div>
+								<div>
+									width
+									<input type="number" value={activeLevel().size.x} onChange={e => updateLevelSize({ ...activeLevel().size, x: e.target.valueAsNumber })}></input>
+								</div>
+								<div>
+									height
+									<input type="number" value={activeLevel().size.y} onChange={e => updateLevelSize({ ...activeLevel().size, y: e.target.valueAsNumber })}></input>
+								</div>
+
+							</div>
 
 							<div style={{ 'position': 'fixed', 'top': 0, 'right': 0, 'display': 'grid', 'grid-template-columns': 'auto auto' }}>
 								<div>
@@ -321,8 +429,11 @@ export const LevelEditor = () => {
 									</For>
 									<span>press ctrl to keep placing props</span>
 									<div><button onClick={uploadModel}>preview model</button></div>
+									<div><button onClick={() => setDraw(x => !x)} classList={{ selected: draw() }}>Draw map</button></div>
+									<Show when={draw() && activeLevel()}>
+										{active => <MapEditor activeLevel={active} updateLevel={updateLevel(active())} />}
+									</Show>
 								</div>
-
 							</div>
 						</div>
 					)

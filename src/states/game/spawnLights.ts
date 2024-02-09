@@ -1,17 +1,17 @@
+import type { Vec2 } from 'three'
 import { AmbientLight, DirectionalLight, Vector3 } from 'three'
 import { ecs } from '@/global/init'
 
-export const spawnLight = () => {
+export const spawnLight = ({ x, y }: Vec2) => {
 	const light = new DirectionalLight(0xFFFFFF, 0.3)
 	light.lookAt(new Vector3(0, 0, 0))
-	const size = 1024
-	light.shadow.mapSize.set(size * 8, size * 8)
+	light.shadow.mapSize.set(x * 2, y * 2)
 
 	light.castShadow = true
-	light.shadow.camera.top = size
-	light.shadow.camera.bottom = -size
-	light.shadow.camera.left = -size
-	light.shadow.camera.right = size
+	light.shadow.camera.top = y / 2
+	light.shadow.camera.bottom = -y / 2
+	light.shadow.camera.left = -x / 2
+	light.shadow.camera.right = x / 2
 	light.shadow.bias = 0.002
 	ecs.add({
 		inMap: true,

@@ -2,11 +2,11 @@ import { CanvasTexture } from 'three'
 
 export const randomColor = () => `#${Math.floor(Math.random() * 16777215).toString(16)}`
 
-export const getScreenBuffer = (width: number, height: number) => {
+export const getScreenBuffer = (width: number, height: number, willReadFrequently = false) => {
 	const canvas = document.createElement('canvas')
 	canvas.width = width
 	canvas.height = height
-	const ctx = canvas.getContext('2d', { alpha: true })!
+	const ctx = canvas.getContext('2d', { alpha: true, willReadFrequently })!
 	return ctx
 }
 export const blankTexture = (w: number, h: number, color = 'red') => {

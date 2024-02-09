@@ -17,6 +17,7 @@ import type { direction } from '@/lib/directions'
 import type { MenuInputMap, PlayerInputMap } from '@/global/inputMaps'
 import type { Item } from '@/constants/items'
 import type { NPC } from '@/constants/NPC'
+import type { Recipe } from '@/constants/recipes'
 
 export type Dialog = Generator<string | string[] | void | false, void, number | void>
 export enum Faction {
@@ -40,6 +41,7 @@ export enum MenuType {
 	Chest,
 	Player,
 	Quest,
+	OvenMinigame,
 }
 export const cropNames = ['carrot', 'beet', 'mushroom', 'tomato', 'lettuce'] as const
 
@@ -57,8 +59,10 @@ export interface Entity {
 	rotation?: Quaternion
 	// ! Camera
 	cameratarget?: true
+	initialCameratarget?: true
 	followCamera?: true
 	mainCamera?: true
+	cameraLookat?: Vector3
 	// ! ThreeJS
 	scene?: Scene
 	renderer?: WebGLRenderer
@@ -89,6 +93,7 @@ export interface Entity {
 	beeAnimator?: Animator<Animations['Armabee']>
 	shagaAnimator?: Animator<Animations['Shaga_A']>
 	pandaAnimator?: Animator<Animations['Panda']>
+	ovenAnimator?: Animator<Animations['BunnyOvenPacked']>
 	template?: () => JSXElement
 	el?: HTMLElement
 	cssObject?: true
@@ -101,6 +106,7 @@ export interface Entity {
 	planted?: With<Entity, 'crop'>
 	// ! Game
 	map?: string
+	ground?: true
 	interacting?: true
 	interactable?: Interactable
 	interactionContainer?: CSS2DObject
@@ -108,6 +114,7 @@ export interface Entity {
 	// ! Camp
 	door?: direction
 	tree?: true
+	grass?: true
 	instanceHandle?: InstanceHandle
 	// ! Dungeon
 	faction?: Faction
@@ -115,6 +122,7 @@ export interface Entity {
 	// ! Items
 	item?: true
 	itemLabel?: items
+	popDirection?: Vector3
 	// ! Inventory
 	inventory?: (Item | null)[]
 	inventorySize?: number
@@ -149,8 +157,12 @@ export interface Entity {
 	// ! FSM
 	stateMachine?: StateMachine<states>
 	state?: states
+	// ! Minigame
+	recipesQueued?: Recipe[]
+	oven?: With<Entity, 'recipesQueued' | 'model'>
+	minigameContainer?: CSS2DObject
 }
-export type states = 'idle' | 'running' | 'picking' | 'dying' | 'hit' | 'hello' | 'dead' | 'waitingAttack' | 'attacking' | 'attackCooldown'
+export type states = 'idle' | 'running' | 'picking' | 'dying' | 'hit' | 'hello' | 'dead' | 'waitingAttack' | 'attacking' | 'attackCooldown' | 'doorOpening' | 'doorClosing'
 export type Bundle<C extends keyof Entity> = () => With<Entity, C>
 
 type KeysOfType<T, U> = {

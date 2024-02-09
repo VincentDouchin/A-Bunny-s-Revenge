@@ -1,10 +1,11 @@
-import type { Euler, Material } from 'three'
-import { DynamicDrawUsage, Group, Matrix4, Mesh, TextureLoader, Vector3 } from 'three'
+import type { Euler, Material, Vec2 } from 'three'
+import { DynamicDrawUsage, Group, Matrix4, Mesh, TextureLoader, Vector3, Vector4 } from 'three'
 
 import { InstancedUniformsMesh } from 'three-instanced-uniforms-mesh'
 import { DRACOLoader } from 'three/examples/jsm/loaders/DRACOLoader'
 import type { GLTF } from 'three/examples/jsm/loaders/GLTFLoader'
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader'
+import { getScreenBuffer } from '@/utils/buffer'
 
 export type stringCaster<K extends string> = (s: string) => K
 export const getFileName = <K extends string>(path: string) => {
@@ -83,4 +84,37 @@ export const instanceMesh = <T extends Material>(obj: GLTF) => {
 		return group
 	}
 	return { addAt, process, glb: obj }
+}
+
+export const dataUrlToCanvas = async (size: Vec2, dataUrl?: string) => {
+	const buffer = getScreenBuffer(size.x, size.y)
+	if (dataUrl && dataUrl !== 'data:,') {
+		const img = await loadImage(dataUrl)
+		buffer.drawImage(img, 0, 0, img.width, img.height)
+	}
+	return buffer.canvas
+}
+export const canvasToArray = (canvas: HTMLCanvasElement) => {
+	const context = canvas.getContext('2d')!
+	const imageData = context.getImageData(0, 0, canvas.width, canvas.height)
+	const pixels = []
+
+	for (let i = 0; i < imageData.data.length; i += 4) {
+		const pixel = new Vector4(
+			imageData.data[i],
+			imageData.data[i + 1],
+			imageData.data[i + 2],
+			imageData.data[i + 3],
+		)
+
+		pixels.push(pixel)
+	}
+
+	const arrayOfArrays = []
+
+	for (let i = 0; i < pixels.length; i += canvas.width) {
+		arrayOfArrays.push(pixels.slice(i, i + canvas.width))
+	}
+
+	return arrayOfArrays
 }

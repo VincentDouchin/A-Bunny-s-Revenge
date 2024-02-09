@@ -1,5 +1,5 @@
-import type { Level } from '@/LDTKMap'
 import type { enemy } from '@/constants/enemies'
+import type { Level } from '@/debug/LevelEditor'
 import type { direction } from '@/lib/directions'
 
 export enum RoomType {

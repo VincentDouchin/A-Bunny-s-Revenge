@@ -1,10 +1,12 @@
 import type { Material, WebGLProgramParametersWithUniforms } from 'three'
-import { Color, MeshPhongMaterial, MeshStandardMaterial, Uniform } from 'three'
+import { CanvasTexture, Color, MeshPhongMaterial, MeshStandardMaterial, Uniform, Vector2 } from 'three'
 
 import { generateUUID } from 'three/src/math/MathUtils'
 import noise from '@/shaders/glsl/lib/cnoise.glsl?raw'
 
 import { gradient } from '@/shaders/glsl/lib/generateGradient'
+import { assets } from '@/global/init'
+import { useLocalStorage } from '@/utils/useLocalStorage'
 
 type Constructor<T> = new (...args: any[]) => T
 export class MaterialExtension<U extends Record<string, any>> {
@@ -89,7 +91,7 @@ export const override = (variable: string, part: string) => (shader: string) => 
 export const replace = (toReplace: string, part: string) => (shader: string) => {
 	return shader.replace(toReplace, part)
 }
-export const addUniform = (name: string, type: 'vec2' | 'vec3' | 'vec4' | 'float' | 'int' | 'bool') => (shader: string) => {
+export const addUniform = (name: string, type: 'vec2' | 'vec3' | 'vec4' | 'float' | 'int' | 'bool' | 'sampler2D') => (shader: string) => {
 	return importLib(`uniform ${type} ${name};`)(shader)
 }
 export const remove = (toRemove: string) => (shader: string) => shader.replace(toRemove, '')
@@ -108,22 +110,51 @@ const toonExtension = new MaterialExtension({ }).frag(
 	vec3 outgoingLight2 = colorRamp(color.xyz, max_light);
 	gl_FragColor = vec4(  outgoingLight2  , opacity);`),
 )
-const groundExtension = new MaterialExtension({ topColor: new Color(0x5AB552) }).defines('USE_UV').frag(
-	importLib(noise),
-	importLib(`uniform vec3 topColor;`),
-	remove('color.rgb *= diffuse;'),
-	replace('vec4 color = vec4(1.);', /* glsl */`
-	vec4 color = vec4(1.);
-	float noise = cnoise(vUv.xyx*25.);
-	float noise2 = cnoise(vUv.yxy * 15.);
-	color.rgb =
-		step(0.4,noise2) == 1. 
-		? mix(diffuse,topColor,0.3)
-		: step(0.3,noise) == 1. 
-			? mix(diffuse,topColor,0.2) 
-			: diffuse ;
+const [groundColors] = useLocalStorage('groundColor', {
+	topColor: '#5AB552',
+	pathColor: '#856342',
+	pathColor2: '#A26D3F',
+	grassColor: '#26854C',
+})
+const groundExtension = (image: HTMLCanvasElement, x: number, y: number) => {
+	const level = new CanvasTexture(image)
+	return new MaterialExtension({
+		level,
+		size: new Vector2(x, y),
+		grassColor2: new Color(groundColors.topColor),
+		pathColor: new Color(groundColors.pathColor),
+		pathColor2: new Color(groundColors.pathColor2),
+		grassColor: new Color(groundColors.grassColor),
+		ground: assets.textures.Dirt4_Dark,
+	}).defines('USE_UV').frag(
+		importLib(noise),
+		addUniform('size', 'vec2'),
+		addUniform('level', 'sampler2D'),
+		addUniform(`pathColor2`, 'vec3'),
+		addUniform(`pathColor`, 'vec3'),
+		addUniform(`grassColor2`, 'vec3'),
+		addUniform(`grassColor`, 'vec3'),
+		remove('color.rgb *= diffuse;'),
+		replace('vec4 color = vec4(1.);', /* glsl */`
+			vec4 color = vec4(1.);
+			vec2 scaled_uv = vUv*size/10.;
+			float noise = cnoise(scaled_uv.xyx);
+			float noise2 = cnoise((scaled_uv/2.).yxy);
+			bool is_path = texture2D(level,1. - vUv ).r == 1.0;
+			if(is_path){
+				color.rgb = step(cnoise(scaled_uv.yyy)+cnoise(scaled_uv.xyy)/2.,0.2) ==0.
+					? pathColor
+					: mix(pathColor,pathColor2,0.1) ;
+			}else {
+				color.rgb =
+					step(0.4,noise2) == 1.
+					? mix(grassColor,grassColor2,0.3)
+					: step(0.3,noise) == 1.
+						? mix(grassColor,grassColor2,0.2)
+						: grassColor ;
+			}
 	`),
-)
+	) }
 
 const treeExtension = new MaterialExtension({ playerZ: 0 }).frag(
 	addUniform('playerZ', 'float'),
@@ -141,5 +172,5 @@ const characterExtension = new MaterialExtension({ flash: 0 }).frag(
 )
 export const CharacterMaterial = extendMaterial(MeshStandardMaterial, [toonExtension, characterExtension])
 export const ToonMaterial = extendMaterial(MeshStandardMaterial, [toonExtension])
-export const GroundMaterial = extendMaterial(MeshStandardMaterial, [toonExtension, groundExtension])
+export const GroundMaterial = (image: HTMLCanvasElement, x: number, y: number) => extendMaterial(MeshStandardMaterial, [toonExtension, groundExtension(image, x, y)])
 export const TreeMaterial = extendMaterial(MeshPhongMaterial, [toonExtension, treeExtension])

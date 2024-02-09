@@ -31,6 +31,7 @@ export const playerBundle = () => {
 		playerAnimator: new Animator(bundle.model, model.animations),
 		inMap: true,
 		cameratarget: true,
+		initialCameratarget: true,
 		faction: Faction.Player,
 		sensor: true,
 		player: true,

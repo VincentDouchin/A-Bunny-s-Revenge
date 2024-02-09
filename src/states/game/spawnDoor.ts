@@ -1,4 +1,4 @@
-import { BoxGeometry, DoubleSide, Group, Mesh, MeshStandardMaterial, PlaneGeometry, ShaderMaterial } from 'three'
+import { BoxGeometry, DoubleSide, Group, Mesh, MeshBasicMaterial, MeshStandardMaterial, PlaneGeometry, ShaderMaterial } from 'three'
 import { RoomType } from '../dungeon/dungeonTypes'
 import { ecs, world } from '@/global/init'
 import type { DungeonRessources } from '@/global/states'
@@ -48,7 +48,15 @@ export const doorSide = () => {
 	mesh.position.z = 10
 	mesh.position.y = 15
 	mesh.renderOrder = -1
-	return mesh
+	const doorBack = new Mesh(
+		new PlaneGeometry(80, 30),
+		new MeshBasicMaterial({ color: 0x000000, side: DoubleSide }),
+	)
+	doorBack.position.set(0, 15, 80)
+	const door = new Group()
+	door.add(mesh)
+	door.add(doorBack)
+	return door
 }
 const doorQuery = ecs.with('collider', 'door')
 const playerQuery = ecs.with('collider', 'playerControls').without('ignoreDoor')

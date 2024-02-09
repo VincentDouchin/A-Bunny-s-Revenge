@@ -1,10 +1,9 @@
-import { getFieldIntances } from '../game/spawnLevel'
 import type { Room } from './dungeonTypes'
 import { RoomType } from './dungeonTypes'
-import type { Level } from '@/LDTKMap'
 import type { enemy } from '@/constants/enemies'
 import { enemyGroups } from '@/constants/enemies'
-import { assets, levelsData } from '@/global/init'
+import type { Level } from '@/debug/LevelEditor'
+import { levelsData } from '@/global/init'
 import { dungeonState } from '@/global/states'
 import type { direction } from '@/lib/directions'
 import { otherDirection } from '@/lib/directions'
@@ -28,17 +27,14 @@ const getEnemies = (type: RoomType): enemy[] => {
 		}
 	}
 }
-const getProps = (level: Level) => Object.values(levelsData.levelData).filter(prop => prop?.map === level.iid).filter(Boolean)
+const getProps = (level: Level) => Object.values(levelsData.levelData).filter(prop => prop?.map === level.id).filter(Boolean)
 const getConnectingLevels = (levels: Level[], direction: direction) => {
 	return levels.filter(level => getProps(level).some(prop => prop.data?.direction === direction))
 }
 const getOtherDirections = (level: Level, direction: direction): direction[] => getProps(level).filter(prop => prop.data?.direction && prop.data.direction !== direction).map(prop => prop.data.direction)
 
 export const createDungeon = (roomsAmount: number): Room => {
-	const dungeons = assets.levels.levels.filter((level) => {
-		const fields = getFieldIntances<'level'>(level)
-		return fields.dungeon
-	})
+	const dungeons = levelsData.levels.filter(level => level.dungeon)
 	let roomsCreated = 0
 	const createRoom = (enteringFrom: direction, last: null | Room = null): Room => {
 		const type = getRoomType(roomsCreated, roomsAmount)

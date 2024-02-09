@@ -1,18 +1,21 @@
 import type { models } from '@assets/assets'
-import { ColliderDesc, RigidBodyDesc } from '@dimforge/rapier3d-compat'
+import { ColliderDesc, RigidBodyDesc, RigidBodyType } from '@dimforge/rapier3d-compat'
 import type { With } from 'miniplex'
 import type { Object3D, Object3DEventMap } from 'three'
-import { Vector3 } from 'three'
+import { Quaternion, Vector3 } from 'three'
+import { CSS2DObject } from 'three/examples/jsm/renderers/CSS2DRenderer'
 import type { EntityData } from './LevelEditor'
 import { dialogs } from '@/constants/dialogs'
+import { Animator } from '@/global/animator'
 import { type Entity, Interactable, MenuType } from '@/global/entity'
 import { assets, ecs } from '@/global/init'
 import { menuInputMap } from '@/global/inputMaps'
 import { save } from '@/global/save'
 import type { DungeonRessources, FarmRessources } from '@/global/states'
 import type { direction } from '@/lib/directions'
+import { modelColliderBundle } from '@/lib/models'
+import { stateBundle } from '@/lib/stateMachine'
 import { cropBundle } from '@/states/farm/farming'
-import { inventoryBundle } from '@/states/game/inventory'
 import { playerBundle } from '@/states/game/spawnCharacter'
 import { doorSide } from '@/states/game/spawnDoor'
 
@@ -69,17 +72,40 @@ export const props: PlacableProp<propNames>[] = [
 	{
 		name: 'oven',
 		models: ['StoneOven', 'BunnyOvenPacked'],
-		bundle: entity => ({
-			...entity,
-			...inventoryBundle(MenuType.Oven, 3, entity.entityId, Interactable.Cook),
-		}),
+		bundle: (entity) => {
+			return {
+				...entity,
+				...menuInputMap(),
+				recipesQueued: [],
+				ovenAnimator: new Animator(entity.model, assets.models.BunnyOvenPacked.animations),
+				...stateBundle<'doorOpening' | 'idle'>('idle', {
+					idle: ['doorOpening'],
+					doorOpening: ['idle'],
+				}),
+				minigameContainer: new CSS2DObject(document.createElement('div')),
+				withChildren(parent) {
+					ecs.add({
+						...modelColliderBundle(assets.models.Bellow.scene, RigidBodyType.Fixed, true),
+						parent,
+						interactable: Interactable.Cook,
+						position: new Vector3(10, 0, 0),
+						rotation: new Quaternion().setFromAxisAngle(new Vector3(0, 1, 0), -Math.PI / 2),
+						oven: parent,
+						menuType: MenuType.OvenMinigame,
+					})
+				},
+				menuType: MenuType.Oven,
+				interactable: Interactable.Cook,
+			} },
 	},
 	{
 		name: 'cauldron',
 		models: ['cauldron'],
 		bundle: entity => ({
 			...entity,
-			...inventoryBundle(MenuType.Cauldron, 3, entity.entityId, Interactable.Cook),
+			...menuInputMap(),
+			menuType: MenuType.Cauldron,
+			interactable: Interactable.Cook,
 		}),
 	},
 	{
@@ -87,14 +113,10 @@ export const props: PlacableProp<propNames>[] = [
 		models: ['Stove1'],
 		bundle: entity => ({
 			...entity,
-			...inventoryBundle(MenuType.Oven, 3, entity.entityId, Interactable.Cook),
+			...menuInputMap(),
+			menuType: MenuType.Oven,
+			interactable: Interactable.Cook,
 		}),
-		// bundle: entity => ({
-		// 	...entity,
-		// 	...menuInputMap(),
-		// 	menuType: MenuType.Oven,
-		// 	interactable: Interactable.Cook,
-		// }),
 	},
 	{
 		name: 'sign',

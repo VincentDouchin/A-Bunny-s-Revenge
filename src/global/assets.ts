@@ -1,17 +1,17 @@
-import type { characters, items, models, particles, trees } from '@assets/assets'
+import type { characters, items, models, particles, textures, trees } from '@assets/assets'
 import data from '@assets/levels/data.json'
 import { get } from 'idb-keyval'
 import type { ColorRepresentation, Material } from 'three'
-import { CanvasTexture, Mesh, MeshStandardMaterial, NearestFilter, SRGBColorSpace, TextureLoader, Vector2 } from 'three'
+import { CanvasTexture, Mesh, MeshStandardMaterial, NearestFilter, RepeatWrapping, SRGBColorSpace, TextureLoader, Vector2 } from 'three'
 
 import type { GLTF } from 'three/examples/jsm/loaders/GLTFLoader'
 import type { stringCaster } from './assetLoaders'
-import { getExtension, getFileName, loadGLB, loadImage, textureLoader } from './assetLoaders'
+import { dataUrlToCanvas, getExtension, getFileName, loadGLB, loadImage, textureLoader } from './assetLoaders'
 import { params } from './context'
 import type { crops } from './entity'
 import type { LDTKMap } from '@/LDTKMap'
 import { keys } from '@/constants/keys'
-import type { CollidersData, LevelData } from '@/debug/LevelEditor'
+import type { CollidersData, Level, LevelData, LevelImage, RawLevel } from '@/debug/LevelEditor'
 import { CharacterMaterial, ToonMaterial, TreeMaterial } from '@/shaders/GroundShader'
 import { getScreenBuffer } from '@/utils/buffer'
 import { asyncMapValues, entries, groupByObject, mapKeys, mapValues } from '@/utils/mapFunctions'
@@ -117,11 +117,16 @@ const fontLoader = async (glob: Glob) => {
 const levelLoader = async (glob: GlobEager) => {
 	return JSON.parse(Object.values(glob)[0]) as LDTKMap
 }
+const levelImagesLoader = async (glob: GlobEager) => {
+	return mapKeys(await asyncMapValues(glob, loadImage), getFileName)
+}
 const texturesLoader = async (glob: GlobEager) => {
 	return mapKeys(await asyncMapValues(glob, async (src) => {
 		const texture = await textureLoader.loadAsync(src)
 		texture.magFilter = NearestFilter
 		texture.minFilter = NearestFilter
+		texture.wrapS = RepeatWrapping
+		texture.wrapT = RepeatWrapping
 		return texture
 	}), getFileName)
 }
@@ -152,9 +157,19 @@ const buttonsLoader = async (glob: Record<string, any>) => {
 export const loadLevelData = async () => {
 	const levelData = data.levelData as unknown as LevelData
 	const colliderData = data.colliderData as unknown as CollidersData
+	const levelsUrl = data.levels as unknown as RawLevel[]
 	Object.assign(levelData, await get('levelData'))
 	Object.assign(colliderData, await get('colliderData'))
-	return { levelData, colliderData }
+	Object.assign(levelsUrl, await get('levels'))
+	const levels: Level[] = await Promise.all(levelsUrl.map(async (level) => {
+		const levelCanvases: LevelImage[] = ['path', 'trees', 'grass']
+		const newLevel: Partial<Level> = {}
+		for (const canvas of levelCanvases) {
+			newLevel[canvas] = await dataUrlToCanvas(level.size, level[canvas])
+		}
+		return { ...level, ...newLevel } as Level
+	}))
+	return { levelData, colliderData, levels }
 }
 
 const overrideRockColor = (node: Mesh<any, MeshStandardMaterial>, map?: CanvasTexture) => {
@@ -180,12 +195,13 @@ export const loadAssets = async () => ({
 		return mat
 	},
 	})),
-	grass: await typeGlob(import.meta.glob('@assets/grass/*.glb', { as: 'url' }))(loadGLBAsToon()),
 	crops: await cropsLoader<crops>(import.meta.glob('@assets/crops/*.glb', { as: 'url' })),
 	items: await typeGlob<items>(import.meta.glob('@assets/items/*.png', { eager: true, import: 'default' }))(itemsLoader),
 	particles: await typeGlob<particles>(import.meta.glob('@assets/particles/*.png', { eager: true, import: 'default' }))(texturesLoader),
+	textures: await typeGlob<textures>(import.meta.glob('@assets/textures/*.png', { eager: true, import: 'default' }))(texturesLoader),
 	fonts: await fontLoader(import.meta.glob('@assets/fonts/*.ttf', { eager: true, import: 'default' })),
 	levels: await levelLoader(import.meta.glob('@assets/levels/*.ldtk', { eager: true, as: 'raw' })),
+	levelImages: await levelImagesLoader(import.meta.glob('@assets/levels/*.png', { eager: true, import: 'default' })),
 	icons: await typeGlobEager(import.meta.glob('@assets/icons/*.svg', { eager: true, import: 'default', as: 'raw' }))(iconsLoader),
 	buttons: await buttonsLoader(import.meta.glob('@assets/buttons/*.*', { eager: true, import: 'default' })),
 } as const)
