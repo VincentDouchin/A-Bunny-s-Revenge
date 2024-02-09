@@ -9,7 +9,6 @@ import type { stringCaster } from './assetLoaders'
 import { dataUrlToCanvas, getExtension, getFileName, loadGLB, loadImage, textureLoader } from './assetLoaders'
 import { params } from './context'
 import type { crops } from './entity'
-import type { LDTKMap } from '@/LDTKMap'
 import { keys } from '@/constants/keys'
 import type { CollidersData, Level, LevelData, LevelImage, RawLevel } from '@/debug/LevelEditor'
 import { CharacterMaterial, ToonMaterial, TreeMaterial } from '@/shaders/GroundShader'
@@ -114,9 +113,7 @@ const fontLoader = async (glob: Glob) => {
 		document.fonts.add(font)
 	}
 }
-const levelLoader = async (glob: GlobEager) => {
-	return JSON.parse(Object.values(glob)[0]) as LDTKMap
-}
+
 const levelImagesLoader = async (glob: GlobEager) => {
 	return mapKeys(await asyncMapValues(glob, loadImage), getFileName)
 }
@@ -200,7 +197,6 @@ export const loadAssets = async () => ({
 	particles: await typeGlob<particles>(import.meta.glob('@assets/particles/*.png', { eager: true, import: 'default' }))(texturesLoader),
 	textures: await typeGlob<textures>(import.meta.glob('@assets/textures/*.png', { eager: true, import: 'default' }))(texturesLoader),
 	fonts: await fontLoader(import.meta.glob('@assets/fonts/*.ttf', { eager: true, import: 'default' })),
-	levels: await levelLoader(import.meta.glob('@assets/levels/*.ldtk', { eager: true, as: 'raw' })),
 	levelImages: await levelImagesLoader(import.meta.glob('@assets/levels/*.png', { eager: true, import: 'default' })),
 	icons: await typeGlobEager(import.meta.glob('@assets/icons/*.svg', { eager: true, import: 'default', as: 'raw' }))(iconsLoader),
 	buttons: await buttonsLoader(import.meta.glob('@assets/buttons/*.*', { eager: true, import: 'default' })),

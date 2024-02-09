@@ -27,7 +27,7 @@ import { beeFSM, ovenFSM, pandaFSM, playerFSM, shagaFSM } from './states/game/pl
 import { target } from './states/game/sensor'
 import { spawnCharacter } from './states/game/spawnCharacter'
 import { allowDoorCollision, collideWithDoor, collideWithDoorCamp } from './states/game/spawnDoor'
-import { spawnSkyBox } from './states/game/spawnGround'
+import { spawnSkyBox } from './states/game/spawnSkyBox'
 import { spawnDungeon, spawnFarm, spawnLevelData } from './states/game/spawnLevel'
 import { showInteraction, touchItem } from './states/game/touchItem'
 import { setupGame } from './states/setup/setupGame'

@@ -90,7 +90,7 @@ export const props: PlacableProp<propNames>[] = [
 						interactable: Interactable.Cook,
 						position: new Vector3(10, 0, 0),
 						rotation: new Quaternion().setFromAxisAngle(new Vector3(0, 1, 0), -Math.PI / 2),
-						oven: parent,
+						oven: parent as With<Entity, 'model' | 'recipesQueued'>,
 						menuType: MenuType.OvenMinigame,
 					})
 				},
@@ -106,6 +106,7 @@ export const props: PlacableProp<propNames>[] = [
 			...menuInputMap(),
 			menuType: MenuType.Cauldron,
 			interactable: Interactable.Cook,
+			recipesQueued: [],
 		}),
 	},
 	{
@@ -116,6 +117,7 @@ export const props: PlacableProp<propNames>[] = [
 			...menuInputMap(),
 			menuType: MenuType.Oven,
 			interactable: Interactable.Cook,
+			recipesQueued: [],
 		}),
 	},
 	{
@@ -156,7 +158,7 @@ export const props: PlacableProp<propNames>[] = [
 	},
 	{
 		name: 'Flower/plants',
-		models: ['SM_Env_Flower_01', 'SM_Env_Flower_02', 'SM_Env_Flower_03', 'SM_Env_Flower_04', 'SM_Env_Flower_05', 'SM_Env_Flower_06', 'SM_Env_Flower_07', 'SM_Env_Flower_08', 'SM_Env_Grass_01', 'SM_Env_Grass_02'],
+		models: ['SM_Env_Flower_01', 'SM_Env_Flower_02', 'SM_Env_Flower_03', 'SM_Env_Flower_05', 'SM_Env_Flower_06', 'SM_Env_Flower_07', 'SM_Env_Flower_08', 'SM_Env_Grass_01', 'SM_Env_Grass_02'],
 	},
 	{
 		name: 'door',
