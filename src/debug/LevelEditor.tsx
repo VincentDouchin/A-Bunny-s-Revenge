@@ -64,6 +64,7 @@ export interface Level {
 const addedEntitiesQuery = ecs.with('entityId', 'model', 'group', 'position', 'rotation')
 const mapQuery = ecs.with('map')
 const cameraQuery = ecs.with('mainCamera', 'camera')
+const groundQuery = ecs.with('ground', 'model')
 export const LevelEditor = () => {
 	const [disableSave, setDisableSave] = createSignal(false, { equals: false })
 	const [open, setOpen] = createSignal(false)
@@ -270,7 +271,7 @@ export const LevelEditor = () => {
 						const intersects = raycaster.intersectObjects(scene.children)
 						if (!draw()) {
 							if (selected && propModel) {
-								const position = intersects.find(x => x.point.y === 0.5)?.point
+								const position = intersects.find(x => x.object === groundQuery.first?.model)?.point
 								if (!position) return
 								const scale = colliderData()[propModel]?.scale ?? 1
 								const model = getModel(propModel)
