@@ -53,6 +53,7 @@ export interface Level {
 	path: HTMLCanvasElement
 	trees: HTMLCanvasElement
 	grass: HTMLCanvasElement
+	heightMap: HTMLCanvasElement
 	farm: boolean
 	dungeon: boolean
 	id: string
@@ -112,6 +113,7 @@ export const LevelEditor = () => {
 							path: getScreenBuffer(100, 100).canvas,
 							trees: getScreenBuffer(100, 100).canvas,
 							grass: getScreenBuffer(100, 100).canvas,
+							heightMap: getScreenBuffer(100, 100).canvas,
 							size: { x: 100, y: 100 },
 							farm: false,
 							dungeon: false,
@@ -128,6 +130,7 @@ export const LevelEditor = () => {
 								path: level.path.toDataURL(),
 								trees: level.trees.toDataURL(),
 								grass: level.grass.toDataURL(),
+								heightMap: level.heightMap.toDataURL(),
 							}))
 							set('levels', rawLevels)
 						}
@@ -156,7 +159,7 @@ export const LevelEditor = () => {
 					const updateLevelSize = (size: Vec2) => {
 						const newLevel: Level = activeLevel()
 						newLevel.size = size
-						for (const canvas of ['path', 'trees', 'grass'] as LevelImage[]) {
+						for (const canvas of ['path', 'trees', 'grass', 'heightMap'] as LevelImage[]) {
 							const buffer = getScreenBuffer(size.x, size.y, true)
 							buffer.drawImage(activeLevel()[canvas], 0, 0, size.x, size.y)
 							newLevel[canvas] = buffer.canvas

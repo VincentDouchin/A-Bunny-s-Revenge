@@ -7,18 +7,20 @@ import { cameraQuery, renderer, scene } from '@/global/rendering'
 import { throttle } from '@/lib/state'
 import { spawnGrass, spawnTrees } from '@/states/game/spawnLevel'
 
-type drawingColors = 'path' | 'trees' | 'trees_transparent' | 'grass'
+type drawingColors = 'path' | 'trees' | 'trees_transparent' | 'grass' | 'heightMap'
 const colors: Record<drawingColors, string> = {
 	path: 'rgb(255,0,0)',
 	trees: 'rgb(0,255,0)',
 	trees_transparent: 'rgb(255,0,0)',
 	grass: 'rgb(255,0,0)',
+	heightMap: 'rgba(255,255,255,0.1)',
 }
 const canvases: Record<drawingColors, LevelImage> = {
 	path: 'path',
 	trees: 'trees',
 	trees_transparent: 'trees',
 	grass: 'grass',
+	heightMap: 'heightMap',
 }
 const grassQuery = ecs.with('grass')
 const treeQuery = ecs.with('tree')
@@ -88,6 +90,9 @@ export const MapEditor = ({ updateLevel, activeLevel }: { updateLevel: (l: Parti
 				}
 				spawnGrass(activeLevel())
 			}
+			if (canvases[color()] === 'heightMap') {
+				groundMat.displacementMap.needsUpdate = true
+			}
 		})
 
 		onMount(async () => {
@@ -111,6 +116,7 @@ export const MapEditor = ({ updateLevel, activeLevel }: { updateLevel: (l: Parti
 					<option value="trees">trees</option>
 					<option value="trees_transparent">transparent trees</option>
 					<option value="grass">grass</option>
+					<option value="heightMap">heightMap</option>
 				</select>
 				<div>Brush size</div>
 				<div><input type="range" name="brush size" min="1" max="100" value={brush()} onChange={e => setBrush(e.target.valueAsNumber)}></input></div>

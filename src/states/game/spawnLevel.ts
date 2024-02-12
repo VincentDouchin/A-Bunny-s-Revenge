@@ -1,8 +1,8 @@
-import { ColliderDesc, RigidBodyDesc, RigidBodyType } from '@dimforge/rapier3d-compat'
+import { ColliderDesc, RigidBodyDesc } from '@dimforge/rapier3d-compat'
 import { between } from 'randomish'
 import { createNoise2D, createNoise3D } from 'simplex-noise'
-import type { Vector4 } from 'three'
-import { BoxGeometry, Euler, Group, Mesh, Quaternion, Vector3 } from 'three'
+import type { Vector4, Vector4Like } from 'three'
+import { CanvasTexture, Euler, Group, Mesh, PlaneGeometry, Quaternion, Vector3 } from 'three'
 import { enemyBundle } from '../dungeon/enemies'
 import { spawnLight } from './spawnLights'
 import type { Level } from '@/debug/LevelEditor'
@@ -12,13 +12,13 @@ import { canvasToArray, instanceMesh } from '@/global/assetLoaders'
 import type { Entity } from '@/global/entity'
 import { assets, ecs, levelsData } from '@/global/init'
 import type { DungeonRessources, FarmRessources } from '@/global/states'
-import { getBoundingBox, getSize, modelColliderBundle } from '@/lib/models'
+import { getBoundingBox, getSize } from '@/lib/models'
 import type { System } from '@/lib/state'
 import { GroundMaterial } from '@/shaders/GroundShader'
 
 const SCALE = 10
 
-const spawnFromCanvas = (image: HTMLCanvasElement, scale: number, fn: (val: Vector4, x: number, y: number) => void) => {
+const spawnFromCanvas = (image: HTMLCanvasElement, scale: number, fn: (val: Vector4Like, x: number, y: number) => void) => {
 	const grid = canvasToArray(image)
 	for (let i = 0; i < grid.length; i += scale) {
 		const treeRow = grid[i]
@@ -113,18 +113,23 @@ export const spawnGrass = (level: Level) => {
 export const spawnGroundAndTrees = (level: Level) => {
 	// ! Ground
 	const groundMesh = new Mesh(
-		new BoxGeometry(level.size.x, 1, level.size.y),
+		new PlaneGeometry(level.size.x, level.size.y, level.size.x, level.size.y),
+		// new (GroundMaterial(level.path, level.size.x, level.size.y))({ displacementMap: new CanvasTexture(level.heightMap), displacementScale: 30, displacementBias: 0 }),
 		new (GroundMaterial(level.path, level.size.x, level.size.y))({ }),
 	)
+	// groundMesh.material.displacementMap!.flipY = false
+	groundMesh.rotation.x = -Math.PI / 2
 	spawnLight(level.size)
 
 	groundMesh.receiveShadow = true
-	const bundle = modelColliderBundle(groundMesh, RigidBodyType.Fixed)
 	ecs.add({
+		model: groundMesh,
 		inMap: true,
+		bodyDesc: RigidBodyDesc.fixed().lockRotations(),
+		colliderDesc: ColliderDesc.cuboid(level.size.x, 1, level.size.y),
 		position: new Vector3(),
 		ground: true,
-		...bundle,
+		// ...bundle,
 	})
 	spawnTrees(level)
 	spawnGrass(level)

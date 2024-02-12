@@ -100,12 +100,12 @@ export const canvasToArray = (canvas: HTMLCanvasElement) => {
 	const pixels = []
 
 	for (let i = 0; i < imageData.data.length; i += 4) {
-		const pixel = new Vector4(
-			imageData.data[i],
-			imageData.data[i + 1],
-			imageData.data[i + 2],
-			imageData.data[i + 3],
-		)
+		const pixel = {
+			x: imageData.data[i],
+			y: imageData.data[i + 1],
+			z: imageData.data[i + 2],
+			w: imageData.data[i + 3],
+		}
 
 		pixels.push(pixel)
 	}
