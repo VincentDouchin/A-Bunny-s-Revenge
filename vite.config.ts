@@ -16,8 +16,7 @@ export default defineConfig(() => {
 			extractAnimations(),
 			solidPlugin(),
 			VitePWA({
-				registerType: 'autoUpdate',
-				injectRegister: 'auto',
+				registerType: 'prompt',
 				includeAssets: ['favicon.ico', 'apple-touch-icon.png'],
 				injectManifest: {
 					globPatterns: ['**/*.{js,html,wasm}', './assets/*.*'],
