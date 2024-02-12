@@ -2,7 +2,7 @@ import { ColliderDesc, RigidBodyDesc } from '@dimforge/rapier3d-compat'
 import { between } from 'randomish'
 import { createNoise2D, createNoise3D } from 'simplex-noise'
 import type { Vector4, Vector4Like } from 'three'
-import { CanvasTexture, Euler, Group, Mesh, PlaneGeometry, Quaternion, Vector3 } from 'three'
+import { CanvasTexture, Euler, Group, Mesh, PlaneGeometry, Quaternion, RepeatWrapping, Vector3 } from 'three'
 import { enemyBundle } from '../dungeon/enemies'
 import { spawnLight } from './spawnLights'
 import type { Level } from '@/debug/LevelEditor'
@@ -114,10 +114,12 @@ export const spawnGroundAndTrees = (level: Level) => {
 	// ! Ground
 	const groundMesh = new Mesh(
 		new PlaneGeometry(level.size.x, level.size.y, level.size.x, level.size.y),
-		// new (GroundMaterial(level.path, level.size.x, level.size.y))({ displacementMap: new CanvasTexture(level.heightMap), displacementScale: 30, displacementBias: 0 }),
-		new (GroundMaterial(level.path, level.size.x, level.size.y))({ }),
+		new (GroundMaterial(level.path, level.size.x, level.size.y))({ displacementMap: new CanvasTexture(level.heightMap), displacementScale: 30, displacementBias: 0 }),
 	)
-	// groundMesh.material.displacementMap!.flipY = false
+	groundMesh.material.displacementMap!.repeat.set(-1, -1)
+	groundMesh.material.displacementMap!.wrapS = RepeatWrapping
+	groundMesh.material.displacementMap!.wrapT = RepeatWrapping
+
 	groundMesh.rotation.x = -Math.PI / 2
 	spawnLight(level.size)
 
