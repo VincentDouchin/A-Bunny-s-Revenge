@@ -1,0 +1,10 @@
+[[headers]]
+  # Define which paths this specific [[headers]] block will cover.
+  for = "/*.html"
+
+  [headers.values]
+	cache-control = '''
+	max-age=0,
+	no-cache,
+	no-store,
+	must-revalidate'''
