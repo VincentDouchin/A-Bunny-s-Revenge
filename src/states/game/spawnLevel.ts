@@ -1,7 +1,7 @@
 import { ColliderDesc, RigidBodyDesc } from '@dimforge/rapier3d-compat'
 import { between } from 'randomish'
 import { createNoise2D, createNoise3D } from 'simplex-noise'
-import type { Vector4, Vector4Like } from 'three'
+import type { Vector4Like } from 'three'
 import { CanvasTexture, Euler, Group, Mesh, PlaneGeometry, Quaternion, RepeatWrapping, Vector3 } from 'three'
 import { enemyBundle } from '../dungeon/enemies'
 import { spawnLight } from './spawnLights'
