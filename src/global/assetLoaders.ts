@@ -1,5 +1,5 @@
 import type { Euler, Material, Vec2 } from 'three'
-import { DynamicDrawUsage, Group, Matrix4, Mesh, TextureLoader, Vector3, Vector4 } from 'three'
+import { DynamicDrawUsage, Group, Matrix4, Mesh, TextureLoader, Vector3 } from 'three'
 
 import { InstancedUniformsMesh } from 'three-instanced-uniforms-mesh'
 import { DRACOLoader } from 'three/examples/jsm/loaders/DRACOLoader'
