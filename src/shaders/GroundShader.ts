@@ -118,6 +118,7 @@ const [groundColors] = useLocalStorage('groundColor', {
 })
 const groundExtension = (image: HTMLCanvasElement, x: number, y: number) => {
 	const level = new CanvasTexture(image)
+	level.flipY = false
 	return new MaterialExtension({
 		level,
 		size: new Vector2(x, y),
@@ -140,7 +141,7 @@ const groundExtension = (image: HTMLCanvasElement, x: number, y: number) => {
 			vec2 scaled_uv = vUv*size/10.;
 			float noise = cnoise(scaled_uv.xyx);
 			float noise2 = cnoise((scaled_uv/2.).yxy);
-			bool is_path = texture2D(level,1. - vUv ).r == 1.0;
+			bool is_path = texture2D(level,vUv ).r == 1.0;
 			if(is_path){
 				color.rgb = step(cnoise(scaled_uv.yyy)+cnoise(scaled_uv.xyy)/2.,0.2) ==0.
 					? pathColor

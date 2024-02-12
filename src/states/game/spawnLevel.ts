@@ -1,14 +1,14 @@
-import { ColliderDesc, RigidBodyDesc } from '@dimforge/rapier3d-compat'
+import { ColliderDesc, RigidBodyDesc, RigidBodyType } from '@dimforge/rapier3d-compat'
 import { between } from 'randomish'
 import { createNoise2D, createNoise3D } from 'simplex-noise'
 import type { Vector4Like } from 'three'
-import { CanvasTexture, Euler, Group, Mesh, PlaneGeometry, Quaternion, RepeatWrapping, Vector3 } from 'three'
+import { CanvasTexture, Euler, Group, Mesh, PlaneGeometry, Quaternion, Vector3 } from 'three'
 import { enemyBundle } from '../dungeon/enemies'
 import { spawnLight } from './spawnLights'
 import type { Level } from '@/debug/LevelEditor'
 import { getModel, props } from '@/debug/props'
 import type { InstanceHandle } from '@/global/assetLoaders'
-import { canvasToArray, instanceMesh } from '@/global/assetLoaders'
+import { canvasToArray, canvasToGrid, instanceMesh } from '@/global/assetLoaders'
 import type { Entity } from '@/global/entity'
 import { assets, ecs, levelsData } from '@/global/init'
 import type { DungeonRessources, FarmRessources } from '@/global/states'
@@ -17,14 +17,18 @@ import type { System } from '@/lib/state'
 import { GroundMaterial } from '@/shaders/GroundShader'
 
 const SCALE = 10
+const HEIGHT = 30
 
-const spawnFromCanvas = (image: HTMLCanvasElement, scale: number, fn: (val: Vector4Like, x: number, y: number) => void) => {
-	const grid = canvasToArray(image)
-	for (let i = 0; i < grid.length; i += scale) {
-		const treeRow = grid[i]
-		for (let j = 0; j < treeRow.length; j += scale) {
-			const val = treeRow[j]
-			fn(val, j, i)
+const spawnFromCanvas = (level: Level, image: HTMLCanvasElement, scale: number, fn: (val: Vector4Like, x: number, y: number, z: number) => void) => {
+	const heightGrid = canvasToGrid(level.heightMap)
+	const grid = canvasToGrid(image)
+	for (let y = 0; y < grid.length; y += scale) {
+		const treeRow = grid[y]
+		for (let x = 0; x < treeRow.length; x += scale) {
+			const height = heightGrid[y][x]
+			const displacement = height.x / 255 * HEIGHT / SCALE
+			const val = treeRow[x]
+			fn(val, x, y, displacement)
 		}
 	}
 }
@@ -33,11 +37,11 @@ export const spawnTrees = (level: Level) => {
 	const trees = Object.values(assets.trees).map(instanceMesh)
 	const treesInstances: InstanceHandle[] = []
 	const noise = createNoise3D(() => 0)
-	spawnFromCanvas(level.trees, SCALE, (val, x, y) => {
+	spawnFromCanvas(level, level.trees, SCALE, (val, x, y, displacement) => {
 		if (val.x === 255 || val.y === 255) {
 			const position = new Vector3(
-				(level.trees.width / 2 - x) / SCALE + noise(x, y, y),
-				0,
+				(x - level.trees.width / 2) / SCALE + noise(x, y, y),
+				displacement,
 				(level.trees.height / 2 - y) / SCALE + noise(y, x, x),
 			).multiplyScalar(SCALE)
 			const size = 3 + (1 * Math.abs(noise(x, y, x)))
@@ -74,7 +78,7 @@ export const spawnGrass = (level: Level) => {
 	const noiseY = createNoise2D(() => 300)
 	const noiseFlower = createNoise2D(() => 400)
 	const noiseFlower2 = createNoise2D(() => 500)
-	spawnFromCanvas(level.grass, 5, (val, x, y) => {
+	spawnFromCanvas(level, level.grass, 5, (val, x, y, displacement) => {
 		if (val.x !== 255) return
 		const n = noise(x / level.size.x * 10, y / level.size.y * 10)
 		const n2 = noise2(x / level.size.x * 10, y / level.size.y * 10)
@@ -84,8 +88,8 @@ export const spawnGrass = (level: Level) => {
 		const nF2 = noiseFlower2(x / level.size.x * 10, y / level.size.y * 10)
 		if (n2 < 0.7 && (n < 0 || n2 < 0)) return
 		const position = new Vector3(
-			(level.grass.width / 2 - x) / SCALE + nX,
-			0.1,
+			(x - level.grass.width / 2) / SCALE + nX,
+			0.1 + displacement,
 			(level.grass.height / 2 - y) / SCALE + nY,
 		).multiplyScalar(SCALE)
 		const isFlower = nF > 0.8
@@ -114,21 +118,22 @@ export const spawnGroundAndTrees = (level: Level) => {
 	// ! Ground
 	const groundMesh = new Mesh(
 		new PlaneGeometry(level.size.x, level.size.y, level.size.x, level.size.y),
-		new (GroundMaterial(level.path, level.size.x, level.size.y))({ displacementMap: new CanvasTexture(level.heightMap), displacementScale: 30, displacementBias: 0 }),
+		new (GroundMaterial(level.path, level.size.x, level.size.y))({ displacementMap: new CanvasTexture(level.heightMap), displacementScale: HEIGHT, displacementBias: 0.5 }),
 	)
-	groundMesh.material.displacementMap!.repeat.set(-1, -1)
-	groundMesh.material.displacementMap!.wrapS = RepeatWrapping
-	groundMesh.material.displacementMap!.wrapT = RepeatWrapping
-
+	groundMesh.material.displacementMap!.flipY = false
 	groundMesh.rotation.x = -Math.PI / 2
 	spawnLight(level.size)
 
 	groundMesh.receiveShadow = true
+	const heights = canvasToArray(level.heightMap).map(pixel => pixel.x / 255)
+	const heightfield = new Float32Array(heights.length)
+	heightfield.set(heights)
+
 	ecs.add({
 		model: groundMesh,
 		inMap: true,
-		bodyDesc: RigidBodyDesc.fixed().lockRotations(),
-		colliderDesc: ColliderDesc.cuboid(level.size.x, 1, level.size.y),
+		bodyDesc: new RigidBodyDesc(RigidBodyType.Fixed),
+		colliderDesc: ColliderDesc.heightfield(level.size.x - 1, level.size.y - 1, heightfield, { x: level.size.y, y: HEIGHT, z: level.size.x }).setRotation(new Quaternion().setFromAxisAngle(new Vector3(0, 1, 0), Math.PI / 2)),
 		position: new Vector3(),
 		ground: true,
 		// ...bundle,

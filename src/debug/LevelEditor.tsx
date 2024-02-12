@@ -27,6 +27,7 @@ import { playerBundle } from '@/states/game/spawnCharacter'
 import { spawnGroundAndTrees, spawnLevelData } from '@/states/game/spawnLevel'
 import { getScreenBuffer } from '@/utils/buffer'
 import { getRandom } from '@/utils/mapFunctions'
+import { throttle } from '@/lib/state'
 
 export interface EntityData<T extends Record<string, any>> {
 	model: models | customModel
@@ -97,7 +98,7 @@ export const LevelEditor = () => {
 		<div>
 			<Show when={open() && map()}>
 				{(map) => {
-					const [draw, setDraw] = createSignal(false)
+					const [selectedTab, setSelectedTab] = createSignal<'place props' | 'draw map'>('place props')
 					const [random, setRandom] = createSignal(false)
 					const [selectedProp, setSelectedProp] = createSignal<PlacableProp<any> | null>(null)
 					const [selectedEntity, setSelectedEntity] = createSignal<With<Entity, 'entityId' | 'model' | 'position' | 'rotation'> | null>(null)
@@ -122,8 +123,7 @@ export const LevelEditor = () => {
 						}])
 						setActiveLevel(levels().at(-1)!)
 					}
-					createEffect(() => {
-						Object.assign(levelsData.levels, levels())
+					const saveChanges = throttle(2000, () => {
 						if (!disableSave()) {
 							const rawLevels: RawLevel[] = levels().map(level => ({
 								...level,
@@ -134,6 +134,10 @@ export const LevelEditor = () => {
 							}))
 							set('levels', rawLevels)
 						}
+					})
+					createEffect(() => {
+						Object.assign(levelsData.levels, levels())
+						saveChanges({})
 					})
 					const deleteLevel = (level: Level) => {
 						// eslint-disable-next-line no-alert
@@ -167,6 +171,7 @@ export const LevelEditor = () => {
 						updateLevel(activeLevel())(newLevel)
 						switchLevel(newLevel)
 					}
+					const draw = createMemo(() => selectedTab() === 'draw map')
 
 					const uploadModel = () => {
 						setDisableSave(true)
@@ -415,27 +420,36 @@ export const LevelEditor = () => {
 									}}
 								</Show>
 								<div>
-									<For each={props}>
-										{(prop) => {
-											const isSelected = createMemo(() => selectedProp() === prop)
-											return (
-												<div style={{ display: 'grid' }}>
-													<button
-														classList={{ selected: isSelected() }}
-														onClick={() => setSelectedProp(isSelected() ? null : prop)}
-													>
-														{prop.name}
-													</button>
-												</div>
-											)
-										}}
-									</For>
-									<span>press ctrl to keep placing props</span>
-									<div><button onClick={uploadModel}>preview model</button></div>
-									<div><button onClick={() => setDraw(x => !x)} classList={{ selected: draw() }}>Draw map</button></div>
-									<Show when={draw() && activeLevel()}>
-										{active => <MapEditor activeLevel={active} updateLevel={updateLevel(active())} />}
+									<div>
+										<For each={['place props', 'draw map'] as const}>
+											{tab => <button classList={{ selected: tab === selectedTab() }} onClick={() => setSelectedTab(tab)}>{tab}</button>}
+										</For>
+									</div>
+									<Show when={selectedTab() === 'place props'}>
+										<For each={props}>
+											{(prop) => {
+												const isSelected = createMemo(() => selectedProp() === prop)
+												return (
+													<div style={{ display: 'grid' }}>
+														<button
+															classList={{ selected: isSelected() }}
+															onClick={() => setSelectedProp(isSelected() ? null : prop)}
+														>
+															{prop.name}
+														</button>
+													</div>
+												)
+											}}
+										</For>
+										<span>press ctrl to keep placing props</span>
+										<div><button onClick={uploadModel}>preview model</button></div>
 									</Show>
+									<Show when={selectedTab() === 'draw map'}>
+										<Show when={activeLevel()}>
+											{active => <MapEditor activeLevel={active} updateLevel={updateLevel(active())} />}
+										</Show>
+									</Show>
+
 								</div>
 							</div>
 						</div>

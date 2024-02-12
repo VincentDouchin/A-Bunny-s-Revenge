@@ -1,4 +1,4 @@
-import type { Euler, Material, Vec2 } from 'three'
+import type { Euler, Material, Vec2, Vector4Like } from 'three'
 import { DynamicDrawUsage, Group, Matrix4, Mesh, TextureLoader, Vector3 } from 'three'
 
 import { InstancedUniformsMesh } from 'three-instanced-uniforms-mesh'
@@ -94,7 +94,7 @@ export const dataUrlToCanvas = async (size: Vec2, dataUrl?: string) => {
 	}
 	return buffer.canvas
 }
-export const canvasToArray = (canvas: HTMLCanvasElement) => {
+export const canvasToArray = (canvas: HTMLCanvasElement): Vector4Like[] => {
 	const context = canvas.getContext('2d')!
 	const imageData = context.getImageData(0, 0, canvas.width, canvas.height)
 	const pixels = []
@@ -109,7 +109,10 @@ export const canvasToArray = (canvas: HTMLCanvasElement) => {
 
 		pixels.push(pixel)
 	}
-
+	return pixels
+}
+export const canvasToGrid = (canvas: HTMLCanvasElement): Vector4Like[][] => {
+	const pixels = canvasToArray(canvas)
 	const arrayOfArrays = []
 
 	for (let i = 0; i < pixels.length; i += canvas.width) {
