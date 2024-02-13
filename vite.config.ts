@@ -1,6 +1,6 @@
 import path from 'node:path'
 import type { UserConfig } from 'vite'
-import { defineConfig } from 'vite'
+import { defineConfig, splitVendorChunkPlugin } from 'vite'
 import solidPlugin from 'vite-plugin-solid'
 
 import { VitePWA } from 'vite-plugin-pwa'
@@ -14,13 +14,18 @@ export default defineConfig(() => {
 			generateAssetNames(),
 			autoConvertFBXtoGLB(),
 			extractAnimations(),
+			splitVendorChunkPlugin(),
 			solidPlugin(),
 			VitePWA({
 				registerType: 'prompt',
+
 				includeAssets: ['favicon.ico', 'apple-touch-icon.png'],
+
 				injectManifest: {
 					globPatterns: ['**/*.{js,html,wasm}', './assets/*.*'],
+					maximumFileSizeToCacheInBytes: 6000000,
 				},
+
 				manifest: {
 					start_url: 'index.html?fullscreen=true',
 					display: 'fullscreen',
@@ -61,6 +66,16 @@ export default defineConfig(() => {
 
 		build: {
 			target: 'esnext',
+			rollupOptions: {
+				output: {
+					manualChunks: {
+						'three': ['three'],
+						'three.quarks': ['three.quarks'],
+						'@dimforge/rapier3d-compat': ['@dimforge/rapier3d-compat'],
+						'level': ['./assets/levels/data.json'],
+					},
+				},
+			},
 
 		},
 

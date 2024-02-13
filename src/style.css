@@ -42,7 +42,7 @@ body {
 img{
   image-rendering:pixelated;
 }
-canvas{
+canvas.main{
   width:100% !important;
   height:100% !important;
   image-rendering:pixelated;

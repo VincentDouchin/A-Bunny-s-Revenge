@@ -35,6 +35,7 @@ export const initThree = () => {
 	renderer.clear()
 	renderer.shadowMap.enabled = true
 	renderer.shadowMap.type = BasicShadowMap
+	renderer.domElement.classList.add('main')
 	document.body.appendChild(renderer.domElement)
 	renderer.outputColorSpace = LinearSRGBColorSpace
 	renderer.setSize(width, width * ratio)
@@ -44,6 +45,7 @@ export const initThree = () => {
 	cssRenderer.domElement.style.top = '0'
 	cssRenderer.domElement.style.imageRendering = 'pixelated'
 	cssRenderer.domElement.style.pointerEvents = 'none'
+	cssRenderer.domElement.classList.add('main')
 	cssRenderer.domElement.classList.add('no-events')
 	document.body.appendChild(cssRenderer.domElement)
 	ecs.add({ scene })

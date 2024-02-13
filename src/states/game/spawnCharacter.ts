@@ -4,7 +4,7 @@ import { inventoryBundle } from './inventory'
 import { Sizes } from '@/constants/sizes'
 import { Animator } from '@/global/animator'
 import { type Entity, Faction, MenuType } from '@/global/entity'
-import { assets, ecs } from '@/global/init'
+import { assets, ecs, thumbnail } from '@/global/init'
 import { playerInputMap } from '@/global/inputMaps'
 import { save, updateSave } from '@/global/save'
 import type { FarmRessources } from '@/global/states'
@@ -22,12 +22,7 @@ export const playerBundle = () => {
 			node.material.map.magFilter = NearestFilter
 		}
 	})
-	const carrotSoup = assets.models.carrot_soup.scene
-	carrotSoup.scale.setScalar(5)
-	ecs.add({
-		model: carrotSoup,
-		position: new Vector3(),
-	})
+	document.body.appendChild(thumbnail.getCanvas(assets.models.carrot_soup.scene))
 	const bundle = capsuleColliderBundle(model.scene, Sizes.character)
 	bundle.bodyDesc.setLinearDamping(20)
 	const player = {

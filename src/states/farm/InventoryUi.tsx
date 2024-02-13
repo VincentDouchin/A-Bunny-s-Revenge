@@ -27,6 +27,7 @@ export const ItemDisplay = (props: { item: Item | null, selected?: Accessor<bool
 	})
 	const isSelected = createMemo(() => props.selected && props.selected())
 	const quantity = createMemo(() => props.item?.quantity)
+
 	return (
 		<div style={{ 'border-radius': '1rem', 'background': 'hsla(0 0% 100% / 50%)', 'width': '5rem', 'height': '5rem', 'display': 'grid', 'place-items': 'center', 'position': 'relative', 'border': isSelected() ? 'solid 0.2rem white' : '' }}>
 			<Show when={props.item?.name && itemsData[props.item.name]}>

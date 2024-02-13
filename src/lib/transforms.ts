@@ -70,6 +70,6 @@ export const transformsPlugin = (state: State) => {
 
 export const isInIntersectionWithCollider = (collider: Collider) => {
 	let isInIntersection = false
-	world.intersectionsWith(collider, () => isInIntersection = true)
+	world.intersectionPairsWith(collider, () => isInIntersection = true)
 	return isInIntersection
 }

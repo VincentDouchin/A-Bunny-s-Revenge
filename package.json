@@ -11,7 +11,7 @@
 		"save_data_schema": "npx ts-json-schema-generator --path './src/global/save.ts' --type SaveData --tsconfig ./tsconfig.json --no-type-check --out ./src/debug/saveDataSchema.json"
 	},
 	"dependencies": {
-		"@dimforge/rapier3d-compat": "^0.11.2",
+		"@dimforge/rapier3d-compat": "^0.12.0",
 		"@tweenjs/tween.js": "^21.0.0",
 		"howler": "^2.2.4",
 		"idb-keyval": "^6.2.1",
@@ -45,6 +45,7 @@
 		"typescript": "^5.3.3",
 		"vite": "^4.5.0",
 		"vite-plugin-pwa": "^0.17.4",
-		"vite-plugin-solid": "^2.7.2"
+		"vite-plugin-solid": "^2.7.2",
+		"vite-plugin-wasm": "^3.3.0"
 	}
 }
