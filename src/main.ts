@@ -78,3 +78,6 @@ const animate = async () => {
 }
 
 animate()
+
+// eslint-disable-next-line no-console
+console.log('v0')
