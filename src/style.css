@@ -39,13 +39,16 @@ body {
 * {
   box-sizing: border-box;
 }
+canvas,
 img{
   image-rendering:pixelated;
 }
 canvas.main{
   width:100% !important;
   height:100% !important;
-  image-rendering:pixelated;
+}
+.input-icon>canvas{
+  width:100%;
 }
 
 .slide-enter-active,

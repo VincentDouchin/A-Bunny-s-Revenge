@@ -11,7 +11,7 @@ export const InputIcon = (props: { input: Input }) => {
 	})
 	return (
 		<For each={icons()}>
-			{icon => <div style={{ 'width': '1.5em', 'overflow': 'hidden', 'aspect-ratio': 1 }}>{icon}</div>}
+			{icon => <div style={{ 'width': '1.5em', 'overflow': 'hidden', 'aspect-ratio': 1 }} class="input-icon">{icon}</div>}
 		</For>
 	)
 }
