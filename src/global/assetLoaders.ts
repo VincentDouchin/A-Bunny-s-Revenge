@@ -2,7 +2,6 @@ import type { Euler, Material, Vec2, Vector4Like } from 'three'
 import { DynamicDrawUsage, Group, Matrix4, Mesh, TextureLoader, Vector3 } from 'three'
 
 import { InstancedUniformsMesh } from 'three-instanced-uniforms-mesh'
-import { DRACOLoader } from 'three/examples/jsm/loaders/DRACOLoader'
 import type { GLTF } from 'three/examples/jsm/loaders/GLTFLoader'
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader'
 import { getScreenBuffer } from '@/utils/buffer'
@@ -21,12 +20,8 @@ export const getPathPart = (part: number) => (path: string) => {
 	return	path.split(/[./]/g).at(part) ?? ''
 }
 
-const loader = new GLTFLoader()
-const dracoLoader = new DRACOLoader()
-dracoLoader.setDecoderPath('/examples/jsm/libs/draco/')
-loader.setDRACOLoader(dracoLoader)
 export const textureLoader = new TextureLoader()
-export const loadGLB = (path: string) => loader.loadAsync(path)
+export const loadGLB = (path: string) => new GLTFLoader().loadAsync(path)
 export const loadImage = (path: string) => new Promise<HTMLImageElement>((resolve) => {
 	const img = new Image()
 	img.src = path
