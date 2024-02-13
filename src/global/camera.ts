@@ -14,7 +14,7 @@ const cameraQuery = ecs.with('camera', 'position', 'mainCamera', 'cameraLookat')
 const cameraTargetQuery = ecs.with('cameratarget', 'worldPosition')
 const doorsQuery = ecs.with('door', 'position')
 export const moveCamera = () => {
-	for (const { position, camera, cameraLookat } of cameraQuery) {
+	for (const { position, camera, cameraLookat, cameraOffset } of cameraQuery) {
 		const target = new Vector3()
 		for (const { worldPosition } of cameraTargetQuery) {
 			target.z = worldPosition.z
@@ -38,7 +38,7 @@ export const moveCamera = () => {
 		if (!debugState.enabled) {
 			cameraLookat.lerp(target, time.delta / 1000 * 5)
 			camera.lookAt(cameraLookat)
-			position.set(...cameraLookat.clone().add(new Vector3(params.cameraOffsetX, params.cameraOffsetY, params.cameraOffsetZ)).toArray())
+			position.set(...cameraLookat.clone().add(cameraOffset ?? new Vector3(params.cameraOffsetX, params.cameraOffsetY, params.cameraOffsetZ)).toArray())
 			camera.zoom = window.innerWidth / window.innerHeight / params.zoom
 			camera.fov = params.fov
 		}

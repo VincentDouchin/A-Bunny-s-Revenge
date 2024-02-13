@@ -72,8 +72,15 @@ export const popItems = () => ecs.with('body', 'item', 'collider').onEntityAdded
 	force.y = 300
 	force.x = force.x * 100
 	force.z = force.z * 100
-	world.createCollider(ColliderDesc.ball(0.01).setTranslation(0, e.size ? -e.size.y : 1, 0), e.body)
 	e.body.setLinearDamping(1)
 	e.body.setAdditionalMass(2, true)
 	e.body.applyImpulse(force, true)
 })
+const itemsToStopQuery = ecs.with('item', 'body', 'position')
+export const stopItems = () => {
+	for (const item of itemsToStopQuery) {
+		if (item.position.y <= 0) {
+			item.body.setBodyType(RigidBodyType.Fixed, true)
+		}
+	}
+}

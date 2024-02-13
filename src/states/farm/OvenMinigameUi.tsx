@@ -1,3 +1,4 @@
+import fire from '@assets/icons/fire-solid.svg?raw'
 import type { With } from 'miniplex'
 import { between } from 'randomish'
 import { Show, createSignal, onCleanup, onMount } from 'solid-js'
@@ -10,7 +11,8 @@ import type { FarmUiProps } from '@/ui/types'
 import { ForQuery } from '@/ui/components/ForQuery'
 import { smoke } from '@/particles/smoke'
 import { addTag } from '@/lib/hierarchy'
-import { ecs, time, ui } from '@/global/init'
+import { cameraQuery } from '@/global/rendering'
+import { ecs, inputManager, time, ui } from '@/global/init'
 import { MenuType } from '@/global/entity'
 import type { Entity } from '@/global/entity'
 
@@ -22,8 +24,13 @@ export const OvenMinigameUi = ({ player }: FarmUiProps) => {
 			{(bellow) => {
 				const output = ui.sync(() => bellow.oven.recipesQueued[0]?.output)
 				const smokeTrails: With<Entity, 'emitter'>[] = []
+				let targetEntity: Entity | null = null
 				onMount(() => {
-					addTag(bellow.oven, 'cameratarget')
+					for (const camera of cameraQuery) {
+						ecs.addComponent(camera, 'cameraOffset', new Vector3(0, 30, 80).applyQuaternion(bellow.oven.rotation!))
+					}
+					targetEntity = ecs.add({ worldPosition: bellow.oven.worldPosition!.clone().add(new Vector3(0, 10, 0)), cameratarget: true })
+					// addTag(bellow.oven, 'cameratarget')
 					ecs.removeComponent(player, 'cameratarget')
 					bellow.oven.model?.traverse((node) => {
 						if (node.name.includes('smoke')) {
@@ -37,7 +44,11 @@ export const OvenMinigameUi = ({ player }: FarmUiProps) => {
 					})
 				})
 				onCleanup(() => {
+					targetEntity && ecs.remove(targetEntity)
 					addTag(player, 'cameratarget')
+					for (const camera of cameraQuery) {
+						ecs.removeComponent(camera, 'cameraOffset')
+					}
 					ecs.removeComponent(bellow.oven, 'cameratarget')
 					for (const smokeTrail of smokeTrails) {
 						ecs.remove(smokeTrail)
@@ -55,7 +66,7 @@ export const OvenMinigameUi = ({ player }: FarmUiProps) => {
 						ecs.removeComponent(bellow, 'menuOpen')
 					}
 					if (output()) {
-						if (player.playerControls.get('primary').justPressed) {
+						if (player.playerControls.get('primary').justReleased) {
 							setBar(x => Math.min(100, x - 10))
 						}
 						setBar(x => x + 7 * time.delta / 1000)
@@ -85,47 +96,64 @@ export const OvenMinigameUi = ({ player }: FarmUiProps) => {
 								}
 							})
 							for (let i = 0; i < output().quantity; i++) {
-								ecs.add({ ...itemBundle(output().name), position, popDirection: new Vector3(0, 0, -1) })
+								ecs.add({ ...itemBundle(output().name), position, popDirection: new Vector3(0, 0, 2).applyQuaternion(bellow.oven.rotation!) })
 							}
 						}
 					}
 				})
+				const playerInputs = () => player.playerControls.touchController
+				const isPrimaryPressed = ui.sync(() => playerInputs()?.get('primary'))
+				const interact = (value: number, input: 'primary' | 'secondary' | 'pause') => () => {
+					playerInputs()?.set(input, value)
+				}
+				const isTouch = ui.sync(() => inputManager.controls === 'touch')
+				const close = () => ecs.removeComponent(bellow, 'menuOpen')
 				return (
-					<Portal mount={bellow.oven.minigameContainer?.element}>
-						<div style={{ display: 'flex', gap: '3rem', translate: '-100%' }}>
-							{/*  progress */}
-							<div style={{ position: 'relative' }}>
-								<div style={{ 'position': 'absolute', 'translate': '-50% -100%', 'font-size': '2rem', 'color': 'white', 'left': '50%' }}>Progress</div>
-								<div style={{ 'width': '2rem', 'height': '20rem', 'border': 'solid 0.5rem hsl(0,0%,0%,0.7)', 'border-radius': '1rem', 'overflow': 'hidden', 'position': 'relative' }}>
-									<div style={{ 'height': `${progress()}%`, 'width': '100%', 'background': 'linear-gradient(0, #5ab552,#9de64e)', 'margin-top': 'auto', 'position': 'absolute', 'bottom': 0 }}></div>
-								</div>
-							</div>
-							{/* middle */}
-							<div style={{ position: 'relative' }}>
-								<Show when={output()}>
-									{output => (
-										<div style={{ position: 'absolute', bottom: 'calc(100% + 2rem)' }}>
-											<ItemDisplay item={output()}></ItemDisplay>
-										</div>
-									)}
-								</Show>
-								<div style={{ 'width': '5rem', 'height': '20rem', 'background': 'hsl(0,0%,100%,0.7)', 'border-radius': '1rem', 'outline': 'solid 0.5rem hsl(0,0%,0%,0.7)', 'display': 'grid', 'overflow': 'hidden', 'position': 'relative' }}>
-									{/* target */}
-									<div style={{ height: `${height}%`, width: '100%', position: 'absolute', background: 'linear-gradient(0deg, transparent, #f3a833, #e98537, #f3a833, transparent)', translate: '0 -50%', top: `${target()}%` }}></div>
-									{/* bar */}
-									<div style={{ height: '0.5rem', background: 'black', top: `${bar()}%`, position: 'relative', width: '100%', transition: 'all 200ms ease' }}></div>
-								</div>
-							</div>
-							{/* heat */}
-							<div style={{ position: 'relative' }}>
-								<div style={{ 'position': 'absolute', 'translate': '-50% -100%', 'font-size': '2rem', 'color': 'white', 'left': '50%' }}>Heat</div>
-								<div style={{ 'width': '2rem', 'height': '20rem', 'border': 'solid 0.5rem hsl(0,0%,0%,0.7)', 'border-radius': '1rem', 'overflow': 'hidden', 'position': 'relative' }}>
-									<div style={{ 'height': `${heat()}%`, 'width': '100%', 'background': 'linear-gradient(0, #ec273f,#de5d3a,#e98537,#f3a833)', 'margin-top': 'auto', 'position': 'absolute', 'bottom': 0 }}></div>
-								</div>
-							</div>
+					<>
 
-						</div>
-					</Portal>
+						<Portal mount={bellow.oven.minigameContainer?.element}>
+							<Show when={isTouch()}>
+								<div style={{ 'position': 'absolute', 'width': '5rem', 'height': '5rem', 'background': 'hsl(0,0%,0%, 20%)', 'border-radius': '3rem', 'border': `solid ${isPrimaryPressed() ? '0.3rem' : '0.1rem'} hsl(0, 0%,100%, 30% )`, 'top': '0%', 'left': '0%', 'display': 'grid', 'place-items': 'center', 'translate': '-50%' }} onTouchStart={interact(1, 'primary')} onTouchEnd={interact(0, 'primary')}>
+									<div innerHTML={fire} style={{ color: 'white', width: '50%', height: '50%' }}></div>
+								</div>
+							</Show>
+							<div style={{ 'display': 'grid', 'grid-template-columns': 'auto auto auto', 'gap': '1rem 3rem', 'translate': '-150% -80%', 'position': 'absolute' }}>
+								{/*  progress */}
+								<div style={{ position: 'relative' }}>
+									<div style={{ 'position': 'absolute', 'translate': '-50% -100%', 'font-size': '2rem', 'color': 'white', 'left': '50%' }}>Progress</div>
+									<div style={{ 'width': '2rem', 'height': '20rem', 'border': 'solid 0.5rem hsl(0,0%,0%,0.7)', 'border-radius': '1rem', 'overflow': 'hidden', 'position': 'relative' }}>
+										<div style={{ 'height': `${progress()}%`, 'width': '100%', 'background': 'linear-gradient(0, #5ab552,#9de64e)', 'margin-top': 'auto', 'position': 'absolute', 'bottom': 0 }}></div>
+									</div>
+								</div>
+								{/* middle */}
+								<div style={{ position: 'relative' }}>
+									<Show when={output()}>
+										{output => (
+											<div style={{ position: 'absolute', bottom: 'calc(100% + 2rem)' }}>
+												<ItemDisplay item={output()}></ItemDisplay>
+											</div>
+										)}
+									</Show>
+									<div style={{ 'width': '5rem', 'height': '20rem', 'background': 'hsl(0,0%,100%,0.7)', 'border-radius': '1rem', 'outline': 'solid 0.5rem hsl(0,0%,0%,0.7)', 'display': 'grid', 'overflow': 'hidden', 'position': 'relative' }}>
+										{/* target */}
+										<div style={{ height: `${height}%`, width: '100%', position: 'absolute', background: 'linear-gradient(0deg, transparent, #f3a833, #e98537, #f3a833, transparent)', translate: '0 -50%', top: `${target()}%` }}></div>
+										{/* bar */}
+										<div style={{ height: '0.5rem', background: 'black', top: `${bar()}%`, position: 'relative', width: '100%', transition: 'all 200ms ease' }}></div>
+									</div>
+								</div>
+								{/* heat */}
+								<div style={{ position: 'relative' }}>
+									<div style={{ 'position': 'absolute', 'translate': '-50% -100%', 'font-size': '2rem', 'color': 'white', 'left': '50%' }}>Heat</div>
+									<div style={{ 'width': '2rem', 'height': '20rem', 'border': 'solid 0.5rem hsl(0,0%,0%,0.7)', 'border-radius': '1rem', 'overflow': 'hidden', 'position': 'relative' }}>
+										<div style={{ 'height': `${heat()}%`, 'width': '100%', 'background': 'linear-gradient(0, #ec273f,#de5d3a,#e98537,#f3a833)', 'margin-top': 'auto', 'position': 'absolute', 'bottom': 0 }}></div>
+									</div>
+								</div>
+								<Show when={isTouch()}>
+									<button class="button" style={{ 'grid-column': 'span 3' }} onClick={close}>Exit</button>
+								</Show>
+							</div>
+						</Portal>
+					</>
 				)
 			}}
 		</ForQuery>

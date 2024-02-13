@@ -22,6 +22,12 @@ export const playerBundle = () => {
 			node.material.map.magFilter = NearestFilter
 		}
 	})
+	const carrotSoup = assets.models.carrot_soup.scene
+	carrotSoup.scale.setScalar(5)
+	ecs.add({
+		model: carrotSoup,
+		position: new Vector3(),
+	})
 	const bundle = capsuleColliderBundle(model.scene, Sizes.character)
 	bundle.bodyDesc.setLinearDamping(20)
 	const player = {

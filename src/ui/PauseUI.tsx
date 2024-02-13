@@ -13,6 +13,7 @@ export const PauseUI = () => {
 	const muteSound = () => {
 		setMute(x => !x)
 		Destination.mute = mute()
+		updateSave(s => s.settings.mute = mute())
 	}
 	const setVolume = (volume: number) => {
 		updateSave(s => s.settings.volume = volume)

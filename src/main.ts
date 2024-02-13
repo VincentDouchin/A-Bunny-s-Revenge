@@ -20,7 +20,7 @@ import { spawnItems } from './states/dungeon/itemRoom'
 import { harvestCrop, initPlantableSpotsInteractions, interactablePlantableSpot, plantSeed, updateCropsSave } from './states/farm/farming'
 import { closeMenu, closePlayerInventory, disableInventoryState, enableInventoryState, openMenu, openPlayerInventory } from './states/farm/openInventory'
 import { talkToNPC } from './states/game/dialog'
-import { bobItems, collectItems, popItems } from './states/game/items'
+import { bobItems, collectItems, popItems, stopItems } from './states/game/items'
 import { applyMove, canPlayerMove, movePlayer, playerSteps, savePlayerPosition } from './states/game/movePlayer'
 import { pauseGame } from './states/game/pauseGame'
 import { beeFSM, ovenFSM, pandaFSM, playerFSM, shagaFSM } from './states/game/playerFSM'
@@ -50,7 +50,7 @@ gameState
 	.onEnter()
 	.addSubscriber(initializeCameraPosition, bobItems, enableInventoryState, killAnimation, ...showInteraction, ...playerFSM, ...pandaFSM, ...beeFSM, ...shagaFSM, ...ovenFSM, popItems)
 	.onUpdate(runIf(canPlayerMove, movePlayer), runIf(() => !pausedState.enabled, applyMove, playerSteps))
-	.onUpdate(collectItems, touchItem, talkToNPC, runIf(() => !openMenuState.enabled, pauseGame))
+	.onUpdate(collectItems, touchItem, talkToNPC, stopItems, runIf(() => !openMenuState.enabled, pauseGame))
 	.enable()
 campState
 	.addSubscriber(...interactablePlantableSpot)

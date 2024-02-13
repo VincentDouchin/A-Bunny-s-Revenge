@@ -129,6 +129,22 @@
               "$ref": "#/definitions/crops"
             }
           ]
+        },
+        "settings": {
+          "additionalProperties": false,
+          "properties": {
+            "mute": {
+              "type": "boolean"
+            },
+            "volume": {
+              "type": "number"
+            }
+          },
+          "required": [
+            "volume",
+            "mute"
+          ],
+          "type": "object"
         }
       },
       "required": [
@@ -138,7 +154,8 @@
         "quests",
         "selectedSeed",
         "inventories",
-        "modifiers"
+        "modifiers",
+        "settings"
       ],
       "type": "object"
     },
