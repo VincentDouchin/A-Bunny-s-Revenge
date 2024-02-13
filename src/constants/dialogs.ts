@@ -1,5 +1,6 @@
 import type { Dialog } from '@/global/entity'
 import { cutSceneState } from '@/global/states'
+import { soundDialog } from '@/lib/dialogSound'
 import { addItemToPlayer, addQuest, canCompleteQuest, completeQuest, enterHouse, hasCompletedQuest, hasQuest, leaveHouse, pandaQuery } from '@/utils/dialogHelpers'
 
 export const dialogs = {
@@ -23,7 +24,9 @@ export const dialogs = {
 	},
 	*GrandmasHouse() {
 		while (true) {
+			soundDialog('Hello dear')
 			yield 'Hello dear'
+			soundDialog('How are you doing')
 			yield 'How are you doing?'
 			addItemToPlayer({ name: 'carrot_seeds', quantity: 10 })
 			if (hasQuest('grandma_1')) {
@@ -38,6 +41,7 @@ export const dialogs = {
 				yield 'Could you bring me some roasted carrots?'
 				addQuest('grandma_1')
 			} else {
+				soundDialog('Thanks again for these delicious roasted carrots')
 				yield 'Thanks again for these delicious roasted carrots'
 			}
 			leaveHouse()

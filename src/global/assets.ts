@@ -5,15 +5,16 @@ import type { ColorRepresentation, Material } from 'three'
 import { CanvasTexture, Mesh, MeshStandardMaterial, NearestFilter, RepeatWrapping, SRGBColorSpace, TextureLoader, Vector2 } from 'three'
 
 import type { GLTF } from 'three/examples/jsm/loaders/GLTFLoader'
+import { Player, start } from 'tone'
 import type { stringCaster } from './assetLoaders'
 import { dataUrlToCanvas, getExtension, getFileName, loadGLB, loadImage, textureLoader } from './assetLoaders'
 import { params } from './context'
 import type { crops } from './entity'
-import { keys } from '@/constants/keys'
-import type { CollidersData, Level, LevelData, LevelImage, RawLevel } from '@/debug/LevelEditor'
-import { CharacterMaterial, ToonMaterial, TreeMaterial } from '@/shaders/GroundShader'
-import { getScreenBuffer } from '@/utils/buffer'
 import { asyncMapValues, entries, groupByObject, mapKeys, mapValues } from '@/utils/mapFunctions'
+import { getScreenBuffer } from '@/utils/buffer'
+import { CharacterMaterial, ToonMaterial, TreeMaterial } from '@/shaders/GroundShader'
+import type { CollidersData, Level, LevelData, LevelImage, RawLevel } from '@/debug/LevelEditor'
+import { keys } from '@/constants/keys'
 
 type Glob = Record<string, () => Promise<any>>
 type GlobEager<T = string> = Record<string, T>
@@ -177,6 +178,14 @@ const overrideRockColor = (node: Mesh<any, MeshStandardMaterial>, map?: CanvasTe
 
 	return new ToonMaterial({ color, map: map ?? node.material?.map })
 }
+const loadVoices = (glob: GlobEager) => {
+	window.addEventListener('pointerdown', () => start())
+	const sounds = mapValues(glob, src => new Player(src))
+	return mapKeys(sounds, k => getFileName(k).split('_')[1])
+}
+const loadSteps = (glob: GlobEager) => {
+	return Object.values(mapValues(glob, src => new Player(src)))
+}
 
 export const loadAssets = async () => ({
 	characters: await typeGlob<characters>(import.meta.glob('@assets/characters/*.glb', { as: 'url' }))(loadGLBAsToon({ material: node => new CharacterMaterial({ map: node.material.map }) })),
@@ -198,6 +207,8 @@ export const loadAssets = async () => ({
 	textures: await typeGlob<textures>(import.meta.glob('@assets/textures/*.png', { eager: true, import: 'default' }))(texturesLoader),
 	fonts: await fontLoader(import.meta.glob('@assets/fonts/*.ttf', { eager: true, import: 'default' })),
 	levelImages: await levelImagesLoader(import.meta.glob('@assets/levels/*.png', { eager: true, import: 'default' })),
-	icons: await typeGlobEager(import.meta.glob('@assets/icons/*.svg', { eager: true, import: 'default', as: 'raw' }))(iconsLoader),
+	icons: typeGlobEager(import.meta.glob('@assets/icons/*.svg', { eager: true, import: 'default', as: 'raw' }))(iconsLoader),
 	buttons: await buttonsLoader(import.meta.glob('@assets/buttons/*.*', { eager: true, import: 'default' })),
+	voices: loadVoices(import.meta.glob('@assets/voices/*.ogg', { eager: true, import: 'default' })),
+	steps: loadSteps(import.meta.glob('@assets/steps/*.*', { eager: true, import: 'default' })),
 } as const)

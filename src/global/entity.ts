@@ -161,6 +161,8 @@ export interface Entity {
 	recipesQueued?: Recipe[]
 	oven?: With<Entity, 'recipesQueued' | 'model'>
 	minigameContainer?: CSS2DObject
+	// ! Sounds
+	lastStep?: { left: boolean, right: boolean }
 }
 export type states = 'idle' | 'running' | 'picking' | 'dying' | 'hit' | 'hello' | 'dead' | 'waitingAttack' | 'attacking' | 'attackCooldown' | 'doorOpening' | 'doorClosing'
 export type Bundle<C extends keyof Entity> = () => With<Entity, C>

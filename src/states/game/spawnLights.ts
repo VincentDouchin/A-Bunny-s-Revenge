@@ -1,8 +1,9 @@
 import type { Vec2 } from 'three'
 import { AmbientLight, DirectionalLight, Vector3 } from 'three'
 import { ecs } from '@/global/init'
+import type { Entity } from '@/global/entity'
 
-export const spawnLight = ({ x, y }: Vec2) => {
+export const spawnLight = ({ x, y }: Vec2, parent: Entity) => {
 	const light = new DirectionalLight(0xFFFFFF, 0.3)
 	light.lookAt(new Vector3(0, 0, 0))
 	light.shadow.mapSize.set(x * 2, y * 2)
@@ -14,11 +15,13 @@ export const spawnLight = ({ x, y }: Vec2) => {
 	light.shadow.camera.right = x / 2
 	light.shadow.bias = 0.002
 	ecs.add({
+		parent,
 		inMap: true,
 		light,
 		position: new Vector3(0, 50, 0),
 	})
 	ecs.add({
+		parent,
 		inMap: true,
 		light: new AmbientLight(0xFFFFFF, 1),
 		position: new Vector3(),

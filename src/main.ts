@@ -21,7 +21,7 @@ import { harvestCrop, initPlantableSpotsInteractions, interactablePlantableSpot,
 import { closeMenu, closePlayerInventory, disableInventoryState, enableInventoryState, openMenu, openPlayerInventory } from './states/farm/openInventory'
 import { talkToNPC } from './states/game/dialog'
 import { bobItems, collectItems, popItems } from './states/game/items'
-import { applyMove, canPlayerMove, movePlayer, savePlayerPosition } from './states/game/movePlayer'
+import { applyMove, canPlayerMove, movePlayer, playerSteps, savePlayerPosition } from './states/game/movePlayer'
 import { pauseGame } from './states/game/pauseGame'
 import { beeFSM, ovenFSM, pandaFSM, playerFSM, shagaFSM } from './states/game/playerFSM'
 import { target } from './states/game/sensor'
@@ -48,7 +48,7 @@ setupState
 gameState
 	.onEnter()
 	.addSubscriber(initializeCameraPosition, bobItems, enableInventoryState, killAnimation, ...showInteraction, ...playerFSM, ...pandaFSM, ...beeFSM, ...shagaFSM, ...ovenFSM, popItems)
-	.onUpdate(runIf(canPlayerMove, movePlayer), runIf(() => !pausedState.enabled, applyMove))
+	.onUpdate(runIf(canPlayerMove, movePlayer), runIf(() => !pausedState.enabled, applyMove, playerSteps))
 	.onUpdate(collectItems, touchItem, talkToNPC, runIf(() => !openMenuState.enabled, pauseGame))
 	.enable()
 campState

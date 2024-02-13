@@ -1,6 +1,6 @@
 import type { models } from '@assets/assets'
 import type { RigidBodyType } from '@dimforge/rapier3d-compat'
-import { get, set } from 'idb-keyval'
+import { delMany, get, set } from 'idb-keyval'
 import type { With } from 'miniplex'
 import { For, Show, createEffect, createMemo, createSignal, onCleanup, onMount } from 'solid-js'
 import type { Vec2 } from 'three'
@@ -123,6 +123,10 @@ export const LevelEditor = () => {
 							id,
 						}])
 						setActiveLevel(levels().at(-1)!)
+					}
+					const resetLocalChanges = async () => {
+						await delMany(['levels', 'levelData', 'colliderData'])
+						window.location.reload()
 					}
 					const saveChanges = throttle(2000, () => {
 						if (!disableSave()) {
@@ -355,8 +359,11 @@ export const LevelEditor = () => {
 									}}
 								</For>
 							</div>
-							<button onClick={newLevel}>New level</button>
-							<button onClick={download}>Download</button>
+							<div><button onClick={newLevel}>New level</button></div>
+							<div><button onClick={download}>Download</button></div>
+							<div>
+								<button onClick={resetLocalChanges}>Reset local changes</button>
+							</div>
 
 							<div>
 								<input type="text" value={activeLevel().name} onChange={e => update()({ name: e.target.value })} />

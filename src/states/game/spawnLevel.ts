@@ -33,7 +33,7 @@ const spawnFromCanvas = (level: Level, image: HTMLCanvasElement, scale: number, 
 	}
 }
 
-export const spawnTrees = (level: Level) => {
+export const spawnTrees = (level: Level, parent: Entity) => {
 	const trees = Object.values(assets.trees).map(instanceMesh)
 	const treesInstances: InstanceHandle[] = []
 	const noise = createNoise3D(() => 0)
@@ -58,18 +58,19 @@ export const spawnTrees = (level: Level) => {
 				bodyDesc: RigidBodyDesc.fixed().lockRotations(),
 				colliderDesc: ColliderDesc.cylinder(treeSize.y / 2, treeSize.x / 2),
 				tree: true,
+				parent,
 			})
 		}
 	})
 	trees.forEach((t) => {
 		const group = t.process()
-		ecs.add({ group, inMap: true, tree: true })
+		ecs.add({ group, inMap: true, tree: true, parent })
 	})
 	for (const treesInstance of treesInstances) {
 		treesInstance.setUniform('playerZ', 1)
 	}
 }
-export const spawnGrass = (level: Level) => {
+export const spawnGrass = (level: Level, parent: Entity) => {
 	const grass = Object.entries(assets.models).filter(([name]) => name.includes('Grass')).map(x => instanceMesh(x[1]))
 	const flowers = Object.entries(assets.models).filter(([name]) => name.includes('Flower')).map(x => instanceMesh(x[1]))
 	const noise = createNoise2D(() => 0)
@@ -103,15 +104,16 @@ export const spawnGrass = (level: Level) => {
 			position,
 			instanceHandle,
 			grass: true,
+			parent,
 		})
 	})
 	grass.forEach((t) => {
 		const group = t.process()
-		ecs.add({ group, inMap: true, grass: true })
+		ecs.add({ group, inMap: true, grass: true, parent })
 	})
 	flowers.forEach((t) => {
 		const group = t.process()
-		ecs.add({ group, inMap: true, grass: true })
+		ecs.add({ group, inMap: true, grass: true, parent })
 	})
 }
 export const spawnGroundAndTrees = (level: Level) => {
@@ -122,14 +124,13 @@ export const spawnGroundAndTrees = (level: Level) => {
 	)
 	groundMesh.material.displacementMap!.flipY = false
 	groundMesh.rotation.x = -Math.PI / 2
-	spawnLight(level.size)
 
 	groundMesh.receiveShadow = true
 	const heights = canvasToArray(level.heightMap).map(pixel => pixel.x / 255)
 	const heightfield = new Float32Array(heights.length)
 	heightfield.set(heights)
 
-	ecs.add({
+	const ground = ecs.add({
 		model: groundMesh,
 		inMap: true,
 		bodyDesc: new RigidBodyDesc(RigidBodyType.Fixed),
@@ -138,8 +139,9 @@ export const spawnGroundAndTrees = (level: Level) => {
 		ground: true,
 		// ...bundle,
 	})
-	spawnTrees(level)
-	spawnGrass(level)
+	spawnLight(level.size, ground)
+	spawnTrees(level, ground)
+	spawnGrass(level, ground)
 }
 
 export const spawnFarm: System<FarmRessources> = () => {

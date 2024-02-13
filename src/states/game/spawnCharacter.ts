@@ -38,6 +38,7 @@ export const playerBundle = () => {
 		movementForce: new Vector3(),
 		speed: 200,
 		strength: new Stat(1),
+		lastStep: { right: false, left: false },
 		...healthBundle(5),
 		...stateBundle<'idle' | 'running' | 'picking'>('idle', {
 			idle: ['running', 'picking'],
