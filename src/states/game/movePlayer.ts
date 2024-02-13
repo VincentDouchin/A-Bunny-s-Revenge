@@ -22,7 +22,6 @@ export const playerSteps = () => {
 						sound.volume.value = -12
 						sound.start()
 						sound.onstop = () => sound.dispose()
-						console.log('ok')
 						ecs.update(player, { lastStep: { ...player.lastStep, [foot]: true } })
 					}
 				} else {

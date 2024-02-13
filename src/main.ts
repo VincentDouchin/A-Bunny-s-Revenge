@@ -32,11 +32,12 @@ import { spawnDungeon, spawnFarm, spawnLevelData } from './states/game/spawnLeve
 import { showInteraction, touchItem } from './states/game/touchItem'
 import { setupGame } from './states/setup/setupGame'
 import { UI } from './ui/UI'
+import { initTone } from './global/sounds'
 
 coreState
 	.addPlugins(debugPlugin)
 	.addPlugins(hierarchyPlugin, physicsPlugin, transformsPlugin, addToScene('camera', 'light', 'mesh', 'model', 'dialogContainer', 'batchRenderer', 'emitter', 'interactionContainer', 'minigameContainer'), updateModels, particlesPlugin)
-	.addSubscriber(...target, startTweens, preCompileShaders)
+	.addSubscriber(...target, startTweens, preCompileShaders, initTone)
 	.onEnter(initCamera, initThree, ui.render(UI))
 	.onPreUpdate(coroutines.tick)
 	.onUpdate(runIf(() => !pausedState.enabled, updateAnimations('beeAnimator', 'playerAnimator', 'pandaAnimator', 'shagaAnimator', 'ovenAnimator'), () => time.tick()), updateTweens, inputManager.update, ui.update, updateParticles, moveCamera)

@@ -5,7 +5,7 @@ import type { ColorRepresentation, Material } from 'three'
 import { CanvasTexture, Mesh, MeshStandardMaterial, NearestFilter, RepeatWrapping, SRGBColorSpace, TextureLoader, Vector2 } from 'three'
 
 import type { GLTF } from 'three/examples/jsm/loaders/GLTFLoader'
-import { Player, start } from 'tone'
+import { Player } from 'tone'
 import type { stringCaster } from './assetLoaders'
 import { dataUrlToCanvas, getExtension, getFileName, loadGLB, loadImage, textureLoader } from './assetLoaders'
 import { params } from './context'
@@ -179,7 +179,6 @@ const overrideRockColor = (node: Mesh<any, MeshStandardMaterial>, map?: CanvasTe
 	return new ToonMaterial({ color, map: map ?? node.material?.map })
 }
 const loadVoices = (glob: GlobEager) => {
-	window.addEventListener('pointerdown', () => start())
 	const sounds = mapValues(glob, src => new Player(src))
 	return mapKeys(sounds, k => getFileName(k).split('_')[1])
 }

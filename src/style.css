@@ -123,3 +123,23 @@ button.selected{
 body>div{
   box-shadow: 0 0 20vw rgba(0,0,0,0.5) inset;
 }
+
+/* ! INPUT RANGE */
+.input-range{
+  cursor: pointer;
+  appearance: none;
+  background:hsl(0, 0%, 0%, 0.3);
+  border-radius: 0.5rem;
+  box-shadow:0 0.2rem 0 0 hsl(0, 0%, 0%, 0.8);
+}
+.input-range:hover{
+  outline:solid 0.2rem hsl(0, 0%, 100%,0.3);
+}
+input[type="range"]::-webkit-slider-thumb {
+  -webkit-appearance: none; 
+   appearance: none;
+   background-color: hsl(0,0%,100%,0.7);
+   border-radius: 0.5rem;
+   height: 1.5rem;
+   width: 1rem;    
+}

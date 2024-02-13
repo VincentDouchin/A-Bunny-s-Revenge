@@ -15,6 +15,7 @@ export interface SaveData {
 	selectedSeed: null | crops
 	inventories: Record<string, Item[]>
 	modifiers: Modifier<any>[]
+	settings: { volume: number, mute: boolean }
 }
 
 const blankSave = (): SaveData => ({
@@ -25,6 +26,7 @@ const blankSave = (): SaveData => ({
 	selectedSeed: null,
 	inventories: {},
 	modifiers: [],
+	settings: { volume: 100, mute: false },
 })
 
 export const save: Readonly<SaveData> = blankSave()
