@@ -1,9 +1,9 @@
 import { Tween } from '@tweenjs/tween.js'
-import { Mesh } from 'three'
+import { Material, Mesh } from 'three'
 import type { Entity } from '@/global/entity'
 import { ecs } from '@/global/init'
 import { Stat } from '@/lib/stats'
-import { ToonMaterial } from '@/shaders/GroundShader'
+import type { ToonMaterial } from '@/shaders/GroundShader'
 
 export const healthBundle = (health: number) => ({
 	currentHealth: health,
@@ -26,7 +26,7 @@ export const killAnimation = () => deadEntities.onEntityAdded.subscribe((e) => {
 		if (node instanceof Mesh) {
 			node.castShadow = false
 			const mat = node.material as InstanceType<typeof ToonMaterial>
-			if (mat instanceof ToonMaterial) {
+			if (mat instanceof Material) {
 				mat.transparent = true
 				mat.depthWrite = false
 				tween.onUpdate(([val]) => mat.opacity = val)

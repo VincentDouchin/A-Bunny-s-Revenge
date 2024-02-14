@@ -108,7 +108,7 @@ const toonExtension = new MaterialExtension({ }).frag(
 	color.rgb *= diffuse;
 	float max_light = max(outgoingLight.z,max(outgoingLight.x,outgoingLight.y)) * 3.;
 	vec3 outgoingLight2 = colorRamp(color.xyz, max_light);
-	gl_FragColor = vec4(  outgoingLight2  , opacity);`),
+	gl_FragColor = vec4(  outgoingLight2 , opacity);`),
 )
 const [groundColors] = useLocalStorage('groundColor', {
 	topColor: '#5AB552',
@@ -142,18 +142,15 @@ const groundExtension = (image: HTMLCanvasElement, x: number, y: number) => {
 			float noise = cnoise(scaled_uv.xyx);
 			float noise2 = cnoise((scaled_uv/2.).yxy);
 			bool is_path = texture2D(level,vUv ).r == 1.0;
-			if(is_path){
-				color.rgb = step(cnoise(scaled_uv.yyy)+cnoise(scaled_uv.xyy)/2.,0.2) ==0.
+			vec3 path = step(cnoise(scaled_uv.yyy)+cnoise(scaled_uv.xyy)/2.,0.2) ==0.
 					? pathColor
 					: mix(pathColor,pathColor2,0.1) ;
-			}else {
-				color.rgb =
-					step(0.4,noise2) == 1.
-					? mix(grassColor,grassColor2,0.3)
-					: step(0.3,noise) == 1.
-						? mix(grassColor,grassColor2,0.2)
-						: grassColor ;
-			}
+			vec3 grass = step(0.4,noise2) == 1.
+				? mix(grassColor,grassColor2,0.3)
+				: step(0.3,noise) == 1.
+					? mix(grassColor,grassColor2,0.2)
+					: grassColor ;
+			color.rgb = mix(grass,path,smoothstep(0.2,0.8,texture2D(level,vUv ).r) );
 	`),
 	) }
 
@@ -168,7 +165,7 @@ const treeExtension = new MaterialExtension({ playerZ: 0 }).frag(
 const characterExtension = new MaterialExtension({ flash: 0 }).frag(
 	addUniform('flash', 'float'),
 	override('gl_FragColor', `
-	vec4(  outgoingLight2 + vec3(flash)  , opacity);;
+	vec4(outgoingLight2 + vec3(flash), opacity);;
 	`),
 )
 export const CharacterMaterial = extendMaterial(MeshStandardMaterial, [toonExtension, characterExtension])

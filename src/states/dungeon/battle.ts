@@ -27,13 +27,15 @@ export const playerAttack = () => {
 						enemy.body.applyImpulse(force, true)
 						// ! damage flash
 						const tween = new Tween({ color: 0 })
-							.to({ color: 1 }, 50)
+							.to({ color: 1 }, 200)
 							.yoyo(true)
 							.repeat(1)
 							.onComplete(() => ecs.removeComponent(enemy, 'tween'))
 						enemy.model.traverse((node) => {
 							if (node instanceof Mesh && node.material instanceof CharacterMaterial) {
-								tween.onUpdate(({ color }) => node.material.uniforms.flash.value = color)
+								tween.onUpdate(({ color }) => {
+									node.material.uniforms.flash.value = color
+								})
 							}
 						})
 						ecs.update(enemy, { tween })
