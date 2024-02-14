@@ -1,4 +1,4 @@
-import { BasicShadowMap, DepthTexture, NearestFilter, RGBAFormat, SRGBColorSpace, Scene, ShaderMaterial, WebGLRenderTarget, WebGLRenderer } from 'three'
+import { BasicShadowMap, DepthTexture, LinearSRGBColorSpace, NearestFilter, RGBAFormat, SRGBColorSpace, Scene, ShaderMaterial, WebGLRenderTarget, WebGLRenderer } from 'three'
 import { FullScreenQuad } from 'three/examples/jsm/postprocessing/Pass'
 import { CSS2DRenderer } from 'three/examples/jsm/renderers/CSS2DRenderer'
 import { camera } from './camera'
@@ -37,7 +37,7 @@ export const initThree = () => {
 	renderer.shadowMap.type = BasicShadowMap
 	renderer.domElement.classList.add('main')
 	document.body.appendChild(renderer.domElement)
-	renderer.outputColorSpace = SRGBColorSpace
+	renderer.outputColorSpace = LinearSRGBColorSpace
 	renderer.setSize(width, width * ratio)
 	cssRenderer.setSize(window.innerWidth, window.innerHeight)
 	cssRenderer.domElement.style.position = 'fixed'
