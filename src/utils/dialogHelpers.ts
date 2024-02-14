@@ -12,7 +12,7 @@ import { addItem, removeItem, save, updateSave } from '@/global/save'
 import type { Item } from '@/constants/items'
 
 const playerQuery = ecs.with('player', 'position', 'collider', 'movementForce')
-const houseQuery = ecs.with('npcName', 'position', 'collider').where(({ npcName }) => npcName === 'Grandma')
+const houseQuery = ecs.with('npcName', 'position', 'collider', 'rotation').where(({ npcName }) => npcName === 'Grandma')
 const doorQuery = ecs.with('npcName', 'worldPosition', 'collider').where(({ npcName }) => npcName === 'door')
 export const pandaQuery = ecs.with('stateMachine', 'npcName').where(({ npcName }) => npcName === 'Panda')
 const setSensor = <T extends With<Entity, 'collider'>>(query: Query<T>, sensor: boolean) => {
@@ -64,7 +64,7 @@ export const leaveHouse = () => {
 	const house = houseQuery.first
 	const door = doorQuery.first
 	if (house && door) {
-		movePlayerTo(new Vector3(0, 0, -30).add(house.position)).then(() => {
+		movePlayerTo(new Vector3(0, 0, 30).applyQuaternion(house.rotation).add(house.position)).then(() => {
 			cutSceneState.disable()
 			setSensor(houseQuery, false)
 			setSensor(doorQuery, false)
