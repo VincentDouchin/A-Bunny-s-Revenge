@@ -7,7 +7,7 @@ import { type Entity, Faction, MenuType } from '@/global/entity'
 import { assets, ecs } from '@/global/init'
 import { playerInputMap } from '@/global/inputMaps'
 import { save, updateSave } from '@/global/save'
-import type { FarmRessources } from '@/global/states'
+import { type FarmRessources, openMenuState } from '@/global/states'
 import { capsuleColliderBundle } from '@/lib/models'
 import type { System } from '@/lib/state'
 import { stateBundle } from '@/lib/stateMachine'
@@ -20,6 +20,7 @@ export const playerBundle = () => {
 			node.material.map.colorSpace = LinearSRGBColorSpace
 			node.material.map.minFilter = NearestFilter
 			node.material.map.magFilter = NearestFilter
+			node.material.opacity = 1
 		}
 	})
 	const bundle = capsuleColliderBundle(model.scene, Sizes.character)
@@ -40,10 +41,13 @@ export const playerBundle = () => {
 		strength: new Stat(1),
 		lastStep: { right: false, left: false },
 		...healthBundle(5),
-		...stateBundle<'idle' | 'running' | 'picking'>('idle', {
-			idle: ['running', 'picking'],
-			running: ['idle'],
+		...stateBundle<'idle' | 'running' | 'picking' | 'hit' | 'dying' | 'dead'>('idle', {
+			idle: ['running', 'picking', 'hit'],
+			running: ['idle', 'hit'],
 			picking: ['idle'],
+			hit: ['idle', 'dying'],
+			dying: ['dead'],
+			dead: [],
 		}),
 	} as const satisfies Entity
 	for (const mod of save.modifiers) {
@@ -65,3 +69,9 @@ export const spawnCharacter: System<FarmRessources> = ({ previousState }) => {
 		rotation,
 	})
 }
+const playerQuery = ecs.with('player', 'position')
+
+export const losingBattle = () => playerQuery.onEntityRemoved.subscribe((e) => {
+	openMenuState.enable()
+	ecs.add({ inMap: true, position: e.position, cameratarget: true })
+})

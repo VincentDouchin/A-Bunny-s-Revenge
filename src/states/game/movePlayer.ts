@@ -54,7 +54,7 @@ export const applyMove = () => {
 		force.setY(0)
 		const moving = force.length() > 0
 		moving && rotation.setFromAxisAngle(new Vector3(0, 1, 0), Math.atan2(force.x, force.z))
-		if (state !== 'picking' && state !== 'waitingAttack') {
+		if (state !== 'picking' && state !== 'waitingAttack' && state !== 'hit' && state !== 'dying' && state !== 'dead') {
 			if (moving) {
 				stateMachine.enter('running', entity)
 			} else {

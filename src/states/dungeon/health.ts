@@ -1,6 +1,6 @@
 import { Tween } from '@tweenjs/tween.js'
 import { Material, Mesh } from 'three'
-import type { Entity } from '@/global/entity'
+import { type Entity, Faction } from '@/global/entity'
 import { ecs } from '@/global/init'
 import { Stat } from '@/lib/stats'
 import type { ToonMaterial } from '@/shaders/GroundShader'
@@ -18,21 +18,23 @@ export const killEntities = () => {
 		}
 	}
 }
-const deadEntities = ecs.with('state', 'body', 'movementForce', 'model').where(e => e.state === 'dead')
+const deadEntities = ecs.with('state', 'body', 'movementForce', 'model', 'faction').where(e => e.state === 'dead')
 export const killAnimation = () => deadEntities.onEntityAdded.subscribe((e) => {
 	ecs.removeComponent(e, 'body')
 	const tween = new Tween([1]).to([0])
-	e.model.traverse((node) => {
-		if (node instanceof Mesh) {
-			node.castShadow = false
-			const mat = node.material as InstanceType<typeof ToonMaterial>
-			if (mat instanceof Material) {
-				mat.transparent = true
-				mat.depthWrite = false
-				tween.onUpdate(([val]) => mat.opacity = val)
+	if (e.faction === Faction.Enemy) {
+		e.model.traverse((node) => {
+			if (node instanceof Mesh) {
+				node.castShadow = false
+				const mat = node.material as InstanceType<typeof ToonMaterial>
+				if (mat instanceof Material) {
+					mat.transparent = true
+					mat.depthWrite = false
+					tween.onUpdate(([val]) => mat.opacity = val)
+				}
 			}
-		}
-	})
+		})
+	}
 	tween.onComplete(() => ecs.remove(e))
 	ecs.update(e, { tween })
 })

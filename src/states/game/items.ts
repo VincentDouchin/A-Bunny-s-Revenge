@@ -43,6 +43,7 @@ export const itemBundle = (item: items, model?: Object3D<Object3DEventMap>) => {
 		...bundle,
 		model,
 		item: true,
+		inMap: true,
 		itemLabel: item,
 	} as const satisfies Entity
 }

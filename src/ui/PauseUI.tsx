@@ -7,7 +7,7 @@ import { ui } from '@/global/init'
 import { pausedState } from '@/global/states'
 import { save, updateSave } from '@/global/save'
 
-export const PauseUI = () => {
+export const PauseUi = () => {
 	const paused = ui.sync(() => pausedState.enabled)
 	const [mute, setMute] = createSignal(save.settings.mute)
 	const muteSound = () => {

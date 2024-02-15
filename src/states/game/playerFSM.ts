@@ -19,6 +19,8 @@ export const playerFSM = setupAnimations('playerAnimator', {
 	idle: e => e.playerAnimator.playAnimation('idle'),
 	picking: e => e.playerAnimator.playOnce('picking_vegetables').then(() => e.stateMachine.enter('idle', e)),
 	running: e => e.playerAnimator.playAnimation('run'),
+	hit: e => setTimeout(() => e.stateMachine.enter('idle', e), 200),
+	dying: e => setTimeout(() => e.stateMachine.enter('dead', e), 1000),
 
 })
 export const pandaFSM = setupAnimations('pandaAnimator', {

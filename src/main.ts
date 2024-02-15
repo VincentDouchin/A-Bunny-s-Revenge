@@ -12,8 +12,7 @@ import { addToScene } from './lib/registerComponents'
 import { runIf } from './lib/state'
 import { transformsPlugin } from './lib/transforms'
 import { startTweens, updateTweens } from './lib/updateTween'
-import { playerAttack, spawnDrops } from './states/dungeon/battle'
-import { enemyAttackPlayer } from './states/dungeon/enemies'
+import { enemyAttackPlayer, playerAttack, spawnDrops } from './states/dungeon/battle'
 import { generateDungeon } from './states/dungeon/generateDungeon'
 import { killAnimation, killEntities } from './states/dungeon/health'
 import { spawnItems } from './states/dungeon/itemRoom'
@@ -25,7 +24,7 @@ import { applyMove, canPlayerMove, movePlayer, playerSteps, savePlayerPosition }
 import { pauseGame } from './states/game/pauseGame'
 import { beeFSM, ovenFSM, pandaFSM, playerFSM, shagaFSM } from './states/game/playerFSM'
 import { target } from './states/game/sensor'
-import { spawnCharacter } from './states/game/spawnCharacter'
+import { losingBattle, spawnCharacter } from './states/game/spawnCharacter'
 import { allowDoorCollision, collideWithDoor, collideWithDoorCamp } from './states/game/spawnDoor'
 import { spawnSkyBox } from './states/game/spawnSkyBox'
 import { spawnDungeon, spawnFarm, spawnLevelData } from './states/game/spawnLevel'
@@ -65,7 +64,7 @@ openMenuState
 genDungeonState
 	.onEnter(generateDungeon)
 dungeonState
-	.addSubscriber(spawnDrops)
+	.addSubscriber(spawnDrops, losingBattle)
 	.onEnter(spawnDungeon, spawnSkyBox, spawnItems, spawnLevelData)
 	.onUpdate(runIf(canPlayerMove, allowDoorCollision, collideWithDoor, enemyAttackPlayer, harvestCrop, playerAttack, killEntities))
 	.onExit(despawnOfType('map'))

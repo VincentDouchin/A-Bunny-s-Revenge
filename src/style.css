@@ -127,6 +127,20 @@ body>div{
   box-shadow: 0 0 20vw rgba(0,0,0,0.5) inset;
 }
 
+@keyframes fade-in{
+  from{
+    opacity: 0;
+  }
+  to{
+   opacity: 1;
+  }
+}
+
+.fade-in{
+  animation-name:fade-in;
+  animation-duration:1s;
+}
+
 /* ! INPUT RANGE */
 .input-range{
   cursor: pointer;
