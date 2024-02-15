@@ -4,7 +4,7 @@ import { FullScreenQuad } from 'three/examples/jsm/postprocessing/Pass'
 import { getScreenBuffer } from '@/utils/buffer'
 import { outlinePass } from '@/shaders/PixelOutlineMaterial'
 
-const SIZE = 24
+const SIZE = 32
 
 export const thumbnailRenderer = () => {
 	const renderer = new WebGLRenderer({ alpha: true })
@@ -19,11 +19,11 @@ export const thumbnailRenderer = () => {
 	camera.position.set(0, 1, -1)
 	camera.zoom = 2.3
 	camera.updateProjectionMatrix()
-	const light = new DirectionalLight(0xFFFFFF, 0.5)
+	const light = new DirectionalLight(0xFFFFFF, 3)
 	light.position.set(0, 5, 0)
 	light.lookAt(new Vector3(0, 0, 0))
 	scene.add(light)
-	scene.add(new AmbientLight(0xFFFFFF, 0.5))
+	scene.add(new AmbientLight(0xFFFFFF, 1))
 	const getCanvas = (model: Object3D<Object3DEventMap>) => {
 		const clone = model.clone()
 		scene.add(clone)

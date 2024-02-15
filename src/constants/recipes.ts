@@ -11,7 +11,7 @@ export const recipes: Array<Recipe> = [
 	{
 		input: [{ name: 'carrot', quantity: 3 }],
 		output: { name: 'carrot_soup', quantity: 1 },
-		processor: MenuType.Cauldron,
+		processor: MenuType.Oven,
 	},
 	{
 		input: [{ name: 'tomato', quantity: 3 }, { name: 'parsley', quantity: 1 }],

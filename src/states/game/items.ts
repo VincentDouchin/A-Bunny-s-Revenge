@@ -12,6 +12,10 @@ import { modelColliderBundle } from '@/lib/models'
 const itemsQuery = ecs.with('item', 'position', 'model', 'collider', 'itemLabel')
 
 export const itemBundle = (item: items, model?: Object3D<Object3DEventMap>) => {
+	if (item in assets.itemModels) {
+		model = assets.itemModels[item].scene.clone()
+		model.scale.setScalar(5)
+	}
 	const bundle = model
 		? modelColliderBundle(model, RigidBodyType.Dynamic, true)
 		: {
@@ -43,7 +47,11 @@ export const itemBundle = (item: items, model?: Object3D<Object3DEventMap>) => {
 	} as const satisfies Entity
 }
 export const bobItems = () => itemsQuery.onEntityAdded.subscribe((entity) => {
-	const tween	= new Tween(entity.model.position).to({ y: 5 }, 2000).repeat(Number.POSITIVE_INFINITY).yoyo(true).easing(Easing.Quadratic.InOut)
+	const tween = new TweenGroup()
+		.add(new Tween(entity.model.position).to({ y: 5 }, 2000).repeat(Number.POSITIVE_INFINITY).yoyo(true).easing(Easing.Quadratic.InOut))
+	if (entity.rotation) {
+		tween.add(new Tween({ rotation: 0 }).to({ rotation: Math.PI * 2 }, 2000).repeat(Number.POSITIVE_INFINITY).onUpdate(({ rotation }) => entity.rotation?.setFromAxisAngle(new Vector3(0, 1, 0), rotation)))
+	}
 	ecs.update(entity, { tween })
 })
 

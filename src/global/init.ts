@@ -1,8 +1,9 @@
 import { World as RapierWrold, init } from '@dimforge/rapier3d-compat'
 import { World as MiniplexWorld } from 'miniplex'
-import { loadAssets, loadLevelData } from './assets'
+import { loadAssets } from './assets'
 import type { Entity } from './entity'
 import { loadImage } from './assetLoaders'
+import { loadLevelData } from './levelData'
 import { Time } from '@/lib/time'
 import { UIManager } from '@/lib/uiManager'
 import { CoroutinesManager } from '@/lib/coroutines'
@@ -20,7 +21,7 @@ export const coroutines = new CoroutinesManager()
 export const inputManager = new InputManager()
 export const levelsData = await loadLevelData()
 export const thumbnail = thumbnailRenderer()
-for (const [key, val] of entries(assets.models)) {
+for (const [key, val] of entries(assets.itemModels)) {
 	if (key in assets.items) {
 		const canvas = thumbnail.getCanvas(val.scene)
 		// @ts-expect-error hack
