@@ -2,19 +2,18 @@ import type { characters, items, models, particles, textures, trees } from '@ass
 import data from '@assets/levels/data.json'
 import { get } from 'idb-keyval'
 import type { ColorRepresentation, Material, Side } from 'three'
-import { CanvasTexture, DoubleSide, Mesh, MeshStandardMaterial, NearestFilter, RepeatWrapping, SRGBColorSpace, TextureLoader, Vector2 } from 'three'
+import { CanvasTexture, DoubleSide, Mesh, MeshStandardMaterial, NearestFilter, RepeatWrapping, SRGBColorSpace, TextureLoader } from 'three'
 
 import type { GLTF } from 'three/examples/jsm/loaders/GLTFLoader'
 import { Player } from 'tone'
 import type { stringCaster } from './assetLoaders'
 import { dataUrlToCanvas, getExtension, getFileName, loadGLB, loadImage, textureLoader } from './assetLoaders'
-import { params } from './context'
 import type { crops } from './entity'
-import { asyncMapValues, entries, groupByObject, mapKeys, mapValues } from '@/utils/mapFunctions'
-import { getScreenBuffer } from '@/utils/buffer'
-import { CharacterMaterial, ToonMaterial, TreeMaterial } from '@/shaders/GroundShader'
-import type { CollidersData, Level, LevelData, LevelImage, RawLevel } from '@/debug/LevelEditor'
 import { keys } from '@/constants/keys'
+import type { CollidersData, Level, LevelData, LevelImage, RawLevel } from '@/debug/LevelEditor'
+import { CharacterMaterial, ToonMaterial, TreeMaterial } from '@/shaders/GroundShader'
+import { getScreenBuffer } from '@/utils/buffer'
+import { asyncMapValues, entries, groupByObject, mapKeys, mapValues } from '@/utils/mapFunctions'
 
 type Glob = Record<string, () => Promise<any>>
 type GlobEager<T = string> = Record<string, T>
