@@ -210,4 +210,5 @@ export const loadAssets = async () => ({
 	buttons: await buttonsLoader(import.meta.glob('@assets/buttons/*.*', { eager: true, import: 'default' })),
 	voices: loadVoices(import.meta.glob('@assets/voices/*.ogg', { eager: true, import: 'default' })),
 	steps: loadSteps(import.meta.glob('@assets/steps/*.*', { eager: true, import: 'default' })),
+	itemModels: await loadGLBAsToon()(import.meta.glob('@assets/items/*.glb', { as: 'url' })),
 } as const)
