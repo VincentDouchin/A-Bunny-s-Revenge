@@ -11,13 +11,14 @@ import { type Entity, Interactable, MenuType } from '@/global/entity'
 import { assets, ecs } from '@/global/init'
 import { menuInputMap } from '@/global/inputMaps'
 import { save } from '@/global/save'
-import type { DungeonRessources, FarmRessources } from '@/global/states'
+import { type DungeonRessources, type FarmRessources, campState } from '@/global/states'
 import type { direction } from '@/lib/directions'
 import { modelColliderBundle } from '@/lib/models'
 import { stateBundle } from '@/lib/stateMachine'
 import { cropBundle } from '@/states/farm/farming'
-import { playerBundle } from '@/states/game/spawnCharacter'
+import { playerBundle } from '@/states/game/spawnPlayer'
 import { doorSide } from '@/states/game/spawnDoor'
+import { doorClosed } from '@/particles/doorClosed'
 
 export const customModels = {
 	door: doorSide,
@@ -165,11 +166,15 @@ export const props: PlacableProp<propNames>[] = [
 		data: { direction: 'north' },
 		models: ['door'],
 		bundle: (entity, data, ressources) => {
+			if (!campState.enabled) {
+				entity.colliderDesc!.setSensor(false)
+				entity.emitter = doorClosed()
+			}
 			if ('dungeon' in ressources) {
 				if (data.data.direction === ressources.direction) {
 					ecs.add({
-						...playerBundle(),
-						position: new Vector3(...data.position),
+						...playerBundle(ressources.playerHealth),
+						position: new Vector3(...data.position).add(new Vector3(0, 0, -20).applyQuaternion(entity.rotation)),
 						ignoreDoor: data.data.direction,
 					})
 				}

@@ -17,6 +17,7 @@ export const pausedState = app.create()
 export interface DungeonRessources {
 	dungeon: Room
 	direction: direction
+	playerHealth?: number
 }
 
 export const dungeonState = app.create<DungeonRessources>()

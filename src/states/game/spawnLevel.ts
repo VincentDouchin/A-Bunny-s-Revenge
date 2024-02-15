@@ -62,14 +62,15 @@ export const spawnTrees = (level: Level, parent: Entity) => {
 			})
 		}
 	})
-	trees.forEach((t) => {
-		const group = t.process()
+	for (const tree of trees) {
+		const group = tree.process()
 		ecs.add({ group, inMap: true, tree: true, parent })
-	})
+	}
 	for (const treesInstance of treesInstances) {
 		treesInstance.setUniform('playerZ', 1)
 	}
 }
+
 export const spawnGrass = (level: Level, parent: Entity) => {
 	const grass = Object.entries(assets.models).filter(([name]) => name.includes('Grass')).map(x => instanceMesh(x[1]))
 	const flowers = Object.entries(assets.models).filter(([name]) => name.includes('Flower')).map(x => instanceMesh(x[1]))

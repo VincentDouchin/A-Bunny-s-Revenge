@@ -96,7 +96,7 @@ export const OvenMinigameUi = ({ player }: FarmUiProps) => {
 								}
 							})
 							for (let i = 0; i < output().quantity; i++) {
-								ecs.add({ ...itemBundle(output().name), position, popDirection: new Vector3(0, 0, 2).applyQuaternion(bellow.oven.rotation!) })
+								ecs.add({ ...itemBundle(output().name), position, popDirection: new Vector3(between(-1, 1), 0, between(2, 2.5)).applyQuaternion(bellow.oven.rotation!) })
 							}
 						}
 					}

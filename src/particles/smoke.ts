@@ -1,5 +1,5 @@
-import { CircleGeometry, MeshBasicMaterial, Vector4 } from 'three'
-import { Bezier, ColorOverLife, ColorRange, ConeEmitter, ConstantValue, IntervalValue, ParticleSystem, PiecewiseBezier, RandomQuatGenerator, RenderMode, SizeOverLife } from 'three.quarks'
+import { CircleGeometry, MeshBasicMaterial, Vector3 } from 'three'
+import { Bezier, ColorOverLife, ConeEmitter, ConstantValue, Gradient, IntervalValue, ParticleSystem, PiecewiseBezier, RandomQuatGenerator, RenderMode, SizeOverLife } from 'three.quarks'
 
 const geo = new CircleGeometry(1, 8)
 const mat = new MeshBasicMaterial({ color: 0x000000 })
@@ -23,8 +23,10 @@ export const smoke = () => {
 		renderOrder: 1,
 		behaviors: [
 			new SizeOverLife(new PiecewiseBezier([[new Bezier(1, 0.75, 0.50, 0.25), 0]])),
-			// @ts-expect-error wrong type
-			new ColorOverLife(new ColorRange(new Vector4(0, 0, 0, 1), new Vector4(0.3, 0.3, 0.3, 1))),
+			new ColorOverLife(new Gradient(
+				[[new Vector3(0, 0, 0), 0], [new Vector3(0.3, 0.3, 0.3), 1]],
+				[[1, 0], [0, 1]],
+			)),
 		],
 	})
 	system.emitter.rotateX(-Math.PI / 2)

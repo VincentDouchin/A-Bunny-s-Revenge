@@ -1,8 +1,8 @@
 import type { characters, items, models, particles, textures, trees } from '@assets/assets'
 import data from '@assets/levels/data.json'
 import { get } from 'idb-keyval'
-import type { ColorRepresentation, Material } from 'three'
-import { CanvasTexture, Mesh, MeshStandardMaterial, NearestFilter, RepeatWrapping, SRGBColorSpace, TextureLoader, Vector2 } from 'three'
+import type { ColorRepresentation, Material, Side } from 'three'
+import { CanvasTexture, DoubleSide, Mesh, MeshStandardMaterial, NearestFilter, RepeatWrapping, SRGBColorSpace, TextureLoader, Vector2 } from 'three'
 
 import type { GLTF } from 'three/examples/jsm/loaders/GLTFLoader'
 import { Player } from 'tone'
@@ -32,7 +32,7 @@ const typeGlobEager = <K extends string>(glob: GlobEager) => <F extends (glob: G
 	return fn(glob) as Record<K, ReturnType<F>[string]>
 }
 
-const loadGLBAsToon = (options?: { src?: string, color?: ColorRepresentation, material?: (node: Mesh<any, MeshStandardMaterial>, map?: CanvasTexture) => Material }) => async (glob: Glob) => {
+const loadGLBAsToon = (options?: { src?: string, color?: ColorRepresentation, material?: (node: Mesh<any, MeshStandardMaterial>, map?: CanvasTexture) => Material, side?: Side }) => async (glob: Glob) => {
 	const loaded = await asyncMapValues(glob, async (f) => {
 		const path = await f()
 		const ext = getExtension(path)
@@ -55,6 +55,7 @@ const loadGLBAsToon = (options?: { src?: string, color?: ColorRepresentation, ma
 					node.material = options?.material
 						? options?.material(node, map)
 						: new ToonMaterial({ color: options?.color ?? node.material.color, map: map ?? node.material.map })
+					if (options?.side) node.material.side = options.side
 				}
 				node.castShadow = true
 				node.receiveShadow = false
@@ -192,11 +193,6 @@ export const loadAssets = async () => ({
 	skybox: await skyboxLoader(import.meta.glob('@assets/skybox/*.png', { eager: true, import: 'default' })),
 	trees: await typeGlob<trees>(import.meta.glob('@assets/trees/*.*', { as: 'url' }))(loadGLBAsToon({ material: (node) => {
 		const mat = new TreeMaterial({ map: node.material.map, transparent: true })
-		const width = params.renderWidth
-		const ratio = window.innerHeight / window.innerWidth
-		const height = Math.round(width * ratio)
-		const resolution = new Vector2(width, height)
-		mat.uniforms.resolution = resolution
 		return mat
 	},
 	})),
@@ -210,5 +206,5 @@ export const loadAssets = async () => ({
 	buttons: await buttonsLoader(import.meta.glob('@assets/buttons/*.*', { eager: true, import: 'default' })),
 	voices: loadVoices(import.meta.glob('@assets/voices/*.ogg', { eager: true, import: 'default' })),
 	steps: loadSteps(import.meta.glob('@assets/steps/*.*', { eager: true, import: 'default' })),
-	itemModels: await loadGLBAsToon()(import.meta.glob('@assets/items/*.glb', { as: 'url' })),
+	itemModels: await loadGLBAsToon({ side: DoubleSide })(import.meta.glob('@assets/items/*.glb', { as: 'url' })),
 } as const)

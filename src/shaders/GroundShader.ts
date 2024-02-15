@@ -89,6 +89,7 @@ export const override = (variable: string, part: string) => (shader: string) => 
 	return shader.split(`\n\t`).map(p => p.startsWith(variable) ? `${variable} = ${part};` : p).join(`\n\t`)
 }
 export const replace = (toReplace: string, part: string) => (shader: string) => {
+	if (!shader.includes(toReplace)) console.error(`part to replace ${toReplace} not found in shader`)
 	return shader.replace(toReplace, part)
 }
 export const addUniform = (name: string, type: 'vec2' | 'vec3' | 'vec4' | 'float' | 'int' | 'bool' | 'sampler2D') => (shader: string) => {
@@ -108,7 +109,7 @@ const toonExtension = new MaterialExtension({ }).frag(
 	color.rgb *= diffuse;
 	float max_light = max(outgoingLight.z,max(outgoingLight.x,outgoingLight.y)) * 3.;
 	vec3 outgoingLight2 = colorRamp(color.xyz, max_light);
-	gl_FragColor = vec4(  outgoingLight2 , opacity);`),
+	gl_FragColor = vec4(outgoingLight2,opacity);`),
 )
 const [groundColors] = useLocalStorage('groundColor', {
 	topColor: '#5AB552',
@@ -156,16 +157,16 @@ const groundExtension = (image: HTMLCanvasElement, x: number, y: number) => {
 
 const treeExtension = new MaterialExtension({ playerZ: 0 }).frag(
 	addUniform('playerZ', 'float'),
-	replace('gl_FragColor = vec4(  outgoingLight2  , opacity);', /* glsl */`
+	replace('gl_FragColor = vec4(outgoingLight2,opacity);', /* glsl */`
 	vec2 view = vViewPosition.xy ;
 	float new_opacity = playerZ == 1. ? smoothstep(15.,25.,abs(length(view))) : opacity;
-	gl_FragColor = vec4(  outgoingLight2  , new_opacity);
+	gl_FragColor = vec4(outgoingLight2, new_opacity);
 	`),
 )
 const characterExtension = new MaterialExtension({ flash: 0 }).frag(
 	addUniform('flash', 'float'),
 	override('gl_FragColor', `
-	vec4(outgoingLight2 + vec3(flash), opacity);;
+	vec4(outgoingLight2 + vec3(flash), opacity);
 	`),
 )
 export const CharacterMaterial = extendMaterial(MeshStandardMaterial, [toonExtension, characterExtension])

@@ -1,4 +1,4 @@
-import { BoxGeometry, DoubleSide, Group, Mesh, MeshBasicMaterial, MeshStandardMaterial, PlaneGeometry, ShaderMaterial } from 'three'
+import { DoubleSide, Group, Mesh, MeshBasicMaterial, PlaneGeometry, ShaderMaterial } from 'three'
 import { RoomType } from '../dungeon/dungeonTypes'
 import { ecs, world } from '@/global/init'
 import type { DungeonRessources } from '@/global/states'
@@ -6,27 +6,8 @@ import { campState, dungeonState, genDungeonState } from '@/global/states'
 import { otherDirection } from '@/lib/directions'
 import type { System } from '@/lib/state'
 import vertexShader from '@/shaders/glsl/main.vert?raw'
+import { Faction } from '@/global/entity'
 
-const getDoorLayer = (opacity: number) => {
-	const sizeFactor = (3 - opacity) / 3
-	const mesh = new Mesh(
-		new BoxGeometry(30, 30 * sizeFactor),
-		new MeshStandardMaterial({ color: 0x000000, opacity: opacity / 10, transparent: true, side: DoubleSide }),
-	)
-	mesh.renderOrder = -1
-	mesh.material.depthWrite = false
-	return mesh
-}
-export const doorGroup = () => {
-	const group = new Group()
-	for (let i = 0.1; i <= 1; i += 0.02) {
-		const layer = getDoorLayer(i)
-		layer.position.z = 0.5 + i * 50
-		group.add(layer)
-	}
-	group.position.y = 15
-	return group
-}
 export const doorSide = () => {
 	const mesh = new Mesh(
 		new PlaneGeometry(120, 80),
@@ -60,13 +41,18 @@ export const doorSide = () => {
 }
 const doorQuery = ecs.with('collider', 'door')
 const playerQuery = ecs.with('collider', 'playerControls').without('ignoreDoor')
+const enemyQuery = ecs.with('faction').where(({ faction }) => faction === Faction.Enemy)
 export const collideWithDoor: System<DungeonRessources> = ({ dungeon }) => {
 	for (const door of doorQuery) {
+		if (enemyQuery.size === 0 && !door.collider.isSensor()) {
+			door.collider.setSensor(true)
+			door.emitter && (door.emitter.system.looping = false)
+		}
 		for (const player of playerQuery) {
 			if (world.intersectionPair(door.collider, player.collider)) {
 				const nextRoom = dungeon.doors[door.door]
 				if (nextRoom) {
-					dungeonState.enable({ dungeon: nextRoom, direction: otherDirection[door.door] })
+					dungeonState.enable({ dungeon: nextRoom, direction: otherDirection[door.door], playerHealth: player.currentHealth })
 				} else {
 					if (dungeon.type === RoomType.Boss) {
 						campState.enable({ previousState: 'dungeon' })

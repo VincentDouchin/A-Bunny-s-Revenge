@@ -6,7 +6,7 @@ import { initThree, preCompileShaders, render, updateControls } from './global/r
 import { app, campState, coreState, dungeonState, gameState, genDungeonState, openMenuState, pausedState, setupState } from './global/states'
 import { despawnOfType, hierarchyPlugin } from './lib/hierarchy'
 import { updateModels } from './lib/modelsProperties'
-import { particlesPlugin, updateParticles } from './lib/particles'
+import { particlesPlugin } from './lib/particles'
 import { physicsPlugin } from './lib/physics'
 import { addToScene } from './lib/registerComponents'
 import { runIf } from './lib/state'
@@ -24,7 +24,7 @@ import { applyMove, canPlayerMove, movePlayer, playerSteps, savePlayerPosition }
 import { pauseGame } from './states/game/pauseGame'
 import { beeFSM, ovenFSM, pandaFSM, playerFSM, shagaFSM } from './states/game/playerFSM'
 import { target } from './states/game/sensor'
-import { losingBattle, spawnCharacter } from './states/game/spawnCharacter'
+import { losingBattle, spawnCharacter } from './states/game/spawnPlayer'
 import { allowDoorCollision, collideWithDoor, collideWithDoorCamp } from './states/game/spawnDoor'
 import { spawnSkyBox } from './states/game/spawnSkyBox'
 import { spawnDungeon, spawnFarm, spawnLevelData } from './states/game/spawnLevel'
@@ -39,7 +39,7 @@ coreState
 	.addSubscriber(...target, startTweens, preCompileShaders, initTone)
 	.onEnter(initCamera, initThree, ui.render(UI))
 	.onPreUpdate(coroutines.tick)
-	.onUpdate(runIf(() => !pausedState.enabled, updateAnimations('beeAnimator', 'playerAnimator', 'pandaAnimator', 'shagaAnimator', 'ovenAnimator'), () => time.tick()), updateTweens, inputManager.update, ui.update, updateParticles, moveCamera)
+	.onUpdate(runIf(() => !pausedState.enabled, updateAnimations('beeAnimator', 'playerAnimator', 'pandaAnimator', 'shagaAnimator', 'ovenAnimator'), () => time.tick()), updateTweens, inputManager.update, ui.update, moveCamera)
 	.onPostUpdate(updateControls, render)
 	.enable()
 setupState

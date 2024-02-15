@@ -13,7 +13,7 @@ import type { System } from '@/lib/state'
 import { stateBundle } from '@/lib/stateMachine'
 import { Stat, addModifier } from '@/lib/stats'
 
-export const playerBundle = () => {
+export const playerBundle = (health = 5) => {
 	const model = assets.characters.BunnydAnim
 	model.scene.traverse((node) => {
 		if (node instanceof Mesh && node.material.map) {
@@ -40,7 +40,7 @@ export const playerBundle = () => {
 		speed: 200,
 		strength: new Stat(1),
 		lastStep: { right: false, left: false },
-		...healthBundle(5),
+		...healthBundle(5, health),
 		...stateBundle<'idle' | 'running' | 'picking' | 'hit' | 'dying' | 'dead'>('idle', {
 			idle: ['running', 'picking', 'hit'],
 			running: ['idle', 'hit'],

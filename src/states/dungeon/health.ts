@@ -5,8 +5,8 @@ import { ecs } from '@/global/init'
 import { Stat } from '@/lib/stats'
 import type { ToonMaterial } from '@/shaders/GroundShader'
 
-export const healthBundle = (health: number) => ({
-	currentHealth: health,
+export const healthBundle = (health: number, current?: number) => ({
+	currentHealth: current ?? health,
 	maxHealth: new Stat(health),
 } as const satisfies Entity)
 

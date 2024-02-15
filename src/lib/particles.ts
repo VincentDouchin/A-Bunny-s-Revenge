@@ -1,7 +1,8 @@
 import { BatchedRenderer } from 'three.quarks'
-import type { State } from './state'
+import { type State, runIf } from './state'
 import { ecs, time } from '@/global/init'
 import { scene } from '@/global/rendering'
+import { pausedState } from '@/global/states'
 
 const initBatchRender = () => {
 	const batchRenderer = new BatchedRenderer()
@@ -9,7 +10,7 @@ const initBatchRender = () => {
 	ecs.add({ batchRenderer })
 }
 const batchRendererQuery = ecs.with('batchRenderer')
-export const updateParticles = () => batchRendererQuery.first && batchRendererQuery.first.batchRenderer.update(time.delta)
+const updateParticles = () => batchRendererQuery.first && batchRendererQuery.first.batchRenderer.update(time.delta * 1000)
 const emittersQuery = ecs.with('emitter')
 const addParticles = () => emittersQuery.onEntityAdded.subscribe((entity) => {
 	const batchRenderer = batchRendererQuery.first?.batchRenderer
@@ -20,7 +21,7 @@ const addParticles = () => emittersQuery.onEntityAdded.subscribe((entity) => {
 const removeEmitter = () => {
 	for (const entity of emittersQuery) {
 		// @ts-expect-error wrong interface
-		if (entity.emitter.system.emitEnded) {
+		if (entity.emitter.system.emitEnded && entity.emitter.system.particleNum === 0) {
 			ecs.removeComponent(entity, 'emitter')
 		}
 	}
@@ -28,6 +29,6 @@ const removeEmitter = () => {
 export const particlesPlugin = (state: State) => {
 	state
 		.onEnter(initBatchRender)
-		.onUpdate(updateParticles, removeEmitter)
+		.onPreUpdate(runIf(() => !pausedState.enabled, updateParticles), removeEmitter)
 		.addSubscriber(addParticles)
 }
