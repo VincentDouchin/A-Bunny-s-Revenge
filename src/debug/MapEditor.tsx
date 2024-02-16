@@ -145,9 +145,11 @@ export const MapEditor = ({ updateLevel, activeLevel }: { updateLevel: (l: Parti
 		}
 	})
 	const respawnEnvListener = () => {
-		ecs.remove(ground())
-		spawnGroundAndTrees(activeLevel())
-		displayHeights()
+		if (selectedColor() === 'heightMap') {
+			ecs.remove(ground())
+			spawnGroundAndTrees(activeLevel())
+			displayHeights()
+		}
 	}
 	onMount(async () => {
 		scene.add(mesh)

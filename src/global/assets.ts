@@ -31,7 +31,7 @@ const typeGlobEager = <K extends string>(glob: GlobEager) => <F extends (glob: G
 	return fn(glob) as Record<K, ReturnType<F>[string]>
 }
 
-const loadGLBAsToon = (options?: { src?: string, color?: ColorRepresentation, material?: (node: Mesh<any, MeshStandardMaterial>, map?: CanvasTexture) => Material, side?: Side }) => async (glob: Glob) => {
+const loadGLBAsToon = (options?: { src?: string, color?: ColorRepresentation, material?: (node: Mesh<any, MeshStandardMaterial>, map?: CanvasTexture) => Material, side?: Side, transparent?: true }) => async (glob: Glob) => {
 	const loaded = await asyncMapValues(glob, async (f) => {
 		const path = await f()
 		const ext = getExtension(path)
@@ -55,6 +55,7 @@ const loadGLBAsToon = (options?: { src?: string, color?: ColorRepresentation, ma
 						? options?.material(node, map)
 						: new ToonMaterial({ color: options?.color ?? node.material.color, map: map ?? node.material.map })
 					if (options?.side) node.material.side = options.side
+					if (options?.transparent) node.material.transparent = true
 				}
 				node.castShadow = true
 				node.receiveShadow = false
@@ -205,5 +206,5 @@ export const loadAssets = async () => ({
 	buttons: await buttonsLoader(import.meta.glob('@assets/buttons/*.*', { eager: true, import: 'default' })),
 	voices: loadVoices(import.meta.glob('@assets/voices/*.ogg', { eager: true, import: 'default' })),
 	steps: loadSteps(import.meta.glob('@assets/steps/*.*', { eager: true, import: 'default' })),
-	itemModels: await loadGLBAsToon({ side: DoubleSide })(import.meta.glob('@assets/items/*.glb', { as: 'url' })),
+	itemModels: await loadGLBAsToon({ side: DoubleSide, transparent: true })(import.meta.glob('@assets/items/*.glb', { as: 'url' })),
 } as const)
