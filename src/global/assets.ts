@@ -1,8 +1,8 @@
 import type { characters, items, models, particles, textures, trees } from '@assets/assets'
 import data from '@assets/levels/data.json'
 import { get } from 'idb-keyval'
-import type { ColorRepresentation, Material, Side } from 'three'
 import { CanvasTexture, DoubleSide, Mesh, MeshStandardMaterial, NearestFilter, RepeatWrapping, SRGBColorSpace, TextureLoader } from 'three'
+import type { ColorRepresentation, Material, Side } from 'three'
 
 import type { GLTF } from 'three/examples/jsm/loaders/GLTFLoader'
 import { Player } from 'tone'
@@ -13,7 +13,7 @@ import { keys } from '@/constants/keys'
 import type { CollidersData, Level, LevelData, LevelImage, RawLevel } from '@/debug/LevelEditor'
 import { CharacterMaterial, ToonMaterial, TreeMaterial } from '@/shaders/GroundShader'
 import { getScreenBuffer } from '@/utils/buffer'
-import { asyncMapValues, entries, groupByObject, mapKeys, mapValues } from '@/utils/mapFunctions'
+import { asyncMapValues, entries, filterKeys, groupByObject, mapKeys, mapValues } from '@/utils/mapFunctions'
 
 type Glob = Record<string, () => Promise<any>>
 type GlobEager<T = string> = Record<string, T>
@@ -187,6 +187,37 @@ const loadSteps = (glob: GlobEager) => {
 	return Object.values(mapValues(glob, src => new Player(src)))
 }
 
+const loadItems = async (glob: GlobEager) => {
+	const { glb, png } = groupByObject(glob, getExtension)
+	const [seedImages] = filterKeys(png, key => key.includes('_seeds'))
+	const models = await asyncMapValues(glb, async (url) => {
+		const model = await loadGLB(url)
+		model.scene.traverse((node) => {
+			if (node instanceof Mesh && node.material instanceof MeshStandardMaterial) {
+				node.material = new ToonMaterial({ map: node.material.map, transparent: true, side: DoubleSide })
+			}
+		})
+		return model.scene
+	})
+	const seed_bag = models[Object.keys(glb).find(k => k.includes('seeds'))!]
+	const seed_bags = await asyncMapValues(seedImages, async (path) => {
+		const text = new CanvasTexture(await loadImage(path))
+		text.flipY = false
+		text.colorSpace = SRGBColorSpace
+		text.magFilter = NearestFilter
+		text.minFilter = NearestFilter
+		const model = seed_bag.clone()
+		model.traverse((node) => {
+			if (node instanceof Mesh && node.material instanceof MeshStandardMaterial) {
+				node.material = new ToonMaterial({ map: text, transparent: true, side: DoubleSide })
+			}
+		})
+		return model
+	})
+	const allModels = { ...models, ...seed_bags }
+	return mapKeys(allModels, k => getFileName(k as string))
+}
+
 export const loadAssets = async () => ({
 	characters: await typeGlob<characters>(import.meta.glob('@assets/characters/*.glb', { as: 'url' }))(loadGLBAsToon({ material: node => new CharacterMaterial({ map: node.material.map }) })),
 	models: await typeGlob<models>(import.meta.glob('@assets/models/*.*', { as: 'url' }))(loadGLBAsToon({ material: overrideRockColor })),
@@ -206,5 +237,5 @@ export const loadAssets = async () => ({
 	buttons: await buttonsLoader(import.meta.glob('@assets/buttons/*.*', { eager: true, import: 'default' })),
 	voices: loadVoices(import.meta.glob('@assets/voices/*.ogg', { eager: true, import: 'default' })),
 	steps: loadSteps(import.meta.glob('@assets/steps/*.*', { eager: true, import: 'default' })),
-	itemModels: await loadGLBAsToon({ side: DoubleSide, transparent: true })(import.meta.glob('@assets/items/*.glb', { as: 'url' })),
+	itemModels: await loadItems(import.meta.glob('@assets/items/*.*', { as: 'url', eager: true })),
 } as const)

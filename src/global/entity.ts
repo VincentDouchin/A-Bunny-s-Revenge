@@ -29,6 +29,7 @@ export enum Interactable {
 	Plant = 'plant',
 	Harvest = 'harvest',
 	Enter = 'enter',
+	Cauldron = 'cauldron',
 	Cook = 'cook',
 	Chop = 'chop',
 	SelectSeed = 'select seed',

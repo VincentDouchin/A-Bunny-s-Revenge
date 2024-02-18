@@ -13,7 +13,7 @@ const itemsQuery = ecs.with('item', 'position', 'model', 'collider', 'itemLabel'
 
 export const itemBundle = (item: items, model?: Object3D<Object3DEventMap>) => {
 	if (item in assets.itemModels) {
-		model = assets.itemModels[item].scene.clone()
+		model = assets.itemModels[item].clone()
 		model.scale.setScalar(5)
 	}
 	const bundle = model

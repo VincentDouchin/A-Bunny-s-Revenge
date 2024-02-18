@@ -37,7 +37,7 @@ export const playerBundle = (health = 5) => {
 		sensor: true,
 		player: true,
 		movementForce: new Vector3(),
-		speed: 200,
+		speed: 150,
 		strength: new Stat(1),
 		lastStep: { right: false, left: false },
 		...healthBundle(5, health),

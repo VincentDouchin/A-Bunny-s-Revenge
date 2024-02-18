@@ -106,7 +106,7 @@ export const props: PlacableProp<propNames>[] = [
 			...entity,
 			...menuInputMap(),
 			menuType: MenuType.Cauldron,
-			interactable: Interactable.Cook,
+			interactable: Interactable.Cauldron,
 			recipesQueued: [],
 		}),
 	},

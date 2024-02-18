@@ -23,7 +23,7 @@ export const levelsData = await loadLevelData()
 export const thumbnail = thumbnailRenderer()
 for (const [key, val] of entries(assets.itemModels)) {
 	if (key in assets.items) {
-		const canvas = thumbnail.getCanvas(val.scene)
+		const canvas = thumbnail.getCanvas(val)
 		// @ts-expect-error hack
 		assets.items[key] = await loadImage(canvas.toDataURL())
 	}

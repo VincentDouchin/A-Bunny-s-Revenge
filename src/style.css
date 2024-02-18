@@ -59,9 +59,6 @@ canvas.main{
 .slide-exit-to {
   transform: translateY(100vh);
 }
-.slide-enter {
-  transform: translateY(100vh);
-}
 
 @keyframes letter-pop{
   from{
@@ -159,4 +156,16 @@ input[type="range"]::-webkit-slider-thumb {
    border-radius: 0.5rem;
    height: 1.5rem;
    width: 1rem;    
+}
+
+/* ! Interactions */
+
+.popup-enter-active,
+.popup-exit-active {
+  transition: all 0.2s ease;
+}
+.popup-enter,
+.popup-exit-to {
+  transform: scale(0.5);
+  opacity: 0;
 }

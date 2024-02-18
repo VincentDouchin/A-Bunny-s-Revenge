@@ -105,9 +105,7 @@ export const harvestCrop = () => {
 			for (const spot of plantedSpotQuery) {
 				if (spot.planted.interactionContainer && maxStage(spot.planted.crop.name) === spot.planted.crop.stage) {
 					if (stateMachine.enter('picking', player)) {
-						const model = assets.crops[spot.planted.crop.name].crop.scene.clone()
-						model.scale.setScalar(8)
-						const bundle = itemBundle(spot.planted.crop.name, model)
+						const bundle = itemBundle(spot.planted.crop.name)
 						ecs.add({
 							...bundle,
 							position: spot.worldPosition.clone().add(new Vector3(0, bundle.size.y + 5, 0)),
