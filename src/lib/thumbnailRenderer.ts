@@ -4,7 +4,7 @@ import { FullScreenQuad } from 'three/examples/jsm/postprocessing/Pass'
 import { getScreenBuffer } from '@/utils/buffer'
 import { outlinePass } from '@/shaders/PixelOutlineMaterial'
 
-const SIZE = 32
+const SIZE = 24
 
 export const thumbnailRenderer = () => {
 	const renderer = new WebGLRenderer({ alpha: true })

@@ -1,18 +1,21 @@
 import { PitchShift, Player } from 'tone'
+import type { music } from '@assets/assets'
 import { assets } from '@/global/init'
+
+const playbackRate = 3
 
 export const soundDialog = async (dialog: string) => {
 	const filteredDialog = dialog.replace(/[^a-zA-Z\s]/g, '')
 	for (const letter of filteredDialog) {
 		if (letter === ' ') {
-			await new Promise<void>(resolve => setTimeout(resolve, 150))
+			await new Promise<void>(resolve => setTimeout(resolve, 50))
 		} else {
 			const soundPath = assets.voices[letter]
 			if (!soundPath) continue
 			await new Promise<void>((resolve) => {
-				const sound = new Player(soundPath.buffer)
-				sound.playbackRate = 2
-				const pitch = new PitchShift(Math.random() * 5 / 12).toDestination()
+				const sound = new Player(soundPath.buffer).toDestination()
+				sound.playbackRate = playbackRate
+				const pitch = new PitchShift({ pitch: -1, windowSize: 1 }).toDestination()
 				sound.connect(pitch)
 				sound.start()
 				sound.onstop = () => {
@@ -21,8 +24,15 @@ export const soundDialog = async (dialog: string) => {
 				}
 				setTimeout(() => {
 					resolve()
-				}, sound.buffer.duration * 1000 / 2 - 50)
+				}, sound.buffer.duration * 1000 / playbackRate - 50)
 			})
 		}
+	}
+}
+export const playSound = (sound: music) => {
+	const soundPlayer = new Player(assets.music[sound].buffer).toDestination()
+	soundPlayer.start()
+	soundPlayer.onstop = () => {
+		soundPlayer.dispose()
 	}
 }

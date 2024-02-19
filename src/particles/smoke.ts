@@ -10,7 +10,7 @@ export const smoke = () => {
 		looping: true,
 		prewarm: true,
 		instancingGeometry: geo,
-		startLife: new IntervalValue(1.0, 10.0),
+		startLife: new IntervalValue(20.0, 10.0),
 		startSpeed: new ConstantValue(0.5),
 		startRotation: new RandomQuatGenerator(),
 		worldSpace: false,

@@ -87,7 +87,7 @@ export const OvenMinigameUi = ({ player }: FarmUiProps) => {
 							setDirection(x => x *= -1)
 							setTimer(between(2, 7))
 						}
-						setTarget(x => Math.max(0, Math.min(100, x + direction() * 3 * time.delta / 1000)))
+						setTarget(x => Math.max(0, Math.min(100, x + direction() * 3 * (time.delta / 1000) * (1 + progress() / 20))))
 						if (progress() >= 100) {
 							setProgress(0)
 							bellow.oven.recipesQueued?.shift()

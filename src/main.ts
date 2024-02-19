@@ -55,7 +55,7 @@ campState
 	.addSubscriber(...interactablePlantableSpot)
 	.onEnter(spawnFarm, spawnLevelData, updateCropsSave, initPlantableSpotsInteractions, spawnCharacter, spawnSkyBox)
 	.onUpdate(collideWithDoorCamp)
-	.onUpdate(runIf(canPlayerMove, plantSeed, harvestCrop, openPlayerInventory), savePlayerPosition)
+	.onUpdate(runIf(canPlayerMove, plantSeed, harvestCrop, openPlayerInventory, savePlayerPosition))
 	.onExit(despawnOfType('map'))
 openMenuState
 	.addSubscriber(disableInventoryState)

@@ -179,11 +179,15 @@ const overrideRockColor = (node: Mesh<any, MeshStandardMaterial>, map?: CanvasTe
 
 	return new ToonMaterial({ color, map: map ?? node.material?.map })
 }
-const loadVoices = (glob: GlobEager) => {
+const loadVoices = async (glob: GlobEager) => {
 	const sounds = mapValues(glob, src => new Player(src))
 	return mapKeys(sounds, k => getFileName(k).split('_')[1])
 }
-const loadSteps = (glob: GlobEager) => {
+const loadSounds = async (glob: GlobEager) => {
+	const sounds = mapValues(glob, src => new Player(src))
+	return mapKeys(sounds, getFileName)
+}
+const loadSteps = async (glob: GlobEager) => {
 	return Object.values(mapValues(glob, src => new Player(src)))
 }
 
@@ -218,24 +222,31 @@ const loadItems = async (glob: GlobEager) => {
 	return mapKeys(allModels, k => getFileName(k as string))
 }
 
-export const loadAssets = async () => ({
-	characters: await typeGlob<characters>(import.meta.glob('@assets/characters/*.glb', { as: 'url' }))(loadGLBAsToon({ material: node => new CharacterMaterial({ map: node.material.map }) })),
-	models: await typeGlob<models>(import.meta.glob('@assets/models/*.*', { as: 'url' }))(loadGLBAsToon({ material: overrideRockColor })),
-	skybox: await skyboxLoader(import.meta.glob('@assets/skybox/*.png', { eager: true, import: 'default' })),
-	trees: await typeGlob<trees>(import.meta.glob('@assets/trees/*.*', { as: 'url' }))(loadGLBAsToon({ material: (node) => {
-		const mat = new TreeMaterial({ map: node.material.map, transparent: true })
-		return mat
-	},
-	})),
-	crops: await cropsLoader<crops>(import.meta.glob('@assets/crops/*.glb', { as: 'url' })),
-	items: await typeGlob<items>(import.meta.glob('@assets/items/*.png', { eager: true, import: 'default' }))(itemsLoader),
-	particles: await typeGlob<particles>(import.meta.glob('@assets/particles/*.png', { eager: true, import: 'default' }))(texturesLoader),
-	textures: await typeGlob<textures>(import.meta.glob('@assets/textures/*.png', { eager: true, import: 'default' }))(texturesLoader),
-	fonts: await fontLoader(import.meta.glob('@assets/fonts/*.ttf', { eager: true, import: 'default' })),
-	levelImages: await levelImagesLoader(import.meta.glob('@assets/levels/*.png', { eager: true, import: 'default' })),
-	icons: typeGlobEager(import.meta.glob('@assets/icons/*.svg', { eager: true, import: 'default', as: 'raw' }))(iconsLoader),
-	buttons: await buttonsLoader(import.meta.glob('@assets/buttons/*.*', { eager: true, import: 'default' })),
-	voices: loadVoices(import.meta.glob('@assets/voices/*.ogg', { eager: true, import: 'default' })),
-	steps: loadSteps(import.meta.glob('@assets/steps/*.*', { eager: true, import: 'default' })),
-	itemModels: await loadItems(import.meta.glob('@assets/items/*.*', { as: 'url', eager: true })),
-} as const)
+type AssetsLoaded<T extends Record<string, Promise<any> | any>> = { [K in keyof T]: Awaited<T[K]> }
+
+export const loadAssets = async () => {
+	const assets = {
+		characters: typeGlob<characters>(import.meta.glob('@assets/characters/*.glb', { as: 'url' }))(loadGLBAsToon({ material: node => new CharacterMaterial({ map: node.material.map }) })),
+		models: typeGlob<models>(import.meta.glob('@assets/models/*.*', { as: 'url' }))(loadGLBAsToon({ material: overrideRockColor })),
+		skybox: skyboxLoader(import.meta.glob('@assets/skybox/*.png', { eager: true, import: 'default' })),
+		trees: typeGlob<trees>(import.meta.glob('@assets/trees/*.*', { as: 'url' }))(loadGLBAsToon({
+			material: (node) => {
+				const mat = new TreeMaterial({ map: node.material.map, transparent: true })
+				return mat
+			},
+		})),
+		crops: cropsLoader<crops>(import.meta.glob('@assets/crops/*.glb', { as: 'url' })),
+		items: typeGlob<items>(import.meta.glob('@assets/items/*.png', { eager: true, import: 'default' }))(itemsLoader),
+		particles: typeGlob<particles>(import.meta.glob('@assets/particles/*.png', { eager: true, import: 'default' }))(texturesLoader),
+		textures: typeGlob<textures>(import.meta.glob('@assets/textures/*.png', { eager: true, import: 'default' }))(texturesLoader),
+		fonts: fontLoader(import.meta.glob('@assets/fonts/*.ttf', { eager: true, import: 'default' })),
+		levelImages: levelImagesLoader(import.meta.glob('@assets/levels/*.png', { eager: true, import: 'default' })),
+		icons: typeGlobEager(import.meta.glob('@assets/icons/*.svg', { eager: true, import: 'default', as: 'raw' }))(iconsLoader),
+		buttons: buttonsLoader(import.meta.glob('@assets/buttons/*.*', { eager: true, import: 'default' })),
+		voices: loadVoices(import.meta.glob('@assets/voices/*.ogg', { eager: true, import: 'default' })),
+		steps: loadSteps(import.meta.glob('@assets/steps/*.*', { eager: true, import: 'default' })),
+		itemModels: loadItems(import.meta.glob('@assets/items/*.*', { as: 'url', eager: true })),
+		music: loadSounds(import.meta.glob('@assets/music/*.*', { eager: true, import: 'default' })),
+	} as const
+	return await asyncMapValues(assets, async val => await val) as AssetsLoaded<typeof assets>
+}
