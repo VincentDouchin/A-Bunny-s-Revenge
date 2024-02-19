@@ -5,6 +5,7 @@ import { Show, createSignal, onCleanup, onMount } from 'solid-js'
 import { Portal } from 'solid-js/web'
 import { Vector3 } from 'three'
 import { ConstantValue } from 'three.quarks'
+import arrowLeft from '@assets/icons/arrow-left-solid.svg?raw'
 import { itemBundle } from '../game/items'
 import { ItemDisplay } from './InventoryUi'
 import type { FarmUiProps } from '@/ui/types'
@@ -112,7 +113,12 @@ export const OvenMinigameUi = ({ player }: FarmUiProps) => {
 				const close = () => ecs.removeComponent(bellow, 'menuType')
 				return (
 					<>
-
+						<Show when={isTouch()}>
+							<button class="button" style={{ 'position': 'fixed', 'height': '80%', 'left': 0, 'width': '5rem', 'margin': '3rem 2rem', 'display': 'flex', 'justify-content': 'center', 'flex-direction': 'column' }} onClick={close}>
+								<div style={{ width: '2rem' }} innerHTML={arrowLeft}></div>
+								<div>Exit</div>
+							</button>
+						</Show>
 						<Portal mount={bellow.oven.minigameContainer?.element}>
 							<Show when={isTouch()}>
 								<div style={{ 'position': 'absolute', 'width': '5rem', 'height': '5rem', 'background': 'hsl(0,0%,0%, 20%)', 'border-radius': '3rem', 'border': `solid ${isPrimaryPressed() ? '0.3rem' : '0.1rem'} hsl(0, 0%,100%, 30% )`, 'top': '0%', 'left': '0%', 'display': 'grid', 'place-items': 'center', 'translate': '-50%' }} onTouchStart={interact(1, 'primary')} onTouchEnd={interact(0, 'primary')}>
@@ -150,9 +156,7 @@ export const OvenMinigameUi = ({ player }: FarmUiProps) => {
 										<div style={{ 'height': `${heat()}%`, 'width': '100%', 'background': 'linear-gradient(0, #ec273f,#de5d3a,#e98537,#f3a833)', 'margin-top': 'auto', 'position': 'absolute', 'bottom': 0 }}></div>
 									</div>
 								</div>
-								<Show when={isTouch()}>
-									<button class="button" style={{ 'grid-column': 'span 3' }} onClick={close}>Exit</button>
-								</Show>
+
 							</div>
 						</Portal>
 					</>

@@ -5,11 +5,11 @@ import xmark from '@assets/icons/xmark-solid.svg?raw'
 import { Transition } from 'solid-transition-group'
 import { ecs, inputManager, ui } from '@/global/init'
 
-const menuQuery = ecs.with('menuInputs')
+const playercontrolsQuery = ecs.with('player', 'menuInputs')
 const CloseButton = () => {
 	const controls = ui.sync(() => inputManager.controls)
 	const isTouch = createMemo(() => controls() === 'touch')
-	const menuTouchController = ui.sync(() => menuQuery.first?.menuInputs.touchController)
+	const menuTouchController = ui.sync(() => playercontrolsQuery.first?.menuInputs.touchController)
 	const closeInventory = () => {
 		menuTouchController()?.set('cancel', 1)
 	}

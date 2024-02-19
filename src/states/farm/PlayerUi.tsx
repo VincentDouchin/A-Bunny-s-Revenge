@@ -16,7 +16,7 @@ import { TouchControls } from '@/ui/TouchControls'
 import { ForQuery } from '@/ui/components/ForQuery'
 import { playerInventoryQuery } from '@/utils/dialogHelpers'
 
-const playerQuery = playerInventoryQuery.with('playerControls', 'maxHealth', 'currentHealth', 'maxHealth', 'currentHealth', 'strength')
+const playerQuery = playerInventoryQuery.with('playerControls', 'maxHealth', 'currentHealth', 'maxHealth', 'currentHealth', 'strength', 'menuInputs')
 export const PlayerUi = () => {
 	const controls = ui.sync(() => inputManager.controls)
 	const isMenuOpen = ui.sync(() => openMenuState.enabled)

@@ -15,6 +15,7 @@ import { InputIcon } from '@/ui/InputIcon'
 import { Menu } from '@/ui/components/Menu'
 import { Modal } from '@/ui/components/Modal'
 import { range } from '@/utils/mapFunctions'
+import type { FarmUiProps } from '@/ui/types'
 
 const recipeQuery = ecs.with('menuType', 'menuInputs', 'recipesQueued').where(({ menuType }) => [MenuType.Oven, MenuType.Cauldron].includes(menuType))
 const getMenuName = (menuType: MenuType) => {
@@ -41,14 +42,15 @@ export const MealBuffs = ({ meals }: { meals: Accessor<Modifier<any>[]> }) => {
 		</For>
 	)
 }
-export const RecipesUi = ({ player }: { player: With<Entity, 'inventory' | 'playerControls' | 'inventoryId' | 'inventorySize' > }) => {
+export const RecipesUi = ({ player }: FarmUiProps) => {
 	const recipeEntity = ui.sync(() => recipeQuery.first)
+
 	return (
 		<Modal open={recipeEntity()}>
 			<Show when={recipeEntity()}>
 				{(entity) => {
 					ui.updateSync(() => {
-						if (player.playerControls.get('pause').justReleased) {
+						if (player.menuInputs.get('cancel').justReleased) {
 							ecs.removeComponent(entity(), 'menuType')
 						}
 					})
