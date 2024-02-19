@@ -1,4 +1,3 @@
-import type { With } from 'miniplex'
 import type { Accessor } from 'solid-js'
 import { For, Show, createEffect, createMemo, createSignal } from 'solid-js'
 import { InventoryTitle } from './CookingUi'
@@ -6,7 +5,6 @@ import { ItemDisplay } from './InventoryUi'
 import { itemsData } from '@/constants/items'
 import type { Recipe } from '@/constants/recipes'
 import { recipes } from '@/constants/recipes'
-import type { Entity } from '@/global/entity'
 import { MenuType } from '@/global/entity'
 import { assets, ecs, ui } from '@/global/init'
 import { removeItem } from '@/global/save'
@@ -14,8 +12,8 @@ import { ModType, type Modifier } from '@/lib/stats'
 import { InputIcon } from '@/ui/InputIcon'
 import { Menu } from '@/ui/components/Menu'
 import { Modal } from '@/ui/components/Modal'
-import { range } from '@/utils/mapFunctions'
 import type { FarmUiProps } from '@/ui/types'
+import { range } from '@/utils/mapFunctions'
 
 const recipeQuery = ecs.with('menuType', 'menuInputs', 'recipesQueued').where(({ menuType }) => [MenuType.Oven, MenuType.Cauldron].includes(menuType))
 const getMenuName = (menuType: MenuType) => {
