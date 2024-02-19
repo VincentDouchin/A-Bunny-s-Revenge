@@ -151,7 +151,7 @@ const groundExtension = (image: HTMLCanvasElement, x: number, y: number) => {
 				: step(0.3,noise) == 1.
 					? mix(grassColor,grassColor2,0.2)
 					: grassColor ;
-			color.rgb = mix(grass,path,smoothstep(0.2,0.8,texture2D(level,vUv ).r) );
+			color.rgb = mix(grass,path,smoothstep(0.7,0.8,texture2D(level,vUv ).r) );
 	`),
 	) }
 
