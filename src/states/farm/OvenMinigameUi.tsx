@@ -16,7 +16,7 @@ import { ecs, inputManager, time, ui } from '@/global/init'
 import { MenuType } from '@/global/entity'
 import type { Entity } from '@/global/entity'
 
-const bellowQuery = ecs.with('menuType', 'oven', 'menuOpen').where(({ menuType }) => menuType === MenuType.OvenMinigame)
+const bellowQuery = ecs.with('menuType', 'oven').where(({ menuType }) => menuType === MenuType.OvenMinigame)
 
 export const OvenMinigameUi = ({ player }: FarmUiProps) => {
 	return (
@@ -29,8 +29,10 @@ export const OvenMinigameUi = ({ player }: FarmUiProps) => {
 					for (const camera of cameraQuery) {
 						ecs.addComponent(camera, 'cameraOffset', new Vector3(0, 30, 80).applyQuaternion(bellow.oven.rotation!))
 					}
-					targetEntity = ecs.add({ worldPosition: bellow.oven.worldPosition!.clone().add(new Vector3(0, 10, 0)), cameratarget: true })
-					// addTag(bellow.oven, 'cameratarget')
+					targetEntity = ecs.add({
+						worldPosition: bellow.oven.worldPosition!.clone().add(new Vector3(0, 10, 0)),
+						cameratarget: true,
+					})
 					ecs.removeComponent(player, 'cameratarget')
 					bellow.oven.model?.traverse((node) => {
 						if (node.name.includes('smoke')) {
@@ -63,7 +65,7 @@ export const OvenMinigameUi = ({ player }: FarmUiProps) => {
 				const [timer, setTimer] = createSignal(between(3, 5))
 				ui.updateSync(() => {
 					if (player.playerControls.get('pause').justReleased) {
-						ecs.removeComponent(bellow, 'menuOpen')
+						ecs.removeComponent(bellow, 'menuType')
 					}
 					if (output()) {
 						if (player.playerControls.get('primary').justReleased) {
@@ -107,7 +109,7 @@ export const OvenMinigameUi = ({ player }: FarmUiProps) => {
 					playerInputs()?.set(input, value)
 				}
 				const isTouch = ui.sync(() => inputManager.controls === 'touch')
-				const close = () => ecs.removeComponent(bellow, 'menuOpen')
+				const close = () => ecs.removeComponent(bellow, 'menuType')
 				return (
 					<>
 

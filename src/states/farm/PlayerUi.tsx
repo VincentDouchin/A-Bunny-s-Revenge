@@ -5,6 +5,7 @@ import { HealthUi } from '../dungeon/HealthUi'
 import { QuestUi } from './QuestUi'
 import { RecipesUi } from './RecipesUi'
 import { OvenMinigameUi } from './OvenMinigameUi'
+import { CauldronMinigameUi } from './CauldronMinigameUi'
 import { inputManager, ui } from '@/global/init'
 import { campState, dungeonState, openMenuState, pausedState } from '@/global/states'
 import { ChestUi } from '@/states/farm/ChestUi'
@@ -34,10 +35,11 @@ export const PlayerUi = () => {
 						<StateUi state={campState}>
 							<RecipesUi player={player} />
 							<OvenMinigameUi player={player} />
+							<CauldronMinigameUi player={player} />
 							<InventoryUi player={player} />
 							<DialogUi />
 							<SeedUi player={player} />
-							<QuestUi />
+							<QuestUi player={player} />
 							<ChestUi />
 							<HealthUi player={player}></HealthUi>
 							<Show when={!showTouch()}>

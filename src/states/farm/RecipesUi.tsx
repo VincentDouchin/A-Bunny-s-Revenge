@@ -16,7 +16,7 @@ import { Menu } from '@/ui/components/Menu'
 import { Modal } from '@/ui/components/Modal'
 import { range } from '@/utils/mapFunctions'
 
-const recipeQuery = ecs.with('menuType', 'menuOpen', 'menuInputs', 'recipesQueued').where(({ menuType }) => [MenuType.Oven, MenuType.Cauldron].includes(menuType))
+const recipeQuery = ecs.with('menuType', 'menuInputs', 'recipesQueued').where(({ menuType }) => [MenuType.Oven, MenuType.Cauldron].includes(menuType))
 const getMenuName = (menuType: MenuType) => {
 	switch (menuType) {
 		case MenuType.Oven :return 'Oven'
@@ -47,6 +47,11 @@ export const RecipesUi = ({ player }: { player: With<Entity, 'inventory' | 'play
 		<Modal open={recipeEntity()}>
 			<Show when={recipeEntity()}>
 				{(entity) => {
+					ui.updateSync(() => {
+						if (player.playerControls.get('pause').justReleased) {
+							ecs.removeComponent(entity(), 'menuType')
+						}
+					})
 					const recipeQueued = ui.sync(() => recipeEntity()?.recipesQueued ?? [])
 					const recipesFiltered = createMemo(() => recipes.filter(recipe => recipe.processor === entity().menuType))
 					const [selectedRecipe, setSelectedRecipe] = createSignal<null | Recipe>(null)

@@ -15,10 +15,11 @@ import { type DungeonRessources, type FarmRessources, campState } from '@/global
 import type { direction } from '@/lib/directions'
 import { modelColliderBundle } from '@/lib/models'
 import { stateBundle } from '@/lib/stateMachine'
-import { cropBundle } from '@/states/farm/farming'
-import { playerBundle } from '@/states/game/spawnPlayer'
-import { doorSide } from '@/states/game/spawnDoor'
 import { doorClosed } from '@/particles/doorClosed'
+import { cropBundle } from '@/states/farm/farming'
+import { openMenu } from '@/states/farm/openInventory'
+import { doorSide } from '@/states/game/spawnDoor'
+import { playerBundle } from '@/states/game/spawnPlayer'
 
 export const customModels = {
 	door: doorSide,
@@ -66,7 +67,7 @@ export const props: PlacableProp<propNames>[] = [
 		bundle: entity => ({
 			...entity,
 			interactable: Interactable.BulletinBoard,
-			menuType: MenuType.Quest,
+			onPrimary: openMenu(MenuType.Quest),
 			...menuInputMap(),
 		}),
 	},
@@ -84,19 +85,19 @@ export const props: PlacableProp<propNames>[] = [
 					doorOpening: ['idle'],
 				}),
 				minigameContainer: new CSS2DObject(document.createElement('div')),
+				interactable: Interactable.Cook,
+				onPrimary: openMenu(MenuType.Oven),
 				withChildren(parent) {
 					ecs.add({
 						...modelColliderBundle(assets.models.Bellow.scene, RigidBodyType.Fixed, true),
 						parent,
+						onPrimary: openMenu(MenuType.OvenMinigame),
 						interactable: Interactable.Cook,
 						position: new Vector3(10, 0, 0),
 						rotation: new Quaternion().setFromAxisAngle(new Vector3(0, 1, 0), -Math.PI / 2),
 						oven: parent as With<Entity, 'model' | 'recipesQueued'>,
-						menuType: MenuType.OvenMinigame,
 					})
 				},
-				menuType: MenuType.Oven,
-				interactable: Interactable.Cook,
 			} },
 	},
 	{
@@ -105,9 +106,11 @@ export const props: PlacableProp<propNames>[] = [
 		bundle: entity => ({
 			...entity,
 			...menuInputMap(),
-			menuType: MenuType.Cauldron,
 			interactable: Interactable.Cauldron,
+			onPrimary: e => ecs.addComponent(e, 'menuType', MenuType.Cauldron),
+			onSecondary: e => ecs.addComponent(e, 'menuType', MenuType.CauldronGame),
 			recipesQueued: [],
+
 		}),
 	},
 	{
@@ -116,7 +119,6 @@ export const props: PlacableProp<propNames>[] = [
 		bundle: entity => ({
 			...entity,
 			...menuInputMap(),
-			menuType: MenuType.Oven,
 			interactable: Interactable.Cook,
 			recipesQueued: [],
 		}),

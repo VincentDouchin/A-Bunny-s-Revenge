@@ -1,15 +1,15 @@
 import type { Query, With } from 'miniplex'
 import { Vector3 } from 'three'
 import { enumerate, range } from './mapFunctions'
-import { type Entity, MenuType } from '@/global/entity'
+import type { QuestName } from '@/constants/quests'
+import { quests } from '@/constants/quests'
+import type { Entity } from '@/global/entity'
 import { coroutines, ecs } from '@/global/init'
 import { cutSceneState } from '@/global/states'
 import { addTag } from '@/lib/hierarchy'
-import { quests } from '@/constants/quests'
-import type { QuestName } from '@/constants/quests'
 
-import { addItem, removeItem, save, updateSave } from '@/global/save'
 import type { Item } from '@/constants/items'
+import { addItem, removeItem, save, updateSave } from '@/global/save'
 
 const playerQuery = ecs.with('player', 'position', 'collider', 'movementForce')
 const houseQuery = ecs.with('npcName', 'position', 'collider', 'rotation').where(({ npcName }) => npcName === 'Grandma')
@@ -35,7 +35,7 @@ export const movePlayerTo = (dest: Vector3) => {
 		}
 	})
 }
-export const playerInventoryQuery = ecs.with('menuType', 'inventoryId', 'inventory', 'inventorySize').where(e => e.menuType === MenuType.Player)
+export const playerInventoryQuery = ecs.with('inventoryId', 'inventory', 'inventorySize', 'player')
 
 export const addItemToPlayer = (item: Item) => {
 	const player = playerInventoryQuery.first

@@ -26,6 +26,7 @@ export const touchItem = () => {
 		if (lastEntity !== null && !lastEntity?.interactionContainer) {
 			const interactionContainer = new CSS2DObject(document.createElement('div'))
 			ecs.update(lastEntity, { interactionContainer })
+			ecs.reindex(lastEntity)
 		}
 		for (const item of losingInteractionQuery) {
 			if (lastEntity !== item) {

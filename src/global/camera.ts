@@ -36,7 +36,11 @@ export const moveCamera = () => {
 			}
 		}
 		if (!debugState.enabled) {
-			cameraLookat.lerp(target, time.delta / 1000 * 5)
+			if (cameraLookat.distanceTo(target) > 0.2) {
+				cameraLookat.lerp(target, time.delta / 1000 * 5)
+			} else {
+				cameraLookat.set(...target.toArray())
+			}
 			camera.lookAt(cameraLookat)
 			position.set(...cameraLookat.clone().add(cameraOffset ?? new Vector3(params.cameraOffsetX, params.cameraOffsetY, params.cameraOffsetZ)).toArray())
 			camera.zoom = window.innerWidth / window.innerHeight / params.zoom

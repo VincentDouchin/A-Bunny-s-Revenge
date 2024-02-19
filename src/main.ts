@@ -17,7 +17,7 @@ import { generateDungeon } from './states/dungeon/generateDungeon'
 import { killAnimation, killEntities } from './states/dungeon/health'
 import { spawnItems } from './states/dungeon/itemRoom'
 import { harvestCrop, initPlantableSpotsInteractions, interactablePlantableSpot, plantSeed, updateCropsSave } from './states/farm/farming'
-import { closeMenu, closePlayerInventory, disableInventoryState, enableInventoryState, openMenu, openPlayerInventory } from './states/farm/openInventory'
+import { closePlayerInventory, disableInventoryState, enableInventoryState, interact, openPlayerInventory } from './states/farm/openInventory'
 import { talkToNPC } from './states/game/dialog'
 import { bobItems, collectItems, popItems, stopItems } from './states/game/items'
 import { applyMove, canPlayerMove, movePlayer, playerSteps, savePlayerPosition } from './states/game/movePlayer'
@@ -49,17 +49,17 @@ gameState
 	.onEnter()
 	.addSubscriber(initializeCameraPosition, bobItems, enableInventoryState, killAnimation, ...showInteraction, ...playerFSM, ...pandaFSM, ...beeFSM, ...shagaFSM, ...ovenFSM, popItems)
 	.onUpdate(runIf(canPlayerMove, movePlayer), runIf(() => !pausedState.enabled, applyMove, playerSteps))
-	.onUpdate(collectItems, touchItem, talkToNPC, stopItems, runIf(() => !openMenuState.enabled, pauseGame))
+	.onUpdate(collectItems, touchItem, talkToNPC, stopItems, runIf(() => !openMenuState.enabled, pauseGame, interact))
 	.enable()
 campState
 	.addSubscriber(...interactablePlantableSpot)
 	.onEnter(spawnFarm, spawnLevelData, updateCropsSave, initPlantableSpotsInteractions, spawnCharacter, spawnSkyBox)
 	.onUpdate(collideWithDoorCamp)
-	.onUpdate(runIf(canPlayerMove, plantSeed, harvestCrop, openMenu, openPlayerInventory), savePlayerPosition)
+	.onUpdate(runIf(canPlayerMove, plantSeed, harvestCrop, openPlayerInventory), savePlayerPosition)
 	.onExit(despawnOfType('map'))
 openMenuState
 	.addSubscriber(disableInventoryState)
-	.onUpdate(closePlayerInventory, closeMenu)
+	.onUpdate(closePlayerInventory)
 
 genDungeonState
 	.onEnter(generateDungeon)

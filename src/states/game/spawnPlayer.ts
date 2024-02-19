@@ -3,7 +3,7 @@ import { healthBundle } from '../dungeon/health'
 import { inventoryBundle } from './inventory'
 import { Sizes } from '@/constants/sizes'
 import { Animator } from '@/global/animator'
-import { type Entity, Faction, MenuType } from '@/global/entity'
+import { type Entity, Faction } from '@/global/entity'
 import { assets, ecs } from '@/global/init'
 import { playerInputMap } from '@/global/inputMaps'
 import { save, updateSave } from '@/global/save'
@@ -27,7 +27,7 @@ export const playerBundle = (health = 5) => {
 	bundle.bodyDesc.setLinearDamping(20)
 	const player = {
 		...playerInputMap(),
-		...inventoryBundle(MenuType.Player, 24, 'player'),
+		...inventoryBundle(24, 'player'),
 		...bundle,
 		playerAnimator: new Animator(bundle.model, model.animations),
 		inMap: true,

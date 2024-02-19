@@ -23,9 +23,13 @@ const removeEmitter = () => {
 		// @ts-expect-error wrong interface
 		if (entity.emitter.system.emitEnded && entity.emitter.system.particleNum === 0) {
 			ecs.removeComponent(entity, 'emitter')
+			if (entity.singleEmitter) {
+				ecs.remove(entity)
+			}
 		}
 	}
 }
+
 export const particlesPlugin = (state: State) => {
 	state
 		.onEnter(initBatchRender)

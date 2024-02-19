@@ -1,8 +1,15 @@
+import type { Object3D, Object3DEventMap } from 'three'
 import { Quaternion, Vector3 } from 'three'
 import type { Collider } from '@dimforge/rapier3d-compat'
 import type { State } from './state'
 import type { direction } from './directions'
 import { ecs, world } from '@/global/init'
+
+export const getWorldPosition = (obj: Object3D<Object3DEventMap>) => {
+	const pos = new Vector3()
+	obj.getWorldPosition(pos)
+	return pos
+}
 
 const positionQuery = ecs.with('position', 'group')
 export const getRotationFromDirection = (direction: direction) => {

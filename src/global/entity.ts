@@ -43,6 +43,8 @@ export enum MenuType {
 	Player,
 	Quest,
 	OvenMinigame,
+	CauldronGame,
+	SelectSeed,
 }
 export const cropNames = ['carrot', 'beet', 'mushroom', 'tomato', 'lettuce'] as const
 
@@ -112,6 +114,8 @@ export interface Entity {
 	interacting?: true
 	interactable?: Interactable
 	interactionContainer?: CSS2DObject
+	onPrimary?: (entity: Entity, player: Entity) => void
+	onSecondary?: (entity: Entity, player: Entity) => void
 	outline?: With<Entity, 'model'>
 	// ! Camp
 	door?: direction
@@ -128,7 +132,6 @@ export interface Entity {
 	// ! Inventory
 	inventory?: (Item | null)[]
 	inventorySize?: number
-	menuOpen?: true
 	menuType?: MenuType
 	inventoryId?: string
 	// ! Cooking
@@ -152,6 +155,7 @@ export interface Entity {
 	drops?: Item[]
 	// ! Particles
 	emitter?: ParticleEmitter<Object3DEventMap>
+	singleEmitter?: true
 	// ! Stats
 	strength?: Stat
 	// ! Level Editor

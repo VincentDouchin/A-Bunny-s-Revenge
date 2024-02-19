@@ -5,7 +5,7 @@ import { InventoryTitle } from './CookingUi'
 import { MealBuffs } from './RecipesUi'
 import { type Item, itemsData } from '@/constants/items'
 
-import type { Entity } from '@/global/entity'
+import { type Entity, MenuType } from '@/global/entity'
 import { assets, ecs, ui } from '@/global/init'
 import { updateSave } from '@/global/save'
 import type { Modifier } from '@/lib/stats'
@@ -121,11 +121,11 @@ export const InventorySlots = (props: {
 export const InventoryUi = ({ player }: FarmUiProps) => {
 	ui.updateSync(() => {
 		if (player?.menuInputs?.get('cancel').justReleased) {
-			ecs.removeComponent(player, 'menuOpen')
+			ecs.removeComponent(player, 'menuType')
 		}
 	})
 	// const [tab, setTab] = createSignal<'inventory' | 'quests'>('inventory')
-	const open = ui.sync(() => player.menuOpen)
+	const open = ui.sync(() => player.menuType === MenuType.Player)
 	const [selectedItem, setSelectedItem] = createSignal<Item | null>(null)
 	const item = createMemo(() => {
 		const name = selectedItem()?.name

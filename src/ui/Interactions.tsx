@@ -28,7 +28,7 @@ export const getInteractables = (player: With<Entity, 'inventory'>, entity?: Wit
 	}
 }
 
-const interactionQuery = ecs.with('interactable', 'interactionContainer', 'position').without('menuOpen', 'currentDialog')
+const interactionQuery = ecs.with('interactable', 'interactionContainer', 'position').without('currentDialog', 'menuType')
 
 export const InteractionUi = ({ player }: {
 	player: With<Entity, 'playerControls' | 'inventory'>

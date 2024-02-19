@@ -4,10 +4,9 @@ import type { With } from 'miniplex'
 import { createMemo, createSignal, onCleanup } from 'solid-js'
 import { Vector2 } from 'three'
 import { getInteractables } from './Interactions'
-import { addTag } from '@/lib/hierarchy'
 import { pausedState } from '@/global/states'
 import { ecs, ui } from '@/global/init'
-import type { Entity } from '@/global/entity'
+import { type Entity, MenuType } from '@/global/entity'
 
 export const TouchControls = ({ player }: { player: With<Entity, 'playerControls' | 'inventory'> }) => {
 	const playerInputs = () => player.playerControls.touchController
@@ -60,7 +59,7 @@ export const TouchControls = ({ player }: { player: With<Entity, 'playerControls
 		playerInputs()?.set('primary', 0)
 	})
 	const openInventory = () => {
-		addTag(player, 'menuOpen')
+		ecs.addComponent(player, 'menuType', MenuType.Player)
 	}
 	const interactableQuery = ecs.with('interactable', 'interactionContainer')
 	const interactableEntity = ui.sync(() => interactableQuery.first)

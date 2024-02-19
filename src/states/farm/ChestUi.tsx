@@ -7,7 +7,7 @@ import { Menu } from '@/ui/components/Menu'
 import { Modal } from '@/ui/components/Modal'
 import { playerInventoryQuery } from '@/utils/dialogHelpers'
 
-const chestQuery = ecs.with('menuType', 'menuOpen', 'menuInputs', 'inventory', 'inventorySize', 'inventoryId').where(e => e.menuType === MenuType.Chest)
+const chestQuery = ecs.with('menuType', 'menuInputs', 'inventory', 'inventorySize', 'inventoryId').where(e => e.menuType === MenuType.Chest)
 export const ChestUi = () => {
 	const chest = ui.sync(() => chestQuery.first)
 	const player = ui.sync(() => playerInventoryQuery.first)

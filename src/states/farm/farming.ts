@@ -5,10 +5,10 @@ import { Vector3 } from 'three'
 import { itemBundle } from '../game/items'
 import { itemsData } from '@/constants/items'
 import { Sizes } from '@/constants/sizes'
-import { type Entity, Interactable, type crops } from '@/global/entity'
+import { type Entity, Interactable, MenuType, type crops } from '@/global/entity'
 import { assets, ecs } from '@/global/init'
 import { removeItem, save, updateSave } from '@/global/save'
-import { addTag, removeEntityRef } from '@/lib/hierarchy'
+import { removeEntityRef } from '@/lib/hierarchy'
 import { modelColliderBundle } from '@/lib/models'
 
 const playerQuery = ecs.with('playerControls', 'sensorCollider', 'movementForce', 'stateMachine', 'inventory', 'inventoryId', 'inventorySize')
@@ -97,7 +97,7 @@ export const harvestCrop = () => {
 		if (playerControls.get('secondary').justPressed) {
 			for (const spot of touchedPlantablespotQuery) {
 				if (save.inventories.player.some(item => itemsData[item.name].seed)) {
-					addTag(spot, 'menuOpen')
+					ecs.addComponent(spot, 'menuType', MenuType.SelectSeed)
 				}
 			}
 		}

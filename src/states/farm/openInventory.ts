@@ -1,67 +1,28 @@
+import type { Entity } from '@/global/entity'
+import { MenuType } from '@/global/entity'
 import { ecs } from '@/global/init'
 import { openMenuState } from '@/global/states'
-import { addTag } from '@/lib/hierarchy'
 
-const playerInventoryClosedQuery = ecs.with('playerControls').without('menuOpen')
-const playerInventoryOpenQuery = ecs.with('playerControls').with('menuOpen')
+export const openMenu = (menu: MenuType) => (e: Entity) => ecs.addComponent(e, 'menuType', menu)
+
+const playerInventoryClosedQuery = ecs.with('playerControls').without('menuType')
+const playerInventoryOpenQuery = ecs.with('playerControls').with('menuType')
 export const openPlayerInventory = () => {
 	for (const player of playerInventoryClosedQuery) {
 		if (player.playerControls.get('inventory').justPressed) {
-			addTag(player, 'menuOpen')
+			ecs.addComponent(player, 'menuType', MenuType.Player)
 		}
 	}
 }
 export const closePlayerInventory = () => {
 	for (const player of playerInventoryOpenQuery) {
 		if (player.playerControls.get('inventory').justPressed) {
-			ecs.removeComponent(player, 'menuOpen')
+			ecs.removeComponent(player, 'menuType')
 		}
 	}
 }
 
-const menuEntityQuery = ecs.with('menuType', 'interactionContainer')
-
-export const openMenu = () => {
-	for (const { playerControls } of playerInventoryClosedQuery) {
-		if (playerControls.get('primary').justPressed) {
-			for (const menuEntity of menuEntityQuery) {
-				addTag(menuEntity, 'menuOpen')
-			}
-		}
-	}
-}
-
-const openMenuEntityQuery = ecs.with('menuOpen', 'menuInputs')
-export const closeMenu = () => {
-	for (const menuEntity of openMenuEntityQuery) {
-		if (menuEntity.menuInputs.get('cancel').justPressed) {
-			ecs.removeComponent(menuEntity, 'menuOpen')
-		}
-	}
-}
-// const playerCollider = ecs.with('sensorCollider', 'playerControls')
-// const cauldronQuery = ecs.with('inventory', 'collider', 'menuInputs')
-// export const openCauldronInventory = () => {
-// 	for (const player of playerCollider) {
-// 		const { sensorCollider, playerControls } = player
-// 		for (const cauldron of cauldronQuery) {
-// 			if (world.intersectionPair(cauldron.collider, sensorCollider)) {
-// 				if (playerControls.get('primary').justReleased) {
-// 					addTag(cauldron, 'openInventory')
-// 				}
-// 			}
-// 		}
-// 	}
-// }
-// export const closeCauldronInventory = () => {
-// 	for (const cauldron of cauldronQuery) {
-// 		if (cauldron.menuInputs.get('cancel').justReleased) {
-// 			ecs.removeComponent(cauldron, 'openInventory')
-// 		}
-// 	}
-// }
-
-const openInventoryQuery = ecs.with('menuOpen')
+const openInventoryQuery = ecs.with('menuType')
 export const enableInventoryState = () => openInventoryQuery.onEntityAdded.subscribe(() => {
 	openMenuState.enable()
 })
@@ -69,3 +30,23 @@ export const disableInventoryState = () => openInventoryQuery.onEntityRemoved.su
 	openMenuState.disable()
 })
 export const toggleMenuState = [enableInventoryState, disableInventoryState]
+
+const interactableQuery = ecs.with('collider', 'interactionContainer')
+const primaryQuery = interactableQuery.with('onPrimary')
+const secondaryQuery = interactableQuery.with('onSecondary')
+export const interact = () => {
+	for (const entity of primaryQuery) {
+		for (const player of playerInventoryClosedQuery) {
+			if (player.playerControls.get('primary').justReleased) {
+				entity.onPrimary(entity, player)
+			}
+		}
+	}
+	for (const entity of secondaryQuery) {
+		for (const player of playerInventoryClosedQuery) {
+			if (player.playerControls.get('secondary').justReleased) {
+				entity.onSecondary(entity, player)
+			}
+		}
+	}
+}
