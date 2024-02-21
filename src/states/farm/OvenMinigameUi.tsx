@@ -65,7 +65,7 @@ export const OvenMinigameUi = ({ player }: FarmUiProps) => {
 				const [direction, setDirection] = createSignal(Math.random() > 0.5 ? 1 : -1)
 				const [timer, setTimer] = createSignal(between(3, 5))
 				ui.updateSync(() => {
-					if (player.playerControls.get('pause').justReleased) {
+					if (player.menuInputs.get('cancel').justReleased) {
 						ecs.removeComponent(bellow, 'menuType')
 					}
 					if (output()) {

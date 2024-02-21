@@ -65,7 +65,7 @@ export const CauldronMinigameUi = ({ player }: FarmUiProps) => {
 				const isSynced = createMemo(() => percentSynced() > 0)
 
 				ui.updateSync(() => {
-					if (player.playerControls.get('pause').justReleased) {
+					if (player.menuInputs.get('cancel').justReleased) {
 						ecs.removeComponent(cauldron(), 'menuType')
 					}
 					if (output()) {

@@ -21,7 +21,7 @@ export const QuestUi = ({ player }: FarmUiProps) => {
 			<Show when={open()}>
 				{(board) => {
 					ui.updateSync(() => {
-						if (player.playerControls.get('pause').justReleased) {
+						if (player.menuInputs.get('cancel').justReleased) {
 							ecs.removeComponent(board(), 'menuType')
 						}
 					})
