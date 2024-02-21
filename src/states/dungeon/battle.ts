@@ -8,6 +8,7 @@ import { ecs, world } from '@/global/init'
 import { spawnDamageNumber } from '@/particles/damageNumber'
 import { impact } from '@/particles/impact'
 import { CharacterMaterial } from '@/shaders/GroundShader'
+import { addTweenTo } from '@/lib/updateTween'
 
 export const flash = (entity: With<Entity, 'model'>) => {
 	const tween = new Tween({ color: 0 })
@@ -22,9 +23,9 @@ export const flash = (entity: With<Entity, 'model'>) => {
 			}
 		})
 	})
-	ecs.update(entity, { tween })
+	return tween
 }
-const entities = ecs.with('faction', 'position', 'rotation', 'body', 'collider', 'movementForce', 'state', 'stateMachine', 'sensorCollider', 'currentHealth', 'model', 'size')
+const entities = ecs.with('faction', 'position', 'rotation', 'body', 'collider', 'movementForce', 'state', 'stateMachine', 'sensorCollider', 'currentHealth', 'model', 'size', 'group')
 
 const enemiesQuery = entities.where(({ faction }) => faction === Faction.Enemy)
 const playerQuery = entities.with('playerControls', 'strength').where(({ faction }) => faction === Faction.Player)
@@ -45,7 +46,7 @@ export const playerAttack = () => {
 						const force = position.clone().sub(enemy.position).normalize().multiplyScalar(-50000)
 						enemy.body.applyImpulse(force, true)
 						// ! damage flash
-						flash(enemy)
+						addTweenTo(enemy)(new Tween(enemy.group.scale).to(new Vector3(0.8, 1.2, 0.8), 200).repeat(1).yoyo(true), flash(enemy))
 					}
 				}
 			}
@@ -96,7 +97,7 @@ export const enemyAttackPlayer = () => {
 					if (world.intersectionPair(player.collider, enemy.sensorCollider)) {
 						player.currentHealth -= 1
 						player.stateMachine.enter('hit', player)
-						flash(player)
+						ecs.update(player, { tween: flash(player) })
 						enemy.stateMachine.enter('attackCooldown', enemy)
 					}
 				}

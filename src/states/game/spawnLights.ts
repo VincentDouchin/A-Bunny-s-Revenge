@@ -4,7 +4,7 @@ import { ecs } from '@/global/init'
 import type { Entity } from '@/global/entity'
 
 export const spawnLight = ({ x, y }: Vec2, parent: Entity) => {
-	const light = new DirectionalLight(0xFFFFFF, 0.3)
+	const light = new DirectionalLight(0xFFFFFF, 0.6)
 	light.lookAt(new Vector3(0, 0, 0))
 	light.shadow.mapSize.set(x * 2, y * 2)
 
@@ -23,7 +23,15 @@ export const spawnLight = ({ x, y }: Vec2, parent: Entity) => {
 	ecs.add({
 		parent,
 		inMap: true,
-		light: new AmbientLight(0xFFFFFF, 1),
+		ambientLight: 'day',
+		light: new AmbientLight(0xFFFFFF, 2),
+		position: new Vector3(),
+	})
+	ecs.add({
+		parent,
+		inMap: true,
+		ambientLight: 'night',
+		light: new AmbientLight(0x7F96D7, 2),
 		position: new Vector3(),
 	})
 }

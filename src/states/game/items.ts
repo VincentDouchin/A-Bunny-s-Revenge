@@ -6,8 +6,8 @@ import { AdditiveBlending, CanvasTexture, Mesh, MeshBasicMaterial, NearestFilter
 import type { Entity } from '@/global/entity'
 import { assets, ecs, world } from '@/global/init'
 import { addItem } from '@/global/save'
-import { TweenGroup } from '@/lib/tweenGroup'
 import { modelColliderBundle } from '@/lib/models'
+import { addTweenTo } from '@/lib/updateTween'
 
 const itemsQuery = ecs.with('item', 'position', 'model', 'collider', 'itemLabel')
 
@@ -48,12 +48,10 @@ export const itemBundle = (item: items, model?: Object3D<Object3DEventMap>) => {
 	} as const satisfies Entity
 }
 export const bobItems = () => itemsQuery.onEntityAdded.subscribe((entity) => {
-	const tween = new TweenGroup()
-		.add(new Tween(entity.model.position).to({ y: 5 }, 2000).repeat(Number.POSITIVE_INFINITY).yoyo(true).easing(Easing.Quadratic.InOut))
-	if (entity.rotation) {
-		tween.add(new Tween({ rotation: 0 }).to({ rotation: Math.PI * 2 }, 2000).repeat(Number.POSITIVE_INFINITY).onUpdate(({ rotation }) => entity.rotation?.setFromAxisAngle(new Vector3(0, 1, 0), rotation)))
-	}
-	ecs.update(entity, { tween })
+	addTweenTo(entity)(
+		new Tween({ rotation: 0 }).to({ rotation: Math.PI * 2 }, 2000).repeat(Number.POSITIVE_INFINITY).onUpdate(({ rotation }) => entity.rotation?.setFromAxisAngle(new Vector3(0, 1, 0), rotation)),
+		new Tween(entity.model.position).to({ y: 5 }, 2000).repeat(Number.POSITIVE_INFINITY).yoyo(true).easing(Easing.Quadratic.InOut),
+	)
 })
 
 const playerQuery = ecs.with('playerControls', 'collider', 'position', 'inventoryId', 'inventorySize', 'inventory')
@@ -64,13 +62,16 @@ export const collectItems = () => {
 				ecs.removeComponent(item, 'tween')
 				ecs.removeComponent(item, 'collider')
 				addItem(player, { name: item.itemLabel, quantity: 1 })
-				const tween = new TweenGroup([
-					new Tween(item.position).to({ ...player.position, y: item.position.y }, 500).onComplete(() => {
+				ecs.add({
+					parent: item,
+					tween: new Tween(item.position).to({ ...player.position, y: item.position.y }, 500).onComplete(() => {
 						ecs.remove(item)
 					}).easing(Easing.Cubic.Out),
-					new Tween(item.model.scale).to(new Vector3(), 500).easing(Easing.Cubic.Out),
-				])
-				ecs.addComponent(item, 'tween', tween)
+				})
+				ecs.add({
+					parent: item,
+					tween:	new Tween(item.model.scale).to(new Vector3(), 500).easing(Easing.Cubic.Out),
+				})
 			}
 		}
 	}

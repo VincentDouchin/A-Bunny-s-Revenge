@@ -56,7 +56,7 @@ export const CauldronMinigameUi = ({ player }: FarmUiProps) => {
 					addTag(player, 'cameratarget')
 				})
 				const percentSynced = createMemo(() => {
-					const precision = 0.05
+					const precision = 0.08
 					const diff = (spoon() - spot()) / (Math.PI * 2)
 					const delta = diff - Math.floor(diff)
 					const percent = delta > 0.5 ? ((1 - delta) / precision) : delta / precision
@@ -69,10 +69,10 @@ export const CauldronMinigameUi = ({ player }: FarmUiProps) => {
 						ecs.removeComponent(cauldron(), 'menuType')
 					}
 					if (output()) {
-						setSpoon(x => x + time.delta / 1000 * (1 + progress() / 50))
+						setSpoon(x => x + time.delta / 500 * (1 + progress() / 50))
 						if (player.playerControls.get('primary').justReleased) {
 							if (isSynced()) {
-								setProgress(x => x + (30 * percentSynced()))
+								setProgress(x => x + 5 + (30 * percentSynced()))
 								setSpot(x => x + Math.PI / 4 + Math.random() * Math.PI)
 								ecs.add({
 									parent: cauldron(),

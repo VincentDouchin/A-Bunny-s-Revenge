@@ -3,9 +3,9 @@ import { between } from 'randomish'
 import { Vector3 } from 'three'
 import { CSS2DObject } from 'three/examples/jsm/renderers/CSS2DRenderer'
 import type { With } from 'miniplex'
-import { TweenGroup } from '@/lib/tweenGroup'
 import { ecs } from '@/global/init'
 import type { Entity } from '@/global/entity'
+import { addTweenTo } from '@/lib/updateTween'
 
 export const spawnDamageNumber = (amount: number, enemy: With<Entity, 'position' | 'size'>) => {
 	const el = document.createElement('div')
@@ -24,7 +24,8 @@ export const spawnDamageNumber = (amount: number, enemy: With<Entity, 'position'
 		position.x = origin.x + direction.x * val
 		position.z = origin.z + direction.z * val
 	})
-	const tween = new TweenGroup([throwing, down, up, size])
-	const damageNumber = ecs.add({ model: mesh, position, tween })
+
+	const damageNumber = ecs.add({ model: mesh, position })
+	addTweenTo(damageNumber)(throwing, down, up, size)
 	throwing.onComplete(() => ecs.remove(damageNumber))
 }

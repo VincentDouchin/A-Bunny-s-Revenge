@@ -30,18 +30,8 @@ export const touchItem = () => {
 		}
 		for (const item of losingInteractionQuery) {
 			if (lastEntity !== item) {
-				ecs.removeComponent(item, 'interactionContainer')
+				setTimeout(() => ecs.removeComponent(item, 'interactionContainer'), 100)
 			}
 		}
 	}
 }
-
-export const showInteraction = [
-	// () => losingInteractionQuery.onEntityAdded.subscribe((entity) => {
-	// 	const interactionContainer = new CSS2DObject(document.createElement('div'))
-	// 	ecs.update(entity, { interactionContainer })
-	// }),
-	// () => losingInteractionQuery.onEntityRemoved.subscribe((entity) => {
-	// 	ecs.removeComponent(entity, 'interactionContainer')
-	// }),
-]

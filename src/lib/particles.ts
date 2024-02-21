@@ -23,7 +23,7 @@ const removeEmitter = () => {
 		// @ts-expect-error wrong interface
 		if (entity.emitter.system.emitEnded && entity.emitter.system.particleNum === 0) {
 			ecs.removeComponent(entity, 'emitter')
-			if (entity.singleEmitter) {
+			if (entity.autoDestroy) {
 				ecs.remove(entity)
 			}
 		}

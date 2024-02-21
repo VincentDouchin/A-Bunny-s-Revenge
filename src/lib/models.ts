@@ -45,7 +45,7 @@ export const getBoundingBox = (modelName: models | customModel, model: Object3D<
 export const modelColliderBundle = (model: Object3D<Object3DEventMap>, type = RigidBodyType.Dynamic, sensor = false, size?: Vector3) => {
 	const cloneModel = clone(model)
 	cloneMaterials(cloneModel)
-	size ??= getSize(cloneModel)
+	if (!size) size ??= getSize(cloneModel)
 	return {
 		model: cloneModel,
 		bodyDesc: new RigidBodyDesc(type).lockRotations(),

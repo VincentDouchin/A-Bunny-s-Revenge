@@ -13,9 +13,9 @@ vec3 colorRamp(vec3 color, float value) {
     if (value <= position1) {
         return color1;
     } else if (value <= position2) {
-        return color1* step(position1, value);
+        return color1 * step(position1, value);
     } else if (value <= position3) {
-        return color2* step(position2, value);
+        return color2 * step(position2, value);
     } else if (value <= position4) {
         return color3 * step(position3, value);
     } else {

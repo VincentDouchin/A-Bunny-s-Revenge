@@ -1,11 +1,11 @@
 import type { Material, WebGLProgramParametersWithUniforms } from 'three'
-import { CanvasTexture, Color, MeshPhongMaterial, MeshStandardMaterial, Uniform, Vector2 } from 'three'
+import { CanvasTexture, Color, MeshPhongMaterial, ShaderChunk, Uniform, Vector2 } from 'three'
 
 import { generateUUID } from 'three/src/math/MathUtils'
 import noise from '@/shaders/glsl/lib/cnoise.glsl?raw'
 
-import { gradient } from '@/shaders/glsl/lib/generateGradient'
 import { assets } from '@/global/init'
+import { gradient } from '@/shaders/glsl/lib/generateGradient'
 import { useLocalStorage } from '@/utils/useLocalStorage'
 
 type Constructor<T> = new (...args: any[]) => T
@@ -75,6 +75,9 @@ export const extendMaterial = <M extends Constructor<Material>, E extends Materi
 		}
 	}
 }
+export const unpack = (part: keyof typeof ShaderChunk) => (shader: string) => {
+	return shader.replace(`#include <${part}>`, ShaderChunk[part])
+}
 export const importLib = (part: string) => (shader: string) => {
 	return shader.replace('void main() {', `${part}\nvoid main() {`)
 }
@@ -100,14 +103,18 @@ const toonExtension = new MaterialExtension({ }).frag(
 	override('vec4 diffuseColor ', 'vec4(1.)'),
 	importLib(gradient),
 	replaceInclude('map_fragment', ''),
+	unpack('lights_phong_pars_fragment'),
+	replace('vec3 irradiance = dotNL * directLight.color;', 'vec3 irradiance = floor(dotNL * directLight.color * 3.)/3.;\n'),
 	replaceInclude('opaque_fragment', /* glsl */`
 	vec4 color = vec4(1.);
 	#ifdef USE_MAP
 		vec4 sampledDiffuseColor = texture2D( map, vMapUv );
 		color *= sampledDiffuseColor;
+	#else
+		color.rgb *= diffuse;
 	#endif
-	color.rgb *= diffuse;
-	float max_light = max(outgoingLight.z,max(outgoingLight.x,outgoingLight.y)) * 3.;
+	color.rgb *= outgoingLight;
+	float max_light = max(outgoingLight.z,max(outgoingLight.x,outgoingLight.y)) * 12.;
 	vec3 outgoingLight2 = colorRamp(color.xyz, max_light);
 	gl_FragColor = vec4(outgoingLight2,opacity);`),
 )
@@ -169,7 +176,7 @@ const characterExtension = new MaterialExtension({ flash: 0 }).frag(
 	vec4(outgoingLight2 + vec3(flash), opacity);
 	`),
 )
-export const CharacterMaterial = extendMaterial(MeshStandardMaterial, [toonExtension, characterExtension])
-export const ToonMaterial = extendMaterial(MeshStandardMaterial, [toonExtension])
-export const GroundMaterial = (image: HTMLCanvasElement, x: number, y: number) => extendMaterial(MeshStandardMaterial, [toonExtension, groundExtension(image, x, y)])
+export const ToonMaterial = extendMaterial(MeshPhongMaterial, [toonExtension])
+export const CharacterMaterial = extendMaterial(MeshPhongMaterial, [toonExtension, characterExtension])
+export const GroundMaterial = (image: HTMLCanvasElement, x: number, y: number) => extendMaterial(MeshPhongMaterial, [toonExtension, groundExtension(image, x, y)])
 export const TreeMaterial = extendMaterial(MeshPhongMaterial, [toonExtension, treeExtension])

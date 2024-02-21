@@ -1,8 +1,8 @@
 import type { characters, items, models, particles, textures, trees } from '@assets/assets'
 import data from '@assets/levels/data.json'
 import { get } from 'idb-keyval'
-import { CanvasTexture, DoubleSide, Mesh, MeshStandardMaterial, NearestFilter, RepeatWrapping, SRGBColorSpace, TextureLoader } from 'three'
 import type { ColorRepresentation, Material, Side } from 'three'
+import { CanvasTexture, DoubleSide, Mesh, MeshStandardMaterial, NearestFilter, RepeatWrapping, SRGBColorSpace, TextureLoader } from 'three'
 
 import type { GLTF } from 'three/examples/jsm/loaders/GLTFLoader'
 import { Player } from 'tone'
@@ -48,12 +48,12 @@ const loadGLBAsToon = (options?: { src?: string, color?: ColorRepresentation, ma
 	const toons = mapValues(glb, (glb, key) => {
 		glb.scene.traverse((node) => {
 			const map = webp ? entries(webp).find(([mapName]) => key.includes(getFileName(mapName)))?.[1] : undefined
-
 			if (node instanceof Mesh) {
 				if (node.material instanceof MeshStandardMaterial) {
 					node.material = options?.material
 						? options?.material(node, map)
 						: new ToonMaterial({ color: options?.color ?? node.material.color, map: map ?? node.material.map })
+
 					if (options?.side) node.material.side = options.side
 					if (options?.transparent) node.material.transparent = true
 				}
@@ -197,7 +197,7 @@ const loadItems = async (glob: GlobEager) => {
 	const models = await asyncMapValues(glb, async (url) => {
 		const model = await loadGLB(url)
 		model.scene.traverse((node) => {
-			if (node instanceof Mesh && node.material instanceof MeshStandardMaterial) {
+			if (node instanceof Mesh) {
 				node.material = new ToonMaterial({ map: node.material.map, transparent: true, side: DoubleSide })
 			}
 		})
@@ -212,7 +212,7 @@ const loadItems = async (glob: GlobEager) => {
 		text.minFilter = NearestFilter
 		const model = seed_bag.clone()
 		model.traverse((node) => {
-			if (node instanceof Mesh && node.material instanceof MeshStandardMaterial) {
+			if (node instanceof Mesh) {
 				node.material = new ToonMaterial({ map: text, transparent: true, side: DoubleSide })
 			}
 		})

@@ -2,7 +2,7 @@ import type { models } from '@assets/assets'
 import { ColliderDesc, RigidBodyDesc, RigidBodyType } from '@dimforge/rapier3d-compat'
 import type { With } from 'miniplex'
 import type { Object3D, Object3DEventMap } from 'three'
-import { Quaternion, Vector3 } from 'three'
+import { Color, Group, Mesh, MeshPhongMaterial, PointLight, Quaternion, Vector3 } from 'three'
 import { CSS2DObject } from 'three/examples/jsm/renderers/CSS2DRenderer'
 import type { EntityData } from './LevelEditor'
 import { dialogs } from '@/constants/dialogs'
@@ -47,7 +47,7 @@ export interface PlacableProp<N extends string> {
 	data?: N extends keyof ExtraData ? ExtraData[N] : undefined
 	bundle?: BundleFn<EntityData<N extends keyof ExtraData ? NonNullable<ExtraData[N]> : never>>
 }
-type propNames = 'log' | 'door' | 'rock' | 'board' | 'oven' | 'cauldron' | 'stove' | 'Flower/plants' | 'sign' | 'plots' | 'bush' | 'fence' | 'house' | 'mushrooms'
+type propNames = 'log' | 'door' | 'rock' | 'board' | 'oven' | 'cauldron' | 'stove' | 'Flower/plants' | 'sign' | 'plots' | 'bush' | 'fence' | 'house' | 'mushrooms' | 'lamp'
 export const props: PlacableProp<propNames>[] = [
 	{
 		name: 'log',
@@ -70,6 +70,27 @@ export const props: PlacableProp<propNames>[] = [
 			onPrimary: openMenu(MenuType.Quest),
 			...menuInputMap(),
 		}),
+	},
+	{
+		name: 'lamp',
+		models: ['Lamp', 'Lamp2'],
+		bundle(entity) {
+			entity.withChildren = (parent) => {
+				entity.model.traverse((node) => {
+					if (node.name.includes('light')) {
+						const nightLight = new PointLight(0xFFFF00, 1, 100, 0.01)
+						node.add(nightLight)
+						ecs.add({ parent, nightLight })
+					}
+					if (node.name.includes('bulb') && node instanceof Mesh && node.material instanceof MeshPhongMaterial) {
+						node.material.emissive = new Color(0xFFFF00)
+						node.material.emissiveIntensity = 1
+						ecs.add({ parent, emissiveMat: node.material })
+					}
+				})
+			}
+			return entity
+		},
 	},
 	{
 		name: 'oven',
@@ -188,26 +209,34 @@ export const props: PlacableProp<propNames>[] = [
 		name: 'house',
 		models: ['House'],
 		bundle: (entity) => {
-			entity.model.traverse((node) => {
-				if (node.name === 'door') {
-					node.removeFromParent()
-					node.scale.set(...entity.model.scale.clone().toArray())
-					const position = node.position.clone().multiply(entity.model.scale)
-					node.position.setScalar(0)
-					entity.withChildren = (parent) => {
+			entity.withChildren = (parent) => {
+				entity.model.traverse((node) => {
+					if (node.name.includes('window') && node instanceof Mesh && node.material instanceof MeshPhongMaterial) {
+						node.material.emissive = new Color(0xFFFF00)
+						node.material.emissiveIntensity = 1
+						ecs.add({ parent, emissiveMat: node.material })
+					}
+					if (node.name.includes('light')) {
+						const nightLight = new PointLight(0xFFFF00, 1, 30, 0.01)
+						node.add(nightLight)
+						ecs.add({ parent, nightLight })
+					}
+					if (node.name === 'door') {
+						const position = node.position.clone()
+
 						ecs.add({
 							parent,
 							npcName: 'door',
 							position,
-							model: node,
+							group: new Group(),
 							dialog: dialogs.GrandmasDoor(),
 							interactable: Interactable.Enter,
 							bodyDesc: RigidBodyDesc.fixed().lockRotations(),
-							colliderDesc: ColliderDesc.cuboid(5, 7, 1).setSensor(false),
+							colliderDesc: ColliderDesc.cuboid(5, 7, 1).setSensor(true),
 						})
 					}
-				}
-			})
+				})
+			}
 			return {
 				...entity,
 				dialogHeight: 4,
