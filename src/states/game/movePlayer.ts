@@ -19,7 +19,7 @@ export const playerSteps = () => {
 						const buffer = getRandom(assets.steps).buffer
 						const sound = new Player(buffer).toDestination()
 						sound.playbackRate = 3
-						sound.volume.value = -12
+
 						sound.start()
 						sound.onstop = () => sound.dispose()
 						ecs.update(player, { lastStep: { ...player.lastStep, [foot]: true } })

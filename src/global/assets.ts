@@ -1,4 +1,4 @@
-import type { characters, items, models, particles, textures, trees } from '@assets/assets'
+import type { characters, models, music, particles, textures, trees } from '@assets/assets'
 import data from '@assets/levels/data.json'
 import { get } from 'idb-keyval'
 import type { ColorRepresentation, Material, Side } from 'three'
@@ -6,8 +6,7 @@ import { CanvasTexture, DoubleSide, Mesh, MeshStandardMaterial, NearestFilter, R
 
 import type { GLTF } from 'three/examples/jsm/loaders/GLTFLoader'
 import { Player } from 'tone'
-import type { stringCaster } from './assetLoaders'
-import { dataUrlToCanvas, getExtension, getFileName, loadGLB, loadImage, textureLoader } from './assetLoaders'
+import { dataUrlToCanvas, getExtension, getFileName, loadGLB, loadImage, textureLoader, thumbnail } from './assetLoaders'
 import type { crops } from './entity'
 import { keys } from '@/constants/keys'
 import type { CollidersData, Level, LevelData, LevelImage, RawLevel } from '@/debug/LevelEditor'
@@ -102,10 +101,7 @@ const cropsLoader = async <K extends string>(glob: Glob) => {
 		return { crop: crop!, stages }
 	})
 }
-const itemsLoader = async (glob: GlobEager) => {
-	const img = await asyncMapValues(glob, loadImage)
-	return mapKeys(img, getFileName as stringCaster<items>)
-}
+
 const fontLoader = async (glob: Glob) => {
 	const fonts = mapKeys(glob, getFileName)
 	for (const [key, m] of entries(fonts)) {
@@ -219,7 +215,11 @@ const loadItems = async (glob: GlobEager) => {
 		return model
 	})
 	const allModels = { ...models, ...seed_bags }
-	return mapKeys(allModels, k => getFileName(k as string))
+	const modelsAndthumbnails = mapValues(allModels, model => ({
+		model,
+		img: thumbnail.getCanvas(model).toDataURL(),
+	}))
+	return mapKeys(modelsAndthumbnails, k => getFileName(k as string))
 }
 
 type AssetsLoaded<T extends Record<string, Promise<any> | any>> = { [K in keyof T]: Awaited<T[K]> }
@@ -236,7 +236,6 @@ export const loadAssets = async () => {
 			},
 		})),
 		crops: cropsLoader<crops>(import.meta.glob('@assets/crops/*.glb', { as: 'url' })),
-		items: typeGlob<items>(import.meta.glob('@assets/items/*.png', { eager: true, import: 'default' }))(itemsLoader),
 		particles: typeGlob<particles>(import.meta.glob('@assets/particles/*.png', { eager: true, import: 'default' }))(texturesLoader),
 		textures: typeGlob<textures>(import.meta.glob('@assets/textures/*.png', { eager: true, import: 'default' }))(texturesLoader),
 		fonts: fontLoader(import.meta.glob('@assets/fonts/*.ttf', { eager: true, import: 'default' })),
@@ -245,8 +244,8 @@ export const loadAssets = async () => {
 		buttons: buttonsLoader(import.meta.glob('@assets/buttons/*.*', { eager: true, import: 'default' })),
 		voices: loadVoices(import.meta.glob('@assets/voices/*.ogg', { eager: true, import: 'default' })),
 		steps: loadSteps(import.meta.glob('@assets/steps/*.*', { eager: true, import: 'default' })),
-		itemModels: loadItems(import.meta.glob('@assets/items/*.*', { as: 'url', eager: true })),
-		music: loadSounds(import.meta.glob('@assets/music/*.*', { eager: true, import: 'default' })),
+		items: loadItems(import.meta.glob('@assets/items/*.*', { as: 'url', eager: true })),
+		music: typeGlob<music>(import.meta.glob('@assets/music/*.*', { eager: true, import: 'default' }))(loadSounds),
 	} as const
 	return await asyncMapValues(assets, async val => await val) as AssetsLoaded<typeof assets>
 }

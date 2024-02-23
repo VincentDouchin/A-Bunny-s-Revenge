@@ -100,5 +100,14 @@ export const itemsData: Record<items, ItemData> = {
 			createModifier('maxHealth', 3, ModStage.Base, ModType.Add, true),
 		],
 	},
+	slime_dough: {
+		name: 'Slime Dough',
+	},
+	slime_bread: {
+		name: 'Slime Bread',
+	},
+	slime_dumpling: {
+		name: 'Slime Dumpling',
+	},
 
 }

@@ -1,8 +1,7 @@
 import type { items } from '@assets/assets'
-import { ColliderDesc, RigidBodyDesc, RigidBodyType } from '@dimforge/rapier3d-compat'
+import { RigidBodyType } from '@dimforge/rapier3d-compat'
 import { Easing, Tween } from '@tweenjs/tween.js'
-import type { Object3D, Object3DEventMap } from 'three'
-import { AdditiveBlending, CanvasTexture, Mesh, MeshBasicMaterial, NearestFilter, SphereGeometry, Sprite, SpriteMaterial, Vector3 } from 'three'
+import { Vector3 } from 'three'
 import type { Entity } from '@/global/entity'
 import { assets, ecs, world } from '@/global/init'
 import { addItem } from '@/global/save'
@@ -11,33 +10,12 @@ import { addTweenTo } from '@/lib/updateTween'
 
 const itemsQuery = ecs.with('item', 'position', 'model', 'collider', 'itemLabel')
 
-export const itemBundle = (item: items, model?: Object3D<Object3DEventMap>) => {
-	if (item in assets.itemModels) {
-		model = assets.itemModels[item].clone()
-		model.scale.setScalar(5)
-	}
-	const bundle = model
-		? modelColliderBundle(model, RigidBodyType.Dynamic, true)
-		: {
-				bodyDesc: RigidBodyDesc.dynamic().lockRotations().setCcdEnabled(true),
-				colliderDesc: ColliderDesc.cuboid(1, 1, 1).setSensor(true),
-				size: new Vector3(1, 1, 1),
-			}
+export const itemBundle = (item: items) => {
+	const model = assets.items[item].model.clone()
+	model.scale.setScalar(5)
+	const bundle = modelColliderBundle(model, RigidBodyType.Dynamic, true)
+	model.castShadow = true
 	bundle.colliderDesc.setMass(8)
-	if (!model) {
-		const map = new CanvasTexture(assets.items[item])
-		map.minFilter = NearestFilter
-		map.magFilter = NearestFilter
-		model = new Sprite(new SpriteMaterial({ map, depthWrite: false }))
-		model.scale.setScalar(5)
-		model.position.setY(2.5)
-		const shadow = new Mesh(
-			new SphereGeometry(0.3),
-			new MeshBasicMaterial({ color: 0x000000, transparent: true, blending: AdditiveBlending, depthWrite: false }),
-		)
-		shadow.castShadow = true
-		model.add(shadow)
-	}
 
 	return {
 		...bundle,

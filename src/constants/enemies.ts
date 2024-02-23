@@ -54,7 +54,7 @@ export const enemyData: Record<enemy, Enemy> = {
 	Porin_A: {
 		health: 4,
 		scale: 2,
-		drops: () => [],
+		drops: () => [{ name: 'slime_dough', quantity: 1 }],
 		animator: 'shagaAnimator',
 	},
 

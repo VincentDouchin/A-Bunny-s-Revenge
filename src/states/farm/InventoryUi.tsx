@@ -34,7 +34,7 @@ export const ItemDisplay = (props: { item: Item | null, selected?: Accessor<bool
 				{(item) => {
 					return (
 						<>
-							<img src={assets.items[props.item!.name].src} style={{ width: '80%', ...disabledStyles() }}></img>
+							<img src={assets.items[props.item!.name].img} style={{ width: '80%', ...disabledStyles() }}></img>
 							<div style={{ 'color': 'white', 'position': 'absolute', 'width': '1rem', 'bottom': '0.5rem', 'right': '0.5rem', 'text-align': 'center' }}>{quantity()}</div>
 							<Show when={isSelected()}>
 								<div style={{ 'color': 'white', 'position': 'absolute', 'top': '100%', 'font-size': '1.5rem', 'z-index': 2, 'white-space': 'nowrap' }}>{item().name}</div>

@@ -10,6 +10,7 @@ import { assets, ecs } from '@/global/init'
 import { removeItem, save, updateSave } from '@/global/save'
 import { removeEntityRef } from '@/lib/hierarchy'
 import { modelColliderBundle } from '@/lib/models'
+import { playSound } from '@/lib/dialogSound'
 
 const playerQuery = ecs.with('playerControls', 'sensorCollider', 'movementForce', 'stateMachine', 'inventory', 'inventoryId', 'inventorySize')
 const plantedSpotQuery = ecs.with('plantableSpot', 'worldPosition', 'planted')
@@ -110,6 +111,7 @@ export const harvestCrop = () => {
 							...bundle,
 							position: spot.worldPosition.clone().add(new Vector3(0, bundle.size.y + 5, 0)),
 						})
+						playSound(['Harvest_1', 'Harvest_2'], { volume: -12 })
 						removeEntityRef(spot, 'planted')
 					}
 				}

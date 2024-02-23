@@ -136,7 +136,7 @@ export const RecipesUi = ({ player }: FarmUiProps) => {
 																const color = createMemo(() => amount() < input.quantity ? { color: 'red' } : {})
 																return (
 																	<div style={{ 'display': 'flex', 'align-items': 'center', 'gap': '1rem' }}>
-																		<img style={{ width: '2rem', height: '2rem' }} src={assets.items[input.name].src}></img>
+																		<img style={{ width: '2rem', height: '2rem' }} src={assets.items[input.name].img}>{}</img>
 																		<span style={{ 'font-size': '1.5rem', ...color() }}>{` X ${input.quantity} (${amount()})`}</span>
 																	</div>
 																)

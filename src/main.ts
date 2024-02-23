@@ -3,7 +3,7 @@ import { updateAnimations } from './global/animations'
 import { initCamera, initializeCameraPosition, moveCamera } from './global/camera'
 import { coroutines, inputManager, time, ui } from './global/init'
 import { initThree, preCompileShaders, render, updateControls } from './global/rendering'
-import { initTone } from './global/sounds'
+import { initTone, playAmbiance } from './global/sounds'
 import { app, campState, coreState, dungeonState, gameState, genDungeonState, openMenuState, pausedState, setupState } from './global/states'
 import { despawnOfType, hierarchyPlugin } from './lib/hierarchy'
 import { updateModels } from './lib/modelsProperties'
@@ -54,7 +54,7 @@ gameState
 	.onUpdate(collectItems, touchItem, talkToNPC, stopItems, runIf(() => !openMenuState.enabled, pauseGame, interact))
 	.enable()
 campState
-	.addSubscriber(...interactablePlantableSpot)
+	.addSubscriber(...interactablePlantableSpot, playAmbiance('Farm_Ambience_Loop'))
 	.onEnter(spawnFarm, spawnLevelData, updateCropsSave, initPlantableSpotsInteractions, spawnCharacter, spawnSkyBox)
 	.onUpdate(collideWithDoorCamp)
 	.onUpdate(runIf(canPlayerMove, plantSeed, harvestCrop, openPlayerInventory, savePlayerPosition))
