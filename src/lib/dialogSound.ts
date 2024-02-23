@@ -1,6 +1,7 @@
 import { PitchShift, Player } from 'tone'
 import type { music } from '@assets/assets'
 import { assets } from '@/global/init'
+import { getRandom } from '@/utils/mapFunctions'
 
 const playbackRate = 3
 
@@ -29,8 +30,12 @@ export const soundDialog = async (dialog: string) => {
 		}
 	}
 }
-export const playSound = (sound: music) => {
-	const soundPlayer = new Player(assets.music[sound].buffer).toDestination()
+export const playSound = (sound: music | music[], options?: { volume?: number }) => {
+	const selectedSound = Array.isArray(sound) ? getRandom(sound) : sound
+	const soundPlayer = new Player(assets.music[selectedSound].buffer).toDestination()
+	if (options?.volume) {
+		soundPlayer.volume.value = options.volume
+	}
 	soundPlayer.start()
 	soundPlayer.onstop = () => {
 		soundPlayer.dispose()

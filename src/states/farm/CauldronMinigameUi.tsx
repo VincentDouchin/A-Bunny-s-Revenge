@@ -16,7 +16,7 @@ import type { FarmUiProps } from '@/ui/types'
 import { cauldronSparkles } from '@/particles/cauldronSparkles'
 import { playSound } from '@/lib/dialogSound'
 
-const cauldronQuery = ecs.with('menuType', 'interactionContainer', 'group', 'rotation', 'recipesQueued').where(({ menuType }) => menuType === MenuType.CauldronGame)
+const cauldronQuery = ecs.with('menuType', 'interactionContainer', 'group', 'rotation', 'recipesQueued', 'spoon').where(({ menuType }) => menuType === MenuType.CauldronGame)
 export const CauldronMinigameUi = ({ player }: FarmUiProps) => {
 	const cauldron = ui.sync(() => cauldronQuery.first)
 	return (
@@ -31,10 +31,6 @@ export const CauldronMinigameUi = ({ player }: FarmUiProps) => {
 				const spotCoordinates = createMemo(() => ({
 					x: Math.cos(spot()),
 					y: Math.sin(spot()),
-				}))
-				const targetCoordinates = createMemo(() => ({
-					x: Math.cos(spoon()),
-					y: Math.sin(spoon()),
 				}))
 				const cauldronPosition = getWorldPosition(cauldron().group).add(new Vector3(0, 0, -10))
 				onMount(() => {
@@ -70,6 +66,7 @@ export const CauldronMinigameUi = ({ player }: FarmUiProps) => {
 					}
 					if (output()) {
 						setSpoon(x => x + time.delta / 500 * (1 + progress() / 50))
+						cauldron().spoon.rotation?.setFromAxisAngle(new Vector3(0, 1, 0), -spoon())
 						if (player.playerControls.get('primary').justReleased) {
 							if (isSynced()) {
 								setProgress(x => x + 5 + (30 * percentSynced()))
@@ -139,7 +136,6 @@ export const CauldronMinigameUi = ({ player }: FarmUiProps) => {
 												<div style={{ position: 'absolute', left: '50%', translate: '-50%', bottom: 'calc(100% + 2rem)' }}>
 													<ItemDisplay item={output()}></ItemDisplay>
 												</div>
-												<div style={{ 'position': 'absolute', 'width': '5rem', 'height': '5rem', 'background': 'hsl(0,0%,100%,0.5)', 'border-radius': '300rem', 'transform': 'translate(-50%,-50%)', 'top': '50%', 'left': '50%', 'translate': `calc(10rem * ${targetCoordinates().x}) calc(10rem * ${targetCoordinates().y})` }}></div>
 												<div style={{ 'position': 'absolute', 'width': '5rem', 'height': '5rem', 'border': `solid ${spotColor()} ${spotSize()}`, 'border-radius': '300rem', 'transform': 'translate(-50%,-50%)', 'top': '50%', 'left': '50%', 'translate': `calc(10rem * ${spotCoordinates().x}) calc(10rem * ${spotCoordinates().y})`, 'box-sizing': 'content-box' }}></div>
 											</>
 										)}

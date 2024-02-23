@@ -1,5 +1,5 @@
 import type { Object3D, Object3DEventMap } from 'three'
-import { AmbientLight, DirectionalLight, LinearSRGBColorSpace, OrthographicCamera, Scene, Vector2, Vector3, WebGLRenderTarget, WebGLRenderer } from 'three'
+import { AmbientLight, LinearSRGBColorSpace, OrthographicCamera, Scene, Vector2, Vector3, WebGLRenderTarget, WebGLRenderer } from 'three'
 import { FullScreenQuad } from 'three/examples/jsm/postprocessing/Pass'
 import { getScreenBuffer } from '@/utils/buffer'
 import { outlinePass } from '@/shaders/PixelOutlineMaterial'
@@ -19,11 +19,7 @@ export const thumbnailRenderer = () => {
 	camera.position.set(0, 1, -1)
 	camera.zoom = 2.3
 	camera.updateProjectionMatrix()
-	const light = new DirectionalLight(0xFFFFFF, 3)
-	light.position.set(0, 5, 0)
-	light.lookAt(new Vector3(0, 0, 0))
-	scene.add(light)
-	scene.add(new AmbientLight(0xFFFFFF, 1))
+	scene.add(new AmbientLight(0xFFFFFF, 2))
 	const getCanvas = (model: Object3D<Object3DEventMap>) => {
 		const clone = model.clone()
 		scene.add(clone)
