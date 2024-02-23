@@ -41,7 +41,7 @@ coreState
 	.addSubscriber(...target, preCompileShaders, initTone)
 	.onEnter(initCamera, initThree, ui.render(UI))
 	.onPreUpdate(coroutines.tick)
-	.onUpdate(runIf(() => !pausedState.enabled, updateAnimations('beeAnimator', 'playerAnimator', 'pandaAnimator', 'shagaAnimator', 'ovenAnimator', 'chestAnimator', 'houseAnimator'), () => time.tick()), inputManager.update, ui.update, moveCamera)
+	.onUpdate(runIf(() => !pausedState.enabled, updateAnimations('beeAnimator', 'playerAnimator', 'pandaAnimator', 'shagaAnimator', 'ovenAnimator', 'chestAnimator'), () => time.tick()), inputManager.update, ui.update, moveCamera)
 	.onPostUpdate(updateControls, render)
 	.enable()
 setupState
