@@ -16,7 +16,6 @@ import { tweenPlugin } from './lib/updateTween'
 import { enemyAttackPlayer, playerAttack, spawnDrops } from './states/dungeon/battle'
 import { generateDungeon } from './states/dungeon/generateDungeon'
 import { killAnimation, killEntities } from './states/dungeon/health'
-import { spawnItems } from './states/dungeon/itemRoom'
 import { endBattleSpawnChest } from './states/dungeon/spawnChest'
 import { harvestCrop, initPlantableSpotsInteractions, interactablePlantableSpot, plantSeed, updateCropsSave } from './states/farm/farming'
 import { closePlayerInventory, disableInventoryState, enableInventoryState, interact, openPlayerInventory } from './states/farm/openInventory'
@@ -67,7 +66,7 @@ genDungeonState
 	.onEnter(generateDungeon)
 dungeonState
 	.addSubscriber(spawnDrops, losingBattle, endBattleSpawnChest)
-	.onEnter(spawnDungeon, spawnSkyBox, spawnItems, spawnLevelData)
+	.onEnter(spawnDungeon, spawnSkyBox, spawnLevelData)
 	.onUpdate(runIf(canPlayerMove, allowDoorCollision, collideWithDoor, enemyAttackPlayer, harvestCrop, playerAttack, killEntities))
 	.onExit(despawnOfType('map'))
 pausedState
