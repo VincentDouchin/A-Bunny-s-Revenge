@@ -34,10 +34,6 @@ export const itemsData: Record<items, ItemData> = {
 			createModifier('strength', 1, ModStage.Base, ModType.Percent, true),
 		],
 	},
-	mushroom: {
-		name: 'Mushroom',
-		choppable: true,
-	},
 	carrot_soup: {
 		name: 'Carrot soup',
 		meal: [

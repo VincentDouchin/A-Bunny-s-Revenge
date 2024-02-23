@@ -45,7 +45,7 @@ export enum MenuType {
 	CauldronGame,
 	SelectSeed,
 }
-export const cropNames = ['carrot', 'beet', 'mushroom', 'tomato', 'lettuce'] as const
+export const cropNames = ['carrot', 'beet', 'tomato', 'lettuce'] as const
 
 export type crops = (typeof cropNames)[number]
 export interface Entity {
