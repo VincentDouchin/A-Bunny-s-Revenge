@@ -130,6 +130,16 @@ export const props: PlacableProp<propNames>[] = [
 			interactable: Interactable.Cauldron,
 			onPrimary: e => ecs.addComponent(e, 'menuType', MenuType.Cauldron),
 			onSecondary: e => ecs.addComponent(e, 'menuType', MenuType.CauldronGame),
+			withChildren(parent) {
+				const model = assets.models.spoon.scene.clone()
+				const spoon = ecs.add({
+					parent,
+					model,
+					position: new Vector3(),
+					rotation: new Quaternion(),
+				})
+				ecs.update(parent, { spoon })
+			},
 			recipesQueued: [],
 
 		}),
@@ -222,8 +232,7 @@ export const props: PlacableProp<propNames>[] = [
 						ecs.add({ parent, nightLight })
 					}
 					if (node.name === 'door') {
-						const position = node.position.clone()
-
+						const position = node.position.clone().multiply(entity.model.scale)
 						ecs.add({
 							parent,
 							npcName: 'door',
