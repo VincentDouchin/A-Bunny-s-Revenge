@@ -51,7 +51,7 @@ type propNames = 'log' | 'door' | 'rock' | 'board' | 'oven' | 'cauldron' | 'stov
 export const props: PlacableProp<propNames>[] = [
 	{
 		name: 'log',
-		models: ['WoodLog', 'WoodLog_Moss'],
+		models: ['WoodLog', 'WoodLog_Moss', 'TreeStump', 'TreeStump_Moss'],
 	},
 	{
 		name: 'rock',
@@ -96,6 +96,8 @@ export const props: PlacableProp<propNames>[] = [
 		name: 'oven',
 		models: ['StoneOven', 'BunnyOvenPacked'],
 		bundle: (entity) => {
+			const minigameContainer = new CSS2DObject(document.createElement('div'))
+			minigameContainer.position.setX(-30)
 			return {
 				...entity,
 				...menuInputMap(),
@@ -105,7 +107,7 @@ export const props: PlacableProp<propNames>[] = [
 					idle: ['doorOpening'],
 					doorOpening: ['idle'],
 				}),
-				minigameContainer: new CSS2DObject(document.createElement('div')),
+				minigameContainer,
 				interactable: Interactable.Cook,
 				onPrimary: openMenu(MenuType.Oven),
 				withChildren(parent) {

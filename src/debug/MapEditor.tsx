@@ -74,7 +74,7 @@ export const MapEditor = ({ updateLevel, activeLevel }: { updateLevel: (l: Parti
 		buffer().fill()
 	}
 
-	const longClickListener = throttle(100, (event: MouseEvent) => {
+	const longClickListener = throttle(10, (event: MouseEvent) => {
 		const camera = cameraQuery.first?.camera
 		if (!camera) return
 
@@ -85,8 +85,8 @@ export const MapEditor = ({ updateLevel, activeLevel }: { updateLevel: (l: Parti
 		const raycaster = new Raycaster()
 		raycaster.setFromCamera(pointer, camera)
 
-		const intersects = raycaster.intersectObjects(scene.children)
-		const position = intersects.find(x => x.object === ground().model)?.point
+		const intersect = raycaster.intersectObject(ground().model)
+		const position = intersect[0].point
 		if (!position) return
 		mesh.position.x = position.x
 		mesh.position.z = position.z
@@ -214,7 +214,7 @@ export const MapEditor = ({ updateLevel, activeLevel }: { updateLevel: (l: Parti
 			<div>
 
 				<div>
-					<div style={{ background: 'black', scale: '-1 1', width: '150px' }}>{selectedCanvas()}</div>
+					<div style={{ background: 'black', scale: '-1 1' }} class="debug-canvas-container">{selectedCanvas()}</div>
 					<button onClick={() => flipCanvas(true, false)}>flip X</button>
 					<button onClick={() => flipCanvas(false, true)}>flip Y</button>
 					<div>

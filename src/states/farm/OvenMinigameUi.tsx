@@ -41,6 +41,7 @@ export const OvenMinigameUi = ({ player }: FarmUiProps) => {
 								parent: bellow.oven,
 								position: node.position.clone().multiply(bellow.oven.model!.scale),
 								emitter: smoke(),
+								autoDestroy: true,
 							})
 							smokeTrails.push(smokeTrail)
 						}
@@ -54,7 +55,7 @@ export const OvenMinigameUi = ({ player }: FarmUiProps) => {
 					}
 					ecs.removeComponent(bellow.oven, 'cameratarget')
 					for (const smokeTrail of smokeTrails) {
-						ecs.remove(smokeTrail)
+						smokeTrail.emitter.system.looping = false
 					}
 				})
 				const [bar, setBar] = createSignal(50)
@@ -72,7 +73,7 @@ export const OvenMinigameUi = ({ player }: FarmUiProps) => {
 						if (player.playerControls.get('primary').justReleased) {
 							setBar(x => Math.min(100, x - 10))
 						}
-						setBar(x => x + 7 * time.delta / 1000)
+						setBar(x => x + 25 * time.delta / 1000)
 						if (bar() < target() + height / 2 && bar() > target() - height / 2) {
 							setProgress(x => Math.min(100, x + 20 * time.delta / 1000))
 							setHeat(x => Math.min(100, x + 5 * time.delta / 1000))
@@ -125,7 +126,7 @@ export const OvenMinigameUi = ({ player }: FarmUiProps) => {
 									<div innerHTML={fire} style={{ color: 'white', width: '50%', height: '50%' }}></div>
 								</div>
 							</Show>
-							<div style={{ 'display': 'grid', 'grid-template-columns': 'auto auto auto', 'gap': '1rem 3rem', 'translate': '-150% -80%', 'position': 'absolute' }}>
+							<div style={{ 'display': 'grid', 'grid-template-columns': 'auto auto auto', 'gap': '1rem 3rem', 'translate': '0% -80%', 'position': 'absolute' }}>
 								{/*  progress */}
 								<div style={{ position: 'relative' }}>
 									<div style={{ 'position': 'absolute', 'translate': '-50% -100%', 'font-size': '2rem', 'color': 'white', 'left': '50%' }}>Progress</div>

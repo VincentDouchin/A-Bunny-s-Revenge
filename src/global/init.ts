@@ -3,6 +3,7 @@ import { World as MiniplexWorld } from 'miniplex'
 import { loadAssets } from './assets'
 import type { Entity } from './entity'
 import { loadLevelData } from './levelData'
+import { getSave } from './save'
 import { UIManager } from '@/lib/uiManager'
 import { Time } from '@/lib/time'
 import { InputManager } from '@/lib/inputs'
@@ -17,3 +18,4 @@ export const ui = new UIManager()
 export const coroutines = new CoroutinesManager()
 export const inputManager = new InputManager()
 export const levelsData = await loadLevelData()
+await getSave()

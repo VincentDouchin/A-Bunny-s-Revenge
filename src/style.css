@@ -10,17 +10,10 @@
   -webkit-text-size-adjust: 100%;
   font-size:14px
 }
+:root{
+  font-size:2vh;
+}
 
-@media only screen and (max-width: 700px){
-  :root{
-    font-size:10px
-  }
-}
-@media only screen and (max-width: 400px){
-  :root{
-    font-size:5px
-  }
-}
 html, body, *{
   overscroll-behaviour: contain;
   touch-action: none;
@@ -168,4 +161,9 @@ input[type="range"]::-webkit-slider-thumb {
 .popup-exit-to {
   transform: scale(0.5);
   opacity: 0;
+}
+
+/* ! DEBUG */
+.debug-canvas-container>canvas{
+  width:150px;
 }

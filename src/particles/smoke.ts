@@ -6,7 +6,7 @@ const mat = new MeshBasicMaterial({ color: 0x000000 })
 
 export const smoke = () => {
 	const system = new ParticleSystem({
-		duration: 1,
+		duration: 30,
 		looping: true,
 		prewarm: true,
 		instancingGeometry: geo,

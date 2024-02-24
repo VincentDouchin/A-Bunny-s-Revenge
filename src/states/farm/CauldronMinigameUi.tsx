@@ -129,7 +129,7 @@ export const CauldronMinigameUi = ({ player }: FarmUiProps) => {
 										<div style={{ 'height': `${progress()}%`, 'width': '100%', 'background': 'linear-gradient(0, #5ab552,#9de64e)', 'margin-top': 'auto', 'position': 'absolute', 'bottom': 0 }}></div>
 									</div>
 								</div>
-								<div style={{ 'width': '20rem', 'height': '20rem', 'border-radius': '200rem', 'border': 'solid 0.5rem hsl(0,0%,0%,0.7)', 'position': 'relative' }}>
+								<div style={{ 'width': '20rem', 'height': '20rem', 'border-radius': '200rem', 'position': 'relative' }}>
 									<Show when={output()}>
 										{output => (
 											<>
