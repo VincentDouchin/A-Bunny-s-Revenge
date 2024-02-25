@@ -187,7 +187,7 @@ const waterExtension = (size: Vec2) => new MaterialExtension({ time: 0, size })
 			if (sampledDiffuseColor.r == 0.){
 				discard;
 			}
-			vec3 water_color = water(vUv*size/8., vec3(0,1,0),time);
+			vec3 water_color = water(vUv*size/8., vec3(0,1,0),time) * outgoingLight;
 			gl_FragColor = vec4(water_color,1.);
 		`),
 

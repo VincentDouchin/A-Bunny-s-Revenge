@@ -147,6 +147,7 @@ const waterBundle = (level: Level) => {
 	const waterMap = new CanvasTexture(level.water)
 	waterMap.flipY = false
 	const waterMesh = new Mesh(new PlaneGeometry(level.size.x, level.size.y), new (WaterMaterial(level.size))({ map: waterMap, transparent: true }))
+	waterMesh.receiveShadow = true
 	return {
 		model: waterMesh,
 		position: new Vector3(0, -3, 0),
