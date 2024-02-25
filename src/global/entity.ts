@@ -174,6 +174,9 @@ export interface Entity {
 	nightLight?: Light
 	emissiveMat?: MeshPhongMaterial
 	ambientLight?: 'night' | 'day'
+	firefly?: true
+
+	withTimeUniform?: true
 }
 export type states = 'idle' | 'running' | 'picking' | 'dying' | 'hit' | 'hello' | 'dead' | 'waitingAttack' | 'attacking' | 'attackCooldown' | 'doorOpening' | 'doorClosing'
 export type Bundle<C extends keyof Entity> = () => With<Entity, C>

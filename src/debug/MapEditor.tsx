@@ -1,23 +1,24 @@
 import type { Accessor } from 'solid-js'
 import { For, Show, createEffect, createMemo, createSignal, onCleanup, onMount } from 'solid-js'
-import type { Vector3 } from 'three'
+import type { Material, MeshPhongMaterial, Vector3 } from 'three'
 import { CanvasTexture, CircleGeometry, DoubleSide, Mesh, MeshBasicMaterial, MeshStandardMaterial, Raycaster, Vector2 } from 'three'
 import type { Level, LevelImage } from './LevelEditor'
 import { ecs } from '@/global/init'
 import { cameraQuery, renderer, scene } from '@/global/rendering'
 import { throttle } from '@/lib/state'
 import { GroundMaterial } from '@/shaders/GroundShader'
-import { spawnGrass, spawnGroundAndTrees, spawnTrees } from '@/states/game/spawnLevel'
+import { getdisplacementMap, spawnGrass, spawnGroundAndTrees, spawnTrees } from '@/states/game/spawnLevel'
 import { getScreenBuffer } from '@/utils/buffer'
 import { loadImage } from '@/global/assetLoaders'
 
-type drawingColors = 'path' | 'trees' | 'trees_transparent' | 'grass' | 'heightMap'
+type drawingColors = 'path' | 'trees' | 'trees_transparent' | 'grass' | 'heightMap' | 'water'
 const colors: Record<drawingColors, string> = {
 	path: 'rgb(255,0,0)',
 	trees: 'rgb(0,255,0)',
 	trees_transparent: 'rgb(255,0,0)',
 	grass: 'rgb(255,0,0)',
 	heightMap: 'rgba(255,255,255,1)',
+	water: 'rgba(255,255,255,1)',
 }
 const canvases: Record<drawingColors, LevelImage> = {
 	path: 'path',
@@ -25,6 +26,7 @@ const canvases: Record<drawingColors, LevelImage> = {
 	trees_transparent: 'trees',
 	grass: 'grass',
 	heightMap: 'heightMap',
+	water: 'water',
 }
 const grassQuery = ecs.with('grass')
 const groundQuery = ecs.with('ground', 'model')
@@ -41,10 +43,12 @@ export const MapEditor = ({ updateLevel, activeLevel }: { updateLevel: (l: Parti
 	const buffer = createMemo(() => selectedCanvas().getContext('2d', { willReadFrequently: true })!)
 	const ground = () => groundQuery.first!
 	const groundMat = () => ((groundQuery.first!.model as Mesh).material as any)
+	const waterMat = () => ([...ground().children?.values() ?? []].find(x => x.withTimeUniform)?.model as Mesh).material as MeshPhongMaterial
 	createEffect(() => {
 		if (selectedColor() === 'path') {
 			const levelText = new CanvasTexture(activeLevel().path)
 			levelText.flipY = false
+			if (!groundMat().uniforms?.level) return
 			groundMat().uniforms.level.value = levelText
 			groundMat().uniforms.size.value = new Vector2(activeLevel().size.x, activeLevel().size.y)
 		}
@@ -86,13 +90,16 @@ export const MapEditor = ({ updateLevel, activeLevel }: { updateLevel: (l: Parti
 		raycaster.setFromCamera(pointer, camera)
 
 		const intersect = raycaster.intersectObject(ground().model)
-		const position = intersect[0].point
+		const position = intersect[0]?.point
 		if (!position) return
 		mesh.position.x = position.x
 		mesh.position.z = position.z
 		if (!event.buttons) return
 		if (event.buttons !== 1) {
+			buffer().save()
+			buffer().globalCompositeOperation = 'destination-out'
 			drawCircle(position, 'black')
+			buffer().restore()
 		} else if (selectedColor() === 'heightMap') {
 			if (gradual()) {
 				const color = up() ? 255 : 0
@@ -125,30 +132,44 @@ export const MapEditor = ({ updateLevel, activeLevel }: { updateLevel: (l: Parti
 			groundMat().displacementMap.needsUpdate = true
 			groundMat().map.needsUpdate = true
 		}
+		if (canvases[selectedColor()] === 'water') {
+			const mat = waterMat()
+			mat.map?.needsUpdate && (mat.map.needsUpdate = true)
+		}
 	})
 	const resetGroundMat = () => {
-		const displacementMap = new CanvasTexture(activeLevel().heightMap)
-		displacementMap.flipY = false;
+		const displacementMap = new CanvasTexture(getdisplacementMap(activeLevel()))
+		displacementMap.flipY = false
+		ground().model.position.y = -7.5;
 		(ground().model as Mesh).material = new (GroundMaterial(activeLevel().path, activeLevel().size.x, activeLevel().size.y))({ displacementMap, displacementScale: 30, displacementBias: 0.5 })
 	}
 	const displayHeights = () => {
 		const displacementMap = new CanvasTexture(activeLevel().heightMap)
-		displacementMap.flipY = false;
+		displacementMap.flipY = false
+		ground().model.position.y = 0;
 		(ground().model as Mesh).material = new MeshStandardMaterial({ map: displacementMap, displacementMap, displacementScale: 30, displacementBias: 0 })
+	}
+	const displayWater = () => {
+		const waterMap = new CanvasTexture(activeLevel().water)
+		waterMap.flipY = false
+		waterMat().map = waterMap
 	}
 	onCleanup(resetGroundMat)
 	createEffect(() => {
 		if (selectedColor() === 'heightMap') {
 			displayHeights()
+		} else if (selectedColor() === 'water') {
+			displayWater()
 		} else {
 			resetGroundMat()
 		}
 	})
 	const respawnEnvListener = () => {
-		if (selectedColor() === 'heightMap') {
+		if (selectedColor() === 'heightMap' || selectedColor() === 'water') {
 			ecs.remove(ground())
 			spawnGroundAndTrees(activeLevel())
-			displayHeights()
+			selectedColor() === 'heightMap' && displayHeights()
+			selectedColor() === 'water' && displayWater()
 		}
 	}
 	onMount(async () => {
@@ -221,7 +242,7 @@ export const MapEditor = ({ updateLevel, activeLevel }: { updateLevel: (l: Parti
 						<button onClick={download}>download</button>
 						<button onClick={upload}>upload</button>
 					</div>
-					<For each={['path', 'trees', 'trees_transparent', 'grass', 'heightMap'] as drawingColors[]}>
+					<For each={['path', 'trees', 'trees_transparent', 'grass', 'heightMap', 'water'] as drawingColors[]}>
 						{color => <div><button style={{ width: '100%' }} onClick={() => setSelectedColor(color)} classList={{ selected: selectedColor() === color }}>{color}</button></div>}
 					</For>
 				</div>

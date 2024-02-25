@@ -15,7 +15,6 @@ import { getModel, props } from './props'
 import { MapEditor } from './MapEditor'
 import { debugState } from './debugState'
 import { getFileName } from '@/global/assetLoaders'
-import { loadLevelData } from '@/global/assets'
 import { camera } from '@/global/camera'
 import { params } from '@/global/context'
 import type { Entity } from '@/global/entity'
@@ -28,6 +27,7 @@ import { spawnGroundAndTrees, spawnLevelData } from '@/states/game/spawnLevel'
 import { getScreenBuffer } from '@/utils/buffer'
 import { getRandom } from '@/utils/mapFunctions'
 import { throttle } from '@/lib/state'
+import { loadLevelData } from '@/global/levelData'
 
 export interface EntityData<T extends Record<string, any>> {
 	model: models | customModel
@@ -55,6 +55,7 @@ export interface Level {
 	trees: HTMLCanvasElement
 	grass: HTMLCanvasElement
 	heightMap: HTMLCanvasElement
+	water: HTMLCanvasElement
 	farm: boolean
 	dungeon: boolean
 	id: string
@@ -116,6 +117,7 @@ export const LevelEditor = () => {
 							trees: getScreenBuffer(100, 100).canvas,
 							grass: getScreenBuffer(100, 100).canvas,
 							heightMap: getScreenBuffer(100, 100).canvas,
+							water: getScreenBuffer(100, 100).canvas,
 							size: { x: 100, y: 100 },
 							farm: false,
 							dungeon: false,
@@ -136,6 +138,7 @@ export const LevelEditor = () => {
 								trees: level.trees.toDataURL(),
 								grass: level.grass.toDataURL(),
 								heightMap: level.heightMap.toDataURL(),
+								water: level.water.toDataURL(),
 							}))
 							set('levels', rawLevels)
 						}
@@ -168,7 +171,7 @@ export const LevelEditor = () => {
 					const updateLevelSize = (size: Vec2) => {
 						const newLevel: Level = activeLevel()
 						newLevel.size = size
-						for (const canvas of ['path', 'trees', 'grass', 'heightMap'] as LevelImage[]) {
+						for (const canvas of ['path', 'trees', 'grass', 'heightMap', 'water'] as LevelImage[]) {
 							const buffer = getScreenBuffer(size.x, size.y, true)
 							buffer.drawImage(activeLevel()[canvas], 0, 0, size.x, size.y)
 							newLevel[canvas] = buffer.canvas

@@ -11,10 +11,10 @@ export const renderer = new WebGLRenderer({ alpha: false })
 renderer.setPixelRatio(1)
 export const cssRenderer = new CSS2DRenderer()
 const ratio = window.innerHeight / window.innerWidth
-const width = params.renderWidth
+export const width = params.renderWidth
 // const width = window.innerWidth
 // const height = window.innerHeight
-const height = Math.round(width * ratio)
+export const height = Math.round(width * ratio)
 const target = new WebGLRenderTarget(width, height)
 const depthTarget = new WebGLRenderTarget(width, height)
 depthTarget.texture.format = RGBAFormat

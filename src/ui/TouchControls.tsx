@@ -75,9 +75,9 @@ export const TouchControls = ({ player }: { player: With<Entity, 'playerControls
 				<div style={{ 'width': '4rem', 'height': '4rem', 'background': 'hsl(0,0%,0%, 20%)', 'border-radius': '1rem', 'border': `solid 0.1rem hsl(0, 0%,100%, 30% )`, 'font-size': '2rem', 'color': 'white', 'display': 'grid', 'place-items': 'center' }} class="icon-container" innerHTML={pause} onTouchStart={() => pausedState.enable()}></div>
 				<div style={{ 'width': '4rem', 'height': '4rem', 'background': 'hsl(0,0%,0%, 20%)', 'border-radius': '1rem', 'border': `solid 0.1rem hsl(0, 0%,100%, 30% )`, 'font-size': '2rem', 'color': 'white', 'display': 'grid', 'place-items': 'center' }} class="icon-container" innerHTML={basket} onTouchStart={openInventory}></div>
 			</div>
-			<div style={{ position: 'fixed', margin: '3rem', left: '0', bottom: '0', right: '0' }}>
-				<div ref={el => setContainer(el)} onTouchMove={moveCenter} onTouchEnd={resetCenter} style={{ 'position': 'relative', 'background': 'hsl(0,0%,0%, 20%)', 'border-radius': '1000px', 'width': '8rem', 'height': '8rem', 'border': `solid ${isJoystickPressed() ? '0.3rem' : '0.1rem'} hsl(0, 0%,100%, 30% )` }}>
-					<div style={{ 'border-radius': '1000px', 'width': '3rem', 'height': '3rem', 'background': 'hsl(0, 0%,100%, 30% )', 'position': 'absolute', 'top': '50%', 'left': '50%', 'transform': centerPostion() }}></div>
+			<div style={{ position: 'fixed', margin: '9rem', left: '0', bottom: '0', right: '0' }}>
+				<div ref={el => setContainer(el)} onTouchMove={moveCenter} onTouchEnd={resetCenter} style={{ 'position': 'relative', 'background': 'hsl(0,0%,0%, 20%)', 'border-radius': '1000px', 'width': '12rem', 'height': '12rem', 'border': `solid ${isJoystickPressed() ? '0.3rem' : '0.1rem'} hsl(0, 0%,100%, 30% )` }}>
+					<div style={{ 'border-radius': '1000px', 'width': '5rem', 'height': '5rem', 'background': 'hsl(0, 0%,100%, 30% )', 'position': 'absolute', 'top': '50%', 'left': '50%', 'transform': centerPostion() }}></div>
 				</div>
 			</div>
 			<div style={{ position: 'absolute', bottom: '0', right: '0', margin: '4em', display: 'flex', gap: '4rem' }}>

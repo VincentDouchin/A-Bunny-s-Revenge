@@ -1,4 +1,4 @@
-import type { Material, WebGLProgramParametersWithUniforms } from 'three'
+import type { Material, Vec2, WebGLProgramParametersWithUniforms } from 'three'
 import { CanvasTexture, Color, MeshPhongMaterial, ShaderChunk, Uniform, Vector2 } from 'three'
 
 import { generateUUID } from 'three/src/math/MathUtils'
@@ -6,6 +6,7 @@ import noise from '@/shaders/glsl/lib/cnoise.glsl?raw'
 
 import { assets } from '@/global/init'
 import { gradient } from '@/shaders/glsl/lib/generateGradient'
+import water from '@/shaders/glsl/water.glsl?raw'
 import { useLocalStorage } from '@/utils/useLocalStorage'
 
 type Constructor<T> = new (...args: any[]) => T
@@ -176,7 +177,24 @@ const characterExtension = new MaterialExtension({ flash: 0 }).frag(
 	vec4(outgoingLight2 + vec3(flash), opacity);
 	`),
 )
+const waterExtension = (size: Vec2) => new MaterialExtension({ time: 0, size })
+	.defines('USE_UV')
+	.frag(
+		importLib(water),
+		addUniform('time', 'float'),
+		addUniform('size', 'vec2'),
+		replace('gl_FragColor = vec4(outgoingLight2,opacity);', /* glsl */`
+			if (sampledDiffuseColor.r == 0.){
+				discard;
+			}
+			vec3 water_color = water(vUv*size/8., vec3(0,1,0),time);
+			gl_FragColor = vec4(water_color,1.);
+		`),
+
+	)
+
 export const ToonMaterial = extendMaterial(MeshPhongMaterial, [toonExtension])
 export const CharacterMaterial = extendMaterial(MeshPhongMaterial, [toonExtension, characterExtension])
 export const GroundMaterial = (image: HTMLCanvasElement, x: number, y: number) => extendMaterial(MeshPhongMaterial, [toonExtension, groundExtension(image, x, y)])
+export const WaterMaterial = (size: Vec2) => extendMaterial(MeshPhongMaterial, [toonExtension, waterExtension(size)])
 export const TreeMaterial = extendMaterial(MeshPhongMaterial, [toonExtension, treeExtension])

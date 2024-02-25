@@ -10,14 +10,15 @@ import { getModel, props } from '@/debug/props'
 import type { InstanceHandle } from '@/global/assetLoaders'
 import { canvasToArray, canvasToGrid, instanceMesh } from '@/global/assetLoaders'
 import type { Entity } from '@/global/entity'
-import { assets, ecs, levelsData } from '@/global/init'
+import { assets, ecs, levelsData, time } from '@/global/init'
 import type { DungeonRessources, FarmRessources } from '@/global/states'
 import { getBoundingBox, getSize } from '@/lib/models'
 import type { System } from '@/lib/state'
-import { GroundMaterial } from '@/shaders/GroundShader'
+import { GroundMaterial, WaterMaterial } from '@/shaders/GroundShader'
+import { getScreenBuffer } from '@/utils/buffer'
 
 const SCALE = 10
-const HEIGHT = 30
+const HEIGHT = 60
 
 const spawnFromCanvas = (level: Level, image: HTMLCanvasElement, scale: number, fn: (val: Vector4Like, x: number, y: number, z: number) => void) => {
 	const heightGrid = canvasToGrid(level.heightMap)
@@ -26,7 +27,7 @@ const spawnFromCanvas = (level: Level, image: HTMLCanvasElement, scale: number, 
 		const treeRow = grid[y]
 		for (let x = 0; x < treeRow.length; x += scale) {
 			const height = heightGrid[y][x]
-			const displacement = height.x / 255 * HEIGHT / SCALE
+			const displacement = height.x / 255 * HEIGHT / 2 / SCALE
 			const val = treeRow[x]
 			fn(val, x, y, displacement)
 		}
@@ -117,28 +118,79 @@ export const spawnGrass = (level: Level, parent: Entity) => {
 		ecs.add({ group, inMap: true, grass: true, parent })
 	})
 }
+
+export const getdisplacementMap = (level: Level, invert = true) => {
+	const ctx = getScreenBuffer(level.heightMap.width, level.heightMap.height)
+	// ! heightmap
+	const filledHeightMap = getScreenBuffer(level.heightMap.width, level.heightMap.height)
+	filledHeightMap.fillStyle = 'black'
+	filledHeightMap.fillRect(0, 0, level.heightMap.width, level.heightMap.height)
+	filledHeightMap.drawImage(level.heightMap, 0, 0)
+	// ! combine
+	ctx.fillStyle = 'rgb(128,128,128)'
+	ctx.fillRect(0, 0, ctx.canvas.width, ctx.canvas.height)
+	ctx.save()
+	ctx.globalAlpha = 0.5
+	ctx.drawImage(filledHeightMap.canvas, 0, 0)
+	ctx.restore()
+	// ! water
+	ctx.save()
+	if (invert) {
+		ctx.filter = 'invert(1)'
+	}
+	ctx.drawImage(level.water, 0, 0)
+	ctx.restore()
+	return ctx.canvas
+}
+
+const waterBundle = (level: Level) => {
+	const waterMap = new CanvasTexture(level.water)
+	waterMap.flipY = false
+	const waterMesh = new Mesh(new PlaneGeometry(level.size.x, level.size.y), new (WaterMaterial(level.size))({ map: waterMap, transparent: true }))
+	return {
+		model: waterMesh,
+		position: new Vector3(0, -3, 0),
+		withTimeUniform: true,
+		rotation: new Quaternion().setFromAxisAngle(new Vector3(1, 0, 0), -Math.PI / 2),
+	} as const satisfies Entity
+}
+
 export const spawnGroundAndTrees = (level: Level) => {
+	const displacementMap = getdisplacementMap(level)
+
 	// ! Ground
 	const groundMesh = new Mesh(
 		new PlaneGeometry(level.size.x, level.size.y, level.size.x, level.size.y),
-		new (GroundMaterial(level.path, level.size.x, level.size.y))({ displacementMap: new CanvasTexture(level.heightMap), displacementScale: HEIGHT, displacementBias: 0.5 }),
+		new (GroundMaterial(level.path, level.size.x, level.size.y))({ displacementMap: new CanvasTexture(displacementMap), displacementScale: HEIGHT, displacementBias: 0 }),
 	)
 	groundMesh.material.displacementMap!.flipY = false
 	groundMesh.rotation.x = -Math.PI / 2
-
+	groundMesh.position.y = -HEIGHT / 4
 	groundMesh.receiveShadow = true
-	const heights = canvasToArray(level.heightMap).map(pixel => pixel.x / 255)
+	const heightfieldMap = getdisplacementMap(level, false)
+	const heights = canvasToArray(heightfieldMap).map(pixel => pixel.x / 255)
 	const heightfield = new Float32Array(heights.length)
 	heightfield.set(heights)
 
 	const ground = ecs.add({
 		model: groundMesh,
 		inMap: true,
+		position: new Vector3(0, 0, 0),
 		bodyDesc: new RigidBodyDesc(RigidBodyType.Fixed),
-		colliderDesc: ColliderDesc.heightfield(level.size.x - 1, level.size.y - 1, heightfield, { x: level.size.y, y: HEIGHT, z: level.size.x }).setRotation(new Quaternion().setFromAxisAngle(new Vector3(0, 1, 0), Math.PI / 2)),
-		position: new Vector3(),
+		colliderDesc: ColliderDesc
+			.heightfield(
+				level.size.x - 1,
+				level.size.y - 1,
+				heightfield,
+				{ x: level.size.y, y: HEIGHT, z: level.size.x },
+			)
+			.setTranslation(0, -HEIGHT / 4, 0)
+			.setRotation(new Quaternion().setFromAxisAngle(new Vector3(0, 1, 0), Math.PI / 2)),
 		ground: true,
-		// ...bundle,
+	})
+	ecs.add({
+		parent: ground,
+		...waterBundle(level),
 	})
 	spawnLight(level.size, ground)
 	spawnTrees(level, ground)
@@ -188,5 +240,12 @@ export const spawnLevelData: System<FarmRessources | DungeonRessources> = (resso
 				}
 			}
 		}
+	}
+}
+const withTimeUniformQuery = ecs.with('withTimeUniform', 'model')
+export const updateTimeUniforms = () => {
+	for (const entity of withTimeUniformQuery) {
+		if (entity.model instanceof Mesh)
+			entity.model.material.uniforms.time.value = time.elapsed / 1000
 	}
 }
