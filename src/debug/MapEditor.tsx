@@ -1,15 +1,15 @@
 import type { Accessor } from 'solid-js'
 import { For, Show, createEffect, createMemo, createSignal, onCleanup, onMount } from 'solid-js'
-import type { Material, MeshPhongMaterial, Vector3 } from 'three'
+import type { MeshPhongMaterial, Vector3 } from 'three'
 import { CanvasTexture, CircleGeometry, DoubleSide, Mesh, MeshBasicMaterial, MeshStandardMaterial, Raycaster, Vector2 } from 'three'
 import type { Level, LevelImage } from './LevelEditor'
+import { loadImage } from '@/global/assetLoaders'
 import { ecs } from '@/global/init'
 import { cameraQuery, renderer, scene } from '@/global/rendering'
 import { throttle } from '@/lib/state'
 import { GroundMaterial } from '@/shaders/GroundShader'
 import { getdisplacementMap, spawnGrass, spawnGroundAndTrees, spawnTrees } from '@/states/game/spawnLevel'
 import { getScreenBuffer } from '@/utils/buffer'
-import { loadImage } from '@/global/assetLoaders'
 
 type drawingColors = 'path' | 'trees' | 'trees_transparent' | 'grass' | 'heightMap' | 'water'
 const colors: Record<drawingColors, string> = {
