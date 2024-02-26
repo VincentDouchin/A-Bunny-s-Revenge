@@ -15,7 +15,7 @@ export const impact = () => {
 		looping: false,
 		prewarm: true,
 		instancingGeometry: geo,
-		startLife: new IntervalValue(1.0, 2.0),
+		startLife: new IntervalValue(2.0, 4.0),
 		startSpeed: new ConstantValue(0.6),
 		startRotation: new RandomQuatGenerator(),
 		worldSpace: true,

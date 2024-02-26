@@ -1,5 +1,5 @@
 import type { Material, Vec2, WebGLProgramParametersWithUniforms } from 'three'
-import { CanvasTexture, Color, MeshPhongMaterial, ShaderChunk, Uniform, Vector2 } from 'three'
+import { CanvasTexture, Color, MeshPhongMaterial, ShaderChunk, ShaderLib, Uniform, Vector2 } from 'three'
 
 import { generateUUID } from 'three/src/math/MathUtils'
 import noise from '@/shaders/glsl/lib/cnoise.glsl?raw'
@@ -11,7 +11,7 @@ import { useLocalStorage } from '@/utils/useLocalStorage'
 
 type Constructor<T> = new (...args: any[]) => T
 export class MaterialExtension<U extends Record<string, any>> {
-	_defines: Record<string, 1 | 0> = {}
+	_defines: Record<string, any> = {}
 	_vert: ((vertexShader: string) => string)[] = []
 	_frag: ((fragmentShader: string) => string)[] = []
 	key = generateUUID()
@@ -20,7 +20,7 @@ export class MaterialExtension<U extends Record<string, any>> {
 	}
 
 	defines(key: string) {
-		this._defines[key] = 1
+		this._defines[key] = ''
 		return this
 	}
 
@@ -70,6 +70,9 @@ export const extendMaterial = <M extends Constructor<Material>, E extends Materi
 				}
 			}
 			if (options?.debug) {
+				shader.fragmentShader = shader.fragmentShader.replaceAll(/#include\s*<([^>]+)>/g, (_match, part) => {
+					return ShaderChunk[part as keyof typeof ShaderChunk]
+				})
 				// eslint-disable-next-line no-console
 				console.log(shader.fragmentShader)
 			}
@@ -136,16 +139,18 @@ const groundExtension = (image: HTMLCanvasElement, x: number, y: number) => {
 		pathColor2: new Color(groundColors.pathColor2),
 		grassColor: new Color(groundColors.grassColor),
 		ground: assets.textures.Dirt4_Dark,
-	}).defines('USE_UV').frag(
-		importLib(noise),
-		addUniform('size', 'vec2'),
-		addUniform('level', 'sampler2D'),
-		addUniform(`pathColor2`, 'vec3'),
-		addUniform(`pathColor`, 'vec3'),
-		addUniform(`grassColor2`, 'vec3'),
-		addUniform(`grassColor`, 'vec3'),
-		remove('color.rgb *= diffuse;'),
-		replace('vec4 color = vec4(1.);', /* glsl */`
+	})
+		.defines('USE_UV')
+		.frag(
+			importLib(noise),
+			addUniform('size', 'vec2'),
+			addUniform('level', 'sampler2D'),
+			addUniform(`pathColor2`, 'vec3'),
+			addUniform(`pathColor`, 'vec3'),
+			addUniform(`grassColor2`, 'vec3'),
+			addUniform(`grassColor`, 'vec3'),
+			remove('color.rgb *= diffuse;'),
+			replace('vec4 color = vec4(1.);', /* glsl */`
 			vec4 color = vec4(1.);
 			vec2 scaled_uv = vUv*size/10.;
 			float noise = cnoise(scaled_uv.xyx);
@@ -158,10 +163,13 @@ const groundExtension = (image: HTMLCanvasElement, x: number, y: number) => {
 				? mix(grassColor,grassColor2,0.3)
 				: step(0.3,noise) == 1.
 					? mix(grassColor,grassColor2,0.2)
-					: grassColor ;
-			color.rgb = mix(grass,path,smoothstep(0.7,0.8,texture2D(level,vUv ).r) );
+					: grassColor;
+			vec3 normal2 = normalize( cross( dFdx( vViewPosition ), dFdy( vViewPosition ) ) );
+			float slope = dot(normal2, vec3(0.,1.,0.));
+			grass *= (1. + slope * 0.2);
+			color.rgb = mix(grass,path,smoothstep(0.7,0.8,texture2D(level,vUv ).r ) );
 	`),
-	) }
+		) }
 
 const treeExtension = new MaterialExtension({ playerZ: 0 }).frag(
 	addUniform('playerZ', 'float'),

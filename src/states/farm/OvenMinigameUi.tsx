@@ -120,12 +120,12 @@ export const OvenMinigameUi = ({ player }: FarmUiProps) => {
 								<div>Exit</div>
 							</button>
 						</Show>
+						<Show when={isTouch()}>
+							<div style={{ 'position': 'fixed', 'width': '8rem', 'height': '8rem', 'background': 'hsl(0,0%,0%, 20%)', 'border-radius': '8rem', 'border': `solid ${isPrimaryPressed() ? '0.3rem' : '0.1rem'} hsl(0, 0%,100%, 30% )`, 'bottom': '0%', 'right': '0%', 'display': 'grid', 'place-items': 'center', 'margin': '7rem' }} onTouchStart={interact(1, 'primary')} onTouchEnd={interact(0, 'primary')}>
+								<div innerHTML={fire} style={{ color: 'white', width: '50%', height: '50%' }}></div>
+							</div>
+						</Show>
 						<Portal mount={bellow.oven.minigameContainer?.element}>
-							<Show when={isTouch()}>
-								<div style={{ 'position': 'absolute', 'width': '5rem', 'height': '5rem', 'background': 'hsl(0,0%,0%, 20%)', 'border-radius': '3rem', 'border': `solid ${isPrimaryPressed() ? '0.3rem' : '0.1rem'} hsl(0, 0%,100%, 30% )`, 'top': '0%', 'left': '0%', 'display': 'grid', 'place-items': 'center', 'translate': '-50%' }} onTouchStart={interact(1, 'primary')} onTouchEnd={interact(0, 'primary')}>
-									<div innerHTML={fire} style={{ color: 'white', width: '50%', height: '50%' }}></div>
-								</div>
-							</Show>
 							<div style={{ 'display': 'grid', 'grid-template-columns': 'auto auto auto', 'gap': '1rem 3rem', 'translate': '0% -80%', 'position': 'absolute' }}>
 								{/*  progress */}
 								<div style={{ position: 'relative' }}>

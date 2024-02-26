@@ -158,11 +158,12 @@ const waterBundle = (level: Level) => {
 
 export const spawnGroundAndTrees = (level: Level) => {
 	const displacementMap = getdisplacementMap(level)
-
+	const displacementTexture = new CanvasTexture(displacementMap)
+	displacementTexture.flipY = false
 	// ! Ground
 	const groundMesh = new Mesh(
 		new PlaneGeometry(level.size.x, level.size.y, level.size.x, level.size.y),
-		new (GroundMaterial(level.path, level.size.x, level.size.y))({ displacementMap: new CanvasTexture(displacementMap), displacementScale: HEIGHT, displacementBias: 0 }),
+		new (GroundMaterial(level.path, level.size.x, level.size.y))({ displacementMap: displacementTexture, displacementScale: HEIGHT, displacementBias: 0 }),
 	)
 	groundMesh.material.displacementMap!.flipY = false
 	groundMesh.rotation.x = -Math.PI / 2

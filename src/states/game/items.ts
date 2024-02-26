@@ -1,7 +1,7 @@
 import type { items } from '@assets/assets'
 import { RigidBodyType } from '@dimforge/rapier3d-compat'
 import { Easing, Tween } from '@tweenjs/tween.js'
-import { Vector3 } from 'three'
+import { AdditiveBlending, Mesh, MeshBasicMaterial, SphereGeometry, Vector3 } from 'three'
 import type { Entity } from '@/global/entity'
 import { assets, ecs, world } from '@/global/init'
 import { addItem } from '@/global/save'
@@ -14,9 +14,15 @@ export const itemBundle = (item: items) => {
 	const model = assets.items[item].model.clone()
 	model.scale.setScalar(5)
 	const bundle = modelColliderBundle(model, RigidBodyType.Dynamic, true)
-	model.castShadow = true
+	bundle.model.castShadow = true
 	bundle.colliderDesc.setMass(8)
-
+	const shadow = new Mesh(
+		new SphereGeometry(1),
+		new MeshBasicMaterial({ color: 0x000000, transparent: true, blending: AdditiveBlending, depthWrite: false }),
+	)
+	shadow.position.y = 5
+	shadow.castShadow = true
+	bundle.model.add(shadow)
 	return {
 		...bundle,
 		model,
@@ -27,8 +33,13 @@ export const itemBundle = (item: items) => {
 }
 export const bobItems = () => itemsQuery.onEntityAdded.subscribe((entity) => {
 	addTweenTo(entity)(
-		new Tween({ rotation: 0 }).to({ rotation: Math.PI * 2 }, 2000).repeat(Number.POSITIVE_INFINITY).onUpdate(({ rotation }) => entity.rotation?.setFromAxisAngle(new Vector3(0, 1, 0), rotation)),
-		new Tween(entity.model.position).to({ y: 5 }, 2000).repeat(Number.POSITIVE_INFINITY).yoyo(true).easing(Easing.Quadratic.InOut),
+		new Tween({ rotation: 0 })
+			.to({ rotation: Math.PI * 2 }, 2000)
+			.repeat(Number.POSITIVE_INFINITY)
+			.onUpdate(({ rotation }) => entity.rotation?.setFromAxisAngle(new Vector3(0, 1, 0), rotation)),
+		new Tween(entity.model.position)
+			.to({ y: 5 }, 2000)
+			.repeat(Number.POSITIVE_INFINITY).yoyo(true).easing(Easing.Quadratic.InOut),
 	)
 })
 

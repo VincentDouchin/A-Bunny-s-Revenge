@@ -117,7 +117,7 @@ export const CauldronMinigameUi = ({ player }: FarmUiProps) => {
 								<div style={{ width: '2rem' }} innerHTML={arrowLeft}></div>
 								<div>Exit</div>
 							</button>
-							<div style={{ 'position': 'fixed', 'width': '5rem', 'height': '5rem', 'background': 'hsl(0,0%,0%, 20%)', 'border-radius': '3rem', 'border': `solid ${isPrimaryPressed() ? '0.3rem' : '0.1rem'} hsl(0, 0%,100%, 30% )`, 'top': '50%', 'left': '50%', 'display': 'grid', 'place-items': 'center', 'translate': '-50% -50%' }} onTouchStart={interact(1, 'primary')} onTouchEnd={interact(0, 'primary')}>
+							<div style={{ 'position': 'fixed', 'width': '8rem', 'height': '8rem', 'background': 'hsl(0,0%,0%, 20%)', 'border-radius': '8rem', 'border': `solid ${isPrimaryPressed() ? '0.3rem' : '0.1rem'} hsl(0, 0%,100%, 30% )`, 'bottom': '0%', 'right': '0%', 'display': 'grid', 'place-items': 'center', 'margin': '7rem' }} onTouchStart={interact(1, 'primary')} onTouchEnd={interact(0, 'primary')}>
 								<div innerHTML={spoonIcon} style={{ color: 'white', width: '50%', height: '50%' }}></div>
 							</div>
 						</Show>

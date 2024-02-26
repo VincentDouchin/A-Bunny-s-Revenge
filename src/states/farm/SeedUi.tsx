@@ -1,4 +1,6 @@
 import { For, Portal, Show } from 'solid-js/web'
+import { createSignal, onMount } from 'solid-js'
+import { Transition } from 'solid-transition-group'
 import { ItemDisplay } from './InventoryUi'
 import type { Item } from '@/constants/items'
 import { itemsData } from '@/constants/items'
@@ -29,20 +31,31 @@ export const SeedUi = ({ player }: FarmUiProps) => {
 						return (
 							<ForQuery query={query}>
 								{(entity) => {
+									const [visible, setVisible] = createSignal(false)
+									onMount(() => setTimeout(() => setVisible(true), 100))
+									ui.updateSync(() => {
+										if (inputs().get('cancel').justReleased) {
+											ecs.removeComponent(entity, 'menuType')
+										}
+									})
 									return (
 										<Portal mount={entity.interactionContainer.element}>
-											<div style={{ 'display': 'flex', 'background': 'hsl(0,0%,0%,0.3)', 'padding': '1rem', 'border-radius': '1rem', 'gap': '1rem' }}>
-												<For each={seeds()}>
-													{(seed, i) => {
-														const props = getProps(i() === 0)
-														return (
-															<div {...props} onClick={() => chooseSeed(seed, entity)}>
-																<ItemDisplay item={seed} selected={props.selected}></ItemDisplay>
-															</div>
-														)
-													}}
-												</For>
-											</div>
+											<Transition name="popup">
+												<Show when={visible()}>
+													<div style={{ 'display': 'flex', 'background': 'hsl(0,0%,0%,0.3)', 'padding': '1rem', 'border-radius': '1rem', 'gap': '1rem' }}>
+														<For each={seeds()}>
+															{(seed, i) => {
+																const props = getProps(i() === 0)
+																return (
+																	<div {...props} onClick={() => chooseSeed(seed, entity)}>
+																		<ItemDisplay item={seed} selected={props.selected}></ItemDisplay>
+																	</div>
+																)
+															}}
+														</For>
+													</div>
+												</Show>
+											</Transition>
 										</Portal>
 									)
 								}}
