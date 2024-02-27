@@ -10,17 +10,26 @@ import { addTag } from '@/lib/hierarchy'
 
 import type { Item } from '@/constants/items'
 import { addItem, removeItem, save, updateSave } from '@/global/save'
+import { playerInputMap } from '@/global/inputMaps'
 
 const playerQuery = ecs.with('player', 'position', 'collider', 'movementForce')
 const houseQuery = ecs.with('npcName', 'position', 'collider', 'rotation').where(({ npcName }) => npcName === 'Grandma')
 const doorQuery = ecs.with('npcName', 'worldPosition', 'collider').where(({ npcName }) => npcName === 'door')
-export const pandaQuery = ecs.with('stateMachine', 'npcName').where(({ npcName }) => npcName === 'Panda')
 const setSensor = <T extends With<Entity, 'collider'>>(query: Query<T>, sensor: boolean) => {
 	for (const { collider } of query) {
 		collider.setSensor(sensor)
 	}
 }
-
+export const lockPlayer = () => {
+	for (const player of playerQuery) {
+		ecs.removeComponent(player, 'playerControls')
+	}
+}
+export const unlockPlayer = () => {
+	for (const player of playerQuery) {
+		ecs.update(player, playerInputMap())
+	}
+}
 export const movePlayerTo = (dest: Vector3) => {
 	return new Promise<void>((resolve) => {
 		for (const player of playerQuery) {

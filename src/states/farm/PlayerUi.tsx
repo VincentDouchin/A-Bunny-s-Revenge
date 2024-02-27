@@ -1,5 +1,4 @@
 import { Show, createMemo } from 'solid-js'
-import { DialogUi } from '../../ui/DialogUi'
 import { StateUi } from '../../ui/components/StateUi'
 import { HealthUi } from '../dungeon/HealthUi'
 import { CauldronMinigameUi } from './CauldronMinigameUi'
@@ -37,7 +36,6 @@ export const PlayerUi = () => {
 							<OvenMinigameUi player={player} />
 							<CauldronMinigameUi player={player} />
 							<InventoryUi player={player} />
-							<DialogUi />
 							<SeedUi player={player} />
 							<QuestUi player={player} />
 							<ChestUi />

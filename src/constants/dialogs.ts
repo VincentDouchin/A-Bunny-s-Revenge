@@ -1,20 +1,10 @@
 import type { Dialog } from '@/global/entity'
 import { cutSceneState } from '@/global/states'
 import { soundDialog } from '@/lib/dialogSound'
-import { addItemToPlayer, addQuest, canCompleteQuest, completeQuest, enterHouse, hasCompletedQuest, hasQuest, leaveHouse, pandaQuery } from '@/utils/dialogHelpers'
+import { addItemToPlayer, addQuest, canCompleteQuest, completeQuest, enterHouse, hasCompletedQuest, hasQuest, leaveHouse, lockPlayer, unlockPlayer } from '@/utils/dialogHelpers'
 
 export const dialogs = {
-	*Panda() {
-		while (true) {
-			const panda = pandaQuery.first
-			if (panda) {
-				panda.stateMachine.enter('hello', panda)
-			}
-			yield 'hello'
-			yield 'What a beautiful day we\'re having!'
-			yield false
-		}
-	},
+
 	*GrandmasDoor() {
 		while (true) {
 			cutSceneState.enable()
@@ -47,5 +37,15 @@ export const dialogs = {
 			leaveHouse()
 			yield false
 		}
+	},
+	*Jack() {
+		lockPlayer()
+		yield 'Hello! I am a placeholder for jack'
+		yield 'I am so hungry but all I have is this lousy bean'
+		yield 'The guy who sold it to me said it was magic'
+		yield 'but so far nothing happened'
+		yield 'Tell you what, bring me some food and I\'ll give you the bean.'
+		yield 'Deal?'
+		unlockPlayer()
 	},
 } as const satisfies Partial<Record<string, () => Dialog>>

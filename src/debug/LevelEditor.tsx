@@ -168,7 +168,7 @@ export const LevelEditor = () => {
 						ecs.add({ map: level.id })
 						spawnGroundAndTrees(level)
 						spawnLevelData({})
-						ecs.add({ ...playerBundle(), position: new Vector3() })
+						ecs.add({ ...playerBundle(), position: new Vector3(0, 10, 0) })
 					}
 
 					const draw = createMemo(() => selectedTab() === 'draw map')
