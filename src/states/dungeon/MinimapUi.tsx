@@ -46,8 +46,7 @@ const RoomUi = ({ room, direction, previous, current }: { room: Room, direction?
 											room={nextRoom()}
 											direction={direction}
 											previous={room}
-										>
-										</RoomUi>
+										/>
 									</>
 								)}
 							</Show>

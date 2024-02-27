@@ -132,7 +132,7 @@ const createRooms = (count: number): BlankRoom[] => {
 
 	while (count > 1) {
 		const rndRoomId = Math.floor(Math.random() * rooms.length)
-		const rndSide = getRandom(['north', 'south', 'east', 'west'] as const)
+		const rndSide: direction = getRandom(['north', 'south', 'east', 'west'])
 		const rndRoom = rooms[rndRoomId]
 		const position = getRoomSidePosition(rndRoom, rndSide)
 
