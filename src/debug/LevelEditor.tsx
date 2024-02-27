@@ -3,7 +3,6 @@ import type { RigidBodyType } from '@dimforge/rapier3d-compat'
 import { delMany, get, set } from 'idb-keyval'
 import type { With } from 'miniplex'
 import { For, Show, createEffect, createMemo, createSignal, onCleanup, onMount } from 'solid-js'
-import type { Vec2 } from 'three'
 import { Mesh, MeshStandardMaterial, Quaternion, Raycaster, Vector2, Vector3 } from 'three'
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls'
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader'
@@ -19,15 +18,15 @@ import { camera } from '@/global/camera'
 import { params } from '@/global/context'
 import type { Entity } from '@/global/entity'
 import { assets, ecs, levelsData, ui } from '@/global/init'
+import { loadLevelData } from '@/global/levelData'
 import { renderer, scene } from '@/global/rendering'
 import { campState, dungeonState } from '@/global/states'
+import { throttle } from '@/lib/state'
 import { ToonMaterial } from '@/shaders/GroundShader'
-import { playerBundle } from '@/states/game/spawnPlayer'
 import { spawnGroundAndTrees, spawnLevelData } from '@/states/game/spawnLevel'
+import { playerBundle } from '@/states/game/spawnPlayer'
 import { getScreenBuffer } from '@/utils/buffer'
 import { getRandom } from '@/utils/mapFunctions'
-import { throttle } from '@/lib/state'
-import { loadLevelData } from '@/global/levelData'
 
 export interface EntityData<T extends Record<string, any>> {
 	model: models | customModel
@@ -108,7 +107,7 @@ export const LevelEditor = () => {
 					const [levelData, setLevelData] = createSignal<LevelData>(levelsData.levelData)
 					const [colliderData, setColliderData] = createSignal<CollidersData>(levelsData.colliderData)
 					// ! LEVELS
-					const [activeLevel, setActiveLevel] = createSignal<Level>(levelsData.levels.find(x => x.id === map())!)
+					const [activeLevelIndex, setActiveLevelIndex] = createSignal<number>(levelsData.levels.findIndex(x => x.id === map())!)
 					const [levels, setLevels] = createSignal<Level[]>(levelsData.levels)
 					const newLevel = () => {
 						const id = generateUUID()
@@ -124,7 +123,7 @@ export const LevelEditor = () => {
 							name: `level n°${x.length + 1}`,
 							id,
 						}])
-						setActiveLevel(levels().at(-1)!)
+						setActiveLevelIndex(levels().length - 1)
 					}
 					const resetLocalChanges = async () => {
 						await delMany(['levels', 'levelData', 'colliderData'])
@@ -154,12 +153,15 @@ export const LevelEditor = () => {
 						}
 					}
 					const updateLevel = (level: Level) => (newLevel: Partial<Level>) => {
-						Object.assign(level, newLevel)
-						setActiveLevel(level)
-						setLevels(x => x.map(l => l === level ? { ...l, ...newLevel } : l))
+						setLevels(x => x.map((l) => {
+							if (l === level) {
+								return { ...l, ...newLevel }
+							}
+							return l
+						}))
 					}
 					const switchLevel = (level: Level) => {
-						setActiveLevel(level)
+						setActiveLevelIndex(levels().indexOf(level))
 						dungeonState.disable()
 						campState.disable()
 
@@ -168,17 +170,7 @@ export const LevelEditor = () => {
 						spawnLevelData({})
 						ecs.add({ ...playerBundle(), position: new Vector3() })
 					}
-					const updateLevelSize = (size: Vec2) => {
-						const newLevel: Level = activeLevel()
-						newLevel.size = size
-						for (const canvas of ['path', 'trees', 'grass', 'heightMap', 'water'] as LevelImage[]) {
-							const buffer = getScreenBuffer(size.x, size.y, true)
-							buffer.drawImage(activeLevel()[canvas], 0, 0, size.x, size.y)
-							newLevel[canvas] = buffer.canvas
-						}
-						updateLevel(activeLevel())(newLevel)
-						switchLevel(newLevel)
-					}
+
 					const draw = createMemo(() => selectedTab() === 'draw map')
 
 					const uploadModel = () => {
@@ -342,7 +334,26 @@ export const LevelEditor = () => {
 						renderer.domElement.removeEventListener('contextmenu', unSelect)
 						params.pixelation = true
 					})
-					const update = createMemo(() => updateLevel(activeLevel()))
+					const update = (change: (level: Level) => void) => {
+						setLevels(x => x.map((l, i) => {
+							if (i === activeLevelIndex()) {
+								change(l)
+							}
+							return l
+						}))
+					}
+					const activeLevel = createMemo(() => levels()[activeLevelIndex()])
+					const updateLevelSize = (change: (l: Level) => void) => {
+						update(change)
+
+						for (const canvas of ['path', 'trees', 'grass', 'heightMap', 'water'] as LevelImage[]) {
+							const buffer = getScreenBuffer(activeLevel().size.x, activeLevel().size.y, true)
+							buffer.drawImage(activeLevel()[canvas], 0, 0, activeLevel().size.x, activeLevel().size.y)
+							update(x => x[canvas] = buffer.canvas)
+						}
+
+						switchLevel(activeLevel())
+					}
 
 					return (
 						<div style={{ 'z-index': 2, 'position': 'fixed' }}>
@@ -369,22 +380,22 @@ export const LevelEditor = () => {
 							</div>
 
 							<div>
-								<input type="text" value={activeLevel().name} onChange={e => update()({ name: e.target.value })} />
+								<input type="text" value={activeLevel().name} onChange={e => update(l => l.name = e.target.value)} />
 								<div>
 									farm
-									<input type="checkbox" checked={activeLevel().farm} onChange={e => update()({ farm: e.target.checked })}></input>
+									<input type="checkbox" checked={activeLevel().farm} onChange={e => update(l => l.farm = e.target.checked)}></input>
 								</div>
 								<div>
 									dungeon
-									<input type="checkbox" checked={activeLevel().dungeon} onChange={e => update()({ dungeon: e.target.checked })}></input>
+									<input type="checkbox" checked={activeLevel().dungeon} onChange={e => update(l => l.dungeon = e.target.checked)}></input>
 								</div>
 								<div>
 									width
-									<input type="number" value={activeLevel().size.x} onChange={e => updateLevelSize({ ...activeLevel().size, x: e.target.valueAsNumber })}></input>
+									<input type="number" value={activeLevel().size.x} onChange={e => updateLevelSize(x => x.size.x = e.target.valueAsNumber)}></input>
 								</div>
 								<div>
 									height
-									<input type="number" value={activeLevel().size.y} onChange={e => updateLevelSize({ ...activeLevel().size, y: e.target.valueAsNumber })}></input>
+									<input type="number" value={activeLevel().size.y} onChange={e => updateLevelSize(x => x.size.y = e.target.valueAsNumber)}></input>
 								</div>
 
 							</div>

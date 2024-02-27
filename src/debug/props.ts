@@ -1,8 +1,9 @@
 import type { models } from '@assets/assets'
 import { ColliderDesc, RigidBodyDesc, RigidBodyType } from '@dimforge/rapier3d-compat'
 import type { With } from 'miniplex'
-import type { Object3D, Object3DEventMap } from 'three'
 import { Color, Group, Mesh, MeshPhongMaterial, PointLight, Quaternion, Vector3 } from 'three'
+import type { Object3D, Object3DEventMap } from 'three'
+
 import { CSS2DObject } from 'three/examples/jsm/renderers/CSS2DRenderer'
 import type { EntityData } from './LevelEditor'
 import { dialogs } from '@/constants/dialogs'
@@ -20,6 +21,7 @@ import { cropBundle } from '@/states/farm/farming'
 import { openMenu } from '@/states/farm/openInventory'
 import { doorSide } from '@/states/game/spawnDoor'
 import { playerBundle } from '@/states/game/spawnPlayer'
+import { RoomType } from '@/states/dungeon/dungeonTypes'
 
 export const customModels = {
 	door: doorSide,
@@ -206,11 +208,12 @@ export const props: PlacableProp<propNames>[] = [
 				entity.emitter = doorClosed()
 			}
 			if ('dungeon' in ressources) {
-				if (data.data.direction === ressources.direction) {
+				const isStart = ressources.dungeon.type === RoomType.Entrance
+				if (isStart ? ressources.dungeon.doors[data.data.direction] === null : data.data.direction === ressources.direction) {
 					ecs.add({
 						...playerBundle(ressources.playerHealth),
 						position: new Vector3(...data.position).add(new Vector3(0, 0, -20).applyQuaternion(entity.rotation)),
-						ignoreDoor: data.data.direction,
+						rotation: entity.rotation.clone().multiply(new Quaternion().setFromAxisAngle(new Vector3(0, 1, 0), Math.PI)),
 					})
 				}
 			}

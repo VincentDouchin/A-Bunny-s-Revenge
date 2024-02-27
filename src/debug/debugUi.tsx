@@ -60,6 +60,16 @@ export const DebugUi = () => {
 	onCleanup(() => {
 		document.removeEventListener('keydown', showUiListener)
 	})
+	const changePixelation = (pixelation: boolean) => {
+		params.pixelation = pixelation
+		if (pixelation) {
+			const val = params.renderWidth
+			const ratio = window.innerHeight / window.innerWidth
+			renderer.setSize(val, val * ratio)
+		} else {
+			renderer.setSize(window.innerWidth, window.innerHeight)
+		}
+	}
 	return (
 		<div style={{ position: 'absolute', color: 'white' }}>
 			<Show when={showUi()}>
@@ -143,6 +153,10 @@ export const DebugUi = () => {
 				</div>
 				<div>
 					<button onClick={reset}>Reset Save</button>
+				</div>
+				<div>
+					Pixelation
+					<input type="checkbox" checked={params.pixelation} onChange={e => changePixelation(e.target.checked)}></input>
 				</div>
 				<div>
 					<For each={entries(groundColors)}>

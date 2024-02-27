@@ -61,7 +61,6 @@ campState
 openMenuState
 	.addSubscriber(disableInventoryState)
 	.onUpdate(closePlayerInventory)
-
 genDungeonState
 	.onEnter(generateDungeon)
 dungeonState

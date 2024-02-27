@@ -1,6 +1,6 @@
-#define WATER_COL vec3(0.0, 0.4453, 0.7305)
-#define WATER2_COL vec3(0.0, 0.4180, 0.6758)
-#define FOAM_COL vec3(0.8125, 0.9609, 0.9648)
+// #define WATER_COL vec3(0.0, 0.4453, 0.7305)
+// #define WATER2_COL vec3(0.0, 0.4180, 0.6758)
+// #define FOAM_COL vec3(0.8125, 0.9609, 0.9648)
 
 #define M_2PI 6.283185307
 #define M_6PI 18.84955592
@@ -97,7 +97,7 @@ float waterlayer(vec2 uv)
 }
 
 // Procedural texture generation for the water
-vec3 water(vec2 uv, vec3 cdir, float time)
+vec3 water(vec2 uv, vec3 cdir, float time, vec3 water_color, vec3 water_color2, vec3 foam_color)
 {
     uv *= vec2(0.25);
 
@@ -119,7 +119,7 @@ vec3 water(vec2 uv, vec3 cdir, float time)
     	cos(d1) * 0.15 + cos(d2) * 0.05
     );
     
-    vec3 ret = mix(WATER_COL, WATER2_COL, waterlayer(uv + dist.xy));
-    ret = mix(ret, FOAM_COL, waterlayer(vec2(1.0) - uv - dist.yx));
+    vec3 ret = mix(water_color, water_color2, waterlayer(uv + dist.xy));
+    ret = mix(ret, foam_color, waterlayer(vec2(1.0) - uv - dist.yx));
     return ret;
 }

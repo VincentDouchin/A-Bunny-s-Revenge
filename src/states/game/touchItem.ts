@@ -3,7 +3,7 @@ import { Vector3 } from 'three'
 import { ecs, world } from '@/global/init'
 import type { Entity } from '@/global/entity'
 
-const playerQuery = ecs.with('playerControls', 'sensorCollider', 'position')
+const playerQuery = ecs.with('playerControls', 'sensorCollider', 'position', 'rotation')
 const items = ecs.with('collider', 'interactable', 'position')
 const interactingQuery = items
 const losingInteractionQuery = items.with('interactionContainer')
@@ -15,8 +15,8 @@ export const touchItem = () => {
 		for (const item of interactingQuery) {
 			const intersection = world.intersectionPair(player.sensorCollider, item.collider)
 			if (intersection) {
-				const sensorPos = player.sensorCollider.translation()
-				const dist = item.position.distanceTo(new Vector3(sensorPos.x, sensorPos.y, sensorPos.z))
+				const sensorPos = new Vector3(0, 0, 5).applyQuaternion(player.rotation).add(player.position)
+				const dist = item.position.distanceTo(sensorPos)
 				if (dist < lastDist) {
 					lastDist = dist
 					lastEntity = item
@@ -30,7 +30,7 @@ export const touchItem = () => {
 		}
 		for (const item of losingInteractionQuery) {
 			if (lastEntity !== item) {
-				setTimeout(() => ecs.removeComponent(item, 'interactionContainer'), 100)
+				ecs.removeComponent(item, 'interactionContainer')
 			}
 		}
 	}

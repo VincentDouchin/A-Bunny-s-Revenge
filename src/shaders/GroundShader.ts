@@ -1,5 +1,5 @@
 import type { Material, Vec2, WebGLProgramParametersWithUniforms } from 'three'
-import { CanvasTexture, Color, MeshPhongMaterial, ShaderChunk, ShaderLib, Uniform, Vector2 } from 'three'
+import { CanvasTexture, Color, MeshPhongMaterial, ShaderChunk, Uniform, Vector2 } from 'three'
 
 import { generateUUID } from 'three/src/math/MathUtils'
 import noise from '@/shaders/glsl/lib/cnoise.glsl?raw'
@@ -168,6 +168,7 @@ const groundExtension = (image: HTMLCanvasElement, x: number, y: number) => {
 			float slope = dot(normal2, vec3(0.,1.,0.));
 			grass *= (1. + slope * 0.2);
 			color.rgb = mix(grass,path,smoothstep(0.7,0.8,texture2D(level,vUv ).r ) );
+			// color.rgb = normal2;
 	`),
 		) }
 
@@ -185,17 +186,24 @@ const characterExtension = new MaterialExtension({ flash: 0 }).frag(
 	vec4(outgoingLight2 + vec3(flash), opacity);
 	`),
 )
-const waterExtension = (size: Vec2) => new MaterialExtension({ time: 0, size })
+const waterExtension = (size: Vec2) => new MaterialExtension({
+	time: 0,
+	size,
+	water_color: new Color(0x36C5F4),
+	foam_color: new Color(0xCFF5F6),
+})
 	.defines('USE_UV')
 	.frag(
 		importLib(water),
+		addUniform('water_color', 'vec3'),
+		addUniform('foam_color', 'vec3'),
 		addUniform('time', 'float'),
 		addUniform('size', 'vec2'),
 		replace('gl_FragColor = vec4(outgoingLight2,opacity);', /* glsl */`
 			if (sampledDiffuseColor.r == 0.){
 				discard;
 			}
-			vec3 water_color = water(vUv*size/8., vec3(0,1,0),time) * outgoingLight;
+			vec3 water_color = water(vUv*size/8., vec3(0,1,0),time,water_color,water_color - vec3(0.1) ,foam_color) * outgoingLight;
 			gl_FragColor = vec4(water_color,1.);
 		`),
 

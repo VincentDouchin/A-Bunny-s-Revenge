@@ -17,6 +17,7 @@ import type { MenuInputMap, PlayerInputMap } from '@/global/inputMaps'
 import type { Recipe } from '@/constants/recipes'
 import type { Item } from '@/constants/items'
 import type { NPC } from '@/constants/NPC'
+import type { Room } from '@/states/dungeon/dungeonTypes'
 
 export type Dialog = Generator<string | string[] | void | false, void, number | void>
 export enum Faction {
@@ -46,8 +47,9 @@ export enum MenuType {
 	SelectSeed,
 }
 export const cropNames = ['carrot', 'beet', 'tomato', 'lettuce'] as const
-
+export const fruitNames = ['apple'] as const
 export type crops = (typeof cropNames)[number]
+export type fruits = (typeof fruitNames)[number]
 export interface Entity {
 	// ! Tween
 	tween?: Tween<any>
@@ -123,6 +125,7 @@ export interface Entity {
 	grass?: true
 	instanceHandle?: InstanceHandle
 	// ! Dungeon
+	dungeon?: Room
 	faction?: Faction
 	ignoreDoor?: direction
 	// ! Items

@@ -16,6 +16,7 @@ export const itemBundle = (item: items) => {
 	const bundle = modelColliderBundle(model, RigidBodyType.Dynamic, true)
 	bundle.model.castShadow = true
 	bundle.colliderDesc.setMass(8)
+	bundle.model.renderOrder = 2
 	const shadow = new Mesh(
 		new SphereGeometry(1),
 		new MeshBasicMaterial({ color: 0x000000, transparent: true, blending: AdditiveBlending, depthWrite: false }),

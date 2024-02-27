@@ -22,14 +22,15 @@ export const playerSteps = () => {
 
 						sound.start()
 						sound.onstop = () => sound.dispose()
-						ecs.update(player, { lastStep: { ...player.lastStep, [foot]: true } })
+						player.lastStep[foot] = true
 					}
 				} else {
-					ecs.update(player, { lastStep: { ...player.lastStep, [foot]: false } })
+					player.lastStep[foot] = false
 				}
 			}
 		} else {
-			ecs.update(player, { lastStep: { left: false, right: false } })
+			player.lastStep.left = false
+			player.lastStep.right = false
 		}
 	}
 }

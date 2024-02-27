@@ -1,4 +1,4 @@
-import { BasicShadowMap, DepthTexture, LinearSRGBColorSpace, NearestFilter, RGBAFormat, Scene, ShaderMaterial, WebGLRenderTarget, WebGLRenderer } from 'three'
+import { BasicShadowMap, DepthTexture, LinearSRGBColorSpace, NearestFilter, PerspectiveCamera, RGBAFormat, Scene, ShaderMaterial, Vector3, WebGLRenderTarget, WebGLRenderer } from 'three'
 import { FullScreenQuad } from 'three/examples/jsm/postprocessing/Pass'
 import { CSS2DRenderer } from 'three/examples/jsm/renderers/CSS2DRenderer'
 import { camera } from './camera'
@@ -74,7 +74,12 @@ export const updateControls = () => {
 		controls.update()
 	}
 }
-
 export const preCompileShaders = () => ecs.with('model').onEntityAdded.subscribe((e) => {
-	renderer.compileAsync(e.model, camera, scene)
+	const compileCamera = new PerspectiveCamera()
+	e.model.add(compileCamera)
+	compileCamera.position.set(...new Vector3(0, 20, 0).add(e.model.position).toArray())
+	compileCamera.lookAt(e.model.position)
+	renderer.compileAsync(e.model, compileCamera, scene).then(() => {
+		compileCamera.removeFromParent()
+	})
 })

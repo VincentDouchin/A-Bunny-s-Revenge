@@ -1,11 +1,11 @@
-import type { characters, models, music, particles, textures, trees } from '@assets/assets'
+import type { characters, fruit_trees, icons, models, music, particles, textures, trees } from '@assets/assets'
 import type { ColorRepresentation, Material, Side } from 'three'
 import { CanvasTexture, DoubleSide, Mesh, MeshStandardMaterial, NearestFilter, RepeatWrapping, SRGBColorSpace, TextureLoader } from 'three'
 
 import type { GLTF } from 'three/examples/jsm/loaders/GLTFLoader'
 import { Player } from 'tone'
 import { getExtension, getFileName, loadGLB, loadImage, textureLoader, thumbnail } from './assetLoaders'
-import type { crops } from './entity'
+import type { crops, fruits } from './entity'
 import { keys } from '@/constants/keys'
 import { CharacterMaterial, ToonMaterial, TreeMaterial } from '@/shaders/GroundShader'
 import { getScreenBuffer } from '@/utils/buffer'
@@ -27,7 +27,7 @@ const typeGlobEager = <K extends string>(glob: GlobEager) => <F extends (glob: G
 	return fn(glob) as Record<K, ReturnType<F>[string]>
 }
 
-const loadGLBAsToon = (options?: { src?: string, color?: ColorRepresentation, material?: (node: Mesh<any, MeshStandardMaterial>, map?: CanvasTexture) => Material, side?: Side, transparent?: true }) => async (glob: Glob) => {
+const loadGLBAsToon = (options?: { color?: ColorRepresentation, material?: (node: Mesh<any, MeshStandardMaterial>, map?: CanvasTexture) => Material, side?: Side, transparent?: true }) => async (glob: Glob) => {
 	const loaded = await asyncMapValues(glob, async (f) => {
 		const path = await f()
 		const ext = getExtension(path)
@@ -201,6 +201,12 @@ const loadItems = async (glob: GlobEager) => {
 	return mapKeys(modelsAndthumbnails, k => getFileName(k as string))
 }
 
+const fruitTreeLoader = async (glob: Glob) => {
+	const glbs = await loadGLBAsToon()(glob)
+	const perFruit = groupByObject(glbs, key => key.split('_')[0].toLowerCase())
+	return mapValues(perFruit, x => mapKeys(x, key => key.split('_')[1].toLowerCase())) as Record<fruits, Record<'Tree' | 'Harvested', GLTF>>
+}
+
 type AssetsLoaded<T extends Record<string, Promise<any> | any>> = { [K in keyof T]: Awaited<T[K]> }
 
 export const loadAssets = async () => {
@@ -219,7 +225,8 @@ export const loadAssets = async () => {
 		textures: typeGlob<textures>(import.meta.glob('@assets/textures/*.png', { eager: true, import: 'default' }))(texturesLoader),
 		fonts: fontLoader(import.meta.glob('@assets/fonts/*.ttf', { eager: true, import: 'default' })),
 		levelImages: levelImagesLoader(import.meta.glob('@assets/levels/*.png', { eager: true, import: 'default' })),
-		icons: typeGlobEager(import.meta.glob('@assets/icons/*.svg', { eager: true, import: 'default', as: 'raw' }))(iconsLoader),
+		icons: typeGlobEager<icons>(import.meta.glob('@assets/icons/*.svg', { eager: true, import: 'default', as: 'raw' }))(iconsLoader),
+		fruitTrees: typeGlob<fruit_trees>(import.meta.glob('@assets/fruit_trees/*.glb', { as: 'url' }))(fruitTreeLoader),
 		buttons: buttonsLoader(import.meta.glob('@assets/buttons/*.*', { eager: true, import: 'default' })),
 		voices: loadVoices(import.meta.glob('@assets/voices/*.ogg', { eager: true, import: 'default' })),
 		steps: loadSteps(import.meta.glob('@assets/steps/*.*', { eager: true, import: 'default' })),

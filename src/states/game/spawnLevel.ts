@@ -205,7 +205,7 @@ export const spawnFarm: System<FarmRessources> = () => {
 	spawnGroundAndTrees(level)
 }
 export const spawnDungeon: System<DungeonRessources> = ({ dungeon }) => {
-	ecs.add({ map: dungeon.plan.id })
+	ecs.add({ map: dungeon.plan.id, dungeon })
 	for (const enemy of dungeon.enemies) {
 		ecs.add({
 			...enemyBundle(enemy),
