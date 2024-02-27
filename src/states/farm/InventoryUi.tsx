@@ -10,6 +10,7 @@ import { assets, ecs, ui } from '@/global/init'
 import { updateSave } from '@/global/save'
 import type { Modifier } from '@/lib/stats'
 import { addModifier } from '@/lib/stats'
+import { thumbnailRenderer } from '@/lib/thumbnailRenderer'
 import { InputIcon } from '@/ui/InputIcon'
 import type { getProps } from '@/ui/components/Menu'
 import { Menu } from '@/ui/components/Menu'
@@ -18,6 +19,7 @@ import type { FarmUiProps } from '@/ui/types'
 import { removeItemFromPlayer } from '@/utils/dialogHelpers'
 import { range } from '@/utils/mapFunctions'
 
+const thumbnail = thumbnailRenderer()
 export const ItemDisplay = (props: { item: Item | null, selected?: Accessor<boolean>, disabled?: boolean }) => {
 	const isDisabled = createMemo(() => props.disabled ?? false)
 	const disabledStyles = createMemo(() => {
@@ -34,7 +36,16 @@ export const ItemDisplay = (props: { item: Item | null, selected?: Accessor<bool
 				{(item) => {
 					return (
 						<>
-							<img src={assets.items[props.item!.name].img} style={{ width: '80%', ...disabledStyles() }}></img>
+							<Show when={isSelected()}>
+								{(_) => {
+									const spin = thumbnail.spin(assets.items[props.item!.name].model)
+
+									return <div class="item">{spin}</div>
+								}}
+							</Show>
+							<Show when={!isSelected()}>
+								<img src={assets.items[props.item!.name].img} style={{ width: '80%', ...disabledStyles() }}></img>
+							</Show>
 							<div style={{ 'color': 'white', 'position': 'absolute', 'width': '1rem', 'bottom': '0.5rem', 'right': '0.5rem', 'text-align': 'center' }}>{quantity()}</div>
 							<Show when={isSelected()}>
 								<div style={{ 'color': 'white', 'position': 'absolute', 'top': '100%', 'font-size': '1.5rem', 'z-index': 2, 'white-space': 'nowrap' }}>{item().name}</div>

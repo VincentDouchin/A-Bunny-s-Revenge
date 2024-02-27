@@ -1,7 +1,9 @@
 export class CoroutinesManager {
 	coroutines = new Set<Generator>()
 	add(fn: () => Generator) {
-		this.coroutines.add(fn())
+		const coroutine = fn()
+		this.coroutines.add(coroutine)
+		return () => this.coroutines.delete(coroutine)
 	}
 
 	tick = () => {

@@ -43,6 +43,13 @@ canvas.main{
 .input-icon>canvas{
   width:100%;
 }
+.item{
+  width: 80%
+}
+.item>canvas{
+  width: 100% !important;
+  height: 100% !important;
+}
 
 .slide-enter-active,
 .slide-exit-active {
