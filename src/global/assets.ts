@@ -62,14 +62,6 @@ const loadGLBAsToon = (options?: { color?: ColorRepresentation, material?: (node
 	return mapKeys(toons, getFileName)
 }
 
-const skyboxLoader = async (glob: GlobEager) => {
-	const loader = new TextureLoader()
-	const entries = Object.entries(glob)
-	return await Promise.all(['right', 'left', 'up', 'down', 'back', 'front'].map((side) => {
-		const path = entries.find(([name]) => name.toLowerCase().includes(side))![1]
-		return loader.loadAsync(path)
-	}))
-}
 const cropsColors: Record<string, number> = {
 	LightOrange: 0xF3A833,
 	DarkGreen: 0x5AB552,
@@ -213,7 +205,6 @@ export const loadAssets = async () => {
 	const assets = {
 		characters: typeGlob<characters>(import.meta.glob('@assets/characters/*.glb', { as: 'url' }))(loadGLBAsToon({ material: node => new CharacterMaterial({ map: node.material.map }) })),
 		models: typeGlob<models>(import.meta.glob('@assets/models/*.*', { as: 'url' }))(loadGLBAsToon({ material: overrideRockColor })),
-		skybox: skyboxLoader(import.meta.glob('@assets/skybox/*.png', { eager: true, import: 'default' })),
 		trees: typeGlob<trees>(import.meta.glob('@assets/trees/*.*', { as: 'url' }))(loadGLBAsToon({
 			material: (node) => {
 				const mat = new TreeMaterial({ map: node.material.map, transparent: true })

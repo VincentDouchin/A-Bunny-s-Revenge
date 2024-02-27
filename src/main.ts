@@ -29,7 +29,6 @@ import { target } from './states/game/sensor'
 import { allowDoorCollision, collideWithDoor, collideWithDoorCamp } from './states/game/spawnDoor'
 import { spawnDungeon, spawnFarm, spawnLevelData, updateTimeUniforms } from './states/game/spawnLevel'
 import { losingBattle, spawnCharacter } from './states/game/spawnPlayer'
-import { spawnSkyBox } from './states/game/spawnSkyBox'
 import { touchItem } from './states/game/touchItem'
 import { setupGame } from './states/setup/setupGame'
 import { UI } from './ui/UI'
@@ -54,7 +53,7 @@ gameState
 	.enable()
 campState
 	.addSubscriber(...interactablePlantableSpot, playAmbiance('Farm_Ambience_Loop'))
-	.onEnter(spawnFarm, spawnLevelData, updateCropsSave, initPlantableSpotsInteractions, spawnCharacter, spawnSkyBox)
+	.onEnter(spawnFarm, spawnLevelData, updateCropsSave, initPlantableSpotsInteractions, spawnCharacter)
 	.onUpdate(collideWithDoorCamp)
 	.onUpdate(runIf(canPlayerMove, plantSeed, harvestCrop, openPlayerInventory, savePlayerPosition))
 	.onExit(despawnOfType('map'))
@@ -65,7 +64,7 @@ genDungeonState
 	.onEnter(generateDungeon)
 dungeonState
 	.addSubscriber(spawnDrops, losingBattle, endBattleSpawnChest)
-	.onEnter(spawnDungeon, spawnSkyBox, spawnLevelData)
+	.onEnter(spawnDungeon, spawnLevelData)
 	.onUpdate(runIf(canPlayerMove, allowDoorCollision, collideWithDoor, enemyAttackPlayer, harvestCrop, playerAttack, killEntities))
 	.onExit(despawnOfType('map'))
 pausedState
