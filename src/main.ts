@@ -22,7 +22,7 @@ import { closePlayerInventory, disableInventoryState, enableInventoryState, inte
 import { dayNight } from './states/game/dayNight'
 import { talkToNPC } from './states/game/dialog'
 import { bobItems, collectItems, popItems, stopItems } from './states/game/items'
-import { applyMove, canPlayerMove, movePlayer, playerSteps, savePlayerPosition } from './states/game/movePlayer'
+import { applyMove, canPlayerMove, movePlayer, playerSteps, savePlayerFromTheEmbraceOfTheVoid, savePlayerPosition } from './states/game/movePlayer'
 import { pauseGame } from './states/game/pauseGame'
 import { beeFSM, ovenFSM, pandaFSM, playerFSM, shagaFSM } from './states/game/playerFSM'
 import { target } from './states/game/sensor'
@@ -39,7 +39,7 @@ coreState
 	.addPlugins(hierarchyPlugin, physicsPlugin, transformsPlugin, addToScene('camera', 'light', 'mesh', 'model', 'dialogContainer', 'batchRenderer', 'emitter', 'interactionContainer', 'minigameContainer'), updateModels, particlesPlugin, tweenPlugin)
 	.addSubscriber(...target, preCompileShaders, initTone)
 	.onEnter(initCamera, initThree, ui.render(UI))
-	.onPreUpdate(coroutines.tick)
+	.onPreUpdate(coroutines.tick, savePlayerFromTheEmbraceOfTheVoid)
 	.onUpdate(runIf(() => !pausedState.enabled, updateAnimations('beeAnimator', 'playerAnimator', 'pandaAnimator', 'shagaAnimator', 'ovenAnimator', 'chestAnimator'), () => time.tick()), inputManager.update, ui.update, moveCamera)
 	.onPostUpdate(updateControls, render)
 	.enable()

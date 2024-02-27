@@ -77,3 +77,9 @@ export const savePlayerPosition = throttle(1000, () => {
 		})
 	}
 })
+export const savePlayerFromTheEmbraceOfTheVoid = () => {
+	const player = playerQuery.first
+	if (player && player.position.y < -10) {
+		player.body.setTranslation({ x: 0, y: 10, z: 0 }, true)
+	}
+}
