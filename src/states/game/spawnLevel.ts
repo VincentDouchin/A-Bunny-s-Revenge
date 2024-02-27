@@ -18,7 +18,7 @@ import { GroundMaterial, WaterMaterial } from '@/shaders/GroundShader'
 import { getScreenBuffer } from '@/utils/buffer'
 
 const SCALE = 10
-const HEIGHT = 60
+export const HEIGHT = 240
 
 const spawnFromCanvas = (level: Level, image: HTMLCanvasElement, scale: number, fn: (val: Vector4Like, x: number, y: number, z: number) => void) => {
 	const heightGrid = canvasToGrid(level.heightMap)
@@ -155,17 +155,31 @@ const waterBundle = (level: Level) => {
 		rotation: new Quaternion().setFromAxisAngle(new Vector3(1, 0, 0), -Math.PI / 2),
 	} as const satisfies Entity
 }
+export const setDisplacement = (geo: PlaneGeometry, canvas: HTMLCanvasElement) => {
+	const width = geo.parameters.widthSegments + 1
+	const height = geo.parameters.heightSegments + 1
+	const positionAttribute = geo.getAttribute('position')
+	const ctx = canvas.getContext('2d')!
+	const imageData = ctx.getImageData(0, 0, width, height).data
+	for (let i = 0; i < (width * height * 4); i += 4) {
+		let displacementVal = imageData[i] / 255.0
+		displacementVal *= HEIGHT
+		const index = i / 4
+		const x = index % width
+		const y = Math.floor(index / width)
 
+		positionAttribute.setZ(width * (height - y) + x, displacementVal)
+	}
+	positionAttribute.needsUpdate = true
+}
 export const spawnGroundAndTrees = (level: Level) => {
 	const displacementMap = getdisplacementMap(level)
-	const displacementTexture = new CanvasTexture(displacementMap)
-	displacementTexture.flipY = false
 	// ! Ground
 	const groundMesh = new Mesh(
 		new PlaneGeometry(level.size.x, level.size.y, level.size.x, level.size.y),
-		new (GroundMaterial(level.path, level.size.x, level.size.y))({ displacementMap: displacementTexture, displacementScale: HEIGHT, displacementBias: 0 }),
+		new (GroundMaterial(level.path, level.size.x, level.size.y))({ }),
 	)
-	groundMesh.material.displacementMap!.flipY = false
+	setDisplacement(groundMesh.geometry, displacementMap)
 	groundMesh.rotation.x = -Math.PI / 2
 	groundMesh.position.y = -HEIGHT / 4
 	groundMesh.receiveShadow = true

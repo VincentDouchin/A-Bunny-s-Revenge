@@ -162,6 +162,9 @@ export const LevelEditor = () => {
 					}
 					const switchLevel = (level: Level) => {
 						setActiveLevelIndex(levels().indexOf(level))
+						for (const ground of groundQuery) {
+							ecs.remove(ground)
+						}
 						dungeonState.disable()
 						campState.disable()
 
@@ -468,7 +471,7 @@ export const LevelEditor = () => {
 									</Show>
 									<Show when={selectedTab() === 'draw map'}>
 										<Show when={activeLevel()}>
-											{active => <MapEditor activeLevel={active} updateLevel={updateLevel(active())} />}
+											{active => <MapEditor activeLevel={active} updateLevel={updateLevel(active())} switchLevel={() => switchLevel(activeLevel())} />}
 										</Show>
 									</Show>
 
