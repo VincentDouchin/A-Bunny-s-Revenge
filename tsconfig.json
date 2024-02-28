@@ -8,7 +8,7 @@
 		"experimentalDecorators": true,
 		"module": "ESNext",
 		/* Bundler mode */
-		"moduleResolution": "Node",
+		"moduleResolution": "Bundler",
 		"paths": {
 			"@/*": [ "./src/*" ],
 			"@assets/*": [ "./assets/*" ]
@@ -17,7 +17,9 @@
 		"types": [
 			"vite/client",
 			"vite-plugin-pwa/client",
-			"new-javascript"
+			"new-javascript",
+			"@total-typescript/ts-reset"
+
 		],
 		"allowImportingTsExtensions": true,
 		/* Linting */

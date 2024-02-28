@@ -101,10 +101,14 @@ const resetFloodFill = (rooms: RoomDistance[]) => {
 	rooms.forEach(room => delete room.distance)
 }
 const assignStartOrEnd = (room: BlankRoom, rooms: BlankRoom[]) => {
-	const possibleStart = (['north', 'east', 'west'] as const).filter((dir) => {
+	const possibleStart = (['north', 'east', 'west', 'south'] as const).filter((dir) => {
 		const position = getRoomSidePosition(room, dir)
 		return !rooms.find(r => r.position.x === position.x && r.position.y === position.y)
 	})
+	if (possibleStart.length === 0) {
+		const newPossibleDirections = (['north', 'south', 'east', 'west'] as const).filter(dir => !(dir in room.connections))
+		possibleStart.push(...newPossibleDirections)
+	}
 	room.connections[getRandom(possibleStart)] = null
 }
 
@@ -209,7 +213,7 @@ const assignPlanAndEnemies = (rooms: BlankRoom[]): Room[] => {
 		const enemies = [...getEnemies(room.type)]
 		const doors = {}
 		const plan = getRandom(possibleRooms)
-		if (!plan) console.error('no plan found for connections : ', directions)
+		if (!plan) throw new Error(`no plan found for connections : ${directions.join(', ')}`)
 		let encounter: null | keyof typeof encounters = null
 		if (room.type === RoomType.NPC) {
 			encounter = getRandom(Object.keys(encounters) as (keyof typeof encounters)[])
@@ -224,7 +228,7 @@ const assignPlanAndEnemies = (rooms: BlankRoom[]): Room[] => {
 
 const placeNPC = (rooms: BlankRoom[]) => {
 	const criticalPath = findCriticalPath(rooms)
-	const possibleRooms = rooms.filter(r => !criticalPath.includes(r))
+	const possibleRooms = rooms.filter(r => !criticalPath.includes(r) && ![RoomType.Entrance, RoomType.Boss].includes(r.type))
 	if (possibleRooms.length) {
 		const npcRoom = getRandom(possibleRooms)
 		npcRoom.type = RoomType.NPC
@@ -238,9 +242,9 @@ export const genDungeon = (roomsAmount: number, npc: boolean) => {
 		placeNPC(rooms)
 	}
 	const filledRooms = assignPlanAndEnemies(rooms)
-	return filledRooms.find(room => room.type === RoomType.Entrance)!
+	return filledRooms
 }
 export const generateDungeon = () => {
-	const dungeon = genDungeon(5, true)
+	const dungeon = genDungeon(5, true).find(room => room.type === RoomType.Entrance)!
 	dungeonState.enable({ dungeon, direction: 'south', firstEntry: true })
 }
