@@ -40,12 +40,28 @@ export const dialogs = {
 	},
 	*Jack() {
 		lockPlayer()
-		yield 'Hello! I am a placeholder for jack'
-		yield 'I am so hungry but all I have is this lousy bean'
-		yield 'The guy who sold it to me said it was magic'
-		yield 'but so far nothing happened'
-		yield 'Tell you what, bring me some food and I\'ll give you the bean.'
-		yield 'Deal?'
+
+		if (hasCompletedQuest('jack_1')) {
+			yield 'The soup was delicious!'
+		} else {
+			if (!hasQuest('jack_1')) {
+				yield 'Hello! I am a placeholder for jack'
+				yield 'I am so hungry but all I have is this lousy bean'
+				yield 'The guy who sold it to me said it was magic'
+				yield 'but so far nothing happened'
+				yield 'Tell you what, bring me some food and I\'ll give you the bean.'
+				yield 'Deal?'
+				addQuest('jack_1')
+			}
+			if (canCompleteQuest('jack_1')) {
+				completeQuest('jack_1')
+				yield 'Oh thank you for the carrot soup!'
+				yield 'I was so hungry'
+				yield 'Here is the magic bean'
+				yield 'Maybe you can grow something with it?'
+				addItemToPlayer({ name: 'magic_bean', quantity: 1 })
+			}
+		}
 		unlockPlayer()
 	},
 } as const satisfies Partial<Record<string, () => Dialog>>

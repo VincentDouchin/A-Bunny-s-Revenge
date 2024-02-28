@@ -10,14 +10,15 @@ import type { EffectComposer } from 'three/examples/jsm/postprocessing/EffectCom
 import type { CSS2DObject } from 'three/examples/jsm/renderers/CSS2DRenderer'
 import type { Animator } from './animator'
 import type { InstanceHandle } from './assetLoaders'
+import type { Room } from '@/states/dungeon/generateDungeon'
 import type { Stat } from '@/lib/stats'
 import type { StateMachine } from '@/lib/stateMachine'
 import type { direction } from '@/lib/directions'
 import type { MenuInputMap, PlayerInputMap } from '@/global/inputMaps'
 import type { Recipe } from '@/constants/recipes'
 import type { Item } from '@/constants/items'
+import type { enemy } from '@/constants/enemies'
 import type { NPC } from '@/constants/NPC'
-import type { Room } from '@/states/dungeon/dungeonTypes'
 
 export type Dialog = Generator<string | string[] | void | false, void, number | void>
 export enum Faction {
@@ -155,6 +156,7 @@ export interface Entity {
 	maxHealth?: Stat
 
 	// ! Enemies
+	enemyName?: enemy
 	drops?: Item[]
 	// ! Particles
 	emitter?: ParticleEmitter<Object3DEventMap>

@@ -22,6 +22,7 @@ const setSensor = <T extends With<Entity, 'collider'>>(query: Query<T>, sensor: 
 }
 export const lockPlayer = () => {
 	for (const player of playerQuery) {
+		player.movementForce.setScalar(0)
 		ecs.removeComponent(player, 'playerControls')
 	}
 }

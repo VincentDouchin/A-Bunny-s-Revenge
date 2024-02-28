@@ -1,5 +1,5 @@
-import type { Room } from './dungeonTypes'
-import { RoomType } from './dungeonTypes'
+import { encounters } from './encounters'
+import type { Level } from '@/debug/LevelEditor'
 import type { enemy } from '@/constants/enemies'
 import { enemyGroups } from '@/constants/enemies'
 import { levelsData } from '@/global/init'
@@ -11,6 +11,20 @@ import { getRandom, mapValues } from '@/utils/mapFunctions'
 // ! ROOMS
 type Connections = Partial<Record<direction, number | null>>
 
+export enum RoomType {
+	Battle,
+	Boss,
+	Entrance,
+	Item,
+	NPC,
+}
+export interface Room {
+	plan: Level
+	enemies: enemy[]
+	doors: Partial<Record<direction, Room | null>>
+	type: RoomType
+	encounter: keyof typeof encounters | null
+}
 interface Position {
 	x: number
 	y: number
@@ -122,6 +136,28 @@ const findStartExit = (rooms: RoomDistance[]) => {
 	assignStartOrEnd(startRoom, rooms)
 	assignStartOrEnd(endRoom, rooms)
 }
+const findCriticalPath = (rooms: RoomDistance[]) => {
+	let maxInterations = rooms.length
+	const startRoomId = rooms.findIndex(room => room.type === RoomType.Entrance)
+	let currRoomId = rooms.findIndex(room => room.type === RoomType.Boss)
+	const criticalRooms: RoomDistance[] = []
+	floodFill(startRoomId, rooms, 0)
+
+	while (maxInterations-- >= 0) {
+		criticalRooms.push(rooms[currRoomId])
+		if (currRoomId === startRoomId) break
+
+		const currRoom = rooms[currRoomId]
+		for (const connectionSide in currRoom.connections) {
+			const roomId = currRoom.connections[connectionSide as direction]
+			if (roomId && rooms[roomId].distance! === currRoom.distance! - 1) {
+				currRoomId = roomId
+				break
+			}
+		}
+	}
+	return criticalRooms
+}
 
 const createRooms = (count: number): BlankRoom[] => {
 	const rooms: BlankRoom[] = [{
@@ -146,12 +182,6 @@ const createRooms = (count: number): BlankRoom[] => {
 	return rooms
 }
 
-export const genPath = (roomsAmount: number) => {
-	const rooms = createRooms(roomsAmount)
-	findStartExit(rooms)
-	return rooms
-}
-
 const getEnemies = (type: RoomType): enemy[] => {
 	switch (type) {
 		case RoomType.Battle:
@@ -162,6 +192,7 @@ const getEnemies = (type: RoomType): enemy[] => {
 			const group = getRandom(possibleGroups)
 			return [group.boss, ...group.enemies].filter(Boolean)
 		}
+		default:return []
 	}
 }
 
@@ -175,11 +206,15 @@ const assignPlanAndEnemies = (rooms: BlankRoom[]): Room[] => {
 				return p?.data?.direction === dir
 			}))
 		})
-		const enemies = getEnemies(room.type)
+		const enemies = [...getEnemies(room.type)]
 		const doors = {}
 		const plan = getRandom(possibleRooms)
 		if (!plan) console.error('no plan found for connections : ', directions)
-		return { ...room, plan, enemies, doors }
+		let encounter: null | keyof typeof encounters = null
+		if (room.type === RoomType.NPC) {
+			encounter = getRandom(Object.keys(encounters) as (keyof typeof encounters)[])
+		}
+		return { ...room, plan, enemies, doors, encounter }
 	})
 	for (let i = 0; i < filledRooms.length; i++) {
 		filledRooms[i].doors = mapValues(rooms[i].connections, index => typeof index === 'number' ? filledRooms[index] : null)
@@ -187,12 +222,25 @@ const assignPlanAndEnemies = (rooms: BlankRoom[]): Room[] => {
 	return filledRooms
 }
 
-export const genDungeon = (roomsAmount: number) => {
-	const rooms = genPath(roomsAmount)
+const placeNPC = (rooms: BlankRoom[]) => {
+	const criticalPath = findCriticalPath(rooms)
+	const possibleRooms = rooms.filter(r => !criticalPath.includes(r))
+	if (possibleRooms.length) {
+		const npcRoom = getRandom(possibleRooms)
+		npcRoom.type = RoomType.NPC
+	}
+}
+
+export const genDungeon = (roomsAmount: number, npc: boolean) => {
+	const rooms = createRooms(roomsAmount)
+	findStartExit(rooms)
+	if (npc) {
+		placeNPC(rooms)
+	}
 	const filledRooms = assignPlanAndEnemies(rooms)
 	return filledRooms.find(room => room.type === RoomType.Entrance)!
 }
 export const generateDungeon = () => {
-	const dungeon = genDungeon(5)
-	dungeonState.enable({ dungeon, direction: 'south' })
+	const dungeon = genDungeon(5, true)
+	dungeonState.enable({ dungeon, direction: 'south', firstEntry: true })
 }

@@ -1,5 +1,5 @@
 import { DoubleSide, Group, Mesh, MeshBasicMaterial, PlaneGeometry, ShaderMaterial } from 'three'
-import { RoomType } from '../dungeon/dungeonTypes'
+import { RoomType } from '../dungeon/generateDungeon'
 import { ecs, world } from '@/global/init'
 import type { DungeonRessources } from '@/global/states'
 import { campState, dungeonState, genDungeonState } from '@/global/states'

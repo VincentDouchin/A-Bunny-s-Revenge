@@ -15,6 +15,7 @@ export const encounters = {
 		ecs.add({
 			...bundle,
 			inMap: true,
+			npcName: 'Jack Placeholder',
 			npc: true,
 			dialog: dialogs.Jack(),
 			position: new Vector3(),

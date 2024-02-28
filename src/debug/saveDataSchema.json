@@ -116,6 +116,12 @@
                 "type": "boolean"
               },
               "type": "array"
+            },
+            "jack_1": {
+              "items": {
+                "type": "boolean"
+              },
+              "type": "array"
             }
           },
           "type": "object"
@@ -163,7 +169,6 @@
       "enum": [
         "carrot",
         "beet",
-        "mushroom",
         "tomato",
         "lettuce"
       ],
@@ -183,9 +188,12 @@
         "honey_glazed_carrot",
         "lettuce",
         "lettuce_seeds",
-        "mushroom",
+        "magic_bean",
         "parsley",
         "roasted_carrot",
+        "slime_bread",
+        "slime_dough",
+        "slime_dumpling",
         "tomato",
         "tomato_seeds",
         "tomato_soup"

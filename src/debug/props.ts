@@ -21,7 +21,7 @@ import { cropBundle } from '@/states/farm/farming'
 import { openMenu } from '@/states/farm/openInventory'
 import { doorSide } from '@/states/game/spawnDoor'
 import { playerBundle } from '@/states/game/spawnPlayer'
-import { RoomType } from '@/states/dungeon/dungeonTypes'
+import { RoomType } from '@/states/dungeon/generateDungeon'
 
 export const customModels = {
 	door: doorSide,
@@ -208,7 +208,7 @@ export const props: PlacableProp<propNames>[] = [
 				entity.emitter = doorClosed()
 			}
 			if ('dungeon' in ressources) {
-				const isStart = ressources.dungeon.type === RoomType.Entrance
+				const isStart = ressources.dungeon.type === RoomType.Entrance && ressources.firstEntry
 				if (isStart ? ressources.dungeon.doors[data.data.direction] === null : data.data.direction === ressources.direction) {
 					ecs.add({
 						...playerBundle(ressources.playerHealth),

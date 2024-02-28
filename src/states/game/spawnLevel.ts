@@ -4,6 +4,8 @@ import { createNoise2D, createNoise3D } from 'simplex-noise'
 import type { Vector4Like } from 'three'
 import { CanvasTexture, Euler, Group, Mesh, PlaneGeometry, Quaternion, Vector3 } from 'three'
 import { enemyBundle } from '../dungeon/enemies'
+import { RoomType } from '../dungeon/generateDungeon'
+import { encounters } from '../dungeon/encounters'
 import { spawnLight } from './spawnLights'
 import type { Level } from '@/debug/LevelEditor'
 import { getModel, props } from '@/debug/props'
@@ -225,6 +227,9 @@ export const spawnDungeon: System<DungeonRessources> = ({ dungeon }) => {
 			...enemyBundle(enemy),
 			position: new Vector3(between(-10, 10), 0, between(-10, 10)),
 		})
+	}
+	if (dungeon.type === RoomType.NPC && dungeon.encounter) {
+		encounters[dungeon.encounter]()
 	}
 	spawnGroundAndTrees(dungeon.plan)
 }

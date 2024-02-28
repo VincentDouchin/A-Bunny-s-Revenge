@@ -1,5 +1,5 @@
 import { StateMananger } from './../lib/state'
-import type { Room } from '@/states/dungeon/dungeonTypes'
+import type { Room } from '@/states/dungeon/generateDungeon'
 import type { direction } from '@/lib/directions'
 
 export const app = new StateMananger()
@@ -18,6 +18,7 @@ export interface DungeonRessources {
 	dungeon: Room
 	direction: direction
 	playerHealth?: number
+	firstEntry?: true
 }
 
 export const dungeonState = app.create<DungeonRessources>()

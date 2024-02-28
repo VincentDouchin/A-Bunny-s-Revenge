@@ -6,9 +6,11 @@ import { enemyData } from '@/constants/enemies'
 import { Sizes } from '@/constants/sizes'
 import { Animator } from '@/global/animator'
 import { type Entity, Faction } from '@/global/entity'
-import { assets } from '@/global/init'
+import { assets, ecs } from '@/global/init'
 import { modelColliderBundle } from '@/lib/models'
 import { stateBundle } from '@/lib/stateMachine'
+import type { Subscriber } from '@/lib/state'
+import type { DungeonRessources } from '@/global/states'
 
 export const enemyBundle = (name: enemy) => {
 	const enemy = enemyData[name]
@@ -22,6 +24,7 @@ export const enemyBundle = (name: enemy) => {
 		...healthBundle(enemy.health),
 		inMap: true,
 		faction: Faction.Enemy,
+		enemyName: name,
 		movementForce: new Vector3(),
 		speed: 100,
 		drops: enemy.drops(),
@@ -38,3 +41,7 @@ export const enemyBundle = (name: enemy) => {
 		}),
 	} as const satisfies Entity
 }
+const enemyQuery = ecs.with('enemyName')
+export const removeEnemyFromSpawn: Subscriber<DungeonRessources> = ({ dungeon }) => enemyQuery.onEntityRemoved.subscribe((entity) => {
+	dungeon.enemies.splice(dungeon.enemies.indexOf(entity.enemyName), 1)
+})

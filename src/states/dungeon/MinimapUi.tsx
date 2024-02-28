@@ -1,6 +1,6 @@
 import { For, Show } from 'solid-js'
-import type { Room } from './dungeonTypes'
-import { RoomType } from './dungeonTypes'
+import type { Room } from './generateDungeon'
+import { RoomType } from './generateDungeon'
 import { assets, ecs } from '@/global/init'
 import type { direction } from '@/lib/directions'
 import { ForQuery } from '@/ui/components/ForQuery'
@@ -20,6 +20,7 @@ const RoomUi = ({ room, direction, previous, current }: { room: Room, direction?
 		[RoomType.Boss]: assets.icons.skull,
 		[RoomType.Entrance]: assets.icons['door-closed-solid'],
 		[RoomType.Item]: assets.icons.pouch,
+		[RoomType.NPC]: assets.icons.pawn,
 	}
 	const borderStyle = 'solid 0.2rem black'
 	const connectorSize: Record<direction, any> = {

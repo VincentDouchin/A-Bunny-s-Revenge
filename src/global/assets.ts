@@ -165,7 +165,7 @@ const loadItems = async (glob: GlobEager) => {
 		const model = await loadGLB(url)
 		model.scene.traverse((node) => {
 			if (node instanceof Mesh) {
-				node.material = new ToonMaterial({ map: node.material.map, transparent: true, side: DoubleSide })
+				node.material = new ToonMaterial({ map: node.material.map, transparent: true, side: DoubleSide, color: node.material.color })
 			}
 		})
 		return model.scene

@@ -14,6 +14,7 @@ import { runIf } from './lib/state'
 import { transformsPlugin } from './lib/transforms'
 import { tweenPlugin } from './lib/updateTween'
 import { enemyAttackPlayer, playerAttack, spawnDrops } from './states/dungeon/battle'
+import { removeEnemyFromSpawn } from './states/dungeon/enemies'
 import { generateDungeon } from './states/dungeon/generateDungeon'
 import { killAnimation, killEntities } from './states/dungeon/health'
 import { endBattleSpawnChest } from './states/dungeon/spawnChest'
@@ -63,7 +64,7 @@ openMenuState
 genDungeonState
 	.onEnter(generateDungeon)
 dungeonState
-	.addSubscriber(spawnDrops, losingBattle, endBattleSpawnChest)
+	.addSubscriber(spawnDrops, losingBattle, endBattleSpawnChest, removeEnemyFromSpawn)
 	.onEnter(spawnDungeon, spawnLevelData)
 	.onUpdate(runIf(canPlayerMove, allowDoorCollision, collideWithDoor, enemyAttackPlayer, harvestCrop, playerAttack, killEntities))
 	.onExit(despawnOfType('map'))

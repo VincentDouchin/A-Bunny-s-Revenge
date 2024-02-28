@@ -1,6 +1,6 @@
 import { CSS2DObject } from 'three/examples/jsm/renderers/CSS2DRenderer'
 import { dialogs } from '@/constants/dialogs'
-import type { Entity } from '@/global/entity'
+import { type Entity, Interactable } from '@/global/entity'
 import { ecs } from '@/global/init'
 import { addTag } from '@/lib/hierarchy'
 
@@ -29,6 +29,9 @@ export const talkToNPC = () => {
 				if (nextDialog.done || !nextDialog.value) {
 					ecs.removeComponent(npc, 'currentDialog')
 					ecs.removeComponent(npc, 'dialogContainer')
+					if (npc.interactable === Interactable.Talk) {
+						ecs.removeComponent(npc, 'interactable')
+					}
 				} else if (nextDialog.value) {
 					ecs.update(npc, { currentDialog: nextDialog.value })
 					if (!npc.dialogContainer) {

@@ -105,5 +105,8 @@ export const itemsData: Record<items, ItemData> = {
 	slime_dumpling: {
 		name: 'Slime Dumpling',
 	},
+	magic_bean: {
+		name: '"Magic" bean',
+	},
 
 }
