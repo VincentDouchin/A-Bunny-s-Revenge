@@ -11,7 +11,7 @@ export interface Enemy {
 	drops: () => Item[]
 	animator: ComponentsOfType<Animator<any>>
 }
-const enemyNames = ['Armabee', 'Armabee_Evolved', 'Shaga_A', 'Big_Boar_A', 'Snailo_A', 'Porin_A'] as const satisfies readonly characters[]
+const enemyNames = ['Armabee', 'Armabee_Evolved', 'Shaga_A', 'Big_Boar_A', 'Snailo_A', 'Porin_A', 'Forest_Butterfly_A', 'Racco_A', 'Platopo_A'] as const satisfies readonly characters[]
 export type enemy = (typeof enemyNames)[number]
 export const enemyData: Record<enemy, Enemy> = {
 	Armabee: {
@@ -57,6 +57,24 @@ export const enemyData: Record<enemy, Enemy> = {
 		drops: () => [{ name: 'slime_dough', quantity: 1 }],
 		animator: 'shagaAnimator',
 	},
+	Racco_A: {
+		health: 3,
+		scale: 2,
+		drops: () => [],
+		animator: 'shagaAnimator',
+	},
+	Forest_Butterfly_A: {
+		health: 3,
+		scale: 2,
+		drops: () => [],
+		animator: 'shagaAnimator',
+	},
+	Platopo_A: {
+		health: 3,
+		scale: 10,
+		drops: () => Math.random() > 0.5 ? [{ name: 'milk', quantity: 1 }] : [],
+		animator: 'shagaAnimator',
+	},
 
 }
 
@@ -83,5 +101,11 @@ export const enemyGroups: EnemyGroup[] = [
 	},
 	{
 		enemies: ['Snailo_A', 'Snailo_A', 'Snailo_A'],
+	},
+	{
+		enemies: ['Platopo_A', 'Racco_A', 'Platopo_A'],
+	},
+	{
+		enemies: ['Forest_Butterfly_A', 'Forest_Butterfly_A', 'Porin_A'],
 	},
 ]

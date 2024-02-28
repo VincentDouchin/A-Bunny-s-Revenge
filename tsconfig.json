@@ -8,7 +8,7 @@
 		"experimentalDecorators": true,
 		"module": "ESNext",
 		/* Bundler mode */
-		"moduleResolution": "Bundler",
+		"moduleResolution": "Node",
 		"paths": {
 			"@/*": [ "./src/*" ],
 			"@assets/*": [ "./assets/*" ]
