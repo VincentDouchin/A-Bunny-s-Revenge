@@ -18,30 +18,30 @@ import { MenuType } from '@/global/entity'
 import type { Entity } from '@/global/entity'
 import { getWorldPosition } from '@/lib/transforms'
 
-const bellowQuery = ecs.with('menuType', 'oven').where(({ menuType }) => menuType === MenuType.OvenMinigame)
+const ovenQuery = ecs.with('menuType', 'recipesQueued').where(({ menuType }) => menuType === MenuType.OvenMinigame)
 
 export const OvenMinigameUi = ({ player }: FarmUiProps) => {
 	return (
-		<ForQuery query={bellowQuery}>
-			{(bellow) => {
-				const output = ui.sync(() => bellow.oven.recipesQueued[0]?.output)
+		<ForQuery query={ovenQuery}>
+			{(oven) => {
+				const output = ui.sync(() => oven.recipesQueued?.[0]?.output)
 				const smokeTrails: With<Entity, 'emitter'>[] = []
 				let targetEntity: Entity | null = null
 				onMount(() => {
 					for (const camera of cameraQuery) {
-						ecs.addComponent(camera, 'cameraOffset', new Vector3(0, 30, 80).applyQuaternion(bellow.oven.rotation!))
+						ecs.addComponent(camera, 'cameraOffset', new Vector3(0, 30, 80).applyQuaternion(oven.rotation!))
 					}
-					const position = getWorldPosition(bellow.oven.group!)
+					const position = getWorldPosition(oven.group!)
 					targetEntity = ecs.add({
 						worldPosition: position.add(new Vector3(0, 10, 0)),
 						cameratarget: true,
 					})
 					ecs.removeComponent(player, 'cameratarget')
-					bellow.oven.model?.traverse((node) => {
+					oven.model?.traverse((node) => {
 						if (node.name.includes('smoke')) {
 							const smokeTrail = ecs.add({
-								parent: bellow.oven,
-								position: node.position.clone().multiply(bellow.oven.model!.scale),
+								parent: oven,
+								position: node.position.clone().multiply(oven.model!.scale),
 								emitter: smoke(),
 								autoDestroy: true,
 							})
@@ -55,7 +55,7 @@ export const OvenMinigameUi = ({ player }: FarmUiProps) => {
 					for (const camera of cameraQuery) {
 						ecs.removeComponent(camera, 'cameraOffset')
 					}
-					ecs.removeComponent(bellow.oven, 'cameratarget')
+					ecs.removeComponent(oven, 'cameratarget')
 					for (const smokeTrail of smokeTrails) {
 						smokeTrail.emitter.system.looping = false
 					}
@@ -69,7 +69,7 @@ export const OvenMinigameUi = ({ player }: FarmUiProps) => {
 				const [timer, setTimer] = createSignal(between(3, 5))
 				ui.updateSync(() => {
 					if (player.menuInputs.get('cancel').justReleased) {
-						ecs.removeComponent(bellow, 'menuType')
+						ecs.removeComponent(oven, 'menuType')
 					}
 					if (output()) {
 						if (player.playerControls.get('primary').justReleased) {
@@ -94,15 +94,15 @@ export const OvenMinigameUi = ({ player }: FarmUiProps) => {
 						setTarget(x => Math.max(0, Math.min(100, x + direction() * 3 * (time.delta / 1000) * (1 + progress() / 20))))
 						if (progress() >= 100) {
 							setProgress(0)
-							bellow.oven.recipesQueued?.shift()
+							oven.recipesQueued?.shift()
 							const position = new Vector3()
-							bellow.oven.model!.traverse((node) => {
+							oven.model!.traverse((node) => {
 								if (node.name.includes('Door')) {
 									node.getWorldPosition(position)
 								}
 							})
 							for (let i = 0; i < output().quantity; i++) {
-								ecs.add({ ...itemBundle(output().name), position, popDirection: new Vector3(between(-1, 1), 0, between(2, 2.5)).applyQuaternion(bellow.oven.rotation!) })
+								ecs.add({ ...itemBundle(output().name), position, popDirection: new Vector3(between(-1, 1), 0, between(2, 2.5)).applyQuaternion(oven.rotation!) })
 							}
 						}
 					}
@@ -113,7 +113,7 @@ export const OvenMinigameUi = ({ player }: FarmUiProps) => {
 					playerInputs()?.set(input, value)
 				}
 				const isTouch = ui.sync(() => inputManager.controls === 'touch')
-				const close = () => ecs.removeComponent(bellow, 'menuType')
+				const close = () => ecs.removeComponent(oven, 'menuType')
 				return (
 					<>
 						<Show when={isTouch()}>
@@ -127,7 +127,7 @@ export const OvenMinigameUi = ({ player }: FarmUiProps) => {
 								<div innerHTML={fire} style={{ color: 'white', width: '50%', height: '50%' }}></div>
 							</div>
 						</Show>
-						<Portal mount={bellow.oven.minigameContainer?.element}>
+						<Portal mount={oven.minigameContainer?.element}>
 							<div style={{ 'display': 'grid', 'grid-template-columns': 'auto auto auto', 'gap': '1rem 3rem', 'translate': '0% -80%', 'position': 'absolute' }}>
 								{/*  progress */}
 								<div style={{ position: 'relative' }}>

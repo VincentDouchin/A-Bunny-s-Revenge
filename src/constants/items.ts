@@ -122,5 +122,8 @@ export const itemsData: Record<items, ItemData> = {
 	pumpkin: {
 		name: 'Pumpkin',
 	},
+	egg: {
+		name: 'Egg',
+	},
 
 }

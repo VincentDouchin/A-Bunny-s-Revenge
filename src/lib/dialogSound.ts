@@ -5,6 +5,7 @@ const playbackRate = 3
 
 export const soundDialog = async (dialog: string) => {
 	const filteredDialog = dialog.replace(/[^a-zA-Z\s]/g, '')
+
 	for (const letter of filteredDialog) {
 		if (letter === ' ') {
 			await new Promise<void>(resolve => setTimeout(resolve, 50))

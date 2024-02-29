@@ -105,19 +105,10 @@ export const props: PlacableProp<propNames>[] = [
 				recipesQueued: [],
 				ovenAnimator: new Animator(entity.model, assets.models.BunnyOvenPacked.animations),
 				minigameContainer,
-				interactable: Interactable.Cook,
+				interactable: Interactable.Oven,
 				onPrimary: openMenu(MenuType.Oven),
-				withChildren(parent) {
-					ecs.add({
-						...modelColliderBundle(assets.models.Bellow.scene, RigidBodyType.Fixed, true),
-						parent,
-						onPrimary: openMenu(MenuType.OvenMinigame),
-						interactable: Interactable.Cook,
-						position: new Vector3(10, 0, 0),
-						rotation: new Quaternion().setFromAxisAngle(new Vector3(0, 1, 0), -Math.PI / 2),
-						oven: parent as With<Entity, 'model' | 'recipesQueued'>,
-					})
-				},
+				onSecondary: openMenu(MenuType.OvenMinigame),
+
 			} },
 	},
 	{
@@ -149,7 +140,6 @@ export const props: PlacableProp<propNames>[] = [
 		bundle: entity => ({
 			...entity,
 			...menuInputMap(),
-			interactable: Interactable.Cook,
 			recipesQueued: [],
 		}),
 	},

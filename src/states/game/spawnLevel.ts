@@ -94,7 +94,7 @@ export const spawnGrass = (level: Level, parent: Entity) => {
 		if (n2 < 0.7 && (n < 0 || n2 < 0)) return
 		const position = new Vector3(
 			(x - level.grass.width / 2) / SCALE + nX,
-			0.1 + displacement,
+			0 + displacement,
 			(level.grass.height / 2 - y) / SCALE + nY,
 		).multiplyScalar(SCALE)
 		const isFlower = nF > 0.8

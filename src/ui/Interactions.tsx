@@ -24,6 +24,7 @@ export const getInteractables = (player: With<Entity, 'inventory'>, entity?: Wit
 			entity.currentDialog ? undefined : 'talk',
 		]
 		case Interactable.Cauldron: return ['Prepare', 'Cook']
+		case Interactable.Oven: return ['Prepare', 'Cook']
 		default: return [entity?.interactable]
 	}
 }

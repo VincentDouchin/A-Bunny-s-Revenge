@@ -31,7 +31,7 @@ export enum Interactable {
 	Harvest = 'harvest',
 	Enter = 'enter',
 	Cauldron = 'cauldron',
-	Cook = 'cook',
+	Oven = 'oven',
 	Chop = 'chop',
 	SelectSeed = 'select seed',
 	Open = 'open',
@@ -172,7 +172,6 @@ export interface Entity {
 	state?: states
 	// ! Minigame
 	recipesQueued?: Recipe[]
-	oven?: With<Entity, 'recipesQueued' | 'model'>
 	minigameContainer?: CSS2DObject
 	spoon?: Entity
 	// ! Sounds
