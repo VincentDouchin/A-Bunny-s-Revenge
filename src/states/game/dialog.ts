@@ -11,11 +11,11 @@ export const dialogBundle = (key: keyof typeof dialogs) => {
 	} as const satisfies Entity
 }
 const dialogQuery = ecs.with('dialog')
-const playerQuery = ecs.with('player', 'menuInputs')
+const playerQuery = ecs.with('player', 'playerControls')
 const activeDialogQuery = dialogQuery.with('activeDialog')
 export const talkToNPC = () => {
 	for (const player of playerQuery) {
-		if (player.menuInputs.get('validate').justPressed) {
+		if (player.playerControls.get('primary').justPressed) {
 			for (const npc of dialogQuery) {
 				if (npc.interactionContainer) {
 					addTag(npc, 'activeDialog')
