@@ -3,9 +3,8 @@ import { params } from './context'
 import { ecs, time } from './init'
 import { debugState } from '@/debug/debugState'
 
-export const camera = new PerspectiveCamera(params.fov, window.innerWidth / window.innerHeight, 0.1, 1000)
-
 export const initCamera = () => {
+	const camera = new PerspectiveCamera(params.fov, window.innerWidth / window.innerHeight, 0.1, 1000)
 	camera.zoom = window.innerWidth / window.innerHeight / params.zoom
 	camera.updateProjectionMatrix()
 	ecs.add({ camera, position: new Vector3(), mainCamera: true, cameraLookat: new Vector3() })
@@ -36,11 +35,9 @@ export const moveCamera = () => {
 			}
 		}
 		if (!debugState.enabled) {
-			cameraLookat.lerp(target, time.delta / 1000 * 5).max(target)
+			cameraLookat.lerp(target, time.delta / 1000 * 5)
 			camera.lookAt(cameraLookat)
 			position.set(...cameraLookat.clone().add(cameraOffset ?? new Vector3(params.cameraOffsetX, params.cameraOffsetY, params.cameraOffsetZ)).toArray())
-			camera.zoom = window.innerWidth / window.innerHeight / params.zoom
-			camera.fov = params.fov
 		}
 	}
 }

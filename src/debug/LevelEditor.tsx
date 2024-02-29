@@ -14,7 +14,6 @@ import { getModel, props } from './props'
 import { MapEditor } from './MapEditor'
 import { debugState } from './debugState'
 import { getFileName } from '@/global/assetLoaders'
-import { camera } from '@/global/camera'
 import { params } from '@/global/context'
 import type { Entity } from '@/global/entity'
 import { assets, ecs, levelsData, ui } from '@/global/init'
@@ -211,6 +210,8 @@ export const LevelEditor = () => {
 						}
 					})
 					onMount(async () => {
+						const camera = cameraQuery.first?.camera
+						if (!camera) return
 						debugState.enable()
 						const val = window.innerWidth
 						const ratio = window.innerHeight / window.innerWidth

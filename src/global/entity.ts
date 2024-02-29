@@ -3,7 +3,7 @@ import type { Collider, ColliderDesc, RigidBody, RigidBodyDesc } from '@dimforge
 import type { Tween } from '@tweenjs/tween.js'
 import type { With } from 'miniplex'
 import type { JSXElement } from 'solid-js'
-import type { Group, Light, Mesh, MeshPhongMaterial, Object3D, Object3DEventMap, PerspectiveCamera, Quaternion, Scene, Vector3, WebGLRenderer } from 'three'
+import type { Camera, Group, Light, Mesh, MeshPhongMaterial, Object3D, Object3DEventMap, Quaternion, Scene, Vector3, WebGLRenderer } from 'three'
 import type { BatchedRenderer, ParticleEmitter } from 'three.quarks'
 import type { OrbitControls } from 'three/examples/jsm/controls/OrbitControls'
 import type { EffectComposer } from 'three/examples/jsm/postprocessing/EffectComposer'
@@ -73,7 +73,7 @@ export interface Entity {
 	scene?: Scene
 	renderer?: WebGLRenderer
 	batchRenderer?: BatchedRenderer
-	camera?: PerspectiveCamera
+	camera?: Camera
 	controls?: OrbitControls
 	light?: Light
 	group?: Group

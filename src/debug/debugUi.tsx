@@ -1,11 +1,11 @@
 import { For, Show, createSignal, onCleanup, onMount } from 'solid-js'
-import { Color, Mesh } from 'three'
+import { Color, Mesh, OrthographicCamera, PerspectiveCamera } from 'three'
 import { LevelEditor } from './LevelEditor'
 import { SaveEditor } from './saveEditor'
 import { ToonEditor } from './toonEditor'
 import { params } from '@/global/context'
 import { ecs } from '@/global/init'
-import { renderer } from '@/global/rendering'
+import { cameraQuery, height, renderer, width } from '@/global/rendering'
 import { resetSave, updateSave } from '@/global/save'
 import { campState } from '@/global/states'
 import { entries } from '@/utils/mapFunctions'
@@ -70,9 +70,54 @@ export const DebugUi = () => {
 			renderer.setSize(window.innerWidth, window.innerHeight)
 		}
 	}
+	const removeCamera = () => {
+		const camera = cameraQuery.first
+		if (!camera) return
+		ecs.removeComponent(camera, 'camera')
+		return camera
+	}
+	const changeCameraNormal = () => {
+		const camera = removeCamera()
+		if (!camera) return
+		ecs.addComponent(camera, 'camera', new PerspectiveCamera(params.fov, window.innerWidth / window.innerHeight, 0.1, 1000))
+	}
+	const changeCameraOrtho = () => {
+		const camera = removeCamera()
+		if (!camera) return
+		ecs.addComponent(camera, 'camera', new OrthographicCamera(
+			-width / 2 / params.zoom,
+			width / 2 / params.zoom,
+			height / 2 / params.zoom,
+			-height / 2 / params.zoom,
+			0.1,
+			1000,
+		))
+	}
+	const changeZoom = (zoom: number) => {
+		params.zoom = zoom
+		const camera = cameraQuery.first
+		if (!camera) return
+		if (camera.camera instanceof PerspectiveCamera) {
+			camera.camera.zoom = window.innerWidth / window.innerHeight / params.zoom
+		}
+		if (camera.camera instanceof OrthographicCamera) {
+			camera.camera.left = -width / 2 / params.zoom
+			camera.camera.right = width / 2 / params.zoom
+			camera.camera.top = height / 2 / params.zoom
+			camera.camera.bottom = -height / 2 / params.zoom
+			camera.camera.updateProjectionMatrix()
+		}
+	}
 	return (
 		<div style={{ position: 'absolute', color: 'white' }}>
 			<Show when={showUi()}>
+				<div>
+					<div>Perspective</div>
+					<div>
+						<button onClick={changeCameraNormal}>Normal</button>
+						<button onClick={changeCameraOrtho}>Ortho</button>
+					</div>
+				</div>
 				<div>
 					Render width
 					<input
@@ -114,7 +159,7 @@ export const DebugUi = () => {
 					<input
 						type="number"
 						value={params?.zoom}
-						onChange={e => params.zoom = e.target.valueAsNumber}
+						onChange={e => changeZoom(e.target.valueAsNumber)}
 					>
 					</input>
 				</div>
