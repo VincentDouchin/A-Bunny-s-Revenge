@@ -40,7 +40,7 @@ export const doorSide = () => {
 	return door
 }
 const doorQuery = ecs.with('collider', 'door')
-const playerQuery = ecs.with('collider', 'playerControls').without('ignoreDoor')
+const playerQuery = ecs.with('collider', 'playerControls', 'currentHealth').without('ignoreDoor')
 const enemyQuery = ecs.with('faction').where(({ faction }) => faction === Faction.Enemy)
 export const collideWithDoor: System<DungeonRessources> = ({ dungeon }) => {
 	for (const door of doorQuery) {
@@ -52,7 +52,7 @@ export const collideWithDoor: System<DungeonRessources> = ({ dungeon }) => {
 			if (world.intersectionPair(door.collider, player.collider)) {
 				const nextRoom = dungeon.doors[door.door]
 				if (nextRoom) {
-					dungeonState.enable({ dungeon: nextRoom, direction: otherDirection[door.door], playerHealth: player.currentHealth })
+					dungeonState.enable({ dungeon: nextRoom, direction: otherDirection[door.door], playerHealth: player.currentHealth, firstEntry: false })
 				} else {
 					if (dungeon.type === RoomType.Boss) {
 						campState.enable({ previousState: 'dungeon' })

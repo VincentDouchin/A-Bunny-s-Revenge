@@ -10,10 +10,11 @@ import { assets, ecs } from '@/global/init'
 import { removeItem, save, updateSave } from '@/global/save'
 import { removeEntityRef } from '@/lib/hierarchy'
 import { modelColliderBundle } from '@/lib/models'
-import { playSound } from '@/lib/dialogSound'
+import { playSound } from '@/global/sounds'
+import { getWorldPosition } from '@/lib/transforms'
 
 const playerQuery = ecs.with('playerControls', 'sensorCollider', 'movementForce', 'stateMachine', 'inventory', 'inventoryId', 'inventorySize')
-const plantedSpotQuery = ecs.with('plantableSpot', 'worldPosition', 'planted')
+const plantedSpotQuery = ecs.with('plantableSpot', 'planted', 'group')
 
 export const updateCropsSave = () => {
 	updateSave((s) => {
@@ -107,9 +108,10 @@ export const harvestCrop = () => {
 				if (spot.planted.interactionContainer && maxStage(spot.planted.crop.name) === spot.planted.crop.stage) {
 					if (stateMachine.enter('picking', player)) {
 						const bundle = itemBundle(spot.planted.crop.name)
+						const position = getWorldPosition(spot.group)
 						ecs.add({
 							...bundle,
-							position: spot.worldPosition.clone().add(new Vector3(0, bundle.size.y + 5, 0)),
+							position: position.add(new Vector3(0, bundle.size.y + 5, 0)),
 						})
 						playSound(['Harvest_1', 'Harvest_2'], { volume: -12 })
 						removeEntityRef(spot, 'planted')

@@ -16,6 +16,7 @@ import { cameraQuery } from '@/global/rendering'
 import { ecs, inputManager, time, ui } from '@/global/init'
 import { MenuType } from '@/global/entity'
 import type { Entity } from '@/global/entity'
+import { getWorldPosition } from '@/lib/transforms'
 
 const bellowQuery = ecs.with('menuType', 'oven').where(({ menuType }) => menuType === MenuType.OvenMinigame)
 
@@ -30,8 +31,9 @@ export const OvenMinigameUi = ({ player }: FarmUiProps) => {
 					for (const camera of cameraQuery) {
 						ecs.addComponent(camera, 'cameraOffset', new Vector3(0, 30, 80).applyQuaternion(bellow.oven.rotation!))
 					}
+					const position = getWorldPosition(bellow.oven.group!)
 					targetEntity = ecs.add({
-						worldPosition: bellow.oven.worldPosition!.clone().add(new Vector3(0, 10, 0)),
+						worldPosition: position.add(new Vector3(0, 10, 0)),
 						cameratarget: true,
 					})
 					ecs.removeComponent(player, 'cameratarget')

@@ -148,7 +148,7 @@ export const InventoryUi = ({ player }: FarmUiProps) => {
 			removeItemFromPlayer({ name: item.name, quantity: 1 })
 			for (const mod of mods) {
 				updateSave(s => s.modifiers.push(mod))
-				addModifier(mod, player)
+				addModifier(mod, player, true)
 			}
 		}
 	}

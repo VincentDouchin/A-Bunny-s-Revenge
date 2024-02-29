@@ -83,3 +83,9 @@ export const savePlayerFromTheEmbraceOfTheVoid = () => {
 		player.body.setTranslation({ x: 0, y: 10, z: 0 }, true)
 	}
 }
+export const stopPlayer = () => {
+	const player = playerQuery.first
+	if (player) {
+		player.movementForce.setScalar(0)
+	}
+}

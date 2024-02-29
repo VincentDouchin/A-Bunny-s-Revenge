@@ -13,7 +13,7 @@ import type { System } from '@/lib/state'
 import { stateBundle } from '@/lib/stateMachine'
 import { Stat, addModifier } from '@/lib/stats'
 
-export const playerBundle = (health = 5) => {
+export const playerBundle = (health: number, addHealth: boolean) => {
 	const model = assets.characters.BunnydAnim
 	model.scene.traverse((node) => {
 		if (node instanceof Mesh && node.material.map) {
@@ -53,7 +53,7 @@ export const playerBundle = (health = 5) => {
 		}),
 	} as const satisfies Entity
 	for (const mod of save.modifiers) {
-		addModifier(mod, player)
+		addModifier(mod, player, addHealth)
 	}
 	return player
 }
@@ -66,7 +66,7 @@ export const spawnCharacter: System<FarmRessources> = ({ previousState }) => {
 		updateSave(s => s.modifiers = [])
 	}
 	ecs.add({
-		...playerBundle(),
+		...playerBundle(5, true),
 		position,
 		rotation,
 	})

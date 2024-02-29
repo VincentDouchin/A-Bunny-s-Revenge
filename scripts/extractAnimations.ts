@@ -8,7 +8,7 @@ import type { PluginOption } from 'vite'
 import { getFileName } from './generateAssetNamesPlugin'
 
 const launchScript = async (filePath?: string) => {
-	if (!filePath || ((filePath.includes('assets\\') && filePath.split('.').at(-1) === 'glb'))) {
+	if (!filePath || ((filePath.includes('assets') && filePath.split('.').at(-1) === 'glb'))) {
 		let animations = `
 			interface Animations {
 		`

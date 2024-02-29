@@ -37,7 +37,7 @@ const spawnFromCanvas = (level: Level, image: HTMLCanvasElement, scale: number, 
 }
 
 export const spawnTrees = (level: Level, parent: Entity) => {
-	const trees = Object.values(assets.trees).map(instanceMesh)
+	const trees = Object.values(assets.trees).map(x => instanceMesh(x, true))
 	const treesInstances: InstanceHandle[] = []
 	const noise = createNoise3D(() => 0)
 	spawnFromCanvas(level, level.trees, SCALE, (val, x, y, displacement) => {
@@ -75,8 +75,8 @@ export const spawnTrees = (level: Level, parent: Entity) => {
 }
 
 export const spawnGrass = (level: Level, parent: Entity) => {
-	const grass = Object.entries(assets.models).filter(([name]) => name.includes('Grass')).map(x => instanceMesh(x[1]))
-	const flowers = Object.entries(assets.models).filter(([name]) => name.includes('Flower')).map(x => instanceMesh(x[1]))
+	const grass = Object.entries(assets.models).filter(([name]) => name.includes('Grass')).map(x => instanceMesh(x[1], true))
+	const flowers = Object.entries(assets.models).filter(([name]) => name.includes('Flower')).map(x => instanceMesh(x[1], true))
 	const noise = createNoise2D(() => 0)
 	const noise2 = createNoise2D(() => 100)
 	const noiseX = createNoise2D(() => 200)

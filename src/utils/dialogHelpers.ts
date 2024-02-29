@@ -10,11 +10,11 @@ import { addTag } from '@/lib/hierarchy'
 
 import type { Item } from '@/constants/items'
 import { addItem, removeItem, save, updateSave } from '@/global/save'
-import { playerInputMap } from '@/global/inputMaps'
 
-const playerQuery = ecs.with('player', 'position', 'collider', 'movementForce')
+const playerQuery = ecs.with('player', 'position', 'collider')
+const movingPlayerQuery = playerQuery.with('movementForce')
 const houseQuery = ecs.with('npcName', 'position', 'collider', 'rotation').where(({ npcName }) => npcName === 'Grandma')
-const doorQuery = ecs.with('npcName', 'worldPosition', 'collider').where(({ npcName }) => npcName === 'door')
+const doorQuery = ecs.with('npcName', 'collider').where(({ npcName }) => npcName === 'door')
 const setSensor = <T extends With<Entity, 'collider'>>(query: Query<T>, sensor: boolean) => {
 	for (const { collider } of query) {
 		collider.setSensor(sensor)
@@ -22,18 +22,17 @@ const setSensor = <T extends With<Entity, 'collider'>>(query: Query<T>, sensor: 
 }
 export const lockPlayer = () => {
 	for (const player of playerQuery) {
-		player.movementForce.setScalar(0)
-		ecs.removeComponent(player, 'playerControls')
+		ecs.removeComponent(player, 'movementForce')
 	}
 }
 export const unlockPlayer = () => {
 	for (const player of playerQuery) {
-		ecs.update(player, playerInputMap())
+		ecs.addComponent(player, 'movementForce', new Vector3())
 	}
 }
 export const movePlayerTo = (dest: Vector3) => {
 	return new Promise<void>((resolve) => {
-		for (const player of playerQuery) {
+		for (const player of movingPlayerQuery) {
 			player.movementForce = dest.clone().sub(player.position).normalize()
 			coroutines.add(function* () {
 				while (player.position.distanceTo(dest) > 2) {

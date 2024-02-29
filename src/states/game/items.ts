@@ -13,7 +13,7 @@ const itemsQuery = ecs.with('item', 'position', 'model', 'collider', 'itemLabel'
 export const itemBundle = (item: items) => {
 	const model = assets.items[item].model.clone()
 	model.scale.setScalar(5)
-	const bundle = modelColliderBundle(model, RigidBodyType.Dynamic, true)
+	const bundle = modelColliderBundle(model, RigidBodyType.Dynamic, true, new Vector3(10, 10, 10))
 	bundle.model.castShadow = true
 	bundle.colliderDesc.setMass(8)
 	bundle.model.renderOrder = 2

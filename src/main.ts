@@ -23,7 +23,7 @@ import { closePlayerInventory, disableInventoryState, enableInventoryState, inte
 import { dayNight } from './states/game/dayNight'
 import { talkToNPC } from './states/game/dialog'
 import { bobItems, collectItems, popItems, stopItems } from './states/game/items'
-import { applyMove, canPlayerMove, movePlayer, playerSteps, savePlayerFromTheEmbraceOfTheVoid, savePlayerPosition } from './states/game/movePlayer'
+import { applyMove, canPlayerMove, movePlayer, playerSteps, savePlayerFromTheEmbraceOfTheVoid, savePlayerPosition, stopPlayer } from './states/game/movePlayer'
 import { pauseGame } from './states/game/pauseGame'
 import { beeFSM, ovenFSM, pandaFSM, playerFSM, shagaFSM } from './states/game/playerFSM'
 import { target } from './states/game/sensor'
@@ -31,6 +31,7 @@ import { allowDoorCollision, collideWithDoor, collideWithDoorCamp } from './stat
 import { spawnDungeon, spawnFarm, spawnLevelData, updateTimeUniforms } from './states/game/spawnLevel'
 import { losingBattle, spawnCharacter } from './states/game/spawnPlayer'
 import { touchItem } from './states/game/touchItem'
+import { playCloseSound, playOpenSound } from './states/pause/pause'
 import { setupGame } from './states/setup/setupGame'
 import { UI } from './ui/UI'
 import { range } from './utils/mapFunctions'
@@ -60,7 +61,9 @@ campState
 	.onUpdate(runIf(canPlayerMove, plantSeed, harvestCrop, openPlayerInventory, savePlayerPosition))
 	.onExit(despawnOfType('map'))
 openMenuState
+	.onEnter(playOpenSound, stopPlayer)
 	.addSubscriber(disableInventoryState)
+	.onExit(playCloseSound)
 	.onUpdate(closePlayerInventory)
 genDungeonState
 	.onEnter(generateDungeon)

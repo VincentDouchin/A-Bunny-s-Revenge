@@ -5,6 +5,7 @@ import { camera } from './camera'
 import { params } from './context'
 import { ecs } from './init'
 import { getDepthShader, getSobelShader } from '@/shaders/EdgePass'
+import { throttle } from '@/lib/state'
 
 export const scene = new Scene()
 export const renderer = new WebGLRenderer({ alpha: false })
@@ -54,7 +55,7 @@ export const rendererQuery = ecs.with('renderer')
 export const sceneQuery = ecs.with('scene')
 export const cameraQuery = ecs.with('camera')
 
-export const render = () => {
+export const render = throttle(1 / 60, () => {
 	renderer.render(scene, camera)
 	if (params.pixelation) {
 		renderer.setRenderTarget(depthTarget)
@@ -66,7 +67,7 @@ export const render = () => {
 		renderer.setRenderTarget(null)
 	}
 	cssRenderer.render(scene, camera)
-}
+})
 
 const controlsQuery = ecs.with('controls')
 export const updateControls = () => {

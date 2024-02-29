@@ -1,8 +1,8 @@
 import type { models } from '@assets/assets'
 import { ColliderDesc, RigidBodyDesc, RigidBodyType } from '@dimforge/rapier3d-compat'
 import type { With } from 'miniplex'
-import { Color, Group, Mesh, MeshPhongMaterial, PointLight, Quaternion, Vector3 } from 'three'
 import type { Object3D, Object3DEventMap } from 'three'
+import { Color, Group, Mesh, MeshPhongMaterial, PointLight, Quaternion, Vector3 } from 'three'
 
 import { CSS2DObject } from 'three/examples/jsm/renderers/CSS2DRenderer'
 import type { EntityData } from './LevelEditor'
@@ -15,13 +15,12 @@ import { save } from '@/global/save'
 import { type DungeonRessources, type FarmRessources, campState } from '@/global/states'
 import type { direction } from '@/lib/directions'
 import { modelColliderBundle } from '@/lib/models'
-import { stateBundle } from '@/lib/stateMachine'
 import { doorClosed } from '@/particles/doorClosed'
+import { RoomType } from '@/states/dungeon/generateDungeon'
 import { cropBundle } from '@/states/farm/farming'
 import { openMenu } from '@/states/farm/openInventory'
 import { doorSide } from '@/states/game/spawnDoor'
 import { playerBundle } from '@/states/game/spawnPlayer'
-import { RoomType } from '@/states/dungeon/generateDungeon'
 
 export const customModels = {
 	door: doorSide,
@@ -105,10 +104,6 @@ export const props: PlacableProp<propNames>[] = [
 				...menuInputMap(),
 				recipesQueued: [],
 				ovenAnimator: new Animator(entity.model, assets.models.BunnyOvenPacked.animations),
-				...stateBundle<'doorOpening' | 'idle'>('idle', {
-					idle: ['doorOpening'],
-					doorOpening: ['idle'],
-				}),
 				minigameContainer,
 				interactable: Interactable.Cook,
 				onPrimary: openMenu(MenuType.Oven),
@@ -211,7 +206,7 @@ export const props: PlacableProp<propNames>[] = [
 				const isStart = ressources.dungeon.type === RoomType.Entrance && ressources.firstEntry
 				if (isStart ? ressources.dungeon.doors[data.data.direction] === null : data.data.direction === ressources.direction) {
 					ecs.add({
-						...playerBundle(ressources.playerHealth),
+						...playerBundle(ressources.playerHealth, ressources.firstEntry),
 						position: new Vector3(...data.position).add(new Vector3(0, 0, -20).applyQuaternion(entity.rotation)),
 						rotation: entity.rotation.clone().multiply(new Quaternion().setFromAxisAngle(new Vector3(0, 1, 0), Math.PI)),
 					})

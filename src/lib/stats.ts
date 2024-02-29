@@ -67,8 +67,8 @@ export class Stat {
 	}
 }
 
-export const addModifier = <S extends ComponentsOfType<Stat>>(mod: Modifier<S>, entity: With<Entity, S>) => {
-	if (mod.name === 'maxHealth' && entity.currentHealth && entity.maxHealth) {
+export const addModifier = <S extends ComponentsOfType<Stat>>(mod: Modifier<S>, entity: With<Entity, S>, addHealth: boolean) => {
+	if (mod.name === 'maxHealth' && entity.currentHealth && entity.maxHealth && addHealth) {
 		const old = entity.maxHealth.value
 		entity.maxHealth.addModifier(mod)
 		const diff = entity.maxHealth.value - old

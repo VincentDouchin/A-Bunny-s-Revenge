@@ -35,7 +35,7 @@ export interface InstanceHandle {
 	setUniform: (name: string, value: any) => void
 }
 
-export const instanceMesh = <T extends Material>(obj: GLTF) => {
+export const instanceMesh = <T extends Material>(obj: GLTF, castShadow = true) => {
 	const intanceParams: Matrix4[] = []
 	const meshes: InstancedUniformsMesh<T>[] = []
 	const group = new Group()
@@ -70,7 +70,7 @@ export const instanceMesh = <T extends Material>(obj: GLTF) => {
 			}
 		})
 		for (const mesh of meshes) {
-			mesh.castShadow = true
+			mesh.castShadow = castShadow
 			group.add(mesh)
 			for (let i = 0; i < intanceParams.length; i++) {
 				const matrix = intanceParams[i]

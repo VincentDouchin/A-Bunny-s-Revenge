@@ -14,7 +14,7 @@ import { addTag } from '@/lib/hierarchy'
 import { getWorldPosition } from '@/lib/transforms'
 import type { FarmUiProps } from '@/ui/types'
 import { cauldronSparkles } from '@/particles/cauldronSparkles'
-import { playSound } from '@/lib/dialogSound'
+import { playSound } from '@/global/sounds'
 
 const cauldronQuery = ecs.with('menuType', 'interactionContainer', 'group', 'rotation', 'recipesQueued', 'spoon').where(({ menuType }) => menuType === MenuType.CauldronGame)
 export const CauldronMinigameUi = ({ player }: FarmUiProps) => {

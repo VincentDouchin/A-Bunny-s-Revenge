@@ -246,5 +246,5 @@ export const genDungeon = (roomsAmount: number, npc: boolean) => {
 }
 export const generateDungeon = () => {
 	const dungeon = genDungeon(5, true).find(room => room.type === RoomType.Entrance)!
-	dungeonState.enable({ dungeon, direction: 'south', firstEntry: true })
+	dungeonState.enable({ dungeon, direction: 'south', firstEntry: true, playerHealth: 5 })
 }
