@@ -27,15 +27,19 @@ export const spawnChest = () => {
 			chestEntity.chestAnimator.playClamped('chest_open')
 			const seeds = entries(itemsData).filter(([_, data]) => data.seed).map(([name]) => name)
 			const items = range(1, between(3, 5), () => getRandom(seeds))
+			if (Math.random() > 0.5) {
+				items.push('egg')
+			}
 			await sleep(200)
-			for (const seed of items) {
+			for (let i = 0; i < items.length; i++) {
+				const seed = items[i]
 				await sleep(100)
-				const direction = Math.random() * Math.PI * 2
+				const angle = Math.PI * i / (items.length - 1)
 				ecs.add({
 					parent: chestEntity,
 					...itemBundle(seed),
 					position: new Vector3(),
-					popDirection: new Vector3(Math.cos(direction), 1, -Math.abs(Math.sin(direction))).multiplyScalar(2),
+					popDirection: new Vector3(Math.cos(angle), 1, -Math.sin(angle)).multiplyScalar(2),
 				})
 			}
 		}).easing(Easing.Exponential.Out),

@@ -48,4 +48,13 @@ export const recipes: Array<Recipe> = [
 		output: { name: 'slime_dumpling', quantity: 1 },
 		processor: MenuType.Oven,
 	},
+	{
+		input: [
+			{ name: 'egg', quantity: 3 },
+			{ name: 'milk', quantity: 2 },
+			{ name: 'carrot', quantity: 3 },
+		],
+		output: { name: 'carrot_cake', quantity: 2 },
+		processor: MenuType.Oven,
+	},
 ]
