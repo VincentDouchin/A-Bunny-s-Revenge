@@ -170,7 +170,8 @@
         "carrot",
         "beet",
         "tomato",
-        "lettuce"
+        "lettuce",
+        "pumpkin"
       ],
       "type": "string"
     },
@@ -189,7 +190,10 @@
         "lettuce",
         "lettuce_seeds",
         "magic_bean",
+        "milk",
         "parsley",
+        "pumpkin",
+        "pumpkin_seeds",
         "roasted_carrot",
         "slime_bread",
         "slime_dough",

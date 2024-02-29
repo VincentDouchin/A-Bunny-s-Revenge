@@ -85,6 +85,7 @@ export const itemsData: Record<items, ItemData> = {
 		name: 'Beetroot Salad',
 		meal: [
 			createModifier('strength', 2, ModStage.Base, ModType.Add, false),
+			createModifier('critDamage', -0.05, ModStage.Base, ModType.Add, false),
 		],
 	},
 	ham: {
@@ -101,6 +102,9 @@ export const itemsData: Record<items, ItemData> = {
 	},
 	slime_bread: {
 		name: 'Slime Bread',
+		meal: [
+			createModifier('critChance', 0.5, ModStage.Total, ModType.Add, false),
+		],
 	},
 	slime_dumpling: {
 		name: 'Slime Dumpling',
@@ -110,6 +114,13 @@ export const itemsData: Record<items, ItemData> = {
 	},
 	milk: {
 		name: 'Milk',
+	},
+	pumpkin_seeds: {
+		name: 'Pumpkin seeds',
+		seed: 'pumpkin',
+	},
+	pumpkin: {
+		name: 'Pumpkin',
 	},
 
 }

@@ -27,21 +27,32 @@ export const flash = (entity: With<Entity, 'model'>) => {
 }
 const entities = ecs.with('faction', 'position', 'rotation', 'body', 'collider', 'movementForce', 'state', 'stateMachine', 'sensorCollider', 'currentHealth', 'model', 'size', 'group')
 
+const calculateDamage = (entity: With<Entity, 'strength' | 'critChance' | 'critDamage'>) => {
+	let damage = entity.strength.value
+	const isCrit = Math.random() < entity.critChance.value
+	if (isCrit) {
+		damage += entity.strength.value * entity.critDamage.value
+	}
+	return [damage, isCrit] as const
+}
+
 const enemiesQuery = entities.where(({ faction }) => faction === Faction.Enemy)
-const playerQuery = entities.with('playerControls', 'strength').where(({ faction }) => faction === Faction.Player)
+const playerQuery = entities.with('playerControls', 'strength', 'critChance', 'critDamage').where(({ faction }) => faction === Faction.Player)
 export const playerAttack = () => {
-	for (const { playerControls, sensorCollider, position, strength } of playerQuery) {
+	for (const player of playerQuery) {
+		const { playerControls, sensorCollider, position } = player
 		if (playerControls.get('primary').justPressed) {
 			for (const enemy of enemiesQuery) {
 				if (world.intersectionPair(sensorCollider, enemy.collider)) {
 					if (enemy.stateMachine.enter('hit', enemy)) {
 						// ! damage
-						enemy.currentHealth -= strength.value
+						const [damage, crit] = calculateDamage(player)
+						enemy.currentHealth -= damage
 						const emitter = impact().emitter
 						emitter.position.y = 5
 						ecs.update(enemy, { emitter })
 
-						spawnDamageNumber(strength.value, enemy)
+						spawnDamageNumber(damage, enemy, crit)
 						// ! knockback
 						const force = position.clone().sub(enemy.position).normalize().multiplyScalar(-50000)
 						enemy.body.applyImpulse(force, true)

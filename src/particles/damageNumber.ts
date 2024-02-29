@@ -7,10 +7,10 @@ import { ecs } from '@/global/init'
 import type { Entity } from '@/global/entity'
 import { addTweenTo } from '@/lib/updateTween'
 
-export const spawnDamageNumber = (amount: number, enemy: With<Entity, 'position' | 'size'>) => {
+export const spawnDamageNumber = (amount: number, enemy: With<Entity, 'position' | 'size'>, crit: boolean) => {
 	const el = document.createElement('div')
-	el.textContent = String(Math.round(amount))
-	el.style.color = 'red'
+	el.textContent = String(Math.round(amount * 10) / 10)
+	el.style.color = crit ? 'red' : 'yellow'
 	const mesh = new CSS2DObject(el)
 	const y = enemy.size.y
 	const top = y + between(2, 4)
