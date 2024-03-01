@@ -57,4 +57,24 @@ export const recipes: Array<Recipe> = [
 		output: { name: 'carrot_cake', quantity: 2 },
 		processor: MenuType.Oven,
 	},
+	{
+		input: [{ name: 'wheat', quantity: 1 }],
+		output: { name: 'flour', quantity: 1 },
+		processor: MenuType.Oven,
+	},
+	{
+		input: [{ name: 'milk', quantity: 2 }],
+		output: { name: 'butter', quantity: 1 },
+		processor: MenuType.Oven,
+	},
+	{
+		input: [
+			{ name: 'butter', quantity: 1 },
+			{ name: 'flour', quantity: 2 },
+			{ name: 'pumpkin', quantity: 1 },
+			{ name: 'cinnamon', quantity: 1 },
+		],
+		output: { name: 'pumpkin_bread', quantity: 1 },
+		processor: MenuType.Oven,
+	},
 ]

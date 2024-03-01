@@ -78,16 +78,11 @@ const cropsLoader = async <K extends string>(glob: Glob) => {
 	const models = await typeGlob<crops>(glob)(loadGLBAsToon({ material: overrideCropsColor }))
 	const grouped = groupByObject(models, key => key.split('_')[0].toLowerCase() as K)
 	return mapValues(grouped, (group) => {
-		let crop: GLTF | null = null
 		const stages = new Array<GLTF>()
 		for (const [key, model] of entries(group) as [string, GLTF][]) {
-			if (key.toLowerCase().includes('crop')) {
-				crop = model
-			} else {
-				stages[Number(key.split('_')[1]) - 1] = model
-			}
+			stages[Number(key.split('_')[1]) - 1] = model
 		}
-		return { crop: crop!, stages }
+		return { stages }
 	})
 }
 

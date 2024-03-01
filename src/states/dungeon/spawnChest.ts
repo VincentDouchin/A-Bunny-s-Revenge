@@ -30,6 +30,9 @@ export const spawnChest = () => {
 			if (Math.random() > 0.5) {
 				items.push('egg')
 			}
+			if (Math.random() > 0.5) {
+				items.push('cinnamon')
+			}
 			await sleep(200)
 			for (let i = 0; i < items.length; i++) {
 				const seed = items[i]

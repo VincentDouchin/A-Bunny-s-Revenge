@@ -128,5 +128,24 @@ export const itemsData: Record<items, ItemData> = {
 	carrot_cake: {
 		name: 'Carrot cake',
 	},
+	cinnamon: {
+		name: 'Cinnamon',
+	},
+	wheat_seeds: {
+		name: 'Wheat seeds',
+		seed: 'wheat',
+	},
+	wheat: {
+		name: 'Wheat',
+	},
+	flour: {
+		name: 'Flour',
+	},
+	butter: {
+		name: 'Butter',
+	},
+	pumpkin_bread: {
+		name: 'Pumpkin bread',
+	},
 
 }

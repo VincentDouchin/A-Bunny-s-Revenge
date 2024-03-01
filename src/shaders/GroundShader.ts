@@ -35,7 +35,7 @@ export class MaterialExtension<U extends Record<string, any>> {
 	}
 }
 
-export const extendMaterial = <M extends Constructor<Material>, E extends MaterialExtension<any>[]>(Base: M, extensions: E, options?: { debug: boolean }) => {
+export const extendMaterial = <M extends Constructor<Material>, E extends MaterialExtension<any>[]>(Base: M, extensions: E, options?: { debug: 'fragment' | 'vertex' }) => {
 	return class extends Base {
 		uniforms = {} as any
 		customProgramCacheKey() {
@@ -69,12 +69,19 @@ export const extendMaterial = <M extends Constructor<Material>, E extends Materi
 					shader.defines[define] = value
 				}
 			}
-			if (options?.debug) {
+			if (options?.debug === 'fragment') {
 				shader.fragmentShader = shader.fragmentShader.replaceAll(/#include\s*<([^>]+)>/g, (_match, part) => {
 					return ShaderChunk[part as keyof typeof ShaderChunk]
 				})
 				// eslint-disable-next-line no-console
 				console.log(shader.fragmentShader)
+			}
+			if (options?.debug === 'vertex') {
+				// shader.vertexShader = shader.vertexShader.replaceAll(/#include\s*<([^>]+)>/g, (_match, part) => {
+				// 	return ShaderChunk[part as keyof typeof ShaderChunk]
+				// })
+				// eslint-disable-next-line no-console
+				console.log(shader.vertexShader)
 			}
 		}
 	}
@@ -172,14 +179,27 @@ const groundExtension = (image: HTMLCanvasElement, x: number, y: number) => {
 	`),
 		) }
 
-const treeExtension = new MaterialExtension({ playerZ: 0 }).frag(
-	addUniform('playerZ', 'float'),
-	replace('gl_FragColor = vec4(outgoingLight2,opacity);', /* glsl */`
+const treeExtension = new MaterialExtension({ playerZ: 0, time: 0 })
+	.frag(
+		addUniform('playerZ', 'float'),
+		replace('gl_FragColor = vec4(outgoingLight2,opacity);', /* glsl */`
 	vec2 view = vViewPosition.xy ;
 	float new_opacity = playerZ == 1. ? smoothstep(15.,25.,abs(length(view))) : opacity;
 	gl_FragColor = vec4(outgoingLight2, new_opacity);
 	`),
-)
+	)
+	.vert(
+		importLib(noise),
+		addUniform('time', 'float'),
+		addUniform('time', 'float'),
+		unpack('project_vertex'),
+		replace('mvPosition = instanceMatrix * mvPosition;', /* glsl */`
+		vec4 position2 = vec4( transformed, 1.0 ) * instanceMatrix;
+		float noise = cnoise(vec3(position2.xy,time));
+
+		mvPosition = instanceMatrix * (mvPosition + vec4(noise*mvPosition.y/4.,0.,noise*mvPosition.y/4.,0.))  ;
+		`),
+	)
 const characterExtension = new MaterialExtension({ flash: 0 }).frag(
 	addUniform('flash', 'float'),
 	override('gl_FragColor', `
@@ -213,4 +233,4 @@ export const ToonMaterial = extendMaterial(MeshPhongMaterial, [toonExtension])
 export const CharacterMaterial = extendMaterial(MeshPhongMaterial, [toonExtension, characterExtension])
 export const GroundMaterial = (image: HTMLCanvasElement, x: number, y: number) => extendMaterial(MeshPhongMaterial, [toonExtension, groundExtension(image, x, y)])
 export const WaterMaterial = (size: Vec2) => extendMaterial(MeshPhongMaterial, [toonExtension, waterExtension(size)])
-export const TreeMaterial = extendMaterial(MeshPhongMaterial, [toonExtension, treeExtension])
+export const TreeMaterial = extendMaterial(MeshPhongMaterial, [toonExtension, treeExtension], { debug: 'vertex' })

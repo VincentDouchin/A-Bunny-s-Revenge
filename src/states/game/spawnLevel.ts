@@ -61,6 +61,7 @@ export const spawnTrees = (level: Level, parent: Entity) => {
 				bodyDesc: RigidBodyDesc.fixed().lockRotations(),
 				colliderDesc: ColliderDesc.cylinder(treeSize.y / 2, treeSize.x / 2),
 				tree: true,
+				withTimeUniform: true,
 				parent,
 			})
 		}
@@ -263,10 +264,13 @@ export const spawnLevelData: System<FarmRessources | DungeonRessources> = (resso
 		}
 	}
 }
-const withTimeUniformQuery = ecs.with('withTimeUniform', 'model')
+const withTimeUniformQuery = ecs.with('withTimeUniform')
 export const updateTimeUniforms = () => {
 	for (const entity of withTimeUniformQuery) {
 		if (entity.model instanceof Mesh)
 			entity.model.material.uniforms.time.value = time.elapsed / 1000
+		if (entity.instanceHandle) {
+			entity.instanceHandle.setUniform('time', time.elapsed / 1000)
+		}
 	}
 }

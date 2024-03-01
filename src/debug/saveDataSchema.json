@@ -171,7 +171,8 @@
         "beet",
         "tomato",
         "lettuce",
-        "pumpkin"
+        "pumpkin",
+        "wheat"
       ],
       "type": "string"
     },
@@ -181,8 +182,10 @@
         "beetroot_salad",
         "beet_seeds",
         "carrot",
+        "carrot_cake",
         "carrot_seeds",
         "carrot_soup",
+        "cinnamon",
         "egg",
         "ham",
         "ham_honey",
@@ -201,7 +204,8 @@
         "slime_dumpling",
         "tomato",
         "tomato_seeds",
-        "tomato_soup"
+        "tomato_soup",
+        "wheat_seeds"
       ],
       "type": "string"
     }
