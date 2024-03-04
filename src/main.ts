@@ -15,7 +15,7 @@ import { transformsPlugin } from './lib/transforms'
 import { tweenPlugin } from './lib/updateTween'
 import { enemyAttackPlayer, playerAttack, spawnDrops } from './states/dungeon/battle'
 import { removeEnemyFromSpawn } from './states/dungeon/enemies'
-import { genDungeon, generateDungeon } from './states/dungeon/generateDungeon'
+import { generateDungeon } from './states/dungeon/generateDungeon'
 import { killAnimation, killEntities } from './states/dungeon/health'
 import { endBattleSpawnChest } from './states/dungeon/spawnChest'
 import { harvestCrop, initPlantableSpotsInteractions, interactablePlantableSpot, plantSeed, updateCropsSave } from './states/farm/farming'
@@ -34,7 +34,6 @@ import { touchItem } from './states/game/touchItem'
 import { playCloseSound, playOpenSound } from './states/pause/pause'
 import { setupGame } from './states/setup/setupGame'
 import { UI } from './ui/UI'
-import { range } from './utils/mapFunctions'
 
 coreState
 	.addPlugins(debugPlugin)
@@ -81,7 +80,3 @@ const animate = async () => {
 }
 
 animate()
-
-for (const _ of range(0, 100)) {
-	genDungeon(5, true)
-}
