@@ -179,7 +179,7 @@ const groundExtension = (image: HTMLCanvasElement, x: number, y: number) => {
 	`),
 		) }
 
-const treeExtension = new MaterialExtension({ playerZ: 0, time: 0 })
+const treeExtension = new MaterialExtension({ playerZ: 0, time: 0, pos: new Vector2() })
 	.frag(
 		addUniform('playerZ', 'float'),
 		replace('gl_FragColor = vec4(outgoingLight2,opacity);', /* glsl */`
@@ -191,13 +191,13 @@ const treeExtension = new MaterialExtension({ playerZ: 0, time: 0 })
 	.vert(
 		importLib(noise),
 		addUniform('time', 'float'),
-		addUniform('time', 'float'),
+		addUniform('pos', 'vec2'),
 		unpack('project_vertex'),
 		replace('mvPosition = instanceMatrix * mvPosition;', /* glsl */`
 		vec4 position2 = vec4( transformed, 1.0 ) * instanceMatrix;
-		float noise = cnoise(vec3(position2.xy,time));
-
-		mvPosition = instanceMatrix * (mvPosition + vec4(noise*mvPosition.y/4.,0.,noise*mvPosition.y/4.,0.))  ;
+		float noise = cnoise(vec3(pos.xy,time));
+		float height_factor = mvPosition.y/10.;
+		mvPosition = instanceMatrix * (mvPosition + vec4(sin(noise)*height_factor,0.,cos(noise)*height_factor,0.))  ;
 		`),
 	)
 const characterExtension = new MaterialExtension({ flash: 0 }).frag(

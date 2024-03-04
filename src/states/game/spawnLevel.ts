@@ -1,7 +1,7 @@
 import { ColliderDesc, RigidBodyDesc, RigidBodyType } from '@dimforge/rapier3d-compat'
 import { between } from 'randomish'
 import { createNoise2D, createNoise3D } from 'simplex-noise'
-import type { Vector4Like } from 'three'
+import type { Vec2, Vector4Like } from 'three'
 import { CanvasTexture, Euler, Group, Mesh, PlaneGeometry, Quaternion, Vector3 } from 'three'
 import { encounters } from '../dungeon/encounters'
 import { enemyBundle } from '../dungeon/enemies'
@@ -40,6 +40,7 @@ export const spawnTrees = (level: Level, parent: Entity) => {
 	const trees = Object.values(assets.trees).map(x => instanceMesh(x, true))
 	const treesInstances: InstanceHandle[] = []
 	const noise = createNoise3D(() => 0)
+	const treeMap = new Map<Vec2, InstanceHandle>()
 	spawnFromCanvas(level, level.trees, SCALE, (val, x, y, displacement) => {
 		if (val.x === 255 || val.y === 255) {
 			const position = new Vector3(
@@ -51,6 +52,7 @@ export const spawnTrees = (level: Level, parent: Entity) => {
 			const treeGenerator = trees[Math.floor(trees.length * Math.abs(Math.sin((x + y) * 50 * (x - y))))]
 			const instanceHandle = treeGenerator.addAt(position, size, new Euler(0, noise(x, y, x), 0))
 			if (val.x === 255) treesInstances.push(instanceHandle)
+			treeMap.set(position, instanceHandle)
 			const treeSize = getSize(treeGenerator.glb.scene).multiplyScalar(size)
 			ecs.add({
 				inMap: true,
@@ -72,6 +74,9 @@ export const spawnTrees = (level: Level, parent: Entity) => {
 	}
 	for (const treesInstance of treesInstances) {
 		treesInstance.setUniform('playerZ', 1)
+	}
+	for (const [pos, tree] of treeMap.entries()) {
+		tree.setUniform('pos', pos)
 	}
 }
 
