@@ -66,7 +66,7 @@ export const InteractionUi = ({ player }: {
 					</Transition>
 				))
 				return (
-					<Show when={content.toArray().length}>
+					<Show when={content.toArray().length && entity.interactionContainer?.element}>
 						<Portal mount={entity.interactionContainer.element}>
 							{content()}
 						</Portal>

@@ -31,12 +31,17 @@ export const cropBundle = (grow: boolean, crop: { name: crops, stage: number }) 
 	const model = assets.crops[crop.name].stages[stage].scene.clone()
 	model.scale.setScalar(10)
 	const hole = assets.models.plantedHole.scene.clone()
-	hole.scale.setScalar(0.1)
-	model.add(hole)
 	const modelBundle = modelColliderBundle(model, RigidBodyType.Fixed, true, Sizes.small)
 	const bundle: With<Entity, 'crop'> = {
 		crop: { name: crop.name, stage },
 		...modelBundle,
+		withChildren(parent) {
+			ecs.add({
+				parent,
+				position: new Vector3(),
+				model: hole,
+			})
+		},
 	}
 	if (stage === 0) {
 		modelBundle.model.scale.setScalar(0)

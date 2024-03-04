@@ -13,8 +13,8 @@ import type { System } from '@/lib/state'
 import { stateBundle } from '@/lib/stateMachine'
 import { Stat, addModifier } from '@/lib/stats'
 
-export const playerBundle = (health: number, addHealth: boolean) => {
-	const model = assets.characters.BunnydAnim
+export const playerBundle = (dungeon: boolean, health: number, addHealth: boolean) => {
+	const model = dungeon ? assets.characters.BunnyWithWeapon : assets.characters.Bunny
 	model.scene.traverse((node) => {
 		if (node instanceof Mesh && node.material.map) {
 			node.material.map.colorSpace = LinearSRGBColorSpace
@@ -43,14 +43,19 @@ export const playerBundle = (health: number, addHealth: boolean) => {
 		critDamage: new Stat(0.20),
 		lastStep: { right: false, left: false },
 		...healthBundle(5, health),
-		...stateBundle<'idle' | 'running' | 'picking' | 'hit' | 'dying' | 'dead'>('idle', {
-			idle: ['running', 'picking', 'hit'],
-			running: ['idle', 'hit'],
+		...stateBundle<'idle' | 'running' | 'picking' | 'hit' | 'dying' | 'dead' | 'attacking'>('idle', {
+			idle: ['running', 'picking', 'hit', 'attacking'],
+			running: ['idle', 'hit', 'attacking'],
 			picking: ['idle'],
 			hit: ['idle', 'dying'],
 			dying: ['dead'],
+			attacking: ['idle', 'dying'],
 			dead: [],
 		}),
+		combo: {
+			lastAttack: 0,
+			heavyAttack: 0,
+		},
 	} as const satisfies Entity
 	for (const mod of save.modifiers) {
 		addModifier(mod, player, addHealth)
@@ -66,7 +71,7 @@ export const spawnCharacter: System<FarmRessources> = ({ previousState }) => {
 		updateSave(s => s.modifiers = [])
 	}
 	ecs.add({
-		...playerBundle(5, true),
+		...playerBundle(false, 5, true),
 		position,
 		rotation,
 	})
@@ -77,3 +82,11 @@ export const losingBattle = () => playerQuery.onEntityRemoved.subscribe((e) => {
 	openMenuState.enable()
 	ecs.add({ inMap: true, position: e.position, cameratarget: true })
 })
+
+export const debugPlayer = () => {
+	for (const player of ecs.with('playerControls')) {
+		if (player.playerControls.get('primary').justPressed) {
+			// addCameraShake()
+		}
+	}
+}

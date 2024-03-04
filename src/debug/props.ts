@@ -195,7 +195,7 @@ export const props: PlacableProp<propNames>[] = [
 				const isStart = ressources.dungeon.type === RoomType.Entrance && ressources.firstEntry
 				if (isStart ? ressources.dungeon.doors[data.data.direction] === null : data.data.direction === ressources.direction) {
 					ecs.add({
-						...playerBundle(ressources.playerHealth, ressources.firstEntry),
+						...playerBundle(true, ressources.playerHealth, ressources.firstEntry),
 						position: new Vector3(...data.position).add(new Vector3(0, 0, -20).applyQuaternion(entity.rotation)),
 						rotation: entity.rotation.clone().multiply(new Quaternion().setFromAxisAngle(new Vector3(0, 1, 0), Math.PI)),
 					})

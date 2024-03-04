@@ -29,7 +29,7 @@ import { beeFSM, ovenFSM, pandaFSM, playerFSM, shagaFSM } from './states/game/pl
 import { target } from './states/game/sensor'
 import { allowDoorCollision, collideWithDoor, collideWithDoorCamp } from './states/game/spawnDoor'
 import { spawnDungeon, spawnFarm, spawnLevelData, updateTimeUniforms } from './states/game/spawnLevel'
-import { losingBattle, spawnCharacter } from './states/game/spawnPlayer'
+import { debugPlayer, losingBattle, spawnCharacter } from './states/game/spawnPlayer'
 import { touchItem } from './states/game/touchItem'
 import { playCloseSound, playOpenSound } from './states/pause/pause'
 import { setupGame } from './states/setup/setupGame'
@@ -57,7 +57,7 @@ gameState
 campState
 	.addSubscriber(...interactablePlantableSpot, playAmbiance('Farm_Ambience_Loop'))
 	.onEnter(spawnFarm, spawnLevelData, updateCropsSave, initPlantableSpotsInteractions, spawnCharacter)
-	.onUpdate(collideWithDoorCamp)
+	.onUpdate(collideWithDoorCamp, debugPlayer)
 	.onUpdate(runIf(canPlayerMove, plantSeed, harvestCrop, openPlayerInventory, savePlayerPosition))
 	.onExit(despawnOfType('map'))
 openMenuState

@@ -64,6 +64,7 @@ export interface Entity {
 	rotation?: Quaternion
 	// ! Camera
 	cameratarget?: true
+	cameraShake?: Vector3
 	initialCameratarget?: true
 	followCamera?: true
 	mainCamera?: true
@@ -95,7 +96,7 @@ export interface Entity {
 	collider?: Collider
 	size?: Vector3
 	// ! Animations
-	playerAnimator?: Animator<Animations['BunnydAnim']>
+	playerAnimator?: Animator<Animations['Bunny']>
 	beeAnimator?: Animator<Animations['Armabee']>
 	shagaAnimator?: Animator<Animations['Shaga_A']>
 	pandaAnimator?: Animator<Animations['Panda']>
@@ -142,6 +143,10 @@ export interface Entity {
 	displayedItem?: Entity
 	// ! Player
 	player?: true
+	combo?: {
+		lastAttack: number
+		heavyAttack: number
+	}
 	// ! NPC
 	npc?: true
 	npcName?: (typeof NPC)[number]

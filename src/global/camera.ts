@@ -1,3 +1,4 @@
+import { Tween } from '@tweenjs/tween.js'
 import { PerspectiveCamera, Vector3 } from 'three'
 import { params } from './context'
 import { ecs, time } from './init'
@@ -7,13 +8,29 @@ export const initCamera = () => {
 	const camera = new PerspectiveCamera(params.fov, window.innerWidth / window.innerHeight, 0.1, 1000)
 	camera.zoom = window.innerWidth / window.innerHeight / params.zoom
 	camera.updateProjectionMatrix()
-	ecs.add({ camera, position: new Vector3(), mainCamera: true, cameraLookat: new Vector3() })
+	ecs.add({ camera, position: new Vector3(), mainCamera: true, cameraLookat: new Vector3(), cameraShake: new Vector3() })
 }
-const cameraQuery = ecs.with('camera', 'position', 'mainCamera', 'cameraLookat')
+const cameraQuery = ecs.with('camera', 'position', 'mainCamera', 'cameraLookat', 'cameraShake')
 const cameraTargetQuery = ecs.with('cameratarget', 'worldPosition')
 const doorsQuery = ecs.with('door', 'position')
+
+export const addCameraShake = () => {
+	const camera = cameraQuery.first
+	if (camera) {
+		const randomTween = (amount: number) => new Tween(camera.cameraShake).to(new Vector3().randomDirection().normalize().multiplyScalar(amount / 20), 20).repeat(1).yoyo(true)
+		const tween = randomTween(11)
+		let lastTween = tween
+		for (let i = 10; i > 0; i--) {
+			const newTween = randomTween(i)
+			lastTween.chain(newTween)
+			lastTween = newTween
+		}
+		ecs.add({ tween, autoDestroy: true })
+	}
+}
+
 export const moveCamera = () => {
-	for (const { position, camera, cameraLookat, cameraOffset } of cameraQuery) {
+	for (const { position, camera, cameraLookat, cameraOffset, cameraShake } of cameraQuery) {
 		const target = new Vector3()
 		for (const { worldPosition } of cameraTargetQuery) {
 			target.z = worldPosition.z
@@ -36,6 +53,7 @@ export const moveCamera = () => {
 		}
 		if (!debugState.enabled) {
 			cameraLookat.lerp(target, time.delta / 1000 * 5)
+			cameraLookat.add({ x: cameraShake.x, y: 0, z: cameraShake.y })
 			camera.lookAt(cameraLookat)
 			position.set(...cameraLookat.clone().add(cameraOffset ?? new Vector3(params.cameraOffsetX, params.cameraOffsetY, params.cameraOffsetZ)).toArray())
 		}

@@ -1,14 +1,14 @@
 import { Tween } from '@tweenjs/tween.js'
-import { Mesh, Vector3 } from 'three'
 import type { With } from 'miniplex'
+import { Mesh, Vector3 } from 'three'
 import { itemBundle } from '../game/items'
 import type { Entity } from '@/global/entity'
 import { Faction } from '@/global/entity'
-import { ecs, world } from '@/global/init'
+import { ecs, time, world } from '@/global/init'
+import { addTweenTo } from '@/lib/updateTween'
 import { spawnDamageNumber } from '@/particles/damageNumber'
 import { impact } from '@/particles/impact'
 import { CharacterMaterial } from '@/shaders/GroundShader'
-import { addTweenTo } from '@/lib/updateTween'
 
 export const flash = (entity: With<Entity, 'model'>) => {
 	const tween = new Tween({ color: 0 })
@@ -27,8 +27,14 @@ export const flash = (entity: With<Entity, 'model'>) => {
 }
 const entities = ecs.with('faction', 'position', 'rotation', 'body', 'collider', 'movementForce', 'state', 'stateMachine', 'sensorCollider', 'currentHealth', 'model', 'size', 'group')
 
-const calculateDamage = (entity: With<Entity, 'strength' | 'critChance' | 'critDamage'>) => {
+const calculateDamage = (entity: With<Entity, 'strength' | 'critChance' | 'critDamage' | 'combo'>) => {
 	let damage = entity.strength.value
+	if (entity.combo.lastAttack === 1) {
+		damage *= 1.2
+	}
+	if (entity.combo.lastAttack === 2) {
+		damage *= 1.5
+	}
 	const isCrit = Math.random() < entity.critChance.value
 	if (isCrit) {
 		damage += entity.strength.value * entity.critDamage.value
@@ -37,11 +43,30 @@ const calculateDamage = (entity: With<Entity, 'strength' | 'critChance' | 'critD
 }
 
 const enemiesQuery = entities.where(({ faction }) => faction === Faction.Enemy)
-const playerQuery = entities.with('playerControls', 'strength', 'critChance', 'critDamage').where(({ faction }) => faction === Faction.Player)
+const playerQuery = entities.with('playerControls', 'strength', 'body', 'critChance', 'critDamage', 'speed', 'state', 'stateMachine', 'combo', 'playerAnimator').where(({ faction }) => faction === Faction.Player)
 export const playerAttack = () => {
 	for (const player of playerQuery) {
-		const { playerControls, sensorCollider, position } = player
-		if (playerControls.get('primary').justPressed) {
+		const { playerControls, sensorCollider, position, state, stateMachine, combo, playerAnimator } = player
+		if (['idle', 'running'].includes(state)) {
+			if (playerControls.get('primary').justReleased) {
+				if (combo.heavyAttack >= 500) {
+					combo.lastAttack = 2
+					combo.heavyAttack = 0
+				}
+				stateMachine.enter('attacking', player)
+			}
+			if (playerControls.get('primary').pressed) {
+				combo.heavyAttack += time.delta
+			}
+		}
+		if (state === 'attacking') {
+			if (playerControls.get('primary').justReleased) {
+				if (combo.lastAttack === 0 && playerAnimator.current === 'FIGHT_ACTION1') {
+					combo.lastAttack = 1
+				} else if (combo.lastAttack === 1 && playerAnimator.current === 'SLASH') {
+					combo.lastAttack = 2
+				}
+			}
 			for (const enemy of enemiesQuery) {
 				if (world.intersectionPair(sensorCollider, enemy.collider)) {
 					if (enemy.stateMachine.enter('hit', enemy)) {
