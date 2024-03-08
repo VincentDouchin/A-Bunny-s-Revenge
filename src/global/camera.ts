@@ -17,7 +17,7 @@ const doorsQuery = ecs.with('door', 'position')
 export const addCameraShake = () => {
 	const camera = cameraQuery.first
 	if (camera) {
-		const randomTween = (amount: number) => new Tween(camera.cameraShake).to(new Vector3().randomDirection().normalize().multiplyScalar(amount / 20), 20).repeat(1).yoyo(true)
+		const randomTween = (amount: number) => new Tween(camera.cameraShake).to(new Vector3().randomDirection().normalize().multiplyScalar(amount / 10), 20).repeat(1).yoyo(true)
 		const tween = randomTween(11)
 		let lastTween = tween
 		for (let i = 10; i > 0; i--) {

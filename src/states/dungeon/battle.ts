@@ -9,6 +9,7 @@ import { addTweenTo } from '@/lib/updateTween'
 import { spawnDamageNumber } from '@/particles/damageNumber'
 import { impact } from '@/particles/impact'
 import { CharacterMaterial } from '@/shaders/GroundShader'
+import { addCameraShake } from '@/global/camera'
 
 export const flash = (entity: With<Entity, 'model'>) => {
 	const tween = new Tween({ color: 0 })
@@ -132,6 +133,7 @@ export const enemyAttackPlayer = () => {
 				for (const player of playerQuery) {
 					if (world.intersectionPair(player.collider, enemy.sensorCollider)) {
 						player.currentHealth -= 1
+						addCameraShake()
 						player.stateMachine.enter('hit', player)
 						ecs.update(player, { tween: flash(player) })
 						enemy.stateMachine.enter('attackCooldown', enemy)
