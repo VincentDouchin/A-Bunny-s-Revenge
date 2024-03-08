@@ -17,8 +17,9 @@ import { ecs, inputManager, time, ui } from '@/global/init'
 import { MenuType } from '@/global/entity'
 import type { Entity } from '@/global/entity'
 import { getWorldPosition } from '@/lib/transforms'
+import { sleep } from '@/utils/sleep'
 
-const ovenQuery = ecs.with('menuType', 'recipesQueued').where(({ menuType }) => menuType === MenuType.OvenMinigame)
+const ovenQuery = ecs.with('menuType', 'recipesQueued', 'ovenAnimator').where(({ menuType }) => menuType === MenuType.OvenMinigame)
 
 export const OvenMinigameUi = ({ player }: FarmUiProps) => {
 	return (
@@ -94,16 +95,20 @@ export const OvenMinigameUi = ({ player }: FarmUiProps) => {
 						setTarget(x => Math.max(0, Math.min(100, x + direction() * 3 * (time.delta / 1000) * (1 + progress() / 20))))
 						if (progress() >= 100) {
 							setProgress(0)
-							oven.recipesQueued?.shift()
-							const position = new Vector3()
-							oven.model!.traverse((node) => {
-								if (node.name.includes('Door')) {
-									node.getWorldPosition(position)
+							oven.ovenAnimator.playClamped('Opening').then(async () => {
+								oven.recipesQueued.shift()
+								const position = new Vector3()
+								oven.model!.traverse((node) => {
+									if (node.name.includes('Door')) {
+										node.getWorldPosition(position)
+									}
+								})
+								for (let i = 0; i < output().quantity; i++) {
+									ecs.add({ ...itemBundle(output().name), position, popDirection: new Vector3(between(-1, 1), 0, between(2, 2.5)).applyQuaternion(oven.rotation!) })
 								}
+								await sleep(500)
+								oven.ovenAnimator.playClamped('Closing')
 							})
-							for (let i = 0; i < output().quantity; i++) {
-								ecs.add({ ...itemBundle(output().name), position, popDirection: new Vector3(between(-1, 1), 0, between(2, 2.5)).applyQuaternion(oven.rotation!) })
-							}
 						}
 					}
 				})

@@ -70,9 +70,3 @@ export const shagaFSM = setupAnimations('shagaAnimator', {
 	waitingAttack: e => setTimeout(() => e.stateMachine.enter('attacking', e), 400),
 	attackCooldown: e => setTimeout(() => e.stateMachine.enter('idle', e), 1000),
 })
-
-export const ovenFSM = setupAnimations('ovenAnimator', {
-	// idle: e => e.ovenAnimator.playClamped('Static'),
-	// doorOpening: e => e.ovenAnimator.playClamped('Body|OvenOpening'),
-	// idle: e => e.ovenAnimator.playAnimation('OvenOpening'),
-})

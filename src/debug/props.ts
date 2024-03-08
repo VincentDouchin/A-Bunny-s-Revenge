@@ -5,6 +5,7 @@ import type { Object3D, Object3DEventMap } from 'three'
 import { Color, Group, Mesh, MeshPhongMaterial, PointLight, Quaternion, Vector3 } from 'three'
 
 import { CSS2DObject } from 'three/examples/jsm/renderers/CSS2DRenderer'
+import { clone } from 'three/examples/jsm/utils/SkeletonUtils'
 import type { EntityData } from './LevelEditor'
 import { dialogs } from '@/constants/dialogs'
 import { Animator } from '@/global/animator'
@@ -31,7 +32,7 @@ export const getModel = (key: models | customModel) => {
 		return customModels[key]()
 	}
 	// @ts-expect-error okok
-	return assets.models[key].scene.clone()
+	return clone(assets.models[key].scene)
 }
 export interface ExtraData {
 	door: {
@@ -94,7 +95,7 @@ export const props: PlacableProp<propNames>[] = [
 	},
 	{
 		name: 'oven',
-		models: ['StoneOven', 'BunnyOvenPacked'],
+		models: ['BunnyOvenPacked'],
 		bundle: (entity) => {
 			const minigameContainer = new CSS2DObject(document.createElement('div'))
 			minigameContainer.position.setX(-30)

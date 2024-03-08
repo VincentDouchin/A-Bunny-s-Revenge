@@ -258,8 +258,8 @@ export const spawnLevelData: System<FarmRessources | DungeonRessources> = (resso
 					entityId,
 					model,
 					inMap: true,
-
 				} as const satisfies Entity
+
 				if (bundleFn) {
 					ecs.add(bundleFn(entity, entityData, ressources))
 				} else {
