@@ -17,7 +17,7 @@ export default defineConfig(() => {
 			splitVendorChunkPlugin(),
 			solidPlugin(),
 			VitePWA({
-				registerType: 'prompt',
+				registerType: 'autoUpdate',
 
 				includeAssets: ['favicon.ico', 'apple-touch-icon.png'],
 
