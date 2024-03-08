@@ -46,7 +46,7 @@ export const despawnOfType = (...components: (keyof Entity)[]) => {
 	}))
 }
 
-const addChildrenCallBack = () => ecs.with('withChildren').onEntityAdded.subscribe((entity) => {
+const addChildrenCallBack = () => ecs.with('withChildren').without('bodyDesc').onEntityAdded.subscribe((entity) => {
 	entity.withChildren(entity)
 	ecs.removeComponent(entity, 'withChildren')
 })

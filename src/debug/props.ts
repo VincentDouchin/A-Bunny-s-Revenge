@@ -209,37 +209,38 @@ export const props: PlacableProp<propNames>[] = [
 		name: 'house',
 		models: ['House'],
 		bundle: (entity) => {
-			entity.withChildren = (parent) => {
-				entity.model.traverse((node) => {
-					if (node.name.includes('window') && node instanceof Mesh && node.material instanceof MeshPhongMaterial) {
-						node.material.emissive = new Color(0xFFFF00)
-						node.material.emissiveIntensity = 1
-						ecs.add({ parent, emissiveMat: node.material })
-					}
-					if (node.name.includes('light')) {
-						const nightLight = new PointLight(0xFFFF00, 1, 30, 0.01)
-						node.add(nightLight)
-						ecs.add({ parent, nightLight })
-					}
-					if (node.name === 'door') {
-						const position = node.position.clone().multiply(entity.model.scale)
-						ecs.add({
-							parent,
-							npcName: 'door',
-							position,
-							group: new Group(),
-							dialog: dialogs.GrandmasDoor(),
-							interactable: Interactable.Enter,
-							bodyDesc: RigidBodyDesc.fixed().lockRotations(),
-							colliderDesc: ColliderDesc.cuboid(5, 7, 1).setSensor(true),
-						})
-					}
-				})
-			}
 			return {
 				...entity,
+				withChildren: (parent) => {
+					entity.model.traverse((node) => {
+						if (node.name.includes('window') && node instanceof Mesh && node.material instanceof MeshPhongMaterial) {
+							node.material.emissive = new Color(0xFFFF00)
+							node.material.emissiveIntensity = 1
+							ecs.add({ parent, emissiveMat: node.material })
+						}
+						if (node.name.includes('light')) {
+							const nightLight = new PointLight(0xFFFF00, 1, 30, 0.01)
+							node.add(nightLight)
+							ecs.add({ parent, nightLight })
+						}
+						if (node.name === 'door') {
+							const position = node.position.clone().multiply(entity.model.scale)
+							ecs.add({
+								parent,
+								npcName: 'door',
+								position,
+								group: new Group(),
+								dialog: dialogs.GrandmasDoor(),
+								interactable: Interactable.Enter,
+								bodyDesc: RigidBodyDesc.fixed().lockRotations(),
+								colliderDesc: ColliderDesc.cuboid(5, 7, 1).setSensor(true),
+							})
+						}
+					})
+				},
 				dialogHeight: 4,
 				npcName: 'Grandma',
+				houseAnimator: new Animator(entity.model, assets.models.House.animations),
 				dialog: dialogs.GrandmasHouse(),
 			}
 		},

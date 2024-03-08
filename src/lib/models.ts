@@ -23,7 +23,6 @@ export const getSize = (model: Object3D<Object3DEventMap>) => {
 }
 export const getBoundingBox = (modelName: models | customModel, model: Object3D<Object3DEventMap>, colliderData: CollidersData): Entity => {
 	const collider = colliderData[modelName]
-
 	if (collider) {
 		const size = new Vector3()
 		if (collider.size) {

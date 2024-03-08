@@ -102,6 +102,7 @@ export interface Entity {
 	pandaAnimator?: Animator<Animations['Panda']>
 	ovenAnimator?: Animator<Animations['BunnyOvenPacked']>
 	chestAnimator?: Animator<Animations['Chest']>
+	houseAnimator?: Animator<Animations['House']>
 	template?: () => JSXElement
 	el?: HTMLElement
 	cssObject?: true

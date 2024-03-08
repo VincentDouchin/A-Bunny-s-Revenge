@@ -25,7 +25,7 @@ import { talkToNPC } from './states/game/dialog'
 import { bobItems, collectItems, popItems, stopItems } from './states/game/items'
 import { applyMove, canPlayerMove, movePlayer, playerSteps, savePlayerFromTheEmbraceOfTheVoid, savePlayerPosition, stopPlayer } from './states/game/movePlayer'
 import { pauseGame } from './states/game/pauseGame'
-import { beeFSM, ovenFSM, pandaFSM, playerFSM, shagaFSM } from './states/game/playerFSM'
+import { beeFSM, pandaFSM, playerFSM, shagaFSM } from './states/game/playerFSM'
 import { target } from './states/game/sensor'
 import { allowDoorCollision, collideWithDoor, collideWithDoorCamp } from './states/game/spawnDoor'
 import { spawnDungeon, spawnFarm, spawnLevelData, updateTimeUniforms } from './states/game/spawnLevel'
@@ -41,7 +41,7 @@ coreState
 	.addSubscriber(...target, preCompileShaders, initTone)
 	.onEnter(initCamera, initThree, ui.render(UI))
 	.onPreUpdate(coroutines.tick, savePlayerFromTheEmbraceOfTheVoid)
-	.onUpdate(runIf(() => !pausedState.enabled, updateAnimations('beeAnimator', 'playerAnimator', 'pandaAnimator', 'shagaAnimator', 'ovenAnimator', 'chestAnimator'), () => time.tick()), inputManager.update, ui.update, moveCamera)
+	.onUpdate(runIf(() => !pausedState.enabled, updateAnimations('beeAnimator', 'playerAnimator', 'pandaAnimator', 'shagaAnimator', 'ovenAnimator', 'chestAnimator', 'houseAnimator'), () => time.tick()), inputManager.update, ui.update, moveCamera)
 	.onPostUpdate(updateControls, render)
 	.enable()
 setupState
@@ -49,7 +49,7 @@ setupState
 	.enable()
 gameState
 	.onEnter()
-	.addSubscriber(initializeCameraPosition, bobItems, enableInventoryState, killAnimation, ...playerFSM, ...pandaFSM, ...beeFSM, ...shagaFSM, ...ovenFSM, popItems)
+	.addSubscriber(initializeCameraPosition, bobItems, enableInventoryState, killAnimation, ...playerFSM, ...pandaFSM, ...beeFSM, ...shagaFSM, popItems)
 	.onUpdate(runIf(canPlayerMove, movePlayer), runIf(() => !pausedState.enabled, applyMove, playerSteps, dayNight, updateTimeUniforms))
 	.onUpdate(collectItems, touchItem, talkToNPC, stopItems, runIf(() => !openMenuState.enabled, pauseGame, interact))
 	.enable()

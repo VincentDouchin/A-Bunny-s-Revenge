@@ -1,6 +1,7 @@
 import type { Query, With } from 'miniplex'
 import { Vector3 } from 'three'
 import { enumerate, range } from './mapFunctions'
+import { sleep } from './sleep'
 import type { QuestName } from '@/constants/quests'
 import { quests } from '@/constants/quests'
 import type { Entity } from '@/global/entity'
@@ -13,7 +14,7 @@ import { addItem, removeItem, save, updateSave } from '@/global/save'
 
 const playerQuery = ecs.with('player', 'position', 'collider')
 const movingPlayerQuery = playerQuery.with('movementForce')
-const houseQuery = ecs.with('npcName', 'position', 'collider', 'rotation').where(({ npcName }) => npcName === 'Grandma')
+const houseQuery = ecs.with('npcName', 'position', 'collider', 'rotation', 'houseAnimator').where(({ npcName }) => npcName === 'Grandma')
 const doorQuery = ecs.with('npcName', 'collider').where(({ npcName }) => npcName === 'door')
 const setSensor = <T extends With<Entity, 'collider'>>(query: Query<T>, sensor: boolean) => {
 	for (const { collider } of query) {
@@ -59,25 +60,31 @@ export const removeItemFromPlayer = (item: Item) => {
 	}
 }
 
-export const enterHouse = () => {
+export const enterHouse = async () => {
 	setSensor(doorQuery, true)
 	setSensor(houseQuery, true)
 	const house = houseQuery.first
 
 	if (house) {
+		await house.houseAnimator.playClamped('DoorOpen')
 		movePlayerTo(house.position)
 		addTag(house, 'activeDialog')
+		await sleep(500)
+		house.houseAnimator.playClamped('DoorClose')
 	}
 }
-export const leaveHouse = () => {
+export const leaveHouse = async () => {
 	const house = houseQuery.first
 	const door = doorQuery.first
 	if (house && door) {
+		await house.houseAnimator.playClamped('DoorOpen')
 		movePlayerTo(new Vector3(0, 0, 30).applyQuaternion(house.rotation).add(house.position)).then(() => {
 			cutSceneState.disable()
 			setSensor(houseQuery, false)
 			setSensor(doorQuery, false)
 		})
+		await sleep(500)
+		house.houseAnimator.playClamped('DoorClose')
 	}
 }
 
