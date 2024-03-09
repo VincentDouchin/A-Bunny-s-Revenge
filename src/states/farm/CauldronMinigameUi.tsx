@@ -1,20 +1,20 @@
+import arrowLeft from '@assets/icons/arrow-left-solid.svg?raw'
+import spoonIcon from '@assets/icons/spoon-solid.svg?raw'
 import { between } from 'randomish'
 import { Show, createMemo, createSignal, onCleanup, onMount } from 'solid-js'
 import { Portal } from 'solid-js/web'
 import { Vector3 } from 'three'
-import arrowLeft from '@assets/icons/arrow-left-solid.svg?raw'
-import spoonIcon from '@assets/icons/spoon-solid.svg?raw'
 import { itemBundle } from '../game/items'
 import { ItemDisplay } from './InventoryUi'
 import type { Entity } from '@/global/entity'
 import { MenuType } from '@/global/entity'
 import { ecs, inputManager, time, ui } from '@/global/init'
 import { cameraQuery } from '@/global/rendering'
+import { playSound } from '@/global/sounds'
 import { addTag } from '@/lib/hierarchy'
 import { getWorldPosition } from '@/lib/transforms'
-import type { FarmUiProps } from '@/ui/types'
 import { cauldronSparkles } from '@/particles/cauldronSparkles'
-import { playSound } from '@/global/sounds'
+import type { FarmUiProps } from '@/ui/types'
 
 const cauldronQuery = ecs.with('menuType', 'interactionContainer', 'group', 'rotation', 'recipesQueued', 'spoon').where(({ menuType }) => menuType === MenuType.CauldronGame)
 export const CauldronMinigameUi = ({ player }: FarmUiProps) => {
@@ -32,14 +32,14 @@ export const CauldronMinigameUi = ({ player }: FarmUiProps) => {
 					x: Math.cos(spot()),
 					y: Math.sin(spot()),
 				}))
-				const cauldronPosition = getWorldPosition(cauldron().group).add(new Vector3(0, 0, -10))
+				const cauldronPosition = getWorldPosition(cauldron().group).add(new Vector3(0, 0, 0))
 				onMount(() => {
 					targetEntity = ecs.add({
 						cameratarget: true,
 						worldPosition: cauldronPosition,
 					})
 					for (const camera of cameraQuery) {
-						ecs.addComponent(camera, 'cameraOffset', new Vector3(0, 40, 0).applyQuaternion(cauldron().rotation))
+						ecs.addComponent(camera, 'cameraOffset', new Vector3(0, 40, -1).applyQuaternion(cauldron().rotation))
 					}
 
 					ecs.removeComponent(player, 'cameratarget')
@@ -66,7 +66,7 @@ export const CauldronMinigameUi = ({ player }: FarmUiProps) => {
 					}
 					if (output()) {
 						setSpoon(x => x + time.delta / 500 * (1 + progress() / 50))
-						cauldron().spoon.rotation?.setFromAxisAngle(new Vector3(0, 1, 0), -spoon())
+						cauldron().spoon.rotation?.setFromAxisAngle(new Vector3(0, 1, 0), Math.PI - spoon())
 						if (player.playerControls.get('primary').justReleased) {
 							if (isSynced()) {
 								setProgress(x => x + 5 + (30 * percentSynced()))

@@ -48,7 +48,7 @@ export interface PlacableProp<N extends string> {
 	data?: N extends keyof ExtraData ? ExtraData[N] : undefined
 	bundle?: BundleFn<EntityData<N extends keyof ExtraData ? NonNullable<ExtraData[N]> : never>>
 }
-type propNames = 'log' | 'door' | 'rock' | 'board' | 'oven' | 'cauldron' | 'stove' | 'Flower/plants' | 'sign' | 'plots' | 'bush' | 'fence' | 'house' | 'mushrooms' | 'lamp'
+type propNames = 'log' | 'door' | 'rock' | 'board' | 'oven' | 'CookingPot' | 'stove' | 'Flower/plants' | 'sign' | 'plots' | 'bush' | 'fence' | 'house' | 'mushrooms' | 'lamp'
 export const props: PlacableProp<propNames>[] = [
 	{
 		name: 'log',
@@ -112,8 +112,8 @@ export const props: PlacableProp<propNames>[] = [
 			} },
 	},
 	{
-		name: 'cauldron',
-		models: ['cauldron'],
+		name: 'CookingPot',
+		models: ['CookingPot'],
 		bundle: entity => ({
 			...entity,
 			...menuInputMap(),
