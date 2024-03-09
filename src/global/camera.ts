@@ -8,7 +8,13 @@ export const initCamera = () => {
 	const camera = new PerspectiveCamera(params.fov, window.innerWidth / window.innerHeight, 0.1, 1000)
 	camera.zoom = window.innerWidth / window.innerHeight / params.zoom
 	camera.updateProjectionMatrix()
-	ecs.add({ camera, position: new Vector3(), mainCamera: true, cameraLookat: new Vector3(), cameraShake: new Vector3() })
+	ecs.add({
+		camera,
+		position: new Vector3(),
+		mainCamera: true,
+		cameraLookat: new Vector3(),
+		cameraShake: new Vector3(),
+	})
 }
 const cameraQuery = ecs.with('camera', 'position', 'mainCamera', 'cameraLookat', 'cameraShake')
 const cameraTargetQuery = ecs.with('cameratarget', 'worldPosition')
@@ -38,10 +44,10 @@ export const moveCamera = () => {
 			target.y += worldPosition.y
 			for (const door of doorsQuery) {
 				if (door.door === 'north') {
-					target.z = Math.min(worldPosition.z, door.position.z - 20) + 10
+					target.z = Math.min(worldPosition.z, door.position.z - 20)
 				}
 				if (door.door === 'south') {
-					target.z = Math.max(worldPosition.z, door.position.z + 20) + 10
+					target.z = Math.max(worldPosition.z, door.position.z + 20)
 				}
 				if (door.door === 'west') {
 					target.x = Math.min(worldPosition.x, door.position.x - 20)
@@ -52,10 +58,12 @@ export const moveCamera = () => {
 			}
 		}
 		if (!debugState.enabled) {
-			cameraLookat.lerp(target, time.delta / 1000 * 5)
+			const lerpSpeed = time.delta / 1000 * 5
+			cameraLookat.lerp(target, lerpSpeed)
 			cameraLookat.add({ x: cameraShake.x, y: 0, z: cameraShake.y })
 			camera.lookAt(cameraLookat)
-			position.set(...cameraLookat.clone().add(cameraOffset ?? new Vector3(params.cameraOffsetX, params.cameraOffsetY, params.cameraOffsetZ)).toArray())
+			const newPosition = cameraLookat.clone().add(cameraOffset ?? new Vector3(params.cameraOffsetX, params.cameraOffsetY, params.cameraOffsetZ))
+			position.lerp(newPosition, lerpSpeed)
 		}
 	}
 }
