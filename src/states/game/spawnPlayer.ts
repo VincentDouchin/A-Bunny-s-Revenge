@@ -1,4 +1,5 @@
 import { LinearSRGBColorSpace, Mesh, NearestFilter, Quaternion, Vector3 } from 'three'
+import { clone } from 'three/examples/jsm/utils/SkeletonUtils'
 import { healthBundle } from '../dungeon/health'
 import { inventoryBundle } from './inventory'
 import { Sizes } from '@/constants/sizes'
@@ -13,23 +14,33 @@ import type { System } from '@/lib/state'
 import { stateBundle } from '@/lib/stateMachine'
 import { Stat, addModifier } from '@/lib/stats'
 
+const weaponModel = () => {
+	const model = assets.weapons.Ladle.scene.clone()
+	model.scale.setScalar(2)
+	return model
+}
+
 export const playerBundle = (dungeon: boolean, health: number, addHealth: boolean) => {
-	const model = dungeon ? assets.characters.BunnyWithWeapon : assets.characters.Bunny
-	model.scene.traverse((node) => {
+	const model = clone(assets.characters.Bunny.scene)
+	model.traverse((node) => {
 		if (node instanceof Mesh && node.material.map) {
 			node.material.map.colorSpace = LinearSRGBColorSpace
 			node.material.map.minFilter = NearestFilter
 			node.material.map.magFilter = NearestFilter
 			node.material.opacity = 1
 		}
+
+		if (node.name === 'DEF_FingerL' && dungeon) {
+			node.add(weaponModel())
+		}
 	})
-	const bundle = capsuleColliderBundle(model.scene, Sizes.character)
+	const bundle = capsuleColliderBundle(model, Sizes.character)
 	bundle.bodyDesc.setLinearDamping(20)
 	const player = {
 		...playerInputMap(),
 		...inventoryBundle(24, 'player'),
 		...bundle,
-		playerAnimator: new Animator(bundle.model, model.animations),
+		playerAnimator: new Animator(bundle.model, assets.characters.Bunny.animations),
 		inMap: true,
 		cameratarget: true,
 		initialCameratarget: true,

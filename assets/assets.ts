@@ -1,5 +1,5 @@
 export type buttons = `texture` | `texture`
-export type characters = `Armabee` | `Armabee_Evolved` | `Big_Boar_A` | `Big_Boar_B` | `Big_Boar_C` | `Bunny` | `BunnyWithWeapon` | `Forest_Butterfly_A` | `Forest_Butterfly_B` | `Forest_Butterfly_C` | `Forest_Butterfly_D` | `Frog Man` | `Panda` | `Platopo_A` | `Platopo_B` | `Platopo_C` | `Porin_A` | `Porin_B` | `Porin_C` | `Porin_D` | `Porin_E` | `Racco_A` | `Racco_B` | `Racco_C` | `Shaga_A` | `Shaga_B` | `Shaga_C` | `Snailo_A` | `Snailo_B` | `Snailo_C` | `Snailo_D`
+export type characters = `Armabee` | `Armabee_Evolved` | `Big_Boar_A` | `Big_Boar_B` | `Big_Boar_C` | `Bunny` | `Forest_Butterfly_A` | `Forest_Butterfly_B` | `Forest_Butterfly_C` | `Forest_Butterfly_D` | `Frog Man` | `Panda` | `Platopo_A` | `Platopo_B` | `Platopo_C` | `Porin_A` | `Porin_B` | `Porin_C` | `Porin_D` | `Porin_E` | `Racco_A` | `Racco_B` | `Racco_C` | `Shaga_A` | `Shaga_B` | `Shaga_C` | `Snailo_A` | `Snailo_B` | `Snailo_C` | `Snailo_D`
 export type crops = `Beet_1` | `Beet_2` | `Beet_3` | `Beet_4` | `Carrot_1` | `Carrot_2` | `Carrot_3` | `Carrot_4` | `Lettuce_1` | `Lettuce_2` | `Lettuce_3` | `Lettuce_4` | `Lettuce_Crop` | `Mushroom_1` | `Mushroom_2` | `Mushroom_3` | `Mushroom_4` | `Pumpkin_1` | `Pumpkin_2` | `Pumpkin_3` | `Pumpkin_4` | `Tomato_1` | `Tomato_2` | `Tomato_3` | `Tomato_4` | `Wheat_1` | `Wheat_2` | `Wheat_3` | `Wheat_4`
 export type fonts = `GrapeSoda` | `NanoPlus`
 export type fruit_trees = `Apple_Harvested` | `Apple_Tree`
@@ -13,3 +13,4 @@ export type steps = `Bare Step Grass Soft A` | `Bare Step Grass Soft B` | `Bare 
 export type textures = `Dirt4_Dark`
 export type trees = `Low_Poly_Forest_treeTall` | `Low_Poly_Forest_treeTall` | `Low_Poly_Forest_treeTall01` | `Low_Poly_Forest_treeTall02` | `Low_Poly_Forest_treeTall03` | `Low_Poly_Forest_treeTall04`
 export type voices = `babe_a` | `babe_b` | `babe_c` | `babe_d` | `babe_e` | `babe_f` | `babe_g` | `babe_h` | `babe_i` | `babe_j` | `babe_k` | `babe_l` | `babe_m` | `babe_n` | `babe_o` | `babe_p` | `babe_q` | `babe_r` | `babe_s` | `babe_t` | `babe_u` | `babe_v` | `babe_w` | `babe_x` | `babe_y` | `babe_z`
+export type weapons = `Ladle`

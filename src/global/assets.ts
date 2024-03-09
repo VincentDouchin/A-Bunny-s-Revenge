@@ -1,4 +1,4 @@
-import type { characters, fruit_trees, icons, models, music, particles, textures, trees } from '@assets/assets'
+import type { characters, fruit_trees, icons, models, music, particles, textures, trees, weapons } from '@assets/assets'
 import type { ColorRepresentation, Material, Side } from 'three'
 import { CanvasTexture, DoubleSide, Mesh, MeshStandardMaterial, NearestFilter, RepeatWrapping, SRGBColorSpace, TextureLoader } from 'three'
 
@@ -218,6 +218,7 @@ export const loadAssets = async () => {
 		steps: loadSteps(import.meta.glob('@assets/steps/*.*', { eager: true, import: 'default' })),
 		items: loadItems(import.meta.glob('@assets/items/*.*', { as: 'url', eager: true })),
 		music: typeGlob<music>(import.meta.glob('@assets/music/*.*', { eager: true, import: 'default' }))(loadSounds),
+		weapons: typeGlob<weapons>(import.meta.glob('@assets/weapons/*.*', { as: 'url' }))(loadGLBAsToon({})),
 	} as const
 	return await asyncMapValues(assets, async val => await val) as AssetsLoaded<typeof assets>
 }
