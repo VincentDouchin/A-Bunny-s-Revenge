@@ -46,10 +46,6 @@ export const playerFSM = setupAnimations('playerAnimator', {
 		e.stateMachine.enter('idle', e)
 	},
 }, ['combo', 'body', 'speed', 'rotation'])
-export const pandaFSM = setupAnimations('pandaAnimator', {
-	idle: e => e.pandaAnimator.playAnimation('Idle'),
-	hello: e => e.pandaAnimator.playOnce('Wave').then(() => e.stateMachine.enter('idle', e)),
-})
 
 export const beeFSM = setupAnimations('beeAnimator', {
 	idle: e => e.beeAnimator.playAnimation('Flying_Idle'),
