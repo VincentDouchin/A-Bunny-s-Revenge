@@ -99,7 +99,6 @@ export interface Entity {
 	playerAnimator?: Animator<Animations['Bunny']>
 	beeAnimator?: Animator<Animations['Armabee']>
 	shagaAnimator?: Animator<Animations['Shaga_A']>
-	pandaAnimator?: Animator<Animations['Panda']>
 	ovenAnimator?: Animator<Animations['BunnyOvenPacked']>
 	chestAnimator?: Animator<Animations['Chest']>
 	houseAnimator?: Animator<Animations['House']>
