@@ -22,7 +22,7 @@ export default defineConfig(() => {
 				includeAssets: ['favicon.ico', 'apple-touch-icon.png'],
 
 				injectManifest: {
-					globPatterns: ['**/*.{js,html,wasm}', './assets/*.*'],
+					globPatterns: ['**/*.{js,html,css,wasm}'],
 					maximumFileSizeToCacheInBytes: 6000000,
 				},
 
