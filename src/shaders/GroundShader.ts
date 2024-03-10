@@ -171,11 +171,7 @@ const groundExtension = (image: HTMLCanvasElement, x: number, y: number) => {
 				: step(0.3,noise) == 1.
 					? mix(grassColor,grassColor2,0.2)
 					: grassColor;
-			vec3 normal2 = normalize( cross( dFdx( vViewPosition ), dFdy( vViewPosition ) ) );
-			float slope = dot(normal2, vec3(0.,1.,0.));
-			grass *= (1. + slope * 0.2);
 			color.rgb = mix(grass,path,smoothstep(0.7,0.8,texture2D(level,vUv ).r ) );
-			// color.rgb = normal2;
 	`),
 		) }
 
