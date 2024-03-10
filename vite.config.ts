@@ -7,6 +7,7 @@ import { VitePWA } from 'vite-plugin-pwa'
 import generateAssetNames from './scripts/generateAssetNamesPlugin'
 import { autoConvertFBXtoGLB } from './scripts/convertFbx2GLB'
 import { extractAnimations } from './scripts/extractAnimations'
+import { generateAssetManifest } from './scripts/generateAssetManifest'
 
 export default defineConfig(() => {
 	const config: UserConfig = {
@@ -14,6 +15,7 @@ export default defineConfig(() => {
 			generateAssetNames(),
 			autoConvertFBXtoGLB(),
 			extractAnimations(),
+			generateAssetManifest(),
 			splitVendorChunkPlugin(),
 			solidPlugin(),
 			VitePWA({

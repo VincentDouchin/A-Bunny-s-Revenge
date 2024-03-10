@@ -1,9 +1,12 @@
 import type { Euler, Material, Vec2, Vector4Like } from 'three'
 import { DynamicDrawUsage, Group, Matrix4, Mesh, TextureLoader, Vector3 } from 'three'
 
+import assetManifest from '@assets/assetManifest.json'
+import { createStore, del, entries, set } from 'idb-keyval'
 import { InstancedUniformsMesh } from 'three-instanced-uniforms-mesh'
 import type { GLTF } from 'three/examples/jsm/loaders/GLTFLoader'
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader'
+import { useLocalStorage } from '@/utils/useLocalStorage'
 import { getScreenBuffer } from '@/utils/buffer'
 import { thumbnailRenderer } from '@/lib/thumbnailRenderer'
 
@@ -23,7 +26,35 @@ export const getPathPart = (part: number) => (path: string) => {
 export const thumbnail = thumbnailRenderer()
 
 export const textureLoader = new TextureLoader()
-export const loadGLB = (path: string) => new GLTFLoader().loadAsync(path)
+
+const cachedLoader = async <R>(storeName: string, fn: (arr: ArrayBuffer) => Promise<R>) => {
+	const store = createStore('fabled-recipes', storeName)
+	const [localManifest, setLocalManifest] = useLocalStorage<Partial<Record<string, number>>>('assetManifest', {})
+	const files = new Map<string, ArrayBuffer>(await entries(store))
+	for (const file of files.keys()) {
+		if (!(file in assetManifest)) {
+			await del(file, store)
+		}
+	}
+	return async (src: string, originalSrc: string) => {
+		const localEntry = localManifest[originalSrc]
+		if (localEntry === undefined || localEntry < assetManifest[originalSrc as keyof typeof assetManifest]) {
+			const arr = await (await fetch(src)).arrayBuffer()
+			await set(originalSrc, arr, store)
+			setLocalManifest({ ...localManifest, [originalSrc]: assetManifest[originalSrc as keyof typeof assetManifest] })
+
+			return await fn(arr)
+		}
+		const existingEntry = files.get(originalSrc)
+		if (existingEntry) {
+			return fn(existingEntry)
+		} else {
+			throw new Error('cached asset not found')
+		}
+	}
+}
+
+export const loadGLB = await cachedLoader('glb', (arrayBuffer: ArrayBuffer) => new GLTFLoader().parseAsync(arrayBuffer, ''))
 export const loadImage = (path: string) => new Promise<HTMLImageElement>((resolve) => {
 	const img = new Image()
 	img.src = path

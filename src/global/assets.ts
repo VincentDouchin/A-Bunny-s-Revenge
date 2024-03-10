@@ -27,12 +27,11 @@ const typeGlobEager = <K extends string>(glob: GlobEager) => <F extends (glob: G
 	return fn(glob) as Record<K, ReturnType<F>[string]>
 }
 
-const loadGLBAsToon = (options?: { color?: ColorRepresentation, material?: (node: Mesh<any, MeshStandardMaterial>, map?: CanvasTexture) => Material, side?: Side, transparent?: true }) => async (glob: Glob) => {
-	const loaded = await asyncMapValues(glob, async (f) => {
-		const path = await f()
+const loadGLBAsToon = (options?: { color?: ColorRepresentation, material?: (node: Mesh<any, MeshStandardMaterial>, map?: CanvasTexture) => Material, side?: Side, transparent?: true }) => async (glob: GlobEager) => {
+	const loaded = await asyncMapValues(glob, async (path, key) => {
 		const ext = getExtension(path)
 		if (ext === 'glb') {
-			return await loadGLB(path)
+			return await loadGLB(path, key)
 		} else {
 			const texture = new CanvasTexture(await loadImage(path))
 			texture.colorSpace = SRGBColorSpace
@@ -156,8 +155,8 @@ const loadSteps = async (glob: GlobEager) => {
 const loadItems = async (glob: GlobEager) => {
 	const { glb, png } = groupByObject(glob, getExtension)
 	const [seedImages] = filterKeys(png, key => key.includes('_seeds'))
-	const models = await asyncMapValues(glb, async (url) => {
-		const model = await loadGLB(url)
+	const models = await asyncMapValues(glb, async (url, key) => {
+		const model = await loadGLB(url, key)
 		model.scene.traverse((node) => {
 			if (node instanceof Mesh) {
 				node.material = new ToonMaterial({ map: node.material.map, transparent: true, side: DoubleSide, color: node.material.color })
@@ -188,7 +187,7 @@ const loadItems = async (glob: GlobEager) => {
 	return mapKeys(modelsAndthumbnails, k => getFileName(k as string))
 }
 
-const fruitTreeLoader = async (glob: Glob) => {
+const fruitTreeLoader = async (glob: GlobEager) => {
 	const glbs = await loadGLBAsToon()(glob)
 	const perFruit = groupByObject(glbs, key => key.split('_')[0].toLowerCase())
 	return mapValues(perFruit, x => mapKeys(x, key => key.split('_')[1].toLowerCase())) as Record<fruits, Record<'Tree' | 'Harvested', GLTF>>
@@ -198,27 +197,27 @@ type AssetsLoaded<T extends Record<string, Promise<any> | any>> = { [K in keyof 
 
 export const loadAssets = async () => {
 	const assets = {
-		characters: typeGlob<characters>(import.meta.glob('@assets/characters/*.glb', { as: 'url' }))(loadGLBAsToon({ material: node => new CharacterMaterial({ map: node.material.map }) })),
-		models: typeGlob<models>(import.meta.glob('@assets/models/*.*', { as: 'url' }))(loadGLBAsToon({ material: overrideRockColor })),
-		trees: typeGlob<trees>(import.meta.glob('@assets/trees/*.*', { as: 'url' }))(loadGLBAsToon({
+		characters: typeGlob<characters>(import.meta.glob('@assets/characters/*.glb', { as: 'url', eager: true }))(loadGLBAsToon({ material: node => new CharacterMaterial({ map: node.material.map }) })),
+		models: typeGlob<models>(import.meta.glob('@assets/models/*.*', { as: 'url', eager: true }))(loadGLBAsToon({ material: overrideRockColor })),
+		trees: typeGlob<trees>(import.meta.glob('@assets/trees/*.*', { as: 'url', eager: true }))(loadGLBAsToon({
 			material: (node) => {
 				const mat = new TreeMaterial({ map: node.material.map, transparent: true })
 				return mat
 			},
 		})),
-		crops: cropsLoader<crops>(import.meta.glob('@assets/crops/*.glb', { as: 'url' })),
+		crops: cropsLoader<crops>(import.meta.glob('@assets/crops/*.glb', { as: 'url', eager: true })),
 		particles: typeGlob<particles>(import.meta.glob('@assets/particles/*.png', { eager: true, import: 'default' }))(texturesLoader),
 		textures: typeGlob<textures>(import.meta.glob('@assets/textures/*.png', { eager: true, import: 'default' }))(texturesLoader),
 		fonts: fontLoader(import.meta.glob('@assets/fonts/*.ttf', { eager: true, import: 'default' })),
 		levelImages: levelImagesLoader(import.meta.glob('@assets/levels/*.png', { eager: true, import: 'default' })),
 		icons: typeGlobEager<icons>(import.meta.glob('@assets/icons/*.svg', { eager: true, import: 'default', as: 'raw' }))(iconsLoader),
-		fruitTrees: typeGlob<fruit_trees>(import.meta.glob('@assets/fruit_trees/*.glb', { as: 'url' }))(fruitTreeLoader),
+		fruitTrees: typeGlob<fruit_trees>(import.meta.glob('@assets/fruit_trees/*.glb', { as: 'url', eager: true }))(fruitTreeLoader),
 		buttons: buttonsLoader(import.meta.glob('@assets/buttons/*.*', { eager: true, import: 'default' })),
 		voices: loadVoices(import.meta.glob('@assets/voices/*.ogg', { eager: true, import: 'default' })),
 		steps: loadSteps(import.meta.glob('@assets/steps/*.*', { eager: true, import: 'default' })),
 		items: loadItems(import.meta.glob('@assets/items/*.*', { as: 'url', eager: true })),
 		music: typeGlob<music>(import.meta.glob('@assets/music/*.*', { eager: true, import: 'default' }))(loadSounds),
-		weapons: typeGlob<weapons>(import.meta.glob('@assets/weapons/*.*', { as: 'url' }))(loadGLBAsToon({})),
+		weapons: typeGlob<weapons>(import.meta.glob('@assets/weapons/*.*', { as: 'url', eager: true }))(loadGLBAsToon({})),
 	} as const
 	return await asyncMapValues(assets, async val => await val) as AssetsLoaded<typeof assets>
 }
