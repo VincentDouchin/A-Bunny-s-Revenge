@@ -193,9 +193,21 @@ const treeExtension = new MaterialExtension({ playerZ: 0, time: 0, pos: new Vect
 		vec4 position2 = vec4( transformed, 1.0 ) * instanceMatrix;
 		float noise = cnoise(vec3(pos.xy,time));
 		float height_factor = mvPosition.y/10.;
-		mvPosition = instanceMatrix * (mvPosition + vec4(sin(noise)*height_factor,0.,cos(noise)*height_factor,0.))  ;
+		mvPosition = instanceMatrix * (mvPosition + vec4(sin(noise)*height_factor,0.,cos(noise)*height_factor,0.));
 		`),
 	)
+const grassExtension = new MaterialExtension({ time: 0, pos: new Vector2() }).vert(
+	importLib(noise),
+	addUniform('time', 'float'),
+	addUniform('pos', 'vec2'),
+	unpack('project_vertex'),
+	replace('mvPosition = instanceMatrix * mvPosition;', /* glsl */`
+		vec4 position2 = vec4( transformed, 1.0 ) * instanceMatrix;
+		float noise = cnoise(vec3(pos.xy,time));
+		float height_factor = mvPosition.y/4.;
+		mvPosition = instanceMatrix * (mvPosition + vec4(sin(noise)*height_factor,0.,cos(noise)*height_factor,0.));
+		`),
+)
 const characterExtension = new MaterialExtension({ flash: 0 }).frag(
 	addUniform('flash', 'float'),
 	override('gl_FragColor', `
@@ -230,3 +242,4 @@ export const CharacterMaterial = extendMaterial(MeshPhongMaterial, [toonExtensio
 export const GroundMaterial = (image: HTMLCanvasElement, x: number, y: number) => extendMaterial(MeshPhongMaterial, [toonExtension, groundExtension(image, x, y)])
 export const WaterMaterial = (size: Vec2) => extendMaterial(MeshPhongMaterial, [toonExtension, waterExtension(size)])
 export const TreeMaterial = extendMaterial(MeshPhongMaterial, [toonExtension, treeExtension])
+export const GrassMaterial = extendMaterial(MeshPhongMaterial, [toonExtension, grassExtension])

@@ -1,4 +1,4 @@
-import type { models } from '@assets/assets'
+import type { models, vegetation } from '@assets/assets'
 import { ColliderDesc, RigidBodyDesc } from '@dimforge/rapier3d-compat'
 import type { With } from 'miniplex'
 import type { Object3D, Object3DEventMap } from 'three'
@@ -26,10 +26,14 @@ export const customModels = {
 	door: doorSide,
 } as const satisfies Record<string, () => Object3D<Object3DEventMap>>
 export type customModel = keyof typeof customModels
-export const getModel = (key: models | customModel) => {
+export const getModel = (key: models | customModel | vegetation) => {
 	if (key in customModels) {
 		// @ts-expect-error okok
 		return customModels[key]()
+	}
+	if (key in assets.vegetation) {
+		// @ts-expect-error okok
+		return clone(assets.vegetation[key].scene)
 	}
 	// @ts-expect-error okok
 	return clone(assets.models[key].scene)
@@ -44,7 +48,7 @@ type BundleFn<E extends EntityData<any>> = (entity: With<Entity, 'entityId' | 'm
 
 export interface PlacableProp<N extends string> {
 	name: N
-	models: (models | customModel)[]
+	models: (models | customModel | vegetation)[]
 	data?: N extends keyof ExtraData ? ExtraData[N] : undefined
 	bundle?: BundleFn<EntityData<N extends keyof ExtraData ? NonNullable<ExtraData[N]> : never>>
 }

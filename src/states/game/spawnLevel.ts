@@ -81,14 +81,15 @@ export const spawnTrees = (level: Level, parent: Entity) => {
 }
 
 export const spawnGrass = (level: Level, parent: Entity) => {
-	const grass = Object.entries(assets.models).filter(([name]) => name.includes('Grass')).map(x => instanceMesh(x[1], true))
-	const flowers = Object.entries(assets.models).filter(([name]) => name.includes('Flower')).map(x => instanceMesh(x[1], true))
+	const grass = Object.entries(assets.vegetation).filter(([name]) => name.includes('Grass')).map(x => instanceMesh(x[1], true))
+	const flowers = Object.entries(assets.vegetation).filter(([name]) => name.includes('Flower')).map(x => instanceMesh(x[1], true))
 	const noise = createNoise2D(() => 0)
 	const noise2 = createNoise2D(() => 100)
 	const noiseX = createNoise2D(() => 200)
 	const noiseY = createNoise2D(() => 300)
 	const noiseFlower = createNoise2D(() => 400)
 	const noiseFlower2 = createNoise2D(() => 500)
+	const instances = new Map<InstanceHandle, Vec2>()
 	spawnFromCanvas(level, level.grass, 5, (val, x, y, displacement) => {
 		if (val.x !== 255) return
 		const n = noise(x / level.size.x * 10, y / level.size.y * 10)
@@ -109,12 +110,14 @@ export const spawnGrass = (level: Level, parent: Entity) => {
 			? flowers[Math.floor(flowers.length * Math.abs(nF2))]
 			: grass[Math.floor(grass.length * Math.abs(nF2))]
 		const instanceHandle = grassGenerator.addAt(position, size, new Euler(0, noise(x, y), 0))
+		instances.set(instanceHandle, position)
 		ecs.add({
 			inMap: true,
 			position,
 			instanceHandle,
 			grass: true,
 			parent,
+			withTimeUniform: true,
 		})
 	})
 	grass.forEach((t) => {
@@ -125,6 +128,9 @@ export const spawnGrass = (level: Level, parent: Entity) => {
 		const group = t.process()
 		ecs.add({ group, inMap: true, grass: true, parent })
 	})
+	for (const [handle, pos] of instances.entries()) {
+		handle.setUniform('pos', pos)
+	}
 }
 
 export const getdisplacementMap = (level: Level, invert = true) => {
