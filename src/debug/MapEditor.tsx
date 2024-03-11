@@ -30,7 +30,17 @@ const canvases: Record<drawingColors, LevelImage> = {
 const grassQuery = ecs.with('grass')
 const groundQuery = ecs.with('ground', 'model')
 const treeQuery = ecs.with('tree')
-export const MapEditor = ({ updateLevel, activeLevel, switchLevel }: { updateLevel: (l: Partial<Level>) => void, activeLevel: Accessor<Level>, switchLevel: () => void }) => {
+export const MapEditor = ({
+	updateLevel,
+	activeLevel,
+	switchLevel,
+	fakeGround,
+}: {
+	updateLevel: (l: Partial<Level>) => void
+	activeLevel: Accessor<Level>
+	switchLevel: () => void
+	fakeGround: null | Mesh<PlaneGeometry>
+}) => {
 	const [brush, setBrush] = createSignal(10)
 	const [intensity, setIntensity] = createSignal(0.5)
 	const [up, setUp] = createSignal(true)
@@ -79,7 +89,7 @@ export const MapEditor = ({ updateLevel, activeLevel, switchLevel }: { updateLev
 
 	const longClickListener = throttle(10, (event: MouseEvent) => {
 		const camera = cameraQuery.first?.camera
-		if (!camera) return
+		if (!camera || !fakeGround) return
 
 		const pointer = new Vector2()
 		pointer.x = (event.clientX / window.innerWidth) * 2 - 1
@@ -87,7 +97,7 @@ export const MapEditor = ({ updateLevel, activeLevel, switchLevel }: { updateLev
 
 		const raycaster = new Raycaster()
 		raycaster.setFromCamera(pointer, camera)
-		const intersect = raycaster.intersectObject(ground().model)
+		const intersect = raycaster.intersectObject(fakeGround)
 		const position = intersect[0]?.point
 		if (!position) return
 		mesh.position.x = position.x
@@ -128,8 +138,11 @@ export const MapEditor = ({ updateLevel, activeLevel, switchLevel }: { updateLev
 			spawnGrass(activeLevel(), ground())
 		}
 		if (canvases[selectedColor()] === 'heightMap') {
-			const plane = (ground().model as Mesh<PlaneGeometry>).geometry
-			setDisplacement(plane, getdisplacementMap(activeLevel()))
+			const displacementMap = getdisplacementMap(activeLevel(), false)
+			const displacementTexture = new CanvasTexture(displacementMap)
+			displacementTexture.flipY = false
+			setDisplacement(fakeGround.geometry, displacementMap);
+			((ground().model as Mesh).material as MeshPhongMaterial).displacementMap = displacementTexture
 		}
 		if (canvases[selectedColor()] === 'water') {
 			const mat = waterMat()

@@ -123,6 +123,7 @@ export interface Entity {
 	outline?: With<Entity, 'model'>
 	// ! Camp
 	door?: direction
+	doorLevel?: number
 	tree?: true
 	grass?: true
 	instanceHandle?: InstanceHandle

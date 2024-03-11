@@ -3,7 +3,7 @@ import type { Object3D, Object3DEventMap } from 'three'
 import { Box3, Mesh, Quaternion, Vector3 } from 'three'
 
 import { clone } from 'three/examples/jsm/utils/SkeletonUtils.js'
-import type { models } from '@assets/assets'
+import type { models, vegetation } from '@assets/assets'
 import type { Entity } from '@/global/entity'
 import type { CollidersData } from '@/debug/LevelEditor'
 import type { customModel } from '@/debug/props'
@@ -21,7 +21,7 @@ export const getSize = (model: Object3D<Object3DEventMap>) => {
 	boxSize.getSize(size)
 	return size
 }
-export const getBoundingBox = (modelName: models | customModel, model: Object3D<Object3DEventMap>, colliderData: CollidersData): Entity => {
+export const getBoundingBox = (modelName: models | customModel | vegetation, model: Object3D<Object3DEventMap>, colliderData: CollidersData): Entity => {
 	const collider = colliderData[modelName]
 	if (collider) {
 		const size = new Vector3()

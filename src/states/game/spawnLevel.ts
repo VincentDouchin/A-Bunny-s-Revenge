@@ -229,7 +229,14 @@ export const spawnGroundAndTrees = (level: Level) => {
 }
 
 export const spawnFarm: System<FarmRessources> = () => {
-	const level = levelsData.levels.find(level => level.farm)!
+	const level = levelsData.levels.find(level => level.farm)
+	if (!level) throw new Error('can\'t find farm')
+	ecs.add({ map: level.id })
+	spawnGroundAndTrees(level)
+}
+export const spawnCrossRoad = () => {
+	const level = levelsData.levels.find(level => level.crossRoad)
+	if (!level) throw new Error('can\'t find crossroad')
 	ecs.add({ map: level.id })
 	spawnGroundAndTrees(level)
 }
@@ -248,7 +255,7 @@ export const spawnDungeon: System<DungeonRessources> = ({ dungeon }) => {
 }
 
 const mapQuery = ecs.with('map')
-export const spawnLevelData: System<FarmRessources | DungeonRessources> = (ressources) => {
+export const spawnLevelData: System<FarmRessources | DungeonRessources | void> = (ressources) => {
 	for (const { map } of mapQuery) {
 		const { levelData, colliderData } = levelsData
 		for (const [entityId, entityData] of Object.entries(levelData ?? {})) {

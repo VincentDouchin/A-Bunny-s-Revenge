@@ -13,7 +13,9 @@ import { type Entity, Interactable, MenuType } from '@/global/entity'
 import { assets, ecs } from '@/global/init'
 import { menuInputMap } from '@/global/inputMaps'
 import { save } from '@/global/save'
-import { type DungeonRessources, type FarmRessources, campState } from '@/global/states'
+import type { DungeonRessources, FarmRessources } from '@/global/states'
+import { dungeonState, genDungeonState } from '@/global/states'
+
 import type { direction } from '@/lib/directions'
 import { doorClosed } from '@/particles/doorClosed'
 import { RoomType } from '@/states/dungeon/generateDungeon'
@@ -41,10 +43,11 @@ export const getModel = (key: models | customModel | vegetation) => {
 export interface ExtraData {
 	door: {
 		direction: direction
+		doorLevel: number
 	}
 }
 
-type BundleFn<E extends EntityData<any>> = (entity: With<Entity, 'entityId' | 'model' | 'position' | 'rotation'>, data: NonNullable<E>, ressources: FarmRessources | DungeonRessources) => Entity
+type BundleFn<E extends EntityData<any>> = (entity: With<Entity, 'entityId' | 'model' | 'position' | 'rotation'>, data: NonNullable<E>, ressources: FarmRessources | DungeonRessources | void) => Entity
 
 export interface PlacableProp<N extends string> {
 	name: N
@@ -166,7 +169,7 @@ export const props: PlacableProp<propNames>[] = [
 				bodyDesc: RigidBodyDesc.fixed(),
 				colliderDesc: ColliderDesc.cuboid(3, 3, 3).setSensor(true),
 			}
-			if (crop) {
+			if (crop && ressources) {
 				const grow = 'previousState' in ressources && ressources.previousState === 'dungeon'
 				newEntity.withChildren = (parent) => {
 					const planted = ecs.add({
@@ -189,14 +192,17 @@ export const props: PlacableProp<propNames>[] = [
 	},
 	{
 		name: 'door',
-		data: { direction: 'north' },
+		data: { direction: 'north', doorLevel: 0 },
 		models: ['door'],
 		bundle: (entity, data, ressources) => {
-			if (!campState.enabled) {
+			if (dungeonState.enabled) {
 				entity.colliderDesc!.setSensor(false)
 				entity.emitter = doorClosed()
 			}
-			if ('dungeon' in ressources) {
+			if (genDungeonState.enabled && data.data.direction === 'north') {
+				entity.doorLevel = data.data.doorLevel
+			}
+			if (ressources && 'dungeon' in ressources) {
 				const isStart = ressources.dungeon.type === RoomType.Entrance && ressources.firstEntry
 				if (isStart ? ressources.dungeon.doors[data.data.direction] === null : data.data.direction === ressources.direction) {
 					ecs.add({
@@ -205,6 +211,12 @@ export const props: PlacableProp<propNames>[] = [
 						rotation: entity.rotation.clone().multiply(new Quaternion().setFromAxisAngle(new Vector3(0, 1, 0), Math.PI)),
 					})
 				}
+			} else if (genDungeonState.enabled && data.data.direction === 'south') {
+				ecs.add({
+					...playerBundle(false, 5, true),
+					position: new Vector3(...data.position).add(new Vector3(0, 0, -20).applyQuaternion(entity.rotation)),
+					rotation: entity.rotation.clone().multiply(new Quaternion().setFromAxisAngle(new Vector3(0, 1, 0), Math.PI)),
+				})
 			}
 			return { door: data.data.direction, ...entity }
 		},

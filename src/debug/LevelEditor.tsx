@@ -1,9 +1,10 @@
-import type { models } from '@assets/assets'
+import type { models, vegetation } from '@assets/assets'
 import type { RigidBodyType } from '@dimforge/rapier3d-compat'
 import { delMany, get, set } from 'idb-keyval'
 import type { With } from 'miniplex'
 import { For, Show, createEffect, createMemo, createSignal, onCleanup, onMount } from 'solid-js'
-import { Mesh, MeshStandardMaterial, Quaternion, Raycaster, Vector2, Vector3 } from 'three'
+import { Mesh, MeshBasicMaterial, MeshStandardMaterial, PlaneGeometry, Quaternion, Raycaster, Vector2, Vector3 } from 'three'
+
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls'
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader'
 import { generateUUID } from 'three/src/math/MathUtils'
@@ -22,13 +23,13 @@ import { renderer, scene } from '@/global/rendering'
 import { campState, dungeonState } from '@/global/states'
 import { throttle } from '@/lib/state'
 import { ToonMaterial } from '@/shaders/GroundShader'
-import { spawnGroundAndTrees, spawnLevelData } from '@/states/game/spawnLevel'
+import { HEIGHT, getdisplacementMap, setDisplacement, spawnGroundAndTrees, spawnLevelData } from '@/states/game/spawnLevel'
 import { playerBundle } from '@/states/game/spawnPlayer'
 import { getScreenBuffer } from '@/utils/buffer'
 import { getRandom } from '@/utils/mapFunctions'
 
 export interface EntityData<T extends Record<string, any>> {
-	model: models | customModel
+	model: models | customModel | vegetation
 	scale: number
 	position: [number, number, number]
 	rotation: [number, number, number, number]
@@ -37,7 +38,7 @@ export interface EntityData<T extends Record<string, any>> {
 }
 
 export type LevelData = Record<string, EntityData<any> | null>
-export type CollidersData = Partial<Record<models | customModel, {
+export type CollidersData = Partial<Record<models | customModel | vegetation, {
 	type: RigidBodyType
 	size?: [number, number, number]
 	sensor: boolean
@@ -56,6 +57,7 @@ export interface Level {
 	water: HTMLCanvasElement
 	farm: boolean
 	dungeon: boolean
+	crossRoad: boolean
 	id: string
 	name: string
 	size: { x: number, y: number }
@@ -102,11 +104,12 @@ export const LevelEditor = () => {
 					const [random, setRandom] = createSignal(false)
 					const [selectedProp, setSelectedProp] = createSignal<PlacableProp<any> | null>(null)
 					const [selectedEntity, setSelectedEntity] = createSignal<With<Entity, 'entityId' | 'model' | 'position' | 'rotation'> | null>(null)
-					const [selectedModel, setSelectedModel] = createSignal<null | models | customModel>(null)
+					const [selectedModel, setSelectedModel] = createSignal<null | models | customModel | vegetation>(null)
 					const [levelData, setLevelData] = createSignal<LevelData>(levelsData.levelData)
 					const [colliderData, setColliderData] = createSignal<CollidersData>(levelsData.colliderData)
 					// ! LEVELS
 					const [activeLevelIndex, setActiveLevelIndex] = createSignal<number>(levelsData.levels.findIndex(x => x.id === map())!)
+					let fakeGround: null | Mesh<PlaneGeometry> = null
 					const [levels, setLevels] = createSignal<Level[]>(levelsData.levels)
 					const newLevel = () => {
 						const id = generateUUID()
@@ -121,6 +124,7 @@ export const LevelEditor = () => {
 							dungeon: false,
 							name: `level n°${x.length + 1}`,
 							id,
+							crossRoad: false,
 						}])
 						setActiveLevelIndex(levels().length - 1)
 					}
@@ -159,11 +163,22 @@ export const LevelEditor = () => {
 							return l
 						}))
 					}
+					const setFakeGround = (level: Level) => {
+						if (fakeGround) {
+							fakeGround.removeFromParent()
+						}
+						fakeGround = new Mesh(new PlaneGeometry(level.size.x, level.size.y, level.size.x, level.size.y), new MeshBasicMaterial({ opacity: 0, transparent: true }))
+						fakeGround.rotation.setFromQuaternion(new Quaternion().setFromAxisAngle(new Vector3(1, 0, 0), -Math.PI / 2))
+						fakeGround.position.y = -HEIGHT / 4
+						setDisplacement(fakeGround.geometry, getdisplacementMap(level, false))
+						scene.add(fakeGround)
+					}
 					const switchLevel = (level: Level) => {
 						setActiveLevelIndex(levels().indexOf(level))
 						for (const ground of groundQuery) {
 							ecs.remove(ground)
 						}
+						setFakeGround(level)
 						dungeonState.disable()
 						campState.disable()
 
@@ -209,6 +224,7 @@ export const LevelEditor = () => {
 							setSelectedModel(null)
 						}
 					})
+					const activeLevel = createMemo(() => levels()[activeLevelIndex()])
 					onMount(async () => {
 						const camera = cameraQuery.first?.camera
 						if (!camera) return
@@ -224,7 +240,7 @@ export const LevelEditor = () => {
 							controls.enabled = !draw()
 						})
 						controls.update()
-
+						setFakeGround(activeLevel())
 						ui.updateSync(() => controls.update())
 						createEffect(() => {
 							if (selectedEntity()) {
@@ -274,7 +290,7 @@ export const LevelEditor = () => {
 						const intersects = raycaster.intersectObjects(scene.children)
 						if (!draw()) {
 							if (selected && propModel) {
-								const position = intersects.find(x => x.object === groundQuery.first?.model)?.point
+								const position = intersects.find(x => x.object === fakeGround)?.point
 								if (!position) return
 								const scale = colliderData()[propModel]?.scale ?? 1
 								const model = getModel(propModel)
@@ -337,6 +353,7 @@ export const LevelEditor = () => {
 						renderer.domElement.removeEventListener('click', clickListener)
 						renderer.domElement.removeEventListener('contextmenu', unSelect)
 						params.pixelation = true
+						fakeGround && fakeGround.removeFromParent()
 					})
 					const update = (change: (level: Level) => void) => {
 						setLevels(x => x.map((l, i) => {
@@ -346,7 +363,7 @@ export const LevelEditor = () => {
 							return l
 						}))
 					}
-					const activeLevel = createMemo(() => levels()[activeLevelIndex()])
+
 					const updateLevelSize = (change: (l: Level) => void) => {
 						update(change)
 
@@ -392,6 +409,10 @@ export const LevelEditor = () => {
 								<div>
 									dungeon
 									<input type="checkbox" checked={activeLevel().dungeon} onChange={e => update(l => l.dungeon = e.target.checked)}></input>
+								</div>
+								<div>
+									crossRoad
+									<input type="checkbox" checked={activeLevel().crossRoad} onChange={e => update(l => l.crossRoad = e.target.checked)}></input>
 								</div>
 								<div>
 									width
@@ -472,7 +493,7 @@ export const LevelEditor = () => {
 									</Show>
 									<Show when={selectedTab() === 'draw map'}>
 										<Show when={activeLevel()}>
-											{active => <MapEditor activeLevel={active} updateLevel={updateLevel(active())} switchLevel={() => switchLevel(activeLevel())} />}
+											{active => <MapEditor activeLevel={active} updateLevel={updateLevel(active())} switchLevel={() => switchLevel(activeLevel())} fakeGround={fakeGround} />}
 										</Show>
 									</Show>
 

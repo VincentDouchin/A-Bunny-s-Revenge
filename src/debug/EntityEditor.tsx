@@ -178,17 +178,17 @@ export const EntityEditor = ({ entity, levelData, setLevelData, setSelectedEntit
 				return (
 					<div>
 						<Show when={data()}>
-							{(data) => {
+							{(data: Accessor<ExtraData[keyof ExtraData]>) => {
 								return (
 									<For each={entries(data())}>
 										{([key, val]) => {
-											const updateData = (newData: ExtraData[keyof ExtraData]) => updateEntity({ data: { ...data, ...newData } })
+											const updateData = (newData: ExtraData[keyof ExtraData]) => updateEntity({ data: { ...data(), ...newData } })
 											return (
 												<div>
 													{key === 'direction' && (
 														<select
 															value={val}
-															onChange={e => updateData({ ...data, direction: e.target.value as direction })}
+															onChange={e => updateData({ ...data(), direction: e.target.value as direction })}
 														>
 															<option value="north">north</option>
 															<option value="south">south</option>
@@ -196,6 +196,7 @@ export const EntityEditor = ({ entity, levelData, setLevelData, setSelectedEntit
 															<option value="east">east</option>
 														</select>
 													)}
+													{key === 'doorLevel' && (<input type="number" value={val} onChange={e => updateData({ ...data(), doorLevel: e.target.valueAsNumber })}></input>) }
 												</div>
 											)
 										}}
@@ -336,6 +337,7 @@ export const EntityEditor = ({ entity, levelData, setLevelData, setSelectedEntit
 											</select>
 										</div>
 										<div>
+											sensor
 											<input
 												type="checkbox"
 												checked={modelCollider()?.sensor}
@@ -347,7 +349,7 @@ export const EntityEditor = ({ entity, levelData, setLevelData, setSelectedEntit
 													},
 												})}
 											>
-												sensor
+
 											</input>
 										</div>
 									</div>

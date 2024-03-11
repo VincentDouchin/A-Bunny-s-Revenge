@@ -1,9 +1,8 @@
 import { encounters } from './encounters'
-import type { Level } from '@/debug/LevelEditor'
 import type { enemy } from '@/constants/enemies'
 import { enemyGroups } from '@/constants/enemies'
+import type { Level } from '@/debug/LevelEditor'
 import { levelsData } from '@/global/init'
-import { dungeonState } from '@/global/states'
 import type { direction } from '@/lib/directions'
 import { otherDirection } from '@/lib/directions'
 import { getRandom, mapValues } from '@/utils/mapFunctions'
@@ -243,8 +242,4 @@ export const genDungeon = (roomsAmount: number, npc: boolean) => {
 	}
 	const filledRooms = assignPlanAndEnemies(rooms)
 	return filledRooms
-}
-export const generateDungeon = () => {
-	const dungeon = genDungeon(5, true).find(room => room.type === RoomType.Entrance)!
-	dungeonState.enable({ dungeon, direction: 'south', firstEntry: true, playerHealth: 5 })
 }

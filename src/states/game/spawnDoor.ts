@@ -1,12 +1,12 @@
 import { DoubleSide, Group, Mesh, MeshBasicMaterial, PlaneGeometry, ShaderMaterial } from 'three'
-import { RoomType } from '../dungeon/generateDungeon'
+import { RoomType, genDungeon } from '../dungeon/generateDungeon'
+import { Faction } from '@/global/entity'
 import { ecs, world } from '@/global/init'
 import type { DungeonRessources } from '@/global/states'
 import { campState, dungeonState, genDungeonState } from '@/global/states'
 import { otherDirection } from '@/lib/directions'
 import type { System } from '@/lib/state'
 import vertexShader from '@/shaders/glsl/main.vert?raw'
-import { Faction } from '@/global/entity'
 
 export const doorSide = () => {
 	const mesh = new Mesh(
@@ -69,6 +69,21 @@ export const collideWithDoorCamp = () => {
 		for (const player of playerQuery) {
 			if (world.intersectionPair(door.collider, player.collider)) {
 				genDungeonState.enable()
+			}
+		}
+	}
+}
+
+export const collideWithDoorClearing = () => {
+	for (const door of doorQuery) {
+		for (const player of playerQuery) {
+			if (world.intersectionPair(door.collider, player.collider)) {
+				if (door.doorLevel !== undefined) {
+					const dungeon = genDungeon(5 + door.doorLevel * 5, true).find(room => room.type === RoomType.Entrance)!
+					dungeonState.enable({ dungeon, direction: 'south', firstEntry: true, playerHealth: 5 })
+				} else {
+					campState.enable({})
+				}
 			}
 		}
 	}
