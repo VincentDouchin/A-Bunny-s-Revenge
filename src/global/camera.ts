@@ -1,12 +1,21 @@
 import { Tween } from '@tweenjs/tween.js'
-import { PerspectiveCamera, Vector3 } from 'three'
+import { OrthographicCamera, Vector3 } from 'three'
 import { params } from './context'
 import { ecs, time } from './init'
+import { height, width } from './rendering'
 import { debugState } from '@/debug/debugState'
 
 export const initCamera = () => {
-	const camera = new PerspectiveCamera(params.fov, window.innerWidth / window.innerHeight, 0.1, 1000)
-	camera.zoom = window.innerWidth / window.innerHeight / params.zoom
+	const camera = new OrthographicCamera(
+		-width / 2 / params.zoom,
+		width / 2 / params.zoom,
+		height / 2 / params.zoom,
+		-height / 2 / params.zoom,
+		0.1,
+		1000,
+	)
+	// const camera = new PerspectiveCamera(params.fov, window.innerWidth / window.innerHeight, 0.1, 1000)
+	// camera.zoom = window.innerWidth / window.innerHeight / params.zoom
 	camera.updateProjectionMatrix()
 	ecs.add({
 		camera,

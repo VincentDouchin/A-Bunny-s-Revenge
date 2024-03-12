@@ -98,7 +98,8 @@ export const DebugUi = () => {
 		const camera = cameraQuery.first
 		if (!camera) return
 		if (camera.camera instanceof PerspectiveCamera) {
-			camera.camera.zoom = window.innerWidth / window.innerHeight / params.zoom
+			camera.camera.zoom = window.innerWidth / window.innerHeight / zoom
+			camera.camera.updateProjectionMatrix()
 		}
 		if (camera.camera instanceof OrthographicCamera) {
 			camera.camera.left = -width / 2 / params.zoom
