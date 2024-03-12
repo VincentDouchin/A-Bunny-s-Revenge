@@ -42,7 +42,7 @@ export const doorSide = () => {
 const doorQuery = ecs.with('collider', 'door')
 const playerQuery = ecs.with('collider', 'playerControls', 'currentHealth').without('ignoreDoor')
 const enemyQuery = ecs.with('faction').where(({ faction }) => faction === Faction.Enemy)
-export const collideWithDoor: System<DungeonRessources> = ({ dungeon }) => {
+export const collideWithDoor: System<DungeonRessources> = ({ dungeon, dungeonLevel }) => {
 	for (const door of doorQuery) {
 		if (enemyQuery.size === 0 && !door.collider.isSensor()) {
 			door.collider.setSensor(true)
@@ -52,7 +52,7 @@ export const collideWithDoor: System<DungeonRessources> = ({ dungeon }) => {
 			if (world.intersectionPair(door.collider, player.collider)) {
 				const nextRoom = dungeon.doors[door.door]
 				if (nextRoom) {
-					dungeonState.enable({ dungeon: nextRoom, direction: otherDirection[door.door], playerHealth: player.currentHealth, firstEntry: false })
+					dungeonState.enable({ dungeon: nextRoom, direction: otherDirection[door.door], playerHealth: player.currentHealth, firstEntry: false, dungeonLevel })
 				} else {
 					if (dungeon.type === RoomType.Boss) {
 						campState.enable({ previousState: 'dungeon' })
@@ -80,7 +80,7 @@ export const collideWithDoorClearing = () => {
 			if (world.intersectionPair(door.collider, player.collider)) {
 				if (door.doorLevel !== undefined) {
 					const dungeon = genDungeon(5 + door.doorLevel * 5, true).find(room => room.type === RoomType.Entrance)!
-					dungeonState.enable({ dungeon, direction: 'south', firstEntry: true, playerHealth: 5 })
+					dungeonState.enable({ dungeon, direction: 'south', firstEntry: true, playerHealth: 5, dungeonLevel: door.doorLevel })
 				} else {
 					campState.enable({})
 				}

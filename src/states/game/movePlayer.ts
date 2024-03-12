@@ -52,10 +52,10 @@ export const applyMove = () => {
 	for (const entity of movementQuery) {
 		const { body, rotation, stateMachine, movementForce, speed, state } = entity
 		const force = movementForce.clone().multiplyScalar(speed * params.speedUp * time.delta)
-		force.setY(0).multiplyScalar(state === 'attacking' ? 0.3 : 1)
+		force.setY(0).multiplyScalar(['waitingAttack', 'attacking'].includes(state) ? 0.3 : 1)
 		const moving = force.length() > 0
 		moving && rotation.setFromAxisAngle(new Vector3(0, 1, 0), Math.atan2(force.x, force.z))
-		if (state !== 'picking' && state !== 'waitingAttack' && state !== 'hit' && state !== 'dying' && state !== 'dead') {
+		if (state !== 'picking' && state !== 'hit' && state !== 'dying' && state !== 'dead') {
 			if (moving) {
 				stateMachine.enter('running', entity)
 			} else if (state !== 'attacking') {

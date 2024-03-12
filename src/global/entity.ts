@@ -164,6 +164,8 @@ export interface Entity {
 	// ! Enemies
 	enemyName?: enemy
 	drops?: Item[]
+	healthBar?: true
+	healthBarContainer?: CSS2DObject
 	// ! Particles
 	emitter?: ParticleEmitter<Object3DEventMap>
 	autoDestroy?: true

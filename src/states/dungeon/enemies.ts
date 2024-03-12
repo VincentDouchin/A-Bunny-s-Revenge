@@ -11,8 +11,9 @@ import { modelColliderBundle } from '@/lib/models'
 import { stateBundle } from '@/lib/stateMachine'
 import type { Subscriber } from '@/lib/state'
 import type { DungeonRessources } from '@/global/states'
+import { Stat } from '@/lib/stats'
 
-export const enemyBundle = (name: enemy) => {
+export const enemyBundle = (name: enemy, level: number) => {
 	const enemy = enemyData[name]
 	const model = assets.characters[name]
 	model.scene.scale.setScalar(enemy.scale)
@@ -21,7 +22,8 @@ export const enemyBundle = (name: enemy) => {
 	return {
 		...bundle,
 		[enemy.animator]: new Animator(bundle.model, model.animations),
-		...healthBundle(enemy.health),
+		...healthBundle(enemy.health * (level + 1)),
+		strength: new Stat(1 + level),
 		inMap: true,
 		faction: Faction.Enemy,
 		enemyName: name,
@@ -29,6 +31,7 @@ export const enemyBundle = (name: enemy) => {
 		speed: 100,
 		drops: enemy.drops(),
 		sensor: true,
+		healthBar: true,
 		...stateBundle<'dying' | 'idle' | 'running' | 'hit' | 'dead' | 'waitingAttack' | 'attacking' | 'attackCooldown'>('idle', {
 			idle: ['running', 'hit', 'waitingAttack'],
 			running: ['idle', 'hit', 'waitingAttack'],

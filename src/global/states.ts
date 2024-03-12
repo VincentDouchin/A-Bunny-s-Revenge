@@ -19,6 +19,7 @@ export interface DungeonRessources {
 	direction: direction
 	playerHealth: number
 	firstEntry: boolean
+	dungeonLevel: number
 }
 
 export const dungeonState = app.create<DungeonRessources>()

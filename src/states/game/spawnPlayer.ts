@@ -54,14 +54,15 @@ export const playerBundle = (dungeon: boolean, health: number, addHealth: boolea
 		critDamage: new Stat(0.20),
 		lastStep: { right: false, left: false },
 		...healthBundle(5, health),
-		...stateBundle<'idle' | 'running' | 'picking' | 'hit' | 'dying' | 'dead' | 'attacking'>('idle', {
-			idle: ['running', 'picking', 'hit', 'attacking'],
-			running: ['idle', 'hit', 'attacking'],
+		...stateBundle<'idle' | 'running' | 'picking' | 'hit' | 'dying' | 'dead' | 'attacking' | 'waitingAttack'>('idle', {
+			idle: ['running', 'picking', 'hit', 'waitingAttack'],
+			running: ['idle', 'hit', 'waitingAttack'],
 			picking: ['idle'],
 			hit: ['idle', 'dying'],
 			dying: ['dead'],
 			attacking: ['idle', 'dying'],
 			dead: [],
+			waitingAttack: ['attacking'],
 		}),
 		combo: {
 			lastAttack: 0,

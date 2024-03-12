@@ -16,6 +16,7 @@ import { tweenPlugin } from './lib/updateTween'
 import { enemyAttackPlayer, playerAttack, spawnDrops } from './states/dungeon/battle'
 import { removeEnemyFromSpawn } from './states/dungeon/enemies'
 import { killAnimation, killEntities } from './states/dungeon/health'
+import { addHealthBarContainer } from './states/dungeon/healthBar'
 import { endBattleSpawnChest } from './states/dungeon/spawnChest'
 import { harvestCrop, initPlantableSpotsInteractions, interactablePlantableSpot, plantSeed, updateCropsSave } from './states/farm/farming'
 import { closePlayerInventory, disableInventoryState, enableInventoryState, interact, openPlayerInventory } from './states/farm/openInventory'
@@ -36,7 +37,7 @@ import { UI } from './ui/UI'
 
 coreState
 	.addPlugins(debugPlugin)
-	.addPlugins(hierarchyPlugin, physicsPlugin, transformsPlugin, addToScene('camera', 'light', 'mesh', 'model', 'dialogContainer', 'batchRenderer', 'emitter', 'interactionContainer', 'minigameContainer'), updateModels, particlesPlugin, tweenPlugin)
+	.addPlugins(hierarchyPlugin, physicsPlugin, transformsPlugin, addToScene('camera', 'light', 'mesh', 'model', 'dialogContainer', 'batchRenderer', 'emitter', 'interactionContainer', 'minigameContainer', 'healthBarContainer'), updateModels, particlesPlugin, tweenPlugin)
 	.addSubscriber(...target, preCompileShaders, initTone)
 	.onEnter(initCamera, initThree, ui.render(UI))
 	.onPreUpdate(coroutines.tick, savePlayerFromTheEmbraceOfTheVoid)
@@ -48,7 +49,7 @@ setupState
 	.enable()
 gameState
 	.onEnter()
-	.addSubscriber(initializeCameraPosition, bobItems, enableInventoryState, killAnimation, ...playerFSM, ...beeFSM, ...shagaFSM, popItems)
+	.addSubscriber(initializeCameraPosition, bobItems, enableInventoryState, killAnimation, ...playerFSM, ...beeFSM, ...shagaFSM, popItems, addHealthBarContainer)
 	.onUpdate(runIf(canPlayerMove, movePlayer), runIf(() => !pausedState.enabled, applyMove, playerSteps, dayNight, updateTimeUniforms))
 	.onUpdate(collectItems, touchItem, talkToNPC, stopItems, runIf(() => !openMenuState.enabled, pauseGame, interact))
 	.enable()
@@ -67,6 +68,7 @@ genDungeonState
 	.onEnter(spawnCrossRoad, spawnLevelData)
 	.onUpdate(collideWithDoorClearing)
 	.onExit(despawnOfType('map'))
+
 dungeonState
 	.addSubscriber(spawnDrops, losingBattle, endBattleSpawnChest, removeEnemyFromSpawn)
 	.onEnter(spawnDungeon, spawnLevelData)
@@ -74,7 +76,8 @@ dungeonState
 	.onExit(despawnOfType('map'))
 pausedState
 	.onExit(() => time.reset())
-
+// const dungeon = genDungeon(5, true).find(room => room.type === RoomType.Entrance)!
+// dungeonState.enable({ dungeon, direction: 'south', firstEntry: true, playerHealth: 5 })
 const animate = async () => {
 	app.update()
 	requestAnimationFrame(animate)

@@ -240,11 +240,11 @@ export const spawnCrossRoad = () => {
 	ecs.add({ map: level.id })
 	spawnGroundAndTrees(level)
 }
-export const spawnDungeon: System<DungeonRessources> = ({ dungeon }) => {
+export const spawnDungeon: System<DungeonRessources> = ({ dungeon, dungeonLevel }) => {
 	ecs.add({ map: dungeon.plan.id, dungeon })
 	for (const enemy of dungeon.enemies) {
 		ecs.add({
-			...enemyBundle(enemy),
+			...enemyBundle(enemy, dungeonLevel),
 			position: new Vector3(between(-10, 10), 0, between(-10, 10)),
 		})
 	}

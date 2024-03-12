@@ -6,7 +6,6 @@ export class Animator<K extends string> extends AnimationMixer {
 	current?: K
 	action?: AnimationAction
 	#animationClips: AnimationClip[]
-	animationQueue: AnimationClip[] = []
 	constructor(scene: Object3D<Object3DEventMap>, animations: AnimationClip[]) {
 		super(scene)
 		this.#animationClips = animations

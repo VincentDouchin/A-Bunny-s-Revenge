@@ -43,14 +43,19 @@ const calculateDamage = (entity: With<Entity, 'strength' | 'critChance' | 'critD
 	return [damage, isCrit] as const
 }
 
-const enemiesQuery = entities.where(({ faction }) => faction === Faction.Enemy)
+const enemiesQuery = entities.with('strength').where(({ faction }) => faction === Faction.Enemy)
 const playerQuery = entities.with('playerControls', 'strength', 'body', 'critChance', 'critDamage', 'speed', 'state', 'stateMachine', 'combo', 'playerAnimator').where(({ faction }) => faction === Faction.Player)
 export const playerAttack = () => {
 	for (const player of playerQuery) {
 		const { playerControls, sensorCollider, position, state, stateMachine, combo, playerAnimator } = player
 		if (['idle', 'running'].includes(state)) {
+			if (playerControls.get('primary').pressed) {
+				stateMachine.enter('waitingAttack', player)
+			}
+		}
+		if (state === 'waitingAttack') {
 			if (playerControls.get('primary').justReleased) {
-				if (combo.heavyAttack >= 500) {
+				if (combo.heavyAttack >= 2000) {
 					combo.lastAttack = 2
 					combo.heavyAttack = 0
 				}
@@ -70,20 +75,22 @@ export const playerAttack = () => {
 			}
 			for (const enemy of enemiesQuery) {
 				if (world.intersectionPair(sensorCollider, enemy.collider)) {
-					if (enemy.stateMachine.enter('hit', enemy)) {
+					if (player.playerAnimator.action && player.playerAnimator.action.time > 0.5) {
+						if (enemy.stateMachine.enter('hit', enemy)) {
 						// ! damage
-						const [damage, crit] = calculateDamage(player)
-						enemy.currentHealth -= damage
-						const emitter = impact().emitter
-						emitter.position.y = 5
-						ecs.update(enemy, { emitter })
+							const [damage, crit] = calculateDamage(player)
+							enemy.currentHealth -= damage
+							const emitter = impact().emitter
+							emitter.position.y = 5
+							ecs.update(enemy, { emitter })
 
-						spawnDamageNumber(damage, enemy, crit)
-						// ! knockback
-						const force = position.clone().sub(enemy.position).normalize().multiplyScalar(-50000)
-						enemy.body.applyImpulse(force, true)
-						// ! damage flash
-						addTweenTo(enemy)(new Tween(enemy.group.scale).to(new Vector3(0.8, 1.2, 0.8), 200).repeat(1).yoyo(true), flash(enemy))
+							spawnDamageNumber(damage, enemy, crit)
+							// ! knockback
+							const force = position.clone().sub(enemy.position).normalize().multiplyScalar(-50000)
+							enemy.body.applyImpulse(force, true)
+							// ! damage flash
+							addTweenTo(enemy)(new Tween(enemy.group.scale).to(new Vector3(0.8, 1.2, 0.8), 200).repeat(1).yoyo(true), flash(enemy))
+						}
 					}
 				}
 			}
@@ -132,7 +139,7 @@ export const enemyAttackPlayer = () => {
 			case 'attacking': {
 				for (const player of playerQuery) {
 					if (world.intersectionPair(player.collider, enemy.sensorCollider)) {
-						player.currentHealth -= 1
+						player.currentHealth = Math.max(0, player.currentHealth - enemy.strength.value)
 						addCameraShake()
 						player.stateMachine.enter('hit', player)
 						ecs.update(player, { tween: flash(player) })
