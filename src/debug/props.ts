@@ -229,17 +229,11 @@ export const props: PlacableProp<propNames>[] = [
 				...entity,
 				withChildren: (parent) => {
 					entity.model.traverse((node) => {
-						if (node.name.includes('window') && node instanceof Mesh && node.material instanceof MeshPhongMaterial) {
-							node.material.emissive = new Color(0xFFFF00)
-							node.material.emissiveIntensity = 1
-							ecs.add({ parent, emissiveMat: node.material })
-						}
 						if (node.name.includes('light')) {
 							const nightLight = new PointLight(0xFFFF00, 1, 30, 0.01)
 							node.add(nightLight)
 							ecs.add({ parent, nightLight })
-						}
-						if (node.name === 'door') {
+						} else if (node.name === 'door') {
 							const position = node.position.clone().multiply(entity.model.scale)
 							ecs.add({
 								parent,
@@ -251,6 +245,8 @@ export const props: PlacableProp<propNames>[] = [
 								bodyDesc: RigidBodyDesc.fixed().lockRotations(),
 								colliderDesc: ColliderDesc.cuboid(5, 7, 1).setSensor(true),
 							})
+						} else if (node instanceof Mesh) {
+							ecs.add({ parent, emissiveMat: node.material })
 						}
 					})
 				},

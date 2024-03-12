@@ -1,6 +1,6 @@
 import type { characters, fruit_trees, icons, models, music, particles, textures, trees, vegetation, weapons } from '@assets/assets'
 import type { ColorRepresentation, Material, Side } from 'three'
-import { CanvasTexture, DoubleSide, Mesh, MeshStandardMaterial, NearestFilter, RepeatWrapping, SRGBColorSpace, TextureLoader } from 'three'
+import { CanvasTexture, Color, DoubleSide, Mesh, MeshStandardMaterial, NearestFilter, RepeatWrapping, SRGBColorSpace, TextureLoader } from 'three'
 
 import type { GLTF } from 'three/examples/jsm/loaders/GLTFLoader'
 import { Player } from 'tone'
@@ -43,6 +43,8 @@ const loadGLBAsToon = (options?: { color?: ColorRepresentation, material?: (node
 	const toons = mapValues(glb, (glb, key) => {
 		glb.scene.traverse((node) => {
 			const map = webp ? entries(webp).find(([mapName]) => key.includes(getFileName(mapName)))?.[1] : undefined
+			const emissiveMap = webp ? entries(webp).find(([name]) => name.includes('emissive') && name.includes(getFileName(key)))?.[1] : undefined
+
 			if (node instanceof Mesh) {
 				if (node.material instanceof MeshStandardMaterial) {
 					node.material = options?.material
@@ -51,6 +53,11 @@ const loadGLBAsToon = (options?: { color?: ColorRepresentation, material?: (node
 
 					if (options?.side) node.material.side = options.side
 					if (options?.transparent) node.material.transparent = true
+					if (emissiveMap) {
+						node.material.emissiveMap = emissiveMap
+						node.material.emissive = new Color(0xFFFF00)
+						node.material.emissiveIntensity = 1
+					}
 				}
 				node.castShadow = true
 				node.receiveShadow = false
