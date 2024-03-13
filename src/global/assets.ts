@@ -4,7 +4,8 @@ import { CanvasTexture, Color, DoubleSide, Mesh, MeshStandardMaterial, NearestFi
 
 import type { GLTF } from 'three/examples/jsm/loaders/GLTFLoader'
 import { Player } from 'tone'
-import { getExtension, getFileName, loadGLB, loadImage, textureLoader, thumbnail } from './assetLoaders'
+import assetManifest from '@assets/assetManifest.json'
+import { getExtension, getFileName, loadGLB, loadImage, loaderProgress, textureLoader, thumbnail } from './assetLoaders'
 import type { crops, fruits } from './entity'
 import { keys } from '@/constants/keys'
 import { CharacterMaterial, GrassMaterial, ToonMaterial, TreeMaterial } from '@/shaders/GroundShader'
@@ -27,13 +28,16 @@ const typeGlobEager = <K extends string>(glob: GlobEager) => <F extends (glob: G
 	return fn(glob) as Record<K, ReturnType<F>[string]>
 }
 
-const loadGLBAsToon = (options?: { color?: ColorRepresentation, material?: (node: Mesh<any, MeshStandardMaterial>, map?: CanvasTexture) => Material, side?: Side, transparent?: true }) => async (glob: GlobEager) => {
+const loadGLBAsToon = (loader: (key: string) => void, options?: { color?: ColorRepresentation, material?: (node: Mesh<any, MeshStandardMaterial>, map?: CanvasTexture) => Material, side?: Side, transparent?: true }) => async (glob: GlobEager) => {
 	const loaded = await asyncMapValues(glob, async (path, key) => {
 		const ext = getExtension(path)
 		if (ext === 'glb') {
-			return await loadGLB(path, key)
+			const glb = await loadGLB(path, key)
+			loader(key)
+			return glb
 		} else {
 			const texture = new CanvasTexture(await loadImage(path))
+			loader(key)
 			texture.colorSpace = SRGBColorSpace
 			texture.flipY = false
 			return texture
@@ -80,8 +84,8 @@ const overrideCropsColor = (node: Mesh<any, MeshStandardMaterial>) => {
 	const color = node.material.name in cropsColors ? cropsColors[node.material.name] : node.material?.color
 	return new ToonMaterial({ color })
 }
-const cropsLoader = async <K extends string>(glob: Glob) => {
-	const models = await typeGlob<crops>(glob)(loadGLBAsToon({ material: overrideCropsColor }))
+const cropsLoader = <K extends string>(loader: (key: string) => void) => async (glob: Glob) => {
+	const models = await typeGlob<crops>(glob)(loadGLBAsToon(loader, { material: overrideCropsColor }))
 	const grouped = groupByObject(models, key => key.split('_')[0].toLowerCase() as K)
 	return mapValues(grouped, (group) => {
 		const stages = new Array<GLTF>()
@@ -92,22 +96,28 @@ const cropsLoader = async <K extends string>(glob: Glob) => {
 	})
 }
 
-const fontLoader = async (glob: Glob) => {
+const fontLoader = (loader: (key: string) => void) => async (glob: GlobEager) => {
 	const fonts = mapKeys(glob, getFileName)
 	for (const [key, m] of entries(fonts)) {
 		const [name, weight] = key.split('-')
 		const font = new FontFace(name, `url(${m})`, { weight: weight ?? 'normal' })
 		await font.load()
+		loader(m)
 		document.fonts.add(font)
 	}
 }
 
-const levelImagesLoader = async (glob: GlobEager) => {
-	return mapKeys(await asyncMapValues(glob, loadImage), getFileName)
+const levelImagesLoader = (loader: (key: string) => void) => async (glob: GlobEager) => {
+	return mapKeys(await asyncMapValues(glob, async (src) => {
+		const img = await loadImage(src)
+		loader(src)
+		return img
+	}), getFileName)
 }
-const texturesLoader = async (glob: GlobEager) => {
+const texturesLoader = (loader: (key: string) => void) => async (glob: GlobEager) => {
 	return mapKeys(await asyncMapValues(glob, async (src) => {
 		const texture = await textureLoader.loadAsync(src)
+		loader(src)
 		texture.magFilter = NearestFilter
 		texture.minFilter = NearestFilter
 		texture.wrapS = RepeatWrapping
@@ -115,7 +125,8 @@ const texturesLoader = async (glob: GlobEager) => {
 		return texture
 	}), getFileName)
 }
-const iconsLoader = (glob: GlobEager) => {
+const iconsLoader = (loader: (key: string) => void) => (glob: GlobEager) => {
+	Object.keys(glob).forEach(loader)
 	return mapKeys(glob, getFileName)
 }
 
@@ -123,10 +134,11 @@ interface PackedJSON {
 	frames: Record<string, { frame: { x: number, y: number, w: number, h: number } }>
 }
 
-const buttonsLoader = async (glob: Record<string, any>) => {
+const buttonsLoader = (loader: (key: string) => void) => async (glob: Record<string, any>) => {
 	const { json, png } = mapKeys(glob, getExtension)
 	const packed = json as PackedJSON
 	const img = await loadImage(png)
+	loader(png)
 	const getImg = (frame: { x: number, y: number, w: number, h: number }) => {
 		const buffer = getScreenBuffer(frame.w, frame.h)
 		buffer.drawImage(img, frame.x, frame.y, frame.w, frame.h, 0, 0, frame.w, frame.h)
@@ -147,23 +159,36 @@ const overrideRockColor = (node: Mesh<any, MeshStandardMaterial>, map?: CanvasTe
 
 	return new ToonMaterial({ color, map: map ?? node.material?.map })
 }
-const loadVoices = async (glob: GlobEager) => {
-	const sounds = mapValues(glob, src => new Player(src))
+const loadVoices = (loader: (key: string) => void) => async (glob: GlobEager) => {
+	const sounds = mapValues(glob, (src) => {
+		const player = new Player(src)
+		loader(src)
+		return player
+	})
 	return mapKeys(sounds, k => getFileName(k).split('_')[1])
 }
-const loadSounds = async (glob: GlobEager) => {
-	const sounds = mapValues(glob, src => new Player(src))
+const loadSounds = (loader: (key: string) => void) => async (glob: GlobEager) => {
+	const sounds = mapValues(glob, (src) => {
+		const player = new Player(src)
+		loader(src)
+		return player
+	})
 	return mapKeys(sounds, getFileName)
 }
-const loadSteps = async (glob: GlobEager) => {
-	return Object.values(mapValues(glob, src => new Player(src)))
+const loadSteps = (loader: (key: string) => void) => async (glob: GlobEager) => {
+	return Object.values(mapValues(glob, (src) => {
+		const player = new Player(src)
+		loader(src)
+		return player
+	}))
 }
 
-const loadItems = async (glob: GlobEager) => {
+const loadItems = (loader: (key: string) => void) => async (glob: GlobEager) => {
 	const { glb, png } = groupByObject(glob, getExtension)
 	const [seedImages] = filterKeys(png, key => key.includes('_seeds'))
 	const models = await asyncMapValues(glb, async (url, key) => {
 		const model = await loadGLB(url, key)
+		loader(key)
 		model.scene.traverse((node) => {
 			if (node instanceof Mesh) {
 				node.material = new ToonMaterial({ map: node.material.map, transparent: true, side: DoubleSide, color: node.material.color })
@@ -174,6 +199,7 @@ const loadItems = async (glob: GlobEager) => {
 	const seed_bag = models[Object.keys(glb).find(k => k.includes('seeds'))!]
 	const seed_bags = await asyncMapValues(seedImages, async (path) => {
 		const text = new CanvasTexture(await loadImage(path))
+		loader(path)
 		text.flipY = false
 		text.colorSpace = SRGBColorSpace
 		text.magFilter = NearestFilter
@@ -194,38 +220,40 @@ const loadItems = async (glob: GlobEager) => {
 	return mapKeys(modelsAndthumbnails, k => getFileName(k as string))
 }
 
-const fruitTreeLoader = async (glob: GlobEager) => {
-	const glbs = await loadGLBAsToon()(glob)
+const fruitTreeLoader = (loader: (key: string) => void) => async (glob: GlobEager) => {
+	const glbs = await loadGLBAsToon(loader)(glob)
 	const perFruit = groupByObject(glbs, key => key.split('_')[0].toLowerCase())
 	return mapValues(perFruit, x => mapKeys(x, key => key.split('_')[1].toLowerCase())) as Record<fruits, Record<'Tree' | 'Harvested', GLTF>>
 }
 
 type AssetsLoaded<T extends Record<string, Promise<any> | any>> = { [K in keyof T]: Awaited<T[K]> }
-
 export const loadAssets = async () => {
+	const { loader, clear } = loaderProgress(assetManifest)
 	const assets = {
-		characters: typeGlob<characters>(import.meta.glob('@assets/characters/*.glb', { as: 'url', eager: true }))(loadGLBAsToon({ material: node => new CharacterMaterial({ map: node.material.map }) })),
-		models: typeGlob<models>(import.meta.glob('@assets/models/*.*', { as: 'url', eager: true }))(loadGLBAsToon({ material: overrideRockColor })),
-		trees: typeGlob<trees>(import.meta.glob('@assets/trees/*.*', { as: 'url', eager: true }))(loadGLBAsToon({
+		characters: typeGlob<characters>(import.meta.glob('@assets/characters/*.glb', { as: 'url', eager: true }))(loadGLBAsToon(loader, { material: node => new CharacterMaterial({ map: node.material.map }) })),
+		models: typeGlob<models>(import.meta.glob('@assets/models/*.*', { as: 'url', eager: true }))(loadGLBAsToon(loader, { material: overrideRockColor })),
+		trees: typeGlob<trees>(import.meta.glob('@assets/trees/*.*', { as: 'url', eager: true }))(loadGLBAsToon(loader, {
 			material: (node) => {
 				const mat = new TreeMaterial({ map: node.material.map, transparent: true })
 				return mat
 			},
 		})),
-		crops: cropsLoader<crops>(import.meta.glob('@assets/crops/*.glb', { as: 'url', eager: true })),
-		particles: typeGlob<particles>(import.meta.glob('@assets/particles/*.png', { eager: true, import: 'default' }))(texturesLoader),
-		textures: typeGlob<textures>(import.meta.glob('@assets/textures/*.png', { eager: true, import: 'default' }))(texturesLoader),
-		fonts: fontLoader(import.meta.glob('@assets/fonts/*.ttf', { eager: true, import: 'default' })),
-		levelImages: levelImagesLoader(import.meta.glob('@assets/levels/*.png', { eager: true, import: 'default' })),
-		icons: typeGlobEager<icons>(import.meta.glob('@assets/icons/*.svg', { eager: true, import: 'default', as: 'raw' }))(iconsLoader),
-		fruitTrees: typeGlob<fruit_trees>(import.meta.glob('@assets/fruit_trees/*.glb', { as: 'url', eager: true }))(fruitTreeLoader),
-		buttons: buttonsLoader(import.meta.glob('@assets/buttons/*.*', { eager: true, import: 'default' })),
-		voices: loadVoices(import.meta.glob('@assets/voices/*.ogg', { eager: true, import: 'default' })),
-		steps: loadSteps(import.meta.glob('@assets/steps/*.*', { eager: true, import: 'default' })),
-		items: loadItems(import.meta.glob('@assets/items/*.*', { as: 'url', eager: true })),
-		music: typeGlob<music>(import.meta.glob('@assets/music/*.*', { eager: true, import: 'default' }))(loadSounds),
-		weapons: typeGlob<weapons>(import.meta.glob('@assets/weapons/*.*', { as: 'url', eager: true }))(loadGLBAsToon({})),
-		vegetation: typeGlob<vegetation>(import.meta.glob('@assets/vegetation/*.*', { as: 'url', eager: true }))(loadGLBAsToon({ material: (_node, canvas) => new GrassMaterial({ map: canvas }) })),
+		crops: cropsLoader<crops>(loader)(import.meta.glob('@assets/crops/*.glb', { as: 'url', eager: true })),
+		particles: typeGlob<particles>(import.meta.glob('@assets/particles/*.png', { eager: true, import: 'default' }))(texturesLoader(loader)),
+		textures: typeGlob<textures>(import.meta.glob('@assets/textures/*.png', { eager: true, import: 'default' }))(texturesLoader(loader)),
+		fonts: fontLoader(loader)(import.meta.glob('@assets/fonts/*.ttf', { eager: true, import: 'default' })),
+		levelImages: levelImagesLoader(loader)(import.meta.glob('@assets/levels/*.png', { eager: true, import: 'default' })),
+		icons: typeGlobEager<icons>(import.meta.glob('@assets/icons/*.svg', { eager: true, import: 'default', as: 'raw' }))(iconsLoader(loader)),
+		fruitTrees: typeGlob<fruit_trees>(import.meta.glob('@assets/fruit_trees/*.glb', { as: 'url', eager: true }))(fruitTreeLoader(loader)),
+		buttons: buttonsLoader(loader)(import.meta.glob('@assets/buttons/*.*', { eager: true, import: 'default' })),
+		voices: loadVoices(loader)(import.meta.glob('@assets/voices/*.ogg', { eager: true, import: 'default' })),
+		steps: loadSteps(loader)(import.meta.glob('@assets/steps/*.*', { eager: true, import: 'default' })),
+		items: loadItems(loader)(import.meta.glob('@assets/items/*.*', { as: 'url', eager: true })),
+		music: typeGlob<music>(import.meta.glob('@assets/music/*.*', { eager: true, import: 'default' }))(loadSounds(loader)),
+		weapons: typeGlob<weapons>(import.meta.glob('@assets/weapons/*.*', { as: 'url', eager: true }))(loadGLBAsToon(loader, {})),
+		vegetation: typeGlob<vegetation>(import.meta.glob('@assets/vegetation/*.*', { as: 'url', eager: true }))(loadGLBAsToon(loader, { material: (_node, canvas) => new GrassMaterial({ map: canvas }) })),
 	} as const
-	return await asyncMapValues(assets, async val => await val) as AssetsLoaded<typeof assets>
+	const assetsLoaded = await asyncMapValues(assets, async val => await val) as AssetsLoaded<typeof assets>
+	clear()
+	return assetsLoaded
 }

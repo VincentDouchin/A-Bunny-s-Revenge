@@ -121,7 +121,7 @@ button.selected{
   color:white;
 }
 
-body>div{
+body>div.main{
   box-shadow: 0 0 20vw rgba(0,0,0,0.5) inset;
 }
 
@@ -174,4 +174,26 @@ input[type="range"]::-webkit-slider-thumb {
 /* ! DEBUG */
 .debug-canvas-container>canvas{
   width:150px;
+}
+
+/* ! LOADER */
+.loader{
+  width: 30vw;
+  height: 10vh;
+  background: white;
+  z-index: 100;
+  position: absolute;
+  outline: solid 1rem black;
+  --loaded: 0;
+  border-radius: 2vh;
+  padding:0.5rem; 
+}
+.loader::before{
+  content: '';
+  width:var(--loaded);
+  transition: width ease 0.2s;
+  height:100%;
+  background: repeating-linear-gradient(90deg, black 0rem, black 2rem, white 2rem,white 3rem );
+  display:block;
+  z-index: 101;
 }

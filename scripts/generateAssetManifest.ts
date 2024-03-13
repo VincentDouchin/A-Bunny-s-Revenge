@@ -6,11 +6,11 @@ import type { PluginOption } from 'vite'
 
 const launchScript = async (filePath?: string) => {
 	if (!filePath || filePath.includes('assets\\')) {
-		const modified: Record<string, number> = {}
+		const modified: Record<string, { size: number, modified: number }> = {}
 		const assets = await glob('./assets/*/**.*')
 		for (const path of assets) {
 			const file = await stat(path)
-			modified[path.replace('assets\\', '/assets/').replaceAll('\\', '/')] = Math.round(file.mtimeMs)
+			modified[path.replace('assets\\', '/assets/').replace(/\\/g, '/')] = { size: Math.round(file.size), modified: Math.round(file.mtimeMs) }
 		}
 		await writeFile(path.join(process.cwd(), 'assets', 'assetManifest.json'), JSON.stringify(modified))
 	}
