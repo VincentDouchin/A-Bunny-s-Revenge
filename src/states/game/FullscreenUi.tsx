@@ -6,8 +6,10 @@ const requestFullScreen = () => {
 	document.documentElement.requestFullscreen()
 }
 
+export const isStandalone = () => window.matchMedia('(display-mode: standalone)').matches
+
 export const FullscreenUi = () => {
-	const [show, setShow] = createSignal(!window.matchMedia('(display-mode: standalone)').matches && (save.settings.fullscreen === null || save.settings.fullscreen === undefined))
+	const [show, setShow] = createSignal(!isStandalone() && (save.settings.fullscreen === null || save.settings.fullscreen === undefined))
 	const enabledFullScreen = () => {
 		requestFullScreen()
 		updateSave(s => s.settings.fullscreen = true)

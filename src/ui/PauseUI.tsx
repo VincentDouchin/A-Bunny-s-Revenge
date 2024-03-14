@@ -6,6 +6,7 @@ import { Modal } from './components/Modal'
 import { ui } from '@/global/init'
 import { pausedState } from '@/global/states'
 import { save, updateSave } from '@/global/save'
+import { isStandalone } from '@/states/game/FullscreenUi'
 
 export const PauseUi = () => {
 	const paused = ui.sync(() => pausedState.enabled)
@@ -33,11 +34,11 @@ export const PauseUi = () => {
 						<div style={{ width: '2rem', height: '2rem', color: 'white' }} innerHTML={mute() ? volumeOff : volumeOn} onClick={muteSound}></div>
 						<input type="range" class="input-range" value={save.settings.volume} onChange={e => setVolume(e.target.valueAsNumber)}></input>
 					</div>
-					<div>
+					<Show when={!isStandalone()}>
 						<button class="button" style={{ margin: '1rem' }} onClick={toggleFullscreen}>
 							{`${fullscreen() ? 'Disable' : 'Enable'} auto fullscreen`}
 						</button>
-					</div>
+					</Show>
 				</div>
 				<button class="button" onClick={() => pausedState.disable()}>Resume</button>
 			</Show>
