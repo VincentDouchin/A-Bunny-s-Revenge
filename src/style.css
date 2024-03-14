@@ -15,7 +15,6 @@
 }
 
 html, body, *{
-  overflow: hidden;
   touch-action: none;
 }
 .icon-container svg{
@@ -23,6 +22,7 @@ html, body, *{
   height:1em;
 }
 body {
+  overflow: hidden;
   margin: 0;
   display: grid;
   place-items: center;
