@@ -19,6 +19,10 @@ export const PauseUi = () => {
 		updateSave(s => s.settings.volume = volume)
 		Destination.volume.value = volume / 100
 	}
+	const toggleFullscreen = () => {
+		updateSave(s => s.settings.fullscreen = !s.settings.fullscreen)
+	}
+	const fullscreen = ui.sync(() => save.settings.fullscreen)
 	return (
 		<Modal open={paused()} showClose={false}>
 			<Show when={paused()}>
@@ -28,6 +32,11 @@ export const PauseUi = () => {
 					<div style={{ 'display': 'grid', 'grid-template-columns': 'auto 1fr', 'gap': '1rem' }}>
 						<div style={{ width: '2rem', height: '2rem', color: 'white' }} innerHTML={mute() ? volumeOff : volumeOn} onClick={muteSound}></div>
 						<input type="range" class="input-range" value={save.settings.volume} onChange={e => setVolume(e.target.valueAsNumber)}></input>
+					</div>
+					<div>
+						<button class="button" style={{ margin: '1rem' }} onClick={toggleFullscreen}>
+							{`${fullscreen() ? 'Disable' : 'Enable'} auto fullscreen`}
+						</button>
 					</div>
 				</div>
 				<button class="button" onClick={() => pausedState.disable()}>Resume</button>

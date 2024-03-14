@@ -7,11 +7,13 @@ import { DebugUi } from '@/debug/debugUi'
 import { dungeonState } from '@/global/states'
 import { LoseUi } from '@/states/dungeon/LoseUi'
 import { MiniMapUi } from '@/states/dungeon/MinimapUi'
+import { FullscreenUi } from '@/states/game/FullScreenUi'
 
 export const UI = () => (
 	<>
 		<DebugUi />
 		<PauseUi />
+		<FullscreenUi />
 		<LoseUi />
 		<PlayerUi />
 		<StateUi state={dungeonState}>

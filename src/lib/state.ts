@@ -5,6 +5,7 @@ export class StateMananger {
 	states = new Map<State<any>, any>()
 	callbacks = new Map<State<any>, System<any>[]>()
 	queue = new Set<() => void>()
+	running = true
 	create<R = void>() {
 		return new State<R>(this)
 	}
@@ -34,31 +35,40 @@ export class StateMananger {
 	}
 
 	update() {
-		for (const [state, ressources] of this.states.entries()) {
-			for (const system of state._preUpdate) {
-				system(ressources)
+		if (this.running) {
+			for (const [state, ressources] of this.states.entries()) {
+				for (const system of state._preUpdate) {
+					system(ressources)
+				}
 			}
-		}
-		for (const [state, ressources] of this.states.entries()) {
-			for (const system of state._update) {
-				system(ressources)
+			for (const [state, ressources] of this.states.entries()) {
+				for (const system of state._update) {
+					system(ressources)
+				}
 			}
-		}
-		for (const [state, ressources] of this.states.entries()) {
-			for (const system of state._postUpdate) {
-				system(ressources)
+			for (const [state, ressources] of this.states.entries()) {
+				for (const system of state._postUpdate) {
+					system(ressources)
+				}
 			}
-		}
-		for (const callback of this.queue) {
-			callback()
-		}
-		this.queue.clear()
+			for (const callback of this.queue) {
+				callback()
+			}
+			this.queue.clear() }
 	}
 
 	exclusive(...states: State<any>[]) {
 		for (const state of states) {
 			state.onEnter(...states.filter(s => s !== state).map(s => () => this.states.has(s) && s.disable()))
 		}
+	}
+
+	stop() {
+		this.running = false
+	}
+
+	start() {
+		this.running = true
 	}
 }
 export class State<R = void> {

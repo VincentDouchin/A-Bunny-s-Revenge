@@ -7,10 +7,10 @@ import { debugState } from '@/debug/debugState'
 
 export const initCamera = () => {
 	const camera = new OrthographicCamera(
-		-width / 2 / params.zoom,
-		width / 2 / params.zoom,
-		height / 2 / params.zoom,
-		-height / 2 / params.zoom,
+		-width / 2 / params.zoom * window.innerWidth / window.innerHeight,
+		width / 2 / params.zoom * window.innerWidth / window.innerHeight,
+		height / 2 / params.zoom * window.innerWidth / window.innerHeight,
+		-height / 2 / params.zoom * window.innerWidth / window.innerHeight,
 		0.1,
 		1000,
 	)

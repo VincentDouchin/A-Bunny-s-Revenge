@@ -1,4 +1,4 @@
-import { BasicShadowMap, DepthTexture, LinearSRGBColorSpace, NearestFilter, PerspectiveCamera, RGBAFormat, Scene, ShaderMaterial, Vector3, WebGLRenderTarget, WebGLRenderer } from 'three'
+import { BasicShadowMap, DepthTexture, LinearSRGBColorSpace, NearestFilter, RGBAFormat, Scene, ShaderMaterial, WebGLRenderTarget, WebGLRenderer } from 'three'
 import { FullScreenQuad } from 'three/examples/jsm/postprocessing/Pass'
 import { CSS2DRenderer } from 'three/examples/jsm/renderers/CSS2DRenderer'
 import { params } from './context'
@@ -12,10 +12,8 @@ renderer.setPixelRatio(1)
 export const cssRenderer = new CSS2DRenderer()
 const ratio = window.innerHeight / window.innerWidth
 export const width = params.renderWidth
-// const width = window.innerWidth
-// const height = window.innerHeight
 export const height = Math.round(width * ratio)
-const target = new WebGLRenderTarget(width, height)
+export const target = new WebGLRenderTarget(width, height)
 const depthTarget = new WebGLRenderTarget(width, height)
 depthTarget.texture.format = RGBAFormat
 depthTarget.texture.magFilter = NearestFilter
@@ -30,7 +28,6 @@ target.depthBuffer = true
 target.depthTexture = new DepthTexture(width, height)
 const depthQuad = new FullScreenQuad(new ShaderMaterial(getDepthShader(target)))
 const sobelQuad = new FullScreenQuad(new ShaderMaterial(getSobelShader(width, height, target, depthTarget)))
-
 export const initThree = () => {
 	renderer.clear()
 	renderer.shadowMap.enabled = true
@@ -38,7 +35,7 @@ export const initThree = () => {
 	renderer.domElement.classList.add('main')
 	document.body.appendChild(renderer.domElement)
 	renderer.outputColorSpace = LinearSRGBColorSpace
-	renderer.setSize(width, width * ratio)
+	renderer.setSize(width, height)
 	cssRenderer.setSize(window.innerWidth, window.innerHeight)
 	cssRenderer.domElement.style.position = 'fixed'
 	cssRenderer.domElement.style.left = '0'
@@ -76,12 +73,3 @@ export const updateControls = () => {
 		controls.update()
 	}
 }
-export const preCompileShaders = () => ecs.with('model').onEntityAdded.subscribe((e) => {
-	const compileCamera = new PerspectiveCamera()
-	e.model.add(compileCamera)
-	compileCamera.position.set(...new Vector3(0, 20, 0).add(e.model.position).toArray())
-	compileCamera.lookAt(e.model.position)
-	renderer.compileAsync(e.model, compileCamera, scene).then(() => {
-		compileCamera.removeFromParent()
-	})
-})

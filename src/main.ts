@@ -2,7 +2,7 @@ import { debugPlugin } from './debug/debugPlugin'
 import { updateAnimations } from './global/animations'
 import { initCamera, initializeCameraPosition, moveCamera } from './global/camera'
 import { coroutines, inputManager, time, ui } from './global/init'
-import { initThree, preCompileShaders, render, updateControls } from './global/rendering'
+import { initThree, render, updateControls } from './global/rendering'
 import { initTone } from './global/sounds'
 import { app, campState, coreState, dungeonState, gameState, genDungeonState, openMenuState, pausedState, setupState } from './global/states'
 import { despawnOfType, hierarchyPlugin } from './lib/hierarchy'
@@ -32,13 +32,13 @@ import { spawnCrossRoad, spawnDungeon, spawnFarm, spawnLevelData, updateTimeUnif
 import { debugPlayer, losingBattle, spawnCharacter } from './states/game/spawnPlayer'
 import { touchItem } from './states/game/touchItem'
 import { playCloseSound, playOpenSound } from './states/pause/pause'
-import { setupGame } from './states/setup/setupGame'
+import { disablePortrait, enableFullscreen, resize, setupGame } from './states/setup/setupGame'
 import { UI } from './ui/UI'
 
 coreState
 	.addPlugins(debugPlugin)
 	.addPlugins(hierarchyPlugin, physicsPlugin, transformsPlugin, addToScene('camera', 'light', 'mesh', 'model', 'dialogContainer', 'batchRenderer', 'emitter', 'interactionContainer', 'minigameContainer', 'healthBarContainer'), updateModels, particlesPlugin, tweenPlugin)
-	.addSubscriber(...target, preCompileShaders, initTone)
+	.addSubscriber(...target, initTone, resize, disablePortrait, enableFullscreen)
 	.onEnter(initCamera, initThree, ui.render(UI))
 	.onPreUpdate(coroutines.tick, savePlayerFromTheEmbraceOfTheVoid)
 	.onUpdate(runIf(() => !pausedState.enabled, updateAnimations('beeAnimator', 'playerAnimator', 'shagaAnimator', 'ovenAnimator', 'chestAnimator', 'houseAnimator'), () => time.tick()), inputManager.update, ui.update, moveCamera)
