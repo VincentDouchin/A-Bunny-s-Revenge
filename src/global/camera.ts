@@ -19,13 +19,14 @@ export const initCamera = () => {
 	camera.updateProjectionMatrix()
 	ecs.add({
 		camera,
+		lockX: true,
 		position: new Vector3(),
 		mainCamera: true,
 		cameraLookat: new Vector3(),
 		cameraShake: new Vector3(),
 	})
 }
-const cameraQuery = ecs.with('camera', 'position', 'mainCamera', 'cameraLookat', 'cameraShake')
+const cameraQuery = ecs.with('camera', 'position', 'mainCamera', 'cameraLookat', 'cameraShake', 'lockX')
 const cameraTargetQuery = ecs.with('cameratarget', 'worldPosition')
 const doorsQuery = ecs.with('door', 'position')
 
@@ -45,7 +46,7 @@ export const addCameraShake = () => {
 }
 
 export const moveCamera = () => {
-	for (const { position, camera, cameraLookat, cameraOffset, cameraShake } of cameraQuery) {
+	for (const { position, camera, cameraLookat, cameraOffset, cameraShake, lockX } of cameraQuery) {
 		const target = new Vector3()
 		for (const { worldPosition } of cameraTargetQuery) {
 			target.z = worldPosition.z
@@ -73,6 +74,9 @@ export const moveCamera = () => {
 			camera.lookAt(cameraLookat)
 			const newPosition = cameraLookat.clone().add(cameraOffset ?? new Vector3(params.cameraOffsetX, params.cameraOffsetY, params.cameraOffsetZ))
 			position.lerp(newPosition, lerpSpeed)
+			if (lockX) {
+				position.setX(newPosition.x)
+			}
 		}
 	}
 }

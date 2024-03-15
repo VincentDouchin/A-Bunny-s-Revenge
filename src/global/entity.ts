@@ -70,6 +70,7 @@ export interface Entity {
 	mainCamera?: true
 	cameraLookat?: Vector3
 	cameraOffset?: Vector3
+	lockX?: boolean
 	// ! ThreeJS
 	scene?: Scene
 	renderer?: WebGLRenderer
