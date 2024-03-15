@@ -12,5 +12,10 @@ export default antfu({
 		'antfu/if-newline': 'off',
 		'no-lone-blocks': 'off',
 	},
-	ignores: ['dev-dist', 'assets/*', 'node-modules', 'dist'],
+	formatters: {
+		css: 'prettier',
+		html: 'prettier',
+	},
+}, {
+	ignores: ['dev-dist', 'assets', 'node-modules', 'dist'],
 })

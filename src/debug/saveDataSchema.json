@@ -1,217 +1,217 @@
 {
-  "$ref": "#/definitions/SaveData",
-  "$schema": "http://json-schema.org/draft-07/schema#",
-  "definitions": {
-    "Item": {
-      "additionalProperties": false,
-      "properties": {
-        "name": {
-          "$ref": "#/definitions/items"
-        },
-        "quantity": {
-          "type": "number"
-        }
-      },
-      "required": [
-        "name",
-        "quantity"
-      ],
-      "type": "object"
-    },
-    "ModStage": {
-      "enum": [
-        0,
-        1,
-        2
-      ],
-      "type": "number"
-    },
-    "ModType": {
-      "enum": [
-        0,
-        1
-      ],
-      "type": "number"
-    },
-    "Modifier<any>": {
-      "additionalProperties": false,
-      "properties": {
-        "name": {},
-        "stackable": {
-          "type": "boolean"
-        },
-        "stage": {
-          "$ref": "#/definitions/ModStage"
-        },
-        "type": {
-          "$ref": "#/definitions/ModType"
-        },
-        "value": {
-          "type": "number"
-        }
-      },
-      "required": [
-        "value",
-        "stage",
-        "type",
-        "name",
-        "stackable"
-      ],
-      "type": "object"
-    },
-    "SaveData": {
-      "additionalProperties": false,
-      "properties": {
-        "crops": {
-          "additionalProperties": {
-            "additionalProperties": false,
-            "properties": {
-              "name": {
-                "$ref": "#/definitions/crops"
-              },
-              "stage": {
-                "type": "number"
-              }
-            },
-            "required": [
-              "stage",
-              "name"
-            ],
-            "type": "object"
-          },
-          "type": "object"
-        },
-        "inventories": {
-          "additionalProperties": {
-            "items": {
-              "$ref": "#/definitions/Item"
-            },
-            "type": "array"
-          },
-          "type": "object"
-        },
-        "modifiers": {
-          "items": {
-            "$ref": "#/definitions/Modifier%3Cany%3E"
-          },
-          "type": "array"
-        },
-        "playerPosition": {
-          "items": {
-            "type": "number"
-          },
-          "type": "array"
-        },
-        "playerRotation": {
-          "items": {
-            "type": "number"
-          },
-          "type": "array"
-        },
-        "quests": {
-          "additionalProperties": false,
-          "properties": {
-            "grandma_1": {
-              "items": {
-                "type": "boolean"
-              },
-              "type": "array"
-            },
-            "jack_1": {
-              "items": {
-                "type": "boolean"
-              },
-              "type": "array"
-            }
-          },
-          "type": "object"
-        },
-        "selectedSeed": {
-          "anyOf": [
-            {
-              "type": "null"
-            },
-            {
-              "$ref": "#/definitions/crops"
-            }
-          ]
-        },
-        "settings": {
-          "additionalProperties": false,
-          "properties": {
-            "mute": {
-              "type": "boolean"
-            },
-            "volume": {
-              "type": "number"
-            }
-          },
-          "required": [
-            "volume",
-            "mute"
-          ],
-          "type": "object"
-        }
-      },
-      "required": [
-        "crops",
-        "playerPosition",
-        "playerRotation",
-        "quests",
-        "selectedSeed",
-        "inventories",
-        "modifiers",
-        "settings"
-      ],
-      "type": "object"
-    },
-    "crops": {
-      "enum": [
-        "carrot",
-        "beet",
-        "tomato",
-        "lettuce",
-        "pumpkin",
-        "wheat"
-      ],
-      "type": "string"
-    },
-    "items": {
-      "enum": [
-        "beet",
-        "beetroot_salad",
-        "beet_seeds",
-        "butter",
-        "carrot",
-        "carrot_cake",
-        "carrot_seeds",
-        "carrot_soup",
-        "cinnamon",
-        "egg",
-        "flour",
-        "ham",
-        "ham_honey",
-        "honey",
-        "honey_glazed_carrot",
-        "lettuce",
-        "lettuce_seeds",
-        "magic_bean",
-        "milk",
-        "parsley",
-        "pumpkin",
-        "pumpkin_bread",
-        "pumpkin_seeds",
-        "roasted_carrot",
-        "slime_bread",
-        "slime_dough",
-        "slime_dumpling",
-        "tomato",
-        "tomato_seeds",
-        "tomato_soup",
-        "wheat",
-        "wheat_seeds"
-      ],
-      "type": "string"
-    }
-  }
+	"$ref": "#/definitions/SaveData",
+	"$schema": "http://json-schema.org/draft-07/schema#",
+	"definitions": {
+		"Item": {
+			"additionalProperties": false,
+			"properties": {
+				"name": {
+					"$ref": "#/definitions/items"
+				},
+				"quantity": {
+					"type": "number"
+				}
+			},
+			"required": [
+				"name",
+				"quantity"
+			],
+			"type": "object"
+		},
+		"ModStage": {
+			"enum": [
+				0,
+				1,
+				2
+			],
+			"type": "number"
+		},
+		"ModType": {
+			"enum": [
+				0,
+				1
+			],
+			"type": "number"
+		},
+		"Modifier<any>": {
+			"additionalProperties": false,
+			"properties": {
+				"name": {},
+				"stackable": {
+					"type": "boolean"
+				},
+				"stage": {
+					"$ref": "#/definitions/ModStage"
+				},
+				"type": {
+					"$ref": "#/definitions/ModType"
+				},
+				"value": {
+					"type": "number"
+				}
+			},
+			"required": [
+				"value",
+				"stage",
+				"type",
+				"name",
+				"stackable"
+			],
+			"type": "object"
+		},
+		"SaveData": {
+			"additionalProperties": false,
+			"properties": {
+				"crops": {
+					"additionalProperties": {
+						"additionalProperties": false,
+						"properties": {
+							"name": {
+								"$ref": "#/definitions/crops"
+							},
+							"stage": {
+								"type": "number"
+							}
+						},
+						"required": [
+							"stage",
+							"name"
+						],
+						"type": "object"
+					},
+					"type": "object"
+				},
+				"inventories": {
+					"additionalProperties": {
+						"items": {
+							"$ref": "#/definitions/Item"
+						},
+						"type": "array"
+					},
+					"type": "object"
+				},
+				"modifiers": {
+					"items": {
+						"$ref": "#/definitions/Modifier%3Cany%3E"
+					},
+					"type": "array"
+				},
+				"playerPosition": {
+					"items": {
+						"type": "number"
+					},
+					"type": "array"
+				},
+				"playerRotation": {
+					"items": {
+						"type": "number"
+					},
+					"type": "array"
+				},
+				"quests": {
+					"additionalProperties": false,
+					"properties": {
+						"grandma_1": {
+							"items": {
+								"type": "boolean"
+							},
+							"type": "array"
+						},
+						"jack_1": {
+							"items": {
+								"type": "boolean"
+							},
+							"type": "array"
+						}
+					},
+					"type": "object"
+				},
+				"selectedSeed": {
+					"anyOf": [
+						{
+							"type": "null"
+						},
+						{
+							"$ref": "#/definitions/crops"
+						}
+					]
+				},
+				"settings": {
+					"additionalProperties": false,
+					"properties": {
+						"mute": {
+							"type": "boolean"
+						},
+						"volume": {
+							"type": "number"
+						}
+					},
+					"required": [
+						"volume",
+						"mute"
+					],
+					"type": "object"
+				}
+			},
+			"required": [
+				"crops",
+				"playerPosition",
+				"playerRotation",
+				"quests",
+				"selectedSeed",
+				"inventories",
+				"modifiers",
+				"settings"
+			],
+			"type": "object"
+		},
+		"crops": {
+			"enum": [
+				"carrot",
+				"beet",
+				"tomato",
+				"lettuce",
+				"pumpkin",
+				"wheat"
+			],
+			"type": "string"
+		},
+		"items": {
+			"enum": [
+				"beet",
+				"beetroot_salad",
+				"beet_seeds",
+				"butter",
+				"carrot",
+				"carrot_cake",
+				"carrot_seeds",
+				"carrot_soup",
+				"cinnamon",
+				"egg",
+				"flour",
+				"ham",
+				"ham_honey",
+				"honey",
+				"honey_glazed_carrot",
+				"lettuce",
+				"lettuce_seeds",
+				"magic_bean",
+				"milk",
+				"parsley",
+				"pumpkin",
+				"pumpkin_bread",
+				"pumpkin_seeds",
+				"roasted_carrot",
+				"slime_bread",
+				"slime_dough",
+				"slime_dumpling",
+				"tomato",
+				"tomato_seeds",
+				"tomato_soup",
+				"wheat",
+				"wheat_seeds"
+			],
+			"type": "string"
+		}
+	}
 }

@@ -1,8 +1,7 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 import { World } from 'miniplex'
 import levelsData from '../assets/levels/data.json'
-import type { Room } from '../src/states/dungeon/generateDungeon'
-import { RoomType, genDungeon, generateDungeon } from '../src/states/dungeon/generateDungeon'
+import { RoomType, genDungeon } from '../src/states/dungeon/generateDungeon'
 
 describe('dungeon generator', () => {
 	beforeEach(() => {
@@ -10,7 +9,7 @@ describe('dungeon generator', () => {
 	})
 	it('doesn\'t throw an error', () => {
 		for (let i = 0; i < 1000; i++) {
-			generateDungeon()
+			genDungeon(5, false)
 		}
 	})
 	it('generates an end and start room', () => {
