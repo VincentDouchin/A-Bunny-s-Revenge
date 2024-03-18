@@ -41,20 +41,27 @@ const cachedLoader = async <R>(storeName: string, fn: (arr: ArrayBuffer) => Prom
 		if (localEntry === undefined || localEntry < assetManifest[originalSrc as keyof typeof assetManifest].modified) {
 			const arr = await (await fetch(src)).arrayBuffer()
 			await set(originalSrc, arr, store)
-			setLocalManifest({ ...localManifest, [originalSrc]: assetManifest[originalSrc as keyof typeof assetManifest].modified })
+			setLocalManifest({ ...localManifest, [originalSrc]: assetManifest[originalSrc as keyof typeof assetManifest]?.modified })
 
 			return await fn(arr)
 		}
+
 		const existingEntry = files.get(originalSrc)
 		if (existingEntry) {
 			return fn(existingEntry)
 		} else {
-			throw new Error('cached asset not found')
+			throw new Error(`cached asset ${originalSrc} not found`)
 		}
 	}
 }
 
 export const loadGLB = await cachedLoader('glb', (arrayBuffer: ArrayBuffer) => new GLTFLoader().parseAsync(arrayBuffer, ''))
+
+export const loadAudio = await cachedLoader('glb', async (arrayBuffer: ArrayBuffer) => {
+	const context = new AudioContext()
+	const buffer = await context.decodeAudioData(arrayBuffer)
+	return buffer
+})
 export const loadImage = (path: string) => new Promise<HTMLImageElement>((resolve) => {
 	const img = new Image()
 	img.src = path

@@ -5,7 +5,7 @@ import { CanvasTexture, Color, DoubleSide, Mesh, MeshStandardMaterial, NearestFi
 import type { GLTF } from 'three/examples/jsm/loaders/GLTFLoader'
 import { Player } from 'tone'
 import assetManifest from '@assets/assetManifest.json'
-import { getExtension, getFileName, loadGLB, loadImage, loaderProgress, textureLoader, thumbnail } from './assetLoaders'
+import { getExtension, getFileName, loadAudio, loadGLB, loadImage, loaderProgress, textureLoader, thumbnail } from './assetLoaders'
 import type { crops, fruits } from './entity'
 import { keys } from '@/constants/keys'
 import { CharacterMaterial, GrassMaterial, ToonMaterial, TreeMaterial } from '@/shaders/GroundShader'
@@ -160,24 +160,27 @@ const overrideRockColor = (node: Mesh<any, MeshStandardMaterial>, map?: CanvasTe
 	return new ToonMaterial({ color, map: map ?? node.material?.map })
 }
 const loadVoices = (loader: (key: string) => void) => async (glob: GlobEager) => {
-	const sounds = mapValues(glob, (src) => {
-		const player = new Player(src)
+	const sounds = await asyncMapValues(glob, async (src, key) => {
+		const audio = await loadAudio(src, key)
+		const player = new Player(audio)
 		loader(src)
 		return player
 	})
 	return mapKeys(sounds, k => getFileName(k).split('_')[1])
 }
 const loadSounds = (loader: (key: string) => void) => async (glob: GlobEager) => {
-	const sounds = mapValues(glob, (src) => {
-		const player = new Player(src)
+	const sounds = await asyncMapValues(glob, async (src, key) => {
+		const audio = await loadAudio(src, key)
+		const player = new Player(audio)
 		loader(src)
 		return player
 	})
 	return mapKeys(sounds, getFileName)
 }
 const loadSteps = (loader: (key: string) => void) => async (glob: GlobEager) => {
-	return Object.values(mapValues(glob, (src) => {
-		const player = new Player(src)
+	return Object.values(await asyncMapValues(glob, async (src, key) => {
+		const audio = await loadAudio(src, key)
+		const player = new Player(audio)
 		loader(src)
 		return player
 	}))
@@ -247,9 +250,9 @@ export const loadAssets = async () => {
 		fruitTrees: typeGlob<fruit_trees>(import.meta.glob('@assets/fruit_trees/*.glb', { as: 'url', eager: true }))(fruitTreeLoader(loader)),
 		buttons: buttonsLoader(loader)(import.meta.glob('@assets/buttons/*.*', { eager: true, import: 'default' })),
 		voices: loadVoices(loader)(import.meta.glob('@assets/voices/*.ogg', { eager: true, import: 'default' })),
-		steps: loadSteps(loader)(import.meta.glob('@assets/steps/*.*', { eager: true, import: 'default' })),
+		steps: loadSteps(loader)(import.meta.glob('@assets/steps/*.ogg', { eager: true, import: 'default' })),
 		items: loadItems(loader)(import.meta.glob('@assets/items/*.*', { as: 'url', eager: true })),
-		music: typeGlob<music>(import.meta.glob('@assets/music/*.*', { eager: true, import: 'default' }))(loadSounds(loader)),
+		music: typeGlob<music>(import.meta.glob('@assets/music/*.ogg', { eager: true, import: 'default' }))(loadSounds(loader)),
 		weapons: typeGlob<weapons>(import.meta.glob('@assets/weapons/*.*', { as: 'url', eager: true }))(loadGLBAsToon(loader, {})),
 		vegetation: typeGlob<vegetation>(import.meta.glob('@assets/vegetation/*.*', { as: 'url', eager: true }))(loadGLBAsToon(loader, { material: (_node, canvas) => new GrassMaterial({ map: canvas }) })),
 	} as const

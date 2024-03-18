@@ -11,6 +11,7 @@ import { addTag } from '@/lib/hierarchy'
 
 import type { Item } from '@/constants/items'
 import { addItem, removeItem, save, updateSave } from '@/global/save'
+import { playSound } from '@/global/sounds'
 
 const playerQuery = ecs.with('player', 'position', 'collider')
 const movingPlayerQuery = playerQuery.with('movementForce')
@@ -66,17 +67,20 @@ export const enterHouse = async () => {
 	const house = houseQuery.first
 
 	if (house) {
+		playSound('glitchedtones_Door+Bedroom+Open+01', { volume: -12 })
 		await house.houseAnimator.playClamped('DoorOpen')
 		movePlayerTo(house.position)
 		addTag(house, 'activeDialog')
 		await sleep(500)
-		house.houseAnimator.playClamped('DoorClose')
+		await house.houseAnimator.playClamped('DoorClose')
+		playSound('zapsplat_household_door_backdoor_close_002_56921')
 	}
 }
 export const leaveHouse = async () => {
 	const house = houseQuery.first
 	const door = doorQuery.first
 	if (house && door) {
+		playSound('glitchedtones_Door+Bedroom+Open+02', { volume: -12 })
 		await house.houseAnimator.playClamped('DoorOpen')
 		movePlayerTo(new Vector3(0, 0, 30).applyQuaternion(house.rotation).add(house.position)).then(() => {
 			cutSceneState.disable()
@@ -84,7 +88,8 @@ export const leaveHouse = async () => {
 			setSensor(doorQuery, false)
 		})
 		await sleep(500)
-		house.houseAnimator.playClamped('DoorClose')
+		await house.houseAnimator.playClamped('DoorClose')
+		playSound('zapsplat_household_door_backdoor_close_002_56921')
 	}
 }
 

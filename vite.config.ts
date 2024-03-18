@@ -8,6 +8,7 @@ import generateAssetNames from './scripts/generateAssetNamesPlugin'
 import { autoConvertFBXtoGLB } from './scripts/convertFbx2GLB'
 import { extractAnimations } from './scripts/extractAnimations'
 import { generateAssetManifest } from './scripts/generateAssetManifest'
+import { convertAudioFiles } from './scripts/convertAudioFiles'
 
 export default defineConfig(() => {
 	const config: UserConfig = {
@@ -16,6 +17,7 @@ export default defineConfig(() => {
 			autoConvertFBXtoGLB(),
 			extractAnimations(),
 			generateAssetManifest(),
+			convertAudioFiles(),
 			splitVendorChunkPlugin(),
 			solidPlugin(),
 			VitePWA({
