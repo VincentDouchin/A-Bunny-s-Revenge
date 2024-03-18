@@ -8,9 +8,9 @@ import { Sizes } from '@/constants/sizes'
 import { type Entity, Interactable, MenuType, type crops } from '@/global/entity'
 import { assets, ecs } from '@/global/init'
 import { removeItem, save, updateSave } from '@/global/save'
+import { playSound } from '@/global/sounds'
 import { removeEntityRef } from '@/lib/hierarchy'
 import { modelColliderBundle } from '@/lib/models'
-import { playSound } from '@/global/sounds'
 import { getWorldPosition } from '@/lib/transforms'
 
 const playerQuery = ecs.with('playerControls', 'sensorCollider', 'movementForce', 'stateMachine', 'inventory', 'inventoryId', 'inventorySize')
@@ -118,7 +118,7 @@ export const harvestCrop = () => {
 							...bundle,
 							position: position.add(new Vector3(0, bundle.size.y + 5, 0)),
 						})
-						playSound(['Harvest_1', 'Harvest_2'], { volume: -12 })
+						playSound(['zapsplat_foley_fern_pull_from_ground_18385', 'zapsplat_foley_moss_grass_clump_pull_rip_from_ground_70635'], { volume: -12 })
 						removeEntityRef(spot, 'planted')
 					}
 				}

@@ -1,5 +1,5 @@
 import type { music } from '@assets/assets'
-import { Destination, Player, start } from 'tone'
+import { Destination, PitchShift, Player, start } from 'tone'
 import { assets } from './init'
 import { save } from './save'
 import { getRandom } from '@/utils/mapFunctions'
@@ -10,11 +10,14 @@ export const initTone = () => {
 	Destination.mute = save.settings.mute
 	return () => window.removeEventListener('pointerdown keydown', start)
 }
-export const playSound = (sound: music | music[], options?: { volume?: number }) => {
+export const playSound = (sound: music | music[], options?: { volume?: number, pitch?: number }) => {
 	const selectedSound = Array.isArray(sound) ? getRandom(sound) : sound
 	const soundPlayer = new Player(assets.music[selectedSound].buffer).toDestination()
 	if (options?.volume) {
 		soundPlayer.volume.value = options.volume
+	}
+	if (options?.pitch) {
+		soundPlayer.connect(new PitchShift(options.pitch)).toDestination()
 	}
 	soundPlayer.start()
 	soundPlayer.onstop = () => {
