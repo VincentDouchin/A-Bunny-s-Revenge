@@ -115,7 +115,15 @@ export const props: PlacableProp<propNames>[] = [
 				interactable: Interactable.Oven,
 				onPrimary: openMenu(MenuType.Oven),
 				onSecondary: openMenu(MenuType.OvenMinigame),
-
+				withChildren(parent) {
+					const model = assets.models['ume-wood'].scene.clone()
+					model.scale.setScalar(5)
+					ecs.add({
+						parent,
+						model,
+						position: new Vector3(),
+					})
+				},
 			} },
 	},
 	{
@@ -128,13 +136,21 @@ export const props: PlacableProp<propNames>[] = [
 			onPrimary: e => ecs.addComponent(e, 'menuType', MenuType.Cauldron),
 			onSecondary: e => ecs.addComponent(e, 'menuType', MenuType.CauldronGame),
 			withChildren(parent) {
-				const model = assets.models.spoon.scene.clone()
+				const spoonmodel = assets.models.spoon.scene.clone()
 				const spoon = ecs.add({
 					parent,
-					model,
+					model: spoonmodel,
 					position: new Vector3(),
 					rotation: new Quaternion(),
 				})
+				const woodmodel = assets.models['ume-wood'].scene.clone()
+				woodmodel.scale.setScalar(5)
+				ecs.add({
+					parent,
+					model: woodmodel,
+					position: new Vector3(),
+				})
+
 				ecs.update(parent, { spoon })
 			},
 			recipesQueued: [],

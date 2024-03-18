@@ -15,15 +15,11 @@
 				
 				
 
-				Forest_Butterfly_B :  `Move`  |  `Idle`  |  `Attack`  |  `Damage`  |  `Die` 
-				
-				
-
 				Forest_Butterfly_C :  `Move`  |  `Idle`  |  `Attack`  |  `Damage`  |  `Die` 
 				
 				
 
-				Forest_Butterfly_D :  `Move`  |  `Idle`  |  `Attack`  |  `Damage`  |  `Die` 
+				Forest_Butterfly_B :  `Move`  |  `Idle`  |  `Attack`  |  `Damage`  |  `Die` 
 				
 				
 
@@ -31,7 +27,15 @@
 				
 				
 
+				Forest_Butterfly_D :  `Move`  |  `Idle`  |  `Attack`  |  `Damage`  |  `Die` 
+				
+				
+
 				Porin_A :  `Move`  |  `Idle`  |  `Attack`  |  `Damage`  |  `Die` 
+				
+				
+
+				Platopo_B :  `Walk`  |  `Idle`  |  `Attack`  |  `Damage`  |  `Die` 
 				
 				
 
@@ -47,23 +51,19 @@
 				
 				
 
-				Porin_D :  `Move`  |  `Idle`  |  `Attack`  |  `Damage`  |  `Die` 
-				
-				
-
-				Platopo_B :  `Walk`  |  `Idle`  |  `Attack`  |  `Damage`  |  `Die` 
-				
-				
-
 				Porin_E :  `Move`  |  `Idle`  |  `Attack`  |  `Damage`  |  `Die` 
 				
 				
 
-				Racco_C :  `Move`  |  `Idle`  |  `Attack`  |  `Damage`  |  `Die` 
+				Porin_D :  `Move`  |  `Idle`  |  `Attack`  |  `Damage`  |  `Die` 
 				
 				
 
 				Racco_B :  `Move`  |  `Idle`  |  `Attack`  |  `Damage`  |  `Die` 
+				
+				
+
+				Racco_C :  `Move`  |  `Idle`  |  `Attack`  |  `Damage`  |  `Die` 
 				
 				
 
@@ -75,10 +75,6 @@
 				
 				
 
-				Shaga_C :  `Move`  |  `Idle`  |  `Attack`  |  `Damage`  |  `Die` 
-				
-				
-
 				Snailo_A :  `Move`  |  `Idle`  |  `Attack`  |  `Damage`  |  `Die` 
 				
 				
@@ -87,11 +83,15 @@
 				
 				
 
+				Shaga_B :  `Move`  |  `Idle`  |  `Attack`  |  `Damage`  |  `Die` 
+				
+				
+
 				Snailo_C :  `Move`  |  `Idle`  |  `Attack`  |  `Damage`  |  `Die` 
 				
 				
 
-				Shaga_B :  `Move`  |  `Idle`  |  `Attack`  |  `Damage`  |  `Die` 
+				Shaga_C :  `Move`  |  `Idle`  |  `Attack`  |  `Damage`  |  `Die` 
 				
 				
 
@@ -107,11 +107,11 @@
 				
 				
 
-				Big_Boar_A :  `Move`  |  `Idle`  |  `Attack`  |  `Damage`  |  `Die` 
+				Big_Boar_C :  `Move`  |  `Idle`  |  `Attack`  |  `Damage`  |  `Die` 
 				
 				
 
-				Big_Boar_C :  `Move`  |  `Idle`  |  `Attack`  |  `Damage`  |  `Die` 
+				Big_Boar_A :  `Move`  |  `Idle`  |  `Attack`  |  `Damage`  |  `Die` 
 				
 				
 
