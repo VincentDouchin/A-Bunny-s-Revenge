@@ -147,5 +147,11 @@ export const itemsData: Record<items, ItemData> = {
 	pumpkin_bread: {
 		name: 'Pumpkin bread',
 	},
+	sugar: {
+		name: 'Sugar',
+	},
+	flan: {
+		name: 'Flan',
+	},
 
 }

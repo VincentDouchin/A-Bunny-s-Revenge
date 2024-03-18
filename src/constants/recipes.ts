@@ -77,4 +77,20 @@ export const recipes: Array<Recipe> = [
 		output: { name: 'pumpkin_bread', quantity: 1 },
 		processor: MenuType.Oven,
 	},
+	{
+		input: [
+			{ name: 'beet', quantity: 3 },
+		],
+		output: { name: 'sugar', quantity: 1 },
+		processor: MenuType.Cauldron,
+	},
+	{
+		input: [
+			{ name: 'egg', quantity: 1 },
+			{ name: 'milk', quantity: 1 },
+			{ name: 'sugar', quantity: 1 },
+		],
+		output: { name: 'flan', quantity: 1 },
+		processor: MenuType.Cauldron,
+	},
 ]

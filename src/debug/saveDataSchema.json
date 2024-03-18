@@ -139,6 +139,12 @@
 				"settings": {
 					"additionalProperties": false,
 					"properties": {
+						"fullscreen": {
+							"type": [
+								"boolean",
+								"null"
+							]
+						},
 						"mute": {
 							"type": "boolean"
 						},
@@ -148,7 +154,8 @@
 					},
 					"required": [
 						"volume",
-						"mute"
+						"mute",
+						"fullscreen"
 					],
 					"type": "object"
 				}
@@ -205,6 +212,7 @@
 				"slime_bread",
 				"slime_dough",
 				"slime_dumpling",
+				"sugar",
 				"tomato",
 				"tomato_seeds",
 				"tomato_soup",
