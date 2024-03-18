@@ -191,7 +191,7 @@ const treeExtension = new MaterialExtension({ playerZ: 0, time: 0, pos: new Vect
 		unpack('project_vertex'),
 		replace('mvPosition = instanceMatrix * mvPosition;', /* glsl */`
 		vec4 position2 = vec4( transformed, 1.0 ) * instanceMatrix;
-		float noise = cnoise(vec3(pos.xy,time));
+		float noise = cnoise(vec3(pos.xy,time/4.));
 		float height_factor = mvPosition.y/10.;
 		mvPosition = instanceMatrix * (mvPosition + vec4(sin(noise)*height_factor,0.,cos(noise)*height_factor,0.));
 		`),

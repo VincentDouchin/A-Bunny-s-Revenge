@@ -1,11 +1,12 @@
 import { For, Show, createSignal, onCleanup, onMount } from 'solid-js'
+import type { ShaderMaterial } from 'three'
 import { Color, Mesh, OrthographicCamera, PerspectiveCamera } from 'three'
 import { LevelEditor } from './LevelEditor'
 import { SaveEditor } from './saveEditor'
 import { ToonEditor } from './toonEditor'
 import { params } from '@/global/context'
 import { ecs } from '@/global/init'
-import { cameraQuery, height, renderer, width } from '@/global/rendering'
+import { cameraQuery, depthQuad, height, renderer, width } from '@/global/rendering'
 import { resetSave, updateSave } from '@/global/save'
 import { campState } from '@/global/states'
 import { entries } from '@/utils/mapFunctions'
@@ -79,11 +80,13 @@ export const DebugUi = () => {
 	const changeCameraNormal = () => {
 		const camera = removeCamera()
 		if (!camera) return
+		(depthQuad.material as ShaderMaterial).uniforms.orthographic.value = false
 		ecs.addComponent(camera, 'camera', new PerspectiveCamera(params.fov, window.innerWidth / window.innerHeight, 0.1, 1000))
 	}
 	const changeCameraOrtho = () => {
 		const camera = removeCamera()
 		if (!camera) return
+		(depthQuad.material as ShaderMaterial).uniforms.orthographic.value = true
 		ecs.addComponent(camera, 'camera', new OrthographicCamera(
 			-width / 2 / params.zoom,
 			width / 2 / params.zoom,

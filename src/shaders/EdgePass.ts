@@ -6,6 +6,7 @@ export const getDepthShader = (target: WebGLRenderTarget) => ({
 		tDepth: new Uniform<Texture>(target.depthTexture),
 		cameraNear: { value: 0.1 },
 		cameraFar: { value: 100 },
+		orthographic: { value: true },
 	},
 	vertexShader: /* glsl */`
 
@@ -24,13 +25,16 @@ export const getDepthShader = (target: WebGLRenderTarget) => ({
 		uniform sampler2D tDiffuse;
 		uniform float cameraNear;
 		uniform float cameraFar;
+		uniform bool orthographic;
 		uniform vec2 resolution;
 		varying vec2 vUv;
 
 		#include <packing>
         float readDepth( sampler2D depthSampler, vec2 coord ) {
             float fragCoordZ = texture2D( depthSampler, coord ).x;
-            float viewZ = perspectiveDepthToViewZ( fragCoordZ, cameraNear, cameraFar );
+            float viewZ = orthographic 
+            	? orthographicDepthToViewZ( fragCoordZ, cameraNear, cameraFar )
+				: perspectiveDepthToViewZ( fragCoordZ, cameraNear, cameraFar );
             return viewZToOrthographicDepth( viewZ, cameraNear, cameraFar );
         }
 
