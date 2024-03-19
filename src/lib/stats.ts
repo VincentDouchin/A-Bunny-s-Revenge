@@ -47,6 +47,10 @@ export class Stat {
 		return this
 	}
 
+	removeModifier(modifier: Modifier<any>) {
+		this.#modifiers.splice(this.#modifiers.indexOf(modifier), 1)
+	}
+
 	calculate() {
 		let value = this.#initialValue
 		for (const stage of [ModStage.Base, ModStage.Add, ModStage.Total]) {
@@ -76,4 +80,8 @@ export const addModifier = <S extends ComponentsOfType<Stat>>(mod: Modifier<S>, 
 	} else {
 		entity[mod.name]?.addModifier(mod)
 	}
+}
+
+export const removeModifier = () => {
+
 }

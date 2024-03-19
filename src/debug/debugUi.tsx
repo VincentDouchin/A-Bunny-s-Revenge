@@ -2,17 +2,18 @@ import { For, Show, createSignal, onCleanup, onMount } from 'solid-js'
 import type { Object3D, Object3DEventMap, ShaderMaterial } from 'three'
 import { Color, Mesh, OrthographicCamera, PerspectiveCamera } from 'three'
 import { LevelEditor } from './LevelEditor'
-import { ToonEditor } from './toonEditor'
-import { SaveEditor } from './saveEditor'
 import { debugOptions } from './debugState'
+import { SaveEditor } from './saveEditor'
+import { ToonEditor } from './toonEditor'
 import { params } from '@/global/context'
 import { ecs, ui } from '@/global/init'
 import { cameraQuery, depthQuad, height, renderer, width } from '@/global/rendering'
 import { resetSave, updateSave } from '@/global/save'
 import { campState } from '@/global/states'
+import { ModStage, ModType, createModifier } from '@/lib/stats'
+import { addWeaponModel } from '@/states/game/spawnPlayer'
 import { entries } from '@/utils/mapFunctions'
 import { useLocalStorage } from '@/utils/useLocalStorage'
-import { addWeaponModel } from '@/states/game/spawnPlayer'
 
 const groundQuery = ecs.with('ground', 'model')
 export const updatePixelation = (e: Event) => {
@@ -126,6 +127,20 @@ export const DebugUi = () => {
 			weaponModel?.removeFromParent()
 		}
 	}
+	const godMode = ui.sync(() => debugOptions.godMode)
+	const modifier = createModifier('strength', 999, ModStage.Base, ModType.Add, false)
+	const toggleGodMode = () => {
+		debugOptions.godMode = !debugOptions.godMode
+		if (debugOptions.godMode) {
+			for (const player of ecs.with('player', 'strength')) {
+				player.strength.addModifier(modifier)
+			}
+		} else {
+			for (const player of ecs.with('player', 'strength')) {
+				player.strength.removeModifier(modifier)
+			}
+		}
+	}
 	return (
 		<div style={{ position: 'absolute', color: 'white' }}>
 			<Show when={showUi()}>
@@ -199,10 +214,9 @@ export const DebugUi = () => {
 					<button onClick={destroyCrops}>Destroy crops</button>
 					<button onClick={reset}>Reset Save</button>
 					<button classList={{ selected: attackInFarm() }} onClick={enableAttackAnimations}>
-						{attackInFarm() ? 'Disable' : 'Enable'}
-						{' '}
-						attack animations
+						{attackInFarm() ? 'Disable attack animations' : 'Enable attack animations'}
 					</button>
+					<button classList={{ selected: godMode() }} onClick={toggleGodMode}>{godMode() ? 'Disable god mode' : 'Enable god mode'}</button>
 				</div>
 
 				<div style={{ position: 'fixed', right: 0, top: 0 }}>
