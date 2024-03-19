@@ -1,5 +1,4 @@
 import { createWriteStream } from 'node:fs'
-import { unlink } from 'node:fs/promises'
 import { glob } from 'glob'
 import type { PluginOption } from 'vite'
 import { path as ffmpegPath } from '@ffmpeg-installer/ffmpeg'
