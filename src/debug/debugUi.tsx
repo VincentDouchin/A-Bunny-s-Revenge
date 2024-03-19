@@ -1,16 +1,18 @@
 import { For, Show, createSignal, onCleanup, onMount } from 'solid-js'
-import type { ShaderMaterial } from 'three'
+import type { Object3D, Object3DEventMap, ShaderMaterial } from 'three'
 import { Color, Mesh, OrthographicCamera, PerspectiveCamera } from 'three'
 import { LevelEditor } from './LevelEditor'
-import { SaveEditor } from './saveEditor'
 import { ToonEditor } from './toonEditor'
+import { SaveEditor } from './saveEditor'
+import { debugOptions } from './debugState'
 import { params } from '@/global/context'
-import { ecs } from '@/global/init'
+import { ecs, ui } from '@/global/init'
 import { cameraQuery, depthQuad, height, renderer, width } from '@/global/rendering'
 import { resetSave, updateSave } from '@/global/save'
 import { campState } from '@/global/states'
 import { entries } from '@/utils/mapFunctions'
 import { useLocalStorage } from '@/utils/useLocalStorage'
+import { addWeaponModel } from '@/states/game/spawnPlayer'
 
 const groundQuery = ecs.with('ground', 'model')
 export const updatePixelation = (e: Event) => {
@@ -112,17 +114,27 @@ export const DebugUi = () => {
 			camera.camera.updateProjectionMatrix()
 		}
 	}
+	const attackInFarm = ui.sync(() => debugOptions.attackInFarm)
+	let weaponModel: null | Object3D<Object3DEventMap> = null
+	const enableAttackAnimations = () => {
+		debugOptions.attackInFarm = !debugOptions.attackInFarm
+		if (debugOptions.attackInFarm) {
+			for (const player of ecs.with('model', 'player')) {
+				weaponModel = addWeaponModel(player.model)
+			}
+		} else {
+			weaponModel?.removeFromParent()
+		}
+	}
 	return (
 		<div style={{ position: 'absolute', color: 'white' }}>
 			<Show when={showUi()}>
-				<div>
+				<div style={{ 'background': 'darkgray', 'display': 'grid', 'grid-template-columns': 'auto auto', 'color': 'black', 'font-size': '2rem', 'padding': '1rem', 'margin': '1rem', 'gap': '0.5rem' }}>
 					<div>Perspective</div>
 					<div>
 						<button onClick={changeCameraNormal}>Normal</button>
 						<button onClick={changeCameraOrtho}>Ortho</button>
 					</div>
-				</div>
-				<div>
 					Render width
 					<input
 						type="number"
@@ -130,8 +142,6 @@ export const DebugUi = () => {
 						onChange={updatePixelation}
 					>
 					</input>
-				</div>
-				<div>
 					Camera Offset X
 					<input
 						type="number"
@@ -139,8 +149,6 @@ export const DebugUi = () => {
 						onChange={e => params.cameraOffsetX = e.target.valueAsNumber}
 					>
 					</input>
-				</div>
-				<div>
 					Camera Offset Y
 					<input
 						type="number"
@@ -148,8 +156,6 @@ export const DebugUi = () => {
 						onChange={e => params.cameraOffsetY = e.target.valueAsNumber}
 					>
 					</input>
-				</div>
-				<div>
 					Camera Offset Z
 					<input
 						type="number"
@@ -157,8 +163,6 @@ export const DebugUi = () => {
 						onChange={e => params.cameraOffsetZ = e.target.valueAsNumber}
 					>
 					</input>
-				</div>
-				<div>
 					Zoom
 					<input
 						type="number"
@@ -166,8 +170,6 @@ export const DebugUi = () => {
 						onChange={e => changeZoom(e.target.valueAsNumber)}
 					>
 					</input>
-				</div>
-				<div>
 					Fov
 					<input
 						type="number"
@@ -175,8 +177,6 @@ export const DebugUi = () => {
 						onChange={e => params.fov = e.target.valueAsNumber}
 					>
 					</input>
-				</div>
-				<div>
 					SpeedUp
 					<input
 						type="number"
@@ -184,8 +184,6 @@ export const DebugUi = () => {
 						onChange={e => params.speedUp = e.target.valueAsNumber}
 					>
 					</input>
-				</div>
-				<div>
 					Dialog speed
 					<input
 						type="number"
@@ -193,45 +191,50 @@ export const DebugUi = () => {
 						onChange={e => params.dialogSpeed = e.target.valueAsNumber}
 					>
 					</input>
-				</div>
-				<div>
-					<button onClick={growCrops}>Grow crops</button>
-				</div>
-				<div>
-					<button onClick={destroyCrops}>Destroy crops</button>
-				</div>
-				<div>
-					<button onClick={reset}>Reset Save</button>
-				</div>
-				<div>
 					Pixelation
 					<input type="checkbox" checked={params.pixelation} onChange={e => changePixelation(e.target.checked)}></input>
 				</div>
-				<div>
-					<For each={entries(groundColors)}>
-						{([name, color]) => {
-							return (
-								<div>
-									{name}
-									<input type="color" value={color} onChange={e => updateGroundColor(name, e.target.value)}></input>
-									{color}
-								</div>
-							)
-						}}
-					</For>
-					<div>
-						<button onClick={() => {
-							resetGroundColors()
-							window.location.reload() }}
-						>
-							reset ground colors
-						</button>
+				<div style={{ display: 'flex', gap: '1rem', margin: '1rem', width: '20rem' }}>
+					<button onClick={growCrops}>Grow crops</button>
+					<button onClick={destroyCrops}>Destroy crops</button>
+					<button onClick={reset}>Reset Save</button>
+					<button classList={{ selected: attackInFarm() }} onClick={enableAttackAnimations}>
+						{attackInFarm() ? 'Disable' : 'Enable'}
+						{' '}
+						attack animations
+					</button>
+				</div>
+
+				<div style={{ position: 'fixed', right: 0, top: 0 }}>
+					<div style={{ 'background': 'darkgray', 'margin': '1rem', 'padding': '1rem', 'color': 'black', 'font-size': '2rem' }}>
+						<For each={entries(groundColors)}>
+							{([name, color]) => {
+								return (
+									<div>
+										{name}
+										<input type="color" value={color} onChange={e => updateGroundColor(name, e.target.value)}></input>
+										{color}
+									</div>
+								)
+							}}
+						</For>
+						<div>
+							<button onClick={() => {
+								resetGroundColors()
+								window.location.reload() }}
+							>
+								reset ground colors
+							</button>
+						</div>
+					</div>
+					<div style={{ 'background': 'darkgray', 'margin': '1rem', 'padding': '1rem', 'color': 'black', 'font-size': '2rem' }}>
+						<ToonEditor />
+
 					</div>
 				</div>
-				<ToonEditor />
-				<SaveEditor />
 			</Show>
 			<LevelEditor />
+			<SaveEditor />
 		</div>
 	)
 }

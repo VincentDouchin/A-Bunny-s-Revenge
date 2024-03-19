@@ -1,4 +1,5 @@
-import { debugState } from './debugState'
+import { debugOptions, debugState } from './debugState'
+import { playerAttack } from '@/states/dungeon/battle'
 import type { State } from '@/lib/state'
 
 const enableDebugState = () => {
@@ -14,6 +15,13 @@ const enableDebugState = () => {
 	}
 }
 
+const attackInFarm = () => {
+	if (debugOptions.attackInFarm) {
+		playerAttack()
+	}
+}
+
 export const debugPlugin = (state: State) => {
 	state.addSubscriber(enableDebugState)
+		.onUpdate(attackInFarm)
 }

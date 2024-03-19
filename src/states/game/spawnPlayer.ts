@@ -1,3 +1,4 @@
+import type { Object3D, Object3DEventMap } from 'three'
 import { LinearSRGBColorSpace, Mesh, NearestFilter, Quaternion, Vector3 } from 'three'
 import { clone } from 'three/examples/jsm/utils/SkeletonUtils'
 import { healthBundle } from '../dungeon/health'
@@ -14,10 +15,19 @@ import type { System } from '@/lib/state'
 import { stateBundle } from '@/lib/stateMachine'
 import { Stat, addModifier } from '@/lib/stats'
 
-const weaponModel = () => {
+const getWeaponModel = () => {
 	const model = assets.weapons.Ladle.scene.clone()
 	model.scale.setScalar(2)
 	return model
+}
+export const addWeaponModel = (model: Object3D<Object3DEventMap>) => {
+	const weaponModel = getWeaponModel()
+	model.traverse((node) => {
+		if (node.name === 'DEF_FingerL') {
+			node.add(weaponModel)
+		}
+	})
+	return weaponModel
 }
 
 export const playerBundle = (dungeon: boolean, health: number, addHealth: boolean) => {
@@ -29,11 +39,10 @@ export const playerBundle = (dungeon: boolean, health: number, addHealth: boolea
 			node.material.map.magFilter = NearestFilter
 			node.material.opacity = 1
 		}
-
-		if (node.name === 'DEF_FingerL' && dungeon) {
-			node.add(weaponModel())
-		}
 	})
+	if (dungeon) {
+		addWeaponModel(model)
+	}
 	const bundle = capsuleColliderBundle(model, Sizes.character)
 	bundle.bodyDesc.setLinearDamping(20)
 	const player = {
