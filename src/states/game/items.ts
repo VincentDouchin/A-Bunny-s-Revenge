@@ -7,6 +7,7 @@ import { assets, ecs, world } from '@/global/init'
 import { addItem } from '@/global/save'
 import { modelColliderBundle } from '@/lib/models'
 import { addTweenTo } from '@/lib/updateTween'
+import { sleep } from '@/utils/sleep'
 
 const itemsQuery = ecs.with('item', 'position', 'model', 'collider', 'itemLabel')
 
@@ -44,24 +45,28 @@ export const bobItems = () => itemsQuery.onEntityAdded.subscribe((entity) => {
 	)
 })
 
-const playerQuery = ecs.with('playerControls', 'collider', 'position', 'inventoryId', 'inventorySize', 'inventory')
+const basketQuery = ecs.with('basket', 'collider', 'position', 'inventoryId', 'inventorySize', 'inventory', 'stateMachine')
 export const collectItems = () => {
-	for (const player of playerQuery) {
+	for (const basket of basketQuery) {
 		for (const item of itemsQuery) {
-			if (world.intersectionPair(player.collider, item.collider)) {
+			if (world.intersectionPair(basket.collider, item.collider)) {
 				ecs.removeComponent(item, 'tween')
 				ecs.removeComponent(item, 'collider')
-				addItem(player, { name: item.itemLabel, quantity: 1 })
-				ecs.add({
-					parent: item,
-					tween: new Tween(item.position).to({ ...player.position, y: item.position.y }, 500).onComplete(() => {
-						ecs.remove(item)
-					}).easing(Easing.Cubic.Out),
-				})
-				ecs.add({
-					parent: item,
-					tween:	new Tween(item.model.scale).to(new Vector3(), 500).easing(Easing.Cubic.Out),
-				})
+				addItem(basket, { name: item.itemLabel, quantity: 1 })
+				if (basket.stateMachine.enter('picking', basket)) {
+					sleep(500).then(() => {
+						ecs.add({
+							parent: item,
+							tween: new Tween(item.position).to({ ...basket.position, y: item.position.y }, 500).onComplete(() => {
+								ecs.remove(item)
+							}).easing(Easing.Cubic.Out),
+						})
+						ecs.add({
+							parent: item,
+							tween: new Tween(item.model.scale).to(new Vector3(), 500).easing(Easing.Cubic.Out),
+						})
+					})
+				}
 			}
 		}
 	}

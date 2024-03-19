@@ -5,6 +5,7 @@ import { params } from '@/global/context'
 import type { ComponentsOfType, Entity, states } from '@/global/entity'
 import { ecs, time } from '@/global/init'
 import { entries } from '@/utils/mapFunctions'
+import { sleep } from '@/utils/sleep'
 
 const setupAnimations = <A extends ComponentsOfType<Animator<any>>, K extends keyof Entity>(key: A, transitions: Partial<Record<states, (e: With<With<With<Entity, A>, | 'stateMachine' | 'state'>, K>) => void>>, additionalComponents: K[] = []) => {
 	const query = ecs.with(key).with('stateMachine', 'state').with(...additionalComponents)
@@ -65,4 +66,14 @@ export const shagaFSM = setupAnimations('shagaAnimator', {
 	attacking: e => e.shagaAnimator.playClamped('Attack').then(() => e.stateMachine.enter('attackCooldown', e)),
 	waitingAttack: e => setTimeout(() => e.stateMachine.enter('attacking', e), 400),
 	attackCooldown: e => setTimeout(() => e.stateMachine.enter('idle', e), 1000),
+})
+export const basketFSM = setupAnimations('basketAnimator', {
+	idle: e => e.basketAnimator.playAnimation('WingFlap_Rocking'),
+	running: e => e.basketAnimator.playAnimation('WingFlapBounce'),
+	picking: async (e) => {
+		await e.basketAnimator.playClamped('LidOpen', { timeScale: 2 })
+		await sleep(500)
+		await e.basketAnimator.playClamped('LidClose', { timeScale: 2 })
+		e.stateMachine.enter('idle', e)
+	},
 })

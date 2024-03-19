@@ -25,8 +25,9 @@ import { talkToNPC } from './states/game/dialog'
 import { bobItems, collectItems, popItems, stopItems } from './states/game/items'
 import { applyMove, canPlayerMove, movePlayer, playerSteps, savePlayerFromTheEmbraceOfTheVoid, savePlayerPosition, stopPlayer } from './states/game/movePlayer'
 import { pauseGame } from './states/game/pauseGame'
-import { beeFSM, playerFSM, shagaFSM } from './states/game/playerFSM'
+import { basketFSM, beeFSM, playerFSM, shagaFSM } from './states/game/playerFSM'
 import { target } from './states/game/sensor'
+import { basketFollowPlayer, spawnBasket } from './states/game/spawnBasket'
 import { allowDoorCollision, collideWithDoor, collideWithDoorCamp, collideWithDoorClearing } from './states/game/spawnDoor'
 import { spawnCrossRoad, spawnDungeon, spawnFarm, spawnLevelData, updateTimeUniforms } from './states/game/spawnLevel'
 import { debugPlayer, losingBattle, spawnCharacter } from './states/game/spawnPlayer'
@@ -41,7 +42,7 @@ coreState
 	.addSubscriber(...target, initTone, resize, disablePortrait, enableFullscreen)
 	.onEnter(initCamera, initThree, ui.render(UI))
 	.onPreUpdate(coroutines.tick, savePlayerFromTheEmbraceOfTheVoid)
-	.onUpdate(runIf(() => !pausedState.enabled, updateAnimations('beeAnimator', 'playerAnimator', 'shagaAnimator', 'ovenAnimator', 'chestAnimator', 'houseAnimator'), () => time.tick()), inputManager.update, ui.update, moveCamera)
+	.onUpdate(runIf(() => !pausedState.enabled, updateAnimations('beeAnimator', 'playerAnimator', 'shagaAnimator', 'ovenAnimator', 'chestAnimator', 'houseAnimator', 'basketAnimator'), () => time.tick()), inputManager.update, ui.update, moveCamera)
 	.onPostUpdate(updateControls, render)
 	.enable()
 setupState
@@ -49,15 +50,15 @@ setupState
 	.enable()
 gameState
 	.onEnter()
-	.addSubscriber(initializeCameraPosition, bobItems, enableInventoryState, killAnimation, ...playerFSM, ...beeFSM, ...shagaFSM, popItems, addHealthBarContainer)
+	.addSubscriber(initializeCameraPosition, bobItems, enableInventoryState, killAnimation, ...playerFSM, ...beeFSM, ...shagaFSM, ...basketFSM, popItems, addHealthBarContainer)
 	.onUpdate(runIf(canPlayerMove, movePlayer), runIf(() => !pausedState.enabled, applyMove, playerSteps, dayNight, updateTimeUniforms))
 	.onUpdate(collectItems, touchItem, talkToNPC, stopItems, runIf(() => !openMenuState.enabled, pauseGame, interact))
 	.enable()
 campState
 	.addSubscriber(...interactablePlantableSpot)
-	.onEnter(spawnFarm, spawnLevelData, updateCropsSave, initPlantableSpotsInteractions, spawnCharacter)
+	.onEnter(spawnFarm, spawnLevelData, updateCropsSave, initPlantableSpotsInteractions, spawnCharacter, spawnBasket)
 	.onUpdate(collideWithDoorCamp, debugPlayer)
-	.onUpdate(runIf(canPlayerMove, plantSeed, harvestCrop, openPlayerInventory, savePlayerPosition))
+	.onUpdate(runIf(canPlayerMove, plantSeed, harvestCrop, openPlayerInventory, savePlayerPosition, basketFollowPlayer))
 	.onExit(despawnOfType('map'))
 openMenuState
 	.onEnter(playOpenSound, stopPlayer)
@@ -71,8 +72,8 @@ genDungeonState
 
 dungeonState
 	.addSubscriber(spawnDrops, losingBattle, endBattleSpawnChest, removeEnemyFromSpawn)
-	.onEnter(spawnDungeon, spawnLevelData)
-	.onUpdate(runIf(canPlayerMove, allowDoorCollision, collideWithDoor, enemyAttackPlayer, harvestCrop, playerAttack, killEntities))
+	.onEnter(spawnDungeon, spawnLevelData, spawnBasket)
+	.onUpdate(runIf(canPlayerMove, allowDoorCollision, collideWithDoor, enemyAttackPlayer, harvestCrop, playerAttack, killEntities, basketFollowPlayer))
 	.onExit(despawnOfType('map'))
 pausedState
 	.onExit(() => time.reset())

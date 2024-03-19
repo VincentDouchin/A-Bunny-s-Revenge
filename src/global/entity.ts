@@ -103,6 +103,7 @@ export interface Entity {
 	ovenAnimator?: Animator<Animations['BunnyOvenPacked']>
 	chestAnimator?: Animator<Animations['Chest']>
 	houseAnimator?: Animator<Animations['House']>
+	basketAnimator?: Animator<Animations['Basket']>
 	template?: () => JSXElement
 	el?: HTMLElement
 	cssObject?: true
@@ -192,6 +193,8 @@ export interface Entity {
 	firefly?: true
 
 	withTimeUniform?: true
+	// ! Basket
+	basket?: true
 }
 export type states = 'idle' | 'running' | 'picking' | 'dying' | 'hit' | 'hello' | 'dead' | 'waitingAttack' | 'attacking' | 'attackCooldown' | 'doorOpening' | 'doorClosing'
 export type Bundle<C extends keyof Entity> = () => With<Entity, C>
