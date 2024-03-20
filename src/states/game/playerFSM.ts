@@ -30,7 +30,6 @@ export const playerFSM = setupAnimations('playerAnimator', {
 			e.body.addForce(force, true)
 			setTimeout(() => e.body.resetForces(true), 500)
 		}
-
 		if (e.combo.lastAttack === 0) {
 			applyforce(1)
 			await e.playerAnimator.playOnce('FIGHT_ACTION1', undefined, 0.2)

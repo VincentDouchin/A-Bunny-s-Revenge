@@ -1,8 +1,8 @@
-import type { Object3D, Object3DEventMap } from 'three'
 import { LinearSRGBColorSpace, Mesh, NearestFilter, Quaternion, Vector3 } from 'three'
 import { clone } from 'three/examples/jsm/utils/SkeletonUtils'
 import { healthBundle } from '../dungeon/health'
 import { inventoryBundle } from './inventory'
+import { weaponBundle } from './weapon'
 import { Sizes } from '@/constants/sizes'
 import { Animator } from '@/global/animator'
 import { type Entity, Faction } from '@/global/entity'
@@ -15,21 +15,6 @@ import type { System } from '@/lib/state'
 import { stateBundle } from '@/lib/stateMachine'
 import { Stat, addModifier } from '@/lib/stats'
 
-const getWeaponModel = () => {
-	const model = assets.weapons.Ladle.scene.clone()
-	model.scale.setScalar(2)
-	return model
-}
-export const addWeaponModel = (model: Object3D<Object3DEventMap>) => {
-	const weaponModel = getWeaponModel()
-	model.traverse((node) => {
-		if (node.name === 'DEF_FingerL') {
-			node.add(weaponModel)
-		}
-	})
-	return weaponModel
-}
-
 export const playerBundle = (dungeon: boolean, health: number, addHealth: boolean) => {
 	const model = clone(assets.characters.Bunny.scene)
 	model.traverse((node) => {
@@ -40,9 +25,7 @@ export const playerBundle = (dungeon: boolean, health: number, addHealth: boolea
 			node.material.opacity = 1
 		}
 	})
-	if (dungeon) {
-		addWeaponModel(model)
-	}
+
 	const bundle = capsuleColliderBundle(model, Sizes.character)
 	bundle.bodyDesc.setLinearDamping(20)
 	const player = {
@@ -78,6 +61,9 @@ export const playerBundle = (dungeon: boolean, health: number, addHealth: boolea
 			heavyAttack: 0,
 		},
 	} as const satisfies Entity
+	if (dungeon) {
+		ecs.update(player, { weapon: weaponBundle() })
+	}
 	for (const mod of save.modifiers) {
 		addModifier(mod, player, addHealth)
 	}

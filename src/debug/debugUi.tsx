@@ -1,5 +1,5 @@
 import { For, Show, createSignal, onCleanup, onMount } from 'solid-js'
-import type { Object3D, Object3DEventMap, ShaderMaterial } from 'three'
+import type { ShaderMaterial } from 'three'
 import { Color, Mesh, OrthographicCamera, PerspectiveCamera } from 'three'
 import { LevelEditor } from './LevelEditor'
 import { debugOptions } from './debugState'
@@ -11,7 +11,7 @@ import { cameraQuery, depthQuad, height, renderer, width } from '@/global/render
 import { resetSave, updateSave } from '@/global/save'
 import { campState } from '@/global/states'
 import { ModStage, ModType, createModifier } from '@/lib/stats'
-import { addWeaponModel } from '@/states/game/spawnPlayer'
+import { weaponBundle } from '@/states/game/weapon'
 import { entries } from '@/utils/mapFunctions'
 import { useLocalStorage } from '@/utils/useLocalStorage'
 
@@ -116,15 +116,14 @@ export const DebugUi = () => {
 		}
 	}
 	const attackInFarm = ui.sync(() => debugOptions.attackInFarm)
-	let weaponModel: null | Object3D<Object3DEventMap> = null
 	const enableAttackAnimations = () => {
 		debugOptions.attackInFarm = !debugOptions.attackInFarm
-		if (debugOptions.attackInFarm) {
-			for (const player of ecs.with('model', 'player')) {
-				weaponModel = addWeaponModel(player.model)
+		for (const player of ecs.with('model', 'player')) {
+			if (debugOptions.attackInFarm) {
+				ecs.update(player, { weapon: weaponBundle() })
+			} else {
+				ecs.removeComponent(player, 'weapon')
 			}
-		} else {
-			weaponModel?.removeFromParent()
 		}
 	}
 	const godMode = ui.sync(() => debugOptions.godMode)

@@ -32,6 +32,7 @@ import { allowDoorCollision, collideWithDoor, collideWithDoorCamp, collideWithDo
 import { spawnCrossRoad, spawnDungeon, spawnFarm, spawnLevelData, updateTimeUniforms } from './states/game/spawnLevel'
 import { debugPlayer, losingBattle, spawnCharacter } from './states/game/spawnPlayer'
 import { touchItem } from './states/game/touchItem'
+import { addOrRemoveWeaponModel } from './states/game/weapon'
 import { playCloseSound, playOpenSound } from './states/pause/pause'
 import { disablePortrait, enableFullscreen, resize, setupGame } from './states/setup/setupGame'
 import { UI } from './ui/UI'
@@ -50,7 +51,7 @@ setupState
 	.enable()
 gameState
 	.onEnter()
-	.addSubscriber(initializeCameraPosition, bobItems, enableInventoryState, killAnimation, ...playerFSM, ...beeFSM, ...shagaFSM, ...basketFSM, popItems, addHealthBarContainer)
+	.addSubscriber(initializeCameraPosition, bobItems, enableInventoryState, killAnimation, ...playerFSM, ...beeFSM, ...shagaFSM, ...basketFSM, popItems, addHealthBarContainer, ...addOrRemoveWeaponModel)
 	.onUpdate(runIf(canPlayerMove, movePlayer), runIf(() => !pausedState.enabled, applyMove, playerSteps, dayNight, updateTimeUniforms))
 	.onUpdate(collectItems, touchItem, talkToNPC, stopItems, runIf(() => !openMenuState.enabled, pauseGame, interact))
 	.enable()

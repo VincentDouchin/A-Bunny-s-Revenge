@@ -195,6 +195,8 @@ export interface Entity {
 	withTimeUniform?: true
 	// ! Basket
 	basket?: true
+	// ! Weapon
+	weapon?: With<Entity, 'model'>
 }
 export type states = 'idle' | 'running' | 'picking' | 'dying' | 'hit' | 'hello' | 'dead' | 'waitingAttack' | 'attacking' | 'attackCooldown' | 'doorOpening' | 'doorClosing'
 export type Bundle<C extends keyof Entity> = () => With<Entity, C>
