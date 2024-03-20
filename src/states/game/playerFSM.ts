@@ -32,7 +32,7 @@ export const playerFSM = setupAnimations('playerAnimator', {
 		}
 		if (e.combo.lastAttack === 0) {
 			applyforce(1)
-			await e.playerAnimator.playOnce('FIGHT_ACTION1', undefined, 0.2)
+			await e.playerAnimator.playOnce('FIGHT_ACTION1', undefined, 0.5)
 		}
 		if (e.combo.lastAttack === 1) {
 			applyforce(2)
