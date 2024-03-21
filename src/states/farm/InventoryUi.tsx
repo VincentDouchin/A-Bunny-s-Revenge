@@ -1,7 +1,6 @@
 import type { With } from 'miniplex'
 import type { Accessor, Setter } from 'solid-js'
-import { For, Show, createEffect, createMemo, createSignal, onCleanup, onMount } from 'solid-js'
-import { del } from 'idb-keyval'
+import { For, Show, createEffect, createMemo, createSignal, onCleanup } from 'solid-js'
 import { InventoryTitle } from './CookingUi'
 import { MealBuffs } from './RecipesUi'
 import { itemsData } from '@/constants/items'
