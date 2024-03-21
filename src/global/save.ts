@@ -46,21 +46,25 @@ export const resetSave = async (newSave?: SaveData) => {
 	await set(context.save, newSave ?? blankSave())
 }
 
-export const addItem = (entity: With<Entity, 'inventoryId' | 'inventory' | 'inventorySize'>, item: Item, slot?: number) => {
+export const addItem = (entity: With<Entity, 'inventoryId' | 'inventory' | 'inventorySize'>, item: Item, stack = true) => {
+	let wasAdded = false
 	updateSave((s) => {
 		const inventory = s.inventories[entity.inventoryId]
-		const existingItem = inventory.find((it, i) => it && it.name === item.name && (slot === undefined || i === slot))
+		const existingItem = inventory.find(it => it && it.name === item.name && stack)
 		if (existingItem) {
+			wasAdded = true
 			existingItem.quantity += item.quantity
 		} else {
 			for (let i = 0; i < entity.inventorySize; i++) {
 				if (inventory[i] === undefined) {
 					inventory[i] = item
+					wasAdded = true
 					break
 				}
 			}
 		}
 	})
+	return wasAdded
 }
 export const removeItem = (entity: With<Entity, 'inventoryId' | 'inventory' | 'inventorySize'>, item: Item, slot?: number) => {
 	updateSave((s) => {

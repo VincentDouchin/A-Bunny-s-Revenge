@@ -30,15 +30,20 @@ export const spawnBasket = () => {
 			...bundle,
 			basket: player,
 			speed: 100,
-			...inventoryBundle(3, 'basket', Interactable.Open),
-			onPrimary(entity) {
-				ecs.update(entity, { menuType: MenuType.Basket })
-			},
-
 		})
 	}
 }
 const basketQuery = ecs.with('basket', 'movementForce', 'position')
+export const enableBasketUi = () => {
+	for (const basket of basketQuery) {
+		ecs.update(basket, {
+			...inventoryBundle(3, 'basket', Interactable.Open),
+			onPrimary(entity) {
+				ecs.update(entity, { menuType: MenuType.Basket })
+			},
+		})
+	}
+}
 
 const itemsQuery = ecs.with('item', 'position')
 export const basketFollowPlayer = () => {

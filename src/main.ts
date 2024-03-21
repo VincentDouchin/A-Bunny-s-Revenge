@@ -27,7 +27,7 @@ import { applyMove, canPlayerMove, movePlayer, playerSteps, savePlayerFromTheEmb
 import { pauseGame } from './states/game/pauseGame'
 import { basketFSM, beeFSM, playerFSM, shagaFSM } from './states/game/playerFSM'
 import { target } from './states/game/sensor'
-import { basketFollowPlayer, spawnBasket } from './states/game/spawnBasket'
+import { basketFollowPlayer, enableBasketUi, spawnBasket } from './states/game/spawnBasket'
 import { allowDoorCollision, collideWithDoor, collideWithDoorCamp, collideWithDoorClearing } from './states/game/spawnDoor'
 import { spawnCrossRoad, spawnDungeon, spawnFarm, spawnLevelData, updateTimeUniforms } from './states/game/spawnLevel'
 import { debugPlayer, losingBattle, spawnCharacter } from './states/game/spawnPlayer'
@@ -57,7 +57,7 @@ gameState
 	.enable()
 campState
 	.addSubscriber(...interactablePlantableSpot)
-	.onEnter(spawnFarm, spawnLevelData, updateCropsSave, initPlantableSpotsInteractions, spawnCharacter, spawnBasket)
+	.onEnter(spawnFarm, spawnLevelData, updateCropsSave, initPlantableSpotsInteractions, spawnCharacter, spawnBasket, enableBasketUi)
 	.onUpdate(collideWithDoorCamp, debugPlayer)
 	.onUpdate(runIf(canPlayerMove, plantSeed, harvestCrop, openPlayerInventory, savePlayerPosition, basketFollowPlayer))
 	.onExit(despawnOfType('map'))

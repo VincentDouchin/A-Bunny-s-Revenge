@@ -4,6 +4,7 @@ import { between } from 'randomish'
 import { Vector3 } from 'three'
 import { clone } from 'three/examples/jsm/utils/SkeletonUtils'
 import { itemBundle } from '../game/items'
+import { enableBasketUi } from '../game/spawnBasket'
 import { itemsData } from '@/constants/items'
 import { Animator } from '@/global/animator'
 import { Faction } from '@/global/entity'
@@ -54,5 +55,6 @@ const enemiesQuery = ecs.with('faction').where(({ faction }) => faction === Fact
 export const endBattleSpawnChest = () => enemiesQuery.onEntityRemoved.subscribe(() => {
 	if (enemiesQuery.size === 1) {
 		spawnChest()
+		enableBasketUi()
 	}
 })
