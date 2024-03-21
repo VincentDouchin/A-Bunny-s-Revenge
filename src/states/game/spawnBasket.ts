@@ -6,8 +6,9 @@ import { assets, ecs } from '@/global/init'
 import { Animator } from '@/global/animator'
 import { stateBundle } from '@/lib/stateMachine'
 import { modelColliderBundle } from '@/lib/models'
+import { Interactable, MenuType } from '@/global/entity'
 
-const playerQuery = ecs.with('player', 'position', 'rotation')
+const playerQuery = ecs.with('player', 'position', 'rotation', 'inventory', 'inventoryId', 'inventorySize')
 export const spawnBasket = () => {
 	const model = clone(assets.characters.Basket.scene)
 	model.scale.setScalar(5)
@@ -27,13 +28,16 @@ export const spawnBasket = () => {
 			}),
 			movementForce: new Vector3(),
 			...bundle,
-			basket: true,
+			basket: player,
 			speed: 100,
-			...inventoryBundle(24, 'player'),
+			...inventoryBundle(3, 'basket', Interactable.Open),
+			onPrimary(entity) {
+				ecs.update(entity, { menuType: MenuType.Basket })
+			},
+
 		})
 	}
 }
-
 const basketQuery = ecs.with('basket', 'movementForce', 'position')
 
 const itemsQuery = ecs.with('item', 'position')

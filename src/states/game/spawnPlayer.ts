@@ -30,7 +30,7 @@ export const playerBundle = (dungeon: boolean, health: number, addHealth: boolea
 	bundle.bodyDesc.setLinearDamping(20)
 	const player = {
 		...playerInputMap(),
-		...inventoryBundle(24, 'player'),
+		...inventoryBundle(Number.POSITIVE_INFINITY, 'player'),
 		...bundle,
 		playerAnimator: new Animator(bundle.model, assets.characters.Bunny.animations),
 		inMap: true,

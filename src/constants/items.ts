@@ -7,26 +7,25 @@ export interface Item {
 	quantity: number
 }
 
-export type ItemTags = 'choppable' | 'cookable'
-export type ItemData = Partial<Record<ItemTags, true>> & {
+export interface ItemData {
 	name: string
 	seed?: crops
 	meal?: Modifier<any>[]
+	ingredient?: true
 }
 
 export const itemsData: Record<items, ItemData> = {
 	beet: {
 		name: 'Beet',
-		choppable: true,
+		ingredient: true,
 	},
 	carrot: {
 		name: 'Carrot',
-		cookable: true,
-		choppable: true,
+		ingredient: true,
 	},
 	tomato: {
 		name: 'Tomato',
-		cookable: true,
+		ingredient: true,
 	},
 	roasted_carrot: {
 		name: 'Roasted carrot',
@@ -66,10 +65,11 @@ export const itemsData: Record<items, ItemData> = {
 	},
 	lettuce: {
 		name: 'Lettuce',
+		ingredient: true,
 	},
 	honey: {
 		name: 'Honey',
-		cookable: true,
+		ingredient: true,
 	},
 	honey_glazed_carrot: {
 		name: 'Honey glazed carrot',
@@ -80,6 +80,7 @@ export const itemsData: Record<items, ItemData> = {
 	},
 	parsley: {
 		name: 'Parsley',
+		ingredient: true,
 	},
 	beetroot_salad: {
 		name: 'Beetroot Salad',
@@ -90,6 +91,7 @@ export const itemsData: Record<items, ItemData> = {
 	},
 	ham: {
 		name: 'Ham',
+		ingredient: true,
 	},
 	ham_honey: {
 		name: 'Honey Ham',
@@ -99,6 +101,7 @@ export const itemsData: Record<items, ItemData> = {
 	},
 	slime_dough: {
 		name: 'Slime Dough',
+		ingredient: true,
 	},
 	slime_bread: {
 		name: 'Slime Bread',
@@ -108,12 +111,15 @@ export const itemsData: Record<items, ItemData> = {
 	},
 	slime_dumpling: {
 		name: 'Slime Dumpling',
+		meal: [],
 	},
 	magic_bean: {
 		name: '"Magic" bean',
+		ingredient: true,
 	},
 	milk: {
 		name: 'Milk',
+		ingredient: true,
 	},
 	pumpkin_seeds: {
 		name: 'Pumpkin seeds',
@@ -121,15 +127,19 @@ export const itemsData: Record<items, ItemData> = {
 	},
 	pumpkin: {
 		name: 'Pumpkin',
+		ingredient: true,
 	},
 	egg: {
 		name: 'Egg',
+		ingredient: true,
 	},
 	carrot_cake: {
 		name: 'Carrot cake',
+		meal: [],
 	},
 	cinnamon: {
 		name: 'Cinnamon',
+		ingredient: true,
 	},
 	wheat_seeds: {
 		name: 'Wheat seeds',
@@ -137,21 +147,27 @@ export const itemsData: Record<items, ItemData> = {
 	},
 	wheat: {
 		name: 'Wheat',
+		ingredient: true,
 	},
 	flour: {
 		name: 'Flour',
+		ingredient: true,
 	},
 	butter: {
 		name: 'Butter',
+		ingredient: true,
 	},
 	pumpkin_bread: {
 		name: 'Pumpkin bread',
+		meal: [],
 	},
 	sugar: {
 		name: 'Sugar',
+		ingredient: true,
 	},
 	flan: {
 		name: 'Flan',
+		meal: [],
 	},
 
 }

@@ -46,6 +46,7 @@ export enum MenuType {
 	OvenMinigame,
 	CauldronGame,
 	SelectSeed,
+	Basket,
 }
 export const cropNames = ['carrot', 'beet', 'tomato', 'lettuce', 'pumpkin', 'wheat'] as const
 export const fruitNames = ['apple'] as const
@@ -194,7 +195,7 @@ export interface Entity {
 
 	withTimeUniform?: true
 	// ! Basket
-	basket?: true
+	basket?: With<Entity, 'inventory' | 'inventoryId' | 'inventorySize'>
 	// ! Weapon
 	weapon?: With<Entity, 'model'>
 }

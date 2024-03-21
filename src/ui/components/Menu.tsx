@@ -1,5 +1,5 @@
 import type { Accessor, Component } from 'solid-js'
-import { createMemo, createRoot, createSignal } from 'solid-js'
+import { createEffect, createMemo, createRoot, createSignal } from 'solid-js'
 
 import { generateUUID } from 'three/src/math/MathUtils'
 import { ui } from '@/global/init'
@@ -108,5 +108,10 @@ export function Menu(props: MenuProps) {
 			selected: isSelected,
 		}
 	}
+	// createEffect(() => {
+	// 	if (selected()) {
+	// 		refs.get(selected())?.scrollIntoView()
+	// 	}
+	// })
 	return <props.children getProps={getProps} selected={selected}></props.children>
 }

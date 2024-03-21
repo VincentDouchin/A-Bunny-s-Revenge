@@ -1,6 +1,7 @@
 import { Show, createMemo } from 'solid-js'
 import { StateUi } from '../../ui/components/StateUi'
 import { HealthUi } from '../dungeon/HealthUi'
+import { BasketUi } from '../game/BasketUi'
 import { CauldronMinigameUi } from './CauldronMinigameUi'
 import { OvenMinigameUi } from './OvenMinigameUi'
 import { QuestUi } from './QuestUi'
@@ -31,6 +32,9 @@ export const PlayerUi = () => {
 						<Show when={showTouch()}>
 							<TouchControls player={player} />
 						</Show>
+						<Show when={!showTouch()}>
+							<InteractionUi player={player} />
+						</Show>
 						<StateUi state={campState}>
 							<RecipesUi player={player} />
 							<OvenMinigameUi player={player} />
@@ -41,12 +45,10 @@ export const PlayerUi = () => {
 							<ChestUi />
 							<HealthUi player={player}></HealthUi>
 						</StateUi>
-						<Show when={!showTouch()}>
-							<InteractionUi player={player} />
-						</Show>
 						<StateUi state={dungeonState}>
 							<HealthUi player={player}></HealthUi>
 						</StateUi>
+						<BasketUi player={player} />
 					</>
 				)
 			}}

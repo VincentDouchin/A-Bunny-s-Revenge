@@ -52,7 +52,7 @@ export const collectItems = () => {
 			if (world.intersectionPair(basket.collider, item.collider)) {
 				ecs.removeComponent(item, 'tween')
 				ecs.removeComponent(item, 'collider')
-				addItem(basket, { name: item.itemLabel, quantity: 1 })
+				addItem(basket.basket, { name: item.itemLabel, quantity: 1 })
 				if (basket.stateMachine.enter('picking', basket)) {
 					sleep(500).then(() => {
 						ecs.add({

@@ -35,29 +35,32 @@ export const thumbnailRenderer = () => {
 		clone.removeFromParent()
 		return buffer.canvas
 	}
-	let existingClone: null | Object3D<Object3DEventMap> = null
-	let existingCoroutine: null | (() => void) = null
-	const spin = (model: Object3D<Object3DEventMap>) => {
-		existingClone?.removeFromParent()
-		existingClone = model
-		existingCoroutine && existingCoroutine()
+	const render = () => {
+		renderer.setRenderTarget(target)
+		renderer.render(scene, camera)
+		renderer.setRenderTarget(null)
+		outlineQuad.render(renderer)
+	}
+	const spin = (existingClone: Object3D<Object3DEventMap>) => {
 		scene.add(existingClone)
 		camera.position.set(0, 1, -1)
 		camera.zoom = 2.3
 		camera.lookAt(new Vector3(0, 0.3, 0))
 		camera.updateProjectionMatrix()
-		existingCoroutine = coroutines.add(function*() {
+		render()
+		const existingCoroutine = coroutines.add(function*() {
 			while (true) {
-				renderer.setRenderTarget(target)
-				renderer.render(scene, camera)
-				renderer.setRenderTarget(null)
-				outlineQuad.render(renderer)
+				render()
 				existingClone?.rotateY(0.0025 * time.delta)
 				yield
 			}
 		})
-
-		return renderer.domElement
+		const clear = () => {
+			existingClone?.rotation.set(0, 0, 0)
+			existingClone?.removeFromParent()
+			existingCoroutine && existingCoroutine()
+		}
+		return { element: renderer.domElement, clear }
 	}
 
 	return { getCanvas, spin }
