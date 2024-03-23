@@ -17,7 +17,7 @@ import type { DungeonRessources, FarmRessources } from '@/global/states'
 import { getBoundingBox, getSize } from '@/lib/models'
 import type { System } from '@/lib/state'
 import { GroundMaterial, WaterMaterial } from '@/shaders/GroundShader'
-import { getScreenBuffer } from '@/utils/buffer'
+import { getScreenBuffer, scaleCanvas } from '@/utils/buffer'
 
 const SCALE = 10
 export const HEIGHT = 240
@@ -187,7 +187,7 @@ export const setDisplacement = (geo: PlaneGeometry, canvas: HTMLCanvasElement) =
 	positionAttribute.needsUpdate = true
 }
 export const spawnGroundAndTrees = (level: Level) => {
-	const displacementMap = getdisplacementMap(level)
+	const displacementMap = scaleCanvas (getdisplacementMap(level), 0.5)
 	const displacementTexture = new CanvasTexture(displacementMap)
 	displacementTexture.flipY = false
 	// ! Ground
