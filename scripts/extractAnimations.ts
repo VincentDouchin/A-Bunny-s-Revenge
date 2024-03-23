@@ -8,7 +8,7 @@ import type { PluginOption } from 'vite'
 import { getFileName } from './generateAssetNamesPlugin'
 
 const launchScript = async (filePath?: string) => {
-	if (!filePath || ((filePath.includes('assets') && filePath.split('.').at(-1) === 'glb'))) {
+	if (!filePath || ((filePath.includes('assets\\') && filePath.split('.').at(-1) === 'glb'))) {
 		let animations = `
 			interface Animations {
 		`
@@ -19,7 +19,7 @@ const launchScript = async (filePath?: string) => {
 				'draco3d.decoder': await draco3d.createDecoderModule(), // Optional.
 				'draco3d.encoder': await draco3d.createEncoderModule(), // Optional.
 			})
-		await Promise.all(Array.from(glbs.values()).sort((a, b) => a.localeCompare(b)).map(async (path) => {
+		for (const path of Array.from(glbs.values()).sort((a, b) => a.localeCompare(b))) {
 			// Read from URL.
 			const glb = await io.read(path)
 			const root = glb.getRoot()
@@ -30,7 +30,7 @@ const launchScript = async (filePath?: string) => {
 				${`${getFileName(path)}`} : ${animationNames.map(x => ` \`${x}\` `).join(` | `)}
 				`
 			}
-		}))
+		}
 		await writeFileSync('./assets/animations.d.ts', `${animations}}`)
 		exec('eslint assets/animations.d.ts --fix')
 	}

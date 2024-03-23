@@ -6,11 +6,16 @@ import type { PluginOption } from 'vite'
 
 const launchScript = async (filePath?: string) => {
 	if (!filePath || filePath.includes('assets\\')) {
+		console.log('generating asset manifest')
 		const modified: Record<string, { size: number, modified: number }> = {}
-		const assets = await glob('./assets/*/**.*')
+		const assets = filePath ? [filePath] : await glob('./assets/*/**.*')
 		for (const path of assets) {
-			const file = await stat(path)
-			modified[path.replace('assets\\', '/assets/').replace(/\\/g, '/')] = { size: Math.round(file.size), modified: Math.round(file.mtimeMs) }
+			try {
+				const file = await stat(path)
+				modified[path.replace('assets\\', '/assets/').replace(/\\/g, '/')] = { size: Math.round(file.size), modified: Math.round(file.mtimeMs) }
+			} catch (e) {
+				console.error(`file ${path} not present`)
+			}
 		}
 		await writeFile(path.join(process.cwd(), 'assets', 'assetManifest.json'), JSON.stringify(modified))
 	}

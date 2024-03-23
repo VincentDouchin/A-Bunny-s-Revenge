@@ -1,4 +1,5 @@
 import { exec, execSync } from 'node:child_process'
+import { unlink } from 'node:fs/promises'
 import type { PluginOption } from 'vite'
 import { glob } from 'glob'
 import { getFileName } from './generateAssetNamesPlugin'
@@ -8,7 +9,7 @@ const launchScript = async (filePath?: string) => {
 		const fbx = await glob('./assets/**/*.fbx')
 		for (const path of fbx) {
 			execSync(`FBX2GLB.exe --binary ${path} --output ${path.replace('fbx', 'glb')}`)
-			exec(`del ${path}`)
+			unlink(path)
 			console.log(`converted ${getFileName(path)} to glb`)
 		}
 	}
@@ -21,7 +22,6 @@ export const autoConvertFBXtoGLB = (): PluginOption => {
 		apply: 'serve',
 		configureServer(server) {
 			server.watcher.on('add', launchScript)
-			server.watcher.on('unlink', launchScript)
 		},
 
 	}
