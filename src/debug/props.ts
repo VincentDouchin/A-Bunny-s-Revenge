@@ -1,5 +1,5 @@
 import type { models, vegetation } from '@assets/assets'
-import { ColliderDesc, RigidBodyDesc } from '@dimforge/rapier3d-compat'
+import { ActiveCollisionTypes, ColliderDesc, RigidBodyDesc } from '@dimforge/rapier3d-compat'
 import type { With } from 'miniplex'
 import type { Object3D, Object3DEventMap } from 'three'
 import { Color, Group, Mesh, MeshPhongMaterial, PointLight, Quaternion, Vector3 } from 'three'
@@ -182,7 +182,7 @@ export const props: PlacableProp<propNames>[] = [
 			const newEntity: Entity = {
 				...entity,
 				plantableSpot: entity.entityId,
-				bodyDesc: RigidBodyDesc.fixed(),
+				bodyDesc: RigidBodyDesc.fixed().lockRotations(),
 				colliderDesc: ColliderDesc.cuboid(3, 3, 3).setSensor(true),
 			}
 			if (crop && ressources) {
@@ -259,7 +259,7 @@ export const props: PlacableProp<propNames>[] = [
 								dialog: dialogs.GrandmasDoor(),
 								interactable: Interactable.Enter,
 								bodyDesc: RigidBodyDesc.fixed().lockRotations(),
-								colliderDesc: ColliderDesc.cuboid(5, 7, 1).setSensor(true),
+								colliderDesc: ColliderDesc.cuboid(5, 7, 1).setSensor(true).setActiveCollisionTypes(ActiveCollisionTypes.ALL),
 							})
 						} else if (node instanceof Mesh) {
 							ecs.add({ parent, emissiveMat: node.material })
