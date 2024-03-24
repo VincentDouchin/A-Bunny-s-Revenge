@@ -42,19 +42,18 @@ const updateWorldPosition = () => {
 	for (const entity of worldPositionQuery) {
 		const { group, worldPosition, body } = entity
 		group.getWorldPosition(worldPosition)
-		body.setTranslation(worldPosition, true)
+
 		if (body.isFixed()) {
 			ecs.removeComponent(entity, 'worldPosition')
 		}
 	}
 }
 
-const bodiesQuery = ecs.with('body', 'position').where(({ body }) => body.isDynamic())
+const bodiesQuery = ecs.with('body', 'position').where(({ body }) => body.isDynamic() || body.isKinematic())
 const updateGroupPosition = () => {
 	for (const entity of bodiesQuery) {
 		const { body, position } = entity
 		const bodyPos = body.translation()
-
 		position.x = bodyPos.x
 		position.y = bodyPos.y
 		position.z = bodyPos.z

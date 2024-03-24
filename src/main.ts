@@ -80,7 +80,7 @@ pausedState
 	.onExit(() => time.reset())
 // const dungeon = genDungeon(5, true).find(room => room.type === RoomType.Entrance)!
 // dungeonState.enable({ dungeon, direction: 'south', firstEntry: true, playerHealth: 5 })
-const animate = async () => {
+const animate = () => {
 	app.update()
 	requestAnimationFrame(animate)
 }

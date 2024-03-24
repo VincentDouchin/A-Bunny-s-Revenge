@@ -1,7 +1,7 @@
-import { exec, execSync } from 'node:child_process'
+import { execSync } from 'node:child_process'
 import { unlink } from 'node:fs/promises'
-import type { PluginOption } from 'vite'
 import { glob } from 'glob'
+import type { PluginOption } from 'vite'
 import { getFileName } from './generateAssetNamesPlugin'
 
 const launchScript = async (filePath?: string) => {

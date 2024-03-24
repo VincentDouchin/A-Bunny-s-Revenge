@@ -12,6 +12,10 @@ export class Time {
 		this.current = newTime
 		this.elapsed += this.delta
 	}
+
+	get uniform() {
+		return { value: this.current }
+	}
 }
 
 export class Timer {

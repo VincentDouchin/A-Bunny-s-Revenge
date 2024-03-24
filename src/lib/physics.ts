@@ -1,4 +1,4 @@
-import { type State, throttle } from './state'
+import type { State } from './state'
 import { ecs, world } from '@/global/init'
 
 const addBodies = () => ecs.with('bodyDesc', 'position').onEntityAdded.subscribe((entity) => {
@@ -19,7 +19,7 @@ const removeColliders = () => ecs.with('collider').onEntityRemoved.subscribe((en
 const removeBodies = () => ecs.with('body').onEntityRemoved.subscribe((entity) => {
 	world.removeRigidBody(entity.body)
 })
-const stepWorld = throttle(1 / 60, () => world.step())
+const stepWorld = () => world.step()
 export const physicsPlugin = (state: State) => {
 	state
 		.onPreUpdate(stepWorld)

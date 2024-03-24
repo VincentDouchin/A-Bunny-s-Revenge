@@ -5,14 +5,14 @@ import { inventoryBundle } from './inventory'
 import { assets, ecs } from '@/global/init'
 import { Animator } from '@/global/animator'
 import { stateBundle } from '@/lib/stateMachine'
-import { modelColliderBundle } from '@/lib/models'
+import { characterControllerBundle, modelColliderBundle } from '@/lib/models'
 import { Interactable, MenuType } from '@/global/entity'
 
 const playerQuery = ecs.with('player', 'position', 'rotation', 'inventory', 'inventoryId', 'inventorySize')
 export const spawnBasket = () => {
 	const model = clone(assets.characters.Basket.scene)
 	model.scale.setScalar(5)
-	const bundle = modelColliderBundle(model, RigidBodyType.Dynamic, false)
+	const bundle = modelColliderBundle(model, RigidBodyType.KinematicPositionBased, false)
 	bundle.bodyDesc.setLinearDamping(20)
 	const player = playerQuery.first
 	if (player) {
@@ -27,9 +27,12 @@ export const spawnBasket = () => {
 				picking: ['idle'],
 			}),
 			movementForce: new Vector3(),
+			following: false,
+			followTarget: player,
 			...bundle,
+			...characterControllerBundle(),
 			basket: player,
-			speed: 100,
+			speed: 20,
 		})
 	}
 }
@@ -45,14 +48,15 @@ export const enableBasketUi = () => {
 	}
 }
 
+const followQuery = ecs.with('followTarget', 'following', 'position', 'movementForce')
 const itemsQuery = ecs.with('item', 'position')
 export const basketFollowPlayer = () => {
-	for (const basket of basketQuery) {
-		const player = playerQuery.first
+	for (const basket of followQuery) {
+		const player = basket.followTarget
 		if (player) {
 			basket.movementForce.setScalar(0)
-
-			if (itemsQuery.size) {
+			const dist = player.position.distanceTo(basket.position)
+			if (basket.basket && itemsQuery.size) {
 				let closestItem = itemsQuery.first
 				let distance = Number.POSITIVE_INFINITY
 				for (const item of itemsQuery) {
@@ -65,7 +69,14 @@ export const basketFollowPlayer = () => {
 				if (closestItem) {
 					basket.movementForce.add(closestItem.position.clone().sub(basket.position).normalize())
 				}
-			} else if (player.position.distanceTo(basket.position) > 20) {
+			}
+			if (basket.following && dist < 20) {
+				basket.following = false
+			}
+			if (!basket.following && dist > 40) {
+				basket.following = true
+			}
+			if (basket.following) {
 				basket.movementForce.add(player.position.clone().sub(basket.position).normalize())
 			}
 		}

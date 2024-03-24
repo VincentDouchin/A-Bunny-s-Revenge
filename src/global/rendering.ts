@@ -4,7 +4,6 @@ import { CSS2DRenderer } from 'three/examples/jsm/renderers/CSS2DRenderer'
 import { params } from './context'
 import { ecs } from './init'
 import { getDepthShader, getSobelShader } from '@/shaders/EdgePass'
-import { throttle } from '@/lib/state'
 
 export const scene = new Scene()
 export const renderer = new WebGLRenderer({ alpha: false })
@@ -51,7 +50,7 @@ export const rendererQuery = ecs.with('renderer')
 export const sceneQuery = ecs.with('scene')
 export const cameraQuery = ecs.with('camera')
 
-export const render = throttle(1 / 60, () => {
+export const render = () => {
 	const camera = cameraQuery.first?.camera
 	if (!camera) return
 	renderer.render(scene, camera)
@@ -65,7 +64,7 @@ export const render = throttle(1 / 60, () => {
 		renderer.setRenderTarget(null)
 	}
 	cssRenderer.render(scene, camera)
-})
+}
 
 const controlsQuery = ecs.with('controls')
 export const updateControls = () => {

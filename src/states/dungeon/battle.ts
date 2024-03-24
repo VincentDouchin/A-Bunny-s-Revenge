@@ -77,7 +77,7 @@ export const playerAttack = () => {
 				if (world.intersectionPair(sensorCollider, enemy.collider)) {
 					if (player.playerAnimator.action && player.playerAnimator.action.time > 0.5) {
 						if (enemy.stateMachine.enter('hit', enemy)) {
-						// ! damage
+							// ! damage
 							const [damage, crit] = calculateDamage(player)
 							enemy.currentHealth -= damage
 							const emitter = impact().emitter

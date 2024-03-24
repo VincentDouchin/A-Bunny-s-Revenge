@@ -10,7 +10,7 @@ import { assets, ecs } from '@/global/init'
 import { playerInputMap } from '@/global/inputMaps'
 import { save, updateSave } from '@/global/save'
 import { type FarmRessources, openMenuState } from '@/global/states'
-import { capsuleColliderBundle } from '@/lib/models'
+import { capsuleColliderBundle, characterControllerBundle } from '@/lib/models'
 import type { System } from '@/lib/state'
 import { stateBundle } from '@/lib/stateMachine'
 import { Stat, addModifier } from '@/lib/stats'
@@ -32,6 +32,7 @@ export const playerBundle = (dungeon: boolean, health: number, addHealth: boolea
 		...playerInputMap(),
 		...inventoryBundle(Number.POSITIVE_INFINITY, 'player'),
 		...bundle,
+		...characterControllerBundle(),
 		playerAnimator: new Animator(bundle.model, assets.characters.Bunny.animations),
 		inMap: true,
 		cameratarget: true,
@@ -40,7 +41,7 @@ export const playerBundle = (dungeon: boolean, health: number, addHealth: boolea
 		sensor: true,
 		player: true,
 		movementForce: new Vector3(),
-		speed: 150,
+		speed: 50,
 		strength: new Stat(1),
 		critChance: new Stat(0.05),
 		critDamage: new Stat(0.20),

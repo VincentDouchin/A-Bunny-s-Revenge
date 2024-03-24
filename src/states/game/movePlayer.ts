@@ -1,5 +1,6 @@
 import { Vector3 } from 'three'
 import { Player } from 'tone'
+import { QueryFilterFlags } from '@dimforge/rapier3d-compat'
 import { params } from '@/global/context'
 import { assets, ecs, inputManager, time } from '@/global/init'
 import { cutSceneState, openMenuState, pausedState } from '@/global/states'
@@ -50,8 +51,8 @@ export const movePlayer = () => {
 
 export const applyMove = () => {
 	for (const entity of movementQuery) {
-		const { body, rotation, stateMachine, movementForce, speed, state } = entity
-		const force = movementForce.clone().multiplyScalar(speed * params.speedUp * time.delta)
+		const { body, rotation, stateMachine, movementForce, speed, state, controller, collider } = entity
+		const force = movementForce.clone().multiplyScalar(speed * params.speedUp * time.delta / 1000)
 		force.setY(0).multiplyScalar(['waitingAttack', 'attacking'].includes(state) ? 0.3 : 1)
 		const moving = force.length() > 0
 		moving && state !== 'picking' && rotation.setFromAxisAngle(new Vector3(0, 1, 0), Math.atan2(force.x, force.z))
@@ -61,8 +62,15 @@ export const applyMove = () => {
 			} else if (state !== 'attacking') {
 				stateMachine.enter('idle', entity)
 			}
-
-			body.applyImpulse(force, true)
+			if (controller && collider && body.isKinematic()) {
+				controller.computeColliderMovement(collider, force.add(new Vector3(0, -0.981, 0)), QueryFilterFlags.EXCLUDE_SOLIDS, undefined)
+				const movement = controller.computedMovement()
+				const bodyPos = body.translation()
+				const dest = new Vector3(bodyPos.x, bodyPos.y, bodyPos.z).add(movement)
+				body.setNextKinematicTranslation(dest)
+			} else {
+				body.applyImpulse(force.multiplyScalar(1000), true)
+			}
 		}
 	}
 }

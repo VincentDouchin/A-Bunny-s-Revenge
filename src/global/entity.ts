@@ -1,5 +1,5 @@
 import type { items } from '@assets/assets'
-import type { Collider, ColliderDesc, RigidBody, RigidBodyDesc } from '@dimforge/rapier3d-compat'
+import type { Collider, ColliderDesc, KinematicCharacterController, RigidBody, RigidBodyDesc } from '@dimforge/rapier3d-compat'
 import type { Tween } from '@tweenjs/tween.js'
 import type { With } from 'miniplex'
 import type { JSXElement } from 'solid-js'
@@ -97,6 +97,7 @@ export interface Entity {
 	colliderDesc?: ColliderDesc
 	collider?: Collider
 	size?: Vector3
+	controller?: KinematicCharacterController
 	// ! Animations
 	playerAnimator?: Animator<Animations['Bunny']>
 	beeAnimator?: Animator<Animations['Armabee']>
@@ -196,6 +197,8 @@ export interface Entity {
 	withTimeUniform?: true
 	// ! Basket
 	basket?: With<Entity, 'inventory' | 'inventoryId' | 'inventorySize'>
+	following?: boolean
+	followTarget?: With<Entity, 'position'>
 	// ! Weapon
 	weapon?: With<Entity, 'model'>
 }

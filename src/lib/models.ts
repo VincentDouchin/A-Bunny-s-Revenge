@@ -1,4 +1,4 @@
-import { ColliderDesc, RigidBodyDesc, RigidBodyType } from '@dimforge/rapier3d-compat'
+import { ActiveCollisionTypes, ColliderDesc, RigidBodyDesc, RigidBodyType } from '@dimforge/rapier3d-compat'
 import type { Object3D, Object3DEventMap } from 'three'
 import { Box3, Mesh, Quaternion, Vector3 } from 'three'
 
@@ -7,6 +7,7 @@ import type { models, vegetation } from '@assets/assets'
 import type { Entity } from '@/global/entity'
 import type { CollidersData } from '@/debug/LevelEditor'
 import type { customModel } from '@/debug/props'
+import { world } from '@/global/init'
 
 const cloneMaterials = (model: Object3D<Object3DEventMap>) => {
 	model.traverse((node) => {
@@ -34,7 +35,7 @@ export const getBoundingBox = (modelName: models | customModel | vegetation, mod
 		if (collider.offset) {
 			return {
 				bodyDesc: new RigidBodyDesc(collider.type).lockRotations(),
-				colliderDesc: ColliderDesc.cuboid(size.x / 2, size.y / 2, size.z / 2).setTranslation(...collider.offset).setSensor(collider.sensor),
+				colliderDesc: ColliderDesc.cuboid(size.x / 2, size.y / 2, size.z / 2).setTranslation(...collider.offset).setSensor(collider.sensor).setActiveCollisionTypes(ActiveCollisionTypes.ALL),
 				size,
 			}
 		}
@@ -48,7 +49,7 @@ export const modelColliderBundle = (model: Object3D<Object3DEventMap>, type = Ri
 	return {
 		model: cloneModel,
 		bodyDesc: new RigidBodyDesc(type).lockRotations(),
-		colliderDesc: ColliderDesc.cuboid(size.x / 2, size.y / 2, size.z / 2).setTranslation(0, size.y / 2, 0).setSensor(sensor),
+		colliderDesc: ColliderDesc.cuboid(size.x / 2, size.y / 2, size.z / 2).setTranslation(0, size.y / 2, 0).setSensor(sensor).setActiveCollisionTypes(ActiveCollisionTypes.ALL),
 		rotation: new Quaternion(),
 		size,
 	} as const satisfies Entity
@@ -58,10 +59,19 @@ export const capsuleColliderBundle = (model: Object3D<Object3DEventMap>, size: V
 	const cloneModel = clone(model)
 	return {
 		model: cloneModel,
-		bodyDesc: RigidBodyDesc.dynamic().lockRotations(),
-		colliderDesc: ColliderDesc.capsule(size.y / 2, size.x / 2).setTranslation(0, size.y / 2 + size.x / 2, 0),
+		bodyDesc: RigidBodyDesc.kinematicPositionBased().lockRotations(),
+		colliderDesc: ColliderDesc.capsule(size.y / 2, size.x / 2).setTranslation(0, size.y / 2 + size.x / 2, 0).setActiveCollisionTypes(ActiveCollisionTypes.ALL),
 		rotation: new Quaternion(),
 		size,
-
 	} as const satisfies Entity
+}
+
+export const characterControllerBundle = () => {
+	const controller = world.createCharacterController(0.1)
+	controller.setApplyImpulsesToDynamicBodies(true)
+	controller.setCharacterMass(0.2)
+	controller.enableSnapToGround(0.02)
+	// controller.setMaxSlopeClimbAngle(Math.PI / 180 * 120)
+	controller.enableAutostep(0.5, 0.2, true)
+	return { controller } as const satisfies Entity
 }
