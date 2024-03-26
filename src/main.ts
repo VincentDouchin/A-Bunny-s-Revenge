@@ -76,7 +76,7 @@ genDungeonState
 
 dungeonState
 	.addSubscriber(spawnDrops, losingBattle, endBattleSpawnChest, removeEnemyFromSpawn)
-	.onEnter(spawnDungeon, spawnLevelData)
+	.onEnter(spawnDungeon, spawnLevelData, spawnBasket)
 	.onUpdate(runIf(canPlayerMove, allowDoorCollision, collideWithDoor, enemyAttackPlayer, harvestCrop, playerAttack, killEntities, basketFollowPlayer), projectilesDamagePlayer)
 	.onExit(despawnOfType('map'))
 pausedState
