@@ -93,4 +93,19 @@ export const recipes: Array<Recipe> = [
 		output: { name: 'flan', quantity: 1 },
 		processor: MenuType.Cauldron,
 	},
+	{
+		input: [
+			{ name: 'pumpkin', quantity: 1 },
+		],
+		output: { name: 'pumpkin_bowl', quantity: 1 },
+		processor: MenuType.Oven,
+	},
+	{
+		input: [
+			{ name: 'flour', quantity: 1 },
+			{ name: 'sugar', quantity: 1 },
+		],
+		output: { name: 'strawberry_pie', quantity: 1 },
+		processor: MenuType.Oven,
+	},
 ]

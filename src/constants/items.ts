@@ -27,6 +27,86 @@ export const itemsData: Record<items, ItemData> = {
 		name: 'Tomato',
 		ingredient: true,
 	},
+	carrot_seeds: {
+		name: 'Carrot seed',
+		seed: 'carrot',
+	},
+	beet_seeds: {
+		name: 'Beet seed',
+		seed: 'beet',
+	},
+	tomato_seeds: {
+		name: 'Tomato seeds',
+		seed: 'tomato',
+	},
+	lettuce_seeds: {
+		name: 'Lettuce seeds',
+		seed: 'lettuce',
+	},
+	pumpkin_seeds: {
+		name: 'Pumpkin seeds',
+		seed: 'pumpkin',
+	},
+	wheat_seeds: {
+		name: 'Wheat seeds',
+		seed: 'wheat',
+	},
+	lettuce: {
+		name: 'Lettuce',
+		ingredient: true,
+	},
+	honey: {
+		name: 'Honey',
+		ingredient: true,
+	},
+	parsley: {
+		name: 'Parsley',
+		ingredient: true,
+	},
+	ham: {
+		name: 'Ham',
+		ingredient: true,
+	},
+	slime_dough: {
+		name: 'Slime Dough',
+		ingredient: true,
+	},
+	pumpkin: {
+		name: 'Pumpkin',
+		ingredient: true,
+	},
+	magic_bean: {
+		name: '"Magic" bean',
+		ingredient: true,
+	},
+	milk: {
+		name: 'Milk',
+		ingredient: true,
+	},
+	egg: {
+		name: 'Egg',
+		ingredient: true,
+	},
+	cinnamon: {
+		name: 'Cinnamon',
+		ingredient: true,
+	},
+	wheat: {
+		name: 'Wheat',
+		ingredient: true,
+	},
+	flour: {
+		name: 'Flour',
+		ingredient: true,
+	},
+	butter: {
+		name: 'Butter',
+		ingredient: true,
+	},
+	sugar: {
+		name: 'Sugar',
+		ingredient: true,
+	},
 	roasted_carrot: {
 		name: 'Roasted carrot',
 		meal: [
@@ -47,40 +127,12 @@ export const itemsData: Record<items, ItemData> = {
 			createModifier('strength', -2, ModStage.Total, ModType.Percent, true),
 		],
 	},
-	carrot_seeds: {
-		name: 'Carrot seed',
-		seed: 'carrot',
-	},
-	beet_seeds: {
-		name: 'Beet seed',
-		seed: 'beet',
-	},
-	tomato_seeds: {
-		name: 'Tomato seeds',
-		seed: 'tomato',
-	},
-	lettuce_seeds: {
-		name: 'Lettuce seeds',
-		seed: 'lettuce',
-	},
-	lettuce: {
-		name: 'Lettuce',
-		ingredient: true,
-	},
-	honey: {
-		name: 'Honey',
-		ingredient: true,
-	},
 	honey_glazed_carrot: {
 		name: 'Honey glazed carrot',
 		meal: [
 			createModifier('strength', 2, ModStage.Base, ModType.Percent, true),
 			createModifier('maxHealth', 1, ModStage.Total, ModType.Add, true),
 		],
-	},
-	parsley: {
-		name: 'Parsley',
-		ingredient: true,
 	},
 	beetroot_salad: {
 		name: 'Beetroot Salad',
@@ -89,19 +141,11 @@ export const itemsData: Record<items, ItemData> = {
 			createModifier('critDamage', -0.05, ModStage.Base, ModType.Add, false),
 		],
 	},
-	ham: {
-		name: 'Ham',
-		ingredient: true,
-	},
 	ham_honey: {
 		name: 'Honey Ham',
 		meal: [
 			createModifier('maxHealth', 3, ModStage.Base, ModType.Add, true),
 		],
-	},
-	slime_dough: {
-		name: 'Slime Dough',
-		ingredient: true,
 	},
 	slime_bread: {
 		name: 'Slime Bread',
@@ -113,60 +157,24 @@ export const itemsData: Record<items, ItemData> = {
 		name: 'Slime Dumpling',
 		meal: [],
 	},
-	magic_bean: {
-		name: '"Magic" bean',
-		ingredient: true,
-	},
-	milk: {
-		name: 'Milk',
-		ingredient: true,
-	},
-	pumpkin_seeds: {
-		name: 'Pumpkin seeds',
-		seed: 'pumpkin',
-	},
-	pumpkin: {
-		name: 'Pumpkin',
-		ingredient: true,
-	},
-	egg: {
-		name: 'Egg',
-		ingredient: true,
-	},
 	carrot_cake: {
 		name: 'Carrot cake',
 		meal: [],
-	},
-	cinnamon: {
-		name: 'Cinnamon',
-		ingredient: true,
-	},
-	wheat_seeds: {
-		name: 'Wheat seeds',
-		seed: 'wheat',
-	},
-	wheat: {
-		name: 'Wheat',
-		ingredient: true,
-	},
-	flour: {
-		name: 'Flour',
-		ingredient: true,
-	},
-	butter: {
-		name: 'Butter',
-		ingredient: true,
 	},
 	pumpkin_bread: {
 		name: 'Pumpkin bread',
 		meal: [],
 	},
-	sugar: {
-		name: 'Sugar',
-		ingredient: true,
-	},
 	flan: {
 		name: 'Flan',
+		meal: [],
+	},
+	pumpkin_bowl: {
+		name: 'Stuffed pumpkin',
+		meal: [],
+	},
+	strawberry_pie: {
+		name: 'Strawberry pie',
 		meal: [],
 	},
 
