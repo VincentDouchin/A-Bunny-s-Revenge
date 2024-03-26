@@ -49,7 +49,7 @@ export const playerBundle = (dungeon: boolean, health: number, addHealth: boolea
 		...healthBundle(5, health),
 		...stateBundle<'idle' | 'running' | 'picking' | 'hit' | 'dying' | 'dead' | 'attacking' | 'waitingAttack'>('idle', {
 			idle: ['running', 'picking', 'hit', 'waitingAttack'],
-			running: ['idle', 'hit', 'waitingAttack'],
+			running: ['idle', 'hit', 'waitingAttack', 'dying'],
 			picking: ['idle'],
 			hit: ['idle', 'dying'],
 			dying: ['dead'],

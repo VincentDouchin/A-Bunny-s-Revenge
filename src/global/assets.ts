@@ -8,7 +8,7 @@ import assetManifest from '@assets/assetManifest.json'
 import { getExtension, getFileName, loadAudio, loadGLB, loadImage, loaderProgress, textureLoader, thumbnail } from './assetLoaders'
 import type { crops, fruits } from './entity'
 import { keys } from '@/constants/keys'
-import { CharacterMaterial, GrassMaterial, ToonMaterial, TreeMaterial } from '@/shaders/GroundShader'
+import { CharacterMaterial, GrassMaterial, ToonMaterial, TreeMaterial } from '@/shaders/materials'
 import { getScreenBuffer } from '@/utils/buffer'
 import { asyncMapValues, entries, filterKeys, groupByObject, mapKeys, mapValues } from '@/utils/mapFunctions'
 

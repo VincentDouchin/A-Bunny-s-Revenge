@@ -1,4 +1,5 @@
-import type { State } from './state'
+import { type State, runIf } from './state'
+import { pausedState } from '@/global/states'
 import { ecs, world } from '@/global/init'
 
 const addBodies = () => ecs.with('bodyDesc', 'position').onEntityAdded.subscribe((entity) => {
@@ -22,6 +23,6 @@ const removeBodies = () => ecs.with('body').onEntityRemoved.subscribe((entity) =
 const stepWorld = () => world.step()
 export const physicsPlugin = (state: State) => {
 	state
-		.onPreUpdate(stepWorld)
+		.onPreUpdate(runIf(() => !pausedState.enabled, stepWorld))
 		.addSubscriber(addBodies, addColliders, removeColliders, removeBodies)
 }

@@ -199,7 +199,7 @@ const getEnemies = (type: RoomType): enemy[] => {
 	}
 }
 
-const assignPlanAndEnemies = (rooms: BlankRoom[]): Room[] => {
+export const assignPlanAndEnemies = (rooms: BlankRoom[]): Room[] => {
 	const dungeons = levelsData.levels.filter(level => level.dungeon)
 	const filledRooms = rooms.map((room) => {
 		const directions = Object.keys(room.connections) as direction[]

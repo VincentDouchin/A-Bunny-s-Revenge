@@ -13,19 +13,19 @@ import { addToScene } from './lib/registerComponents'
 import { runIf } from './lib/state'
 import { transformsPlugin } from './lib/transforms'
 import { tweenPlugin } from './lib/updateTween'
-import { enemyAttackPlayer, playerAttack, spawnDrops } from './states/dungeon/battle'
+import { applyDeathTimer, enemyAttackPlayer, playerAttack, projectilesDamagePlayer, spawnDrops } from './states/dungeon/battle'
 import { removeEnemyFromSpawn } from './states/dungeon/enemies'
 import { killAnimation, killEntities } from './states/dungeon/health'
 import { addHealthBarContainer } from './states/dungeon/healthBar'
 import { endBattleSpawnChest } from './states/dungeon/spawnChest'
 import { harvestCrop, initPlantableSpotsInteractions, interactablePlantableSpot, plantSeed, updateCropsSave } from './states/farm/farming'
 import { closePlayerInventory, disableInventoryState, enableInventoryState, interact, openPlayerInventory } from './states/farm/openInventory'
+import { basketFSM, beeBossFSM, beeFSM, playerFSM, shagaFSM } from './states/game/FSM'
 import { dayNight } from './states/game/dayNight'
 import { talkToNPC } from './states/game/dialog'
 import { bobItems, collectItems, popItems, stopItems } from './states/game/items'
 import { applyMove, canPlayerMove, movePlayer, playerSteps, savePlayerFromTheEmbraceOfTheVoid, savePlayerPosition, stopPlayer } from './states/game/movePlayer'
 import { pauseGame } from './states/game/pauseGame'
-import { basketFSM, beeFSM, playerFSM, shagaFSM } from './states/game/playerFSM'
 import { target } from './states/game/sensor'
 import { basketFollowPlayer, enableBasketUi, spawnBasket } from './states/game/spawnBasket'
 import { allowDoorCollision, collideWithDoor, collideWithDoorCamp, collideWithDoorClearing } from './states/game/spawnDoor'
@@ -43,7 +43,7 @@ coreState
 	.addSubscriber(...target, initTone, resize, disablePortrait, enableFullscreen)
 	.onEnter(initCamera, initThree, ui.render(UI))
 	.onPreUpdate(coroutines.tick, savePlayerFromTheEmbraceOfTheVoid)
-	.onUpdate(runIf(() => !pausedState.enabled, updateAnimations('beeAnimator', 'playerAnimator', 'shagaAnimator', 'ovenAnimator', 'chestAnimator', 'houseAnimator', 'basketAnimator'), () => time.tick()), inputManager.update, ui.update, moveCamera)
+	.onUpdate(runIf(() => !pausedState.enabled, updateAnimations('beeAnimator', 'playerAnimator', 'shagaAnimator', 'ovenAnimator', 'chestAnimator', 'houseAnimator', 'basketAnimator', 'beeBossAnimator'), () => time.tick()), inputManager.update, ui.update, moveCamera)
 	.onPostUpdate(updateControls, render)
 	.enable()
 setupState
@@ -51,8 +51,11 @@ setupState
 	.enable()
 gameState
 	.onEnter()
-	.addSubscriber(initializeCameraPosition, bobItems, enableInventoryState, killAnimation, ...playerFSM, ...beeFSM, ...shagaFSM, ...basketFSM, popItems, addHealthBarContainer, ...addOrRemoveWeaponModel)
-	.onUpdate(runIf(canPlayerMove, movePlayer, applyMove), runIf(() => !pausedState.enabled, playerSteps, dayNight, updateTimeUniforms))
+	.addSubscriber(initializeCameraPosition, bobItems, enableInventoryState, killAnimation, ...playerFSM, ...beeFSM, ...shagaFSM, ...basketFSM, ...beeBossFSM, popItems, addHealthBarContainer, ...addOrRemoveWeaponModel)
+	.onUpdate(
+		runIf(canPlayerMove, movePlayer, applyMove),
+		runIf(() => !pausedState.enabled, playerSteps, dayNight, updateTimeUniforms, applyDeathTimer),
+	)
 	.onUpdate(collectItems, touchItem, talkToNPC, stopItems, runIf(() => !openMenuState.enabled, pauseGame, interact))
 	.enable()
 campState
@@ -73,13 +76,14 @@ genDungeonState
 
 dungeonState
 	.addSubscriber(spawnDrops, losingBattle, endBattleSpawnChest, removeEnemyFromSpawn)
-	.onEnter(spawnDungeon, spawnLevelData, spawnBasket)
-	.onUpdate(runIf(canPlayerMove, allowDoorCollision, collideWithDoor, enemyAttackPlayer, harvestCrop, playerAttack, killEntities, basketFollowPlayer))
+	.onEnter(spawnDungeon, spawnLevelData)
+	.onUpdate(runIf(canPlayerMove, allowDoorCollision, collideWithDoor, enemyAttackPlayer, harvestCrop, playerAttack, killEntities, basketFollowPlayer), projectilesDamagePlayer)
 	.onExit(despawnOfType('map'))
 pausedState
 	.onExit(() => time.reset())
+// const bossRoom = assignPlanAndEnemies([{ position: { x: 0, y: 0 }, connections: { north: 1, south: null }, type: RoomType.Battle }])
 // const dungeon = genDungeon(5, true).find(room => room.type === RoomType.Entrance)!
-// dungeonState.enable({ dungeon, direction: 'south', firstEntry: true, playerHealth: 5 })
+// dungeonState.enable({ dungeon: bossRoom[0], direction: 'south', firstEntry: true, playerHealth: 5, dungeonLevel: 0 })
 const animate = () => {
 	app.update()
 	requestAnimationFrame(animate)

@@ -19,10 +19,12 @@ export const enemyBundle = (name: enemy, level: number) => {
 	model.scene.scale.setScalar(enemy.scale)
 	const bundle = modelColliderBundle(model.scene, RigidBodyType.Dynamic, false, Sizes.character)
 	bundle.bodyDesc.setLinearDamping(20)
+	const boss = enemy.boss ? { boss: true } as const : {}
 	return {
 		...bundle,
 		[enemy.animator]: new Animator(bundle.model, model.animations),
 		...healthBundle(enemy.health * (level + 1)),
+		...boss,
 		strength: new Stat(1 + level),
 		inMap: true,
 		faction: Faction.Enemy,

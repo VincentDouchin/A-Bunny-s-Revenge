@@ -14,7 +14,7 @@ import { ecs } from '@/global/init'
 import { cameraQuery, renderer, scene } from '@/global/rendering'
 import type { direction } from '@/lib/directions'
 import { getSize } from '@/lib/models'
-import { ToonMaterial } from '@/shaders/GroundShader'
+import { ToonMaterial } from '@/shaders/materials'
 import { entries } from '@/utils/mapFunctions'
 
 export const EntityEditor = ({ entity, levelData, setLevelData, setSelectedEntity, colliderData, setColliderData }: {

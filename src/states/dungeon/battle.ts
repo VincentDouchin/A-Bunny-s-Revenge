@@ -8,7 +8,7 @@ import { ecs, time, world } from '@/global/init'
 import { addTweenTo } from '@/lib/updateTween'
 import { spawnDamageNumber } from '@/particles/damageNumber'
 import { impact } from '@/particles/impact'
-import { CharacterMaterial } from '@/shaders/GroundShader'
+import { CharacterMaterial } from '@/shaders/materials'
 import { addCameraShake } from '@/global/camera'
 
 export const flash = (entity: With<Entity, 'model'>) => {
@@ -105,6 +105,10 @@ export const spawnDrops = () => ecs.with('drops', 'position').onEntityRemoved.su
 	}
 })
 
+const takeDamage = (entity: With<Entity, 'currentHealth'>, damageDealer: With<Entity, 'strength'>) => {
+	entity.currentHealth = Math.max(0, entity.currentHealth - damageDealer.strength.value)
+}
+
 export const enemyAttackPlayer = () => {
 	for (const enemy of enemiesQuery) {
 		switch (enemy.state) {
@@ -139,14 +143,40 @@ export const enemyAttackPlayer = () => {
 			case 'attacking': {
 				for (const player of playerQuery) {
 					if (world.intersectionPair(player.collider, enemy.sensorCollider)) {
-						player.currentHealth = Math.max(0, player.currentHealth - enemy.strength.value)
-						addCameraShake()
 						player.stateMachine.enter('hit', player)
+						takeDamage(player, enemy)
+						addCameraShake()
 						ecs.update(player, { tween: flash(player) })
 						enemy.stateMachine.enter('attackCooldown', enemy)
 					}
 				}
 			}
+		}
+	}
+}
+
+const projectileQuery = ecs.with('projectile', 'strength', 'collider')
+
+export const projectilesDamagePlayer = () => {
+	const player = playerQuery.first
+	for (const projectile of projectileQuery) {
+		world.intersectionPairsWith(projectile.collider, (c) => {
+			if (c === player?.collider) {
+				takeDamage(player, projectile)
+				addCameraShake()
+				ecs.update(player, { tween: flash(player) })
+				ecs.remove(projectile)
+			}
+		})
+	}
+}
+
+const deathTimedQuery = ecs.with('deathTimer')
+export const applyDeathTimer = () => {
+	for (const entity of deathTimedQuery) {
+		entity.deathTimer -= time.delta
+		if (entity.deathTimer <= 0) {
+			ecs.remove(entity)
 		}
 	}
 }

@@ -44,7 +44,7 @@ export const addCameraShake = () => {
 		ecs.add({ tween, autoDestroy: true })
 	}
 }
-
+const OFFSET = -50
 export const moveCamera = () => {
 	for (const { position, camera, cameraLookat, cameraOffset, cameraShake, lockX } of cameraQuery) {
 		const target = new Vector3()
@@ -54,16 +54,16 @@ export const moveCamera = () => {
 			target.y += worldPosition.y
 			for (const door of doorsQuery) {
 				if (door.door === 'north') {
-					target.z = Math.min(worldPosition.z, door.position.z - 20)
+					target.z = Math.min(worldPosition.z, door.position.z - OFFSET)
 				}
 				if (door.door === 'south') {
-					target.z = Math.max(worldPosition.z, door.position.z + 20)
+					target.z = Math.max(worldPosition.z, door.position.z + OFFSET)
 				}
 				if (door.door === 'west') {
-					target.x = Math.min(worldPosition.x, door.position.x - 20)
+					target.x = Math.min(worldPosition.x, door.position.x - OFFSET)
 				}
 				if (door.door === 'east') {
-					target.x = Math.max(worldPosition.x, door.position.x + 20)
+					target.x = Math.max(worldPosition.x, door.position.x + OFFSET)
 				}
 			}
 		}

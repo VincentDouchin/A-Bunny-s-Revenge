@@ -75,10 +75,10 @@ export const collectItems = () => {
 export const popItems = () => ecs.with('body', 'item', 'collider').onEntityAdded.subscribe((e) => {
 	const force = e.popDirection ?? new Vector3().randomDirection()
 	force.y = 300
-	force.x = force.x * 100
-	force.z = force.z * 100
+	force.x = force.x * 200
+	force.z = force.z * 200
 	e.body.setLinearDamping(1)
-	e.body.setAdditionalMass(2, true)
+	e.body.setAdditionalMass(0.5, true)
 	e.body.applyImpulse(force, true)
 })
 const itemsToStopQuery = ecs.with('item', 'body', 'position')

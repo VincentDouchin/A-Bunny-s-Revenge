@@ -16,7 +16,7 @@ import { assets, ecs, levelsData, time } from '@/global/init'
 import type { DungeonRessources, FarmRessources } from '@/global/states'
 import { getBoundingBox, getSize } from '@/lib/models'
 import type { System } from '@/lib/state'
-import { GroundMaterial, WaterMaterial } from '@/shaders/GroundShader'
+import { GroundMaterial, WaterMaterial } from '@/shaders/materials'
 import { getScreenBuffer, scaleCanvas } from '@/utils/buffer'
 
 const SCALE = 10

@@ -1,5 +1,6 @@
 import type { With } from 'miniplex'
 import { Vector3 } from 'three'
+import { projectilesCircleAttack } from '../dungeon/attacks'
 import type { Animator } from '@/global/animator'
 import { params } from '@/global/context'
 import type { ComponentsOfType, Entity, states } from '@/global/entity'
@@ -54,9 +55,22 @@ export const beeFSM = setupAnimations('beeAnimator', {
 	dying: e => e.beeAnimator.playClamped('Death').then(() => e.stateMachine.enter('dead', e)),
 	attacking: e => e.beeAnimator.playClamped('Headbutt').then(() => e.stateMachine.enter('attackCooldown', e)),
 	waitingAttack: e => setTimeout(() => e.stateMachine.enter('attacking', e), 400),
-	attackCooldown: e => setTimeout(() => e.stateMachine.enter('idle', e), 1000)
-	,
+	attackCooldown: e => setTimeout(() => e.stateMachine.enter('idle', e), 1000),
 })
+export const beeBossFSM = setupAnimations('beeBossAnimator', {
+	idle: e => e.beeBossAnimator.playAnimation('Flying_Idle'),
+	running: e => e.beeBossAnimator.playAnimation('Fast_Flying'),
+	hit: e => e.beeBossAnimator.playOnce('HitReact').then(() => e.stateMachine.enter('idle', e)),
+	dying: e => e.beeBossAnimator.playClamped('Death').then(() => e.stateMachine.enter('dead', e)),
+	waitingAttack: e => setTimeout(() => e.stateMachine.enter('attacking', e), 400),
+	attackCooldown: e => setTimeout(() => e.stateMachine.enter('idle', e), 1000),
+	attacking: async (e) => {
+		await Promise.all([e.beeBossAnimator.playClamped('No'), projectilesCircleAttack(e)])
+
+		e.stateMachine.enter('attackCooldown', e)
+	},
+})
+
 export const shagaFSM = setupAnimations('shagaAnimator', {
 	idle: e => e.shagaAnimator.playAnimation('Idle'),
 	running: e => e.shagaAnimator.playAnimation('Move'),

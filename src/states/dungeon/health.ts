@@ -3,7 +3,7 @@ import { Material, Mesh } from 'three'
 import { type Entity, Faction } from '@/global/entity'
 import { ecs } from '@/global/init'
 import { Stat } from '@/lib/stats'
-import type { ToonMaterial } from '@/shaders/GroundShader'
+import type { ToonMaterial } from '@/shaders/materials'
 
 export const healthBundle = (health: number, current?: number) => ({
 	currentHealth: current ?? health,

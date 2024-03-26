@@ -101,6 +101,7 @@ export interface Entity {
 	// ! Animations
 	playerAnimator?: Animator<Animations['Bunny']>
 	beeAnimator?: Animator<Animations['Armabee']>
+	beeBossAnimator?: Animator<Animations['Armabee_Evolved']>
 	shagaAnimator?: Animator<Animations['Shaga_A']>
 	ovenAnimator?: Animator<Animations['BunnyOvenPacked']>
 	chestAnimator?: Animator<Animations['Chest']>
@@ -170,6 +171,9 @@ export interface Entity {
 	drops?: Item[]
 	healthBar?: true
 	healthBarContainer?: CSS2DObject
+	boss?: true
+	projectile?: true
+	deathTimer?: number
 	// ! Particles
 	emitter?: ParticleEmitter<Object3DEventMap>
 	autoDestroy?: true

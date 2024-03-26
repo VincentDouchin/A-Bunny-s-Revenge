@@ -1,115 +1,14 @@
-import type { Material, Vec2, WebGLProgramParametersWithUniforms } from 'three'
-import { CanvasTexture, Color, MeshPhongMaterial, ShaderChunk, Uniform, Vector2 } from 'three'
+import type { Vec2 } from 'three'
+import { CanvasTexture, Color, MeshPhongMaterial, Vector2 } from 'three'
 
-import { generateUUID } from 'three/src/math/MathUtils'
 import noise from '@/shaders/glsl/lib/cnoise.glsl?raw'
 
 import { assets } from '@/global/init'
+import { MaterialExtension, addUniform, extendMaterial, importLib, override, remove, replace, replaceInclude, unpack } from '@/lib/materialExtension'
 import { gradient } from '@/shaders/glsl/lib/generateGradient'
 import water from '@/shaders/glsl/water.glsl?raw'
 import { useLocalStorage } from '@/utils/useLocalStorage'
 
-type Constructor<T> = new (...args: any[]) => T
-export class MaterialExtension<U extends Record<string, any>> {
-	_defines: Record<string, any> = {}
-	_vert: ((vertexShader: string) => string)[] = []
-	_frag: ((fragmentShader: string) => string)[] = []
-	key = generateUUID()
-	constructor(public uniforms: U) {
-
-	}
-
-	defines(key: string) {
-		this._defines[key] = ''
-		return this
-	}
-
-	vert(...fn: ((vertexShader: string) => string)[]) {
-		this._vert = fn
-		return this
-	}
-
-	frag(...fn: ((fragmentShader: string) => string)[]) {
-		this._frag = fn
-		return this
-	}
-}
-
-export const extendMaterial = <M extends Constructor<Material>, E extends MaterialExtension<any>[]>(Base: M, extensions: E, options?: { debug: 'fragment' | 'vertex' }) => {
-	return class extends Base {
-		uniforms = {} as any
-		customProgramCacheKey() {
-			return Base.name + extensions.map(ext => ext.key).join('-')
-		}
-
-		constructor(...args: any[]) {
-			super(...args)
-			for (const extension of extensions) {
-				for (const [name, value] of Object.entries(extension.uniforms)) {
-					const uniform = new Uniform(value);
-					(<any> this.uniforms[name]) = uniform
-				}
-			}
-		}
-
-		onBeforeCompile(shader: WebGLProgramParametersWithUniforms): void {
-			shader.defines ??= {}
-
-			for (const extension of extensions) {
-				for (const name of Object.keys(extension.uniforms)) {
-					shader.uniforms[name] = this.uniforms[name]
-				}
-				for (const fn of extension._vert) {
-					shader.vertexShader = fn(shader.vertexShader)
-				}
-				for (const fn of extension._frag) {
-					shader.fragmentShader = fn(shader.fragmentShader)
-				}
-				for (const [define, value] of Object.entries(extension._defines)) {
-					shader.defines[define] = value
-				}
-			}
-			if (options?.debug === 'fragment') {
-				shader.fragmentShader = shader.fragmentShader.replaceAll(/#include\s*<([^>]+)>/g, (_match, part) => {
-					return ShaderChunk[part as keyof typeof ShaderChunk]
-				})
-				// eslint-disable-next-line no-console
-				console.log(shader.fragmentShader)
-			}
-			if (options?.debug === 'vertex') {
-				// shader.vertexShader = shader.vertexShader.replaceAll(/#include\s*<([^>]+)>/g, (_match, part) => {
-				// 	return ShaderChunk[part as keyof typeof ShaderChunk]
-				// })
-				// eslint-disable-next-line no-console
-				console.log(shader.vertexShader)
-			}
-		}
-	}
-}
-export const unpack = (part: keyof typeof ShaderChunk) => (shader: string) => {
-	return shader.replace(`#include <${part}>`, ShaderChunk[part])
-}
-export const importLib = (part: string) => (shader: string) => {
-	return shader.replace('void main() {', `${part}\nvoid main() {`)
-}
-export const insertBefore = (before: string, part: string) => (shader: string) => {
-	return shader.replace(before, `${before}\n${part}`)
-}
-
-export const replaceInclude = (include: string, part: string) => (shader: string) => {
-	return shader.replace(`#include <${include}>`, part)
-}
-export const override = (variable: string, part: string) => (shader: string) => {
-	return shader.split(`\n\t`).map(p => p.startsWith(variable) ? `${variable} = ${part};` : p).join(`\n\t`)
-}
-export const replace = (toReplace: string, part: string) => (shader: string) => {
-	if (!shader.includes(toReplace)) console.error(`part to replace ${toReplace} not found in shader`)
-	return shader.replace(toReplace, part)
-}
-export const addUniform = (name: string, type: 'vec2' | 'vec3' | 'vec4' | 'float' | 'int' | 'bool' | 'sampler2D') => (shader: string) => {
-	return importLib(`uniform ${type} ${name};`)(shader)
-}
-export const remove = (toRemove: string) => (shader: string) => shader.replace(toRemove, '')
 const toonExtension = new MaterialExtension({ }).frag(
 	override('vec4 diffuseColor ', 'vec4(1.)'),
 	importLib(gradient),
