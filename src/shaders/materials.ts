@@ -3,11 +3,11 @@ import { CanvasTexture, Color, MeshPhongMaterial, Vector2 } from 'three'
 
 import noise from '@/shaders/glsl/lib/cnoise.glsl?raw'
 
-import { assets } from '@/global/init'
 import { MaterialExtension, addUniform, extendMaterial, importLib, override, remove, replace, replaceInclude, unpack } from '@/lib/materialExtension'
 import { gradient } from '@/shaders/glsl/lib/generateGradient'
 import water from '@/shaders/glsl/water.glsl?raw'
 import { useLocalStorage } from '@/utils/useLocalStorage'
+import { assets } from '@/global/init'
 
 const toonExtension = new MaterialExtension({ }).frag(
 	override('vec4 diffuseColor ', 'vec4(1.)'),
@@ -47,14 +47,18 @@ const groundExtension = (image: HTMLCanvasElement, x: number, y: number) => {
 		ground: assets.textures.Dirt4_Dark,
 	})
 		.defines('USE_UV')
+		.defines('USE_ENVMAP')
+		// .vert(importLib('varying vec3 vWorldPosition;'))
 		.frag(
 			importLib(noise),
+			// importLib('varying vec3 vWorldPosition;'),
 			addUniform('size', 'vec2'),
 			addUniform('level', 'sampler2D'),
 			addUniform(`pathColor2`, 'vec3'),
 			addUniform(`pathColor`, 'vec3'),
 			addUniform(`grassColor2`, 'vec3'),
 			addUniform(`grassColor`, 'vec3'),
+			addUniform(`ground`, 'sampler2D'),
 			remove('color.rgb *= diffuse;'),
 			replace('vec4 color = vec4(1.);', /* glsl */`
 			vec4 color = vec4(1.);
@@ -70,7 +74,20 @@ const groundExtension = (image: HTMLCanvasElement, x: number, y: number) => {
 				: step(0.3,noise) == 1.
 					? mix(grassColor,grassColor2,0.2)
 					: grassColor;
-			color.rgb = mix(grass,path,smoothstep(0.7,0.8,texture2D(level,vUv ).r ) );
+			vec3 normal2 = normalize( cross( dFdx( vViewPosition ), dFdy( vViewPosition ) ) );
+			float slope = dot(normal2, vec3(0.,1.,0.));
+			vec3 blending = abs( worldNormal );
+			float b = (blending.x + blending.y + blending.z);
+			blending /= vec3(b, b, b);
+			vec4 xaxis = texture2D( ground, vWorldPosition.yz / 64.);
+			vec4 yaxis = texture2D( ground, vWorldPosition.xz / 64.);
+			vec4 zaxis = texture2D( ground, vWorldPosition.xy / 64.);
+			vec4 tex = xaxis * blending.x + zaxis * blending.z;
+			float dotNormal = smoothstep(0.7,1.,0.3+dot(worldNormal, vec3(0.,1,0.)));
+			float noise_3 = step(0.5,cnoise(vec3(dotNormal)));
+			vec3 grass_and_path = mix(grass,path,smoothstep(0.7,0.8,texture2D(level,vUv ).r ) );
+			color.rgb =	dotNormal< 0.3?tex.rgb:dotNormal < 1.?grass_and_path * 0.7:grass_and_path;
+			// color.rgb = smoothstep(0.,1.,cnoise(vec3(vUv.xy,dotNormal)))- 1.>0.5?grass: tex.rgb;
 	`),
 		) }
 
@@ -138,7 +155,7 @@ const waterExtension = (size: Vec2) => new MaterialExtension({
 
 export const ToonMaterial = extendMaterial(MeshPhongMaterial, [toonExtension])
 export const CharacterMaterial = extendMaterial(MeshPhongMaterial, [toonExtension, characterExtension])
-export const GroundMaterial = (image: HTMLCanvasElement, x: number, y: number) => extendMaterial(MeshPhongMaterial, [toonExtension, groundExtension(image, x, y)])
+export const GroundMaterial = (image: HTMLCanvasElement, x: number, y: number) => extendMaterial(MeshPhongMaterial, [toonExtension, groundExtension(image, x, y)], { debug: 'vertex' })
 export const WaterMaterial = (size: Vec2) => extendMaterial(MeshPhongMaterial, [toonExtension, waterExtension(size)])
 export const TreeMaterial = extendMaterial(MeshPhongMaterial, [toonExtension, treeExtension])
 export const GrassMaterial = extendMaterial(MeshPhongMaterial, [toonExtension, grassExtension])

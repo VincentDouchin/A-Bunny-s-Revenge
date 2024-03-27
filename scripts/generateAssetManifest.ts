@@ -8,7 +8,7 @@ const launchScript = async (filePath?: string) => {
 	if (!filePath || filePath.includes('assets\\')) {
 		console.log('generating asset manifest')
 		const modified: Record<string, { size: number, modified: number }> = {}
-		const assets = filePath ? [filePath] : await glob('./assets/*/**.*')
+		const assets = await glob('./assets/*/**.*')
 		for (const path of assets) {
 			try {
 				const file = await stat(path)

@@ -16,8 +16,8 @@ export const blankTexture = (w: number, h: number, color = 'red') => {
 	return new CanvasTexture(buffer.canvas)
 }
 export const scaleCanvas = (canvas: HTMLCanvasElement, scale: number) => {
-	const newWidth = canvas.width * scale
-	const newHeight = canvas.height * scale
+	const newWidth = Math.floor(canvas.width * scale)
+	const newHeight = Math.floor(canvas.height * scale)
 	const newBuffer = getScreenBuffer(newWidth, newHeight)
 	newBuffer.drawImage(canvas, 0, 0, newWidth, newHeight)
 	return newBuffer.canvas

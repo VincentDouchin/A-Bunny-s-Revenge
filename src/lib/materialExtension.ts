@@ -70,9 +70,9 @@ export const extendMaterial = <M extends Constructor<Material>, E extends Materi
 				console.log(shader.fragmentShader)
 			}
 			if (options?.debug === 'vertex') {
-				// shader.vertexShader = shader.vertexShader.replaceAll(/#include\s*<([^>]+)>/g, (_match, part) => {
-				// 	return ShaderChunk[part as keyof typeof ShaderChunk]
-				// })
+				shader.vertexShader = shader.vertexShader.replaceAll(/#include\s*<([^>]+)>/g, (_match, part) => {
+					return ShaderChunk[part as keyof typeof ShaderChunk]
+				})
 				// eslint-disable-next-line no-console
 				console.log(shader.vertexShader)
 			}

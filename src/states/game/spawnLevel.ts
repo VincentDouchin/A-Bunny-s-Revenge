@@ -187,14 +187,18 @@ export const setDisplacement = (geo: PlaneGeometry, canvas: HTMLCanvasElement) =
 	positionAttribute.needsUpdate = true
 }
 export const spawnGroundAndTrees = (level: Level) => {
-	const displacementMap = scaleCanvas(getdisplacementMap(level), 0.2)
+	const canvasScale = 0.5
+	const displacementMap = scaleCanvas(getdisplacementMap(level), canvasScale)
 	const displacementTexture = new CanvasTexture(displacementMap)
 	displacementTexture.flipY = false
 	// ! Ground
 	const groundMesh = new Mesh(
-		new PlaneGeometry(level.size.x, level.size.y, level.size.x, level.size.y),
-		new (GroundMaterial(level.path, level.size.x, level.size.y))({ displacementMap: displacementTexture, displacementScale: HEIGHT, displacementBias: 0 }),
+		new PlaneGeometry(level.size.x, level.size.y, Math.floor(level.size.x * canvasScale), Math.floor(level.size.y * canvasScale)),
+		new (GroundMaterial(level.path, level.size.x, level.size.y))({ }),
 	)
+	setDisplacement(groundMesh.geometry, displacementMap)
+	groundMesh.geometry.computeVertexNormals()
+	groundMesh.geometry.computeTangents()
 	groundMesh.rotation.x = -Math.PI / 2
 	groundMesh.position.y = -HEIGHT / 4
 	groundMesh.receiveShadow = true
