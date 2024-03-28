@@ -155,7 +155,7 @@ const waterExtension = (size: Vec2) => new MaterialExtension({
 
 export const ToonMaterial = extendMaterial(MeshPhongMaterial, [toonExtension])
 export const CharacterMaterial = extendMaterial(MeshPhongMaterial, [toonExtension, characterExtension])
-export const GroundMaterial = (image: HTMLCanvasElement, x: number, y: number) => extendMaterial(MeshPhongMaterial, [toonExtension, groundExtension(image, x, y)], { debug: 'vertex' })
+export const GroundMaterial = (image: HTMLCanvasElement, x: number, y: number) => extendMaterial(MeshPhongMaterial, [toonExtension, groundExtension(image, x, y)])
 export const WaterMaterial = (size: Vec2) => extendMaterial(MeshPhongMaterial, [toonExtension, waterExtension(size)])
 export const TreeMaterial = extendMaterial(MeshPhongMaterial, [toonExtension, treeExtension])
 export const GrassMaterial = extendMaterial(MeshPhongMaterial, [toonExtension, grassExtension])

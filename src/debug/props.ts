@@ -18,11 +18,9 @@ import { dungeonState, genDungeonState } from '@/global/states'
 
 import type { direction } from '@/lib/directions'
 import { doorClosed } from '@/particles/doorClosed'
-import { RoomType } from '@/states/dungeon/generateDungeon'
 import { cropBundle } from '@/states/farm/farming'
 import { openMenu } from '@/states/farm/openInventory'
 import { doorSide } from '@/states/game/spawnDoor'
-import { playerBundle } from '@/states/game/spawnPlayer'
 
 export const customModels = {
 	door: doorSide,
@@ -55,7 +53,7 @@ export interface PlacableProp<N extends string> {
 	data?: N extends keyof ExtraData ? ExtraData[N] : undefined
 	bundle?: BundleFn<EntityData<N extends keyof ExtraData ? NonNullable<ExtraData[N]> : never>>
 }
-type propNames = 'log' | 'door' | 'rock' | 'board' | 'oven' | 'CookingPot' | 'stove' | 'Flower/plants' | 'sign' | 'plots' | 'bush' | 'fence' | 'house' | 'mushrooms' | 'lamp'
+type propNames = 'log' | 'door' | 'rock' | 'board' | 'oven' | 'CookingPot' | 'stove' | 'Flower/plants' | 'sign' | 'plots' | 'bush' | 'fence' | 'house' | 'mushrooms' | 'lamp' | 'Kitchen'
 export const props: PlacableProp<propNames>[] = [
 	{
 		name: 'log',
@@ -210,7 +208,7 @@ export const props: PlacableProp<propNames>[] = [
 		name: 'door',
 		data: { direction: 'north', doorLevel: 0 },
 		models: ['door'],
-		bundle: (entity, data, ressources) => {
+		bundle: (entity, data) => {
 			if (dungeonState.enabled) {
 				entity.colliderDesc!.setSensor(false)
 				entity.emitter = doorClosed()
@@ -218,22 +216,7 @@ export const props: PlacableProp<propNames>[] = [
 			if (genDungeonState.enabled && data.data.direction === 'north') {
 				entity.doorLevel = data.data.doorLevel
 			}
-			if (ressources && 'dungeon' in ressources) {
-				const isStart = ressources.dungeon.type === RoomType.Entrance && ressources.firstEntry
-				if (isStart ? ressources.dungeon.doors[data.data.direction] === null : data.data.direction === ressources.direction) {
-					ecs.add({
-						...playerBundle(true, ressources.playerHealth, ressources.firstEntry),
-						position: new Vector3(...data.position).add(new Vector3(0, 0, -20).applyQuaternion(entity.rotation)),
-						rotation: entity.rotation.clone().multiply(new Quaternion().setFromAxisAngle(new Vector3(0, 1, 0), Math.PI)),
-					})
-				}
-			} else if (genDungeonState.enabled && data.data.direction === 'south') {
-				ecs.add({
-					...playerBundle(false, 5, true),
-					position: new Vector3(...data.position).add(new Vector3(0, 0, -20).applyQuaternion(entity.rotation)),
-					rotation: entity.rotation.clone().multiply(new Quaternion().setFromAxisAngle(new Vector3(0, 1, 0), Math.PI)),
-				})
-			}
+
 			return { door: data.data.direction, ...entity }
 		},
 	},
@@ -276,5 +259,9 @@ export const props: PlacableProp<propNames>[] = [
 	{
 		name: 'mushrooms',
 		models: ['Shroom1', 'Shroom2', 'Shroom3', 'Shroom4'],
+	},
+	{
+		name: 'Kitchen',
+		models: ['KitchenSet1', 'bench', 'table', 'stringLights'],
 	},
 ]

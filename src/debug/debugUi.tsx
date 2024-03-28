@@ -120,7 +120,7 @@ export const DebugUi = () => {
 		debugOptions.attackInFarm = !debugOptions.attackInFarm
 		for (const player of ecs.with('model', 'player')) {
 			if (debugOptions.attackInFarm) {
-				ecs.update(player, { weapon: weaponBundle() })
+				ecs.update(player, { weapon: weaponBundle('SwordWeapon') })
 			} else {
 				ecs.removeComponent(player, 'weapon')
 			}
