@@ -30,7 +30,7 @@ import { target } from './states/game/sensor'
 import { basketFollowPlayer, enableBasketUi, spawnBasket } from './states/game/spawnBasket'
 import { allowDoorCollision, collideWithDoor, collideWithDoorCamp, collideWithDoorClearing } from './states/game/spawnDoor'
 import { spawnCrossRoad, spawnDungeon, spawnFarm, spawnLevelData, updateTimeUniforms } from './states/game/spawnLevel'
-import { debugPlayer, losingBattle, spawnCharacter } from './states/game/spawnPlayer'
+import { debugPlayer, losingBattle, spawnCharacter, spawnPlayerClearing, spawnPlayerDungeon } from './states/game/spawnPlayer'
 import { touchItem } from './states/game/touchItem'
 import { addOrRemoveWeaponModel } from './states/game/weapon'
 import { playCloseSound, playOpenSound } from './states/pause/pause'
@@ -53,10 +53,11 @@ gameState
 	.onEnter()
 	.addSubscriber(initializeCameraPosition, bobItems, enableInventoryState, killAnimation, ...playerFSM, ...beeFSM, ...shagaFSM, ...basketFSM, ...beeBossFSM, popItems, addHealthBarContainer, ...addOrRemoveWeaponModel)
 	.onUpdate(
-		runIf(canPlayerMove, movePlayer, applyMove),
-		runIf(() => !pausedState.enabled, playerSteps, dayNight, updateTimeUniforms, applyDeathTimer),
+		runIf(canPlayerMove, movePlayer),
+		runIf(() => !pausedState.enabled, playerSteps, dayNight, updateTimeUniforms, applyDeathTimer, applyMove),
+		runIf(() => !openMenuState.enabled, pauseGame, interact),
 	)
-	.onUpdate(collectItems, touchItem, talkToNPC, stopItems, runIf(() => !openMenuState.enabled, pauseGame, interact))
+	.onUpdate(collectItems, touchItem, talkToNPC, stopItems)
 	.enable()
 campState
 	.addSubscriber(...interactablePlantableSpot)
@@ -70,13 +71,13 @@ openMenuState
 	.onExit(playCloseSound)
 	.onUpdate(closePlayerInventory)
 genDungeonState
-	.onEnter(spawnCrossRoad, spawnLevelData)
+	.onEnter(spawnCrossRoad, spawnLevelData, spawnPlayerClearing)
 	.onUpdate(collideWithDoorClearing)
 	.onExit(despawnOfType('map'))
 
 dungeonState
 	.addSubscriber(spawnDrops, losingBattle, endBattleSpawnChest, removeEnemyFromSpawn)
-	.onEnter(spawnDungeon, spawnLevelData, spawnBasket)
+	.onEnter(spawnDungeon, spawnLevelData, spawnPlayerDungeon, spawnBasket)
 	.onUpdate(runIf(canPlayerMove, allowDoorCollision, collideWithDoor, enemyAttackPlayer, harvestCrop, playerAttack, killEntities, basketFollowPlayer), projectilesDamagePlayer)
 	.onExit(despawnOfType('map'))
 pausedState
