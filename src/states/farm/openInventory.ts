@@ -31,7 +31,7 @@ export const disableInventoryState = () => openInventoryQuery.onEntityRemoved.su
 })
 export const toggleMenuState = [enableInventoryState, disableInventoryState]
 
-const interactableQuery = ecs.with('collider', 'interactionContainer')
+const interactableQuery = ecs.with('collider', 'interactionContainer', 'interactable')
 const primaryQuery = interactableQuery.with('onPrimary')
 const secondaryQuery = interactableQuery.with('onSecondary')
 export const interact = () => {

@@ -1,4 +1,4 @@
-import type { items } from '@assets/assets'
+import type { items, weapons } from '@assets/assets'
 import type { Collider, ColliderDesc, KinematicCharacterController, RigidBody, RigidBodyDesc } from '@dimforge/rapier3d-compat'
 import type { Tween } from '@tweenjs/tween.js'
 import type { With } from 'miniplex'
@@ -36,6 +36,7 @@ export enum Interactable {
 	SelectSeed = 'select seed',
 	Open = 'open',
 	BulletinBoard = 'quests',
+	WeaponStand = 'weaponStand',
 }
 export enum MenuType {
 	Oven,
@@ -204,7 +205,10 @@ export interface Entity {
 	following?: boolean
 	followTarget?: With<Entity, 'position'>
 	// ! Weapon
-	weapon?: With<Entity, 'model'>
+	weapon?: With<Entity, 'model' | 'weaponName'>
+	weaponName?: weapons
+	weaponStand?: weapons
+
 }
 export type states = 'idle' | 'running' | 'picking' | 'dying' | 'hit' | 'hello' | 'dead' | 'waitingAttack' | 'attacking' | 'attackCooldown' | 'doorOpening' | 'doorClosing'
 export type Bundle<C extends keyof Entity> = () => With<Entity, C>

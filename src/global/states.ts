@@ -1,3 +1,4 @@
+import type { weapons } from '@assets/assets'
 import { StateMananger } from './../lib/state'
 import type { Room } from '@/states/dungeon/generateDungeon'
 import type { direction } from '@/lib/directions'
@@ -20,6 +21,7 @@ export interface DungeonRessources {
 	playerHealth: number
 	firstEntry: boolean
 	dungeonLevel: number
+	weapon: weapons
 }
 
 export const dungeonState = app.create<DungeonRessources>()

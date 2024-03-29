@@ -215,6 +215,8 @@ export const props: PlacableProp<propNames>[] = [
 			}
 			if (genDungeonState.enabled && data.data.direction === 'north') {
 				entity.doorLevel = data.data.doorLevel
+				entity.colliderDesc!.setSensor(false)
+				entity.emitter = doorClosed()
 			}
 
 			return { door: data.data.direction, ...entity }

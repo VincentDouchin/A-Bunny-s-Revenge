@@ -16,6 +16,7 @@ export interface SaveData {
 	inventories: Record<string, Item[]>
 	modifiers: Modifier<any>[]
 	settings: { volume: number, mute: boolean, fullscreen: boolean | null }
+	unlockedPaths: number
 }
 
 const blankSave = (): SaveData => ({
@@ -27,6 +28,7 @@ const blankSave = (): SaveData => ({
 	inventories: {},
 	modifiers: [],
 	settings: { volume: 100, mute: false, fullscreen: null },
+	unlockedPaths: 1,
 })
 
 export const save: Readonly<SaveData> = blankSave()

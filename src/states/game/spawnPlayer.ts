@@ -1,5 +1,6 @@
 import { LinearSRGBColorSpace, Mesh, NearestFilter, Quaternion, Vector3 } from 'three'
 import { clone } from 'three/examples/jsm/utils/SkeletonUtils'
+import type { weapons } from '@assets/assets'
 import { healthBundle } from '../dungeon/health'
 import { RoomType } from '../dungeon/generateDungeon'
 import { inventoryBundle } from './inventory'
@@ -18,7 +19,7 @@ import type { System } from '@/lib/state'
 import { stateBundle } from '@/lib/stateMachine'
 import { Stat, addModifier } from '@/lib/stats'
 
-export const playerBundle = (dungeon: boolean, health: number, addHealth: boolean) => {
+export const playerBundle = (health: number, addHealth: boolean, weapon: weapons | null) => {
 	const model = clone(assets.characters.Bunny.scene)
 	model.traverse((node) => {
 		if (node instanceof Mesh && node.material.map) {
@@ -65,8 +66,8 @@ export const playerBundle = (dungeon: boolean, health: number, addHealth: boolea
 			heavyAttack: 0,
 		},
 	} as const satisfies Entity
-	if (dungeon) {
-		ecs.update(player, { weapon: weaponBundle('Hoe') })
+	if (weapon !== null) {
+		ecs.update(player, { weapon: weaponBundle(weapon) })
 	}
 	for (const mod of save.modifiers) {
 		addModifier(mod, player, addHealth)
@@ -82,7 +83,7 @@ export const spawnCharacter: System<FarmRessources> = ({ previousState }) => {
 		updateSave(s => s.modifiers = [])
 	}
 	ecs.add({
-		...playerBundle(false, 5, true),
+		...playerBundle(5, true, null),
 		position,
 		rotation,
 	})
@@ -94,7 +95,7 @@ export const spawnPlayerDungeon: System<DungeonRessources> = (ressources) => {
 	for (const door of doorQuery) {
 		if (isStart ? ressources.dungeon.doors[door.door] === null : door.door === ressources.direction) {
 			ecs.add({
-				...playerBundle(true, ressources.playerHealth, ressources.firstEntry),
+				...playerBundle(ressources.playerHealth, ressources.firstEntry, ressources.weapon),
 				position: new Vector3(...door.position.toArray()).add(new Vector3(0, 0, -20).applyQuaternion(door.rotation)),
 				rotation: door.rotation.clone().multiply(new Quaternion().setFromAxisAngle(new Vector3(0, 1, 0), Math.PI)),
 			})
@@ -105,7 +106,7 @@ export const spawnPlayerClearing = () => {
 	for (const door of doorQuery) {
 		if (door.door === 'south') {
 			ecs.add({
-				...playerBundle(false, 5, true),
+				...playerBundle(5, true, null),
 				position: new Vector3(...door.position.toArray()).add(new Vector3(0, 0, -20).applyQuaternion(door.rotation)),
 				rotation: door.rotation.clone().multiply(new Quaternion().setFromAxisAngle(new Vector3(0, 1, 0), Math.PI)),
 			})

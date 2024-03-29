@@ -14,6 +14,7 @@ import { runIf } from './lib/state'
 import { transformsPlugin } from './lib/transforms'
 import { tweenPlugin } from './lib/updateTween'
 import { applyDeathTimer, enemyAttackPlayer, playerAttack, projectilesDamagePlayer, spawnDrops } from './states/dungeon/battle'
+import { spawnWeaponsChoice } from './states/dungeon/chooseWeapon'
 import { removeEnemyFromSpawn } from './states/dungeon/enemies'
 import { killAnimation, killEntities } from './states/dungeon/health'
 import { addHealthBarContainer } from './states/dungeon/healthBar'
@@ -28,7 +29,7 @@ import { applyMove, canPlayerMove, movePlayer, playerSteps, savePlayerFromTheEmb
 import { pauseGame } from './states/game/pauseGame'
 import { target } from './states/game/sensor'
 import { basketFollowPlayer, enableBasketUi, spawnBasket } from './states/game/spawnBasket'
-import { allowDoorCollision, collideWithDoor, collideWithDoorCamp, collideWithDoorClearing } from './states/game/spawnDoor'
+import { allowDoorCollision, collideWithDoor, collideWithDoorCamp, collideWithDoorClearing, unlockDoorClearing } from './states/game/spawnDoor'
 import { spawnCrossRoad, spawnDungeon, spawnFarm, spawnLevelData, updateTimeUniforms } from './states/game/spawnLevel'
 import { debugPlayer, losingBattle, spawnCharacter, spawnPlayerClearing, spawnPlayerDungeon } from './states/game/spawnPlayer'
 import { touchItem } from './states/game/touchItem'
@@ -71,8 +72,9 @@ openMenuState
 	.onExit(playCloseSound)
 	.onUpdate(closePlayerInventory)
 genDungeonState
-	.onEnter(spawnCrossRoad, spawnLevelData, spawnPlayerClearing)
-	.onUpdate(collideWithDoorClearing)
+	.addSubscriber(unlockDoorClearing)
+	.onEnter(spawnCrossRoad, spawnLevelData, spawnPlayerClearing, spawnWeaponsChoice)
+	.onUpdate(collideWithDoorClearing, playerAttack)
 	.onExit(despawnOfType('map'))
 
 dungeonState

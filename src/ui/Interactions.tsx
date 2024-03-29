@@ -9,6 +9,7 @@ import type { Entity } from '@/global/entity'
 import { Interactable } from '@/global/entity'
 import { ecs } from '@/global/init'
 import { save } from '@/global/save'
+import { weaponsData } from '@/constants/weapons'
 
 export const getInteractables = (player: With<Entity, 'inventory'>, entity?: With<Entity, 'interactable'>): (string | undefined)[] => {
 	const hasSeedInInventory = player.inventory?.filter(Boolean)?.some(item => itemsData[item.name].seed)
@@ -25,6 +26,7 @@ export const getInteractables = (player: With<Entity, 'inventory'>, entity?: Wit
 		]
 		case Interactable.Cauldron: return ['Prepare', 'Cook']
 		case Interactable.Oven: return ['Prepare', 'Cook']
+		case Interactable.WeaponStand :return ['Equip']
 		default: return [entity?.interactable]
 	}
 }
@@ -48,15 +50,37 @@ export const InteractionUi = ({ player }: {
 				const content = children(() => (
 					<Transition name="popup">
 						<Show when={visible()}>
-							<div style={{ 'background': 'hsl(0,0%,0%,0.3)', 'padding': '0.25rem 0.5rem', 'font-size': '1.5rem', 'color': 'white', 'border-radius': '1rem' }}>
+							<div style={{ 'background': 'hsl(0,0%,0%,0.3)', 'padding': '0.25rem 0.5rem', 'color': 'white', 'border-radius': '1rem', 'display': 'grid', 'gap': '0.5rem', 'place-items': 'center' }}>
+								<Show when={entity.weaponStand}>
+									{(weaponName) => {
+										const data = weaponsData[weaponName()]
+										return (
+											<div style={{ 'display': 'grid', 'place-items': 'center' }}>
+												<div style={{ 'font-size': '1.5rem' }}>{data.name}</div>
+												<div style={{ 'font-size': '1.2rem' }}>
+													Attack:
+													{data.attack}
+												</div>
+												<div style={{ 'font-size': '1.2rem' }}>
+													Knockback:
+													{data.knockBack}
+												</div>
+												<div style={{ 'font-size': '1.2rem' }}>
+													Attack speed:
+													{data.attackSpeed}
+												</div>
+											</div>
+										)
+									}}
+								</Show>
 								<Show when={interactables()[1]}>
-									<div style={{ display: 'flex', gap: '0.5rem' }}>
+									<div style={{ 'display': 'flex', 'gap': '0.5rem', 'font-size': '1.5rem' }}>
 										<InputIcon input={player.playerControls.get('secondary')} />
 										<div>{interactables()[1]}</div>
 									</div>
 								</Show>
 								<Show when={interactables()[0]}>
-									<div style={{ display: 'flex', gap: '0.5rem' }}>
+									<div style={{ 'display': 'flex', 'gap': '0.5rem', 'font-size': '1.5rem' }}>
 										<InputIcon input={player.playerControls.get('primary')}></InputIcon>
 										<div>{interactables()[0]}</div>
 									</div>

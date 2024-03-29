@@ -16,9 +16,9 @@ export const addOrRemoveWeaponModel = [
 	}),
 ]
 
-export const weaponBundle = (weapon: weapons) => {
-	const data = weaponsData[weapon]
-	const model = assets.weapons[weapon].scene.clone()
+export const weaponBundle = (weaponName: weapons) => {
+	const data = weaponsData[weaponName]
+	const model = assets.weapons[weaponName].scene.clone()
 	model.scale.setScalar(data.scale)
-	return ecs.add({ model })
+	return ecs.add({ model, weaponName })
 }
