@@ -25,6 +25,7 @@ export const playerFSM = setupAnimations('playerAnimator', {
 	running: e => e.playerAnimator.playAnimation('RUN_ALT'),
 	hit: e => setTimeout(() => e.stateMachine.enter('idle', e), 200),
 	dying: e => setTimeout(() => e.stateMachine.enter('dead', e), 1000),
+	cheer: e => e.playerAnimator.playOnce('CHEER').then(() => e.stateMachine.enter('idle', e)),
 	attacking: async (e) => {
 		const applyforce = (multiplier: number) => {
 			const force = new Vector3(0, 0, e.speed * params.speedUp * time.delta * 10 * multiplier).applyQuaternion(e.rotation)

@@ -44,7 +44,7 @@ const calculateDamage = (entity: With<Entity, 'strength' | 'critChance' | 'critD
 }
 
 const enemiesQuery = entities.with('strength').where(({ faction }) => faction === Faction.Enemy)
-const playerQuery = entities.with('playerControls', 'strength', 'body', 'critChance', 'critDamage', 'speed', 'state', 'stateMachine', 'combo', 'playerAnimator').where(({ faction }) => faction === Faction.Player)
+const playerQuery = entities.with('playerControls', 'strength', 'body', 'critChance', 'critDamage', 'speed', 'state', 'stateMachine', 'combo', 'playerAnimator', 'weapon').where(({ faction }) => faction === Faction.Player)
 export const playerAttack = () => {
 	for (const player of playerQuery) {
 		const { playerControls, sensorCollider, position, state, stateMachine, combo, playerAnimator } = player

@@ -69,6 +69,7 @@ export const spawnWeaponsChoice = () => {
 			interactable: Interactable.WeaponStand,
 			onPrimary(_stump, player) {
 				ecs.removeComponent(player, 'weapon')
+				player.stateMachine?.enter('cheer', player)
 				chooseWeapon(weaponName)
 				ecs.update(player, { weapon: weaponBundle(weaponName) })
 			},

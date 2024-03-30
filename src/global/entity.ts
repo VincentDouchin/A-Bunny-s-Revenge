@@ -210,7 +210,7 @@ export interface Entity {
 	weaponStand?: weapons
 
 }
-export type states = 'idle' | 'running' | 'picking' | 'dying' | 'hit' | 'hello' | 'dead' | 'waitingAttack' | 'attacking' | 'attackCooldown' | 'doorOpening' | 'doorClosing'
+export type states = 'idle' | 'running' | 'picking' | 'dying' | 'hit' | 'hello' | 'dead' | 'waitingAttack' | 'attacking' | 'attackCooldown' | 'doorOpening' | 'doorClosing' | 'cheer'
 export type Bundle<C extends keyof Entity> = () => With<Entity, C>
 
 type KeysOfType<T, U> = {

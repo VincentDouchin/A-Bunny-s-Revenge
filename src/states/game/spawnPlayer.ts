@@ -51,8 +51,8 @@ export const playerBundle = (health: number, addHealth: boolean, weapon: weapons
 		critDamage: new Stat(0.20),
 		lastStep: { right: false, left: false },
 		...healthBundle(5, health),
-		...stateBundle<'idle' | 'running' | 'picking' | 'hit' | 'dying' | 'dead' | 'attacking' | 'waitingAttack'>('idle', {
-			idle: ['running', 'picking', 'hit', 'waitingAttack'],
+		...stateBundle<'idle' | 'running' | 'picking' | 'hit' | 'dying' | 'dead' | 'attacking' | 'waitingAttack' | 'cheer'>('idle', {
+			idle: ['running', 'picking', 'hit', 'waitingAttack', 'cheer'],
 			running: ['idle', 'hit', 'waitingAttack', 'dying'],
 			picking: ['idle'],
 			hit: ['idle', 'dying'],
@@ -60,6 +60,7 @@ export const playerBundle = (health: number, addHealth: boolean, weapon: weapons
 			attacking: ['idle', 'dying'],
 			dead: [],
 			waitingAttack: ['attacking'],
+			cheer: ['idle'],
 		}),
 		combo: {
 			lastAttack: 0,
