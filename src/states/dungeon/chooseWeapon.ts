@@ -7,7 +7,7 @@ import { weaponsData } from '@/constants/weapons'
 import type { Entity } from '@/global/entity'
 import { Interactable } from '@/global/entity'
 
-const weaponNames = ['Hoe', 'Ladle', 'ScissorWeapon', 'SwordWeapon'] as const satisfies weapons[]
+const weaponNames = ['Hoe', 'Ladle', 'ScissorWeapon', 'SwordWeapon'] as const satisfies readonly weapons[]
 const displayWeapon = (weaponName: weapons, parent: Entity) => {
 	const weaponModel = assets.weapons[weaponName].scene.clone()
 	weaponModel.scale.setScalar(weaponsData[weaponName].scale * 1.2)
