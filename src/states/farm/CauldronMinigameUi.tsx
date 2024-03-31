@@ -79,10 +79,7 @@ export const CauldronMinigameUi = ({ player }: FarmUiProps) => {
 								})
 								if (progress() >= 100) {
 									for (let i = 0; i < output().quantity; i++) {
-										const angle = Math.random() * Math.PI * 2
-										const direction = new Vector3(Math.cos(angle), 10, Math.sin(angle))
-										direction.setY(10)
-										ecs.add({ ...itemBundle(output().name), position: cauldronPosition.clone().add(new Vector3(0, 0, 10)) })
+										ecs.add({ ...itemBundle(output().name), position: cauldronPosition.clone().add(new Vector3(0, 15, 0)), groundLevel: cauldronPosition.y })
 									}
 									setProgress(0)
 									cauldron().recipesQueued.shift()

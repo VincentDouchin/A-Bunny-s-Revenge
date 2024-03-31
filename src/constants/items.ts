@@ -166,8 +166,10 @@ export const itemsData: Record<items, ItemData> = {
 		meal: [],
 	},
 	flan: {
-		name: 'Flan',
-		meal: [],
+		name: 'Pudding',
+		meal: [
+			createModifier('attackSpeed', 0.1, ModStage.Total, ModType.Add, false),
+		],
 	},
 	pumpkin_bowl: {
 		name: 'Stuffed pumpkin',

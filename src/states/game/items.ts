@@ -6,17 +6,16 @@ import type { Entity } from '@/global/entity'
 import { assets, ecs, world } from '@/global/init'
 import { addItem } from '@/global/save'
 import { modelColliderBundle } from '@/lib/models'
-import { addTweenTo } from '@/lib/updateTween'
 import { sleep } from '@/utils/sleep'
+import { addTweenTo } from '@/lib/updateTween'
 
 const itemsQuery = ecs.with('item', 'position', 'model', 'collider', 'itemLabel')
 
 export const itemBundle = (item: items) => {
 	const model = assets.items[item].model.clone()
 	model.scale.setScalar(5)
-	const bundle = modelColliderBundle(model, RigidBodyType.Dynamic, true, new Vector3(10, 10, 10))
+	const bundle = modelColliderBundle(model, RigidBodyType.Dynamic, true, new Vector3(1, 1, 1))
 	bundle.model.castShadow = true
-	bundle.colliderDesc.setMass(8)
 	bundle.model.renderOrder = 2
 	const shadow = new Mesh(
 		new SphereGeometry(1),
@@ -74,17 +73,15 @@ export const collectItems = () => {
 
 export const popItems = () => ecs.with('body', 'item', 'collider').onEntityAdded.subscribe((e) => {
 	const force = e.popDirection ?? new Vector3().randomDirection()
-	force.y = 300
-	force.x = force.x * 200
-	force.z = force.z * 200
-	e.body.setLinearDamping(1)
-	e.body.setAdditionalMass(0.5, true)
+	force.y = 30
+	force.x = force.x * 20
+	force.z = force.z * 20
 	e.body.applyImpulse(force, true)
 })
-const itemsToStopQuery = ecs.with('item', 'body', 'position')
+const itemsToStopQuery = ecs.with('item', 'body', 'position', 'collider')
 export const stopItems = () => {
 	for (const item of itemsToStopQuery) {
-		if (item.position.y <= 0) {
+		if (item.position.y <= (item.groundLevel ?? 0) + 1) {
 			item.body.setBodyType(RigidBodyType.Fixed, true)
 		}
 	}

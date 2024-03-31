@@ -141,6 +141,7 @@ export interface Entity {
 	item?: true
 	itemLabel?: items
 	popDirection?: Vector3
+	groundLevel?: number
 	// ! Inventory
 	inventory?: (Item | null)[]
 	inventorySize?: number
@@ -182,6 +183,9 @@ export interface Entity {
 	strength?: Stat
 	critChance?: Stat
 	critDamage?: Stat
+	attackSpeed?: Stat
+	lootQuantity?: Stat
+	lootRarity?: Stat
 	// ! Level Editor
 	entityId?: string
 	// ! FSM

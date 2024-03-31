@@ -81,15 +81,15 @@ export const collideWithDoorCamp = () => {
 		}
 	}
 }
-const playerWithWeaponQuery = playerQuery.with('weapon')
 export const collideWithDoorClearing = () => {
 	for (const door of doorQuery) {
-		for (const player of playerWithWeaponQuery) {
+		for (const player of playerQuery) {
 			if (world.intersectionPair(door.collider, player.collider)) {
-				if (door.doorLevel !== undefined) {
+				if (door.doorLevel !== undefined && player.weapon) {
 					const dungeon = genDungeon(5 + door.doorLevel * 5, true).find(room => room.type === RoomType.Entrance)!
 					dungeonState.enable({ dungeon, direction: 'south', firstEntry: true, playerHealth: 5, dungeonLevel: door.doorLevel, weapon: player.weapon.weaponName })
-				} else {
+				}
+				if (door.doorLevel === undefined) {
 					campState.enable({})
 				}
 			}
@@ -97,6 +97,8 @@ export const collideWithDoorClearing = () => {
 	}
 }
 const doorClearingQuery = doorQuery.with('doorLevel')
+const playerWithWeaponQuery = playerQuery.with('weapon')
+
 export const unlockDoorClearing = () => playerWithWeaponQuery.onEntityAdded.subscribe(() => {
 	for (const door of doorClearingQuery) {
 		if (door.doorLevel < save.unlockedPaths) {

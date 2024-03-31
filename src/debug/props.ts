@@ -264,6 +264,6 @@ export const props: PlacableProp<propNames>[] = [
 	},
 	{
 		name: 'Kitchen',
-		models: ['KitchenSet1', 'bench', 'table', 'stringLights'],
+		models: ['KitchenSet1', 'bench', 'table', 'stringLights', 'Bucket', 'well'],
 	},
 ]

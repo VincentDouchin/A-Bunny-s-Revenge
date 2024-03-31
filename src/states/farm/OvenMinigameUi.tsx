@@ -20,7 +20,7 @@ import { getWorldPosition } from '@/lib/transforms'
 import { sleep } from '@/utils/sleep'
 import { playSound } from '@/global/sounds'
 
-const ovenQuery = ecs.with('menuType', 'recipesQueued', 'ovenAnimator').where(({ menuType }) => menuType === MenuType.OvenMinigame)
+const ovenQuery = ecs.with('menuType', 'recipesQueued', 'ovenAnimator', 'position').where(({ menuType }) => menuType === MenuType.OvenMinigame)
 
 export const OvenMinigameUi = ({ player }: FarmUiProps) => {
 	return (
@@ -107,7 +107,12 @@ export const OvenMinigameUi = ({ player }: FarmUiProps) => {
 								})
 								for (let i = 0; i < output().quantity; i++) {
 									playSound('cauldron2')
-									ecs.add({ ...itemBundle(output().name), position, popDirection: new Vector3(between(-1, 1), 0, between(2, 2.5)).applyQuaternion(oven.rotation!) })
+									ecs.add({
+										...itemBundle(output().name),
+										position,
+										popDirection: new Vector3(between(-1, 1), 0, between(2, 2.5)).applyQuaternion(oven.rotation!),
+										groundLevel: oven.position.y,
+									})
 								}
 								await sleep(500)
 								playSound('zapsplat_foley_rubble_rock_drop_onto_pile_others_medium_sized_006_108147', { volume: -12 })

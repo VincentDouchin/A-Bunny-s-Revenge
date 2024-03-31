@@ -42,7 +42,7 @@ export const spawnChest = () => {
 				ecs.add({
 					parent: chestEntity,
 					...itemBundle(seed),
-					position: new Vector3(),
+					position: new Vector3(0, 5, 0),
 					popDirection: new Vector3(Math.cos(angle), 1, -Math.sin(angle)).multiplyScalar(2),
 				})
 			}

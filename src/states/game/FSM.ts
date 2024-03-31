@@ -34,20 +34,20 @@ export const playerFSM = setupAnimations('playerAnimator', {
 		}
 		if (e.combo.lastAttack === 0) {
 			applyforce(1)
-			await e.playerAnimator.playOnce('FIGHT_ACTION1', undefined, 0.5)
+			await e.playerAnimator.playOnce('FIGHT_ACTION1', { timeScale: 1 / e.attackSpeed.value }, 0.5)
 		}
 		if (e.combo.lastAttack === 1) {
 			applyforce(2)
-			await e.playerAnimator.playOnce('SLASH')
+			await e.playerAnimator.playOnce('SLASH', { timeScale: 1 / e.attackSpeed.value })
 		}
 		if (e.combo.lastAttack === 2) {
 			applyforce(3)
-			await e.playerAnimator.playClamped('HEAVYATTACK', { timeScale: 2 })
+			await e.playerAnimator.playClamped('HEAVYATTACK', { timeScale: 2 * 1 / e.attackSpeed.value })
 		}
 		e.combo.lastAttack = 0
 		e.stateMachine.enter('idle', e)
 	},
-}, ['combo', 'body', 'speed', 'rotation'])
+}, ['combo', 'body', 'speed', 'rotation', 'attackSpeed'])
 
 export const beeFSM = setupAnimations('beeAnimator', {
 	idle: e => e.beeAnimator.playAnimation('Flying_Idle'),
