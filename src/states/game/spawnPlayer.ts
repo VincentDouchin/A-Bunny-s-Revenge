@@ -18,6 +18,7 @@ import { capsuleColliderBundle, characterControllerBundle } from '@/lib/models'
 import type { System } from '@/lib/state'
 import { stateBundle } from '@/lib/stateMachine'
 import { Stat, addModifier } from '@/lib/stats'
+import { itemsData } from '@/constants/items'
 
 export const playerBundle = (health: number, addHealth: boolean, weapon: weapons | null) => {
 	const model = clone(assets.characters.Bunny.scene)
@@ -73,8 +74,11 @@ export const playerBundle = (health: number, addHealth: boolean, weapon: weapons
 	if (weapon !== null) {
 		ecs.update(player, { weapon: weaponBundle(weapon) })
 	}
-	for (const mod of save.modifiers) {
-		addModifier(mod, player, addHealth)
+	for (const modKey of save.modifiers) {
+		const mod = Object.values(itemsData).flatMap(i => i.meal).find(m => m?.key === modKey)
+		if (mod) {
+			addModifier(mod, player, addHealth)
+		}
 	}
 	return player
 }

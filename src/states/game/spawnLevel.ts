@@ -1,4 +1,4 @@
-import { ActiveCollisionTypes, ColliderDesc, RigidBodyDesc, RigidBodyType } from '@dimforge/rapier3d-compat'
+import { ColliderDesc, RigidBodyDesc, RigidBodyType } from '@dimforge/rapier3d-compat'
 import { between } from 'randomish'
 import { createNoise2D, createNoise3D } from 'simplex-noise'
 import type { Vec2, Vector4Like } from 'three'

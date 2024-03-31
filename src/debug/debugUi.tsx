@@ -127,7 +127,7 @@ export const DebugUi = () => {
 		}
 	}
 	const godMode = ui.sync(() => debugOptions.godMode)
-	const modifier = createModifier('strength', 999, ModStage.Base, ModType.Add, false)
+	const modifier = createModifier('debug', 'strength', 999, ModStage.Base, ModType.Add, false)
 	const toggleGodMode = () => {
 		debugOptions.godMode = !debugOptions.godMode
 		if (debugOptions.godMode) {

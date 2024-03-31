@@ -1,10 +1,8 @@
 import type { With } from 'miniplex'
-import { Vector3 } from 'three'
 import { projectilesCircleAttack } from '../dungeon/attacks'
 import type { Animator } from '@/global/animator'
-import { params } from '@/global/context'
 import type { ComponentsOfType, Entity, states } from '@/global/entity'
-import { ecs, time } from '@/global/init'
+import { ecs } from '@/global/init'
 import { entries } from '@/utils/mapFunctions'
 import { sleep } from '@/utils/sleep'
 
@@ -27,22 +25,22 @@ export const playerFSM = setupAnimations('playerAnimator', {
 	dying: e => setTimeout(() => e.stateMachine.enter('dead', e), 1000),
 	cheer: e => e.playerAnimator.playOnce('CHEER').then(() => e.stateMachine.enter('idle', e)),
 	attacking: async (e) => {
-		const applyforce = (multiplier: number) => {
-			const force = new Vector3(0, 0, e.speed * params.speedUp * time.delta * 10 * multiplier).applyQuaternion(e.rotation)
-			e.body.addForce(force, true)
-			setTimeout(() => e.body.resetForces(true), 500)
-		}
+		// const applyforce = (multiplier: number) => {
+		// 	const force = new Vector3(0, 0, e.speed * params.speedUp * time.delta * 10 * multiplier).applyQuaternion(e.rotation)
+		// 	e.body.addForce(force, true)
+		// 	setTimeout(() => e.body.resetForces(true), 500)
+		// }
 		if (e.combo.lastAttack === 0) {
-			applyforce(1)
-			await e.playerAnimator.playOnce('FIGHT_ACTION1', { timeScale: 1 / e.attackSpeed.value }, 0.5)
+			// applyforce(1)
+			await e.playerAnimator.playOnce('FIGHT_ACTION1', { timeScale: e.attackSpeed.value }, 0.5)
 		}
 		if (e.combo.lastAttack === 1) {
-			applyforce(2)
-			await e.playerAnimator.playOnce('SLASH', { timeScale: 1 / e.attackSpeed.value })
+			// applyforce(2)
+			await e.playerAnimator.playOnce('SLASH', { timeScale: e.attackSpeed.value * 0.6 }, 0.2)
 		}
 		if (e.combo.lastAttack === 2) {
-			applyforce(3)
-			await e.playerAnimator.playClamped('HEAVYATTACK', { timeScale: 2 * 1 / e.attackSpeed.value })
+			// applyforce(3)
+			await e.playerAnimator.playClamped('HEAVYATTACK', { timeScale: e.attackSpeed.value })
 		}
 		e.combo.lastAttack = 0
 		e.stateMachine.enter('idle', e)

@@ -110,47 +110,47 @@ export const itemsData: Record<items, ItemData> = {
 	roasted_carrot: {
 		name: 'Roasted carrot',
 		meal: [
-			createModifier('strength', 1, ModStage.Base, ModType.Percent, true),
+			createModifier('roasted_carrot', 'strength', 1, ModStage.Base, ModType.Percent, true),
 		],
 	},
 	carrot_soup: {
 		name: 'Carrot soup',
 		meal: [
-			createModifier('maxHealth', 20, ModStage.Add, ModType.Percent, true),
-			createModifier('strength', -2, ModStage.Total, ModType.Percent, true),
+			createModifier('carrot_soup', 'maxHealth', 20, ModStage.Add, ModType.Percent, true),
+			createModifier('carrot_soup', 'strength', -2, ModStage.Total, ModType.Percent, true),
 		],
 	},
 	tomato_soup: {
 		name: 'Tomato soup',
 		meal: [
-			createModifier('maxHealth', 20, ModStage.Add, ModType.Percent, true),
-			createModifier('strength', -2, ModStage.Total, ModType.Percent, true),
+			createModifier('tomato_soup', 'maxHealth', 20, ModStage.Add, ModType.Percent, true),
+			createModifier('tomato_soup', 'strength', -2, ModStage.Total, ModType.Percent, true),
 		],
 	},
 	honey_glazed_carrot: {
 		name: 'Honey glazed carrot',
 		meal: [
-			createModifier('strength', 2, ModStage.Base, ModType.Percent, true),
-			createModifier('maxHealth', 1, ModStage.Total, ModType.Add, true),
+			createModifier('honey_glazed_carrot', 'strength', 2, ModStage.Base, ModType.Percent, true),
+			createModifier('honey_glazed_carrot', 'maxHealth', 1, ModStage.Total, ModType.Add, true),
 		],
 	},
 	beetroot_salad: {
 		name: 'Beetroot Salad',
 		meal: [
-			createModifier('strength', 2, ModStage.Base, ModType.Add, false),
-			createModifier('critDamage', -0.05, ModStage.Base, ModType.Add, false),
+			createModifier('beetroot_salad', 'strength', 2, ModStage.Base, ModType.Add, false),
+			createModifier('beetroot_salad', 'critDamage', -0.05, ModStage.Base, ModType.Add, false),
 		],
 	},
 	ham_honey: {
 		name: 'Honey Ham',
 		meal: [
-			createModifier('maxHealth', 3, ModStage.Base, ModType.Add, true),
+			createModifier('ham_honey', 'maxHealth', 3, ModStage.Base, ModType.Add, true),
 		],
 	},
 	slime_bread: {
 		name: 'Slime Bread',
 		meal: [
-			createModifier('critChance', 0.5, ModStage.Total, ModType.Add, false),
+			createModifier('slime_bread', 'critChance', 0.5, ModStage.Total, ModType.Add, false),
 		],
 	},
 	slime_dumpling: {
@@ -168,7 +168,7 @@ export const itemsData: Record<items, ItemData> = {
 	flan: {
 		name: 'Pudding',
 		meal: [
-			createModifier('attackSpeed', 0.1, ModStage.Total, ModType.Add, false),
+			createModifier('pudding', 'attackSpeed', 0.1, ModStage.Total, ModType.Add, false),
 		],
 	},
 	pumpkin_bowl: {

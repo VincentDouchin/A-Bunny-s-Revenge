@@ -6,6 +6,7 @@ export class Animator<K extends string> extends AnimationMixer {
 	current?: K
 	action?: AnimationAction
 	#animationClips: AnimationClip[]
+	delay: number = 0
 	constructor(scene: Object3D<Object3DEventMap>, animations: AnimationClip[]) {
 		super(scene)
 		this.#animationClips = animations
@@ -28,8 +29,20 @@ export class Animator<K extends string> extends AnimationMixer {
 		}
 	}
 
+	getTimeRatio() {
+		if (this.action) {
+			return this.action.time / (this.action.getClip().duration / this.action.timeScale - this.delay)
+		} else {
+			return 0
+		}
+	}
+
 	play(animation: K, options?: playOptions) {
 		const action = this.#getAction(animation)!
+
+		if (this.action) {
+			this.action?.crossFadeTo(action, 0.1, true)
+		}
 		if (options) {
 			if (options.timeScale) {
 				action.setEffectiveTimeScale(options.timeScale)
@@ -40,9 +53,6 @@ export class Animator<K extends string> extends AnimationMixer {
 			if (options.loopOnce === true) {
 				action.setLoop(LoopOnce, 1)
 			}
-		}
-		if (this.action) {
-			this.action?.crossFadeTo(action, 0.1, true)
 		}
 
 		action.play()
@@ -57,23 +67,20 @@ export class Animator<K extends string> extends AnimationMixer {
 		})
 	}
 
-	playOnce(animation: K, options?: playOptions, delay = 0.1) {
+	playOnce(animation: K, options?: playOptions, delay = 0) {
 		const clip = this.#getClip(animation)
+		this.delay = delay
 		this.play(animation, { ...options, loopOnce: true })
 		return new Promise<void>((resolve) => {
-			setTimeout(resolve, (clip.duration / (options?.timeScale ?? 1) - delay) * 1000)
+			setTimeout(() => {
+				this.delay = 0
+				resolve()
+			}, (clip.duration / (options?.timeScale ?? 1) - delay) * 1000)
 		})
 	}
 
 	playClamped(animation: K, options?: playOptions) {
-		this.play(animation, { ...options, loopOnce: true, clamped: true })
-		return new Promise<void>((resolve) => {
-			const finishListener = () => {
-				resolve()
-				this.removeEventListener('finished', finishListener)
-			}
-			this.addEventListener('finished', finishListener)
-		})
+		return this.play(animation, { ...options, loopOnce: true, clamped: true })
 	}
 
 	playAnimation(animation: K) {

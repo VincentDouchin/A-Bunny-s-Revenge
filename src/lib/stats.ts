@@ -12,6 +12,7 @@ export enum ModType {
 }
 
 export interface Modifier<S extends ComponentsOfType<Stat> > {
+	key: string
 	value: number
 	stage: ModStage
 	type: ModType
@@ -19,7 +20,8 @@ export interface Modifier<S extends ComponentsOfType<Stat> > {
 	stackable: boolean
 }
 
-export const createModifier = <S extends ComponentsOfType<Stat>>(name: S, value: number, stage: ModStage, type: ModType, stackable: boolean): Modifier<S> => ({
+export const createModifier = <S extends ComponentsOfType<Stat>>(from: string, name: S, value: number, stage: ModStage, type: ModType, stackable: boolean): Modifier<S> => ({
+	key: name + from,
 	value,
 	stage,
 	type,
@@ -40,7 +42,7 @@ export class Stat {
 	}
 
 	addModifier(modifier: Modifier<any>) {
-		if (modifier.stackable || !this.#modifiers.includes(modifier)) {
+		if (modifier.stackable || !this.#modifiers.some(m => m.key === modifier.key)) {
 			this.#modifiers.push(modifier)
 		}
 		this.calculate()

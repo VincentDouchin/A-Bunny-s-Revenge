@@ -75,7 +75,7 @@ export const playerAttack = () => {
 			}
 			for (const enemy of enemiesQuery) {
 				if (world.intersectionPair(sensorCollider, enemy.collider)) {
-					if (player.playerAnimator.action && player.playerAnimator.action.time > 0.5) {
+					if (player.playerAnimator.getTimeRatio() > 0.5) {
 						if (enemy.stateMachine.enter('hit', enemy)) {
 							// ! damage
 							const [damage, crit] = calculateDamage(player)
