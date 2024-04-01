@@ -12,11 +12,20 @@ import { assets, ecs } from '@/global/init'
 import { chestAppearing } from '@/particles/chestAppearing'
 import { entries, getRandom, range } from '@/utils/mapFunctions'
 import { sleep } from '@/utils/sleep'
+import type { Subscriber } from '@/lib/state'
+import type { DungeonRessources } from '@/global/states'
+import type { Drop } from '@/constants/enemies'
+import { lootPool } from '@/constants/enemies'
 
-export const spawnChest = () => {
+const playerQuery = ecs.with('player', 'lootQuantity', 'lootRarity')
+
+export const spawnChest = (dungeonLevel: number) => {
+	const player = playerQuery.first
+	if (!player) return
 	const chest = clone(assets.models.Chest.scene)
 	chest.scale.setScalar(0)
 	chest.rotateY(Math.PI)
+
 	const chestEntity = ecs.add({
 		inMap: true,
 		model: chest,
@@ -26,14 +35,15 @@ export const spawnChest = () => {
 		chestAnimator: new Animator(chest, assets.models.Chest.animations),
 		tween: new Tween(chest.scale).to(new Vector3(8, 8, 8)).onComplete(async () => {
 			chestEntity.chestAnimator.playClamped('chest_open')
-			const seeds = entries(itemsData).filter(([_, data]) => data.seed).map(([name]) => name)
-			const items = range(1, between(3, 5), () => getRandom(seeds))
-			if (Math.random() > 0.5) {
-				items.push('egg')
+
+			const possibleDrops: Drop[] = []
+			for (const [name, data] of entries(itemsData)) {
+				if (data.drop && data.drop.level <= dungeonLevel) {
+					possibleDrops.push({ name, rarity: data.drop.rarity, quantity: 1 })
+				}
 			}
-			if (Math.random() > 0.5) {
-				items.push('cinnamon')
-			}
+			const drops = range(0, between(3, 5), () => getRandom(possibleDrops))
+			const items = lootPool(player.lootQuantity.value, player.lootRarity.value, drops)
 			await sleep(200)
 			for (let i = 0; i < items.length; i++) {
 				const seed = items[i]
@@ -41,7 +51,7 @@ export const spawnChest = () => {
 				const angle = Math.PI * i / (items.length - 1)
 				ecs.add({
 					parent: chestEntity,
-					...itemBundle(seed),
+					...itemBundle(seed.name),
 					position: new Vector3(0, 5, 0),
 					popDirection: new Vector3(Math.cos(angle), 1, -Math.sin(angle)).multiplyScalar(2),
 				})
@@ -52,9 +62,9 @@ export const spawnChest = () => {
 }
 
 const enemiesQuery = ecs.with('faction').where(({ faction }) => faction === Faction.Enemy)
-export const endBattleSpawnChest = () => enemiesQuery.onEntityRemoved.subscribe(() => {
+export const endBattleSpawnChest: Subscriber<DungeonRessources> = ressources => enemiesQuery.onEntityRemoved.subscribe(() => {
 	if (enemiesQuery.size === 1) {
-		spawnChest()
+		spawnChest(ressources.dungeonLevel)
 		enableBasketUi()
 	}
 })

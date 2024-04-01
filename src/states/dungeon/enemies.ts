@@ -31,7 +31,7 @@ export const enemyBundle = (name: enemy, level: number) => {
 		enemyName: name,
 		movementForce: new Vector3(),
 		speed: 100,
-		drops: enemy.drops(),
+		drops: enemy.drops,
 		sensor: true,
 		healthBar: true,
 		...stateBundle<'dying' | 'idle' | 'running' | 'hit' | 'dead' | 'waitingAttack' | 'attacking' | 'attackCooldown'>('idle', {

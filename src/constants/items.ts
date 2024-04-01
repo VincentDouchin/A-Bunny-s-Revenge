@@ -7,11 +7,19 @@ export interface Item {
 	quantity: number
 }
 
+export enum Rarity {
+	Common = 50,
+	Rare = 25,
+}
 export interface ItemData {
 	name: string
 	seed?: crops
 	meal?: Modifier<any>[]
 	ingredient?: true
+	drop?: {
+		rarity: Rarity
+		level: 0 | 1 | 2 | 3
+	}
 }
 
 export const itemsData: Record<items, ItemData> = {
@@ -30,26 +38,50 @@ export const itemsData: Record<items, ItemData> = {
 	carrot_seeds: {
 		name: 'Carrot seed',
 		seed: 'carrot',
+		drop: {
+			rarity: Rarity.Common,
+			level: 0,
+		},
 	},
 	beet_seeds: {
 		name: 'Beet seed',
 		seed: 'beet',
+		drop: {
+			rarity: Rarity.Common,
+			level: 0,
+		},
 	},
 	tomato_seeds: {
 		name: 'Tomato seeds',
 		seed: 'tomato',
+		drop: {
+			rarity: Rarity.Common,
+			level: 0,
+		},
 	},
 	lettuce_seeds: {
 		name: 'Lettuce seeds',
 		seed: 'lettuce',
+		drop: {
+			rarity: Rarity.Common,
+			level: 0,
+		},
 	},
 	pumpkin_seeds: {
 		name: 'Pumpkin seeds',
 		seed: 'pumpkin',
+		drop: {
+			rarity: Rarity.Common,
+			level: 1,
+		},
 	},
 	wheat_seeds: {
 		name: 'Wheat seeds',
 		seed: 'wheat',
+		drop: {
+			rarity: Rarity.Common,
+			level: 1,
+		},
 	},
 	lettuce: {
 		name: 'Lettuce',
@@ -58,6 +90,7 @@ export const itemsData: Record<items, ItemData> = {
 	honey: {
 		name: 'Honey',
 		ingredient: true,
+
 	},
 	parsley: {
 		name: 'Parsley',
@@ -86,10 +119,18 @@ export const itemsData: Record<items, ItemData> = {
 	egg: {
 		name: 'Egg',
 		ingredient: true,
+		drop: {
+			level: 1,
+			rarity: Rarity.Common,
+		},
 	},
 	cinnamon: {
 		name: 'Cinnamon',
 		ingredient: true,
+		drop: {
+			level: 1,
+			rarity: Rarity.Rare,
+		},
 	},
 	wheat: {
 		name: 'Wheat',
