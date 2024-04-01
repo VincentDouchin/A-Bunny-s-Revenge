@@ -1,5 +1,5 @@
 import type { Texture, WebGLRenderTarget } from 'three'
-import { Uniform, Vector2 } from 'three'
+import { Color, Uniform, Vector2 } from 'three'
 
 export const getDepthShader = (target: WebGLRenderTarget) => ({
 	uniforms: {
@@ -55,7 +55,7 @@ export const getSobelShader = (x: number, y: number, diffuseTarget: WebGLRenderT
 		tDiffuse: new Uniform<Texture>(diffuseTarget.texture),
 		tDepth: new Uniform<Texture>(depthTarget.texture),
 		resolution: { value: new Vector2(x, y).multiplyScalar(2) },
-
+		edgeColor: new Uniform(new Color(0x4D3533)),
 	},
 
 	vertexShader: /* glsl */`
@@ -72,6 +72,7 @@ export const getSobelShader = (x: number, y: number, diffuseTarget: WebGLRenderT
 		uniform sampler2D tDepth;
 		uniform sampler2D tDiffuse;
 		uniform float cameraNear;
+		uniform vec3 edgeColor;
 		uniform float cameraFar;
 		uniform vec2 resolution;
 		varying vec2 vUv;
@@ -126,7 +127,9 @@ export const getSobelShader = (x: number, y: number, diffuseTarget: WebGLRenderT
 		// magnitute of the total gradient
 
 			float G = sqrt(( valueGx * valueGx ) + ( valueGy * valueGy )) ;
-			gl_FragColor =  vec4(clamp(step(G * 5.0,0.15)+0.85,0.0,1.0) ) * texture2D(tDiffuse,vUv).rgba;
+			float Gfactor = clamp(step(G * 5.0,0.1)+0.8,0.0,1.0) ;
+			vec3 color = texture2D(tDiffuse,vUv).rgb;
+			gl_FragColor =  vec4(mix(edgeColor,color,Gfactor),1.) ;
 
 		}`,
 
