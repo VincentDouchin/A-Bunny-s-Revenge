@@ -19,6 +19,7 @@ import type { System } from '@/lib/state'
 import { stateBundle } from '@/lib/stateMachine'
 import { Stat, addModifier } from '@/lib/stats'
 import { itemsData } from '@/constants/items'
+import { inMap } from '@/lib/hierarchy'
 
 export const playerBundle = (health: number, addHealth: boolean, weapon: weapons | null) => {
 	const model = clone(assets.characters.Bunny.scene)
@@ -39,7 +40,7 @@ export const playerBundle = (health: number, addHealth: boolean, weapon: weapons
 		...bundle,
 		...characterControllerBundle(),
 		playerAnimator: new Animator(bundle.model, assets.characters.Bunny.animations),
-		inMap: true,
+		...inMap(),
 		cameratarget: true,
 		initialCameratarget: true,
 		faction: Faction.Player,
@@ -125,7 +126,7 @@ const playerQuery = ecs.with('player', 'position')
 
 export const losingBattle = () => playerQuery.onEntityRemoved.subscribe((e) => {
 	openMenuState.enable()
-	ecs.add({ inMap: true, position: e.position, cameratarget: true })
+	ecs.add({ ...inMap(), position: e.position, cameratarget: true })
 })
 
 export const debugPlayer = () => {

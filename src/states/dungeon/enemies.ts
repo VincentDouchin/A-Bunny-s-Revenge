@@ -12,6 +12,7 @@ import { stateBundle } from '@/lib/stateMachine'
 import type { Subscriber } from '@/lib/state'
 import type { DungeonRessources } from '@/global/states'
 import { Stat } from '@/lib/stats'
+import { inMap } from '@/lib/hierarchy'
 
 export const enemyBundle = (name: enemy, level: number) => {
 	const enemy = enemyData[name]
@@ -26,7 +27,7 @@ export const enemyBundle = (name: enemy, level: number) => {
 		...healthBundle(enemy.health * (level + 1)),
 		...boss,
 		strength: new Stat(1 + level),
-		inMap: true,
+		...inMap(),
 		faction: Faction.Enemy,
 		enemyName: name,
 		movementForce: new Vector3(),

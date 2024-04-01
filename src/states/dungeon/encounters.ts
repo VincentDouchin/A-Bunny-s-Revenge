@@ -5,16 +5,16 @@ import { Sizes } from '@/constants/sizes'
 import { Interactable } from '@/global/entity'
 import { assets, ecs } from '@/global/init'
 import { modelColliderBundle } from '@/lib/models'
+import { inMap } from '@/lib/hierarchy'
 
 export const encounters = {
 	jack: () => {
 		const model = assets.characters['Frog Man']
 		model.scene.scale.setScalar(4)
 		const bundle = modelColliderBundle(model.scene, RigidBodyType.Fixed, false, Sizes.character)
-
 		ecs.add({
 			...bundle,
-			inMap: true,
+			...inMap(),
 			npcName: 'Jack Placeholder',
 			npc: true,
 			dialog: dialogs.Jack(),

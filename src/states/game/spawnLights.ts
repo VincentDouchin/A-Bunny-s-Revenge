@@ -1,7 +1,7 @@
 import type { Vec2 } from 'three'
 import { AmbientLight, DirectionalLight, Vector3 } from 'three'
-import { ecs } from '@/global/init'
 import type { Entity } from '@/global/entity'
+import { ecs } from '@/global/init'
 
 export const spawnLight = ({ x, y }: Vec2, parent: Entity) => {
 	const light = new DirectionalLight(0xFFFFFF, 0.6)
@@ -16,20 +16,17 @@ export const spawnLight = ({ x, y }: Vec2, parent: Entity) => {
 	light.shadow.bias = 0.002
 	ecs.add({
 		parent,
-		inMap: true,
 		light,
 		position: new Vector3(0, 50, 0),
 	})
 	ecs.add({
 		parent,
-		inMap: true,
 		ambientLight: 'day',
 		light: new AmbientLight(0xFFFFFF, 2),
 		position: new Vector3(),
 	})
 	ecs.add({
 		parent,
-		inMap: true,
 		ambientLight: 'night',
 		light: new AmbientLight(0x7F96D7, 2),
 		position: new Vector3(),

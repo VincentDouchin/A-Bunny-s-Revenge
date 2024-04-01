@@ -87,7 +87,6 @@ export interface Entity {
 	// ! Hierarchy
 	parent?: Entity
 	children?: Set<Entity>
-	inMap?: true
 	withChildren?: (parent: Entity) => void
 	// ! InputMaps
 	playerControls?: PlayerInputMap

@@ -8,6 +8,7 @@ import { addItem } from '@/global/save'
 import { modelColliderBundle } from '@/lib/models'
 import { sleep } from '@/utils/sleep'
 import { addTweenTo } from '@/lib/updateTween'
+import { inMap } from '@/lib/hierarchy'
 
 const itemsQuery = ecs.with('item', 'position', 'model', 'collider', 'itemLabel')
 
@@ -28,7 +29,7 @@ export const itemBundle = (item: items) => {
 		...bundle,
 		model,
 		item: true,
-		inMap: true,
+		...inMap(),
 		itemLabel: item,
 	} as const satisfies Entity
 }

@@ -7,6 +7,7 @@ import { Animator } from '@/global/animator'
 import { stateBundle } from '@/lib/stateMachine'
 import { characterControllerBundle, modelColliderBundle } from '@/lib/models'
 import { Interactable, MenuType } from '@/global/entity'
+import { inMap } from '@/lib/hierarchy'
 
 const playerQuery = ecs.with('player', 'position', 'rotation', 'inventory', 'inventoryId', 'inventorySize')
 export const spawnBasket = () => {
@@ -19,7 +20,7 @@ export const spawnBasket = () => {
 		const position = player.position.clone().add(new Vector3(0, 0, -10).applyQuaternion(player.rotation))
 		ecs.add({
 			position,
-			inMap: true,
+			...inMap(),
 			basketAnimator: new Animator(bundle.model, assets.characters.Basket.animations),
 			...stateBundle<'idle' | 'running' | 'picking'>('idle', {
 				idle: ['running', 'picking'],

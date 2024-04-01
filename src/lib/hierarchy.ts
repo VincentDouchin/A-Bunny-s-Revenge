@@ -5,8 +5,16 @@ import type { State } from './state'
 import { set } from './state'
 
 const mapQuery = ecs.with('map')
+export const inMap = () => {
+	const map = mapQuery.first
+	if (map) {
+		return { parent: map }
+	} else {
+		throw new Error('map not found')
+	}
+}
 export const addChildren = () => ecs.onEntityAdded.subscribe((entity) => {
-	const parent = entity.inMap ? mapQuery.first : entity.parent
+	const parent = entity.parent
 	if (parent) {
 		if (parent.children) {
 			parent.children.add(entity)

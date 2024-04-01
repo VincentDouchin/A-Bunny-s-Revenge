@@ -18,6 +18,7 @@ import { getBoundingBox, getSize } from '@/lib/models'
 import type { System } from '@/lib/state'
 import { GroundMaterial, WaterMaterial } from '@/shaders/materials'
 import { getScreenBuffer, scaleCanvas } from '@/utils/buffer'
+import { inMap } from '@/lib/hierarchy'
 
 const SCALE = 10
 export const HEIGHT = 240
@@ -55,7 +56,7 @@ export const spawnTrees = (level: Level, parent: Entity) => {
 			treeMap.set(position, instanceHandle)
 			const treeSize = getSize(treeGenerator.glb.scene).multiplyScalar(size)
 			ecs.add({
-				inMap: true,
+				...inMap(),
 				position,
 				instanceHandle,
 				group: new Group(),
@@ -70,7 +71,7 @@ export const spawnTrees = (level: Level, parent: Entity) => {
 	})
 	for (const tree of trees) {
 		const group = tree.process()
-		ecs.add({ group, inMap: true, tree: true, parent })
+		ecs.add({ group, ...inMap(), tree: true, parent })
 	}
 	for (const treesInstance of treesInstances) {
 		treesInstance.setUniform('playerZ', 1)
@@ -112,7 +113,7 @@ export const spawnGrass = (level: Level, parent: Entity) => {
 		const instanceHandle = grassGenerator.addAt(position, size, new Euler(0, noise(x, y), 0))
 		instances.set(instanceHandle, position)
 		ecs.add({
-			inMap: true,
+			...inMap(),
 			position,
 			instanceHandle,
 			grass: true,
@@ -122,11 +123,11 @@ export const spawnGrass = (level: Level, parent: Entity) => {
 	})
 	grass.forEach((t) => {
 		const group = t.process()
-		ecs.add({ group, inMap: true, grass: true, parent })
+		ecs.add({ group, ...inMap(), grass: true, parent })
 	})
 	flowers.forEach((t) => {
 		const group = t.process()
-		ecs.add({ group, inMap: true, grass: true, parent })
+		ecs.add({ group, ...inMap(), grass: true, parent })
 	})
 	for (const [handle, pos] of instances.entries()) {
 		handle.setUniform('pos', pos)
@@ -209,7 +210,7 @@ export const spawnGroundAndTrees = (level: Level) => {
 
 	const ground = ecs.add({
 		model: groundMesh,
-		inMap: true,
+		...inMap(),
 		position: new Vector3(0, 0, 0),
 		bodyDesc: new RigidBodyDesc(RigidBodyType.Fixed),
 		colliderDesc: ColliderDesc
@@ -275,7 +276,7 @@ export const spawnLevelData: System<FarmRessources | DungeonRessources | void> =
 					...getBoundingBox(entityData.model, model, colliderData),
 					entityId,
 					model,
-					inMap: true,
+					...inMap(),
 				} as const satisfies Entity
 
 				if (bundleFn) {

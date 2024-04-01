@@ -27,6 +27,7 @@ import { HEIGHT, getdisplacementMap, setDisplacement, spawnGroundAndTrees, spawn
 import { playerBundle } from '@/states/game/spawnPlayer'
 import { getScreenBuffer } from '@/utils/buffer'
 import { getRandom } from '@/utils/mapFunctions'
+import { inMap } from '@/lib/hierarchy'
 
 export interface EntityData<T extends Record<string, any>> {
 	model: models | customModel | vegetation
@@ -300,7 +301,7 @@ export const LevelEditor = () => {
 									position,
 									entityId: generateUUID(),
 									rotation: new Quaternion(),
-									inMap: true,
+									...inMap(),
 								})
 								setLevelData({
 									...levelData(),

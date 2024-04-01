@@ -6,6 +6,7 @@ import { assets, coroutines, ecs } from '@/global/init'
 import { weaponsData } from '@/constants/weapons'
 import type { Entity } from '@/global/entity'
 import { Interactable } from '@/global/entity'
+import { inMap } from '@/lib/hierarchy'
 
 const weaponNames = ['Hoe', 'Ladle', 'ScissorWeapon', 'SwordWeapon'] as const satisfies readonly weapons[]
 const displayWeapon = (weaponName: weapons, parent: Entity) => {
@@ -64,7 +65,7 @@ export const spawnWeaponsChoice = () => {
 			bodyDesc: RigidBodyDesc.fixed().lockRotations(),
 			colliderDesc: ColliderDesc.cylinder(4, 3).setActiveCollisionTypes(ActiveCollisionTypes.ALL),
 			rotation: new Quaternion().setFromAxisAngle(new Vector3(0, 1, 0), Math.random() * Math.PI * 2),
-			inMap: true,
+			...inMap(),
 			weaponStand: weaponName,
 			interactable: Interactable.WeaponStand,
 			onPrimary(_stump, player) {

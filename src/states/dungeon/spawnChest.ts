@@ -16,6 +16,7 @@ import type { Subscriber } from '@/lib/state'
 import type { DungeonRessources } from '@/global/states'
 import type { Drop } from '@/constants/enemies'
 import { lootPool } from '@/constants/enemies'
+import { inMap } from '@/lib/hierarchy'
 
 const playerQuery = ecs.with('player', 'lootQuantity', 'lootChance')
 
@@ -25,9 +26,8 @@ export const spawnChest = (dungeonLevel: number) => {
 	const chest = clone(assets.models.Chest.scene)
 	chest.scale.setScalar(0)
 	chest.rotateY(Math.PI)
-
 	const chestEntity = ecs.add({
-		inMap: true,
+		...inMap(),
 		model: chest,
 		bodyDesc: RigidBodyDesc.fixed().lockRotations(),
 		colliderDesc: ColliderDesc.cuboid(6, 4, 6).setTranslation(0, 2, 0),
@@ -50,7 +50,6 @@ export const spawnChest = (dungeonLevel: number) => {
 				await sleep(100)
 				const angle = Math.PI * i / (items.length - 1)
 				ecs.add({
-					parent: chestEntity,
 					...itemBundle(seed.name),
 					position: new Vector3(0, 5, 0),
 					popDirection: new Vector3(Math.cos(angle), 1, -Math.sin(angle)).multiplyScalar(2),
