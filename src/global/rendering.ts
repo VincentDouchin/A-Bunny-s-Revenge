@@ -44,6 +44,9 @@ export const initThree = () => {
 	cssRenderer.domElement.classList.add('main')
 	cssRenderer.domElement.classList.add('no-events')
 	document.body.appendChild(cssRenderer.domElement)
+	const overlay = document.createElement('div')
+	overlay.classList.add('overlay')
+	document.body.appendChild(overlay)
 	ecs.add({ scene })
 }
 export const rendererQuery = ecs.with('renderer')
