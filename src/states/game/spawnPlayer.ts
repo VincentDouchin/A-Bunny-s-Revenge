@@ -52,7 +52,7 @@ export const playerBundle = (health: number, addHealth: boolean, weapon: weapons
 		critDamage: new Stat(0.20),
 		attackSpeed: new Stat(1),
 		lootQuantity: new Stat(0),
-		lootRarity: new Stat(0),
+		lootChance: new Stat(0),
 		lastStep: { right: false, left: false },
 		...healthBundle(5, health),
 		...stateBundle<'idle' | 'running' | 'picking' | 'hit' | 'dying' | 'dead' | 'attacking' | 'waitingAttack' | 'cheer'>('idle', {

@@ -17,7 +17,7 @@ import type { DungeonRessources } from '@/global/states'
 import type { Drop } from '@/constants/enemies'
 import { lootPool } from '@/constants/enemies'
 
-const playerQuery = ecs.with('player', 'lootQuantity', 'lootRarity')
+const playerQuery = ecs.with('player', 'lootQuantity', 'lootChance')
 
 export const spawnChest = (dungeonLevel: number) => {
 	const player = playerQuery.first
@@ -43,7 +43,7 @@ export const spawnChest = (dungeonLevel: number) => {
 				}
 			}
 			const drops = range(0, between(3, 5), () => getRandom(possibleDrops))
-			const items = lootPool(player.lootQuantity.value, player.lootRarity.value, drops)
+			const items = lootPool(player.lootQuantity.value, player.lootChance.value, drops)
 			await sleep(200)
 			for (let i = 0; i < items.length; i++) {
 				const seed = items[i]

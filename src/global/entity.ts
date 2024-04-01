@@ -185,7 +185,7 @@ export interface Entity {
 	critDamage?: Stat
 	attackSpeed?: Stat
 	lootQuantity?: Stat
-	lootRarity?: Stat
+	lootChance?: Stat
 	// ! Level Editor
 	entityId?: string
 	// ! FSM

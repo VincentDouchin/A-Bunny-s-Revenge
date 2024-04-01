@@ -45,7 +45,7 @@ const calculateDamage = (entity: With<Entity, 'strength' | 'critChance' | 'critD
 }
 
 const enemiesQuery = entities.with('strength').where(({ faction }) => faction === Faction.Enemy)
-const playerQuery = entities.with('playerControls', 'strength', 'body', 'critChance', 'critDamage', 'speed', 'state', 'stateMachine', 'combo', 'playerAnimator', 'weapon', 'lootQuantity', 'lootRarity').where(({ faction }) => faction === Faction.Player)
+const playerQuery = entities.with('playerControls', 'strength', 'body', 'critChance', 'critDamage', 'speed', 'state', 'stateMachine', 'combo', 'playerAnimator', 'weapon', 'lootQuantity', 'lootChance').where(({ faction }) => faction === Faction.Player)
 export const playerAttack = () => {
 	for (const player of playerQuery) {
 		const { playerControls, sensorCollider, position, state, stateMachine, combo, playerAnimator } = player
@@ -101,7 +101,7 @@ export const playerAttack = () => {
 export const spawnDrops = () => ecs.with('drops', 'position').onEntityRemoved.subscribe((e) => {
 	const player = playerQuery.first
 	if (player) {
-		for (const drop of lootPool(player.lootQuantity.value, player.lootRarity.value, e.drops)) {
+		for (const drop of lootPool(player.lootQuantity.value, player.lootChance.value, e.drops)) {
 			ecs.add({ ...itemBundle(drop.name), position: e.position.clone().add(new Vector3(0, 5, 0)) })
 		}
 	}
