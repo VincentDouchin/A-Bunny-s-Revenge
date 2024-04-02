@@ -1,5 +1,4 @@
-import type { Vec2 } from 'three'
-import { CanvasTexture, Color, MeshPhongMaterial, Vector2 } from 'three'
+import { Color, MeshPhongMaterial, Vector2 } from 'three'
 
 import noise from '@/shaders/glsl/lib/cnoise.glsl?raw'
 
@@ -7,7 +6,6 @@ import { MaterialExtension, addUniform, extendMaterial, importLib, override, rem
 import { gradient } from '@/shaders/glsl/lib/generateGradient'
 import water from '@/shaders/glsl/water.glsl?raw'
 import { useLocalStorage } from '@/utils/useLocalStorage'
-import { assets } from '@/global/init'
 
 const toonExtension = new MaterialExtension({ }).frag(
 	override('vec4 diffuseColor ', 'vec4(1.)'),
@@ -34,33 +32,28 @@ const [groundColors] = useLocalStorage('groundColor', {
 	pathColor2: '#A26D3F',
 	grassColor: '#26854C',
 })
-const groundExtension = (image: HTMLCanvasElement, x: number, y: number) => {
-	const level = new CanvasTexture(image)
-	level.flipY = false
-	return new MaterialExtension({
-		level,
-		size: new Vector2(x, y),
-		grassColor2: new Color(groundColors.topColor),
-		pathColor: new Color(groundColors.pathColor),
-		pathColor2: new Color(groundColors.pathColor2),
-		grassColor: new Color(groundColors.grassColor),
-		ground: assets.textures.Dirt4_Dark,
-	})
-		.defines('USE_UV')
-		.defines('USE_ENVMAP')
-		// .vert(importLib('varying vec3 vWorldPosition;'))
-		.frag(
-			importLib(noise),
-			// importLib('varying vec3 vWorldPosition;'),
-			addUniform('size', 'vec2'),
-			addUniform('level', 'sampler2D'),
-			addUniform(`pathColor2`, 'vec3'),
-			addUniform(`pathColor`, 'vec3'),
-			addUniform(`grassColor2`, 'vec3'),
-			addUniform(`grassColor`, 'vec3'),
-			addUniform(`ground`, 'sampler2D'),
-			remove('color.rgb *= diffuse;'),
-			replace('vec4 color = vec4(1.);', /* glsl */`
+const groundExtension = new MaterialExtension({
+	level: null,
+	size: null,
+	grassColor2: new Color(groundColors.topColor),
+	pathColor: new Color(groundColors.pathColor),
+	pathColor2: new Color(groundColors.pathColor2),
+	grassColor: new Color(groundColors.grassColor),
+	ground: null,
+})
+	.defines('USE_UV')
+	.defines('USE_ENVMAP')
+	.frag(
+		importLib(noise),
+		addUniform('size', 'vec2'),
+		addUniform('level', 'sampler2D'),
+		addUniform(`pathColor2`, 'vec3'),
+		addUniform(`pathColor`, 'vec3'),
+		addUniform(`grassColor2`, 'vec3'),
+		addUniform(`grassColor`, 'vec3'),
+		addUniform(`ground`, 'sampler2D'),
+		remove('color.rgb *= diffuse;'),
+		replace('vec4 color = vec4(1.);', /* glsl */`
 			vec4 color = vec4(1.);
 			vec2 scaled_uv = vUv*size/10.;
 			float noise = cnoise(scaled_uv.xyx);
@@ -89,9 +82,10 @@ const groundExtension = (image: HTMLCanvasElement, x: number, y: number) => {
 			color.rgb =	dotNormal< 0.3?tex.rgb:dotNormal < 1.?grass_and_path * 0.7:grass_and_path;
 			// color.rgb = smoothstep(0.,1.,cnoise(vec3(vUv.xy,dotNormal)))- 1.>0.5?grass: tex.rgb;
 	`),
-		) }
+	)
 
-const treeExtension = new MaterialExtension({ playerZ: 0, time: 0, pos: new Vector2() })
+export const treeExtension = new MaterialExtension({ playerZ: 0, pos: new Vector2(), time: 0 })
+
 	.frag(
 		addUniform('playerZ', 'float'),
 		replace('gl_FragColor = vec4(outgoingLight2,opacity);', /* glsl */`
@@ -101,8 +95,8 @@ const treeExtension = new MaterialExtension({ playerZ: 0, time: 0, pos: new Vect
 	`),
 	)
 	.vert(
-		importLib(noise),
 		addUniform('time', 'float'),
+		importLib(noise),
 		addUniform('pos', 'vec2'),
 		unpack('project_vertex'),
 		replace('mvPosition = instanceMatrix * mvPosition;', /* glsl */`
@@ -112,36 +106,40 @@ const treeExtension = new MaterialExtension({ playerZ: 0, time: 0, pos: new Vect
 		mvPosition = instanceMatrix * (mvPosition + vec4(sin(noise)*height_factor,0.,cos(noise)*height_factor,0.));
 		`),
 	)
-const grassExtension = new MaterialExtension({ time: 0, pos: new Vector2() }).vert(
-	importLib(noise),
-	addUniform('time', 'float'),
-	addUniform('pos', 'vec2'),
-	unpack('project_vertex'),
-	replace('mvPosition = instanceMatrix * mvPosition;', /* glsl */`
+
+export const grassExtension = new MaterialExtension({ pos: new Vector2(), time: 0 })
+
+	.vert(
+		addUniform('time', 'float'),
+		importLib(noise),
+		addUniform('pos', 'vec2'),
+		unpack('project_vertex'),
+		replace('mvPosition = instanceMatrix * mvPosition;', /* glsl */`
 		vec4 position2 = vec4( transformed, 1.0 ) * instanceMatrix;
 		float noise = cnoise(vec3(pos.xy,time));
 		float height_factor = mvPosition.y/4.;
 		mvPosition = instanceMatrix * (mvPosition + vec4(sin(noise)*height_factor,0.,cos(noise)*height_factor,0.));
 		`),
-)
+	)
+
 const characterExtension = new MaterialExtension({ flash: 0 }).frag(
 	addUniform('flash', 'float'),
 	override('gl_FragColor', `
 	vec4(outgoingLight2 + vec3(flash), opacity);
 	`),
 )
-const waterExtension = (size: Vec2) => new MaterialExtension({
-	time: 0,
-	size,
+export const waterExtension = new MaterialExtension({
+	size: null,
 	water_color: new Color(0x36C5F4),
 	foam_color: new Color(0xCFF5F6),
+	time: 0,
 })
 	.defines('USE_UV')
 	.frag(
+		addUniform('time', 'float'),
 		importLib(water),
 		addUniform('water_color', 'vec3'),
 		addUniform('foam_color', 'vec3'),
-		addUniform('time', 'float'),
 		addUniform('size', 'vec2'),
 		replace('gl_FragColor = vec4(outgoingLight2,opacity);', /* glsl */`
 			if (sampledDiffuseColor.r == 0.){
@@ -155,7 +153,7 @@ const waterExtension = (size: Vec2) => new MaterialExtension({
 
 export const ToonMaterial = extendMaterial(MeshPhongMaterial, [toonExtension])
 export const CharacterMaterial = extendMaterial(MeshPhongMaterial, [toonExtension, characterExtension])
-export const GroundMaterial = (image: HTMLCanvasElement, x: number, y: number) => extendMaterial(MeshPhongMaterial, [toonExtension, groundExtension(image, x, y)])
-export const WaterMaterial = (size: Vec2) => extendMaterial(MeshPhongMaterial, [toonExtension, waterExtension(size)])
+export const GroundMaterial = extendMaterial(MeshPhongMaterial, [toonExtension, groundExtension])
+export const WaterMaterial = extendMaterial(MeshPhongMaterial, [toonExtension, waterExtension])
 export const TreeMaterial = extendMaterial(MeshPhongMaterial, [toonExtension, treeExtension])
 export const GrassMaterial = extendMaterial(MeshPhongMaterial, [toonExtension, grassExtension])

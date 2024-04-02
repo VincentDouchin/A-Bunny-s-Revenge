@@ -2,7 +2,7 @@ import { ColliderDesc, RigidBodyDesc, RigidBodyType } from '@dimforge/rapier3d-c
 import { between } from 'randomish'
 import { createNoise2D, createNoise3D } from 'simplex-noise'
 import type { Vec2, Vector4Like } from 'three'
-import { CanvasTexture, Euler, Group, Mesh, PlaneGeometry, Quaternion, Vector3 } from 'three'
+import { CanvasTexture, Euler, Group, Mesh, PlaneGeometry, Quaternion, Vector2, Vector3 } from 'three'
 import { encounters } from '../dungeon/encounters'
 import { enemyBundle } from '../dungeon/enemies'
 import { RoomType } from '../dungeon/generateDungeon'
@@ -14,11 +14,11 @@ import { canvasToArray, canvasToGrid, instanceMesh } from '@/global/assetLoaders
 import type { Entity } from '@/global/entity'
 import { assets, ecs, levelsData, time } from '@/global/init'
 import type { DungeonRessources, FarmRessources } from '@/global/states'
+import { inMap } from '@/lib/hierarchy'
 import { getBoundingBox, getSize } from '@/lib/models'
 import type { System } from '@/lib/state'
 import { GroundMaterial, WaterMaterial } from '@/shaders/materials'
 import { getScreenBuffer, scaleCanvas } from '@/utils/buffer'
-import { inMap } from '@/lib/hierarchy'
 
 const SCALE = 10
 export const HEIGHT = 240
@@ -161,7 +161,10 @@ export const getdisplacementMap = (level: Level, invert = true) => {
 const waterBundle = (level: Level) => {
 	const waterMap = new CanvasTexture(level.water)
 	waterMap.flipY = false
-	const waterMesh = new Mesh(new PlaneGeometry(level.size.x, level.size.y), new (WaterMaterial(level.size))({ map: waterMap, transparent: true }))
+	const waterMesh = new Mesh(
+		new PlaneGeometry(level.size.x, level.size.y),
+		new WaterMaterial({ map: waterMap, transparent: true }).setUniforms({ size: new Vector2(level.size.x, level.size.y) }),
+	)
 	waterMesh.receiveShadow = true
 	return {
 		model: waterMesh,
@@ -187,15 +190,22 @@ export const setDisplacement = (geo: PlaneGeometry, canvas: HTMLCanvasElement) =
 	}
 	positionAttribute.needsUpdate = true
 }
+
 export const spawnGroundAndTrees = (level: Level) => {
 	const canvasScale = 0.5
 	const displacementMap = scaleCanvas(getdisplacementMap(level), canvasScale)
 	const displacementTexture = new CanvasTexture(displacementMap)
 	displacementTexture.flipY = false
 	// ! Ground
+	const levelTexture = new CanvasTexture(level.path)
+	levelTexture.flipY = false
 	const groundMesh = new Mesh(
 		new PlaneGeometry(level.size.x, level.size.y, Math.floor(level.size.x * canvasScale), Math.floor(level.size.y * canvasScale)),
-		new (GroundMaterial(level.path, level.size.x, level.size.y))({ }),
+		new GroundMaterial({}).setUniforms({
+			level: levelTexture,
+			size: new Vector2(level.size.x, level.size.y),
+			ground: assets.textures.Dirt4_Dark,
+		}),
 	)
 	setDisplacement(groundMesh.geometry, displacementMap)
 	groundMesh.geometry.computeVertexNormals()
@@ -288,6 +298,7 @@ export const spawnLevelData: System<FarmRessources | DungeonRessources | void> =
 		}
 	}
 }
+
 const withTimeUniformQuery = ecs.with('withTimeUniform')
 export const updateTimeUniforms = () => {
 	for (const entity of withTimeUniformQuery) {
