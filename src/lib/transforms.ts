@@ -1,9 +1,11 @@
 import type { Object3D, Object3DEventMap } from 'three'
 import { Quaternion, Vector3 } from 'three'
 import type { Collider } from '@dimforge/rapier3d-compat'
+import type { With } from 'miniplex'
 import type { State } from './state'
 import type { direction } from './directions'
 import { ecs, world } from '@/global/init'
+import type { Entity } from '@/global/entity'
 
 export const getWorldPosition = (obj: Object3D<Object3DEventMap>) => {
 	const pos = new Vector3()
@@ -38,13 +40,19 @@ const addWorldPosition = () => bodiesWithoutWorldPositionQuery.onEntityAdded.sub
 	ecs.addComponent(entity, 'worldPosition', worldPosition)
 })
 const worldPositionQuery = ecs.with('group', 'worldPosition', 'body')
-const updateWorldPosition = () => {
-	for (const entity of worldPositionQuery) {
-		const { group, worldPosition, body } = entity
-		group.getWorldPosition(worldPosition)
-		if (body.isFixed()) {
-			body.setTranslation(worldPosition, true)
-		}
+const nonFixedworldPositionQuery = worldPositionQuery.where(e => !e.body.isFixed())
+const fixedWorldPositionQuery = worldPositionQuery.where(e => e.body.isFixed())
+const setWorldPosition = (entity: With<Entity, 'body' | 'group' | 'worldPosition'>) => {
+	const { group, worldPosition, body } = entity
+	group.getWorldPosition(worldPosition)
+	if (body.isFixed()) {
+		body.setTranslation(worldPosition, true)
+	}
+}
+const setFixedBodiesWorldPosition = () => fixedWorldPositionQuery.onEntityAdded.subscribe(setWorldPosition)
+const setNonFixedWorldPosition = () => {
+	for (const entity of nonFixedworldPositionQuery) {
+		setWorldPosition(entity)
 	}
 }
 
@@ -73,9 +81,9 @@ const updateRotation = () => {
 
 export const transformsPlugin = (state: State) => {
 	state
-		.addSubscriber(addWorldPosition)
+		.addSubscriber(addWorldPosition, setFixedBodiesWorldPosition)
 		.onUpdate(updateGroupPosition, updateMeshPosition, updateRotation)
-		.onPostUpdate(updateWorldPosition)
+		.onPostUpdate(setNonFixedWorldPosition)
 }
 
 export const isInIntersectionWithCollider = (collider: Collider) => {
