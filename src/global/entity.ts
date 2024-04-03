@@ -221,6 +221,7 @@ export interface Entity {
 	menuTexture?: (direction?: direction) => MenuOptions
 	windowShader?: ShaderMaterial
 	stateEntity?: State
+	menuButton?: MenuOptions
 
 }
 export type states = 'idle' | 'running' | 'picking' | 'dying' | 'hit' | 'hello' | 'dead' | 'waitingAttack' | 'attacking' | 'attackCooldown' | 'doorOpening' | 'doorClosing' | 'cheer'

@@ -1,8 +1,8 @@
 import { Easing, Tween } from '@tweenjs/tween.js'
 import type { MeshStandardMaterial, ShaderMaterial } from 'three'
-import { CanvasTexture, Group, Mesh, MeshBasicMaterial, NearestFilter, PerspectiveCamera, Scene, SphereGeometry, Vector2, Vector3 } from 'three'
-import { playerBundle } from '../game/spawnPlayer'
+import { CanvasTexture, Group, Mesh, MeshBasicMaterial, NearestFilter, PerspectiveCamera, Raycaster, Scene, SphereGeometry, Vector2, Vector3 } from 'three'
 import { basketFollowPlayer, spawnBasket } from '../game/spawnBasket'
+import { playerBundle } from '../game/spawnPlayer'
 import { updateCameraZoom } from '@/global/camera'
 import { params } from '@/global/context'
 import { RenderGroup } from '@/global/entity'
@@ -25,9 +25,9 @@ const drawUnderline = (ctx: CanvasRenderingContext2D, x: number, y: number, w: n
 	ctx.globalAlpha = 0.8
 }
 
+const menu = ['Continue', 'New Game', 'Settings', 'Credits'] as const
 const mainMenuTexture = (mat: MeshStandardMaterial) => {
 	let selected = 0
-	const menu = ['Continue', 'New Game', 'Settings', 'Credits'] as const
 	return (direction?: direction | null) => {
 		if (direction === 'south') {
 			selected = Math.min(selected + 1, menu.length - 1)
@@ -104,6 +104,12 @@ export const intiMainMenuRendering = () => {
 			const menuTexture = mainMenuTexture(node.material)
 			ecs.add({ menuSelected: 'Continue', menuTexture, ...menuInputMap(), windowShader, stateEntity: mainMenuState })
 			menuTexture(null)
+		}
+		for (const text of menu) {
+			if (node.name === text.replace(' ', '_') && node instanceof Mesh) {
+				node.material = new MeshBasicMaterial({ transparent: true, opacity: 0 })
+				ecs.add({ menuButton: text, model: node, stateEntity: mainMenuState })
+			}
 		}
 	})
 
@@ -183,6 +189,37 @@ export const selectMainMenu = () => {
 				continueGame(mainMenu.windowShader)
 			}
 		}
+	}
+}
+const mainMenuButtonsQuery = ecs.with('model', 'menuButton')
+export const clickOnMenuButton = () => {
+	const click = (x: number, y: number) => {
+		for (const camera of mainMenuCameraQuery) {
+			const ray = new Raycaster()
+			ray.setFromCamera(new Vector2(x, y), camera.camera)
+			for (const { model, menuButton } of mainMenuButtonsQuery) {
+				if (ray.intersectObject(model)) {
+					if (menuButton === 'Continue') {
+						for (const mainMenu of menuTextureQuery) {
+							ecs.removeComponent(mainMenu, 'menuSelected')
+							continueGame(mainMenu.windowShader)
+						}
+					}
+				}
+			}
+		}
+	}
+	const touchListener = (e: TouchEvent) => {
+		for (const touch of e.changedTouches) {
+			click(touch.clientX, touch.clientY)
+		}
+	}
+	const clickListener = (e: MouseEvent) => click(e.clientX, e.clientY)
+	window.addEventListener('touchstart', touchListener)
+	window.addEventListener('click', clickListener)
+	return () => {
+		window.removeEventListener('touchstart', touchListener)
+		window.removeEventListener('click', clickListener)
 	}
 }
 export const spawnPlayerContinueGame = async () => {

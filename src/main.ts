@@ -34,7 +34,7 @@ import { spawnCrossRoad, spawnDungeon, spawnFarm, spawnLevelData, updateTimeUnif
 import { debugPlayer, losingBattle, spawnCharacter, spawnPlayerClearing, spawnPlayerDungeon } from './states/game/spawnPlayer'
 import { touchItem } from './states/game/touchItem'
 import { addOrRemoveWeaponModel } from './states/game/weapon'
-import { intiMainMenuRendering, renderMainMenu, selectMainMenu, setMainCameraPosition, spawnPlayerContinueGame } from './states/mainMenu/mainMenuRendering'
+import { clickOnMenuButton, intiMainMenuRendering, renderMainMenu, selectMainMenu, setMainCameraPosition, spawnPlayerContinueGame } from './states/mainMenu/mainMenuRendering'
 import { playCloseSound, playOpenSound } from './states/pause/pause'
 import { disablePortrait, enableFullscreen, resize, setupGame } from './states/setup/setupGame'
 import { UI } from './ui/UI'
@@ -66,6 +66,7 @@ gameState
 mainMenuState
 	.onEnter(intiMainMenuRendering, setMainCameraPosition)
 	.onUpdate(renderMainMenu, selectMainMenu)
+	.addSubscriber(clickOnMenuButton)
 	.onExit(removeStateEntity(mainMenuState), spawnPlayerContinueGame)
 campState
 	.addSubscriber(...interactablePlantableSpot)

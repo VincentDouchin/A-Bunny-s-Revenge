@@ -76,10 +76,12 @@ const groundExtension = new MaterialExtension({
 			vec4 yaxis = texture2D( ground, vWorldPosition.xz / 64.);
 			vec4 zaxis = texture2D( ground, vWorldPosition.xy / 64.);
 			vec4 tex = xaxis * blending.x + zaxis * blending.z;
-			float dotNormal = smoothstep(0.7,1.,0.3+dot(worldNormal, vec3(0.,1,0.)));
+			float dotNormal = 1. - smoothstep(0.7,1.,0.3+dot(worldNormal, vec3(0.,1,0.)));
+			float world_noise = cnoise(vWorldPosition*300.);
+			float normal_noised = step(dotNormal ,dotNormal * world_noise);
 			float noise_3 = step(0.5,cnoise(vec3(dotNormal)));
 			vec3 grass_and_path = mix(grass,path,smoothstep(0.7,0.8,texture2D(level,vUv ).r ) );
-			color.rgb =	dotNormal< 0.3?tex.rgb:dotNormal < 1.?grass_and_path * 0.7:grass_and_path;
+			color.rgb = mix(tex.rgb,grass_and_path,normal_noised);
 			// color.rgb = smoothstep(0.,1.,cnoise(vec3(vUv.xy,dotNormal)))- 1.>0.5?grass: tex.rgb;
 	`),
 	)
