@@ -17,6 +17,8 @@ import { useLocalStorage } from '@/utils/useLocalStorage'
 import { RenderGroup } from '@/global/entity'
 
 const rendererQuery = ecs.with('renderer', 'scene', 'renderGroup').where(e => e.renderGroup === RenderGroup.Game)
+const [{ skipMainMenu }, setSkipMainMenu] = useLocalStorage('skipMainMenu', { skipMainMenu: false })
+params.skipMainMenu = skipMainMenu
 export const getGameRenderGroup = () => {
 	const gameRenderGroup = rendererQuery.first
 	if (gameRenderGroup) {
@@ -154,6 +156,10 @@ export const DebugUi = () => {
 			}
 		}
 	}
+	const skip = (skipMainMenu: boolean) => {
+		params.skipMainMenu = skipMainMenu
+		setSkipMainMenu({ skipMainMenu })
+	}
 	return (
 		<div style={{ position: 'absolute', color: 'white' }}>
 			<Show when={showUi()}>
@@ -221,6 +227,8 @@ export const DebugUi = () => {
 					</input>
 					Pixelation
 					<input type="checkbox" checked={params.pixelation} onChange={e => changePixelation(e.target.checked)}></input>
+					Skip main menu
+					<input type="checkbox" checked={params.skipMainMenu} onChange={e => skip(e.target.checked)}></input>
 				</div>
 				<div style={{ display: 'flex', gap: '1rem', margin: '1rem', width: '20rem' }}>
 					<button onClick={growCrops}>Grow crops</button>

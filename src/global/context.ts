@@ -12,7 +12,7 @@ interface Params {
 	speedUp: number
 	dialogSpeed: number
 	pixelation: boolean
-
+	skipMainMenu: boolean
 }
 
 export const params: Params = {
@@ -25,5 +25,5 @@ export const params: Params = {
 	fov: 50,
 	speedUp: 1,
 	dialogSpeed: 1,
-
+	skipMainMenu: false,
 }

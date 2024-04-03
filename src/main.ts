@@ -67,7 +67,6 @@ mainMenuState
 	.onEnter(intiMainMenuRendering, setMainCameraPosition)
 	.onUpdate(renderMainMenu, selectMainMenu)
 	.onExit(removeStateEntity(mainMenuState), spawnPlayerContinueGame)
-	.enable()
 campState
 	.addSubscriber(...interactablePlantableSpot)
 	.onEnter(spawnFarm, spawnLevelData, updateCropsSave, initPlantableSpotsInteractions, enableBasketUi)

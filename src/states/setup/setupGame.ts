@@ -1,10 +1,13 @@
 import { OrthographicCamera } from 'three'
 import { params } from '@/global/context'
 import { cameraQuery } from '@/global/rendering'
-import { app, campState } from '@/global/states'
 import { save } from '@/global/save'
+import { app, campState, mainMenuState } from '@/global/states'
 
 export const setupGame = async () => {
+	if (!params.skipMainMenu) {
+		mainMenuState.enable()
+	}
 	campState.enable({})
 }
 
