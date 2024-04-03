@@ -1,12 +1,19 @@
-import { OrthographicCamera } from 'three'
+import { OrthographicCamera, Vector2 } from 'three'
+import { updateCameraZoom } from '@/global/camera'
 import { params } from '@/global/context'
-import { cameraQuery } from '@/global/rendering'
+import { cameraQuery, updateRenderSize } from '@/global/rendering'
 import { save } from '@/global/save'
 import { app, campState, mainMenuState } from '@/global/states'
 
 export const setupGame = async () => {
 	if (!params.skipMainMenu) {
 		mainMenuState.enable()
+	} else {
+		updateCameraZoom(6)
+		const ratio = window.innerWidth / window.innerHeight
+		const finalResolution = new Vector2(params.renderWidth, params.renderWidth / ratio)
+		updateRenderSize(finalResolution)
+		updateCameraZoom(6)
 	}
 	campState.enable({})
 }
