@@ -15,10 +15,17 @@ export const blankTexture = (w: number, h: number, color = 'red') => {
 	buffer.fillRect(0, 0, w, h)
 	return new CanvasTexture(buffer.canvas)
 }
-export const scaleCanvas = (canvas: HTMLCanvasElement, scale: number) => {
-	const newWidth = Math.floor(canvas.width * scale)
-	const newHeight = Math.floor(canvas.height * scale)
+export const scaleCanvas = (canvas: HTMLCanvasElement, scale: number | { x: number, y: number }) => {
+	const scaleX = typeof scale === 'number' ? scale : scale.x
+	const scaleY = typeof scale === 'number' ? scale : scale.y
+	const newWidth = Math.floor(canvas.width * scaleX)
+	const newHeight = Math.floor(canvas.height * scaleY)
 	const newBuffer = getScreenBuffer(newWidth, newHeight)
 	newBuffer.drawImage(canvas, 0, 0, newWidth, newHeight)
 	return newBuffer.canvas
+}
+export const imgToCanvas = (img: HTMLImageElement) => {
+	const buffer = getScreenBuffer(img.width, img.height)
+	buffer.drawImage(img, 0, 0)
+	return buffer
 }

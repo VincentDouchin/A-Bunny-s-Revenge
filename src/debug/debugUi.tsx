@@ -7,20 +7,43 @@ import { SaveEditor } from './saveEditor'
 import { ToonEditor } from './toonEditor'
 import { params } from '@/global/context'
 import { ecs, ui } from '@/global/init'
-import { cameraQuery, depthQuad, height, renderer, width } from '@/global/rendering'
+import { cameraQuery, depthQuad, height, width } from '@/global/rendering'
 import { resetSave, updateSave } from '@/global/save'
 import { campState } from '@/global/states'
 import { ModStage, ModType, createModifier } from '@/lib/stats'
 import { weaponBundle } from '@/states/game/weapon'
 import { entries } from '@/utils/mapFunctions'
 import { useLocalStorage } from '@/utils/useLocalStorage'
+import { RenderGroup } from '@/global/entity'
+
+const rendererQuery = ecs.with('renderer', 'scene', 'renderGroup').where(e => e.renderGroup === RenderGroup.Game)
+export const getGameRenderGroup = () => {
+	const gameRenderGroup = rendererQuery.first
+	if (gameRenderGroup) {
+		return gameRenderGroup
+	} else {
+		throw new Error('can\'t find game renderGroup')
+	}
+}
 
 const groundQuery = ecs.with('ground', 'model')
 export const updatePixelation = (e: Event) => {
 	const target = e.target as HTMLInputElement
 	const val = target.valueAsNumber
 	const ratio = window.innerHeight / window.innerWidth
+	const { renderer } = getGameRenderGroup()
 	renderer.setSize(val, val * ratio)
+}
+const changePixelation = (pixelation: boolean) => {
+	params.pixelation = pixelation
+	const { renderer } = getGameRenderGroup()
+	if (pixelation) {
+		const val = params.renderWidth
+		const ratio = window.innerHeight / window.innerWidth
+		renderer.setSize(val, val * ratio)
+	} else {
+		renderer.setSize(window.innerWidth, window.innerHeight)
+	}
 }
 export const DebugUi = () => {
 	const [showUi, setShowUi] = createSignal(false)
@@ -64,16 +87,7 @@ export const DebugUi = () => {
 	onCleanup(() => {
 		document.removeEventListener('keydown', showUiListener)
 	})
-	const changePixelation = (pixelation: boolean) => {
-		params.pixelation = pixelation
-		if (pixelation) {
-			const val = params.renderWidth
-			const ratio = window.innerHeight / window.innerWidth
-			renderer.setSize(val, val * ratio)
-		} else {
-			renderer.setSize(window.innerWidth, window.innerHeight)
-		}
-	}
+
 	const removeCamera = () => {
 		const camera = cameraQuery.first
 		if (!camera) return

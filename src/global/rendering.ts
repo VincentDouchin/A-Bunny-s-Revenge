@@ -1,19 +1,24 @@
+import type { Vector2 } from 'three'
 import { BasicShadowMap, DepthTexture, LinearSRGBColorSpace, NearestFilter, RGBAFormat, Scene, ShaderMaterial, WebGLRenderTarget, WebGLRenderer } from 'three'
 import { FullScreenQuad } from 'three/examples/jsm/postprocessing/Pass'
 import { CSS2DRenderer } from 'three/examples/jsm/renderers/CSS2DRenderer'
-import { params } from './context'
+import { RenderGroup } from './entity'
 import { ecs } from './init'
+import { mainMenuState } from './states'
 import { getDepthShader, getSobelShader } from '@/shaders/EdgePass'
 
-export const scene = new Scene()
+const scene = new Scene()
 export const renderer = new WebGLRenderer({ alpha: false })
 renderer.setPixelRatio(1)
-export const cssRenderer = new CSS2DRenderer()
-const ratio = window.innerHeight / window.innerWidth
-export const width = params.renderWidth
-export const height = Math.round(width * ratio)
+const cssRenderer = new CSS2DRenderer()
+// const ratio = window.innerHeight / window.innerWidth
+// export const width = params.renderWidth
+// export const height = Math.round(width * ratio)
+export const width = window.innerWidth
+export const height = window.innerHeight
 export const target = new WebGLRenderTarget(width, height)
-const depthTarget = new WebGLRenderTarget(width, height)
+export const depthTarget = new WebGLRenderTarget(width, height)
+export const finalTarget = new WebGLRenderTarget(width, height)
 depthTarget.texture.format = RGBAFormat
 depthTarget.texture.magFilter = NearestFilter
 depthTarget.texture.minFilter = NearestFilter
@@ -24,9 +29,16 @@ target.texture.magFilter = NearestFilter
 target.texture.generateMipmaps = false
 target.stencilBuffer = false
 target.depthBuffer = true
-target.depthTexture = new DepthTexture(width, height)
-export const depthQuad = new FullScreenQuad(new ShaderMaterial(getDepthShader(target)))
-const sobelQuad = new FullScreenQuad(new ShaderMaterial(getSobelShader(width, height, target, depthTarget)))
+const depthTexture = new DepthTexture(width, height)
+target.depthTexture = depthTexture
+const depthMat = new ShaderMaterial(getDepthShader(target))
+export const depthQuad = new FullScreenQuad(depthMat)
+export const sobelMat = new ShaderMaterial(getSobelShader(width, height, target, depthTarget))
+const sobelQuad = new FullScreenQuad(sobelMat)
+export const updateRenderSize = (newSize: Vector2) => {
+	renderer.setSize(newSize.x, newSize.y)
+	sobelMat.uniforms.resolution.value = newSize.multiplyScalar(2)
+}
 export const initThree = () => {
 	renderer.clear()
 	renderer.shadowMap.enabled = true
@@ -36,42 +48,28 @@ export const initThree = () => {
 	renderer.outputColorSpace = LinearSRGBColorSpace
 	renderer.setSize(width, height)
 	cssRenderer.setSize(window.innerWidth, window.innerHeight)
-	cssRenderer.domElement.style.position = 'fixed'
-	cssRenderer.domElement.style.left = '0'
-	cssRenderer.domElement.style.top = '0'
-	cssRenderer.domElement.style.imageRendering = 'pixelated'
-	cssRenderer.domElement.style.pointerEvents = 'none'
-	cssRenderer.domElement.classList.add('main')
-	cssRenderer.domElement.classList.add('no-events')
+	cssRenderer.domElement.classList.add('main', 'no-events', 'css-renderer')
 	document.body.appendChild(cssRenderer.domElement)
 	const overlay = document.createElement('div')
-	overlay.classList.add('overlay')
 	document.body.appendChild(overlay)
-	ecs.add({ scene })
+	ecs.add({ scene, renderer, renderGroup: RenderGroup.Game })
 }
-export const rendererQuery = ecs.with('renderer')
-export const sceneQuery = ecs.with('scene')
-export const cameraQuery = ecs.with('camera')
+export const gameRenderGroupQuery = ecs.with('renderer', 'renderGroup', 'scene').where(e => e.renderGroup === RenderGroup.Game)
+export const cameraQuery = ecs.with('camera', 'renderGroup').where(e => e.renderGroup === RenderGroup.Game)
 
-export const render = () => {
+export const renderGame = () => {
 	const camera = cameraQuery.first?.camera
 	if (!camera) return
+	renderer.setRenderTarget(target)
 	renderer.render(scene, camera)
-	if (params.pixelation) {
-		renderer.setRenderTarget(depthTarget)
-		depthQuad.render(renderer)
-		renderer.setRenderTarget(null)
-		sobelQuad.render(renderer)
-		renderer.setRenderTarget(target)
+	renderer.setRenderTarget(depthTarget)
+	depthQuad.render(renderer)
+	if (mainMenuState.enabled) {
+		renderer.setRenderTarget(finalTarget)
 	} else {
 		renderer.setRenderTarget(null)
 	}
-	cssRenderer.render(scene, camera)
-}
+	sobelQuad.render(renderer)
 
-const controlsQuery = ecs.with('controls')
-export const updateControls = () => {
-	for (const { controls } of controlsQuery) {
-		controls.update()
-	}
+	cssRenderer.render(scene, camera)
 }

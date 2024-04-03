@@ -1,13 +1,16 @@
 import { BatchedRenderer } from 'three.quarks'
 import { type State, runIf } from './state'
 import { ecs, time } from '@/global/init'
-import { scene } from '@/global/rendering'
 import { pausedState } from '@/global/states'
+import { gameRenderGroupQuery } from '@/global/rendering'
 
 const initBatchRender = () => {
 	const batchRenderer = new BatchedRenderer()
-	scene.add(batchRenderer)
-	ecs.add({ batchRenderer })
+	const gameRenderGroup = gameRenderGroupQuery.first
+	if (gameRenderGroup) {
+		gameRenderGroup.scene.add(batchRenderer)
+		ecs.add({ batchRenderer })
+	}
 }
 const batchRendererQuery = ecs.with('batchRenderer')
 const updateParticles = () => batchRendererQuery.first && batchRendererQuery.first.batchRenderer.update(time.delta * 1000)

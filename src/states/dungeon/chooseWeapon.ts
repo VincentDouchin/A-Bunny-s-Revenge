@@ -7,6 +7,7 @@ import { weaponsData } from '@/constants/weapons'
 import type { Entity } from '@/global/entity'
 import { Interactable } from '@/global/entity'
 import { inMap } from '@/lib/hierarchy'
+import { genDungeonState } from '@/global/states'
 
 const weaponNames = ['Hoe', 'Ladle', 'ScissorWeapon', 'SwordWeapon'] as const satisfies readonly weapons[]
 const displayWeapon = (weaponName: weapons, parent: Entity) => {
@@ -22,7 +23,7 @@ const displayWeapon = (weaponName: weapons, parent: Entity) => {
 	})
 	coroutines.add(function* () {
 		let rotation = 0
-		while (true) {
+		while (genDungeonState.enabled) {
 			yield
 			rotation += 0.02
 			weapon.rotation.setFromAxisAngle(new Vector3(0, 1, 0), rotation)

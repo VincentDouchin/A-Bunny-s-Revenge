@@ -12,12 +12,13 @@ import { addTag } from '@/lib/hierarchy'
 import type { Item } from '@/constants/items'
 import { addItem, removeItem, save, updateSave } from '@/global/save'
 import { playSound } from '@/global/sounds'
+import { basketFollowPlayer } from '@/states/game/spawnBasket'
 
 const playerQuery = ecs.with('player', 'position', 'collider')
 const movingPlayerQuery = playerQuery.with('movementForce')
-const houseQuery = ecs.with('npcName', 'position', 'collider', 'rotation', 'houseAnimator').where(({ npcName }) => npcName === 'Grandma')
-const doorQuery = ecs.with('npcName', 'collider').where(({ npcName }) => npcName === 'door')
-const setSensor = <T extends With<Entity, 'collider'>>(query: Query<T>, sensor: boolean) => {
+export const houseQuery = ecs.with('npcName', 'position', 'collider', 'rotation', 'houseAnimator').where(({ npcName }) => npcName === 'Grandma')
+export const doorQuery = ecs.with('npcName', 'collider').where(({ npcName }) => npcName === 'door')
+export const setSensor = <T extends With<Entity, 'collider'>>(query: Query<T>, sensor: boolean) => {
 	for (const { collider } of query) {
 		collider.setSensor(sensor)
 	}
@@ -38,6 +39,8 @@ export const movePlayerTo = (dest: Vector3) => {
 			player.movementForce = dest.clone().sub(player.position).normalize()
 			coroutines.add(function* () {
 				while (player.position.distanceTo(dest) > 2) {
+					player.movementForce = dest.clone().sub(player.position).normalize()
+					basketFollowPlayer()
 					yield
 				}
 				player.movementForce.setScalar(0)
@@ -82,13 +85,12 @@ export const leaveHouse = async () => {
 	if (house && door) {
 		playSound(['glitchedtones_Door+Bedroom+Open+01', 'glitchedtones_Door+Bedroom+Open+02'], { volume: -12 })
 		await house.houseAnimator.playClamped('DoorOpen')
-		movePlayerTo(new Vector3(0, 0, 30).applyQuaternion(house.rotation).add(house.position)).then(() => {
-			cutSceneState.disable()
-			setSensor(houseQuery, false)
-			setSensor(doorQuery, false)
-		})
+		await movePlayerTo(new Vector3(0, 0, 50).applyQuaternion(house.rotation).add(house.position))
+		cutSceneState.disable()
 		await sleep(500)
 		await house.houseAnimator.playClamped('DoorClose')
+		setSensor(houseQuery, false)
+		setSensor(doorQuery, false)
 		playSound(['zapsplat_household_door_backdoor_close_002_56921', 'zapsplat_household_door_backdoor_close_004_56923'])
 	}
 }

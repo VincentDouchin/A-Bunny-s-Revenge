@@ -17,8 +17,8 @@ export const spawnBasket = () => {
 	bundle.bodyDesc.setLinearDamping(20)
 	const player = playerQuery.first
 	if (player) {
-		const position = player.position.clone().add(new Vector3(0, 0, -10).applyQuaternion(player.rotation))
-		ecs.add({
+		const position = player.position.clone().add(new Vector3(0, 5, -10).applyQuaternion(player.rotation))
+		return ecs.add({
 			position,
 			...inMap(),
 			basketAnimator: new Animator(bundle.model, assets.characters.Basket.animations),
@@ -51,7 +51,7 @@ export const enableBasketUi = () => {
 
 const followQuery = ecs.with('followTarget', 'following', 'position', 'movementForce')
 const itemsQuery = ecs.with('item', 'position')
-export const basketFollowPlayer = () => {
+export const basketFollowPlayer = (min = 20, max = 40) => () => {
 	for (const basket of followQuery) {
 		const player = basket.followTarget
 		if (player) {
@@ -71,10 +71,10 @@ export const basketFollowPlayer = () => {
 					basket.movementForce.add(closestItem.position.clone().sub(basket.position).normalize())
 				}
 			}
-			if (basket.following && dist < 20) {
+			if (basket.following && dist < min) {
 				basket.following = false
 			}
-			if (!basket.following && dist > 40) {
+			if (!basket.following && dist > max) {
 				basket.following = true
 			}
 			if (basket.following) {

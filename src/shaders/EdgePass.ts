@@ -1,5 +1,7 @@
 import type { Texture, WebGLRenderTarget } from 'three'
 import { Color, Uniform, Vector2 } from 'three'
+import kuwahara from '@/shaders/glsl/lib/kuwahara.glsl?raw'
+import sobel from '@/shaders/glsl/lib/sobel.glsl?raw'
 
 export const getDepthShader = (target: WebGLRenderTarget) => ({
 	uniforms: {
@@ -54,14 +56,14 @@ export const getSobelShader = (x: number, y: number, diffuseTarget: WebGLRenderT
 
 		tDiffuse: new Uniform<Texture>(diffuseTarget.texture),
 		tDepth: new Uniform<Texture>(depthTarget.texture),
-		resolution: { value: new Vector2(x, y).multiplyScalar(2) },
+		resolution: new Uniform(new Vector2(x, y).multiplyScalar(2)),
 		edgeColor: new Uniform(new Color(0x4D3533)),
+		pixelSize: new Uniform(1),
 	},
 
 	vertexShader: /* glsl */`
 
 		varying vec2 vUv;
-
 		void main() {
 			vUv = uv;
 			gl_Position = projectionMatrix * modelViewMatrix * vec4( position, 1.0 );
@@ -71,65 +73,25 @@ export const getSobelShader = (x: number, y: number, diffuseTarget: WebGLRenderT
 		precision highp sampler2D;
 		uniform sampler2D tDepth;
 		uniform sampler2D tDiffuse;
-		uniform float cameraNear;
 		uniform vec3 edgeColor;
-		uniform float cameraFar;
 		uniform vec2 resolution;
 		varying vec2 vUv;
-
+		uniform float pixelSize;
+		${kuwahara}
+		${sobel}
 		#include <packing>
 		void main() {
+			vec2 d = pixelSize / resolution;
+			// vec2 uv = d * (floor(vUv * 1./ d ) + 0.5);
+			vec2 uv = vUv;
+			float G = sobel(tDepth,uv,resolution);	
+			float Gfactor = clamp(step(G * 5.0,0.1)+0.8,0.0,1.0);
+			vec3 color = texture2D(tDiffuse,uv).rgb;
+			// vec4 k =  kuwahara(tDiffuse, resolution, uv, 3);
+			float dark = step(0.4,(color.r+color.g+color.b) /3.);
+			// gl_FragColor = k; 
+			gl_FragColor = vec4(mix(edgeColor,color,Gfactor),1.); 
 
-			vec2 texel = vec2( 1.0 / resolution.x, 1.0 / resolution.y );
-
-		// kernel definition (in glsl matrices are filled in column-major order)
-
-			const mat3 Gx = mat3(
-			-1, -2, -1,
-			0, 0, 0,
-			1, 2, 1 ); // x direction kernel
-			const mat3 Gy = mat3(
-			-1, 0, 1,
-			-2, 0, 2,
-			-1, 0, 1 ); // y direction kernel
-
-		// fetch the 3x3 neighbourhood of a fragment
-
-		// first column
-
-			float tx0y0 = texture2D( tDepth, vUv + texel * vec2( -1, -1 ) ).r;
-			float tx0y1 = texture2D( tDepth, vUv + texel * vec2( -1,  0 ) ).r;
-			float tx0y2 = texture2D( tDepth, vUv + texel * vec2( -1,  1 ) ).r;
-
-		// second column
-
-			float tx1y0 = texture2D( tDepth, vUv + texel * vec2(  0, -1 ) ).r;
-			float tx1y1 = texture2D( tDepth, vUv + texel * vec2(  0,  0 ) ).r;
-			float tx1y2 = texture2D( tDepth, vUv + texel * vec2(  0,  1 ) ).r;
-
-		// third column
-
-			float tx2y0 = texture2D( tDepth, vUv + texel * vec2(  1, -1 ) ).r;
-			float tx2y1 = texture2D( tDepth, vUv + texel * vec2(  1,  0 ) ).r;
-			float tx2y2 = texture2D( tDepth, vUv + texel * vec2(  1,  1 ) ).r;
-
-		// gradient value in x direction
-
-			float valueGx = Gx[0][0] * tx0y0 + Gx[1][0] * tx1y0 + Gx[2][0] * tx2y0 +
-				Gx[0][1] * tx0y1 + Gx[1][1] * tx1y1 + Gx[2][1] * tx2y1 +
-				Gx[0][2] * tx0y2 + Gx[1][2] * tx1y2 + Gx[2][2] * tx2y2;
-
-		// gradient value in y direction
-
-			float valueGy = Gy[0][0] * tx0y0 + Gy[1][0] * tx1y0 + Gy[2][0] * tx2y0 +
-				Gy[0][1] * tx0y1 + Gy[1][1] * tx1y1 + Gy[2][1] * tx2y1 +
-				Gy[0][2] * tx0y2 + Gy[1][2] * tx1y2 + Gy[2][2] * tx2y2;
-		// magnitute of the total gradient
-
-			float G = sqrt(( valueGx * valueGx ) + ( valueGy * valueGy )) ;
-			float Gfactor = clamp(step(G * 5.0,0.1)+0.8,0.0,1.0) ;
-			vec3 color = texture2D(tDiffuse,vUv).rgb;
-			gl_FragColor =  vec4(mix(edgeColor,color,Gfactor),1.) ;
 
 		}`,
 

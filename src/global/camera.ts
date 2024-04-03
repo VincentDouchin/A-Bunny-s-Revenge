@@ -1,8 +1,9 @@
 import { Tween } from '@tweenjs/tween.js'
-import { OrthographicCamera, Vector3 } from 'three'
+import { OrthographicCamera, Vector2, Vector3 } from 'three'
 import { params } from './context'
+import { RenderGroup } from './entity'
 import { ecs, time } from './init'
-import { height, width } from './rendering'
+import { height, renderer, width } from './rendering'
 import { debugState } from '@/debug/debugState'
 
 export const initCamera = () => {
@@ -14,10 +15,9 @@ export const initCamera = () => {
 		0.1,
 		1000,
 	)
-	// const camera = new PerspectiveCamera(params.fov, window.innerWidth / window.innerHeight, 0.1, 1000)
-	// camera.zoom = window.innerWidth / window.innerHeight / params.zoom
 	camera.updateProjectionMatrix()
 	ecs.add({
+		renderGroup: RenderGroup.Game,
 		camera,
 		lockX: true,
 		position: new Vector3(),
@@ -26,9 +26,23 @@ export const initCamera = () => {
 		cameraShake: new Vector3(),
 	})
 }
+
 const cameraQuery = ecs.with('camera', 'position', 'mainCamera', 'cameraLookat', 'cameraShake', 'lockX')
 const cameraTargetQuery = ecs.with('cameratarget', 'worldPosition')
 const doorsQuery = ecs.with('door', 'position')
+export const updateCameraZoom = (zoom: number) => {
+	for (const { camera } of cameraQuery) {
+		const size = new Vector2()
+		renderer.getSize(size)
+		if (camera instanceof OrthographicCamera) {
+			camera.left = -size.x / 2 / zoom * window.innerWidth / window.innerHeight
+			camera.right = size.x / 2 / zoom * window.innerWidth / window.innerHeight
+			camera.top = size.y / 2 / zoom * window.innerWidth / window.innerHeight
+			camera.bottom = -size.y / 2 / zoom * window.innerWidth / window.innerHeight
+			camera.updateProjectionMatrix()
+		}
+	}
+}
 
 export const addCameraShake = () => {
 	const camera = cameraQuery.first
@@ -45,13 +59,13 @@ export const addCameraShake = () => {
 	}
 }
 const OFFSET = -50
-export const moveCamera = () => {
+export const moveCamera = (init = false) => () => {
 	for (const { position, camera, cameraLookat, cameraOffset, cameraShake, lockX } of cameraQuery) {
 		const target = new Vector3()
 		for (const { worldPosition } of cameraTargetQuery) {
-			target.z = worldPosition.z
 			target.x = worldPosition.x
-			target.y += worldPosition.y
+			target.y = worldPosition.y
+			target.z = worldPosition.z
 			for (const door of doorsQuery) {
 				if (door.door === 'north') {
 					target.z = Math.min(worldPosition.z, door.position.z - OFFSET)
@@ -69,11 +83,22 @@ export const moveCamera = () => {
 		}
 		if (!debugState.enabled) {
 			const lerpSpeed = time.delta / 1000 * 5
-			cameraLookat.lerp(target, lerpSpeed)
+			if (cameraTargetQuery.size > 0) {
+				if (init) {
+					cameraLookat.copy(target)
+				} else {
+					cameraLookat.lerp(target, lerpSpeed)
+				}
+			}
+
 			cameraLookat.add({ x: cameraShake.x, y: 0, z: cameraShake.y })
 			camera.lookAt(cameraLookat)
 			const newPosition = cameraLookat.clone().add(cameraOffset ?? new Vector3(params.cameraOffsetX, params.cameraOffsetY, params.cameraOffsetZ))
-			position.lerp(newPosition, lerpSpeed)
+			if (init) {
+				position.copy(newPosition)
+			} else {
+				position.lerp(newPosition, lerpSpeed)
+			}
 			if (lockX) {
 				position.setX(newPosition.x)
 			}
@@ -83,7 +108,7 @@ export const moveCamera = () => {
 
 export const initializeCameraPosition = () => ecs.with('initialCameratarget', 'position').onEntityAdded.subscribe((e) => {
 	for (const camera of cameraQuery) {
-		camera.cameraLookat.set(...e.position.toArray())
+		camera.cameraLookat.copy(e.position)
 		ecs.removeComponent(e, 'initialCameratarget')
 	}
 })

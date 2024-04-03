@@ -4,22 +4,20 @@ import { delMany, get, set } from 'idb-keyval'
 import type { With } from 'miniplex'
 import { For, Show, createEffect, createMemo, createSignal, onCleanup, onMount } from 'solid-js'
 import { Mesh, MeshBasicMaterial, MeshStandardMaterial, PlaneGeometry, Quaternion, Raycaster, Vector2, Vector3 } from 'three'
-
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls'
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader'
 import { generateUUID } from 'three/src/math/MathUtils'
 import { EntityEditor } from './EntityEditor'
 import type { PlacableProp, customModel } from './props'
 import { getModel, props } from './props'
-
 import { MapEditor } from './MapEditor'
 import { debugState } from './debugState'
+import { getGameRenderGroup } from './debugUi'
 import { getFileName } from '@/global/assetLoaders'
 import { params } from '@/global/context'
 import type { Entity } from '@/global/entity'
 import { assets, ecs, levelsData, ui } from '@/global/init'
 import { loadLevelData } from '@/global/levelData'
-import { renderer, scene } from '@/global/rendering'
 import { campState, dungeonState } from '@/global/states'
 import { throttle } from '@/lib/state'
 import { ToonMaterial } from '@/shaders/materials'
@@ -101,6 +99,7 @@ export const LevelEditor = () => {
 		<div>
 			<Show when={open() && map()}>
 				{(map) => {
+					const { scene, renderer } = getGameRenderGroup()
 					const [selectedTab, setSelectedTab] = createSignal<'place props' | 'draw map'>('place props')
 					const [random, setRandom] = createSignal(false)
 					const [selectedProp, setSelectedProp] = createSignal<PlacableProp<any> | null>(null)
@@ -240,6 +239,7 @@ export const LevelEditor = () => {
 						createEffect(() => {
 							controls.enabled = !draw()
 						})
+
 						controls.update()
 						setFakeGround(activeLevel())
 						ui.updateSync(() => controls.update())

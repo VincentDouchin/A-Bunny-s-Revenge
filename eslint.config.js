@@ -13,8 +13,8 @@ export default antfu({
 		'no-lone-blocks': 'off',
 	},
 	formatters: {
-		css: 'prettier',
-		html: 'prettier',
+		css: true,
+		html: true,
 	},
 }, {
 	ignores: ['dev-dist', 'assets', 'node-modules', 'dist'],

@@ -245,6 +245,7 @@ export const props: PlacableProp<propNames>[] = [
 								interactable: Interactable.Enter,
 								bodyDesc: RigidBodyDesc.fixed().lockRotations(),
 								colliderDesc: ColliderDesc.cuboid(5, 7, 1).setSensor(true).setActiveCollisionTypes(ActiveCollisionTypes.ALL),
+
 							})
 						} else if (node instanceof Mesh) {
 							ecs.add({ parent, emissiveMat: node.material })
@@ -255,6 +256,9 @@ export const props: PlacableProp<propNames>[] = [
 				npcName: 'Grandma',
 				houseAnimator: new Animator(entity.model, assets.models.House.animations),
 				dialog: dialogs.GrandmasHouse(),
+				// cameratarget: true,
+				// initialCameratarget: true,
+
 			}
 		},
 	},

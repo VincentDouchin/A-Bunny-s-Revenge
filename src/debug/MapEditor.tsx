@@ -3,9 +3,10 @@ import { For, Show, createEffect, createMemo, createSignal, onCleanup, onMount }
 import type { MeshPhongMaterial, PlaneGeometry, Vector3 } from 'three'
 import { CanvasTexture, CircleGeometry, DoubleSide, Mesh, MeshBasicMaterial, Raycaster, Vector2 } from 'three'
 import type { Level, LevelImage } from './LevelEditor'
+import { getGameRenderGroup } from './debugUi'
 import { loadImage } from '@/global/assetLoaders'
 import { ecs } from '@/global/init'
-import { cameraQuery, renderer, scene } from '@/global/rendering'
+import { cameraQuery } from '@/global/rendering'
 import { throttle } from '@/lib/state'
 import { getdisplacementMap, setDisplacement, spawnGrass, spawnGroundAndTrees, spawnTrees } from '@/states/game/spawnLevel'
 import { getScreenBuffer } from '@/utils/buffer'
@@ -168,6 +169,7 @@ export const MapEditor = ({
 			selectedColor() === 'water' && displayWater()
 		}
 	}
+	const { scene, renderer } = getGameRenderGroup()
 	onMount(async () => {
 		scene.add(mesh)
 		renderer.domElement.addEventListener('mousemove', longClickListener)

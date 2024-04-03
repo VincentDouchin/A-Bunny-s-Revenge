@@ -1,6 +1,6 @@
 import { OrthographicCamera } from 'three'
 import { params } from '@/global/context'
-import { cameraQuery, cssRenderer, renderer, target } from '@/global/rendering'
+import { cameraQuery } from '@/global/rendering'
 import { app, campState } from '@/global/states'
 import { save } from '@/global/save'
 
@@ -54,9 +54,9 @@ export const resize = () => {
 		const width = params.renderWidth
 		const height = Math.round(width * ratio)
 
-		renderer.setSize(width, height)
-		cssRenderer.setSize(window.innerWidth, window.innerHeight)
-		target.setSize(width, height)
+		// renderer.setSize(width, height)
+		// cssRenderer.setSize(window.innerWidth, window.innerHeight)
+		// target.setSize(width, height)
 		const camera = cameraQuery.first?.camera
 		if (camera instanceof OrthographicCamera) {
 			camera.left = -width / 2 / params.zoom * window.innerWidth / window.innerHeight

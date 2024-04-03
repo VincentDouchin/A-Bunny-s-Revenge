@@ -13,7 +13,7 @@ const updateTweens = () => {
 const startTweens = () => tweenQuery.onEntityAdded.subscribe((entity) => {
 	entity.tween.start(time.elapsed)
 	if (entity.autoDestroy) {
-		entity.tween.onComplete(() => ecs.remove(entity))
+		entity.tween.onStop(() => ecs.remove(entity))
 	}
 })
 const endTweens = () => tweenQuery.onEntityRemoved.subscribe((entity) => {

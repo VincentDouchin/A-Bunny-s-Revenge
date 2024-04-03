@@ -1,8 +1,8 @@
+import type { weapons } from '@assets/assets'
 import { LinearSRGBColorSpace, Mesh, NearestFilter, Quaternion, Vector3 } from 'three'
 import { clone } from 'three/examples/jsm/utils/SkeletonUtils'
-import type { weapons } from '@assets/assets'
-import { healthBundle } from '../dungeon/health'
 import { RoomType } from '../dungeon/generateDungeon'
+import { healthBundle } from '../dungeon/health'
 import { inventoryBundle } from './inventory'
 import { weaponBundle } from './weapon'
 import { Sizes } from '@/constants/sizes'
@@ -11,15 +11,15 @@ import { type Entity, Faction } from '@/global/entity'
 import { assets, ecs } from '@/global/init'
 import { playerInputMap } from '@/global/inputMaps'
 import { save, updateSave } from '@/global/save'
-import { openMenuState } from '@/global/states'
 import type { DungeonRessources, FarmRessources } from '@/global/states'
+import { openMenuState } from '@/global/states'
 
+import { itemsData } from '@/constants/items'
+import { inMap } from '@/lib/hierarchy'
 import { capsuleColliderBundle, characterControllerBundle } from '@/lib/models'
 import type { System } from '@/lib/state'
 import { stateBundle } from '@/lib/stateMachine'
 import { Stat, addModifier } from '@/lib/stats'
-import { itemsData } from '@/constants/items'
-import { inMap } from '@/lib/hierarchy'
 
 export const playerBundle = (health: number, addHealth: boolean, weapon: weapons | null) => {
 	const model = clone(assets.characters.Bunny.scene)
@@ -42,18 +42,18 @@ export const playerBundle = (health: number, addHealth: boolean, weapon: weapons
 		playerAnimator: new Animator(bundle.model, assets.characters.Bunny.animations),
 		...inMap(),
 		cameratarget: true,
-		initialCameratarget: true,
+		// initialCameratarget: true,
 		faction: Faction.Player,
 		sensor: true,
 		player: true,
 		movementForce: new Vector3(),
 		speed: 50,
+		lootQuantity: new Stat(0),
+		lootChance: new Stat(0),
 		strength: new Stat(1),
 		critChance: new Stat(0.05),
 		critDamage: new Stat(0.20),
 		attackSpeed: new Stat(1),
-		lootQuantity: new Stat(0),
-		lootChance: new Stat(0),
 		lastStep: { right: false, left: false },
 		...healthBundle(5, health),
 		...stateBundle<'idle' | 'running' | 'picking' | 'hit' | 'dying' | 'dead' | 'attacking' | 'waitingAttack' | 'cheer'>('idle', {
@@ -84,11 +84,11 @@ export const playerBundle = (health: number, addHealth: boolean, weapon: weapons
 	return player
 }
 
-export const spawnCharacter: System<FarmRessources> = ({ previousState }) => {
-	const [position, rotation] = previousState === 'dungeon'
+export const spawnCharacter: System<FarmRessources> = (ressources) => {
+	const [position, rotation] = ressources?.previousState === 'dungeon'
 		? [new Vector3(), new Quaternion()]
 		: [new Vector3().fromArray(save.playerPosition), new Quaternion().fromArray(save.playerRotation)]
-	if (previousState === 'dungeon') {
+	if (ressources?.previousState === 'dungeon') {
 		updateSave(s => s.modifiers = [])
 	}
 	ecs.add({

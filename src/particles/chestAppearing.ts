@@ -8,7 +8,7 @@ mat.depthWrite = false
 export const chestAppearing = () => {
 	const system = new ParticleSystem({
 		duration: 3,
-		looping: false,
+		looping: true,
 		prewarm: true,
 		instancingGeometry: geo,
 		startLife: new IntervalValue(5, 4),

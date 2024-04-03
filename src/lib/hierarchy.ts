@@ -73,3 +73,11 @@ export const removeEntityRef = <C extends ComponentsOfType<Entity>>(entity: With
 		ecs.remove(ref)
 	}
 }
+export const removeStateEntity = (state: State) => {
+	const stateEntities = ecs.with('stateEntity').where(e => e.stateEntity === state)
+	return () => {
+		for (const stateEntity of stateEntities) {
+			ecs.remove(stateEntity)
+		}
+	}
+}

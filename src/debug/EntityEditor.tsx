@@ -7,15 +7,16 @@ import { set } from 'idb-keyval'
 import { Box3, BoxGeometry, CanvasTexture, Euler, Mesh, MeshBasicMaterial, Object3D, Quaternion, SRGBColorSpace, Vector3 } from 'three'
 import { TransformControls } from 'three/examples/jsm/controls/TransformControls'
 import type { CollidersData, LevelData } from './LevelEditor'
+import { getGameRenderGroup } from './debugUi'
 import type { ExtraData } from './props'
 import { getModel } from './props'
-import type { Entity } from '@/global/entity'
-import { ecs } from '@/global/init'
-import { cameraQuery, renderer, scene } from '@/global/rendering'
-import type { direction } from '@/lib/directions'
-import { getSize } from '@/lib/models'
-import { ToonMaterial } from '@/shaders/materials'
 import { entries } from '@/utils/mapFunctions'
+import { ToonMaterial } from '@/shaders/materials'
+import { getSize } from '@/lib/models'
+import type { direction } from '@/lib/directions'
+import { cameraQuery } from '@/global/rendering'
+import { ecs } from '@/global/init'
+import type { Entity } from '@/global/entity'
 
 export const EntityEditor = ({ entity, levelData, setLevelData, setSelectedEntity, colliderData, setColliderData }: {
 	entity: Accessor<NonNullable<With<Entity, 'entityId' | 'position' | 'rotation' | 'model'>>>
@@ -58,7 +59,9 @@ export const EntityEditor = ({ entity, levelData, setLevelData, setSelectedEntit
 					updateEntity({ scale: scale() })
 				}
 				const camera = cameraQuery.first!.camera
+				const { renderer, scene } = getGameRenderGroup()
 				const transform = new TransformControls(camera, renderer.domElement)
+
 				const dummy = new Object3D()
 				scene.add(dummy)
 				transform.attach(dummy)

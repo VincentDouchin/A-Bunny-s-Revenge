@@ -3,9 +3,8 @@ import type { Collider, ColliderDesc, KinematicCharacterController, RigidBody, R
 import type { Tween } from '@tweenjs/tween.js'
 import type { With } from 'miniplex'
 import type { JSXElement } from 'solid-js'
-import type { Camera, Group, Light, Mesh, MeshPhongMaterial, Object3D, Object3DEventMap, Quaternion, Scene, Vector3, WebGLRenderer } from 'three'
+import type { Camera, Group, Light, Mesh, MeshPhongMaterial, Object3D, Object3DEventMap, Quaternion, Scene, ShaderMaterial, Vector3, WebGLRenderer } from 'three'
 import type { BatchedRenderer, ParticleEmitter } from 'three.quarks'
-import type { OrbitControls } from 'three/examples/jsm/controls/OrbitControls'
 import type { EffectComposer } from 'three/examples/jsm/postprocessing/EffectComposer'
 import type { CSS2DObject } from 'three/examples/jsm/renderers/CSS2DRenderer'
 import type { Animator } from './animator'
@@ -19,6 +18,8 @@ import type { Recipe } from '@/constants/recipes'
 import type { Item } from '@/constants/items'
 import type { Drop, enemy } from '@/constants/enemies'
 import type { NPC } from '@/constants/NPC'
+import type { MenuOptions } from '@/states/mainMenu/mainMenuRendering'
+import type { State } from '@/lib/state'
 
 export type Dialog = Generator<string | string[] | void | false, void, number | void>
 export enum Faction {
@@ -49,11 +50,17 @@ export enum MenuType {
 	SelectSeed,
 	Basket,
 }
+export enum RenderGroup {
+	MainMenu,
+	Game,
+}
 export const cropNames = ['carrot', 'beet', 'tomato', 'lettuce', 'pumpkin', 'wheat'] as const
 export const fruitNames = ['apple'] as const
 export type crops = (typeof cropNames)[number]
 export type fruits = (typeof fruitNames)[number]
 export interface Entity {
+	// ! Rendering
+	renderGroup?: RenderGroup
 	// ! Tween
 	tween?: Tween<any>
 	// ! Models
@@ -78,7 +85,6 @@ export interface Entity {
 	renderer?: WebGLRenderer
 	batchRenderer?: BatchedRenderer
 	camera?: Camera
-	controls?: OrbitControls
 	light?: Light
 	group?: Group
 	model?: Object3D<Object3DEventMap>
@@ -200,8 +206,7 @@ export interface Entity {
 	nightLight?: Light
 	emissiveMat?: MeshPhongMaterial
 	ambientLight?: 'night' | 'day'
-	firefly?: true
-
+	timeOfDay?: number
 	withTimeUniform?: true
 	// ! Basket
 	basket?: With<Entity, 'inventory' | 'inventoryId' | 'inventorySize'>
@@ -211,6 +216,11 @@ export interface Entity {
 	weapon?: With<Entity, 'model' | 'weaponName'>
 	weaponName?: weapons
 	weaponStand?: weapons
+	// ! Main menu
+	menuSelected?: MenuOptions
+	menuTexture?: (direction?: direction) => MenuOptions
+	windowShader?: ShaderMaterial
+	stateEntity?: State
 
 }
 export type states = 'idle' | 'running' | 'picking' | 'dying' | 'hit' | 'hello' | 'dead' | 'waitingAttack' | 'attacking' | 'attackCooldown' | 'doorOpening' | 'doorClosing' | 'cheer'

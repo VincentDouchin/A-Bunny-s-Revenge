@@ -1,10 +1,10 @@
 import type { Object3D } from 'three'
 import { Group } from 'three'
-import type { ComponentsOfType } from '../global/entity'
+import { type ComponentsOfType, RenderGroup } from '../global/entity'
 import { ecs } from '../global/init'
 import type { State } from './state'
-import { sceneQuery } from '@/global/rendering'
 
+const gameSceneQuery = ecs.with('scene', 'renderGroup').where(e => e.renderGroup === RenderGroup.Game)
 export const addToScene = (...components: Array<Exclude<ComponentsOfType<Object3D>, 'group'>>) => (state: State) => {
 	for (const component of components) {
 		const query = ecs.with(component, 'position')
@@ -27,10 +27,10 @@ export const addToScene = (...components: Array<Exclude<ComponentsOfType<Object3
 	}
 	const withGroup = ecs.with('group')
 	state.onEnter(() => withGroup.onEntityAdded.subscribe((entity) => {
-		for (const { scene } of sceneQuery) {
-			if (entity.parent?.group) {
-				entity.parent.group.add(entity.group)
-			} else {
+		if (entity.parent?.group) {
+			entity.parent.group.add(entity.group)
+		} else {
+			for (const { scene } of gameSceneQuery) {
 				scene.add(entity.group)
 			}
 		}
