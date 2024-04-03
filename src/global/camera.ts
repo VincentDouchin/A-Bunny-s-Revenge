@@ -30,7 +30,7 @@ export const initCamera = () => {
 const cameraQuery = ecs.with('camera', 'position', 'mainCamera', 'cameraLookat', 'cameraShake', 'lockX')
 const cameraTargetQuery = ecs.with('cameratarget', 'worldPosition')
 const doorsQuery = ecs.with('door', 'position')
-export const updateCameraZoom = (zoom: number) => {
+export const updateCameraZoom = (zoom: number = 6) => {
 	for (const { camera } of cameraQuery) {
 		const size = new Vector2()
 		renderer.getSize(size)

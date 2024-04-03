@@ -14,6 +14,7 @@ import type { direction } from '@/lib/directions'
 import { drawnHouseShader } from '@/shaders/drawnHouseShader'
 import { imgToCanvas } from '@/utils/buffer'
 import { doorQuery, leaveHouse, setSensor } from '@/utils/dialogHelpers'
+import { windowEvent } from '@/lib/uiManager'
 
 export type MenuOptions = 'Continue' | 'New Game' | 'Settings' | 'Credits'
 
@@ -215,11 +216,11 @@ export const clickOnMenuButton = () => {
 		}
 	}
 	const clickListener = (e: MouseEvent) => click(e.clientX, e.clientY)
-	window.addEventListener('touchstart', touchListener)
-	window.addEventListener('click', clickListener)
+	const clickSub = windowEvent('touchstart', touchListener)
+	const touchSub = windowEvent('click', clickListener)
 	return () => {
-		window.removeEventListener('touchstart', touchListener)
-		window.removeEventListener('click', clickListener)
+		clickSub()
+		touchSub()
 	}
 }
 export const spawnPlayerContinueGame = async () => {

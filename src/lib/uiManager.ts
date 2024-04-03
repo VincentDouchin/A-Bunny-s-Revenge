@@ -43,3 +43,13 @@ export class UIManager {
 }
 
 export const textStroke = (color = 'white', size = 1) => ({ textShadow: `${size}px ${size}px ${color}, -${size}px ${size}px ${color}, ${size}px -${size}px ${color}, -${size}px -${size}px ${color}` })
+
+export const windowEvent = <T extends keyof WindowEventMap>(event: T, listener: (e: WindowEventMap[T]) => void) => {
+	window.addEventListener(event, listener)
+	return () => window.removeEventListener(event, listener)
+}
+export const mediaEvent = (event: string, listener: (e: MediaQueryListEvent) => void) => {
+	const mediaMatch = window.matchMedia(event)
+	mediaMatch.addEventListener('change', listener)
+	return () => mediaMatch.removeEventListener('change', listener)
+}

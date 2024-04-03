@@ -1,19 +1,18 @@
-import type { Vector2 } from 'three'
-import { BasicShadowMap, DepthTexture, LinearSRGBColorSpace, NearestFilter, RGBAFormat, Scene, ShaderMaterial, WebGLRenderTarget, WebGLRenderer } from 'three'
+import { BasicShadowMap, DepthTexture, LinearSRGBColorSpace, NearestFilter, RGBAFormat, Scene, ShaderMaterial, Vector2, WebGLRenderTarget, WebGLRenderer } from 'three'
+
 import { FullScreenQuad } from 'three/examples/jsm/postprocessing/Pass'
 import { CSS2DRenderer } from 'three/examples/jsm/renderers/CSS2DRenderer'
 import { RenderGroup } from './entity'
 import { ecs } from './init'
 import { mainMenuState } from './states'
+import { params } from './context'
 import { getDepthShader, getSobelShader } from '@/shaders/EdgePass'
 
 const scene = new Scene()
 export const renderer = new WebGLRenderer({ alpha: false })
 renderer.setPixelRatio(1)
 const cssRenderer = new CSS2DRenderer()
-// const ratio = window.innerHeight / window.innerWidth
-// export const width = params.renderWidth
-// export const height = Math.round(width * ratio)
+
 export const width = window.innerWidth
 export const height = window.innerHeight
 export const target = new WebGLRenderTarget(width, height)
@@ -35,7 +34,11 @@ const depthMat = new ShaderMaterial(getDepthShader(target))
 export const depthQuad = new FullScreenQuad(depthMat)
 export const sobelMat = new ShaderMaterial(getSobelShader(width, height, target, depthTarget))
 const sobelQuad = new FullScreenQuad(sobelMat)
-export const updateRenderSize = (newSize: Vector2) => {
+export const updateRenderSize = (newSize?: Vector2) => {
+	const ratio = window.innerHeight / window.innerWidth
+	const width = params.renderWidth
+	const height = Math.round(width * ratio)
+	newSize ??= new Vector2(width, height)
 	renderer.setSize(newSize.x, newSize.y)
 	sobelMat.uniforms.resolution.value = newSize.multiplyScalar(2)
 }
