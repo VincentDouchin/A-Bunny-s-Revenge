@@ -1,6 +1,6 @@
 import { Easing, Tween } from '@tweenjs/tween.js'
-import type { MeshStandardMaterial, ShaderMaterial } from 'three'
-import { CanvasTexture, Group, Mesh, MeshBasicMaterial, NearestFilter, PerspectiveCamera, Raycaster, Scene, SphereGeometry, Vector2, Vector3 } from 'three'
+import type { MeshStandardMaterial } from 'three'
+import { CanvasTexture, Group, Mesh, MeshBasicMaterial, NearestFilter, PerspectiveCamera, Raycaster, Scene, Vector2, Vector3 } from 'three'
 import { basketFollowPlayer, spawnBasket } from '../game/spawnBasket'
 import { playerBundle } from '../game/spawnPlayer'
 import { updateCameraZoom } from '@/global/camera'
@@ -8,13 +8,13 @@ import { params } from '@/global/context'
 import { RenderGroup } from '@/global/entity'
 import { assets, coroutines, ecs } from '@/global/init'
 import { menuInputMap } from '@/global/inputMaps'
-import { renderer, updateRenderSize } from '@/global/rendering'
+import { getTargetSize, renderer, updateRenderSize } from '@/global/rendering'
 import { cutSceneState, mainMenuState } from '@/global/states'
 import type { direction } from '@/lib/directions'
+import { windowEvent } from '@/lib/uiManager'
 import { drawnHouseShader } from '@/shaders/drawnHouseShader'
 import { imgToCanvas } from '@/utils/buffer'
 import { doorQuery, leaveHouse, setSensor } from '@/utils/dialogHelpers'
-import { windowEvent } from '@/lib/uiManager'
 
 export type MenuOptions = 'Continue' | 'New Game' | 'Settings' | 'Credits'
 
@@ -63,9 +63,10 @@ const mainMenuTexture = (mat: MeshStandardMaterial) => {
 		return menu[selected]
 	}
 }
-
+const ZOOM_OUT = 2
+const scene = new Scene()
 export const intiMainMenuRendering = () => {
-	const scene = new Scene()
+	updateCameraZoom(params.zoom + ZOOM_OUT)
 	const group = new Group()
 	scene.add(group)
 	const mainMenuRenderGroup = ecs.add({
@@ -75,7 +76,7 @@ export const intiMainMenuRendering = () => {
 		group,
 		stateEntity: mainMenuState,
 	})
-	const camera = new PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.001, 1000)
+	const camera = new PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.0001, 1000)
 	camera.name = 'mainMenu'
 	ecs.add({
 		camera,
@@ -113,23 +114,42 @@ export const intiMainMenuRendering = () => {
 			}
 		}
 	})
-
-	const ball = new Mesh(new SphereGeometry(0.1), new MeshBasicMaterial({ color: 0xFF0000 }))
-	ball.position.set(-0.5, 2, 0)
 }
 
 export const mainMenuRenderGroupQuery = ecs.with('renderer', 'scene', 'renderGroup').where(e => e.renderGroup === RenderGroup.MainMenu)
 
 export const cameraQuery = ecs.with('camera', 'renderGroup', 'position')
 const mainMenuCameraQuery = cameraQuery.where(e => e.renderGroup === RenderGroup.MainMenu)
-const gameCameraQuery = cameraQuery.with('cameraLookat').where(e => e.renderGroup === RenderGroup.Game)
+export const gameCameraQuery = cameraQuery.with('cameraLookat').where(e => e.renderGroup === RenderGroup.Game)
+const houseQuery = ecs.with('npcName', 'worldPosition', 'houseAnimator', 'rotation', 'collider').where(e => e.npcName === 'Grandma')
 export const setMainCameraPosition = () => {
-	for (const camera of gameCameraQuery) {
-		camera.cameraLookat.x = 20
-		camera.cameraLookat.y = 20
-		camera.cameraLookat.z = 20
+	for (const menuCam of mainMenuCameraQuery) {
+		for (const gamecam of gameCameraQuery) {
+			for (const house of houseQuery) {
+				const screenPos = new Vector3(-1.5, 0, 0)
+				menuCam.camera.updateMatrixWorld()
+				screenPos.project(menuCam.camera)
+				const widthHalf = 0.5 * window.innerWidth
+				const heightHalf = 0.5 * window.innerHeight
+				screenPos.x = (screenPos.x * widthHalf) + widthHalf
+				screenPos.y = -(screenPos.y * heightHalf) + heightHalf
+				gamecam.position.set(params.cameraOffsetX, params.cameraOffsetY, params.cameraOffsetZ)
+				gamecam.camera.lookAt(new Vector3())
+				gamecam.camera.updateMatrixWorld()
+				const worldPos = new Vector3()
+				worldPos.x = (screenPos.x / renderer.domElement.width) * 2 - 1
+				worldPos.y = -(screenPos.y / renderer.domElement.height) * 2 + 1
+				worldPos.z = 0.5
+				worldPos.unproject(gamecam.camera)
+
+				gamecam.cameraLookat.x = house.worldPosition.x - worldPos.x
+				gamecam.cameraLookat.y = 20
+				gamecam.cameraLookat.z = 20
+			}
+		}
 	}
 }
+export const initMainMenuCamPos = () => houseQuery.onEntityAdded.subscribe(setMainCameraPosition)
 
 export const renderMainMenu = () => {
 	for (const { scene, renderer } of mainMenuRenderGroupQuery) {
@@ -141,41 +161,46 @@ export const renderMainMenu = () => {
 }
 
 const menuTextureQuery = ecs.with('menuSelected', 'menuInputs', 'menuTexture', 'windowShader')
-const houseQuery = ecs.with('npcName', 'worldPosition', 'houseAnimator', 'rotation', 'collider').where(e => e.npcName === 'Grandma')
-export const continueGame = (windowShader: ShaderMaterial) => {
-	const ratio = window.innerWidth / window.innerHeight
-	const finalResolution = new Vector2(params.renderWidth, params.renderWidth / ratio)
-	ecs.add({
-		tween: new Tween([0]).to([1], 4000)
-			.easing(Easing.Quadratic.InOut)
-			.onUpdate(([f]) => {
-				const mainMenuCam = mainMenuCameraQuery.first
-				const gameCam = gameCameraQuery.first
-				const house = houseQuery.first
-				if (mainMenuCam && mainMenuCam.camera instanceof PerspectiveCamera) {
-					mainMenuCam.position.x = -1.5 * f
-					mainMenuCam.camera.zoom = 7 * f + 1
-					mainMenuCam.camera.updateProjectionMatrix()
-					windowShader.uniforms.parchmentMix.value = 0.3 * f + 0.7
-					windowShader.uniforms.windowSize.value = f * 0.5
-					const newSize = finalResolution.clone().add(new Vector2(window.innerWidth, window.innerHeight).sub(finalResolution).multiplyScalar(1 - f))
-					updateRenderSize(newSize)
-					windowShader.uniforms.resolution.value = newSize
-					windowShader.uniforms.kSize.value = 1 + 4 * (1 - f)
-					updateCameraZoom(6 + 4 * (1 - f))
-				}
-				if (gameCam && house) {
-					gameCam.cameraLookat.x = 20 - (20 - house.worldPosition.x) * f
-					gameCam.cameraLookat.z = 20 - (20 - house.worldPosition.z) * f
-					gameCam.cameraLookat.y = 20 - (20 - house.worldPosition.y) * f
-				}
+export const continueGame = (entities = menuTextureQuery.entities) => {
+	for (const mainMenu of entities) {
+		ecs.removeComponent(mainMenu, 'menuSelected')
+		const finalResolution = getTargetSize()
+		const gameCam = gameCameraQuery.first
+		const house = houseQuery.first
+		if (gameCam && house) {
+			const initCameX = gameCam.cameraLookat.x
+			ecs.add({
+				tween: new Tween([0]).to([1], 4000)
+					.easing(Easing.Quadratic.InOut)
+					.onUpdate(([f]) => {
+						const mainMenuCam = mainMenuCameraQuery.first
+
+						if (mainMenuCam && mainMenuCam.camera instanceof PerspectiveCamera) {
+							mainMenuCam.position.x = -1.5 * f
+							mainMenuCam.camera.zoom = 10 * f + 1
+							mainMenuCam.camera.updateProjectionMatrix()
+							mainMenu.windowShader.uniforms.parchmentMix.value = 0.3 * f + 0.7
+							mainMenu.windowShader.uniforms.windowSize.value = f * 0.5
+							const newSize = finalResolution.clone().add(new Vector2(window.innerWidth, window.innerHeight).sub(finalResolution).multiplyScalar(1 - f))
+							updateRenderSize(newSize)
+							mainMenu.windowShader.uniforms.resolution.value = newSize
+							mainMenu.windowShader.uniforms.kSize.value = 1 + 4 * (1 - f)
+							updateCameraZoom(params.zoom + ZOOM_OUT * (1 - f))
+						}
+
+						gameCam.cameraLookat.x = initCameX - (initCameX - house.worldPosition.x) * f
+						gameCam.cameraLookat.z = 20 - (20 - house.worldPosition.z) * f
+						gameCam.cameraLookat.y = 20 - (20 - house.worldPosition.y) * f
+					})
+					.onComplete(() => {
+						mainMenuState.disable()
+					}),
+				autoDestroy: true,
 			})
-			.onComplete(() => {
-				mainMenuState.disable()
-			}),
-		autoDestroy: true,
-	})
+		}
+	}
 }
+
 export const selectMainMenu = () => {
 	for (const mainMenu of menuTextureQuery) {
 		if (mainMenu.menuInputs.get('down').justPressed) {
@@ -186,8 +211,7 @@ export const selectMainMenu = () => {
 		}
 		if (mainMenu.menuInputs.get('validate').justPressed) {
 			if (mainMenu.menuTexture() === 'Continue') {
-				ecs.removeComponent(mainMenu, 'menuSelected')
-				continueGame(mainMenu.windowShader)
+				continueGame([mainMenu])
 			}
 		}
 	}
@@ -197,14 +221,15 @@ export const clickOnMenuButton = () => {
 	const click = (x: number, y: number) => {
 		for (const camera of mainMenuCameraQuery) {
 			const ray = new Raycaster()
-			ray.setFromCamera(new Vector2(x, y), camera.camera)
+			const pointer = new Vector2()
+			pointer.x = (x / window.innerWidth) * 2 - 1
+			pointer.y = -(y / window.innerHeight) * 2 + 1
+			ray.setFromCamera(pointer, camera.camera)
 			for (const { model, menuButton } of mainMenuButtonsQuery) {
-				if (ray.intersectObject(model)) {
+				const intsersect = ray.intersectObject(model)
+				if (intsersect.length) {
 					if (menuButton === 'Continue') {
-						for (const mainMenu of menuTextureQuery) {
-							ecs.removeComponent(mainMenu, 'menuSelected')
-							continueGame(mainMenu.windowShader)
-						}
+						continueGame()
 					}
 				}
 			}

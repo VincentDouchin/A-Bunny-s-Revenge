@@ -128,11 +128,3 @@ export const losingBattle = () => playerQuery.onEntityRemoved.subscribe((e) => {
 	openMenuState.enable()
 	ecs.add({ ...inMap(), position: e.position, cameratarget: true })
 })
-
-export const debugPlayer = () => {
-	for (const player of ecs.with('playerControls')) {
-		if (player.playerControls.get('primary').justPressed) {
-			// addCameraShake()
-		}
-	}
-}

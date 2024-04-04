@@ -31,17 +31,17 @@ import { target } from './states/game/sensor'
 import { basketFollowPlayer, enableBasketUi, spawnBasket } from './states/game/spawnBasket'
 import { allowDoorCollision, collideWithDoor, collideWithDoorCamp, collideWithDoorClearing, unlockDoorClearing } from './states/game/spawnDoor'
 import { spawnCrossRoad, spawnDungeon, spawnFarm, spawnLevelData, updateTimeUniforms } from './states/game/spawnLevel'
-import { debugPlayer, losingBattle, spawnCharacter, spawnPlayerClearing, spawnPlayerDungeon } from './states/game/spawnPlayer'
+import { losingBattle, spawnCharacter, spawnPlayerClearing, spawnPlayerDungeon } from './states/game/spawnPlayer'
 import { touchItem } from './states/game/touchItem'
 import { addOrRemoveWeaponModel } from './states/game/weapon'
-import { clickOnMenuButton, intiMainMenuRendering, renderMainMenu, selectMainMenu, setMainCameraPosition, spawnPlayerContinueGame } from './states/mainMenu/mainMenuRendering'
+import { clickOnMenuButton, initMainMenuCamPos, intiMainMenuRendering, renderMainMenu, selectMainMenu, setMainCameraPosition, spawnPlayerContinueGame } from './states/mainMenu/mainMenuRendering'
 import { playCloseSound, playOpenSound } from './states/pause/pause'
 import { disablePortrait, enableFullscreen, resize, setupGame } from './states/setup/setupGame'
 import { UI } from './ui/UI'
 
 coreState
 	.onEnter(initThree, initCamera, moveCamera(true), initTimeOfDay)
-	.addPlugins(hierarchyPlugin, physicsPlugin, transformsPlugin, addToScene('camera', 'light', 'mesh', 'model', 'dialogContainer', 'emitter', 'interactionContainer', 'minigameContainer', 'healthBarContainer'), updateModels, particlesPlugin, tweenPlugin)
+	.addPlugins(hierarchyPlugin, physicsPlugin, transformsPlugin, addToScene('camera', 'light', 'model', 'dialogContainer', 'emitter', 'interactionContainer', 'minigameContainer', 'healthBarContainer'), updateModels, particlesPlugin, tweenPlugin)
 	.addSubscriber(...target, initTone, resize, disablePortrait, enableFullscreen)
 	.onEnter(ui.render(UI))
 	.onPreUpdate(coroutines.tick, savePlayerFromTheEmbraceOfTheVoid)
@@ -66,13 +66,13 @@ gameState
 mainMenuState
 	.onEnter(intiMainMenuRendering, setMainCameraPosition)
 	.onUpdate(renderMainMenu, selectMainMenu)
-	.addSubscriber(clickOnMenuButton)
+	.addSubscriber(clickOnMenuButton, initMainMenuCamPos)
 	.onExit(removeStateEntity(mainMenuState), spawnPlayerContinueGame)
 campState
 	.addSubscriber(...interactablePlantableSpot)
 	.onEnter(spawnFarm, spawnLevelData, updateCropsSave, initPlantableSpotsInteractions, enableBasketUi)
 	.onEnter(runIf(() => !mainMenuState.enabled, spawnCharacter, spawnBasket), moveCamera(true))
-	.onUpdate(collideWithDoorCamp, debugPlayer)
+	.onUpdate(collideWithDoorCamp)
 	.onUpdate(runIf(canPlayerMove, plantSeed, harvestCrop, openPlayerInventory, savePlayerPosition, basketFollowPlayer()))
 	.onExit(despawnOfType('map'))
 openMenuState

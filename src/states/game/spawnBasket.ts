@@ -13,7 +13,7 @@ const playerQuery = ecs.with('player', 'position', 'rotation', 'inventory', 'inv
 export const spawnBasket = () => {
 	const model = clone(assets.characters.Basket.scene)
 	model.scale.setScalar(5)
-	const bundle = modelColliderBundle(model, RigidBodyType.KinematicPositionBased, false)
+	const bundle = modelColliderBundle(model, RigidBodyType.Dynamic, false)
 	bundle.bodyDesc.setLinearDamping(20)
 	const player = playerQuery.first
 	if (player) {
@@ -31,9 +31,8 @@ export const spawnBasket = () => {
 			following: false,
 			followTarget: player,
 			...bundle,
-			...characterControllerBundle(),
 			basket: player,
-			speed: 20,
+			speed: 100,
 		})
 	}
 }
