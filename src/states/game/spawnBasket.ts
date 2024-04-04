@@ -1,13 +1,13 @@
+import { RigidBodyType } from '@dimforge/rapier3d-compat'
 import { Vector3 } from 'three'
 import { clone } from 'three/examples/jsm/utils/SkeletonUtils'
-import { RigidBodyType } from '@dimforge/rapier3d-compat'
 import { inventoryBundle } from './inventory'
-import { assets, ecs } from '@/global/init'
 import { Animator } from '@/global/animator'
-import { stateBundle } from '@/lib/stateMachine'
-import { characterControllerBundle, modelColliderBundle } from '@/lib/models'
 import { Interactable, MenuType } from '@/global/entity'
+import { assets, ecs } from '@/global/init'
 import { inMap } from '@/lib/hierarchy'
+import { modelColliderBundle } from '@/lib/models'
+import { stateBundle } from '@/lib/stateMachine'
 
 const playerQuery = ecs.with('player', 'position', 'rotation', 'inventory', 'inventoryId', 'inventorySize')
 export const spawnBasket = () => {

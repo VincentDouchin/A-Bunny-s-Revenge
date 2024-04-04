@@ -40,7 +40,7 @@ const changePixelation = (pixelation: boolean) => {
 	params.pixelation = pixelation
 	const { renderer } = getGameRenderGroup()
 	if (pixelation) {
-		const val = params.renderWidth
+		const val = params.renderHeight
 		const ratio = window.innerHeight / window.innerWidth
 		renderer.setSize(val, val * ratio)
 	} else {
@@ -172,7 +172,7 @@ export const DebugUi = () => {
 					Render width
 					<input
 						type="number"
-						value={params.renderWidth}
+						value={params.renderHeight}
 						onChange={updatePixelation}
 					>
 					</input>
