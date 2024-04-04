@@ -26,6 +26,7 @@ import { playerBundle } from '@/states/game/spawnPlayer'
 import { getScreenBuffer } from '@/utils/buffer'
 import { getRandom } from '@/utils/mapFunctions'
 import { inMap } from '@/lib/hierarchy'
+import { updateRenderSize } from '@/global/rendering'
 
 export interface EntityData<T extends Record<string, any>> {
 	model: models | customModel | vegetation
@@ -253,10 +254,8 @@ export const LevelEditor = () => {
 						onCleanup(() => {
 							debugState.disable()
 							group?.add(camera)
-							const val = params.renderWidth
-							const ratio = window.innerHeight / window.innerWidth
 							camera.position.set(0, 0, 0)
-							renderer.setSize(val, val * ratio)
+							updateRenderSize()
 							controls.dispose()
 						})
 					})

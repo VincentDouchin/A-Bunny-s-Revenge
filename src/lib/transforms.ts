@@ -25,13 +25,10 @@ export const getRotationFromDirection = (direction: direction) => {
 	rotation.setFromAxisAngle(new Vector3(0, 1, 0), Math.PI / 2 * rotations[direction])
 	return rotation
 }
-const updateMeshPosition = () => {
-	for (const { position, group } of positionQuery) {
-		group.position.x = position.x
-		group.position.y = position.y
-		group.position.z = position.z
-	}
-}
+const swapPosition = () => positionQuery.onEntityAdded.subscribe((e) => {
+	e.group.position.copy(e.position)
+	e.position = e.group.position
+})
 
 const bodiesWithoutWorldPositionQuery = ecs.with('bodyDesc', 'group').without('worldPosition')
 const addWorldPosition = () => bodiesWithoutWorldPositionQuery.onEntityAdded.subscribe((entity) => {
@@ -56,15 +53,12 @@ const setNonFixedWorldPosition = () => {
 	}
 }
 
-const bodiesQuery = ecs.with('body', 'position').where(({ body }) => body.isDynamic() || body.isKinematic())
+const bodiesQuery = ecs.with('body', 'position').where(({ body }) => !body.isFixed())
 const updateGroupPosition = () => {
 	for (const entity of bodiesQuery) {
 		const { body, position } = entity
 		const bodyPos = body.translation()
-
-		position.x = bodyPos.x
-		position.y = bodyPos.y
-		position.z = bodyPos.z
+		position.copy(bodyPos)
 	}
 }
 const rotationQuery = ecs.with('rotation')
@@ -81,8 +75,8 @@ const updateRotation = () => {
 
 export const transformsPlugin = (state: State) => {
 	state
-		.addSubscriber(addWorldPosition, setFixedBodiesWorldPosition)
-		.onUpdate(updateGroupPosition, updateMeshPosition, updateRotation)
+		.addSubscriber(addWorldPosition, setFixedBodiesWorldPosition, swapPosition)
+		.onUpdate(updateGroupPosition, updateRotation)
 		.onPostUpdate(setNonFixedWorldPosition)
 }
 

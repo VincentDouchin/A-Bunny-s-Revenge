@@ -8,8 +8,8 @@ import { mainMenuState } from './states'
 import { params } from './context'
 import { getDepthShader, getSobelShader } from '@/shaders/EdgePass'
 
-const scene = new Scene()
-export const renderer = new WebGLRenderer({ alpha: false })
+export const scene = new Scene()
+export const renderer = new WebGLRenderer({ alpha: false, powerPreference: 'high-performance' })
 renderer.setPixelRatio(1)
 const cssRenderer = new CSS2DRenderer()
 
@@ -34,12 +34,16 @@ const depthMat = new ShaderMaterial(getDepthShader(target))
 export const depthQuad = new FullScreenQuad(depthMat)
 export const sobelMat = new ShaderMaterial(getSobelShader(width, height, target, depthTarget))
 const sobelQuad = new FullScreenQuad(sobelMat)
+export const getTargetSize = () => {
+	const ratio = window.innerWidth / window.innerHeight
+	const height = params.renderHeight
+	const width = height * ratio
+	return new Vector2(width, height)
+}
 export const updateRenderSize = (newSize?: Vector2) => {
-	const ratio = window.innerHeight / window.innerWidth
-	const width = params.renderWidth
-	const height = Math.round(width * ratio)
-	newSize ??= new Vector2(width, height)
+	newSize ??= getTargetSize()
 	renderer.setSize(newSize.x, newSize.y)
+	cssRenderer.setSize(window.innerWidth, window.innerHeight)
 	sobelMat.uniforms.resolution.value = newSize.multiplyScalar(2)
 }
 export const initThree = () => {

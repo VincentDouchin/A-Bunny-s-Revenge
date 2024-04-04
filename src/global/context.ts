@@ -3,7 +3,7 @@ export const context = {
 }
 
 interface Params {
-	renderWidth: number
+	renderHeight: number
 	cameraOffsetX: number
 	cameraOffsetY: number
 	cameraOffsetZ: number
@@ -17,11 +17,11 @@ interface Params {
 
 export const params: Params = {
 	pixelation: true,
-	renderWidth: 360,
+	renderHeight: 225,
 	cameraOffsetX: 0,
 	cameraOffsetY: 75,
 	cameraOffsetZ: -100,
-	zoom: 10,
+	zoom: 7,
 	fov: 50,
 	speedUp: 1,
 	dialogSpeed: 1,
