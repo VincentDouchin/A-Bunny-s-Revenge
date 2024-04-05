@@ -2,7 +2,8 @@ import type { music } from '@assets/assets'
 import { Destination, PitchShift, Player, start } from 'tone'
 import { assets } from './init'
 import { save } from './save'
-import { getRandom } from '@/utils/mapFunctions'
+import { getRandom, memo } from '@/utils/mapFunctions'
+import { Pool } from '@/lib/pool'
 
 export const initTone = () => {
 	window.addEventListener('pointerdown keydown', start)
@@ -10,20 +11,38 @@ export const initTone = () => {
 	Destination.mute = save.settings.mute
 	return () => window.removeEventListener('pointerdown keydown', start)
 }
-export const playSound = (sound: music | music[], options?: { volume?: number, pitch?: number }) => {
-	const selectedSound = Array.isArray(sound) ? getRandom(sound) : sound
-	const soundPlayer = new Player(assets.music[selectedSound].buffer).toDestination()
-	if (options?.volume) {
-		soundPlayer.volume.value = options.volume
-	}
-	if (options?.pitch) {
-		soundPlayer.connect(new PitchShift(options.pitch)).toDestination()
-	}
-	soundPlayer.start()
-	soundPlayer.onstop = () => {
-		soundPlayer.dispose()
-	}
+const pitch = memo((pitch: number) => new PitchShift({ pitch, windowSize: 1 }))
+const soundPool = new Pool<Player>(player => new Player(player.buffer), 10)
+
+type soundAssets = { [k in keyof typeof assets]: (typeof assets)[k] extends Record<string, Player> ? k : never }[keyof typeof assets]
+
+export const playSFX = <K extends string = string>(soundAsset: soundAssets) => (sound: K | K[], options?: { volume?: number, pitch?: number, playbackRate?: number, offset?: number }) => {
+	return new Promise<void>((resolve) => {
+		const selectedSound = Array.isArray(sound) ? getRandom(sound) : sound
+		const [player, free] = soundPool.get(assets[soundAsset][selectedSound])
+		const soundPlayer = player.toDestination()
+		if (options?.playbackRate) {
+			soundPlayer.playbackRate = options.playbackRate
+		}
+		if (options?.volume) {
+			soundPlayer.volume.value = options.volume
+		}
+		if (options?.pitch) {
+			soundPlayer.connect(pitch(options.pitch).toDestination())
+		}
+
+		soundPlayer.start()
+		soundPlayer.onstop = () => {
+			free()
+			soundPlayer.playbackRate = 1
+		}
+		setTimeout(() => {
+			resolve()
+		}, Math.max(soundPlayer.buffer.duration * 1000 / (options?.playbackRate ?? 1) + (options?.offset ?? 0), 1))
+	})
 }
+export const playSound = playSFX<music>('music')
+export const playVoice = playSFX('voices')
 
 export const playAmbiance = (ambiance: music) => () => {
 	const player = new Player(assets.music[ambiance].buffer).toDestination()
