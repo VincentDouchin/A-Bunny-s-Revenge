@@ -1,4 +1,4 @@
-import type { Euler, Material, Vec2, Vector4Like } from 'three'
+import type { Euler, Material, Object3D, Object3DEventMap, Vec2, Vector4Like } from 'three'
 import { DynamicDrawUsage, Group, Matrix4, Mesh, TextureLoader, Vector3 } from 'three'
 
 import assetManifest from '@assets/assetManifest.json'
@@ -73,7 +73,7 @@ export interface InstanceHandle {
 	setUniform: (name: string, value: any) => void
 }
 
-export const instanceMesh = <T extends Material>(obj: GLTF, castShadow = true) => {
+export const instanceMesh = <T extends Material>(obj: Object3D<Object3DEventMap>, castShadow = true) => {
 	const intanceParams: Matrix4[] = []
 	const meshes: InstancedUniformsMesh<T>[] = []
 	const group = new Group()
@@ -100,7 +100,7 @@ export const instanceMesh = <T extends Material>(obj: GLTF, castShadow = true) =
 		}
 	}
 	const process = () => {
-		obj.scene.traverse((node) => {
+		obj.traverse((node) => {
 			if (node instanceof Mesh) {
 				const mesh = new InstancedUniformsMesh(node.geometry.clone(), node.material.clone(), intanceParams.length)
 				mesh.instanceMatrix.setUsage(DynamicDrawUsage)
@@ -118,7 +118,7 @@ export const instanceMesh = <T extends Material>(obj: GLTF, castShadow = true) =
 
 		return group
 	}
-	return { addAt, process, glb: obj }
+	return { addAt, process, obj }
 }
 
 export const dataUrlToCanvas = async (size: Vec2, dataUrl?: string) => {

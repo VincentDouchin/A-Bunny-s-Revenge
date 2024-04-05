@@ -23,6 +23,10 @@ export interface ItemData {
 }
 
 export const itemsData: Record<items, ItemData> = {
+	acorn: {
+		name: 'Acorn',
+	},
+	// ! Ingredients
 	beet: {
 		name: 'Beet',
 		ingredient: true,
@@ -35,6 +39,57 @@ export const itemsData: Record<items, ItemData> = {
 		name: 'Tomato',
 		ingredient: true,
 	},
+	lettuce: {
+		name: 'Lettuce',
+		ingredient: true,
+	},
+	honey: {
+		name: 'Honey',
+		ingredient: true,
+
+	},
+	parsley: {
+		name: 'Parsley',
+		ingredient: true,
+	},
+	ham: {
+		name: 'Ham',
+		ingredient: true,
+	},
+	slime_dough: {
+		name: 'Slime Dough',
+		ingredient: true,
+	},
+	pumpkin: {
+		name: 'Pumpkin',
+		ingredient: true,
+	},
+	magic_bean: {
+		name: '"Magic" bean',
+		ingredient: true,
+	},
+	milk: {
+		name: 'Milk',
+		ingredient: true,
+	},
+
+	wheat: {
+		name: 'Wheat',
+		ingredient: true,
+	},
+	flour: {
+		name: 'Flour',
+		ingredient: true,
+	},
+	butter: {
+		name: 'Butter',
+		ingredient: true,
+	},
+	sugar: {
+		name: 'Sugar',
+		ingredient: true,
+	},
+	// ! Seeds
 	carrot_seeds: {
 		name: 'Carrot seed',
 		seed: 'carrot',
@@ -83,39 +138,7 @@ export const itemsData: Record<items, ItemData> = {
 			level: 1,
 		},
 	},
-	lettuce: {
-		name: 'Lettuce',
-		ingredient: true,
-	},
-	honey: {
-		name: 'Honey',
-		ingredient: true,
-
-	},
-	parsley: {
-		name: 'Parsley',
-		ingredient: true,
-	},
-	ham: {
-		name: 'Ham',
-		ingredient: true,
-	},
-	slime_dough: {
-		name: 'Slime Dough',
-		ingredient: true,
-	},
-	pumpkin: {
-		name: 'Pumpkin',
-		ingredient: true,
-	},
-	magic_bean: {
-		name: '"Magic" bean',
-		ingredient: true,
-	},
-	milk: {
-		name: 'Milk',
-		ingredient: true,
-	},
+	// ! Chest Loot
 	egg: {
 		name: 'Egg',
 		ingredient: true,
@@ -132,22 +155,7 @@ export const itemsData: Record<items, ItemData> = {
 			rarity: Rarity.Rare,
 		},
 	},
-	wheat: {
-		name: 'Wheat',
-		ingredient: true,
-	},
-	flour: {
-		name: 'Flour',
-		ingredient: true,
-	},
-	butter: {
-		name: 'Butter',
-		ingredient: true,
-	},
-	sugar: {
-		name: 'Sugar',
-		ingredient: true,
-	},
+	// ! Meals
 	roasted_carrot: {
 		name: 'Roasted carrot',
 		meal: [

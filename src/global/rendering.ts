@@ -34,9 +34,8 @@ const depthMat = new ShaderMaterial(getDepthShader(target))
 export const depthQuad = new FullScreenQuad(depthMat)
 export const sobelMat = new ShaderMaterial(getSobelShader(width, height, target, depthTarget))
 const sobelQuad = new FullScreenQuad(sobelMat)
-export const getTargetSize = () => {
+export const getTargetSize = (height = params.renderHeight) => {
 	const ratio = window.innerWidth / window.innerHeight
-	const height = params.renderHeight
 	const width = height * ratio
 	return new Vector2(width, height)
 }

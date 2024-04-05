@@ -38,7 +38,7 @@ const spawnFromCanvas = (level: Level, image: HTMLCanvasElement, scale: number, 
 }
 
 export const spawnTrees = (level: Level, parent: Entity) => {
-	const trees = Object.values(assets.trees).map(x => instanceMesh(x, true))
+	const trees = Object.values(assets.trees).map(x => instanceMesh(x.scene, true))
 	const treesInstances: InstanceHandle[] = []
 	const noise = createNoise3D(() => 0)
 	const treeMap = new Map<Vec2, InstanceHandle>()
@@ -54,7 +54,7 @@ export const spawnTrees = (level: Level, parent: Entity) => {
 			const instanceHandle = treeGenerator.addAt(position, size, new Euler(0, noise(x, y, x), 0))
 			if (val.x === 255) treesInstances.push(instanceHandle)
 			treeMap.set(position, instanceHandle)
-			const treeSize = getSize(treeGenerator.glb.scene).multiplyScalar(size)
+			const treeSize = getSize(treeGenerator.obj).multiplyScalar(size)
 			ecs.add({
 				...inMap(),
 				position,
@@ -82,8 +82,8 @@ export const spawnTrees = (level: Level, parent: Entity) => {
 }
 
 export const spawnGrass = (level: Level, parent: Entity) => {
-	const grass = Object.entries(assets.vegetation).filter(([name]) => name.includes('Grass')).map(x => instanceMesh(x[1], true))
-	const flowers = Object.entries(assets.vegetation).filter(([name]) => name.includes('Flower')).map(x => instanceMesh(x[1], true))
+	const grass = Object.entries(assets.vegetation).filter(([name]) => name.includes('Grass')).map(x => instanceMesh(x[1].scene, true))
+	const flowers = Object.entries(assets.vegetation).filter(([name]) => name.includes('Flower')).map(x => instanceMesh(x[1].scene, true))
 	const noise = createNoise2D(() => 0)
 	const noise2 = createNoise2D(() => 100)
 	const noiseX = createNoise2D(() => 200)

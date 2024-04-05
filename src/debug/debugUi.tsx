@@ -7,7 +7,7 @@ import { SaveEditor } from './saveEditor'
 import { ToonEditor } from './toonEditor'
 import { params } from '@/global/context'
 import { ecs, ui } from '@/global/init'
-import { cameraQuery, depthQuad, height, width } from '@/global/rendering'
+import { cameraQuery, depthQuad, getTargetSize, height, updateRenderSize, width } from '@/global/rendering'
 import { resetSave, updateSave } from '@/global/save'
 import { campState } from '@/global/states'
 import { ModStage, ModType, createModifier } from '@/lib/stats'
@@ -32,18 +32,13 @@ const groundQuery = ecs.with('ground', 'model')
 export const updatePixelation = (e: Event) => {
 	const target = e.target as HTMLInputElement
 	const val = target.valueAsNumber
-	const ratio = window.innerHeight / window.innerWidth
-	const { renderer } = getGameRenderGroup()
-	renderer.setSize(val, val * ratio)
+	updateRenderSize(getTargetSize(val))
 }
 const changePixelation = (pixelation: boolean) => {
-	params.pixelation = pixelation
-	const { renderer } = getGameRenderGroup()
 	if (pixelation) {
-		const val = params.renderHeight
-		const ratio = window.innerHeight / window.innerWidth
-		renderer.setSize(val, val * ratio)
+		updateRenderSize(getTargetSize())
 	} else {
+		const { renderer } = getGameRenderGroup()
 		renderer.setSize(window.innerWidth, window.innerHeight)
 	}
 }
@@ -169,7 +164,7 @@ export const DebugUi = () => {
 						<button onClick={changeCameraNormal}>Normal</button>
 						<button onClick={changeCameraOrtho}>Ortho</button>
 					</div>
-					Render width
+					Render height
 					<input
 						type="number"
 						value={params.renderHeight}

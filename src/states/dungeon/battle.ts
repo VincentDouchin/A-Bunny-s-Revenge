@@ -2,6 +2,7 @@ import { Tween } from '@tweenjs/tween.js'
 import type { With } from 'miniplex'
 import { Mesh, Vector3 } from 'three'
 import { itemBundle } from '../game/items'
+import { spawnAcorns } from './acorn'
 import type { Entity } from '@/global/entity'
 import { Faction } from '@/global/entity'
 import { ecs, time, world } from '@/global/init'
@@ -101,6 +102,7 @@ export const playerAttack = () => {
 export const spawnDrops = () => ecs.with('drops', 'position').onEntityRemoved.subscribe((e) => {
 	const player = playerQuery.first
 	if (player) {
+		spawnAcorns(5, e.position)
 		for (const drop of lootPool(player.lootQuantity.value, player.lootChance.value, e.drops)) {
 			ecs.add({ ...itemBundle(drop.name), position: e.position.clone().add(new Vector3(0, 5, 0)) })
 		}

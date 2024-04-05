@@ -16,6 +16,7 @@ export interface SaveData {
 	modifiers: string[]
 	settings: { volume: number, mute: boolean, fullscreen: boolean | null }
 	unlockedPaths: number
+	acorns: number
 }
 
 const blankSave = (): SaveData => ({
@@ -28,6 +29,7 @@ const blankSave = (): SaveData => ({
 	modifiers: [],
 	settings: { volume: 100, mute: false, fullscreen: null },
 	unlockedPaths: 1,
+	acorns: 0,
 })
 
 export const save: Readonly<SaveData> = blankSave()

@@ -1,11 +1,9 @@
 import type { Object3D, Object3DEventMap } from 'three'
 import { Quaternion, Vector3 } from 'three'
 import type { Collider } from '@dimforge/rapier3d-compat'
-import type { With } from 'miniplex'
 import type { State } from './state'
 import type { direction } from './directions'
 import { ecs, world } from '@/global/init'
-import type { Entity } from '@/global/entity'
 
 export const getWorldPosition = (obj: Object3D<Object3DEventMap>) => {
 	const pos = new Vector3()
@@ -25,6 +23,7 @@ export const getRotationFromDirection = (direction: direction) => {
 	rotation.setFromAxisAngle(new Vector3(0, 1, 0), Math.PI / 2 * rotations[direction])
 	return rotation
 }
+
 const swapPosition = () => positionQuery.onEntityAdded.subscribe((e) => {
 	e.group.position.copy(e.position)
 	e.position = e.group.position
@@ -37,23 +36,17 @@ const addWorldPosition = () => bodiesWithoutWorldPositionQuery.onEntityAdded.sub
 	ecs.addComponent(entity, 'worldPosition', worldPosition)
 })
 const worldPositionQuery = ecs.with('group', 'worldPosition', 'body')
-const nonFixedworldPositionQuery = worldPositionQuery.where(e => !e.body.isFixed())
-const fixedWorldPositionQuery = worldPositionQuery.where(e => e.body.isFixed())
-const setWorldPosition = (entity: With<Entity, 'body' | 'group' | 'worldPosition'>) => {
-	const { group, worldPosition, body } = entity
-	group.getWorldPosition(worldPosition)
-	if (body.isFixed()) {
-		body.setTranslation(worldPosition, true)
-	}
-}
-const setFixedBodiesWorldPosition = () => fixedWorldPositionQuery.onEntityAdded.subscribe(setWorldPosition)
-const setNonFixedWorldPosition = () => {
-	for (const entity of nonFixedworldPositionQuery) {
-		setWorldPosition(entity)
+const updateWorldPosition = () => {
+	for (const entity of worldPositionQuery) {
+		const { group, worldPosition, body } = entity
+		group.getWorldPosition(worldPosition)
+		if (body.isFixed()) {
+			body.setTranslation(worldPosition, true)
+		}
 	}
 }
 
-const bodiesQuery = ecs.with('body', 'position').where(({ body }) => !body.isFixed())
+const bodiesQuery = ecs.with('body', 'position').where(({ body }) => body.isDynamic() || body.isKinematic())
 const updateGroupPosition = () => {
 	for (const entity of bodiesQuery) {
 		const { body, position } = entity
@@ -75,9 +68,9 @@ const updateRotation = () => {
 
 export const transformsPlugin = (state: State) => {
 	state
-		.addSubscriber(addWorldPosition, setFixedBodiesWorldPosition, swapPosition)
+		.addSubscriber(addWorldPosition, swapPosition)
 		.onUpdate(updateGroupPosition, updateRotation)
-		.onPostUpdate(setNonFixedWorldPosition)
+		.onPostUpdate(updateWorldPosition)
 }
 
 export const isInIntersectionWithCollider = (collider: Collider) => {

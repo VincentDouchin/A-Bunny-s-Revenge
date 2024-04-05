@@ -5,6 +5,9 @@ import { ecs, world } from '@/global/init'
 const addBodies = () => ecs.with('bodyDesc', 'position').onEntityAdded.subscribe((entity) => {
 	const body = world.createRigidBody(entity.bodyDesc)
 	body.setTranslation(entity.position, true)
+	if (entity.rotation) {
+		body.setRotation(entity.rotation, true)
+	}
 	ecs.addComponent(entity, 'body', body)
 	ecs.removeComponent(entity, 'bodyDesc')
 })

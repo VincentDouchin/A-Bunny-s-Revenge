@@ -13,6 +13,7 @@ import { addToScene } from './lib/registerComponents'
 import { runIf } from './lib/state'
 import { transformsPlugin } from './lib/transforms'
 import { tweenPlugin } from './lib/updateTween'
+import { pickupAcorn } from './states/dungeon/acorn'
 import { applyDeathTimer, enemyAttackPlayer, playerAttack, projectilesDamagePlayer, spawnDrops } from './states/dungeon/battle'
 import { spawnWeaponsChoice } from './states/dungeon/chooseWeapon'
 import { removeEnemyFromSpawn } from './states/dungeon/enemies'
@@ -24,11 +25,11 @@ import { closePlayerInventory, disableInventoryState, enableInventoryState, inte
 import { basketFSM, beeBossFSM, beeFSM, playerFSM, shagaFSM } from './states/game/FSM'
 import { dayNight, initTimeOfDay } from './states/game/dayNight'
 import { talkToNPC } from './states/game/dialog'
-import { bobItems, collectItems, popItems, stopItems } from './states/game/items'
+import { bobItems, popItems, stopItems } from './states/game/items'
 import { applyMove, canPlayerMove, movePlayer, playerSteps, savePlayerFromTheEmbraceOfTheVoid, savePlayerPosition, stopPlayer } from './states/game/movePlayer'
 import { pauseGame } from './states/game/pauseGame'
 import { target } from './states/game/sensor'
-import { basketFollowPlayer, enableBasketUi, spawnBasket } from './states/game/spawnBasket'
+import { basketFollowPlayer, collectItems, enableBasketUi, spawnBasket } from './states/game/spawnBasket'
 import { allowDoorCollision, collideWithDoor, collideWithDoorCamp, collideWithDoorClearing, unlockDoorClearing } from './states/game/spawnDoor'
 import { spawnCrossRoad, spawnDungeon, spawnFarm, spawnLevelData, updateTimeUniforms } from './states/game/spawnLevel'
 import { losingBattle, spawnCharacter, spawnPlayerClearing, spawnPlayerDungeon } from './states/game/spawnPlayer'
@@ -60,7 +61,7 @@ gameState
 		runIf(() => !pausedState.enabled, playerSteps, dayNight, updateTimeUniforms, applyDeathTimer, applyMove),
 		runIf(() => !openMenuState.enabled, pauseGame, interact),
 	)
-	.onUpdate(collectItems, touchItem, talkToNPC, stopItems)
+	.onUpdate(collectItems, touchItem, talkToNPC, stopItems, pickupAcorn)
 	.onPostUpdate(renderGame)
 	.enable()
 mainMenuState

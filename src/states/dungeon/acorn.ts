@@ -1,0 +1,40 @@
+import { RigidBodyDesc } from '@dimforge/rapier3d-compat'
+import { between } from 'randomish'
+import { Vector3 } from 'three'
+import { assets, ecs } from '@/global/init'
+import { playSound } from '@/global/sounds'
+import { getSize } from '@/lib/models'
+import { sleep } from '@/utils/sleep'
+
+export const spawnAcorns = async (amount: number, position: Vector3) => {
+	const acornModel = assets.items.acorn.model
+	const size = getSize(acornModel)
+	for (let i = 0; i < amount; i++) {
+		const model = acornModel.clone()
+		model.scale.setScalar(2)
+		const angle = Math.random() * Math.PI * 2
+		ecs.add({
+			position: new Vector3(between(-5, 5), 5, between(-5, 5)).add(position),
+			model,
+			bodyDesc: RigidBodyDesc.dynamic().setLinvel(Math.cos(angle) * between(10, 20), Math.random() * between(20, 30), Math.sin(angle) * between(10, 20)).setAdditionalMass(0.1),
+			groundLevel: size.y / 2,
+			item: true,
+			bounce: { amount: Math.floor(Math.random() * 4), force: new Vector3(0, between(2, 5), 0), touchedGround: false },
+			acorn: true,
+			deathTimer: 3000,
+		})
+		playSound(['665181__el_boss__item-or-material-pickup-pop-3-of-3', '665182__el_boss__item-or-material-pickup-pop-2-of-3', '665183__el_boss__item-or-material-pickup-pop-1-of-3'], { volume: -12, pitch: -10 })
+		await sleep(50)
+	}
+}
+const acornQuery = ecs.with('position', 'acorn')
+const playerQuery = ecs.with('player', 'position')
+export const pickupAcorn = () => {
+	for (const player of playerQuery) {
+		for (const acorn of acornQuery) {
+			if (player.position.distanceTo(acorn.position) < 5) {
+				ecs.remove(acorn)
+			}
+		}
+	}
+}

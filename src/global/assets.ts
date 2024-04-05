@@ -1,16 +1,16 @@
-import type { characters, fruit_trees, icons, mainMenuAssets, models, music, particles, textures, trees, vegetation, weapons } from '@assets/assets'
+import type { characters, fruit_trees, icons, items, mainMenuAssets, models, particles, textures, trees, vegetation, weapons } from '@assets/assets'
 import type { ColorRepresentation, Material, Side } from 'three'
 import { CanvasTexture, Color, DoubleSide, Mesh, MeshBasicMaterial, MeshStandardMaterial, NearestFilter, RepeatWrapping, SRGBColorSpace, TextureLoader } from 'three'
 
+import assetManifest from '@assets/assetManifest.json'
 import type { GLTF } from 'three/examples/jsm/loaders/GLTFLoader'
 import { Player } from 'tone'
-import assetManifest from '@assets/assetManifest.json'
 import { getExtension, getFileName, loadAudio, loadGLB, loadImage, loaderProgress, textureLoader, thumbnail } from './assetLoaders'
 import type { crops, fruits } from './entity'
-import { keys } from '@/constants/keys'
-import { CharacterMaterial, GrassMaterial, ToonMaterial, TreeMaterial } from '@/shaders/materials'
-import { getScreenBuffer } from '@/utils/buffer'
 import { asyncMapValues, entries, filterKeys, groupByObject, mapKeys, mapValues } from '@/utils/mapFunctions'
+import { getScreenBuffer } from '@/utils/buffer'
+import { CharacterMaterial, GrassMaterial, ToonMaterial, TreeMaterial } from '@/shaders/materials'
+import { keys } from '@/constants/keys'
 
 type Glob = Record<string, () => Promise<any>>
 type GlobEager<T = string> = Record<string, T>
@@ -263,8 +263,8 @@ export const loadAssets = async () => {
 		buttons: buttonsLoader(loader)(import.meta.glob('@assets/buttons/*.*', { eager: true, import: 'default' })),
 		voices: loadVoices(loader)(import.meta.glob('@assets/voices/*.ogg', { eager: true, import: 'default' })),
 		steps: loadSteps(loader)(import.meta.glob('@assets/steps/*.ogg', { eager: true, import: 'default' })),
-		items: loadItems(loader)(import.meta.glob('@assets/items/*.*', { as: 'url', eager: true })),
-		music: typeGlob<music>(import.meta.glob('@assets/music/*.ogg', { eager: true, import: 'default' }))(loadSounds(loader)),
+		items: typeGlob<items>(import.meta.glob('@assets/items/*.*', { as: 'url', eager: true }))(loadItems(loader)),
+		music: loadSounds(loader)(import.meta.glob('@assets/music/*.ogg', { eager: true, import: 'default' })),
 		weapons: typeGlob<weapons>(import.meta.glob('@assets/weapons/*.*', { as: 'url', eager: true }))(loadGLBAsToon(loader, {})),
 		vegetation: typeGlob<vegetation>(import.meta.glob('@assets/vegetation/*.*', { as: 'url', eager: true }))(loadGLBAsToon(loader, { material: (_node, canvas) => new GrassMaterial({ map: canvas }) })),
 		mainMenuAssets: typeGlob<mainMenuAssets>(import.meta.glob('@assets/mainMenuAssets/*.glb', { as: 'url', eager: true }))(loadMainMenuAssets),

@@ -144,6 +144,7 @@ export interface Entity {
 	itemLabel?: items
 	popDirection?: Vector3
 	groundLevel?: number
+	bounce?: { amount: number, force: Vector3, touchedGround: boolean }
 	// ! Inventory
 	inventory?: (Item | null)[]
 	inventorySize?: number
@@ -219,7 +220,8 @@ export interface Entity {
 	windowShader?: ShaderMaterial
 	stateEntity?: State
 	menuButton?: MenuOptions
-
+	// ! Money
+	acorn?: true
 }
 export type states = 'idle' | 'running' | 'picking' | 'dying' | 'hit' | 'hello' | 'dead' | 'waitingAttack' | 'attacking' | 'attackCooldown' | 'doorOpening' | 'doorClosing' | 'cheer'
 export type Bundle<C extends keyof Entity> = () => With<Entity, C>

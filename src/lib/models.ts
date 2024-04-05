@@ -2,11 +2,12 @@ import { ActiveCollisionTypes, ColliderDesc, RigidBodyDesc, RigidBodyType } from
 import type { Object3D, Object3DEventMap } from 'three'
 import { Box3, Mesh, Quaternion, Vector3 } from 'three'
 
-import { clone } from 'three/examples/jsm/utils/SkeletonUtils.js'
 import type { models, vegetation } from '@assets/assets'
-import type { Entity } from '@/global/entity'
+import { clone } from 'three/examples/jsm/utils/SkeletonUtils.js'
+import type { Constructor } from 'type-fest'
 import type { CollidersData } from '@/debug/LevelEditor'
 import type { customModel } from '@/debug/props'
+import type { Entity } from '@/global/entity'
 import { world } from '@/global/init'
 
 const cloneMaterials = (model: Object3D<Object3DEventMap>) => {
@@ -74,4 +75,14 @@ export const characterControllerBundle = () => {
 	// controller.setMaxSlopeClimbAngle(Math.PI / 180 * 120)
 	controller.enableAutostep(0.5, 0.2, true)
 	return { controller } as const satisfies Entity
+}
+export const traverseFind = <T extends Constructor<Object3D<Object3DEventMap>> = Constructor<Object3D<Object3DEventMap>>>(obj: Object3D<Object3DEventMap>, fn: (node: Object3D<Object3DEventMap>) => boolean, instance?: T): InstanceType<T> | null => {
+	let result: InstanceType<T> | null = null
+
+	obj.traverse((node) => {
+		if (fn(node) && (!instance || node instanceof instance)) {
+			result = node as InstanceType<T>
+		}
+	})
+	return result
 }

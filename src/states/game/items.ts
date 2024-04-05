@@ -3,14 +3,13 @@ import { RigidBodyType } from '@dimforge/rapier3d-compat'
 import { Easing, Tween } from '@tweenjs/tween.js'
 import { AdditiveBlending, Mesh, MeshBasicMaterial, SphereGeometry, Vector3 } from 'three'
 import type { Entity } from '@/global/entity'
-import { assets, ecs, world } from '@/global/init'
-import { addItem } from '@/global/save'
-import { modelColliderBundle } from '@/lib/models'
-import { sleep } from '@/utils/sleep'
-import { addTweenTo } from '@/lib/updateTween'
+import { assets, ecs } from '@/global/init'
 import { inMap } from '@/lib/hierarchy'
+import { modelColliderBundle } from '@/lib/models'
+import { addTweenTo } from '@/lib/updateTween'
+import { playSound } from '@/global/sounds'
 
-const itemsQuery = ecs.with('item', 'position', 'model', 'collider', 'itemLabel')
+export const itemsQuery = ecs.with('item', 'position', 'model', 'collider', 'itemLabel')
 
 export const itemBundle = (item: items) => {
 	const model = assets.items[item].model.clone()
@@ -45,45 +44,30 @@ export const bobItems = () => itemsQuery.onEntityAdded.subscribe((entity) => {
 	)
 })
 
-const basketQuery = ecs.with('basket', 'collider', 'position', 'inventoryId', 'inventorySize', 'inventory', 'stateMachine')
-export const collectItems = () => {
-	for (const basket of basketQuery) {
-		for (const item of itemsQuery) {
-			if (world.intersectionPair(basket.collider, item.collider)) {
-				ecs.removeComponent(item, 'tween')
-				ecs.removeComponent(item, 'collider')
-				addItem(basket.basket, { name: item.itemLabel, quantity: 1 })
-				if (basket.stateMachine.enter('picking', basket)) {
-					sleep(500).then(() => {
-						ecs.add({
-							parent: item,
-							tween: new Tween(item.position).to({ ...basket.position, y: item.position.y }, 500).onComplete(() => {
-								ecs.remove(item)
-							}).easing(Easing.Cubic.Out),
-						})
-						ecs.add({
-							parent: item,
-							tween: new Tween(item.model.scale).to(new Vector3(), 500).easing(Easing.Cubic.Out),
-						})
-					})
-				}
-			}
-		}
-	}
-}
-
 export const popItems = () => ecs.with('body', 'item', 'collider').onEntityAdded.subscribe((e) => {
 	const force = e.popDirection ?? new Vector3().randomDirection()
 	force.y = 30
 	force.x = force.x * 20
 	force.z = force.z * 20
 	e.body.applyImpulse(force, true)
+	playSound(['665181__el_boss__item-or-material-pickup-pop-3-of-3', '665182__el_boss__item-or-material-pickup-pop-2-of-3', '665183__el_boss__item-or-material-pickup-pop-1-of-3'])
 })
-const itemsToStopQuery = ecs.with('item', 'body', 'position', 'collider')
+const itemsToStopQuery = ecs.with('item', 'body', 'position')
 export const stopItems = () => {
 	for (const item of itemsToStopQuery) {
-		if (item.position.y <= (item.groundLevel ?? 0) + 1) {
-			item.body.setBodyType(RigidBodyType.Fixed, true)
+		if (item.body.translation().y <= (item.groundLevel ?? 0) + 1) {
+			if (item.bounce && item.bounce.amount > 0 && !item.bounce.touchedGround) {
+				const force = item.bounce.force.clone().multiplyScalar(item.bounce.amount)
+				item.body.applyImpulse(force, true)
+				item.bounce.amount -= 1
+				item.bounce.touchedGround = true
+				if (force.y < 1)item.bounce.amount = 0
+			} else {
+				item.position.y = item.groundLevel ?? 1
+				item.body.setBodyType(RigidBodyType.Fixed, true)
+			}
+		} else if (item.bounce && item.bounce.touchedGround) {
+			item.bounce.touchedGround = false
 		}
 	}
 }
