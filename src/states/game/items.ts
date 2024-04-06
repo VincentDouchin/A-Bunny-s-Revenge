@@ -50,7 +50,7 @@ export const popItems = () => ecs.with('body', 'item', 'collider').onEntityAdded
 	force.x = force.x * 20
 	force.z = force.z * 20
 	e.body.applyImpulse(force, true)
-	playSound(['665181__el_boss__item-or-material-pickup-pop-3-of-3', '665182__el_boss__item-or-material-pickup-pop-2-of-3', '665183__el_boss__item-or-material-pickup-pop-1-of-3'])
+	playSound(['665181__el_boss__item-or-material-pickup-pop-3-of-3', '665182__el_boss__item-or-material-pickup-pop-2-of-3', '665183__el_boss__item-or-material-pickup-pop-1-of-3'], { volume: -20 })
 })
 const itemsToStopQuery = ecs.with('item', 'body', 'position')
 export const stopItems = () => {

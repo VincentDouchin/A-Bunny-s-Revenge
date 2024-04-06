@@ -16,9 +16,13 @@ const soundPool = new Pool<Player>(player => new Player(player.buffer), 10)
 
 type soundAssets = { [k in keyof typeof assets]: (typeof assets)[k] extends Record<string, Player> ? k : never }[keyof typeof assets]
 
-export const playSFX = <K extends string = string>(soundAsset: soundAssets) => (sound: K | K[], options?: { volume?: number, pitch?: number, playbackRate?: number, offset?: number }) => {
+export const playSFX = <K extends string = string>(soundAsset: soundAssets) => (sound: K | K[] | 'random', options?: { volume?: number, pitch?: number, playbackRate?: number, offset?: number }) => {
 	return new Promise<void>((resolve) => {
-		const selectedSound = Array.isArray(sound) ? getRandom(sound) : sound
+		const selectedSound = sound === 'random'
+			? getRandom(Object.keys(assets[soundAsset]))
+			: Array.isArray(sound)
+				? getRandom(sound)
+				: sound
 		const [player, free] = soundPool.get(assets[soundAsset][selectedSound])
 		const soundPlayer = player.toDestination()
 		if (options?.playbackRate) {
@@ -43,6 +47,7 @@ export const playSFX = <K extends string = string>(soundAsset: soundAssets) => (
 }
 export const playSound = playSFX<music>('music')
 export const playVoice = playSFX('voices')
+export const playStep = playSFX('steps')
 
 export const playAmbiance = (ambiance: music) => () => {
 	const player = new Player(assets.music[ambiance].buffer).toDestination()

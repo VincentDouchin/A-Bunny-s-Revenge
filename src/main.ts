@@ -31,7 +31,7 @@ import { applyMove, canPlayerMove, movePlayer, playerSteps, savePlayerFromTheEmb
 import { pauseGame } from './states/game/pauseGame'
 import { target } from './states/game/sensor'
 import { basketFollowPlayer, collectItems, enableBasketUi, spawnBasket } from './states/game/spawnBasket'
-import { allowDoorCollision, collideWithDoor, collideWithDoorCamp, collideWithDoorClearing, unlockDoorClearing } from './states/game/spawnDoor'
+import { allowDoorCollision, collideWithDoor, collideWithDoorCamp, collideWithDoorClearing, doorLocking, unlockDoorClearing } from './states/game/spawnDoor'
 import { spawnCrossRoad, spawnDungeon, spawnFarm, spawnLevelData, updateTimeUniforms } from './states/game/spawnLevel'
 import { losingBattle, spawnCharacter, spawnPlayerClearing, spawnPlayerDungeon } from './states/game/spawnPlayer'
 import { touchItem } from './states/game/touchItem'
@@ -56,7 +56,7 @@ setupState
 gameState
 	.addPlugins(debugPlugin)
 
-	.addSubscriber(initializeCameraPosition, bobItems, enableInventoryState, killAnimation, ...playerFSM, ...beeFSM, ...shagaFSM, ...basketFSM, ...beeBossFSM, popItems, addHealthBarContainer, ...addOrRemoveWeaponModel)
+	.addSubscriber(initializeCameraPosition, bobItems, enableInventoryState, killAnimation, ...playerFSM, ...beeFSM, ...shagaFSM, ...basketFSM, ...beeBossFSM, popItems, addHealthBarContainer, ...addOrRemoveWeaponModel, ...doorLocking)
 	.onUpdate(
 		runIf(canPlayerMove, movePlayer),
 		runIf(() => !pausedState.enabled, playerSteps, dayNight, updateTimeUniforms, applyDeathTimer, applyMove),

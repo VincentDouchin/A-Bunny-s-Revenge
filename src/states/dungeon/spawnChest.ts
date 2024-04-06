@@ -70,5 +70,5 @@ export const endBattleSpawnChest: Subscriber<DungeonRessources> = ressources => 
 			spawnChest(ressources.dungeonLevel)
 			enableBasketUi()
 		}
-	}, 100)
+	}, 1000)
 })

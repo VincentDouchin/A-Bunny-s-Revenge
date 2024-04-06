@@ -1,15 +1,15 @@
 import { DoubleSide, Group, Mesh, MeshBasicMaterial, PlaneGeometry, ShaderMaterial } from 'three'
-import type { With } from 'miniplex'
 import { RoomType, genDungeon } from '../dungeon/generateDungeon'
-import type { Entity } from '@/global/entity'
 import { Faction } from '@/global/entity'
 import { ecs, world } from '@/global/init'
+import { save } from '@/global/save'
+import { playSound } from '@/global/sounds'
 import type { DungeonRessources } from '@/global/states'
 import { campState, dungeonState, genDungeonState } from '@/global/states'
 import { otherDirection } from '@/lib/directions'
 import type { System } from '@/lib/state'
+import { doorClosed } from '@/particles/doorClosed'
 import vertexShader from '@/shaders/glsl/main.vert?raw'
-import { save } from '@/global/save'
 
 export const doorSide = () => {
 	const mesh = new Mesh(
@@ -43,19 +43,19 @@ export const doorSide = () => {
 	return door
 }
 
-const unlockDoor = (door: With<Entity, 'door' | 'collider'>) => {
-	door.collider.setSensor(true)
-	door.emitter && (door.emitter.system.looping = false)
-}
-
-const doorQuery = ecs.with('collider', 'door')
+const doorQuery = ecs.with('collider', 'door', 'collider')
 const playerQuery = ecs.with('collider', 'playerControls', 'currentHealth').without('ignoreDoor')
 const enemyQuery = ecs.with('faction').where(({ faction }) => faction === Faction.Enemy)
+const doorToLockQuery = doorQuery.with('doorLocked')
+const doorToUnlockQuery = doorToLockQuery.with('emitter')
 export const collideWithDoor: System<DungeonRessources> = ({ dungeon, dungeonLevel, weapon }) => {
-	for (const door of doorQuery) {
-		if (enemyQuery.size === 0 && !door.collider.isSensor()) {
-			unlockDoor(door)
+	if (doorToUnlockQuery.size > 0 && enemyQuery.size === 0) {
+		for (const door of doorToUnlockQuery) {
+			ecs.removeComponent(door, 'doorLocked')
 		}
+		playSound('zapsplat_multimedia_game_tone_twinkle_bright_collect_gain_level_up_50730', { volume: -15 })
+	}
+	for (const door of doorQuery) {
 		for (const player of playerQuery) {
 			if (world.intersectionPair(door.collider, player.collider)) {
 				const nextRoom = dungeon.doors[door.door]
@@ -102,7 +102,7 @@ const playerWithWeaponQuery = playerQuery.with('weapon')
 export const unlockDoorClearing = () => playerWithWeaponQuery.onEntityAdded.subscribe(() => {
 	for (const door of doorClearingQuery) {
 		if (door.doorLevel < save.unlockedPaths) {
-			unlockDoor(door)
+			ecs.removeComponent(door, 'doorLocked')
 		}
 	}
 })
@@ -117,3 +117,13 @@ export const allowDoorCollision: System<DungeonRessources> = () => {
 		}
 	}
 }
+
+const lockDoors = () => doorToLockQuery.onEntityAdded.subscribe((e) => {
+	e.collider.setSensor(false)
+	ecs.update(e, { emitter: doorClosed() })
+})
+const unlockDoors = () => doorToUnlockQuery.onEntityRemoved.subscribe((e) => {
+	e.collider.setSensor(true)
+	e.emitter.system.looping = false
+})
+export const doorLocking = [lockDoors, unlockDoors]

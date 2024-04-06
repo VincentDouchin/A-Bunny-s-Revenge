@@ -171,14 +171,6 @@ const loadSounds = (loader: (key: string) => void) => async (glob: GlobEager) =>
 	})
 	return mapKeys(sounds, getFileName)
 }
-const loadSteps = (loader: (key: string) => void) => async (glob: GlobEager) => {
-	return Object.values(await asyncMapValues(glob, async (src, key) => {
-		const audio = await loadAudio(src, key)
-		const player = new Player(audio)
-		loader(src)
-		return player
-	}))
-}
 
 const loadItems = (loader: (key: string) => void) => async (glob: GlobEager) => {
 	const { glb, png } = groupByObject(glob, getExtension)
@@ -256,7 +248,7 @@ export const loadAssets = async () => {
 		fruitTrees: typeGlob<fruit_trees>(import.meta.glob('@assets/fruit_trees/*.glb', { as: 'url', eager: true }))(fruitTreeLoader(loader)),
 		buttons: buttonsLoader(loader)(import.meta.glob('@assets/buttons/*.*', { eager: true, import: 'default' })),
 		voices: loadVoices(loader)(import.meta.glob('@assets/voices/*.ogg', { eager: true, import: 'default' })),
-		steps: loadSteps(loader)(import.meta.glob('@assets/steps/*.ogg', { eager: true, import: 'default' })),
+		steps: loadSounds(loader)(import.meta.glob('@assets/steps/*.ogg', { eager: true, import: 'default' })),
 		items: typeGlob<items>(import.meta.glob('@assets/items/*.*', { as: 'url', eager: true }))(loadItems(loader)),
 		music: loadSounds(loader)(import.meta.glob('@assets/music/*.ogg', { eager: true, import: 'default' })),
 		weapons: typeGlob<weapons>(import.meta.glob('@assets/weapons/*.*', { as: 'url', eager: true }))(loadGLBAsToon(loader, {})),

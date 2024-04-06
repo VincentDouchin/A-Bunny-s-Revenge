@@ -17,7 +17,7 @@ import type { DungeonRessources, FarmRessources } from '@/global/states'
 import { dungeonState, genDungeonState } from '@/global/states'
 
 import type { direction } from '@/lib/directions'
-import { doorClosed } from '@/particles/doorClosed'
+import { RoomType } from '@/states/dungeon/generateDungeon'
 import { cropBundle } from '@/states/farm/farming'
 import { openMenu } from '@/states/farm/openInventory'
 import { doorSide } from '@/states/game/spawnDoor'
@@ -208,15 +208,15 @@ export const props: PlacableProp<propNames>[] = [
 		name: 'door',
 		data: { direction: 'north', doorLevel: 0 },
 		models: ['door'],
-		bundle: (entity, data) => {
-			if (dungeonState.enabled) {
-				entity.colliderDesc!.setSensor(false)
-				entity.emitter = doorClosed()
+		bundle: (entity, data, ressources) => {
+			if (dungeonState.enabled && ressources && 'dungeon' in ressources) {
+				if (![RoomType.NPC, RoomType.Item].includes(ressources.dungeon.type)) {
+					entity.doorLocked = true
+				}
 			}
 			if (genDungeonState.enabled && data.data.direction === 'north') {
 				entity.doorLevel = data.data.doorLevel
-				entity.colliderDesc!.setSensor(false)
-				entity.emitter = doorClosed()
+				entity.doorLocked = true
 			}
 
 			return { door: data.data.direction, ...entity }

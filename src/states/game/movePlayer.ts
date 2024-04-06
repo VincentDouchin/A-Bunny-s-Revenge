@@ -1,12 +1,11 @@
-import { Vector3 } from 'three'
-import { Player } from 'tone'
 import { QueryFilterFlags } from '@dimforge/rapier3d-compat'
+import { Vector3 } from 'three'
 import { params } from '@/global/context'
-import { assets, ecs, inputManager, time } from '@/global/init'
+import { ecs, inputManager, time } from '@/global/init'
+import { updateSave } from '@/global/save'
+import { playStep } from '@/global/sounds'
 import { cutSceneState, openMenuState, pausedState } from '@/global/states'
 import { throttle } from '@/lib/state'
-import { updateSave } from '@/global/save'
-import { getRandom } from '@/utils/mapFunctions'
 
 const movementQuery = ecs.with('body', 'rotation', 'movementForce', 'speed', 'stateMachine', 'state')
 const playerQuery = movementQuery.with('playerControls', 'position', 'playerAnimator', 'state', 'lastStep')
@@ -17,12 +16,7 @@ export const playerSteps = () => {
 			for (const [time, foot] of [[12 / 20, 'right'], [3 / 20, 'left']] as const) {
 				if (player.playerAnimator.action.time >= time) {
 					if (player.lastStep[foot] === false) {
-						const buffer = getRandom(assets.steps).buffer
-						const sound = new Player(buffer).toDestination()
-						sound.playbackRate = 3
-
-						sound.start()
-						sound.onstop = () => sound.dispose()
+						playStep('random', { volume: -12 })
 						player.lastStep[foot] = true
 					}
 				} else {

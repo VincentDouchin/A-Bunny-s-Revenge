@@ -132,6 +132,7 @@ export interface Entity {
 	// ! Camp
 	door?: direction
 	doorLevel?: number
+	doorLocked?: true
 	tree?: true
 	grass?: true
 	instanceHandle?: InstanceHandle
