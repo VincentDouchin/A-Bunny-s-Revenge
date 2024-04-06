@@ -1,6 +1,6 @@
 import type { characters, fruit_trees, icons, items, mainMenuAssets, models, particles, textures, trees, vegetation, weapons } from '@assets/assets'
 import type { ColorRepresentation, Material, Side } from 'three'
-import { CanvasTexture, Color, DoubleSide, Mesh, MeshBasicMaterial, MeshStandardMaterial, NearestFilter, RepeatWrapping, SRGBColorSpace, TextureLoader } from 'three'
+import { CanvasTexture, Color, DoubleSide, Mesh, MeshBasicMaterial, MeshStandardMaterial, NearestFilter, RepeatWrapping, SRGBColorSpace } from 'three'
 
 import assetManifest from '@assets/assetManifest.json'
 import type { GLTF } from 'three/examples/jsm/loaders/GLTFLoader'
@@ -14,12 +14,6 @@ import { keys } from '@/constants/keys'
 
 type Glob = Record<string, () => Promise<any>>
 type GlobEager<T = string> = Record<string, T>
-
-export const loadToneMap = async (url: string) => {
-	const texture = await new TextureLoader().loadAsync(url)
-	texture.minFilter = texture.magFilter = NearestFilter
-	return texture
-}
 
 const typeGlob = <K extends string>(glob: Record<string, any>) => async <F extends (glob: Record<string, any>) => Promise<Record<string, any>>>(fn: F) => {
 	return await fn(glob) as Record<K, Awaited<ReturnType<F>>[string]>

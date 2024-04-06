@@ -42,6 +42,7 @@ const updateWorldPosition = () => {
 		group.getWorldPosition(worldPosition)
 		if (body.isFixed()) {
 			body.setTranslation(worldPosition, true)
+			worldPositionQuery.remove(entity)
 		}
 	}
 }

@@ -1,6 +1,6 @@
 import { Easing, Tween } from '@tweenjs/tween.js'
 import type { MeshStandardMaterial } from 'three'
-import { CanvasTexture, Group, Mesh, MeshBasicMaterial, NearestFilter, PerspectiveCamera, Raycaster, Scene, Vector2, Vector3 } from 'three'
+import { CanvasTexture, Group, Mesh, MeshBasicMaterial, PerspectiveCamera, Raycaster, Scene, Vector2, Vector3 } from 'three'
 
 import { basketFollowPlayer, spawnBasket } from '../game/spawnBasket'
 import { playerBundle } from '../game/spawnPlayer'
