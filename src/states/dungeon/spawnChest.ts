@@ -17,6 +17,7 @@ import type { Subscriber } from '@/lib/state'
 import { chestAppearing } from '@/particles/chestAppearing'
 import { entries, getRandom, range } from '@/utils/mapFunctions'
 import { sleep } from '@/utils/sleep'
+import { playSound } from '@/global/sounds'
 
 export const lootPlayerQuery = ecs.with('player', 'lootQuantity', 'lootChance')
 
@@ -25,6 +26,8 @@ export const spawnChest = (dungeonLevel: number) => {
 		const chest = clone(assets.models.Chest.scene)
 		chest.scale.setScalar(0)
 		chest.rotateY(Math.PI)
+		playSound('085_save_game_02', { volume: -12, playbackRate: 1.5 })
+		playSound('202092__spookymodem__chest-opening', { volume: -12 })
 		const chestEntity = ecs.add({
 			...inMap(),
 			model: chest,

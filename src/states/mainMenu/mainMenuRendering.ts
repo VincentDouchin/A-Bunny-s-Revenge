@@ -16,25 +16,49 @@ import { windowEvent } from '@/lib/uiManager'
 import { drawnHouseShader } from '@/shaders/drawnHouseShader'
 import { cloneCanvas, imgToCanvas } from '@/utils/buffer'
 import { doorQuery, leaveHouse, setSensor } from '@/utils/dialogHelpers'
+import { playSound } from '@/global/sounds'
 
 export type MenuOptions = 'Continue' | 'New Game' | 'Settings' | 'Credits'
 
-const drawUnderline = (ctx: CanvasRenderingContext2D, x: number, y: number, w: number) => {
+const drawUnderline = (ctx: CanvasRenderingContext2D, x: number, y: number, w: number, offset: number) => {
 	ctx.globalAlpha = 1
 	const underline: HTMLImageElement = assets.textures.borders.source.data
-	ctx.drawImage(underline, 0, 0, 150, underline.height, x - 100, y - underline.height / 2 - 30, 150, underline.height)
-	ctx.drawImage(underline, underline.width - 150, 0, 150, underline.height, x + w - 50, y - underline.height / 2 - 30, 150, underline.height)
+	// left
+	ctx.drawImage(
+		underline,
+		0, // x
+		0, // y
+		150, // w
+		underline.height, // h
+		x - 100 - offset, // x
+		y - underline.height / 2 - 30, // y
+		150, // w
+		underline.height, // h
+	)
+	// right
+	ctx.drawImage(
+		underline,
+		underline.width - 150, // x
+		0, // y
+		150, // w
+		underline.height, // h
+		x + w - 50 + offset, // x
+		y - underline.height / 2 - 30, // y
+		150, // w
+		underline.height, // h
+	)
 	ctx.globalAlpha = 0.8
 }
-
+export type RenderMainMenuFn = (direction?: direction, offset?: number) => MenuOptions
 const menu = ['Continue', 'New Game', 'Settings', 'Credits'] as const
 const mainMenuTexture = (mat: MeshStandardMaterial) => {
 	let selected = 0
 	const optionsDimensions: Partial<Record<MenuOptions, { y: number, w: number }>> = {}
 	const pageRight = imgToCanvas(assets.textures.parchment.source.data)
 	const font = 'EnchantedLand'
+	const textColor = '#2c1e31'
+	pageRight.fillStyle = textColor
 	pageRight.globalAlpha = 0.8
-	pageRight.fillStyle = '#2c1e31'
 	pageRight.font = `bold 130px ${font}`
 	pageRight.fillText('Fabled Recipes', 200, 200)
 	pageRight.font = `normal 110px ${font}`
@@ -51,21 +75,30 @@ const mainMenuTexture = (mat: MeshStandardMaterial) => {
 
 	let lastClone: HTMLCanvasElement | null = null
 	let map: CanvasTexture | null = null
-	return (direction?: direction | null) => {
+	return (direction?: direction | null, offset = 0) => {
+		const oldSelected = selected
 		if (direction === 'south') {
 			selected = Math.min(selected + 1, menu.length - 1)
 		}
 		if (direction === 'north') {
 			selected = Math.max(selected - 1, 0)
 		}
-		if (direction || direction === null) {
+		if (selected !== oldSelected) {
+			playSound('004_Hover_04', { volume: -12 })
+		}
+		if (direction || direction === null || offset) {
 			const clone = cloneCanvas(pageRight.canvas)
 			const dimensions = optionsDimensions[menu[selected]]
 			if (!dimensions) return menu[selected]
 			const { y, w } = dimensions
-			drawUnderline(clone, marginLeft, y, w)
+			drawUnderline(clone, marginLeft, y, w, offset)
 			lastClone = clone.canvas
-		};
+			clone.shadowColor = 'white'
+			clone.shadowBlur = offset
+			clone.fillStyle = textColor
+			clone.font = `normal 110px ${font}`
+			clone.fillText(menu[selected], marginLeft, y)
+		}
 		if (!map && lastClone) {
 			map = new CanvasTexture(lastClone)
 			mat.map = map
@@ -116,6 +149,7 @@ export const intiMainMenuRendering = () => {
 			})
 		}
 		if (node instanceof Mesh && node.name === 'pageRight') {
+			node.material = new MeshBasicMaterial({ map: node.material.map })
 			const menuTexture = mainMenuTexture(node.material)
 			ecs.add({ menuSelected: 'Continue', menuTexture, ...menuInputMap(), windowShader, stateEntity: mainMenuState })
 			menuTexture(null)
@@ -213,7 +247,22 @@ export const continueGame = (entities = menuTextureQuery.entities) => {
 		}
 	}
 }
-
+const selectOption = (fn: (offset: number) => void) => new Promise<void>((resolve) => {
+	playSound('020_Confirm_10', { volume: -1 })
+	ecs.add({
+		tween: new Tween({ f: 0 }).to({ f: 20 }, 200)
+			.onUpdate(({ f }) => fn(f))
+			.easing(Easing.Quadratic.Out)
+			.chain(
+				new Tween(({ f: 20 }))
+					.to(({ f: 0 }), 200)
+					.onUpdate(({ f }) => fn(f))
+					.easing(Easing.Quadratic.In)
+				,
+			),
+	})
+	setTimeout(resolve, 300)
+})
 export const selectMainMenu = () => {
 	for (const mainMenu of menuTextureQuery) {
 		if (mainMenu.menuInputs.get('down').justPressed) {
@@ -224,7 +273,7 @@ export const selectMainMenu = () => {
 		}
 		if (mainMenu.menuInputs.get('validate').justPressed) {
 			if (mainMenu.menuTexture() === 'Continue') {
-				continueGame([mainMenu])
+				selectOption(offset => mainMenu.menuTexture(undefined, offset)).then(() => continueGame([mainMenu]))
 			}
 		}
 	}

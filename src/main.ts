@@ -15,6 +15,7 @@ import { transformsPlugin } from './lib/transforms'
 import { tweenPlugin } from './lib/updateTween'
 import { pickupAcorn } from './states/dungeon/acorn'
 import { applyDeathTimer, enemyAttackPlayer, playerAttack, projectilesDamagePlayer, spawnDrops } from './states/dungeon/battle'
+import { dropBerriesOnHit } from './states/dungeon/bushes'
 import { spawnWeaponsChoice } from './states/dungeon/chooseWeapon'
 import { removeEnemyFromSpawn } from './states/dungeon/enemies'
 import { killAnimation, killEntities } from './states/dungeon/health'
@@ -73,7 +74,7 @@ campState
 	.addSubscriber(...interactablePlantableSpot)
 	.onEnter(spawnFarm, spawnLevelData, updateCropsSave, initPlantableSpotsInteractions, enableBasketUi)
 	.onEnter(runIf(() => !mainMenuState.enabled, spawnCharacter, spawnBasket), moveCamera(true))
-	.onUpdate(collideWithDoorCamp)
+	.onUpdate(collideWithDoorCamp, dropBerriesOnHit)
 	.onUpdate(runIf(canPlayerMove, plantSeed, harvestCrop, openPlayerInventory, savePlayerPosition, basketFollowPlayer()))
 	.onExit(despawnOfType('map'))
 openMenuState

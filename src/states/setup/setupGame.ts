@@ -49,7 +49,7 @@ export const disablePortrait = () => {
 
 	return () => mediaMatch.removeEventListener('change', listener)
 }
-export const enableFullscreen = () => windowEvent('pointerdown', () => {
+export const enableFullscreen = () => windowEvent('pointerup', () => {
 	if (save.settings.fullscreen) {
 		document.documentElement.requestFullscreen()
 	}

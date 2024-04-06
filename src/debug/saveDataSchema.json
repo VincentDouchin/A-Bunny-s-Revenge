@@ -18,50 +18,12 @@
 			],
 			"type": "object"
 		},
-		"ModStage": {
-			"enum": [
-				0,
-				1,
-				2
-			],
-			"type": "number"
-		},
-		"ModType": {
-			"enum": [
-				0,
-				1
-			],
-			"type": "number"
-		},
-		"Modifier<any>": {
-			"additionalProperties": false,
-			"properties": {
-				"name": {},
-				"stackable": {
-					"type": "boolean"
-				},
-				"stage": {
-					"$ref": "#/definitions/ModStage"
-				},
-				"type": {
-					"$ref": "#/definitions/ModType"
-				},
-				"value": {
-					"type": "number"
-				}
-			},
-			"required": [
-				"value",
-				"stage",
-				"type",
-				"name",
-				"stackable"
-			],
-			"type": "object"
-		},
 		"SaveData": {
 			"additionalProperties": false,
 			"properties": {
+				"acorns": {
+					"type": "number"
+				},
 				"crops": {
 					"additionalProperties": {
 						"additionalProperties": false,
@@ -92,7 +54,7 @@
 				},
 				"modifiers": {
 					"items": {
-						"$ref": "#/definitions/Modifier%3Cany%3E"
+						"type": "string"
 					},
 					"type": "array"
 				},
@@ -172,7 +134,8 @@
 				"inventories",
 				"modifiers",
 				"settings",
-				"unlockedPaths"
+				"unlockedPaths",
+				"acorns"
 			],
 			"type": "object"
 		},
@@ -189,6 +152,7 @@
 		},
 		"items": {
 			"enum": [
+				"acorn",
 				"beet",
 				"beetroot_salad",
 				"beet_seeds",
@@ -218,6 +182,7 @@
 				"slime_bread",
 				"slime_dough",
 				"slime_dumpling",
+				"strawberry",
 				"strawberry_pie",
 				"sugar",
 				"tomato",

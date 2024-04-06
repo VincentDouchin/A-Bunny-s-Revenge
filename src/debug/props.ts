@@ -53,7 +53,7 @@ export interface PlacableProp<N extends string> {
 	data?: N extends keyof ExtraData ? ExtraData[N] : undefined
 	bundle?: BundleFn<EntityData<N extends keyof ExtraData ? NonNullable<ExtraData[N]> : never>>
 }
-type propNames = 'log' | 'door' | 'rock' | 'board' | 'oven' | 'CookingPot' | 'stove' | 'Flower/plants' | 'sign' | 'plots' | 'bush' | 'fence' | 'house' | 'mushrooms' | 'lamp' | 'Kitchen'
+type propNames = 'log' | 'door' | 'rock' | 'board' | 'oven' | 'CookingPot' | 'stove' | 'Flower/plants' | 'sign' | 'plots' | 'bush' | 'fence' | 'house' | 'mushrooms' | 'lamp' | 'Kitchen' | 'berry bushes'
 export const props: PlacableProp<propNames>[] = [
 	{
 		name: 'log',
@@ -269,5 +269,15 @@ export const props: PlacableProp<propNames>[] = [
 	{
 		name: 'Kitchen',
 		models: ['KitchenSet1', 'bench', 'table', 'stringLights', 'Bucket', 'well'],
+	},
+	{
+		name: 'berry bushes',
+		models: ['Berry_Bush'],
+		bundle(entity) {
+			return {
+				...entity,
+				berries: true,
+			}
+		},
 	},
 ]

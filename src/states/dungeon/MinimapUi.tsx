@@ -66,9 +66,30 @@ export const MiniMapUi = () => {
 		<ForQuery query={dungeonQuery}>
 			{(dungeon) => {
 				return (
-					<div style={{ 'position': 'fixed', 'top': 0, 'right': 0, 'margin': '2rem', 'width': '15rem', 'height': '10rem', 'background': 'hsl(0,0%,0%,40%)', 'border': 'solid 0.5rem hsl(0,0%,100%,0.8)', 'border-radius': '2rem', 'display': 'grid', 'place-items': 'center', 'overflow': 'hidden' }}>
-						<RoomUi room={dungeon.dungeon} current={true} />
-					</div>
+					<>
+						<style jsx>
+							{/* css */`
+							.minimap{
+								position: fixed;
+								top: 0;
+								right: 0;
+								margin: 2rem;
+								width: 15rem;
+								height: 10rem;
+								background: hsla(0, 0%, 100%, 0.3);
+								/* border: 0.5rem solid hsla(0, 0%, 100%, 0.5); */
+								border-radius: 2rem;
+								display: grid;
+								place-items: center;
+								overflow: hidden;
+							}
+						`}
+
+						</style>
+						<div class="minimap">
+							<RoomUi room={dungeon.dungeon} current={true} />
+						</div>
+					</>
 				)
 			}}
 		</ForQuery>

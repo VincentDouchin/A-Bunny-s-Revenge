@@ -35,13 +35,14 @@ export const drawnHouseShader = () => new ShaderMaterial({
 	uniform float time;
 	uniform float windowSize;
 	uniform float parchmentMix;
-	uniform int kSize;
+	uniform float kSize;
 	uniform vec2 resolution;
 	void main(){
 		vec2 vCoords = vPos.xy;
 		vCoords /= vPos.w;
 		vCoords = vCoords * 0.5 + 0.5 ;
-		vec4 house_color = kuwahara(house,resolution,vCoords,kSize);
+		int floored_k_size = int(floor(kSize));
+		vec4 house_color = kuwahara(house,resolution,vCoords,floored_k_size);
 		vec4 parchment_color = texture2D(parchment, vUv);
 		vec2 centered_uv = abs(vUv *0.5 -0.25)*5.;
 		float distance = abs(length(centered_uv));

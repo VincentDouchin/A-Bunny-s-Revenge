@@ -4,6 +4,7 @@ import { createMemo, createRoot, createSignal } from 'solid-js'
 import { generateUUID } from 'three/src/math/MathUtils'
 import { ui } from '@/global/init'
 import type { MenuInputMap } from '@/global/inputMaps'
+import { playSound } from '@/global/sounds'
 
 const findClosest = (selected: HTMLElement, neighbors: IterableIterator<HTMLElement>) => (direction: 'up' | 'down' | 'left' | 'right') => {
 	let distance = Number.POSITIVE_INFINITY
@@ -80,6 +81,7 @@ export function Menu(props: MenuProps) {
 						const newSelected = inverseRefs.get(newSelectedElement)
 						if (newSelected !== undefined) {
 							setSelected(() => newSelected)
+							playSound('004_Hover_04', { volume: -12 })
 						}
 					}
 				}

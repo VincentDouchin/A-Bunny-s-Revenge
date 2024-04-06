@@ -18,7 +18,7 @@ import type { State } from '@/lib/state'
 import type { StateMachine } from '@/lib/stateMachine'
 import type { Stat } from '@/lib/stats'
 import type { Room } from '@/states/dungeon/generateDungeon'
-import type { MenuOptions } from '@/states/mainMenu/mainMenuRendering'
+import type { MenuOptions, RenderMainMenuFn } from '@/states/mainMenu/mainMenuRendering'
 
 export type Dialog = Generator<string | string[] | void | false, void, number | void>
 export enum Faction {
@@ -216,12 +216,14 @@ export interface Entity {
 	weaponStand?: weapons
 	// ! Main menu
 	menuSelected?: MenuOptions
-	menuTexture?: (direction?: direction) => MenuOptions
+	menuTexture?: RenderMainMenuFn
 	windowShader?: ShaderMaterial
 	stateEntity?: State
 	menuButton?: MenuOptions
 	// ! Money
 	acorn?: true
+	// ! Berry Bush
+	berries?: true
 }
 export type states = 'idle' | 'running' | 'picking' | 'dying' | 'hit' | 'hello' | 'dead' | 'waitingAttack' | 'attacking' | 'attackCooldown' | 'doorOpening' | 'doorClosing' | 'cheer'
 export type Bundle<C extends keyof Entity> = () => With<Entity, C>

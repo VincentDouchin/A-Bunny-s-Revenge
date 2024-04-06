@@ -35,7 +35,7 @@ export const PauseUi = () => {
 						<input type="range" class="input-range" value={save.settings.volume} onChange={e => setVolume(e.target.valueAsNumber)}></input>
 					</div>
 					<Show when={!isStandalone()}>
-						<button class="button" style={{ margin: '1rem' }} onClick={toggleFullscreen}>
+						<button class="button" style={{ margin: '1rem' }} onPointerDown={toggleFullscreen}>
 							{`${fullscreen() ? 'Disable' : 'Enable'} auto fullscreen`}
 						</button>
 					</Show>

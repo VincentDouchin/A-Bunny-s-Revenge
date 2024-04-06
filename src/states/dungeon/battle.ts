@@ -1,6 +1,7 @@
 import { Tween } from '@tweenjs/tween.js'
 import type { With } from 'miniplex'
 import { Mesh, Vector3 } from 'three'
+import { between } from 'randomish'
 import { itemBundle } from '../game/items'
 import { spawnAcorns } from './acorn'
 import type { Entity } from '@/global/entity'
@@ -12,6 +13,7 @@ import { impact } from '@/particles/impact'
 import { CharacterMaterial } from '@/shaders/materials'
 import { addCameraShake } from '@/global/camera'
 import { lootPool } from '@/constants/enemies'
+import { playSound } from '@/global/sounds'
 
 export const flash = (entity: With<Entity, 'model'>) => {
 	const tween = new Tween({ color: 0 })
@@ -79,6 +81,7 @@ export const playerAttack = () => {
 				if (world.intersectionPair(sensorCollider, enemy.collider)) {
 					if (player.playerAnimator.getTimeRatio() > 0.5) {
 						if (enemy.stateMachine.enter('hit', enemy)) {
+							playSound(['Hit_Metal_on_flesh', 'Hit_Metal_on_leather', 'Hit_Wood_on_flesh', 'Hit_Wood_on_leather'], { volume: -12 })
 							// ! damage
 							const [damage, crit] = calculateDamage(player)
 							enemy.currentHealth -= damage
@@ -102,7 +105,7 @@ export const playerAttack = () => {
 export const spawnDrops = () => ecs.with('drops', 'position').onEntityRemoved.subscribe((e) => {
 	const player = playerQuery.first
 	if (player) {
-		spawnAcorns(5, e.position)
+		spawnAcorns(between(2, 5), e.position)
 		for (const drop of lootPool(player.lootQuantity.value, player.lootChance.value, e.drops)) {
 			ecs.add({ ...itemBundle(drop.name), position: e.position.clone().add(new Vector3(0, 5, 0)) })
 		}

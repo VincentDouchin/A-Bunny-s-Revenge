@@ -5,15 +5,13 @@ import { coroutines, time } from '@/global/init'
 import { outlinePass } from '@/shaders/PixelOutlineMaterial'
 import { getScreenBuffer } from '@/utils/buffer'
 
-const SIZE = 24
-
-export const thumbnailRenderer = () => {
+export const thumbnailRenderer = (size = 24) => {
 	const renderer = new WebGLRenderer({ alpha: true })
-	const target = new WebGLRenderTarget(SIZE, SIZE)
+	const target = new WebGLRenderTarget(size, size)
 
-	renderer.setSize(SIZE, SIZE)
+	renderer.setSize(size, size)
 	renderer.outputColorSpace = LinearSRGBColorSpace
-	const outlineQuad = new FullScreenQuad(outlinePass(target.texture, new Vector2(SIZE, SIZE)))
+	const outlineQuad = new FullScreenQuad(outlinePass(target.texture, new Vector2(size, size)))
 	const camera = new OrthographicCamera()
 	const scene = new Scene()
 	scene.add(camera)
@@ -30,8 +28,8 @@ export const thumbnailRenderer = () => {
 		renderer.render(scene, camera)
 		renderer.setRenderTarget(null)
 		outlineQuad.render(renderer)
-		const buffer = getScreenBuffer(SIZE, SIZE)
-		buffer.drawImage(renderer.domElement, 0, 0, SIZE, SIZE)
+		const buffer = getScreenBuffer(size, size)
+		buffer.drawImage(renderer.domElement, 0, 0, size, size)
 		clone.removeFromParent()
 		return buffer.canvas
 	}
@@ -41,26 +39,28 @@ export const thumbnailRenderer = () => {
 		renderer.setRenderTarget(null)
 		outlineQuad.render(renderer)
 	}
-	const spin = (existingClone: Object3D<Object3DEventMap>) => {
-		scene.add(existingClone)
+	const spin = (model: Object3D<Object3DEventMap>) => {
+		scene.add(model)
 		camera.position.set(0, 1, -1)
 		camera.zoom = 2.3
 		camera.lookAt(new Vector3(0, 0.3, 0))
 		camera.updateProjectionMatrix()
 		render()
+		let spinAmount = 0.0025
 		const existingCoroutine = coroutines.add(function*() {
 			while (true) {
 				render()
-				existingClone?.rotateY(0.0025 * time.delta)
+				model?.rotateY(spinAmount * time.delta)
 				yield
 			}
 		})
 		const clear = () => {
-			existingClone?.rotation.set(0, 0, 0)
-			existingClone?.removeFromParent()
+			model?.rotation.set(0, 0, 0)
+			model?.removeFromParent()
 			existingCoroutine && existingCoroutine()
 		}
-		return { element: renderer.domElement, clear }
+		const setSpinAmount = (fn: (amount: number) => number) => spinAmount = fn(spinAmount)
+		return { element: renderer.domElement, clear, setSpinAmount }
 	}
 
 	return { getCanvas, spin }

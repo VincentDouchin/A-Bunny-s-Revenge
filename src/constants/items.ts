@@ -27,6 +27,10 @@ export const itemsData: Record<items, ItemData> = {
 		name: 'Acorn',
 	},
 	// ! Ingredients
+	strawberry: {
+		name: 'Strawberry',
+		ingredient: true,
+	},
 	beet: {
 		name: 'Beet',
 		ingredient: true,
@@ -72,7 +76,6 @@ export const itemsData: Record<items, ItemData> = {
 		name: 'Milk',
 		ingredient: true,
 	},
-
 	wheat: {
 		name: 'Wheat',
 		ingredient: true,
