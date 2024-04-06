@@ -23,7 +23,7 @@ export const spawnAcorns = async (amount: number, position: Vector3) => {
 			acorn: true,
 			deathTimer: 3000,
 		})
-		playSound(['665181__el_boss__item-or-material-pickup-pop-3-of-3', '665182__el_boss__item-or-material-pickup-pop-2-of-3', '665183__el_boss__item-or-material-pickup-pop-1-of-3'], { volume: -12, pitch: -10 })
+		playSound(['665181__el_boss__item-or-material-pickup-pop-3-of-3', '665182__el_boss__item-or-material-pickup-pop-2-of-3', '665183__el_boss__item-or-material-pickup-pop-1-of-3'], { volume: -12 })
 		await sleep(50)
 	}
 }

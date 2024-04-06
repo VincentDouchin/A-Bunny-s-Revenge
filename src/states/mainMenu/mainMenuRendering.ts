@@ -1,6 +1,7 @@
 import { Easing, Tween } from '@tweenjs/tween.js'
 import type { MeshStandardMaterial } from 'three'
 import { CanvasTexture, Group, Mesh, MeshBasicMaterial, NearestFilter, PerspectiveCamera, Raycaster, Scene, Vector2, Vector3 } from 'three'
+
 import { basketFollowPlayer, spawnBasket } from '../game/spawnBasket'
 import { playerBundle } from '../game/spawnPlayer'
 import { updateCameraZoom } from '@/global/camera'
@@ -13,7 +14,7 @@ import { cutSceneState, mainMenuState } from '@/global/states'
 import type { direction } from '@/lib/directions'
 import { windowEvent } from '@/lib/uiManager'
 import { drawnHouseShader } from '@/shaders/drawnHouseShader'
-import { imgToCanvas } from '@/utils/buffer'
+import { cloneCanvas, imgToCanvas } from '@/utils/buffer'
 import { doorQuery, leaveHouse, setSensor } from '@/utils/dialogHelpers'
 
 export type MenuOptions = 'Continue' | 'New Game' | 'Settings' | 'Credits'
@@ -29,6 +30,27 @@ const drawUnderline = (ctx: CanvasRenderingContext2D, x: number, y: number, w: n
 const menu = ['Continue', 'New Game', 'Settings', 'Credits'] as const
 const mainMenuTexture = (mat: MeshStandardMaterial) => {
 	let selected = 0
+	const optionsDimensions: Partial<Record<MenuOptions, { y: number, w: number }>> = {}
+	const pageRight = imgToCanvas(assets.textures.parchment.source.data)
+	const font = 'EnchantedLand'
+	pageRight.globalAlpha = 0.8
+	pageRight.fillStyle = '#2c1e31'
+	pageRight.font = `bold 130px ${font}`
+	pageRight.fillText('Fabled Recipes', 200, 200)
+	pageRight.font = `normal 110px ${font}`
+	let marginTop = 400
+	const marginLeft = 250
+	for (let i = 0; i < menu.length; i++) {
+		const text = menu[i]
+		pageRight.fillText(text, marginLeft, marginTop)
+
+		const { width } = pageRight.measureText(text)
+		optionsDimensions[text] = { y: marginTop, w: width }
+		marginTop += 120
+	}
+
+	let lastClone: HTMLCanvasElement | null = null
+	let map: CanvasTexture | null = null
 	return (direction?: direction | null) => {
 		if (direction === 'south') {
 			selected = Math.min(selected + 1, menu.length - 1)
@@ -37,28 +59,19 @@ const mainMenuTexture = (mat: MeshStandardMaterial) => {
 			selected = Math.max(selected - 1, 0)
 		}
 		if (direction || direction === null) {
-			const pageRight = imgToCanvas(assets.textures.parchment.source.data)
-			const font = 'EnchantedLand'
-			pageRight.globalAlpha = 0.8
-			pageRight.fillStyle = '#2c1e31'
-			pageRight.font = `bold 130px ${font}`
-			pageRight.fillText('Fabled Recipes', 200, 200)
-			pageRight.font = `normal 110px ${font}`
-			let marginTop = 400
-			const marginLeft = 250
-			for (let i = 0; i < menu.length; i++) {
-				const text = menu[i]
-				pageRight.fillText(text, marginLeft, marginTop)
-				if (selected === i) {
-					const { width } = pageRight.measureText(text)
-					drawUnderline(pageRight, marginLeft, marginTop, width)
-				}
-				marginTop += 120
-			}
-			const pageRightTexture = new CanvasTexture(pageRight.canvas)
-			pageRightTexture.magFilter = NearestFilter
-			pageRightTexture.minFilter = NearestFilter
-			mat.map = pageRightTexture
+			const clone = cloneCanvas(pageRight.canvas)
+			const dimensions = optionsDimensions[menu[selected]]
+			if (!dimensions) return menu[selected]
+			const { y, w } = dimensions
+			drawUnderline(clone, marginLeft, y, w)
+			lastClone = clone.canvas
+		};
+		if (!map && lastClone) {
+			map = new CanvasTexture(lastClone)
+			mat.map = map
+		} else if (map) {
+			map.image = lastClone
+			map.needsUpdate = true
 		}
 		return menu[selected]
 	}

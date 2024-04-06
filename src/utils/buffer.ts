@@ -24,8 +24,9 @@ export const scaleCanvas = (canvas: HTMLCanvasElement, scale: number | { x: numb
 	newBuffer.drawImage(canvas, 0, 0, newWidth, newHeight)
 	return newBuffer.canvas
 }
-export const imgToCanvas = (img: HTMLImageElement) => {
+export const imgToCanvas = (img: HTMLImageElement | HTMLCanvasElement) => {
 	const buffer = getScreenBuffer(img.width, img.height)
 	buffer.drawImage(img, 0, 0)
 	return buffer
 }
+export const cloneCanvas = imgToCanvas

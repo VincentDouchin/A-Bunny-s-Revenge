@@ -1,11 +1,11 @@
-import { BasicShadowMap, DepthTexture, LinearSRGBColorSpace, NearestFilter, RGBAFormat, Scene, ShaderMaterial, Vector2, WebGLRenderTarget, WebGLRenderer } from 'three'
+import { ACESFilmicToneMapping, BasicShadowMap, DepthTexture, LinearSRGBColorSpace, NearestFilter, RGBAFormat, Scene, ShaderMaterial, Vector2, WebGLRenderTarget, WebGLRenderer } from 'three'
 
 import { FullScreenQuad } from 'three/examples/jsm/postprocessing/Pass'
 import { CSS2DRenderer } from 'three/examples/jsm/renderers/CSS2DRenderer'
+import { params } from './context'
 import { RenderGroup } from './entity'
 import { ecs } from './init'
 import { mainMenuState } from './states'
-import { params } from './context'
 import { getDepthShader, getSobelShader } from '@/shaders/EdgePass'
 
 export const scene = new Scene()
@@ -49,6 +49,7 @@ export const initThree = () => {
 	renderer.clear()
 	renderer.shadowMap.enabled = true
 	renderer.shadowMap.type = BasicShadowMap
+	renderer.toneMapping = ACESFilmicToneMapping
 	renderer.domElement.classList.add('main')
 	document.body.appendChild(renderer.domElement)
 	renderer.outputColorSpace = LinearSRGBColorSpace
