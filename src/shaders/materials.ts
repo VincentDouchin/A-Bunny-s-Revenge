@@ -79,7 +79,9 @@ const groundExtension = new MaterialExtension({
 			float world_noise = cnoise(vWorldPosition*300.);
 			float normal_noised = step(dotNormal ,dotNormal * world_noise);
 			float noise_3 = step(0.5,cnoise(vec3(dotNormal)));
-			vec3 grass_and_path = mix(grass,path,smoothstep(0.7,0.8,texture2D(level,vUv ).r ) );
+			float path_amount = texture2D(level,vUv ).a;
+			float path_noised = step(0.5- path_amount ,cnoise(vec3(scaled_uv,1.))*(path_amount/3.));
+			vec3 grass_and_path = mix(grass,path,path_noised );
 			color.rgb = mix(tex.rgb,grass_and_path,normal_noised);
 	`),
 	)

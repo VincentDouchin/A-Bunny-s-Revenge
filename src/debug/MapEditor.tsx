@@ -43,6 +43,7 @@ export const MapEditor = ({
 	fakeGround: null | Mesh<PlaneGeometry>
 }) => {
 	const [brush, setBrush] = createSignal(10)
+	const [hardness, setHardness] = createSignal(50)
 	const [intensity, setIntensity] = createSignal(0.5)
 	const [up, setUp] = createSignal(true)
 	const [gradual, setGradual] = createSignal(true)
@@ -76,7 +77,13 @@ export const MapEditor = ({
 	mesh.rotateX(Math.PI / 2)
 	const drawCircle = (position: Vector3, color: string) => {
 		const img = selectedCanvas()
-		buffer().fillStyle = color
+		const x = position.x + img.width / 2
+		const y = img.height / 2 - position.z
+		// buffer().fillStyle = color
+		const gradient = buffer().createRadialGradient(x, y, brush() * hardness() / 100, x, y, brush())
+		gradient.addColorStop(0, color)
+		gradient.addColorStop(1, 'transparent')
+		buffer().fillStyle = gradient
 		buffer().beginPath()
 		buffer().arc(
 			position.x + img.width / 2,
@@ -86,6 +93,8 @@ export const MapEditor = ({
 			2 * Math.PI,
 		)
 		buffer().fill()
+		// console.log('ok')
+		// buffer().fillRect(x, y, brush(), brush())
 	}
 
 	const longClickListener = throttle(10, (event: MouseEvent) => {
@@ -225,11 +234,22 @@ export const MapEditor = ({
 					if (selectedColor() === 'heightMap') {
 						switchLevel()
 					}
+					groundMat().uniforms.level.value.needsUpdate = true
+					updateLevel({ [canvases[selectedColor()]]: selectedCanvas() })
 				}
 			}
 			reader.readAsDataURL(file)
 		})
 		input.click()
+	}
+	const clearCanvas = () => {
+		buffer().save()
+		buffer().globalCompositeOperation = 'destination-out'
+		buffer().fillStyle = 'black'
+		buffer().fillRect(0, 0, buffer().canvas.width, buffer().canvas.height)
+		buffer().restore()
+		groundMat().uniforms.level.value.needsUpdate = true
+		updateLevel({ [canvases[selectedColor()]]: selectedCanvas() })
 	}
 	return (
 		<div>
@@ -239,6 +259,7 @@ export const MapEditor = ({
 					<div style={{ background: 'black', scale: '-1 1' }} class="debug-canvas-container">{selectedCanvas()}</div>
 					<button onClick={() => flipCanvas(true, false)}>flip X</button>
 					<button onClick={() => flipCanvas(false, true)}>flip Y</button>
+					<button onClick={clearCanvas}>clear</button>
 					<div>
 						<button onClick={download}>download</button>
 						<button onClick={upload}>upload</button>
@@ -252,6 +273,11 @@ export const MapEditor = ({
 				<div>
 					{Math.round(brush())}
 					<input type="range" name="brush size" min="1" max="100" value={brush()} onChange={e => setBrush(e.target.valueAsNumber)}></input>
+				</div>
+				<div>Brush hardness (%)</div>
+				<div>
+					{Math.round(hardness())}
+					<input type="range" name="brush size" min="1" max="100" value={hardness()} onChange={e => setHardness(e.target.valueAsNumber)}></input>
 				</div>
 				<Show when={selectedColor() === 'heightMap'}>
 					<div>Brush intensity</div>
