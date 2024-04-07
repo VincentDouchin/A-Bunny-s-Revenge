@@ -1,7 +1,7 @@
 import type { models, vegetation } from '@assets/assets'
 import { ActiveCollisionTypes, ColliderDesc, RigidBodyDesc } from '@dimforge/rapier3d-compat'
 import type { With } from 'miniplex'
-import type { Object3D, Object3DEventMap } from 'three'
+import type { BufferGeometry, Object3D, Object3DEventMap } from 'three'
 import { Color, Group, Mesh, MeshPhongMaterial, PointLight, Quaternion, Vector3 } from 'three'
 
 import { CSS2DObject } from 'three/examples/jsm/renderers/CSS2DRenderer'
@@ -273,10 +273,28 @@ export const props: PlacableProp<propNames>[] = [
 	{
 		name: 'berry bushes',
 		models: ['Berry_Bush'],
-		bundle(entity) {
+		bundle: (entity) => {
+			let berriesModel: Mesh<BufferGeometry, MeshPhongMaterial>[] = []
+			const berries = new Set<Mesh<BufferGeometry, MeshPhongMaterial>>()
+			entity.model.traverse((node) => {
+				if (node.name.includes('Berry') && node instanceof Mesh) {
+					berriesModel.push(node)
+				}
+			})
+			for (let i = 0; i < 15; i++) {
+				const index = Math.floor(Math.random() * berriesModel.length)
+				const berry = berriesModel[index]
+				delete berriesModel[index]
+				berriesModel = berriesModel.filter(Boolean)
+				berries.add(berry)
+				berry.material.color = new Color(0xEC273F)
+			}
+			for (const leftOverBerry of berriesModel) {
+				leftOverBerry.removeFromParent()
+			}
 			return {
 				...entity,
-				berries: true,
+				berries,
 			}
 		},
 	},

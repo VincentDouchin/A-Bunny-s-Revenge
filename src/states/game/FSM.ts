@@ -17,7 +17,7 @@ const setupAnimations = <A extends ComponentsOfType<Animator<any>>, K extends ke
 	}
 	return subscribers
 }
-const ANIMATION_SPEED = 1.5
+const ANIMATION_SPEED = 1.2
 export const playerFSM = setupAnimations('playerAnimator', {
 	idle: e => e.playerAnimator.playAnimation('IDLE_NEW'),
 	picking: e => setTimeout(() => e.stateMachine.enter('idle', e), 300),

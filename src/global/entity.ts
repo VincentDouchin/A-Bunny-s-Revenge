@@ -3,7 +3,7 @@ import type { Collider, ColliderDesc, KinematicCharacterController, RigidBody, R
 import type { Tween } from '@tweenjs/tween.js'
 import type { With } from 'miniplex'
 import type { JSXElement } from 'solid-js'
-import type { Camera, Group, Light, MeshPhongMaterial, Object3D, Object3DEventMap, Quaternion, Scene, ShaderMaterial, Vector3, WebGLRenderer } from 'three'
+import type { BufferGeometry, Camera, Group, Light, Mesh, MeshPhongMaterial, Object3D, Object3DEventMap, Quaternion, Scene, ShaderMaterial, Vector3, WebGLRenderer } from 'three'
 import type { BatchedRenderer, ParticleEmitter } from 'three.quarks'
 import type { CSS2DObject } from 'three/examples/jsm/renderers/CSS2DRenderer'
 import type { Animator } from './animator'
@@ -224,7 +224,7 @@ export interface Entity {
 	// ! Money
 	acorn?: true
 	// ! Berry Bush
-	berries?: true
+	berries?: Set<Mesh<BufferGeometry, MeshPhongMaterial>>
 }
 export type states = 'idle' | 'running' | 'picking' | 'dying' | 'hit' | 'hello' | 'dead' | 'waitingAttack' | 'attacking' | 'attackCooldown' | 'doorOpening' | 'doorClosing' | 'cheer'
 export type Bundle<C extends keyof Entity> = () => With<Entity, C>

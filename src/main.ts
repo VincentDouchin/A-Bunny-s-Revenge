@@ -62,7 +62,7 @@ gameState
 		runIf(() => !pausedState.enabled, playerSteps, dayNight, updateTimeUniforms, applyDeathTimer, applyMove),
 		runIf(() => !openMenuState.enabled, pauseGame, interact),
 	)
-	.onUpdate(collectItems, touchItem, talkToNPC, stopItems, pickupAcorn)
+	.onUpdate(collectItems, touchItem, talkToNPC, stopItems, pickupAcorn, dropBerriesOnHit)
 	.onPostUpdate(renderGame)
 	.enable()
 mainMenuState
@@ -74,7 +74,7 @@ campState
 	.addSubscriber(...interactablePlantableSpot)
 	.onEnter(spawnFarm, spawnLevelData, updateCropsSave, initPlantableSpotsInteractions, enableBasketUi)
 	.onEnter(runIf(() => !mainMenuState.enabled, spawnCharacter, spawnBasket), moveCamera(true))
-	.onUpdate(collideWithDoorCamp, dropBerriesOnHit)
+	.onUpdate(collideWithDoorCamp)
 	.onUpdate(runIf(canPlayerMove, plantSeed, harvestCrop, openPlayerInventory, savePlayerPosition, basketFollowPlayer()))
 	.onExit(despawnOfType('map'))
 openMenuState
