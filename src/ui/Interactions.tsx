@@ -1,5 +1,6 @@
 import type { With } from 'miniplex'
-import { children, createMemo, createSignal, onMount } from 'solid-js'
+import type { Accessor } from 'solid-js'
+import { createMemo, createSignal, onMount } from 'solid-js'
 import { Portal, Show } from 'solid-js/web'
 import { Transition } from 'solid-transition-group'
 import { InputIcon } from './InputIcon'
@@ -9,7 +10,7 @@ import type { Entity } from '@/global/entity'
 import { Interactable } from '@/global/entity'
 import { ecs } from '@/global/init'
 import { save } from '@/global/save'
-import { weaponsData } from '@/constants/weapons'
+import { WeaponStatsUi } from '@/states/dungeon/WeaponStatsUi'
 
 export const getInteractables = (player: With<Entity, 'inventory'>, entity?: With<Entity, 'interactable'>): (string | undefined)[] => {
 	const hasSeedInInventory = player.inventory?.filter(Boolean)?.some(item => itemsData[item.name].seed)
@@ -33,8 +34,9 @@ export const getInteractables = (player: With<Entity, 'inventory'>, entity?: Wit
 
 const interactionQuery = ecs.with('interactable', 'interactionContainer', 'position').without('currentDialog', 'menuType')
 
-export const InteractionUi = ({ player }: {
+export const InteractionUi = ({ player, isTouch }: {
 	player: With<Entity, 'playerControls' | 'inventory'>
+	isTouch: Accessor<boolean>
 }) => {
 	return (
 		<ForQuery query={interactionQuery}>
@@ -47,54 +49,32 @@ export const InteractionUi = ({ player }: {
 				onMount(() => {
 					setTimeout(() => setVisible(true), 10)
 				})
-				const content = children(() => (
-					<Transition name="popup">
-						<Show when={visible()}>
-							<div style={{ 'background': 'hsl(0,0%,0%,0.3)', 'padding': '0.25rem 0.5rem', 'color': 'white', 'border-radius': '1rem', 'display': 'grid', 'gap': '0.5rem', 'place-items': 'center' }}>
-								<Show when={entity.weaponStand}>
-									{(weaponName) => {
-										const data = weaponsData[weaponName()]
-										return (
-											<div style={{ 'display': 'grid', 'place-items': 'center' }}>
-												<div style={{ 'font-size': '1.5rem' }}>{data.name}</div>
-												<div style={{ 'font-size': '1.2rem' }}>
-													Attack:
-													{data.attack}
-												</div>
-												<div style={{ 'font-size': '1.2rem' }}>
-													Knockback:
-													{data.knockBack}
-												</div>
-												<div style={{ 'font-size': '1.2rem' }}>
-													Attack speed:
-													{data.attackSpeed}
-												</div>
-											</div>
-										)
-									}}
-								</Show>
-								<Show when={interactables()[1]}>
-									<div style={{ 'display': 'flex', 'gap': '0.5rem', 'font-size': '1.5rem' }}>
-										<InputIcon input={player.playerControls.get('secondary')} />
-										<div>{interactables()[1]}</div>
-									</div>
-								</Show>
-								<Show when={interactables()[0]}>
-									<div style={{ 'display': 'flex', 'gap': '0.5rem', 'font-size': '1.5rem' }}>
-										<InputIcon input={player.playerControls.get('primary')}></InputIcon>
-										<div>{interactables()[0]}</div>
-									</div>
-								</Show>
-							</div>
-						</Show>
-					</Transition>
-				))
 				return (
-					<Show when={content.toArray().length && entity.interactionContainer?.element}>
-						<Portal mount={entity.interactionContainer.element}>
-							{content()}
-						</Portal>
-					</Show>
+					<Portal mount={entity.interactionContainer.element}>
+						<Transition name="popup">
+							<Show when={visible() && (!isTouch() || entity.weaponStand)}>
+								<div style={{ 'background': 'hsl(0,0%,0%,0.3)', 'padding': '0.25rem 0.5rem', 'color': 'white', 'border-radius': '1rem', 'display': 'grid', 'gap': '0.5rem', 'place-items': 'center' }}>
+									<Show when={entity.weaponStand}>
+										{weaponName => <WeaponStatsUi name={weaponName()} />}
+									</Show>
+									<Show when={!isTouch()}>
+										<Show when={interactables()[1]}>
+											<div style={{ 'display': 'flex', 'gap': '0.5rem', 'font-size': '1.5rem' }}>
+												<InputIcon input={player.playerControls.get('secondary')} />
+												<div>{interactables()[1]}</div>
+											</div>
+										</Show>
+										<Show when={interactables()[0]}>
+											<div style={{ 'display': 'flex', 'gap': '0.5rem', 'font-size': '1.5rem' }}>
+												<InputIcon input={player.playerControls.get('primary')}></InputIcon>
+												<div>{interactables()[0]}</div>
+											</div>
+										</Show>
+									</Show>
+								</div>
+							</Show>
+						</Transition>
+					</Portal>
 				)
 			}}
 		</ForQuery>

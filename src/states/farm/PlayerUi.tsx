@@ -26,15 +26,15 @@ export const PlayerUi = () => {
 		<ForQuery query={playerQuery}>
 			{(player) => {
 				const playerInputs = createMemo(() => player?.playerControls.touchController)
-				const showTouch = createMemo(() => isTouch() && playerInputs() && !isMenuOpen() && !isPauseState())
+				const showTouch = createMemo(() => isTouch() && !!playerInputs() && !isMenuOpen() && !isPauseState())
 				return (
 					<>
 						<Show when={showTouch()}>
 							<TouchControls player={player} />
 						</Show>
-						<Show when={!showTouch()}>
-							<InteractionUi player={player} />
-						</Show>
+
+						<InteractionUi player={player} isTouch={showTouch} />
+
 						<StateUi state={campState}>
 							<RecipesUi player={player} />
 							<OvenMinigameUi player={player} />
