@@ -19,6 +19,18 @@ export const setupGame = async () => {
 	campState.enable({})
 }
 
+export const stopOnLosingFocus = () => {
+	const listener = () => {
+		if (document.hidden) {
+			app.stop()
+		} else {
+			app.start()
+		}
+	}
+	document.addEventListener('visibilitychange', listener)
+	return () => document.removeEventListener('visibilitychange', listener)
+}
+
 export const disablePortrait = () => {
 	let landscapeElement: null | HTMLElement = null
 	const addLandscapeElement = () => {

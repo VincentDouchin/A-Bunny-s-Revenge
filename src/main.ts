@@ -38,13 +38,13 @@ import { touchItem } from './states/game/touchItem'
 import { addOrRemoveWeaponModel } from './states/game/weapon'
 import { clickOnMenuButton, initMainMenuCamPos, intiMainMenuRendering, renderMainMenu, selectMainMenu, setMainCameraPosition, spawnPlayerContinueGame } from './states/mainMenu/mainMenuRendering'
 import { playCloseSound, playOpenSound } from './states/pause/pause'
-import { disablePortrait, enableFullscreen, resize, setupGame } from './states/setup/setupGame'
+import { disablePortrait, enableFullscreen, resize, setupGame, stopOnLosingFocus } from './states/setup/setupGame'
 import { UI } from './ui/UI'
 
 coreState
 	.onEnter(initThree, initCamera, moveCamera(true), initTimeOfDay)
 	.addPlugins(hierarchyPlugin, physicsPlugin, transformsPlugin, addToScene('camera', 'light', 'model', 'dialogContainer', 'emitter', 'interactionContainer', 'minigameContainer', 'healthBarContainer'), updateModels, particlesPlugin, tweenPlugin)
-	.addSubscriber(...target, initTone, resize, disablePortrait, enableFullscreen)
+	.addSubscriber(...target, initTone, resize, disablePortrait, enableFullscreen, stopOnLosingFocus)
 	.onEnter(ui.render(UI))
 	.onPreUpdate(coroutines.tick, savePlayerFromTheEmbraceOfTheVoid)
 	.onUpdate(runIf(() => !pausedState.enabled, updateAnimations('beeAnimator', 'playerAnimator', 'shagaAnimator', 'ovenAnimator', 'chestAnimator', 'houseAnimator', 'basketAnimator', 'beeBossAnimator'), () => time.tick()), inputManager.update, ui.update, moveCamera())
