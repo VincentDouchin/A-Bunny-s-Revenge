@@ -56,7 +56,7 @@ export const ItemDisplay = (props: { item: Item | null, selected?: Accessor<bool
 								}}
 							</Show>
 							<Show when={!(isSelected() && delay())}>
-								<img src={assets.items[props.item!.name].img} style={{ width: '80%', ...disabledStyles() }}></img>
+								<img src={assets.items[props.item!.name].img} style={{ width: '80%', ...disabledStyles() }} classList={{ 'item-selected': isSelected() }}></img>
 							</Show>
 							<div style={{ 'color': 'white', 'position': 'absolute', 'width': '1rem', 'bottom': '0.5rem', 'right': '0.5rem', 'text-align': 'center' }}>{quantity()}</div>
 							<Show when={isSelected()}>

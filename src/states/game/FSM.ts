@@ -17,7 +17,7 @@ const setupAnimations = <A extends ComponentsOfType<Animator<any>>, K extends ke
 	}
 	return subscribers
 }
-
+const ANIMATION_SPEED = 1.5
 export const playerFSM = setupAnimations('playerAnimator', {
 	idle: e => e.playerAnimator.playAnimation('IDLE_NEW'),
 	picking: e => setTimeout(() => e.stateMachine.enter('idle', e), 300),
@@ -28,15 +28,15 @@ export const playerFSM = setupAnimations('playerAnimator', {
 	attacking: async (e) => {
 		if (e.combo.lastAttack === 0) {
 			playSound(['Slash_Attack_Heavy_1', 'Slash_Attack_Heavy_2', 'Slash_Attack_Heavy_3'], { volume: -12 })
-			await e.playerAnimator.playOnce('FIGHT_ACTION1', { timeScale: e.attackSpeed.value }, 0.5)
+			await e.playerAnimator.playOnce('FIGHT_ACTION1', { timeScale: e.attackSpeed.value * ANIMATION_SPEED }, 0.5)
 		}
 		if (e.combo.lastAttack === 1) {
 			playSound(['Slash_Attack_Light_1', 'Slash_Attack_Light_2'], { volume: -12 })
-			await e.playerAnimator.playOnce('SLASH', { timeScale: e.attackSpeed.value * 0.8 }, 0.2)
+			await e.playerAnimator.playOnce('SLASH', { timeScale: e.attackSpeed.value * 0.8 * ANIMATION_SPEED }, 0.2)
 		}
 		if (e.combo.lastAttack === 2) {
 			playSound(['Slash_Attack_Heavy_1', 'Slash_Attack_Heavy_2', 'Slash_Attack_Heavy_3'], { volume: -12 })
-			await e.playerAnimator.playClamped('HEAVYATTACK', { timeScale: e.attackSpeed.value })
+			await e.playerAnimator.playClamped('HEAVYATTACK', { timeScale: e.attackSpeed.value * ANIMATION_SPEED })
 		}
 		e.combo.lastAttack = 0
 		e.stateMachine.enter('idle', e)

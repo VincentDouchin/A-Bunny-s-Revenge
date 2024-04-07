@@ -247,3 +247,18 @@ input[type='range']::-webkit-slider-thumb {
 	top: 0;
 	left: 0;
 }
+
+@keyframes item-selected {
+	from {
+		transform: scale(1.2);
+	}
+	to {
+		transform: scale(1);
+	}
+}
+
+.item-selected {
+	animation-name: item-selected;
+	animation-duration: 0.4s;
+	animation-timing-function: ease-in;
+}

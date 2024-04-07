@@ -78,23 +78,25 @@ export const playerAttack = () => {
 				}
 			}
 			for (const enemy of enemiesQuery) {
-				if (world.intersectionPair(sensorCollider, enemy.collider)) {
-					if (player.playerAnimator.getTimeRatio() > 0.5) {
-						if (enemy.stateMachine.enter('hit', enemy)) {
-							playSound(['Hit_Metal_on_flesh', 'Hit_Metal_on_leather', 'Hit_Wood_on_flesh', 'Hit_Wood_on_leather'], { volume: -12 })
-							// ! damage
-							const [damage, crit] = calculateDamage(player)
-							enemy.currentHealth -= damage
-							const emitter = impact().emitter
-							emitter.position.y = 5
-							ecs.update(enemy, { emitter })
+				if (enemy.state !== 'hit') {
+					if (world.intersectionPair(sensorCollider, enemy.collider)) {
+						if (player.playerAnimator.getTimeRatio() > 0.5) {
+							if (enemy.stateMachine.enter('hit', enemy)) {
+								playSound(['Hit_Metal_on_flesh', 'Hit_Metal_on_leather', 'Hit_Wood_on_flesh', 'Hit_Wood_on_leather'], { volume: -12 })
+								// ! damage
+								const [damage, crit] = calculateDamage(player)
+								enemy.currentHealth -= damage
+								const emitter = impact().emitter
+								emitter.position.y = 5
+								ecs.update(enemy, { emitter })
 
-							spawnDamageNumber(damage, enemy, crit)
-							// ! knockback
-							const force = position.clone().sub(enemy.position).normalize().multiplyScalar(-50000)
-							enemy.body.applyImpulse(force, true)
-							// ! damage flash
-							addTweenTo(enemy)(new Tween(enemy.group.scale).to(new Vector3(0.8, 1.2, 0.8), 200).repeat(1).yoyo(true), flash(enemy))
+								spawnDamageNumber(damage, enemy, crit)
+								// ! knockback
+								const force = position.clone().sub(enemy.position).normalize().multiplyScalar(-50000)
+								enemy.body.applyImpulse(force, true)
+								// ! damage flash
+								addTweenTo(enemy)(new Tween(enemy.group.scale).to(new Vector3(0.8, 1.2, 0.8), 200).repeat(1).yoyo(true), flash(enemy))
+							}
 						}
 					}
 				}
