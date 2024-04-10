@@ -1,6 +1,6 @@
 import path from 'node:path'
 import type { UserConfig } from 'vite'
-import { defineConfig, splitVendorChunkPlugin } from 'vite'
+import { defineConfig } from 'vite'
 import solidPlugin from 'vite-plugin-solid'
 
 import { VitePWA } from 'vite-plugin-pwa'
@@ -9,6 +9,7 @@ import { autoConvertFBXtoGLB } from './scripts/convertFbx2GLB'
 import { extractAnimations } from './scripts/extractAnimations'
 import { generateAssetManifest } from './scripts/generateAssetManifest'
 import { convertAudioFiles } from './scripts/convertAudioFiles'
+import { optimizeAssets } from './scripts/optimizeAssets'
 
 export default defineConfig(() => {
 	const config: UserConfig = {
@@ -18,7 +19,7 @@ export default defineConfig(() => {
 			extractAnimations(),
 			generateAssetManifest(),
 			convertAudioFiles(),
-			splitVendorChunkPlugin(),
+			optimizeAssets(),
 			solidPlugin(),
 			VitePWA({
 				registerType: 'autoUpdate',

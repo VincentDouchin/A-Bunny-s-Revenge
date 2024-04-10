@@ -4,10 +4,11 @@ import { Easing, Tween } from '@tweenjs/tween.js'
 import { AdditiveBlending, Mesh, MeshBasicMaterial, SphereGeometry, Vector3 } from 'three'
 import type { Entity } from '@/global/entity'
 import { assets, ecs } from '@/global/init'
+import { playSound } from '@/global/sounds'
 import { inMap } from '@/lib/hierarchy'
 import { modelColliderBundle } from '@/lib/models'
 import { addTweenTo } from '@/lib/updateTween'
-import { playSound } from '@/global/sounds'
+import { addItem } from '@/global/save'
 
 export const itemsQuery = ecs.with('item', 'position', 'model', 'collider', 'itemLabel')
 
@@ -18,15 +19,14 @@ export const itemBundle = (item: items) => {
 	bundle.model.castShadow = true
 	bundle.model.renderOrder = 2
 	const shadow = new Mesh(
-		new SphereGeometry(1),
+		new SphereGeometry(0.3),
 		new MeshBasicMaterial({ color: 0x000000, transparent: true, blending: AdditiveBlending, depthWrite: false }),
 	)
-	shadow.position.y = 5
+	shadow.position.y = 0.3
 	shadow.castShadow = true
 	bundle.model.add(shadow)
 	return {
 		...bundle,
-		model,
 		item: true,
 		...inMap(),
 		itemLabel: item,
@@ -68,6 +68,30 @@ export const stopItems = () => {
 			}
 		} else if (item.bounce && item.bounce.touchedGround) {
 			item.bounce.touchedGround = false
+		}
+	}
+}
+
+const playerQuery = ecs.with('player', 'position', 'inventory', 'inventoryId', 'inventorySize')
+export const collectItems = () => {
+	for (const player of playerQuery) {
+		for (const item of itemsQuery) {
+			if (item.position.clone().setY(0).distanceTo(player.position.clone().setY(0)) < 3) {
+				ecs.removeComponent(item, 'tween')
+				ecs.removeComponent(item, 'collider')
+				addItem(player, { name: item.itemLabel, quantity: 1 })
+				playSound('zapsplat_multimedia_alert_action_collect_pick_up_point_or_item_79293', { volume: -20 })
+				ecs.add({
+					parent: item,
+					tween: new Tween(item.position).to({ ...player.position, y: item.position.y }, 500).onComplete(() => {
+						ecs.remove(item)
+					}).easing(Easing.Cubic.Out),
+				})
+				ecs.add({
+					parent: item,
+					tween: new Tween(item.model.scale).to(new Vector3(), 500).easing(Easing.Cubic.Out),
+				})
+			}
 		}
 	}
 }

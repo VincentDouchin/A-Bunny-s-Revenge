@@ -171,7 +171,7 @@ export const LevelEditor = () => {
 						fakeGround = new Mesh(new PlaneGeometry(level.size.x, level.size.y, level.size.x, level.size.y), new MeshBasicMaterial({ opacity: 0, transparent: true }))
 						fakeGround.rotation.setFromQuaternion(new Quaternion().setFromAxisAngle(new Vector3(1, 0, 0), -Math.PI / 2))
 						fakeGround.position.y = -HEIGHT / 4
-						setDisplacement(fakeGround.geometry, getdisplacementMap(level, false))
+						setDisplacement(fakeGround.geometry, getdisplacementMap(level, true))
 						scene.add(fakeGround)
 					}
 					const switchLevel = (level: Level) => {

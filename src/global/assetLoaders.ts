@@ -1,10 +1,13 @@
 import type { Euler, Material, Object3D, Object3DEventMap, Vec2, Vector4Like } from 'three'
-import { DynamicDrawUsage, Group, Matrix4, Mesh, TextureLoader, Vector3 } from 'three'
+import { DynamicDrawUsage, Group, LoadingManager, Matrix4, Mesh, TextureLoader, Vector3 } from 'three'
 
 import assetManifest from '@assets/assetManifest.json'
 import { createStore, del, entries, set } from 'idb-keyval'
 import { InstancedUniformsMesh } from 'three-instanced-uniforms-mesh'
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader'
+import { DRACOLoader } from 'three/examples/jsm/loaders/DRACOLoader'
+import draco_wasm_wrapper from 'three/examples/jsm/libs/draco/draco_wasm_wrapper.js?url'
+import draco_decoder from 'three/examples/jsm/libs/draco/draco_decoder.wasm?url'
 import { useLocalStorage } from '@/utils/useLocalStorage'
 import { getScreenBuffer } from '@/utils/buffer'
 import { thumbnailRenderer } from '@/lib/thumbnailRenderer'
@@ -54,7 +57,19 @@ const cachedLoader = async <R>(storeName: string, fn: (arr: ArrayBuffer) => Prom
 	}
 }
 
-export const loadGLB = await cachedLoader('glb', (arrayBuffer: ArrayBuffer) => new GLTFLoader().parseAsync(arrayBuffer, ''))
+const getDracoLoader = () => {
+	const draco: Record<string, string> = {
+		'draco_wasm_wrapper.js': draco_wasm_wrapper,
+		'draco_decoder.wasm': draco_decoder,
+	}
+	const loadingManager = new LoadingManager().setURLModifier((url) => {
+		return draco[url]
+	})
+	return new DRACOLoader(loadingManager).setDecoderPath('').preload()
+}
+const draco = getDracoLoader()
+
+export const loadGLB = await cachedLoader('glb', (arrayBuffer: ArrayBuffer) => new GLTFLoader().setDRACOLoader(draco).parseAsync(arrayBuffer, ''))
 
 export const loadAudio = await cachedLoader('glb', async (arrayBuffer: ArrayBuffer) => {
 	const context = new AudioContext()
@@ -84,6 +99,7 @@ export const instanceMesh = <T extends Material>(obj: Object3D<Object3DEventMap>
 		matrix.scale(new Vector3().setScalar(scale))
 		const i = intanceParams.length
 		intanceParams.push(matrix)
+		const uniformCache: Record<string, any> = {}
 		return {
 			setMatrix: (fn: (m: Matrix4) => void) => {
 				fn(matrix)
@@ -92,6 +108,8 @@ export const instanceMesh = <T extends Material>(obj: Object3D<Object3DEventMap>
 				}
 			},
 			setUniform: (name: string, value: any) => {
+				if (uniformCache[name] === value) return
+				uniformCache[name] = value
 				for (const mesh of meshes) {
 					mesh.setUniformAt(name, i, value)
 				}

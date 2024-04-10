@@ -17,6 +17,7 @@ export class Pool<T> {
 			for (let i = 0; i < this.amount; i++) {
 				newPool.add(this.duplicate(item))
 			}
+			this.map.set(item, newPool)
 			return this.getItem(newPool)
 		} else if (pool.size === 0) {
 			pool.add(this.duplicate(item))

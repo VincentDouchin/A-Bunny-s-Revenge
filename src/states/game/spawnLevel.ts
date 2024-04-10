@@ -1,6 +1,6 @@
 import { ColliderDesc, RigidBodyDesc, RigidBodyType } from '@dimforge/rapier3d-compat'
+import FastNoiseLite from 'fastnoise-lite'
 import { between } from 'randomish'
-import { createNoise2D, createNoise3D } from 'simplex-noise'
 import type { Vec2, Vector4Like } from 'three'
 import { CanvasTexture, Euler, Group, Mesh, PlaneGeometry, Quaternion, Vector2, Vector3 } from 'three'
 import { encounters } from '../dungeon/encounters'
@@ -40,18 +40,19 @@ const spawnFromCanvas = (level: Level, image: HTMLCanvasElement, scale: number, 
 export const spawnTrees = (level: Level, parent: Entity) => {
 	const trees = Object.values(assets.trees).map(x => instanceMesh(x.scene, true))
 	const treesInstances: InstanceHandle[] = []
-	const noise = createNoise3D(() => 0)
+	const noise = new FastNoiseLite(0)
+	noise.SetNoiseType(FastNoiseLite.NoiseType.OpenSimplex2)
 	const treeMap = new Map<Vec2, InstanceHandle>()
 	spawnFromCanvas(level, level.trees, SCALE, (val, x, y, displacement) => {
 		if (val.x === 255 || val.y === 255) {
 			const position = new Vector3(
-				(x - level.trees.width / 2) / SCALE + noise(x, y, y),
+				(x - level.trees.width / 2) / SCALE + noise.GetNoise(x, y, y),
 				displacement,
-				(level.trees.height / 2 - y) / SCALE + noise(y, x, x),
+				(level.trees.height / 2 - y) / SCALE + noise.GetNoise(y, x, x),
 			).multiplyScalar(SCALE)
-			const size = 3 + (1 * Math.abs(noise(x, y, x)))
+			const size = 3 + (1 * Math.abs(noise.GetNoise(x, y, x)))
 			const treeGenerator = trees[Math.floor(trees.length * Math.abs(Math.sin((x + y) * 50 * (x - y))))]
-			const instanceHandle = treeGenerator.addAt(position, size, new Euler(0, noise(x, y, x), 0))
+			const instanceHandle = treeGenerator.addAt(position, size, new Euler(0, noise.GetNoise(x, y, x), 0))
 			if (val.x === 255) treesInstances.push(instanceHandle)
 			treeMap.set(position, instanceHandle)
 			const treeSize = getSize(treeGenerator.obj).multiplyScalar(size)
@@ -80,32 +81,41 @@ export const spawnTrees = (level: Level, parent: Entity) => {
 		tree.setUniform('pos', pos)
 	}
 }
-
 export const spawnGrass = (level: Level, parent: Entity) => {
 	const grass = Object.entries(assets.vegetation).filter(([name]) => name.includes('Grass')).map(x => instanceMesh(x[1].scene, true))
 	const flowers = Object.entries(assets.vegetation).filter(([name]) => name.includes('Flower')).map(x => instanceMesh(x[1].scene, true))
-	const noise = createNoise2D(() => 0)
-	const noise2 = createNoise2D(() => 100)
-	const noiseX = createNoise2D(() => 200)
-	const noiseY = createNoise2D(() => 300)
-	const noiseFlower = createNoise2D(() => 400)
-	const noiseFlower2 = createNoise2D(() => 500)
+	const createNoise = (seed: number) => {
+		const noise = new FastNoiseLite(seed)
+		noise.SetNoiseType(FastNoiseLite.NoiseType.OpenSimplex2)
+		return (x: number, y: number) => {
+			return noise.GetNoise(x, y)
+		}
+	}
+
 	const instances = new Map<InstanceHandle, Vec2>()
 	spawnFromCanvas(level, level.grass, 5, (val, x, y, displacement) => {
 		if (val.x !== 255) return
-		const n = noise(x / level.size.x * 10, y / level.size.y * 10)
-		const n2 = noise2(x / level.size.x * 10, y / level.size.y * 10)
-		const nX = noiseX(x / level.size.x * 10, y / level.size.y * 10)
-		const nY = noiseY(x / level.size.x * 10, y / level.size.y * 10)
-		const nF = noiseFlower(x / level.size.x * 100, y / level.size.y * 100)
-		const nF2 = noiseFlower2(x / level.size.x * 10, y / level.size.y * 10)
-		if (n2 < 0.7 && (n < 0 || n2 < 0)) return
+		const noise = createNoise(0)
+		const s = noise(x, y)
+		const noise2 = createNoise(s)
+		const noiseX = createNoise(s * 38)
+		const noiseY = createNoise(s * 76)
+		const noiseFlower = createNoise(s * 52)
+		const noiseFlower2 = createNoise(s * 93)
+		const n = noise(x, y)
+		const n2 = noise2(x, y)
+		const nX = noiseX(x, y)
+		const nY = noiseY(x, y)
+		const nF = noiseFlower(x, y)
+		const nF2 = noiseFlower2(x, y)
+
 		const position = new Vector3(
 			(x - level.grass.width / 2) / SCALE + nX,
 			0 + displacement,
 			(level.grass.height / 2 - y) / SCALE + nY,
 		).multiplyScalar(SCALE)
-		const isFlower = nF > 0.8
+		if (n * n2 < 0.2) return
+		const isFlower = nF > 0.9
 		const size = 1
 		const grassGenerator = isFlower
 			? flowers[Math.floor(flowers.length * Math.abs(nF2))]
@@ -184,7 +194,7 @@ export const setDisplacement = (geo: PlaneGeometry, canvas: HTMLCanvasElement) =
 		displacementVal *= HEIGHT
 		const index = i / 4
 		const x = index % width
-		const y = Math.floor(index / width)
+		const y = Math.ceil(index / width) + 1
 
 		positionAttribute.setZ(width * (height - y) + x, displacementVal)
 	}

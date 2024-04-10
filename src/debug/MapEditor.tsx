@@ -48,7 +48,6 @@ export const MapEditor = ({
 	const [up, setUp] = createSignal(true)
 	const [gradual, setGradual] = createSignal(true)
 	const [selectedColor, setSelectedColor] = createSignal<drawingColors>('path')
-
 	const selectedCanvas = createMemo(() => activeLevel()[canvases[selectedColor()]])
 
 	const buffer = createMemo(() => selectedCanvas().getContext('2d', { willReadFrequently: true })!)
@@ -79,11 +78,15 @@ export const MapEditor = ({
 		const img = selectedCanvas()
 		const x = position.x + img.width / 2
 		const y = img.height / 2 - position.z
-		// buffer().fillStyle = color
-		const gradient = buffer().createRadialGradient(x, y, brush() * hardness() / 100, x, y, brush())
-		gradient.addColorStop(0, color)
-		gradient.addColorStop(1, 'transparent')
-		buffer().fillStyle = gradient
+		if (hardness() < 100) {
+			const gradient = buffer().createRadialGradient(x, y, brush() * hardness() / 100, x, y, brush())
+			gradient.addColorStop(0, color)
+			gradient.addColorStop(1, 'transparent')
+			buffer().fillStyle = gradient
+		} else {
+			buffer().fillStyle = color
+		}
+
 		buffer().beginPath()
 		buffer().arc(
 			position.x + img.width / 2,
@@ -93,8 +96,6 @@ export const MapEditor = ({
 			2 * Math.PI,
 		)
 		buffer().fill()
-		// console.log('ok')
-		// buffer().fillRect(x, y, brush(), brush())
 	}
 
 	const longClickListener = throttle(10, (event: MouseEvent) => {
@@ -148,7 +149,7 @@ export const MapEditor = ({
 			spawnGrass(activeLevel(), ground())
 		}
 		if (canvases[selectedColor()] === 'heightMap') {
-			const displacementMap = getdisplacementMap(activeLevel(), false)
+			const displacementMap = getdisplacementMap(activeLevel())
 			const displacementTexture = new CanvasTexture(displacementMap)
 			displacementTexture.flipY = false
 			setDisplacement(fakeGround.geometry, displacementMap);

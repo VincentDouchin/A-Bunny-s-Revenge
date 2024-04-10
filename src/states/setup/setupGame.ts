@@ -7,6 +7,7 @@ import { save } from '@/global/save'
 import { app, campState, mainMenuState } from '@/global/states'
 import { windowEvent } from '@/lib/uiManager'
 import { throttle } from '@/lib/state'
+import { time } from '@/global/init'
 
 export const setupGame = async () => {
 	if (!params.skipMainMenu) {
@@ -24,6 +25,7 @@ export const stopOnLosingFocus = () => {
 		if (document.hidden) {
 			app.stop()
 		} else {
+			time.reset()
 			app.start()
 		}
 	}

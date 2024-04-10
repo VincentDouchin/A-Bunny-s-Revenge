@@ -26,11 +26,11 @@ import { closePlayerInventory, disableInventoryState, enableInventoryState, inte
 import { basketFSM, beeBossFSM, beeFSM, playerFSM, shagaFSM } from './states/game/FSM'
 import { dayNight, initTimeOfDay } from './states/game/dayNight'
 import { talkToNPC } from './states/game/dialog'
-import { bobItems, popItems, stopItems } from './states/game/items'
+import { bobItems, collectItems, popItems, stopItems } from './states/game/items'
 import { applyMove, canPlayerMove, movePlayer, playerSteps, savePlayerFromTheEmbraceOfTheVoid, savePlayerPosition, stopPlayer } from './states/game/movePlayer'
 import { pauseGame } from './states/game/pauseGame'
 import { target } from './states/game/sensor'
-import { basketFollowPlayer, collectItems, enableBasketUi, spawnBasket } from './states/game/spawnBasket'
+import { basketFollowPlayer, enableBasketUi, spawnBasket } from './states/game/spawnBasket'
 import { allowDoorCollision, collideWithDoor, collideWithDoorCamp, collideWithDoorClearing, doorLocking, unlockDoorClearing } from './states/game/spawnDoor'
 import { spawnCrossRoad, spawnDungeon, spawnFarm, spawnLevelData, updateTimeUniforms } from './states/game/spawnLevel'
 import { losingBattle, spawnCharacter, spawnPlayerClearing, spawnPlayerDungeon } from './states/game/spawnPlayer'
@@ -95,9 +95,8 @@ dungeonState
 	.onExit(despawnOfType('map'))
 pausedState
 	.onExit(() => time.reset())
-// const bossRoom = assignPlanAndEnemies([{ position: { x: 0, y: 0 }, connections: { north: 1, south: null }, type: RoomType.Battle }])
-// const dungeon = genDungeon(5, true).find(room => room.type === RoomType.Entrance)!
-// dungeonState.enable({ dungeon: bossRoom[0], direction: 'south', firstEntry: true, playerHealth: 5, dungeonLevel: 0 })
+// const bossRoom = assignPlanAndEnemies([{ position: { x: 0, y: 0 }, connections: { north: 1, south: null }, type: RoomType.Boss }])
+// dungeonState.enable({ dungeon: bossRoom[0], direction: 'south', firstEntry: true, playerHealth: 5, dungeonLevel: 0, weapon: 'Hoe' })
 const animate = () => {
 	app.update()
 	requestAnimationFrame(animate)

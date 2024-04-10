@@ -9,6 +9,7 @@ import { getFileName } from './generateAssetNamesPlugin'
 
 const launchScript = async (filePath?: string) => {
 	if (!filePath || ((filePath.includes('assets\\') && filePath.split('.').at(-1) === 'glb'))) {
+		console.log('extracting animations')
 		let animations = `
 			interface Animations {
 		`
@@ -20,14 +21,13 @@ const launchScript = async (filePath?: string) => {
 				'draco3d.encoder': await draco3d.createEncoderModule(), // Optional.
 			})
 		for (const path of Array.from(glbs.values()).sort((a, b) => a.localeCompare(b))) {
-			// Read from URL.
 			const glb = await io.read(path)
 			const root = glb.getRoot()
 			const animationNames = root.listAnimations().map(animation => animation.getName())
 			if (animationNames.filter(x => !x.toLowerCase().includes('meta')).length) {
 				animations += `
 				\n
-				${`${getFileName(path)}`} : ${animationNames.map(x => ` \`${x}\` `).join(` | `)}
+				'${getFileName(path).replace('-optimized', '')}' : ${animationNames.map(x => ` '${x}' `).join(` | `)}
 				`
 			}
 		}

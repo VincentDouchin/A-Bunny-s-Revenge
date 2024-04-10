@@ -11,7 +11,7 @@ const dropBerries = (amount: number, bushPosition: Vector3, berries: Set<Mesh<Bu
 		berry.material.opacity = 0
 	}
 	const position = new Vector3().randomDirection().multiplyScalar(3).add(bushPosition)
-	position.y = Math.abs(position.y)
+	position.y = Math.abs(position.y + 5)
 	const angle = Math.random() * Math.PI * 2
 
 	const popDirection = new Vector3(Math.cos(angle) * 2, 3, Math.sin(angle) * 2)
