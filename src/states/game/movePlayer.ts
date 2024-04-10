@@ -6,6 +6,7 @@ import { updateSave } from '@/global/save'
 import { playStep } from '@/global/sounds'
 import { cutSceneState, openMenuState, pausedState } from '@/global/states'
 import { throttle } from '@/lib/state'
+import { footstepsBundle } from '@/particles/footsteps'
 
 const movementQuery = ecs.with('body', 'rotation', 'movementForce', 'speed', 'stateMachine', 'state')
 const playerQuery = movementQuery.with('playerControls', 'position', 'playerAnimator', 'state', 'lastStep')
@@ -18,6 +19,10 @@ export const playerSteps = () => {
 					if (player.lastStep[foot] === false) {
 						playStep('random', { volume: -12 })
 						player.lastStep[foot] = true
+						ecs.add({
+							parent: player,
+							...footstepsBundle(foot),
+						})
 					}
 				} else {
 					player.lastStep[foot] = false

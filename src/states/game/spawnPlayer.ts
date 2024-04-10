@@ -42,7 +42,6 @@ export const playerBundle = (health: number, addHealth: boolean, weapon: weapons
 		playerAnimator: new Animator(bundle.model, assets.characters.Bunny.animations),
 		...inMap(),
 		cameratarget: true,
-		// initialCameratarget: true,
 		faction: Faction.Player,
 		sensor: true,
 		player: true,

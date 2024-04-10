@@ -21,6 +21,7 @@ const addParticles = () => emittersQuery.onEntityAdded.subscribe((entity) => {
 		batchRenderer.addSystem(entity.emitter.system)
 	}
 })
+
 const removeEmitter = () => {
 	for (const entity of emittersQuery) {
 		// @ts-expect-error wrong interface
