@@ -175,48 +175,50 @@ const stun: EnemyState = {
 	},
 }
 // ! RANGE
-export const rangeEnemyBehaviorPlugin = behaviorPlugin(enemyQuery.where(e => e.attackStyle === EnemyAttackStyle.Range), 'enemy')(
+export const rangeEnemyBehaviorPlugin = behaviorPlugin(
+	enemyQuery.where(e => e.attackStyle === EnemyAttackStyle.Range),
+	'enemy',
 	enemyDecisions,
-	{
-		idle,
-		wander,
-		running: running(50),
-		waitingAttack: waitingAttack(1000),
-		attack: {
-			enter: async (e, setState, { force }) => {
-				applyRotate(e, force)
-				projectileAttack(e.rotation.clone())(e)
-				await e.enemyAnimator.playClamped('attacking')
-				return setState('attackCooldown')
-			},
-			update: (_e, setState, { touchedByPlayer }) => {
-				if (touchedByPlayer) return setState('hit')
-			},
+)({
+	idle,
+	wander,
+	running: running(50),
+	waitingAttack: waitingAttack(1000),
+	attack: {
+		enter: async (e, setState, { force }) => {
+			applyRotate(e, force)
+			projectileAttack(e.rotation.clone())(e)
+			await e.enemyAnimator.playClamped('attacking')
+			return setState('attackCooldown')
 		},
-		hit,
-		dying,
-		stun,
-		dead: {},
-		attackCooldown: {
-			enter: async (e, setState, { direction, player }) => {
-				e.enemyAnimator.playClamped('running')
-				if (direction && player) {
-					if (e.position.distanceTo(player.position) < 40) {
-						e.movementForce.x = -direction.x
-						e.movementForce.z = -direction.z
-					}
-				}
-				await sleep(1000)
-				return setState('idle')
-			},
-			update: (e, setState, { force, touchedByPlayer }) => {
-				if (touchedByPlayer) return setState('hit')
-				applyMove(e, force)
-				applyRotate(e, force)
-			},
+		update: (_e, setState, { touchedByPlayer }) => {
+			if (touchedByPlayer) return setState('hit')
 		},
-
 	},
+	hit,
+	dying,
+	stun,
+	dead: {},
+	attackCooldown: {
+		enter: async (e, setState, { direction, player }) => {
+			e.enemyAnimator.playClamped('running')
+			if (direction && player) {
+				if (e.position.distanceTo(player.position) < 40) {
+					e.movementForce.x = -direction.x
+					e.movementForce.z = -direction.z
+				}
+			}
+			await sleep(1000)
+			return setState('idle')
+		},
+		update: (e, setState, { force, touchedByPlayer }) => {
+			if (touchedByPlayer) return setState('hit')
+			applyMove(e, force)
+			applyRotate(e, force)
+		},
+	},
+
+},
 )
 
 // ! CHARGING
@@ -224,58 +226,57 @@ const treeQuery = ecs.with('collider', 'tree', 'position')
 export const chargingEnemyBehaviorPlugin = behaviorPlugin(
 	enemyQuery.where(e => e.attackStyle === EnemyAttackStyle.Charging),
 	'enemy',
-)(
 	enemyDecisions,
-	{
-		idle,
-		dying,
-		waitingAttack: waitingAttack(1000),
-		hit,
-		stun,
-		wander,
-		running: running(30),
-		dead: {},
-		attack: {
-			enter: async (e, setState) => {
-				ecs.add({ parent: e, ...dash(4) })
-				e.enemyAnimator.playAnimation('running')
-				await sleep(800)
-				return setState('attackCooldown')
-			},
-			update: (e, setState, { force, touchedByPlayer, player }) => {
-				applyRotate(e, force)
-				applyMove(e, force.multiplyScalar(2))
-				if (touchedByPlayer) return setState('hit')
-				world.contactPairsWith(e.collider, (c) => {
-					for (const tree of treeQuery) {
-						if (tree.collider === c && world.intersectionPair(e.sensorCollider, c)) {
-							playSound('zapsplat_impacts_wood_rotten_tree_trunk_hit_break_crumple_011_102694', { volume: -12 })
-							return setState('stun')
-						}
-					}
-					if (player && c === player.collider) {
-						return setState('attackCooldown')
-					}
-				})
-			},
+)({
+	idle,
+	dying,
+	waitingAttack: waitingAttack(1000),
+	hit,
+	stun,
+	wander,
+	running: running(30),
+	dead: {},
+	attack: {
+		enter: async (e, setState) => {
+			ecs.add({ parent: e, ...dash(4) })
+			e.enemyAnimator.playAnimation('running')
+			await sleep(800)
+			return setState('attackCooldown')
 		},
-		attackCooldown: {
-			enter: async (e, setState) => {
-				e.enemyAnimator.playAnimation('running')
-				await sleep(2000)
-				return setState('idle')
-			},
-			update: (e, setState, { touchedByPlayer, force, direction }) => {
-				if (touchedByPlayer) return setState('hit')
-				if (direction) {
-					e.movementForce.x = direction.x
-					e.movementForce.z = direction.z
-					applyRotate(e, force)
-					applyMove(e, force.multiplyScalar(0.5))
+		update: (e, setState, { force, touchedByPlayer, player }) => {
+			applyRotate(e, force)
+			applyMove(e, force.multiplyScalar(2))
+			if (touchedByPlayer) return setState('hit')
+			world.contactPairsWith(e.collider, (c) => {
+				for (const tree of treeQuery) {
+					if (tree.collider === c && world.intersectionPair(e.sensorCollider, c)) {
+						playSound('zapsplat_impacts_wood_rotten_tree_trunk_hit_break_crumple_011_102694', { volume: -12 })
+						return setState('stun')
+					}
 				}
-			},
+				if (player && c === player.collider) {
+					return setState('attackCooldown')
+				}
+			})
 		},
 	},
+	attackCooldown: {
+		enter: async (e, setState) => {
+			e.enemyAnimator.playAnimation('running')
+			await sleep(2000)
+			return setState('idle')
+		},
+		update: (e, setState, { touchedByPlayer, force, direction }) => {
+			if (touchedByPlayer) return setState('hit')
+			if (direction) {
+				e.movementForce.x = direction.x
+				e.movementForce.z = direction.z
+				applyRotate(e, force)
+				applyMove(e, force.multiplyScalar(0.5))
+			}
+		},
+	},
+},
 
 )
 
@@ -283,45 +284,44 @@ export const chargingEnemyBehaviorPlugin = behaviorPlugin(
 export const meleeEnemyBehaviorPlugin = behaviorPlugin(
 	enemyQuery.where(e => e.attackStyle === EnemyAttackStyle.Melee),
 	'enemy',
-)(
 	enemyDecisions,
-	{
-		idle,
-		dying,
-		waitingAttack: waitingAttack(2000),
-		hit,
-		stun,
-		wander,
-		running: running(10),
-		dead: {},
-		attack: {
-			enter: async (e, setState) => {
-				e.enemyAnimator.playAnimation('attacking')
-				await sleep(800)
-				return setState('attackCooldown')
-			},
-			update: (e, setState, { force, touchedByPlayer }) => {
-				applyRotate(e, force)
-				applyMove(e, force.multiplyScalar(0.5))
-				if (touchedByPlayer) return setState('hit')
-			},
+)({
+	idle,
+	dying,
+	waitingAttack: waitingAttack(2000),
+	hit,
+	stun,
+	wander,
+	running: running(10),
+	dead: {},
+	attack: {
+		enter: async (e, setState) => {
+			e.enemyAnimator.playAnimation('attacking')
+			await sleep(800)
+			return setState('attackCooldown')
 		},
-		attackCooldown: {
-			enter: async (e, setState) => {
-				e.enemyAnimator.playAnimation('running')
-				await sleep(2000)
-				return setState('idle')
-			},
-			update: (e, setState, { touchedByPlayer, force, direction }) => {
-				if (touchedByPlayer) return setState('hit')
-				if (direction) {
-					e.movementForce.x = direction.x
-					e.movementForce.z = direction.z
-					applyRotate(e, force)
-					applyMove(e, force.multiplyScalar(0.5))
-				}
-			},
+		update: (e, setState, { force, touchedByPlayer }) => {
+			applyRotate(e, force)
+			applyMove(e, force.multiplyScalar(0.5))
+			if (touchedByPlayer) return setState('hit')
 		},
 	},
+	attackCooldown: {
+		enter: async (e, setState) => {
+			e.enemyAnimator.playAnimation('running')
+			await sleep(2000)
+			return setState('idle')
+		},
+		update: (e, setState, { touchedByPlayer, force, direction }) => {
+			if (touchedByPlayer) return setState('hit')
+			if (direction) {
+				e.movementForce.x = direction.x
+				e.movementForce.z = direction.z
+				applyRotate(e, force)
+				applyMove(e, force.multiplyScalar(0.5))
+			}
+		},
+	},
+},
 
 )

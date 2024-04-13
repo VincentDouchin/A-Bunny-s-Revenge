@@ -20,15 +20,13 @@ export interface EntityState<C extends keyof Entity, B extends keyof States, F e
 	exit?: StateFn<C, B, F>
 }
 
-export const behaviorPlugin = <C extends keyof Entity, B extends keyof States>(
+export const behaviorPlugin = <C extends keyof Entity, B extends keyof States, F extends StateDecisions<C>>(
 	initalQuery: Query<With<Entity, C>>,
 	behaviorController: B,
+	fn: F,
 ) => {
 	const query = initalQuery.with('behaviorController', 'state').where(e => e.behaviorController === behaviorController)
-	return <F extends StateDecisions<C>>(
-		fn: F,
-		manager: Record<States[B], EntityState<C, B, F>>,
-	) => (state: State) => {
+	return (manager: Record<States[B], EntityState<C, B, F>>) => (state: State) => {
 		for (const [entityState, stateManager] of entries(manager)) {
 			const setState = (e: StateEntity<C>, previousState: States[B]) => (state: States[B]) => {
 				if (e.state === previousState) {
