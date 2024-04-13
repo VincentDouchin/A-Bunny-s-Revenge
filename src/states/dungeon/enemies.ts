@@ -32,7 +32,7 @@ export const enemyBundle = (name: enemy, level: number) => {
 		faction: Faction.Enemy,
 		enemyName: name,
 		movementForce: new Vector3(),
-		speed: 100 * enemy.speed,
+		speed: 70 * enemy.speed,
 		drops: enemy.drops,
 		sensor: true,
 		healthBar: true,

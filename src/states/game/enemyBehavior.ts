@@ -183,7 +183,7 @@ export const rangeEnemyBehaviorPlugin = behaviorPlugin(
 	idle,
 	wander,
 	running: running(50),
-	waitingAttack: waitingAttack(1000),
+	waitingAttack: waitingAttack(2000),
 	attack: {
 		enter: async (e, setState, { force }) => {
 			applyRotate(e, force)
