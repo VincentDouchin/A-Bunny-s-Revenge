@@ -10,6 +10,7 @@ import { ecs, world } from '@/global/init'
 import { playSound } from '@/global/sounds'
 import { dash } from '@/particles/dashParticles'
 import { sleep } from '@/utils/sleep'
+import { campState } from '@/global/states'
 
 const ANIMATION_SPEED = 1.2
 const playerComponents = ['playerAnimator', 'movementForce', 'speed', 'body', 'rotation', 'playerControls', 'combo', 'attackSpeed', 'dash', 'collider', 'currentHealth', 'model', 'hitTimer', 'size'] as const satisfies readonly (keyof Entity)[]
@@ -43,11 +44,13 @@ export const playerBehaviorPlugin = behaviorPlugin(
 				applyRotate(e, force)
 				setState('running')
 			}
-			if (e.playerControls.get('primary').justPressed) {
-				setState('attack')
-			}
-			if (e.playerControls.get('secondary').justPressed && e.dash.finished()) {
-				setState('dash')
+			if (!campState.enabled) {
+				if (e.playerControls.get('primary').justPressed) {
+					setState('attack')
+				}
+				if (e.playerControls.get('secondary').justPressed && e.dash.finished()) {
+					setState('dash')
+				}
 			}
 		},
 	},
@@ -61,11 +64,13 @@ export const playerBehaviorPlugin = behaviorPlugin(
 			} else {
 				setState('idle')
 			}
-			if (e.playerControls.get('primary').justPressed) {
-				setState('attack')
-			}
-			if (e.playerControls.get('secondary').justPressed && e.dash.finished()) {
-				setState('dash')
+			if (!campState.enabled) {
+				if (e.playerControls.get('primary').justPressed) {
+					setState('attack')
+				}
+				if (e.playerControls.get('secondary').justPressed && e.dash.finished()) {
+					setState('dash')
+				}
 			}
 		},
 	},
