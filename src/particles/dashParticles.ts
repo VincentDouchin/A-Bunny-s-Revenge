@@ -1,33 +1,31 @@
 import { CircleGeometry, MeshBasicMaterial, Vector3, Vector4 } from 'three'
-import { Bezier, ConstantColor, ConstantValue, ParticleSystem, PiecewiseBezier, PointEmitter, RenderMode, SizeOverLife } from 'three.quarks'
+import { Bezier, ColorRange, ConstantValue, IntervalValue, ParticleSystem, PiecewiseBezier, PointEmitter, RenderMode, SizeOverLife } from 'three.quarks'
 import type { Entity } from '@/global/entity'
 
 const geo = new CircleGeometry(1, 8)
 
 const mat = new MeshBasicMaterial({ transparent: true })
 mat.depthWrite = false
-export const footstepsBundle = (direction: 'left' | 'right') => {
+export const dash = (duration: number) => {
 	const system = new ParticleSystem({
-		duration: 1,
+		duration,
 		looping: false,
 		prewarm: true,
 		instancingGeometry: geo,
-		startColor: new ConstantColor(new Vector4(0, 0, 0, 0.2)),
+		startColor: new ColorRange(new Vector4(1, 1, 1, 0.2), new Vector4(0.7, 0.7, 0.7, 0.5)),
 		startLife: new ConstantValue(5.0),
-		startSpeed: new ConstantValue(0),
-		startSize: new ConstantValue(1),
+		startSpeed: new ConstantValue(-1),
+		startSize: new IntervalValue(1, 3),
 		worldSpace: true,
-		emissionOverTime: new ConstantValue(1),
+		emissionOverTime: new ConstantValue(20),
 		shape: new PointEmitter(),
 		material: mat,
-		emissionBursts: [],
-		renderMode: RenderMode.HorizontalBillBoard,
+		renderMode: RenderMode.BillBoard,
 		behaviors: [
 			new SizeOverLife(new PiecewiseBezier([[new Bezier(1, 0.75, 0.50, 0.25), 0]])),
 		],
 
 	})
-	system.emitter.position.x = (direction === 'left' ? -1 : 1) * 1.5
-	system.emitter.position.y = 1
+	system.emitter.position.y = 0.5
 	return { emitter: system.emitter, autoDestroy: true, position: new Vector3() } as const satisfies Entity
 }

@@ -2,12 +2,10 @@ import { RigidBodyType } from '@dimforge/rapier3d-compat'
 import { Vector3 } from 'three'
 import { clone } from 'three/examples/jsm/utils/SkeletonUtils'
 import { inventoryBundle } from './inventory'
-import { Animator } from '@/global/animator'
 import { Interactable, MenuType } from '@/global/entity'
 import { assets, ecs } from '@/global/init'
 import { inMap } from '@/lib/hierarchy'
 import { modelColliderBundle } from '@/lib/models'
-import { stateBundle } from '@/lib/stateMachine'
 
 const playerQuery = ecs.with('player', 'position', 'rotation', 'inventory', 'inventoryId', 'inventorySize')
 export const spawnBasket = () => {
@@ -21,12 +19,7 @@ export const spawnBasket = () => {
 		return ecs.add({
 			position,
 			...inMap(),
-			basketAnimator: new Animator(bundle.model, assets.characters.Basket.animations),
-			...stateBundle<'idle' | 'running' | 'picking'>('idle', {
-				idle: ['running', 'picking'],
-				running: ['idle', 'picking'],
-				picking: ['idle'],
-			}),
+			// basketAnimator: new Animator(bundle.model, assets.characters.Basket.animations),
 			movementForce: new Vector3(),
 			following: false,
 			followTarget: player,
@@ -36,7 +29,7 @@ export const spawnBasket = () => {
 		})
 	}
 }
-const basketQuery = ecs.with('basket', 'movementForce', 'position', 'collider', 'stateMachine', 'state')
+const basketQuery = ecs.with('basket', 'movementForce', 'position', 'collider', 'state')
 export const enableBasketUi = () => {
 	for (const basket of basketQuery) {
 		ecs.update(basket, {

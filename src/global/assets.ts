@@ -192,7 +192,7 @@ export const loadAssets = async () => {
 		items: typeGlob<items>(import.meta.glob('@assets/items/*.*', { as: 'url', eager: true }))(loadItems(loader)),
 
 		// ! textures
-		particles: typeGlob<particles>(import.meta.glob('@assets/particles/*.png', { eager: true, import: 'default' }))(texturesLoader(loader)),
+		particles: typeGlob<particles>(import.meta.glob('@assets/particles/*.webp', { eager: true, import: 'default' }))(texturesLoader(loader)),
 
 		textures: typeGlob<textures>(import.meta.glob('@assets/textures/*.webp', { eager: true, import: 'default' }))(texturesLoader(loader)),
 

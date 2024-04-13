@@ -1,11 +1,12 @@
+import { createMemo } from 'solid-js'
 import { Portal, Show } from 'solid-js/web'
+import { enemyData } from '@/constants/enemies'
 import { ecs, ui } from '@/global/init'
 import { ForQuery } from '@/ui/components/ForQuery'
-import { enemyData } from '@/constants/enemies'
 
 const healthBarQuery = ecs.with('healthBarContainer', 'maxHealth', 'currentHealth', 'enemyName')
 
-export const HealthBarUi = () => {
+export const EnemyHealthBarUi = () => {
 	return (
 		<>
 			<style jsx>
@@ -38,16 +39,31 @@ export const HealthBarUi = () => {
 					border-radius: 1rem;
 					transition: width 0.2s ease-in;
 				}
+				@keyframes disappear{
+					from{
+						opacity: 1;
+					}
+					to{
+						opacity:0;
+					}
+				}
+				.enemy-health-bar.disappear{
+					animation-name: disappear;
+					animation-duration: 1s;
+					animation-fill-mode: forwards;
+				}
 				`}
 			</style>
 			<ForQuery query={healthBarQuery}>
 				{(entity) => {
 					const healthPercent = ui.sync(() => Math.max(0, entity.currentHealth / entity.maxHealth.value))
+					const dead = createMemo(() => healthPercent() === 0)
+
 					return (
 						<>
 							<Show when={!entity.boss}>
 								<Portal mount={entity.healthBarContainer.element}>
-									<div class="enemy-health-bar">
+									<div class="enemy-health-bar" classList={{ disappear: dead() }}>
 										<div class="health-bar-inner" style={{ width: `${healthPercent() * 100}%` }}></div>
 									</div>
 								</Portal>

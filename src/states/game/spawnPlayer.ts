@@ -3,11 +3,16 @@ import { LinearSRGBColorSpace, Mesh, NearestFilter, Quaternion, Vector3 } from '
 import { clone } from 'three/examples/jsm/utils/SkeletonUtils'
 import { RoomType } from '../dungeon/generateDungeon'
 import { healthBundle } from '../dungeon/health'
+import { behaviorBundle } from './behaviors'
 import { inventoryBundle } from './inventory'
 import { weaponBundle } from './weapon'
+
+import { Dash } from './dash'
 import { Sizes } from '@/constants/sizes'
 import { Animator } from '@/global/animator'
-import { type Entity, Faction } from '@/global/entity'
+import type { Entity, PlayerAnimations } from '@/global/entity'
+import { Faction } from '@/global/entity'
+
 import { assets, ecs } from '@/global/init'
 import { playerInputMap } from '@/global/inputMaps'
 import { save, updateSave } from '@/global/save'
@@ -18,9 +23,10 @@ import { itemsData } from '@/constants/items'
 import { inMap } from '@/lib/hierarchy'
 import { capsuleColliderBundle, characterControllerBundle } from '@/lib/models'
 import type { System } from '@/lib/state'
-import { stateBundle } from '@/lib/stateMachine'
 import { Stat, addModifier } from '@/lib/stats'
+import { Timer } from '@/lib/timer'
 
+const playerAnimationMap = new Map<Animations['Bunny'], PlayerAnimations>().set('IDLE_NEW', 'idle').set('RUN_ALT', 'running').set('FIGHT_ACTION1', 'lightAttack').set('SLASH', 'slashAttack').set('HEAVYATTACK', 'heavyAttack')
 export const playerBundle = (health: number, addHealth: boolean, weapon: weapons | null) => {
 	const model = clone(assets.characters.Bunny.scene)
 	model.traverse((node) => {
@@ -31,7 +37,6 @@ export const playerBundle = (health: number, addHealth: boolean, weapon: weapons
 			node.material.opacity = 1
 		}
 	})
-
 	const bundle = capsuleColliderBundle(model, Sizes.character)
 	bundle.bodyDesc.setLinearDamping(20)
 	const player = {
@@ -39,7 +44,7 @@ export const playerBundle = (health: number, addHealth: boolean, weapon: weapons
 		...inventoryBundle(Number.POSITIVE_INFINITY, 'player'),
 		...bundle,
 		...characterControllerBundle(),
-		playerAnimator: new Animator(bundle.model, assets.characters.Bunny.animations),
+		playerAnimator: new Animator(bundle.model, assets.characters.Bunny.animations, playerAnimationMap),
 		...inMap(),
 		cameratarget: true,
 		faction: Faction.Player,
@@ -55,17 +60,9 @@ export const playerBundle = (health: number, addHealth: boolean, weapon: weapons
 		attackSpeed: new Stat(1),
 		lastStep: { right: false, left: false },
 		...healthBundle(5, health),
-		...stateBundle<'idle' | 'running' | 'picking' | 'hit' | 'dying' | 'dead' | 'attacking' | 'waitingAttack' | 'cheer'>('idle', {
-			idle: ['running', 'picking', 'hit', 'waitingAttack', 'cheer'],
-			running: ['idle', 'hit', 'waitingAttack', 'dying'],
-			picking: ['idle'],
-			hit: ['idle', 'dying'],
-			dying: ['dead'],
-			attacking: ['idle', 'dying'],
-			dead: [],
-			waitingAttack: ['attacking'],
-			cheer: ['idle'],
-		}),
+		...behaviorBundle('player', 'idle'),
+		hitTimer: new Timer(500, true),
+		dash: new Dash(1000),
 		combo: {
 			lastAttack: 0,
 			heavyAttack: 0,

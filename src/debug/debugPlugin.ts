@@ -1,5 +1,4 @@
 import { debugOptions, debugState } from './debugState'
-import { playerAttack } from '@/states/dungeon/battle'
 import type { State } from '@/lib/state'
 import { ecs } from '@/global/init'
 import { windowEvent } from '@/lib/uiManager'
@@ -13,7 +12,7 @@ const enableDebugState = () => windowEvent('keydown', (e) => {
 
 const attackInFarm = () => {
 	if (debugOptions.attackInFarm) {
-		playerAttack()
+		// playerAttack()
 	}
 }
 const godMode = () => {

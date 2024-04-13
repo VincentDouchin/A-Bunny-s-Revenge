@@ -2,8 +2,8 @@ import type { characters } from '@assets/assets'
 import type { Item } from './items'
 import { Rarity } from './items'
 
-import type { Animator } from '@/global/animator'
-import type { ComponentsOfType } from '@/global/entity'
+import { EnemyAttackStyle } from '@/global/entity'
+import type { EnemyAnimations } from '@/global/entity'
 import { getRandom, range } from '@/utils/mapFunctions'
 
 export const lootPool = (lootQuantity: number, lootRarity: number, drops: Drop[]) => {
@@ -23,95 +23,117 @@ export const lootPool = (lootQuantity: number, lootRarity: number, drops: Drop[]
 export interface Drop extends Item {
 	rarity: Rarity
 }
-export interface Enemy {
+export interface Enemy<Name extends keyof Animations> {
 	name: string
 	health: number
 	scale: number
+	speed: number
 	boss: boolean
+	attackStyle: EnemyAttackStyle
 	drops: Drop[]
-	animator: ComponentsOfType<Animator<any>>
+	animationMap: Map<Animations[Name], EnemyAnimations>
 }
 const enemyNames = ['Armabee', 'Armabee_Evolved', 'Shaga_A', 'Big_Boar_A', 'Snailo_A', 'Porin_A', 'Forest_Butterfly_A', 'Racco_A', 'Platopo_A'] as const satisfies readonly characters[]
+
 export type enemy = (typeof enemyNames)[number]
-export const enemyData: Record<enemy, Enemy> = {
+
+const genericEnemyAnimationMap = new Map<Animations['Big_Boar_A'], EnemyAnimations>().set('Attack', 'attacking').set('Damage', 'hit').set('Die', 'dead').set('Idle', 'idle').set('Move', 'running')
+
+export const enemyData: { [k in enemy]: Enemy<k> } = {
 	Armabee: {
 		name: 'Armabee',
 		health: 3,
 		scale: 4,
+		speed: 1,
 		boss: false,
+		attackStyle: EnemyAttackStyle.Melee,
 		drops: [{ name: 'honey', quantity: 1, rarity: Rarity.Common }],
-
-		animator: 'beeAnimator',
+		animationMap: new Map<Animations['Armabee'], EnemyAnimations>().set('Death', 'dead').set('Flying_Idle', 'idle').set('Headbutt', 'attacking').set('HitReact', 'hit').set('Fast_Flying', 'running'),
 	},
 	Armabee_Evolved: {
 		name: 'Armabee Evolved',
 		health: 5,
 		scale: 10,
+		speed: 1,
 		boss: true,
 		drops: [],
-		animator: 'beeBossAnimator',
+		attackStyle: EnemyAttackStyle.Melee,
+		animationMap: new Map<Animations['Armabee_Evolved'], EnemyAnimations>().set('Death', 'dead').set('Flying_Idle', 'idle').set('Headbutt', 'attacking').set('HitReact', 'hit'),
 
 	},
 	Shaga_A: {
 		name: 'Shaga',
 		health: 4,
 		scale: 2,
+		speed: 1,
 		boss: false,
+		attackStyle: EnemyAttackStyle.Melee,
 		drops: [{ name: 'parsley', quantity: 2, rarity: Rarity.Common }],
-		animator: 'shagaAnimator',
+		animationMap: genericEnemyAnimationMap,
 	},
 	Big_Boar_A: {
 		name: 'Flower Boar',
 		health: 3,
 		scale: 1.5,
+		speed: 1,
 		boss: false,
+		attackStyle: EnemyAttackStyle.Charging,
 		drops: [{ name: 'ham', quantity: 1, rarity: Rarity.Common }],
-		animator: 'shagaAnimator',
+		animationMap: genericEnemyAnimationMap,
 	},
 	Snailo_A: {
 		name: 'Snailo',
 		health: 3,
 		scale: 1.4,
+		speed: 1,
 		boss: false,
 		drops: [],
-		animator: 'shagaAnimator',
+		attackStyle: EnemyAttackStyle.Charging,
+		animationMap: genericEnemyAnimationMap,
 	},
 	Porin_A: {
 		name: 'Porin',
 		health: 4,
 		scale: 2,
+		speed: 1,
 		boss: false,
+		attackStyle: EnemyAttackStyle.Melee,
 		drops: [{ name: 'slime_dough', quantity: 1, rarity: Rarity.Common }],
-		animator: 'shagaAnimator',
+		animationMap: genericEnemyAnimationMap,
 	},
 	Racco_A: {
 		name: 'Racco',
 		health: 3,
 		scale: 2,
+		speed: 1,
 		boss: false,
 		drops: [],
-		animator: 'shagaAnimator',
+		attackStyle: EnemyAttackStyle.Melee,
+		animationMap: genericEnemyAnimationMap,
 	},
 	Forest_Butterfly_A: {
 		name: 'Butterfly',
 		health: 3,
 		scale: 2,
+		speed: 1,
 		boss: false,
 		drops: [],
-		animator: 'shagaAnimator',
+		attackStyle: EnemyAttackStyle.Melee,
+		animationMap: genericEnemyAnimationMap,
 	},
 	Platopo_A: {
 		name: 'Platopo',
 		health: 3,
 		scale: 10,
+		speed: 0.7,
 		boss: false,
+		attackStyle: EnemyAttackStyle.Range,
 		drops: [{ name: 'milk', quantity: 1, rarity: Rarity.Common }],
-		animator: 'shagaAnimator',
+		animationMap: genericEnemyAnimationMap,
 	},
-
 }
 
-interface EnemyGroup {
+export interface EnemyGroup {
 	enemies: enemy[]
 	boss?: enemy
 }

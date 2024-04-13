@@ -1,5 +1,6 @@
 import { RigidBodyType } from '@dimforge/rapier3d-compat'
 import { Vector3 } from 'three'
+import { behaviorBundle } from '../game/behaviors'
 import { healthBundle } from './health'
 import type { enemy } from '@/constants/enemies'
 import { enemyData } from '@/constants/enemies'
@@ -7,12 +8,11 @@ import { Sizes } from '@/constants/sizes'
 import { Animator } from '@/global/animator'
 import { type Entity, Faction } from '@/global/entity'
 import { assets, ecs } from '@/global/init'
-import { modelColliderBundle } from '@/lib/models'
-import { stateBundle } from '@/lib/stateMachine'
-import type { Subscriber } from '@/lib/state'
 import type { DungeonRessources } from '@/global/states'
-import { Stat } from '@/lib/stats'
 import { inMap } from '@/lib/hierarchy'
+import { modelColliderBundle } from '@/lib/models'
+import type { Subscriber } from '@/lib/state'
+import { Stat } from '@/lib/stats'
 
 export const enemyBundle = (name: enemy, level: number) => {
 	const enemy = enemyData[name]
@@ -22,8 +22,9 @@ export const enemyBundle = (name: enemy, level: number) => {
 	bundle.bodyDesc.setLinearDamping(20)
 	const boss = enemy.boss ? { boss: true } as const : {}
 	return {
+		...behaviorBundle('enemy', 'idle'),
 		...bundle,
-		[enemy.animator]: new Animator(bundle.model, model.animations),
+		enemyAnimator: new Animator(bundle.model, model.animations, enemy.animationMap),
 		...healthBundle(enemy.health * (level + 1)),
 		...boss,
 		strength: new Stat(1 + level),
@@ -31,20 +32,11 @@ export const enemyBundle = (name: enemy, level: number) => {
 		faction: Faction.Enemy,
 		enemyName: name,
 		movementForce: new Vector3(),
-		speed: 100,
+		speed: 100 * enemy.speed,
 		drops: enemy.drops,
 		sensor: true,
 		healthBar: true,
-		...stateBundle<'dying' | 'idle' | 'running' | 'hit' | 'dead' | 'waitingAttack' | 'attacking' | 'attackCooldown'>('idle', {
-			idle: ['running', 'hit', 'waitingAttack'],
-			running: ['idle', 'hit', 'waitingAttack'],
-			dying: ['dead'],
-			hit: ['dying', 'idle'],
-			dead: [],
-			waitingAttack: ['idle', 'attacking', 'hit'],
-			attacking: ['attackCooldown', 'hit'],
-			attackCooldown: ['idle', 'hit'],
-		}),
+		attackStyle: enemy.attackStyle,
 	} as const satisfies Entity
 }
 const enemyQuery = ecs.with('enemyName')

@@ -1,8 +1,8 @@
 import { debugPlugin } from './debug/debugPlugin'
 import { updateAnimations } from './global/animations'
-import { initCamera, initializeCameraPosition, moveCamera } from './global/camera'
+import { initCamera, initializeCameraPosition, moveCamera, updateCameraZoom } from './global/camera'
 import { coroutines, inputManager, time, ui } from './global/init'
-import { initThree, renderGame } from './global/rendering'
+import { initThree, renderGame, updateRenderSize } from './global/rendering'
 import { initTone } from './global/sounds'
 import { app, campState, coreState, dungeonState, gameState, genDungeonState, mainMenuState, openMenuState, pausedState, setupState } from './global/states'
 import { despawnOfType, hierarchyPlugin, removeStateEntity } from './lib/hierarchy'
@@ -14,21 +14,24 @@ import { runIf } from './lib/state'
 import { transformsPlugin } from './lib/transforms'
 import { tweenPlugin } from './lib/updateTween'
 import { pickupAcorn } from './states/dungeon/acorn'
-import { applyDeathTimer, enemyAttackPlayer, playerAttack, projectilesDamagePlayer, spawnDrops } from './states/dungeon/battle'
+import { applyDeathTimer, spawnDrops, tickHitCooldown } from './states/dungeon/battle'
 import { dropBerriesOnHit } from './states/dungeon/bushes'
 import { spawnWeaponsChoice } from './states/dungeon/chooseWeapon'
 import { removeEnemyFromSpawn } from './states/dungeon/enemies'
 import { killAnimation, killEntities } from './states/dungeon/health'
 import { addHealthBarContainer } from './states/dungeon/healthBar'
 import { endBattleSpawnChest } from './states/dungeon/spawnChest'
+import { rotateStun } from './states/dungeon/stun'
 import { harvestCrop, initPlantableSpotsInteractions, interactablePlantableSpot, plantSeed, updateCropsSave } from './states/farm/farming'
 import { closePlayerInventory, disableInventoryState, enableInventoryState, interact, openPlayerInventory } from './states/farm/openInventory'
-import { basketFSM, beeBossFSM, beeFSM, playerFSM, shagaFSM } from './states/game/FSM'
+import { addDashDisplay, updateDashDisplay } from './states/game/dash'
 import { dayNight, initTimeOfDay } from './states/game/dayNight'
 import { talkToNPC } from './states/game/dialog'
+import { chargingEnemyBehaviorPlugin, meleeEnemyBehaviorPlugin, rangeEnemyBehaviorPlugin } from './states/game/enemyBehavior'
 import { bobItems, collectItems, popItems, stopItems } from './states/game/items'
-import { applyMove, canPlayerMove, movePlayer, playerSteps, savePlayerFromTheEmbraceOfTheVoid, savePlayerPosition, stopPlayer } from './states/game/movePlayer'
+import { canPlayerMove, movePlayer, playerSteps, savePlayerFromTheEmbraceOfTheVoid, savePlayerPosition, stopPlayer } from './states/game/movePlayer'
 import { pauseGame } from './states/game/pauseGame'
+import { playerBehaviorPlugin } from './states/game/playerBehavior'
 import { target } from './states/game/sensor'
 import { basketFollowPlayer, enableBasketUi, spawnBasket } from './states/game/spawnBasket'
 import { allowDoorCollision, collideWithDoor, collideWithDoorCamp, collideWithDoorClearing, doorLocking, unlockDoorClearing } from './states/game/spawnDoor'
@@ -42,12 +45,13 @@ import { disablePortrait, enableFullscreen, resize, setupGame, stopOnLosingFocus
 import { UI } from './ui/UI'
 
 coreState
+	.addPlugins(hierarchyPlugin, physicsPlugin, transformsPlugin, addToScene('camera', 'light', 'model', 'dialogContainer', 'emitter', 'interactionContainer', 'minigameContainer', 'healthBarContainer', 'dashDisplay', 'stun'), updateModels, particlesPlugin, tweenPlugin)
 	.onEnter(initThree, initCamera, moveCamera(true), initTimeOfDay)
-	.addPlugins(hierarchyPlugin, physicsPlugin, transformsPlugin, addToScene('camera', 'light', 'model', 'dialogContainer', 'emitter', 'interactionContainer', 'minigameContainer', 'healthBarContainer'), updateModels, particlesPlugin, tweenPlugin)
-	.addSubscriber(...target, initTone, resize, disablePortrait, enableFullscreen, stopOnLosingFocus)
 	.onEnter(ui.render(UI))
+	.addSubscriber(...target, initTone, resize, disablePortrait, enableFullscreen, stopOnLosingFocus)
 	.onPreUpdate(coroutines.tick, savePlayerFromTheEmbraceOfTheVoid)
-	.onUpdate(runIf(() => !pausedState.enabled, updateAnimations('beeAnimator', 'playerAnimator', 'shagaAnimator', 'ovenAnimator', 'chestAnimator', 'houseAnimator', 'basketAnimator', 'beeBossAnimator'), () => time.tick()), inputManager.update, ui.update, moveCamera())
+	.onUpdate(runIf(() => !pausedState.enabled, updateAnimations('enemyAnimator', 'playerAnimator', 'chestAnimator', 'houseAnimator', 'ovenAnimator'), () => time.tick()))
+	.onUpdate(inputManager.update, ui.update, moveCamera())
 	.enable()
 setupState
 	.onEnter(setupGame)
@@ -56,14 +60,15 @@ setupState
 gameState
 	.addPlugins(debugPlugin)
 
-	.addSubscriber(initializeCameraPosition, bobItems, enableInventoryState, killAnimation, ...playerFSM, ...beeFSM, ...shagaFSM, ...basketFSM, ...beeBossFSM, popItems, addHealthBarContainer, ...addOrRemoveWeaponModel, ...doorLocking)
+	.addSubscriber(initializeCameraPosition, bobItems, enableInventoryState, killAnimation, popItems, addHealthBarContainer, ...addOrRemoveWeaponModel, ...doorLocking, addDashDisplay)
 	.onUpdate(
-		runIf(canPlayerMove, movePlayer),
-		runIf(() => !pausedState.enabled, playerSteps, dayNight, updateTimeUniforms, applyDeathTimer, applyMove),
+		runIf(canPlayerMove, movePlayer, updateDashDisplay),
+		runIf(() => !pausedState.enabled, playerSteps, dayNight, updateTimeUniforms, applyDeathTimer),
 		runIf(() => !openMenuState.enabled, pauseGame, interact),
 	)
+	.addPlugins(playerBehaviorPlugin, rangeEnemyBehaviorPlugin, chargingEnemyBehaviorPlugin, meleeEnemyBehaviorPlugin)
 	.onUpdate(collectItems, touchItem, talkToNPC, stopItems, pickupAcorn, dropBerriesOnHit)
-	.onPostUpdate(renderGame)
+	.onPostUpdate(renderGame, rotateStun)
 	.enable()
 mainMenuState
 	.onEnter(intiMainMenuRendering, setMainCameraPosition)
@@ -85,17 +90,18 @@ openMenuState
 genDungeonState
 	.addSubscriber(unlockDoorClearing)
 	.onEnter(spawnCrossRoad, spawnLevelData, spawnPlayerClearing, spawnWeaponsChoice, moveCamera(true))
-	.onUpdate(collideWithDoorClearing, playerAttack)
+	.onUpdate(collideWithDoorClearing)
 	.onExit(despawnOfType('map'))
 
 dungeonState
 	.addSubscriber(spawnDrops, losingBattle, endBattleSpawnChest, removeEnemyFromSpawn)
-	.onEnter(spawnDungeon, spawnLevelData, spawnPlayerDungeon, spawnBasket, moveCamera(true))
-	.onUpdate(runIf(canPlayerMove, allowDoorCollision, collideWithDoor, enemyAttackPlayer, harvestCrop, playerAttack, killEntities, basketFollowPlayer()), projectilesDamagePlayer)
+	.onEnter(spawnDungeon, spawnLevelData, spawnPlayerDungeon, spawnBasket, moveCamera(true), () => updateRenderSize(), () => updateCameraZoom())
+	.onUpdate(runIf(canPlayerMove, allowDoorCollision, collideWithDoor, harvestCrop, killEntities, basketFollowPlayer()))
+	.onUpdate(runIf(() => !pausedState.enabled, tickHitCooldown))
 	.onExit(despawnOfType('map'))
 pausedState
 	.onExit(() => time.reset())
-// const bossRoom = assignPlanAndEnemies([{ position: { x: 0, y: 0 }, connections: { north: 1, south: null }, type: RoomType.Boss }])
+// const bossRoom = assignPlanAndEnemies([{ position: { x: 0, y: 0 }, connections: { north: 1, south: null }, type: RoomType.Boss }], ['Armabee'])
 // dungeonState.enable({ dungeon: bossRoom[0], direction: 'south', firstEntry: true, playerHealth: 5, dungeonLevel: 0, weapon: 'Hoe' })
 const animate = () => {
 	app.update()

@@ -10,11 +10,14 @@ export const healthBundle = (health: number, current?: number) => ({
 	maxHealth: new Stat(health),
 } as const satisfies Entity)
 
-const healthQuery = ecs.with('currentHealth', 'maxHealth', 'stateMachine')
+const healthQuery = ecs.with('currentHealth', 'maxHealth', 'state')
 export const killEntities = () => {
 	for (const entity of healthQuery) {
-		if (entity.currentHealth <= 0) {
-			entity.stateMachine.enter('dying', entity)
+		if (entity.faction === Faction.Enemy) {
+			// console.log(entity.state)
+		}
+		if (entity.currentHealth <= 0 && entity.state !== 'dying' && entity.state !== 'dead') {
+			// ecs.update(entity, { state: 'dying' })
 		}
 	}
 }

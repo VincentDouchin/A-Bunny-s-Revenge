@@ -13,7 +13,7 @@ import { removeEntityRef } from '@/lib/hierarchy'
 import { modelColliderBundle } from '@/lib/models'
 import { getWorldPosition } from '@/lib/transforms'
 
-const playerQuery = ecs.with('playerControls', 'sensorCollider', 'movementForce', 'stateMachine', 'inventory', 'inventoryId', 'inventorySize')
+const playerQuery = ecs.with('playerControls', 'sensorCollider', 'movementForce', 'inventory', 'inventoryId', 'inventorySize')
 const plantedSpotQuery = ecs.with('plantableSpot', 'planted', 'group')
 
 export const updateCropsSave = () => {
@@ -100,7 +100,7 @@ const touchedPlantablespotQuery = plantableSpotsQuery.with('interactionContainer
 
 export const harvestCrop = () => {
 	for (const player of playerQuery) {
-		const { playerControls, stateMachine } = player
+		const { playerControls } = player
 		if (playerControls.get('secondary').justPressed) {
 			for (const spot of touchedPlantablespotQuery) {
 				if (save.inventories.player.some(item => itemsData[item.name].seed)) {
@@ -111,16 +111,16 @@ export const harvestCrop = () => {
 		if (playerControls.get('primary').justPressed) {
 			for (const spot of plantedSpotQuery) {
 				if (spot.planted.interactionContainer && maxStage(spot.planted.crop.name) === spot.planted.crop.stage) {
-					if (stateMachine.enter('picking', player)) {
-						const bundle = itemBundle(spot.planted.crop.name)
-						const position = getWorldPosition(spot.group)
-						ecs.add({
-							...bundle,
-							position: position.add(new Vector3(0, bundle.size.y + 5, 0)),
-						})
-						playSound(['zapsplat_foley_fern_pull_from_ground_18385', 'zapsplat_foley_moss_grass_clump_pull_rip_from_ground_70635'], { volume: -12 })
-						removeEntityRef(spot, 'planted')
-					}
+					ecs.update(player, { state: 'picking' })
+					const bundle = itemBundle(spot.planted.crop.name)
+					const position = getWorldPosition(spot.group)
+					ecs.add({
+						...bundle,
+						position: position.add(new Vector3(0, bundle.size.y + 5, 0)),
+					})
+					playSound(['zapsplat_foley_fern_pull_from_ground_18385', 'zapsplat_foley_moss_grass_clump_pull_rip_from_ground_70635'], { volume: -12 })
+					removeEntityRef(spot, 'planted')
+					ecs.update(player, { state: 'idle' })
 				}
 			}
 		}

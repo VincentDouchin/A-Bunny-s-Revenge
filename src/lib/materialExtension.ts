@@ -17,6 +17,7 @@ export const insertBefore = (before: string, part: string) => (shader: string) =
 export const replaceInclude = (include: string, part: string) => (shader: string) => {
 	return shader.replace(`#include <${include}>`, part)
 }
+export const removeInclude = (include: string) => replaceInclude(include, '')
 export const override = (variable: string, part: string) => (shader: string) => {
 	return shader.split(`\n\t`).map(p => p.startsWith(variable) ? `${variable} = ${part};` : p).join(`\n\t`)
 }
@@ -54,7 +55,7 @@ export class MaterialExtension {
 	}
 }
 
-export const extendMaterial = <M extends Constructor<Material>, E extends MaterialExtension[]>(Base: M, extensions: E, options?: { debug: 'fragment' | 'vertex' }) => {
+export const extendMaterial = <M extends Constructor<Material>, E extends MaterialExtension[]>(Base: M, extensions: E, options?: { debug: 'fragment' | 'vertex', unpack?: boolean }) => {
 	return class extends Base {
 		uniforms = {} as any
 		customProgramCacheKey() {
@@ -99,16 +100,20 @@ export const extendMaterial = <M extends Constructor<Material>, E extends Materi
 			}
 
 			if (options?.debug === 'fragment') {
-				shader.fragmentShader = shader.fragmentShader.replaceAll(/#include\s*<([^>]+)>/g, (_match, part) => {
-					return ShaderChunk[part as keyof typeof ShaderChunk]
-				})
+				if (options.unpack) {
+					shader.fragmentShader = shader.fragmentShader.replaceAll(/#include\s*<([^>]+)>/g, (_match, part) => {
+						return ShaderChunk[part as keyof typeof ShaderChunk]
+					})
+				}
 				// eslint-disable-next-line no-console
 				console.log(shader.fragmentShader)
 			}
 			if (options?.debug === 'vertex') {
-				shader.vertexShader = shader.vertexShader.replaceAll(/#include\s*<([^>]+)>/g, (_match, part) => {
-					return ShaderChunk[part as keyof typeof ShaderChunk]
-				})
+				if (options.unpack) {
+					shader.vertexShader = shader.vertexShader.replaceAll(/#include\s*<([^>]+)>/g, (_match, part) => {
+						return ShaderChunk[part as keyof typeof ShaderChunk]
+					})
+				}
 				// eslint-disable-next-line no-console
 				console.log(shader.vertexShader)
 			}

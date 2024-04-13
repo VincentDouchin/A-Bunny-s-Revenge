@@ -4,7 +4,7 @@ import { PauseUi } from './PauseUI'
 import { StateUi } from './components/StateUi'
 import { DebugUi } from '@/debug/debugUi'
 import { dungeonState } from '@/global/states'
-import { HealthBarUi } from '@/states/dungeon/HealthBarUi'
+import { EnemyHealthBarUi } from '@/states/dungeon/EnemyHealthBarUi'
 import { LoseUi } from '@/states/dungeon/LoseUi'
 import { MiniMapUi } from '@/states/dungeon/MinimapUi'
 import { FullscreenUi } from '@/states/game/FullscreenUi'
@@ -19,7 +19,7 @@ export const UI = () => (
 		<LoseUi />
 		<PlayerUi />
 		<StateUi state={dungeonState}>
-			<HealthBarUi />
+			<EnemyHealthBarUi />
 			<MiniMapUi />
 		</StateUi>
 		<DialogUi />

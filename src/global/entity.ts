@@ -3,7 +3,7 @@ import type { Collider, ColliderDesc, KinematicCharacterController, RigidBody, R
 import type { Tween } from '@tweenjs/tween.js'
 import type { With } from 'miniplex'
 import type { JSXElement } from 'solid-js'
-import type { BufferGeometry, Camera, Group, Light, Mesh, MeshPhongMaterial, Object3D, Object3DEventMap, Quaternion, Scene, ShaderMaterial, Vector3, WebGLRenderer } from 'three'
+import type { BufferGeometry, Camera, Group, Light, Mesh, MeshPhongMaterial, Object3D, Object3DEventMap, Quaternion, Scene, ShaderMaterial, Sprite, Vector3, WebGLRenderer } from 'three'
 import type { BatchedRenderer, ParticleEmitter } from 'three.quarks'
 import type { CSS2DObject } from 'three/examples/jsm/renderers/CSS2DRenderer'
 import type { Animator } from './animator'
@@ -15,11 +15,14 @@ import type { Recipe } from '@/constants/recipes'
 import type { MenuInputMap, PlayerInputMap } from '@/global/inputMaps'
 import type { direction } from '@/lib/directions'
 import type { State } from '@/lib/state'
-import type { StateMachine } from '@/lib/stateMachine'
 import type { Stat } from '@/lib/stats'
 import type { Room } from '@/states/dungeon/generateDungeon'
 import type { MenuOptions, RenderMainMenuFn } from '@/states/mainMenu/mainMenuRendering'
+import type { Dash } from '@/states/game/dash'
+import type { Timer } from '@/lib/timer'
 
+export type PlayerAnimations = 'idle' | 'running' | 'lightAttack' | 'slashAttack' | 'heavyAttack'
+export type EnemyAnimations = 'idle' | 'running' | 'attacking' | 'hit' | 'dead'
 export type Dialog = Generator<string | string[] | void | false, void, number | void>
 export enum Faction {
 	Player,
@@ -52,6 +55,15 @@ export enum MenuType {
 export enum RenderGroup {
 	MainMenu,
 	Game,
+}
+export enum EnemyAttackStyle {
+	Charging,
+	Range,
+	Melee,
+}
+export interface States {
+	player: 'idle' | 'running' | 'attack' | 'dying' | 'dead' | 'picking' | 'dash' | 'hit'
+	enemy: 'idle' | 'running' | 'attack' | 'hit' | 'dying' | 'dead' | 'waitingAttack' | 'attackCooldown' | 'stun' | 'wander'
 }
 export const cropNames = ['carrot', 'beet', 'tomato', 'lettuce', 'pumpkin', 'wheat'] as const
 export const fruitNames = ['apple'] as const
@@ -101,15 +113,14 @@ export interface Entity {
 	collider?: Collider
 	size?: Vector3
 	controller?: KinematicCharacterController
+	// ! Behaviors
+	behaviorController?: keyof States
 	// ! Animations
-	playerAnimator?: Animator<Animations['Bunny']>
-	beeAnimator?: Animator<Animations['Armabee']>
-	beeBossAnimator?: Animator<Animations['Armabee_Evolved']>
-	shagaAnimator?: Animator<Animations['Shaga_A']>
+	playerAnimator?: Animator<PlayerAnimations>
+	enemyAnimator?: Animator<EnemyAnimations>
 	ovenAnimator?: Animator<Animations['BunnyOvenPacked']>
-	chestAnimator?: Animator<Animations['Chest']>
 	houseAnimator?: Animator<Animations['House']>
-	basketAnimator?: Animator<Animations['Basket']>
+	chestAnimator?: Animator<Animations['Chest']>
 	template?: () => JSXElement
 	el?: HTMLElement
 	cssObject?: true
@@ -179,7 +190,9 @@ export interface Entity {
 	healthBarContainer?: CSS2DObject
 	boss?: true
 	projectile?: true
-	deathTimer?: number
+	deathTimer?: Timer<false>
+	attackPattern?: 'melee' | 'distance'
+	attackStyle?: EnemyAttackStyle
 	// ! Particles
 	emitter?: ParticleEmitter<Object3DEventMap>
 	autoDestroy?: true
@@ -193,8 +206,7 @@ export interface Entity {
 	// ! Level Editor
 	entityId?: string
 	// ! FSM
-	stateMachine?: StateMachine<states>
-	state?: states
+	state?: States[keyof States]
 	// ! Minigame
 	recipesQueued?: Recipe[]
 	minigameContainer?: CSS2DObject
@@ -225,8 +237,14 @@ export interface Entity {
 	acorn?: true
 	// ! Berry Bush
 	berries?: Set<Mesh<BufferGeometry, MeshPhongMaterial>>
+	dash?: Dash
+	dashDisplay?: Sprite
+	// ! Stun
+	stun?: Group
+	hitTimer?: Timer<false>
+	// ! Wander
+	wander?: { target: Vector3, cooldown: Timer<false> }
 }
-export type states = 'idle' | 'running' | 'picking' | 'dying' | 'hit' | 'hello' | 'dead' | 'waitingAttack' | 'attacking' | 'attackCooldown' | 'doorOpening' | 'doorClosing' | 'cheer'
 export type Bundle<C extends keyof Entity> = () => With<Entity, C>
 
 type KeysOfType<T, U> = {

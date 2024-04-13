@@ -270,7 +270,7 @@ export const spawnDungeon: System<DungeonRessources> = ({ dungeon, dungeonLevel 
 	for (const enemy of dungeon.enemies) {
 		ecs.add({
 			...enemyBundle(enemy, dungeonLevel),
-			position: new Vector3(between(-10, 10), 0, between(-10, 10)),
+			position: new Vector3(between(-20, 20), 0, between(-20, 20)),
 		})
 	}
 	if (dungeon.type === RoomType.NPC && dungeon.encounter) {

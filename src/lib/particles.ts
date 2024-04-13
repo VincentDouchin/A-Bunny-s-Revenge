@@ -5,12 +5,14 @@ import { pausedState } from '@/global/states'
 import { gameRenderGroupQuery } from '@/global/rendering'
 
 const initBatchRender = () => {
-	const batchRenderer = new BatchedRenderer()
-	const gameRenderGroup = gameRenderGroupQuery.first
-	if (gameRenderGroup) {
-		gameRenderGroup.scene.add(batchRenderer)
+	let initiated = false
+	return gameRenderGroupQuery.onEntityAdded.subscribe((e) => {
+		if (initiated) return
+		const batchRenderer = new BatchedRenderer()
+		e.scene.add(batchRenderer)
 		ecs.add({ batchRenderer })
-	}
+		initiated = true
+	})
 }
 const batchRendererQuery = ecs.with('batchRenderer')
 const updateParticles = () => batchRendererQuery.first && batchRendererQuery.first.batchRenderer.update(time.delta * 1000)
@@ -36,7 +38,7 @@ const removeEmitter = () => {
 
 export const particlesPlugin = (state: State) => {
 	state
-		.onEnter(initBatchRender)
+		.addSubscriber(initBatchRender)
 		.onPreUpdate(runIf(() => !pausedState.enabled, updateParticles), removeEmitter)
 		.addSubscriber(addParticles)
 }

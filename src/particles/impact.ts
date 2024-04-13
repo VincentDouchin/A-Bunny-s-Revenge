@@ -25,7 +25,10 @@ export const impact = () => {
 		material: mat,
 		renderMode: RenderMode.BillBoard,
 		renderOrder: 1,
+		behaviors: [
+			new SizeOverLife(new PiecewiseBezier([[new Bezier(1, 0.50, 0.25, 0), 0]])),
+		],
 	})
-	system.addBehavior(new SizeOverLife(new PiecewiseBezier([[new Bezier(1, 0.50, 0.25, 0), 0]])))
-	return system
+	system.emitter.position.y = 5
+	return system.emitter
 }
