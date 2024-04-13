@@ -146,21 +146,18 @@ export const enemyGroups: EnemyGroup[] = [
 		boss: 'Armabee_Evolved',
 	},
 	{
-		enemies: ['Shaga_A', 'Shaga_A', 'Shaga_A'],
+		enemies: ['Shaga_A', 'Shaga_A', 'Snailo_A'],
 	},
 	{
-		enemies: ['Big_Boar_A', 'Big_Boar_A', 'Big_Boar_A'],
+		enemies: ['Big_Boar_A', 'Porin_A', 'Porin_A'],
 	},
 	{
-		enemies: ['Porin_A', 'Porin_A', 'Porin_A'],
+		enemies: ['Snailo_A', 'Racco_A', 'Racco_A'],
 	},
 	{
-		enemies: ['Snailo_A', 'Snailo_A', 'Snailo_A'],
+		enemies: ['Platopo_A', 'Racco_A', 'Shaga_A'],
 	},
 	{
-		enemies: ['Platopo_A', 'Racco_A', 'Platopo_A'],
-	},
-	{
-		enemies: ['Forest_Butterfly_A', 'Forest_Butterfly_A', 'Porin_A'],
+		enemies: ['Forest_Butterfly_A', 'Snailo_A', 'Porin_A'],
 	},
 ]

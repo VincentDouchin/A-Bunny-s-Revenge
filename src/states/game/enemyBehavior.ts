@@ -20,9 +20,9 @@ import { sleep } from '@/utils/sleep'
 import { Timer } from '@/lib/timer'
 import { getWorldPosition } from '@/lib/transforms'
 
-const playerQuery = ecs.with('position', 'rotation', 'sensorCollider', 'currentHealth', 'model', 'size', 'group', 'playerControls', 'strength', 'body', 'critChance', 'critDamage', 'speed', 'state', 'combo', 'playerAnimator', 'weapon', 'lootQuantity', 'lootChance', 'player', 'collider').where(({ faction }) => faction === Faction.Player)
+const playerQuery = ecs.with('position', 'sensorCollider', 'strength', 'body', 'critChance', 'critDamage', 'combo', 'playerAnimator', 'weapon', 'player', 'collider').where(({ faction }) => faction === Faction.Player)
 
-const enemyComponents = ['movementForce', 'body', 'speed', 'enemyAnimator', 'rotation', 'position', 'group', 'strength', 'collider', 'model', 'currentHealth', 'size', 'sensorCollider'] as const satisfies (keyof Entity)[]
+const enemyComponents = ['movementForce', 'body', 'speed', 'enemyAnimator', 'rotation', 'position', 'group', 'strength', 'collider', 'model', 'currentHealth', 'size', 'sensorCollider'] as const satisfies readonly (keyof Entity)[]
 
 const enemyQuery = ecs.with(...enemyComponents)
 

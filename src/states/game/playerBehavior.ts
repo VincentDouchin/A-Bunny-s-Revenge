@@ -12,7 +12,7 @@ import { dash } from '@/particles/dashParticles'
 import { sleep } from '@/utils/sleep'
 
 const ANIMATION_SPEED = 1.2
-const playerComponents = ['playerAnimator', 'movementForce', 'speed', 'body', 'rotation', 'playerControls', 'combo', 'attackSpeed', 'dash', 'collider', 'currentHealth', 'model', 'hitTimer', 'size'] as const satisfies (keyof Entity)[]
+const playerComponents = ['playerAnimator', 'movementForce', 'speed', 'body', 'rotation', 'playerControls', 'combo', 'attackSpeed', 'dash', 'collider', 'currentHealth', 'model', 'hitTimer', 'size'] as const satisfies readonly (keyof Entity)[]
 type PlayerComponents = (typeof playerComponents)[number]
 const playerQuery = ecs.with(...playerComponents)
 const enemyQuery = ecs.with('faction', 'state', 'strength', 'collider').where(e => e.faction === Faction.Enemy && e.state === 'attack')

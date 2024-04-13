@@ -15,6 +15,7 @@ import { InteractionUi } from '@/ui/Interactions'
 import { TouchControls } from '@/ui/TouchControls'
 import { ForQuery } from '@/ui/components/ForQuery'
 import { playerInventoryQuery } from '@/utils/dialogHelpers'
+import { KeyboardControls } from '@/ui/KeyboardControl'
 
 const playerQuery = playerInventoryQuery.with('playerControls', 'maxHealth', 'currentHealth', 'maxHealth', 'currentHealth', 'strength', 'menuInputs')
 export const PlayerUi = () => {
@@ -31,6 +32,9 @@ export const PlayerUi = () => {
 					<>
 						<Show when={showTouch()}>
 							<TouchControls player={player} />
+						</Show>
+						<Show when={!showTouch()}>
+							<KeyboardControls player={player} />
 						</Show>
 
 						<InteractionUi player={player} isTouch={showTouch} />

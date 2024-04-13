@@ -10,13 +10,21 @@ import type { Entity } from '@/global/entity'
 import { Interactable } from '@/global/entity'
 import { ecs } from '@/global/init'
 import { save } from '@/global/save'
+import { dungeonState } from '@/global/states'
 import { WeaponStatsUi } from '@/states/dungeon/WeaponStatsUi'
 
-export const getInteractables = (player: With<Entity, 'inventory'>, entity?: With<Entity, 'interactable'>): (string | undefined)[] => {
+export const getInteractables = (
+	player: With<Entity, 'inventory'>,
+	entity?: With<Entity, 'interactable'>,
+): (string | undefined)[] => {
 	const hasSeedInInventory = player.inventory?.filter(Boolean)?.some(item => itemsData[item.name].seed)
 	const hasSelectedSeed = player.inventory?.filter(Boolean).some((item) => {
 		return itemsData[item.name].seed === save.selectedSeed && item.quantity > 0
 	})
+
+	if (dungeonState.enabled) {
+		return ['Attack', 'Dash']
+	}
 	switch (entity?.interactable) {
 		case Interactable.Plant:return [
 			hasSelectedSeed ? `plant ${save.selectedSeed}` : undefined,
