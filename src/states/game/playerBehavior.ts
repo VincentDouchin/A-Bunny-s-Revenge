@@ -102,19 +102,20 @@ export const playerBehaviorPlugin = behaviorPlugin(
 		},
 	},
 	dying: {
-		enter: (_, setState) => setTimeout(() => setState('dead'), 1000),
+		enter: async (_, setState) => {
+			sleep(1000)
+			setState('dead')
+		},
 	},
 	dead: {},
 	picking: {},
 	dash: {
-		enter: (e, setState) => {
+		enter: async (e, setState) => {
 			playSound('zapsplat_cartoon_whoosh_swipe_fast_grab_dash_007_74748', { volume: -12 })
 			e.playerAnimator.playAnimation('running')
-			setTimeout(() => setState('idle'), 200)
-			ecs.add({
-				parent: e,
-				...dash(1),
-			})
+			ecs.add({ parent: e, ...dash(1) })
+			await sleep(200)
+			setState('idle')
 		},
 		update: (e, _setState) => {
 			applyMove(e, new Vector3(0, 0, 3).applyQuaternion(e.rotation))
