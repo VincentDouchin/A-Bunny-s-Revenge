@@ -13,11 +13,8 @@ export const healthBundle = (health: number, current?: number) => ({
 const healthQuery = ecs.with('currentHealth', 'maxHealth', 'state')
 export const killEntities = () => {
 	for (const entity of healthQuery) {
-		if (entity.faction === Faction.Enemy) {
-			// console.log(entity.state)
-		}
 		if (entity.currentHealth <= 0 && entity.state !== 'dying' && entity.state !== 'dead') {
-			// ecs.update(entity, { state: 'dying' })
+			ecs.update(entity, { state: 'dying' })
 		}
 	}
 }
@@ -39,5 +36,5 @@ export const killAnimation = () => deadEntities.onEntityAdded.subscribe((e) => {
 		})
 	}
 	tween.onComplete(() => ecs.remove(e))
-	ecs.update(e, { tween })
+	ecs.add({ tween })
 })
