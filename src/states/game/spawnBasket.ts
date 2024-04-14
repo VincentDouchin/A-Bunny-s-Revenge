@@ -6,6 +6,7 @@ import { Interactable, MenuType } from '@/global/entity'
 import { assets, ecs } from '@/global/init'
 import { inMap } from '@/lib/hierarchy'
 import { modelColliderBundle } from '@/lib/models'
+import { Stat } from '@/lib/stats'
 
 const playerQuery = ecs.with('player', 'position', 'rotation', 'inventory', 'inventoryId', 'inventorySize')
 export const spawnBasket = () => {
@@ -25,7 +26,7 @@ export const spawnBasket = () => {
 			followTarget: player,
 			...bundle,
 			basket: player,
-			speed: 100,
+			speed: new Stat(100),
 		})
 	}
 }

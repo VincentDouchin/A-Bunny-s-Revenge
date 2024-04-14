@@ -16,9 +16,10 @@ export const playerSteps = () => {
 					if (player.lastStep[foot] === false) {
 						playStep('random', { volume: -12 })
 						player.lastStep[foot] = true
+						const honey = player.speed.hasModifier('beeBoss')
 						ecs.add({
 							parent: player,
-							...footstepsBundle(foot),
+							...footstepsBundle(foot, honey),
 						})
 					}
 				} else {

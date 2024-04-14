@@ -2,6 +2,7 @@ import { Show, createMemo } from 'solid-js'
 import { StateUi } from '../../ui/components/StateUi'
 import { HealthUi } from '../dungeon/HealthUi'
 import { BasketUi } from '../game/BasketUi'
+import { SneezeUi } from '../dungeon/SneezeUi'
 import { CauldronMinigameUi } from './CauldronMinigameUi'
 import { OvenMinigameUi } from './OvenMinigameUi'
 import { QuestUi } from './QuestUi'
@@ -17,7 +18,7 @@ import { ForQuery } from '@/ui/components/ForQuery'
 import { playerInventoryQuery } from '@/utils/dialogHelpers'
 import { KeyboardControls } from '@/ui/KeyboardControl'
 
-const playerQuery = playerInventoryQuery.with('playerControls', 'maxHealth', 'currentHealth', 'maxHealth', 'currentHealth', 'strength', 'menuInputs')
+const playerQuery = playerInventoryQuery.with('playerControls', 'maxHealth', 'currentHealth', 'maxHealth', 'currentHealth', 'strength', 'menuInputs', 'sneeze', 'debuffsContainer')
 export const PlayerUi = () => {
 	const controls = ui.sync(() => inputManager.controls)
 	const isMenuOpen = ui.sync(() => openMenuState.enabled)
@@ -50,6 +51,7 @@ export const PlayerUi = () => {
 							<HealthUi player={player}></HealthUi>
 						</StateUi>
 						<StateUi state={dungeonState}>
+							<SneezeUi player={player} />
 							<HealthUi player={player}></HealthUi>
 						</StateUi>
 						<BasketUi player={player} />

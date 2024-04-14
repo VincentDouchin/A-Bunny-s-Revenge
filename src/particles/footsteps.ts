@@ -1,19 +1,21 @@
 import { CircleGeometry, MeshBasicMaterial, Vector3, Vector4 } from 'three'
-import { Bezier, ConstantColor, ConstantValue, ParticleSystem, PiecewiseBezier, PointEmitter, RenderMode, SizeOverLife } from 'three.quarks'
+import { ColorOverLife, ConstantColor, ConstantValue, Gradient, ParticleSystem, PointEmitter, RenderMode } from 'three.quarks'
+import { colorToVec4 } from './honeySplatParticles'
 import type { Entity } from '@/global/entity'
 
 const geo = new CircleGeometry(1, 8)
 
 const mat = new MeshBasicMaterial({ transparent: true })
 mat.depthWrite = false
-export const footstepsBundle = (direction: 'left' | 'right') => {
+export const footstepsBundle = (direction: 'left' | 'right', honey = false) => {
+	const startOpacity = honey ? 1 : 0.6
 	const system = new ParticleSystem({
 		duration: 1,
 		looping: false,
 		prewarm: true,
 		instancingGeometry: geo,
-		startColor: new ConstantColor(new Vector4(0, 0, 0, 0.2)),
-		startLife: new ConstantValue(5.0),
+		startColor: new ConstantColor(honey ? colorToVec4(0xE8D282) : new Vector4(0, 0, 0, startOpacity)),
+		startLife: new ConstantValue(8.0),
 		startSpeed: new ConstantValue(0),
 		startSize: new ConstantValue(1),
 		worldSpace: true,
@@ -23,7 +25,7 @@ export const footstepsBundle = (direction: 'left' | 'right') => {
 		emissionBursts: [],
 		renderMode: RenderMode.HorizontalBillBoard,
 		behaviors: [
-			new SizeOverLife(new PiecewiseBezier([[new Bezier(1, 0.75, 0.50, 0.25), 0]])),
+			new ColorOverLife(new Gradient(undefined, [[startOpacity, 0], [0, 1]])),
 		],
 
 	})

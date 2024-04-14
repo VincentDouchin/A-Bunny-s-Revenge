@@ -1,23 +1,28 @@
 import { Vector2 } from 'three'
 import { setMainCameraPosition } from '../mainMenu/mainMenuRendering'
+import { RoomType, assignPlanAndEnemies } from '../dungeon/generateDungeon'
 import { updateCameraZoom } from '@/global/camera'
 import { params } from '@/global/context'
 import { updateRenderSize } from '@/global/rendering'
 import { save } from '@/global/save'
-import { app, campState, mainMenuState } from '@/global/states'
+import { app, campState, dungeonState, mainMenuState } from '@/global/states'
 import { windowEvent } from '@/lib/uiManager'
 import { throttle } from '@/lib/state'
 import { time } from '@/global/init'
 
 export const setupGame = async () => {
-	if (!params.skipMainMenu) {
+	if (params.debugBoss) {
+		const bossRoom = assignPlanAndEnemies([{ position: { x: 0, y: 0 }, connections: { north: 1, south: null }, type: RoomType.Boss }])
+		dungeonState.enable({ dungeon: bossRoom[0], direction: 'south', firstEntry: true, playerHealth: 5, dungeonLevel: 0, weapon: 'Hoe' })
+	} else	if (!params.skipMainMenu) {
 		mainMenuState.enable()
 		setMainCameraPosition()
+		campState.enable({})
 	} else {
 		updateRenderSize()
 		updateCameraZoom()
+		campState.enable({})
 	}
-	campState.enable({})
 }
 
 export const stopOnLosingFocus = () => {

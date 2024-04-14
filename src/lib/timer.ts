@@ -11,7 +11,11 @@ export class Timer<F extends boolean> {
 	}
 
 	tick(delta: number) {
-		this.current = Math.min(this.duration, this.current + delta)
+		this.current = Math.max(0, Math.min(this.duration, this.current + delta))
+	}
+
+	percent() {
+		return this.current / this.duration
 	}
 
 	finished() {
@@ -19,6 +23,6 @@ export class Timer<F extends boolean> {
 	}
 
 	running() {
-		return this.current < this.duration
+		return this.current < this.duration && this.current !== 0
 	}
 }

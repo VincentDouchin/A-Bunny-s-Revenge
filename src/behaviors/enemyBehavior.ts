@@ -2,12 +2,12 @@ import { Tween } from '@tweenjs/tween.js'
 import type { With } from 'miniplex'
 import { Vector3 } from 'three'
 import { between } from 'randomish'
-import { projectileAttack } from '../dungeon/attacks'
-import { calculateDamage, flash } from '../dungeon/battle'
-import { stunModel } from '../dungeon/stun'
+import { projectileAttack } from '../states/dungeon/attacks'
+import { calculateDamage, flash } from '../states/dungeon/battle'
+import { stunBundle } from '../states/dungeon/stun'
+import type { EntityState } from '../lib/behaviors'
+import { behaviorPlugin } from '../lib/behaviors'
 import { applyMove, applyRotate, getMovementForce } from './behaviorHelpers'
-import type { EntityState } from './behaviors'
-import { behaviorPlugin } from './behaviors'
 import type { Entity } from '@/global/entity'
 import { EnemyAttackStyle, Faction } from '@/global/entity'
 import { ecs, time, world } from '@/global/init'
@@ -20,7 +20,7 @@ import { sleep } from '@/utils/sleep'
 import { Timer } from '@/lib/timer'
 import { getWorldPosition } from '@/lib/transforms'
 
-const playerQuery = ecs.with('position', 'sensorCollider', 'strength', 'body', 'critChance', 'critDamage', 'combo', 'playerAnimator', 'weapon', 'player', 'collider').where(({ faction }) => faction === Faction.Player)
+export const playerQuery = ecs.with('position', 'sensorCollider', 'strength', 'body', 'critChance', 'critDamage', 'combo', 'playerAnimator', 'weapon', 'player', 'collider').where(({ faction }) => faction === Faction.Player)
 
 const enemyComponents = ['movementForce', 'body', 'speed', 'enemyAnimator', 'rotation', 'position', 'group', 'strength', 'collider', 'model', 'currentHealth', 'size', 'sensorCollider'] as const satisfies readonly (keyof Entity)[]
 
@@ -32,7 +32,7 @@ const enemyDecisions = (e: With<Entity, EnemyComponents>) => {
 	const player = playerQuery.first
 	const direction = player ? player.position.clone().sub(e.position).normalize() : null
 	const canSeePlayer = player && player.position.distanceTo(e.position) < 70
-	const touchedByPlayer = player && player.state === 'attack' && world.intersectionPair(player.sensorCollider, e.collider) && player.playerAnimator.getTimeRatio() > 0.3
+	const touchedByPlayer = player && player.state === 'attack' && world.intersectionPair(player.sensorCollider, e.collider)
 	return { ...getMovementForce(e), player, direction, touchedByPlayer, canSeePlayer }
 }
 
@@ -162,7 +162,7 @@ const dying: EnemyState = {
 
 const stun: EnemyState = {
 	enter: async (e, setState) => {
-		ecs.addComponent(e, 'stun', stunModel(e.size.y))
+		ecs.update(e, stunBundle(e.size.y))
 		e.enemyAnimator.play('hit')
 		await sleep(1000)
 		return setState('idle')

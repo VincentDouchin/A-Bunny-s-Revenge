@@ -23,8 +23,9 @@ const launchScript = async (filePath?: string) => {
 				try {
 					const files = (await readdir(`./assets/${dir.name}`))
 					const fileNames = [...new Set(files.map(x => x.split('.')[0].replace('-optimized', '')))]
-
-					folders[dir.name] = fileNames
+					if (fileNames.length) {
+						folders[dir.name] = fileNames
+					}
 				} catch {
 					console.warn(`couldn't read folder ${dir.name}`)
 				}

@@ -3,7 +3,7 @@ import type { Item } from './items'
 import { Rarity } from './items'
 
 import { EnemyAttackStyle } from '@/global/entity'
-import type { EnemyAnimations } from '@/global/entity'
+import type { EnemyAnimations, States } from '@/global/entity'
 import { getRandom, range } from '@/utils/mapFunctions'
 
 export const lootPool = (lootQuantity: number, lootRarity: number, drops: Drop[]) => {
@@ -29,15 +29,22 @@ export interface Enemy<Name extends keyof Animations> {
 	scale: number
 	speed: number
 	boss: boolean
+	behavior: keyof States
 	attackStyle: EnemyAttackStyle
 	drops: Drop[]
-	animationMap: Map<Animations[Name], EnemyAnimations>
+	animationMap: Record<EnemyAnimations, Animations[Name]>
 }
 const enemyNames = ['Armabee', 'Armabee_Evolved', 'Shaga_A', 'Big_Boar_A', 'Snailo_A', 'Porin_A', 'Forest_Butterfly_A', 'Racco_A', 'Platopo_A'] as const satisfies readonly characters[]
 
 export type enemy = (typeof enemyNames)[number]
 
-const genericEnemyAnimationMap = new Map<Animations['Big_Boar_A'], EnemyAnimations>().set('Attack', 'attacking').set('Damage', 'hit').set('Die', 'dead').set('Idle', 'idle').set('Move', 'running')
+const genericEnemyAnimationMap: Record<EnemyAnimations, Animations['Big_Boar_A']> = {
+	idle: 'Idle',
+	running: 'Move',
+	attacking: 'Attack',
+	hit: 'Damage',
+	dead: 'Die',
+}
 
 export const enemyData: { [k in enemy]: Enemy<k> } = {
 	Armabee: {
@@ -46,19 +53,33 @@ export const enemyData: { [k in enemy]: Enemy<k> } = {
 		scale: 4,
 		speed: 1,
 		boss: false,
-		attackStyle: EnemyAttackStyle.Melee,
 		drops: [{ name: 'honey', quantity: 1, rarity: Rarity.Common }],
-		animationMap: new Map<Animations['Armabee'], EnemyAnimations>().set('Death', 'dead').set('Flying_Idle', 'idle').set('Headbutt', 'attacking').set('HitReact', 'hit').set('Fast_Flying', 'running'),
+		behavior: 'enemy',
+		attackStyle: EnemyAttackStyle.Melee,
+		animationMap: {
+			idle: 'Flying_Idle',
+			running: 'Fast_Flying',
+			attacking: 'Headbutt',
+			hit: 'HitReact',
+			dead: 'Death',
+		},
 	},
 	Armabee_Evolved: {
 		name: 'Armabee Evolved',
-		health: 5,
+		health: 10,
 		scale: 10,
 		speed: 1,
 		boss: true,
 		drops: [],
-		attackStyle: EnemyAttackStyle.Melee,
-		animationMap: new Map<Animations['Armabee_Evolved'], EnemyAnimations>().set('Death', 'dead').set('Flying_Idle', 'idle').set('Headbutt', 'attacking').set('HitReact', 'hit'),
+		behavior: 'boss',
+		attackStyle: EnemyAttackStyle.BeeBoss,
+		animationMap: {
+			idle: 'Flying_Idle',
+			running: 'Fast_Flying',
+			attacking: 'Headbutt',
+			hit: 'HitReact',
+			dead: 'Death',
+		},
 
 	},
 	Shaga_A: {
@@ -67,8 +88,9 @@ export const enemyData: { [k in enemy]: Enemy<k> } = {
 		scale: 2,
 		speed: 1,
 		boss: false,
-		attackStyle: EnemyAttackStyle.Melee,
 		drops: [{ name: 'parsley', quantity: 2, rarity: Rarity.Common }],
+		behavior: 'enemy',
+		attackStyle: EnemyAttackStyle.Melee,
 		animationMap: genericEnemyAnimationMap,
 	},
 	Big_Boar_A: {
@@ -77,8 +99,9 @@ export const enemyData: { [k in enemy]: Enemy<k> } = {
 		scale: 1.5,
 		speed: 1,
 		boss: false,
-		attackStyle: EnemyAttackStyle.Charging,
 		drops: [{ name: 'ham', quantity: 1, rarity: Rarity.Common }],
+		behavior: 'enemy',
+		attackStyle: EnemyAttackStyle.Charging,
 		animationMap: genericEnemyAnimationMap,
 	},
 	Snailo_A: {
@@ -88,6 +111,7 @@ export const enemyData: { [k in enemy]: Enemy<k> } = {
 		speed: 1,
 		boss: false,
 		drops: [],
+		behavior: 'enemy',
 		attackStyle: EnemyAttackStyle.Charging,
 		animationMap: genericEnemyAnimationMap,
 	},
@@ -97,8 +121,9 @@ export const enemyData: { [k in enemy]: Enemy<k> } = {
 		scale: 2,
 		speed: 1,
 		boss: false,
-		attackStyle: EnemyAttackStyle.Melee,
 		drops: [{ name: 'slime_dough', quantity: 1, rarity: Rarity.Common }],
+		behavior: 'enemy',
+		attackStyle: EnemyAttackStyle.Melee,
 		animationMap: genericEnemyAnimationMap,
 	},
 	Racco_A: {
@@ -108,6 +133,7 @@ export const enemyData: { [k in enemy]: Enemy<k> } = {
 		speed: 1,
 		boss: false,
 		drops: [],
+		behavior: 'enemy',
 		attackStyle: EnemyAttackStyle.Melee,
 		animationMap: genericEnemyAnimationMap,
 	},
@@ -118,6 +144,7 @@ export const enemyData: { [k in enemy]: Enemy<k> } = {
 		speed: 1,
 		boss: false,
 		drops: [],
+		behavior: 'enemy',
 		attackStyle: EnemyAttackStyle.Melee,
 		animationMap: genericEnemyAnimationMap,
 	},
@@ -127,8 +154,9 @@ export const enemyData: { [k in enemy]: Enemy<k> } = {
 		scale: 10,
 		speed: 0.7,
 		boss: false,
-		attackStyle: EnemyAttackStyle.Range,
 		drops: [{ name: 'milk', quantity: 1, rarity: Rarity.Common }],
+		behavior: 'enemy',
+		attackStyle: EnemyAttackStyle.Range,
 		animationMap: genericEnemyAnimationMap,
 	},
 }

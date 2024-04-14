@@ -1,8 +1,9 @@
 import { Euler, Group, Sprite, SpriteMaterial } from 'three'
 import { assets, ecs } from '@/global/init'
 import { range } from '@/utils/mapFunctions'
+import type { Entity } from '@/global/entity'
 
-export const stunModel = (offset: number) => {
+export const stunBundle = (offset: number) => {
 	const group = new Group()
 	group.position.y = offset + 5
 	range(0, 5, (i) => {
@@ -13,7 +14,7 @@ export const stunModel = (offset: number) => {
 		star.position.y = Math.sin(angle) * 5
 		group.add(star)
 	})
-	return group
+	return { stun: group } as const satisfies Entity
 }
 
 const stunQuery = ecs.with('stun', 'rotation', 'size', 'group')

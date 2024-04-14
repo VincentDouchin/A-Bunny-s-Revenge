@@ -1,10 +1,10 @@
-import { RigidBodyType } from '@dimforge/rapier3d-compat'
+import { ActiveCollisionTypes, ColliderDesc, RigidBodyType } from '@dimforge/rapier3d-compat'
 import { Vector3 } from 'three'
-import { behaviorBundle } from '../game/behaviors'
+import { behaviorBundle } from '../../lib/behaviors'
 import { healthBundle } from './health'
 import type { enemy } from '@/constants/enemies'
 import { enemyData } from '@/constants/enemies'
-import { Sizes } from '@/constants/sizes'
+import { EnemySizes, Sizes } from '@/constants/sizes'
 import { Animator } from '@/global/animator'
 import { type Entity, Faction } from '@/global/entity'
 import { assets, ecs } from '@/global/init'
@@ -18,11 +18,12 @@ export const enemyBundle = (name: enemy, level: number) => {
 	const enemy = enemyData[name]
 	const model = assets.characters[name]
 	model.scene.scale.setScalar(enemy.scale)
-	const bundle = modelColliderBundle(model.scene, RigidBodyType.Dynamic, false, Sizes.character)
+	const bundle = modelColliderBundle(model.scene, RigidBodyType.Dynamic, false, EnemySizes[name] ?? Sizes.character)
 	bundle.bodyDesc.setLinearDamping(20)
 	const boss = enemy.boss ? { boss: true } as const : {}
+	bundle.colliderDesc.setMass(100)
 	return {
-		...behaviorBundle('enemy', 'idle'),
+		...behaviorBundle(enemy.behavior, 'idle'),
 		...bundle,
 		enemyAnimator: new Animator(bundle.model, model.animations, enemy.animationMap),
 		...healthBundle(enemy.health * (level + 1)),
@@ -32,9 +33,9 @@ export const enemyBundle = (name: enemy, level: number) => {
 		faction: Faction.Enemy,
 		enemyName: name,
 		movementForce: new Vector3(),
-		speed: 70 * enemy.speed,
+		speed: new Stat(70 * enemy.speed),
 		drops: enemy.drops,
-		sensor: true,
+		sensorDesc: ColliderDesc.cuboid(2, 2, 2).setTranslation(0, 1, bundle.size.z / 2 + 2).setSensor(true).setMass(0).setActiveCollisionTypes(ActiveCollisionTypes.ALL),
 		healthBar: true,
 		attackStyle: enemy.attackStyle,
 	} as const satisfies Entity

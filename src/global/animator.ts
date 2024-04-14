@@ -1,5 +1,6 @@
 import type { AnimationAction, AnimationClip, Object3D, Object3DEventMap } from 'three'
 import { AnimationMixer, LoopOnce } from 'three'
+import { entries } from '@/utils/mapFunctions'
 
 interface playOptions { timeScale?: number, weight?: number, clamped?: boolean, loopOnce?: boolean }
 export class Animator<K extends string> extends AnimationMixer {
@@ -7,16 +8,22 @@ export class Animator<K extends string> extends AnimationMixer {
 	action?: AnimationAction
 	#animationClips: Record<K, AnimationClip>
 	delay: number = 0
-	constructor(scene: Object3D<Object3DEventMap>, animations: AnimationClip[], animationMap?: Map<string, K>) {
+	constructor(scene: Object3D<Object3DEventMap>, animations: AnimationClip[], animationMap?: Record<K, string>) {
 		super(scene)
-		const animationClips = {} as Record<K, AnimationClip>
-		for (const clip of animations) {
-			const name = animationMap?.get(clip.name) ?? clip.name as K
-			if (name) {
-				animationClips[name] = clip
+		const clips = {} as Record<K, AnimationClip>
+		if (animationMap) {
+			for (const [animationName, clipName] of entries(animationMap)) {
+				const correspondingClip = animations.find(clip => clip.name === clipName)
+				if (correspondingClip) {
+					clips[animationName] = correspondingClip
+				}
+			}
+		} else {
+			for (const clip of animations) {
+				clips[clip.name as K] = clip
 			}
 		}
-		this.#animationClips = animationClips
+		this.#animationClips = clips
 	}
 
 	#getClip(animation: K) {

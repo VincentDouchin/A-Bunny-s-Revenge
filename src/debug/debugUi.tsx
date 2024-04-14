@@ -17,8 +17,9 @@ import { useLocalStorage } from '@/utils/useLocalStorage'
 import { RenderGroup } from '@/global/entity'
 
 const rendererQuery = ecs.with('renderer', 'scene', 'renderGroup').where(e => e.renderGroup === RenderGroup.Game)
-const [{ skipMainMenu }, setSkipMainMenu] = useLocalStorage('skipMainMenu', { skipMainMenu: false })
-params.skipMainMenu = skipMainMenu
+
+const [localParams, setParams] = useLocalStorage('params', params)
+Object.assign(params, localParams)
 export const getGameRenderGroup = () => {
 	const gameRenderGroup = rendererQuery.first
 	if (gameRenderGroup) {
@@ -71,7 +72,7 @@ export const DebugUi = () => {
 		grassColor: '#26854C',
 	})
 	const updateGroundColor = (key: string, value: string) => {
-		setGroundColor({ ...groundColors, [key]: value })
+		setGroundColor(d => ({ ...d, [key]: value }))
 		for (const ground of groundQuery) {
 			if (ground.model instanceof Mesh && ground.model.material) {
 				(ground.model.material as any).uniforms[key].value = new Color(value)
@@ -151,10 +152,6 @@ export const DebugUi = () => {
 			}
 		}
 	}
-	const skip = (skipMainMenu: boolean) => {
-		params.skipMainMenu = skipMainMenu
-		setSkipMainMenu({ skipMainMenu })
-	}
 	return (
 		<div style={{ position: 'absolute', color: 'white' }}>
 			<Show when={showUi()}>
@@ -223,7 +220,9 @@ export const DebugUi = () => {
 					Pixelation
 					<input type="checkbox" checked={params.pixelation} onChange={e => changePixelation(e.target.checked)}></input>
 					Skip main menu
-					<input type="checkbox" checked={params.skipMainMenu} onChange={e => skip(e.target.checked)}></input>
+					<input type="checkbox" checked={params.skipMainMenu} onChange={e => setParams(d => ({ ...d, skipMainMenu: e.target.checked }))}></input>
+					Debug Boss
+					<input type="checkbox" checked={params.debugBoss} onChange={e => setParams(d => ({ ...d, debugBoss: e.target.checked }))}></input>
 				</div>
 				<div style={{ display: 'flex', gap: '1rem', margin: '1rem', width: '20rem' }}>
 					<button onClick={growCrops}>Grow crops</button>

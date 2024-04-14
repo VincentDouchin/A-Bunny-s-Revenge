@@ -1,3 +1,6 @@
+import { beeBossBehaviorPlugin } from './behaviors/beeBossBehavior'
+import { chargingEnemyBehaviorPlugin, meleeEnemyBehaviorPlugin, rangeEnemyBehaviorPlugin } from './behaviors/enemyBehavior'
+import { playerBehaviorPlugin } from './behaviors/playerBehavior'
 import { debugPlugin } from './debug/debugPlugin'
 import { updateAnimations } from './global/animations'
 import { initCamera, initializeCameraPosition, moveCamera, updateCameraZoom } from './global/camera'
@@ -11,9 +14,11 @@ import { particlesPlugin } from './lib/particles'
 import { physicsPlugin } from './lib/physics'
 import { addToScene } from './lib/registerComponents'
 import { runIf } from './lib/state'
+import { tickModifiers } from './lib/stats'
 import { transformsPlugin } from './lib/transforms'
 import { tweenPlugin } from './lib/updateTween'
 import { pickupAcorn } from './states/dungeon/acorn'
+import { applyArchingForce, honeySplat, stepInHoney, tickSneeze } from './states/dungeon/attacks'
 import { applyDeathTimer, spawnDrops, tickHitCooldown } from './states/dungeon/battle'
 import { dropBerriesOnHit } from './states/dungeon/bushes'
 import { spawnWeaponsChoice } from './states/dungeon/chooseWeapon'
@@ -27,11 +32,9 @@ import { closePlayerInventory, disableInventoryState, enableInventoryState, inte
 import { addDashDisplay, updateDashDisplay } from './states/game/dash'
 import { dayNight, initTimeOfDay } from './states/game/dayNight'
 import { talkToNPC } from './states/game/dialog'
-import { chargingEnemyBehaviorPlugin, meleeEnemyBehaviorPlugin, rangeEnemyBehaviorPlugin } from './states/game/enemyBehavior'
 import { bobItems, collectItems, popItems, stopItems } from './states/game/items'
 import { canPlayerMove, movePlayer, playerSteps, savePlayerFromTheEmbraceOfTheVoid, savePlayerPosition, stopPlayer } from './states/game/movePlayer'
 import { pauseGame } from './states/game/pauseGame'
-import { playerBehaviorPlugin } from './states/game/playerBehavior'
 import { target } from './states/game/sensor'
 import { basketFollowPlayer, enableBasketUi, spawnBasket } from './states/game/spawnBasket'
 import { allowDoorCollision, collideWithDoor, collideWithDoorCamp, collideWithDoorClearing, doorLocking, unlockDoorClearing } from './states/game/spawnDoor'
@@ -45,7 +48,7 @@ import { disablePortrait, enableFullscreen, resize, setupGame, stopOnLosingFocus
 import { UI } from './ui/UI'
 
 coreState
-	.addPlugins(hierarchyPlugin, physicsPlugin, transformsPlugin, addToScene('camera', 'light', 'model', 'dialogContainer', 'emitter', 'interactionContainer', 'minigameContainer', 'healthBarContainer', 'dashDisplay', 'stun'), updateModels, particlesPlugin, tweenPlugin)
+	.addPlugins(hierarchyPlugin, physicsPlugin, transformsPlugin, addToScene('camera', 'light', 'model', 'dialogContainer', 'emitter', 'interactionContainer', 'minigameContainer', 'healthBarContainer', 'dashDisplay', 'stun', 'debuffsContainer'), updateModels, particlesPlugin, tweenPlugin)
 	.onEnter(initThree, initCamera, moveCamera(true), initTimeOfDay)
 	.onEnter(ui.render(UI))
 	.addSubscriber(...target, initTone, resize, disablePortrait, enableFullscreen, stopOnLosingFocus)
@@ -66,7 +69,7 @@ gameState
 		runIf(() => !pausedState.enabled, playerSteps, dayNight, updateTimeUniforms, applyDeathTimer),
 		runIf(() => !openMenuState.enabled, pauseGame, interact),
 	)
-	.addPlugins(playerBehaviorPlugin, rangeEnemyBehaviorPlugin, chargingEnemyBehaviorPlugin, meleeEnemyBehaviorPlugin)
+	.addPlugins(playerBehaviorPlugin, rangeEnemyBehaviorPlugin, chargingEnemyBehaviorPlugin, meleeEnemyBehaviorPlugin, beeBossBehaviorPlugin)
 	.onUpdate(collectItems, touchItem, talkToNPC, stopItems, pickupAcorn, dropBerriesOnHit)
 	.onPostUpdate(renderGame, rotateStun)
 	.enable()
@@ -94,15 +97,15 @@ genDungeonState
 	.onExit(despawnOfType('map'))
 
 dungeonState
-	.addSubscriber(spawnDrops, losingBattle, endBattleSpawnChest, removeEnemyFromSpawn)
+	.addSubscriber(spawnDrops, losingBattle, endBattleSpawnChest, removeEnemyFromSpawn, applyArchingForce)
 	.onEnter(spawnDungeon, spawnLevelData, spawnPlayerDungeon, spawnBasket, moveCamera(true), () => updateRenderSize(), () => updateCameraZoom())
 	.onUpdate(runIf(canPlayerMove, allowDoorCollision, collideWithDoor, harvestCrop, killEntities, basketFollowPlayer()))
-	.onUpdate(runIf(() => !pausedState.enabled, tickHitCooldown))
+	.onUpdate(runIf(() => !pausedState.enabled, tickHitCooldown, tickModifiers('speed')), stepInHoney, tickSneeze)
+	.onUpdate(honeySplat)
 	.onExit(despawnOfType('map'))
 pausedState
 	.onExit(() => time.reset())
-// const bossRoom = assignPlanAndEnemies([{ position: { x: 0, y: 0 }, connections: { north: 1, south: null }, type: RoomType.Boss }], ['Armabee'])
-// dungeonState.enable({ dungeon: bossRoom[0], direction: 'south', firstEntry: true, playerHealth: 5, dungeonLevel: 0, weapon: 'Hoe' })
+
 const animate = () => {
 	app.update()
 	requestAnimationFrame(animate)

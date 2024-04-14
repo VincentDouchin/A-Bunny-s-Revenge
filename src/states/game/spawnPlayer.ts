@@ -1,9 +1,11 @@
 import type { weapons } from '@assets/assets'
 import { LinearSRGBColorSpace, Mesh, NearestFilter, Quaternion, Vector3 } from 'three'
 import { clone } from 'three/examples/jsm/utils/SkeletonUtils'
+import { ActiveCollisionTypes, ColliderDesc } from '@dimforge/rapier3d-compat'
+import { CSS2DObject } from 'three/examples/jsm/renderers/CSS2DRenderer'
 import { RoomType } from '../dungeon/generateDungeon'
 import { healthBundle } from '../dungeon/health'
-import { behaviorBundle } from './behaviors'
+import { behaviorBundle } from '../../lib/behaviors'
 import { inventoryBundle } from './inventory'
 import { weaponBundle } from './weapon'
 
@@ -26,7 +28,13 @@ import type { System } from '@/lib/state'
 import { Stat, addModifier } from '@/lib/stats'
 import { Timer } from '@/lib/timer'
 
-const playerAnimationMap = new Map<Animations['Bunny'], PlayerAnimations>().set('IDLE_NEW', 'idle').set('RUN_ALT', 'running').set('FIGHT_ACTION1', 'lightAttack').set('SLASH', 'slashAttack').set('HEAVYATTACK', 'heavyAttack')
+const playerAnimationMap: Record<PlayerAnimations, Animations['Bunny']> = {
+	idle: 'IDLE_NEW',
+	running: 'RUN_ALT',
+	lightAttack: 'FIGHT_ACTION1',
+	slashAttack: 'SLASH',
+	heavyAttack: 'HEAVYATTACK',
+}
 export const playerBundle = (health: number, addHealth: boolean, weapon: weapons | null) => {
 	const model = clone(assets.characters.Bunny.scene)
 	model.traverse((node) => {
@@ -39,7 +47,10 @@ export const playerBundle = (health: number, addHealth: boolean, weapon: weapons
 	})
 	const bundle = capsuleColliderBundle(model, Sizes.character)
 	bundle.bodyDesc.setLinearDamping(20)
+	const debuffsContainer = new CSS2DObject(document.createElement('div'))
+	debuffsContainer.position.setY(15)
 	const player = {
+		debuffsContainer,
 		...playerInputMap(),
 		...inventoryBundle(Number.POSITIVE_INFINITY, 'player'),
 		...bundle,
@@ -48,10 +59,10 @@ export const playerBundle = (health: number, addHealth: boolean, weapon: weapons
 		...inMap(),
 		cameratarget: true,
 		faction: Faction.Player,
-		sensor: true,
+		sensorDesc: ColliderDesc.cuboid(2, 2, 2).setTranslation(0, 1, 5).setSensor(true).setMass(0).setActiveCollisionTypes(ActiveCollisionTypes.ALL),
 		player: true,
 		movementForce: new Vector3(),
-		speed: 50,
+		speed: new Stat(50),
 		lootQuantity: new Stat(0),
 		lootChance: new Stat(0),
 		strength: new Stat(1),
@@ -63,6 +74,7 @@ export const playerBundle = (health: number, addHealth: boolean, weapon: weapons
 		...behaviorBundle('player', 'idle'),
 		hitTimer: new Timer(500, true),
 		dash: new Dash(1000),
+		sneeze: new Timer(2000, false),
 		combo: {
 			lastAttack: 0,
 			heavyAttack: 0,

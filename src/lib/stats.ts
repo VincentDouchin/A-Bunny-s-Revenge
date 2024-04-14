@@ -1,5 +1,8 @@
 import type { With } from 'miniplex'
+import { Timer } from './timer'
+import { set } from './state'
 import type { ComponentsOfType, Entity } from '@/global/entity'
+import { ecs, time } from '@/global/init'
 
 export enum ModStage {
 	Base,
@@ -13,20 +16,24 @@ export enum ModType {
 
 export interface Modifier<S extends ComponentsOfType<Stat> > {
 	key: string
+	from: string
 	value: number
 	stage: ModStage
 	type: ModType
 	name: S
 	stackable: boolean
+	duration: null | Timer<false>
 }
 
-export const createModifier = <S extends ComponentsOfType<Stat>>(from: string, name: S, value: number, stage: ModStage, type: ModType, stackable: boolean): Modifier<S> => ({
+export const createModifier = <S extends ComponentsOfType<Stat>>(from: string, name: S, value: number, stage: ModStage, type: ModType, stackable: boolean, duration: null | number = null): Modifier<S> => ({
 	key: name + from,
+	from,
 	value,
 	stage,
 	type,
 	name,
 	stackable,
+	duration: duration === null ? null : new Timer(duration, false),
 })
 
 export class Stat {
@@ -49,8 +56,24 @@ export class Stat {
 		return this
 	}
 
+	hasModifier(from: string) {
+		return this.#modifiers.some(mod => mod.from === from)
+	}
+
 	removeModifier(modifier: Modifier<any>) {
 		this.#modifiers.splice(this.#modifiers.indexOf(modifier), 1)
+		this.calculate()
+	}
+
+	tickModifiers(delta: number) {
+		for (const modifier of this.#modifiers) {
+			if (modifier.duration) {
+				modifier.duration.tick(delta)
+				if (modifier.duration.finished()) {
+					this.removeModifier(modifier)
+				}
+			}
+		}
 	}
 
 	calculate() {
@@ -84,6 +107,13 @@ export const addModifier = <S extends ComponentsOfType<Stat>>(mod: Modifier<S>, 
 	}
 }
 
-export const removeModifier = () => {
-
+export const tickModifiers = (...components: ComponentsOfType<Stat>[]) => {
+	return set(components.map((component) => {
+		const query = ecs.with(component)
+		return () => {
+			for (const entity of query) {
+				entity[component].tickModifiers(time.delta)
+			}
+		}
+	}))
 }

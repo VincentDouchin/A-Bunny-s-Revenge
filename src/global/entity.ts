@@ -15,7 +15,7 @@ import type { Recipe } from '@/constants/recipes'
 import type { MenuInputMap, PlayerInputMap } from '@/global/inputMaps'
 import type { direction } from '@/lib/directions'
 import type { State } from '@/lib/state'
-import type { Stat } from '@/lib/stats'
+import type { Modifier, Stat } from '@/lib/stats'
 import type { Room } from '@/states/dungeon/generateDungeon'
 import type { MenuOptions, RenderMainMenuFn } from '@/states/mainMenu/mainMenuRendering'
 import type { Dash } from '@/states/game/dash'
@@ -60,10 +60,12 @@ export enum EnemyAttackStyle {
 	Charging,
 	Range,
 	Melee,
+	BeeBoss,
 }
 export interface States {
-	player: 'idle' | 'running' | 'attack' | 'dying' | 'dead' | 'picking' | 'dash' | 'hit'
+	player: 'idle' | 'running' | 'attack' | 'dying' | 'dead' | 'picking' | 'dash' | 'hit' | 'stun'
 	enemy: 'idle' | 'running' | 'attack' | 'hit' | 'dying' | 'dead' | 'waitingAttack' | 'attackCooldown' | 'stun' | 'wander'
+	boss: 'idle' | 'running' | 'rangeAttack' | 'attack' | 'dying' | 'dead' | 'waitingAttack' | 'attackCooldown'|'hit'
 }
 export const cropNames = ['carrot', 'beet', 'tomato', 'lettuce', 'pumpkin', 'wheat'] as const
 export const fruitNames = ['apple'] as const
@@ -78,7 +80,7 @@ export interface Entity {
 	scale?: number
 	// ! Transforms
 	movementForce?: Vector3
-	speed?: number
+	speed?: Stat
 	position?: Vector3
 	worldPosition?: Vector3
 	rotation?: Quaternion
@@ -126,7 +128,7 @@ export interface Entity {
 	cssObject?: true
 	uiRoot?: true
 	// ! Farming
-	sensor?: true
+	sensorDesc?: ColliderDesc
 	sensorCollider?: Collider
 	crop?: { stage: number, name: crops }
 	plantableSpot?: string
@@ -190,9 +192,14 @@ export interface Entity {
 	healthBarContainer?: CSS2DObject
 	boss?: true
 	projectile?: true
+	archingProjectile?: Vector3
+	honeyProjectile?: true
+	honeySpot?: Modifier<'speed'>
 	deathTimer?: Timer<false>
 	attackPattern?: 'melee' | 'distance'
 	attackStyle?: EnemyAttackStyle
+	sneeze?: Timer<false>
+	pollen?: true
 	// ! Particles
 	emitter?: ParticleEmitter<Object3DEventMap>
 	autoDestroy?: true
@@ -244,6 +251,8 @@ export interface Entity {
 	hitTimer?: Timer<false>
 	// ! Wander
 	wander?: { target: Vector3, cooldown: Timer<false> }
+	// ! Debuffs
+	debuffsContainer?: CSS2DObject
 }
 export type Bundle<C extends keyof Entity> = () => With<Entity, C>
 

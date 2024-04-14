@@ -6,7 +6,7 @@ import { time } from '@/global/init'
 import { params } from '@/global/context'
 
 export const getMovementForce = ({ movementForce, speed }: With<Entity, 'movementForce' | 'speed'>) => {
-	const force = movementForce.clone().multiplyScalar(speed * params.speedUp * time.delta / 1000)
+	const force = movementForce.clone().multiplyScalar(speed.value * params.speedUp * time.delta / 1000)
 	return {
 		force,
 		isMoving: force.length() > 0,
