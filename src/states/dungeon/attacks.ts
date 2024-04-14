@@ -109,7 +109,7 @@ export const pollenAttack = async ({ group }: With<Entity, 'group'>) => {
 		const angle = i / max * Math.PI * 2 + (Math.random() - 0.5)
 		const distance = between(20, 70)
 		ecs.add({
-			 position: new Vector3(Math.cos(angle) * distance, 0, Math.sin(angle) * distance).add(origin),
+			position: new Vector3(Math.cos(angle) * distance, 0, Math.sin(angle) * distance).add(origin),
 			...pollenBundle(),
 			pollen: true,
 		})

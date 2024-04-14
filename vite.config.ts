@@ -14,12 +14,12 @@ import { optimizeAssets } from './scripts/optimizeAssets'
 export default defineConfig(() => {
 	const config: UserConfig = {
 		plugins: [
-			// generateAssetNames(),
-			// autoConvertFBXtoGLB(),
-			// extractAnimations(),
-			// generateAssetManifest(),
-			// convertAudioFiles(),
-			// optimizeAssets(),
+			generateAssetNames(),
+			autoConvertFBXtoGLB(),
+			extractAnimations(),
+			generateAssetManifest(),
+			convertAudioFiles(),
+			optimizeAssets(),
 			solidPlugin(),
 			VitePWA({
 				registerType: 'autoUpdate',
