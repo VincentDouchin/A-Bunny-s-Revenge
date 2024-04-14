@@ -205,7 +205,7 @@ export const loadAssets = async () => {
 
 		steps: loadSounds(loader)(import.meta.glob('@assets/steps/*.ogg', { eager: true, import: 'default' })),
 
-		music: loadSounds(loader)(import.meta.glob('@assets/music/*.ogg', { eager: true, import: 'default' })),
+		soundEffects: loadSounds(loader)(import.meta.glob('@assets/soundEffects/*.ogg', { eager: true, import: 'default' })),
 
 		// ! others
 		fonts: fontLoader(loader)(import.meta.glob('@assets/fonts/*.*', { eager: true, import: 'default' })),

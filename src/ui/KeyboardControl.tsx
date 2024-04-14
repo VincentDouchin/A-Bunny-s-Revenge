@@ -28,17 +28,23 @@ export const KeyboardControls = ({
 				.keyboard-controls{
 					font-size:2rem;
 					display:flex;
+					gap:0.5rem;
+					color: white;	
+				}
+				.controls-icons{
+					display: flex;
 					gap:0.2rem;
-					color: white;
-					
-				}`}
+				}
+				`}
 			</style>
 			<div class="controls-container">
 				<div class="keyboard-controls">
-					<InputIcon input={player.playerControls.get('forward')}></InputIcon>
-					<InputIcon input={player.playerControls.get('left')}></InputIcon>
-					<InputIcon input={player.playerControls.get('backward')}></InputIcon>
-					<InputIcon input={player.playerControls.get('right')}></InputIcon>
+					<div class="controls-icons">
+						<InputIcon input={player.playerControls.get('forward')}></InputIcon>
+						<InputIcon input={player.playerControls.get('left')}></InputIcon>
+						<InputIcon input={player.playerControls.get('backward')}></InputIcon>
+						<InputIcon input={player.playerControls.get('right')}></InputIcon>
+					</div>
 					<div>Move</div>
 				</div>
 				<Show when={interactables[0]}>

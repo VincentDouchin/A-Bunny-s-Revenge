@@ -1,4 +1,4 @@
-import type { music } from '@assets/assets'
+import type { soundEffects } from '@assets/assets'
 import { Destination, PitchShift, Player, start } from 'tone'
 import { assets } from './init'
 import { save } from './save'
