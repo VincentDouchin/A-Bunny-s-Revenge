@@ -45,12 +45,12 @@ export const playSFX = <K extends string = string>(soundAsset: soundAssets) => (
 		}, Math.max(soundPlayer.buffer.duration * 1000 / (options?.playbackRate ?? 1) + (options?.offset ?? 0), 1))
 	})
 }
-export const playSound = playSFX<music>('music')
+export const playSound = playSFX<soundEffects>('soundEffects')
 export const playVoice = playSFX('voices')
 export const playStep = playSFX('steps')
 
-export const playAmbiance = (ambiance: music) => () => {
-	const player = new Player(assets.music[ambiance].buffer).toDestination()
+export const playAmbiance = (ambiance: soundEffects) => () => {
+	const player = new Player(assets.soundEffects[ambiance].buffer).toDestination()
 	player.start()
 	player.loop = true
 	player.volume.value = -12
