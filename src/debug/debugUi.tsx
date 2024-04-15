@@ -228,7 +228,7 @@ export const DebugUi = () => {
 					Time of day
 					<input type="range" min="0" max="1" step="0.01" value={currentTime()} onChange={e => dayTime.current = e.target.valueAsNumber}></input>
 					<button classList={{ selected: dayToNight() }} onClick={() => dayTime.dayToNight = true}>Day to night</button>
-					<button classList={{ selected: !dayToNight() }} onChange={() => dayTime.dayToNight = false}>Night to day</button>
+					<button classList={{ selected: !dayToNight() }} onClick={() => dayTime.dayToNight = false}>Night to day</button>
 				</div>
 				<div style={{ display: 'flex', gap: '1rem', margin: '1rem', width: '20rem' }}>
 					<button onClick={growCrops}>Grow crops</button>
