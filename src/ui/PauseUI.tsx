@@ -1,11 +1,10 @@
-import { Show, createSignal } from 'solid-js'
 import volumeOn from '@assets/icons/volume-high-solid.svg?raw'
 import volumeOff from '@assets/icons/volume-xmark-solid.svg?raw'
-import { Destination } from 'tone'
+import { Show, createSignal } from 'solid-js'
 import { Modal } from './components/Modal'
 import { ui } from '@/global/init'
-import { pausedState } from '@/global/states'
 import { save, updateSave } from '@/global/save'
+import { pausedState } from '@/global/states'
 import { isStandalone } from '@/states/game/FullscreenUi'
 
 export const PauseUi = () => {
