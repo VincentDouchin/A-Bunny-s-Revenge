@@ -70,20 +70,20 @@ export const enterHouse = async () => {
 	const house = houseQuery.first
 
 	if (house) {
-		playSound(['glitchedtones_Door+Bedroom+Open+01', 'glitchedtones_Door+Bedroom+Open+02'], { volume: -12 })
+		playSound(['glitchedtones_Door+Bedroom+Open+01', 'glitchedtones_Door+Bedroom+Open+02'], { volume: 0.05 })
 		await house.houseAnimator.playClamped('DoorOpen')
 		movePlayerTo(house.position)
 		addTag(house, 'activeDialog')
 		await sleep(500)
 		await house.houseAnimator.playClamped('DoorClose')
-		playSound(['zapsplat_household_door_backdoor_close_002_56921', 'zapsplat_household_door_backdoor_close_004_56923'])
+		playSound(['zapsplat_household_door_backdoor_close_002_56921', 'zapsplat_household_door_backdoor_close_004_56923'], { volume: 0.05 })
 	}
 }
 export const leaveHouse = async () => {
 	const house = houseQuery.first
 	const door = doorQuery.first
 	if (house && door) {
-		playSound(['glitchedtones_Door+Bedroom+Open+01', 'glitchedtones_Door+Bedroom+Open+02'], { volume: -12 })
+		playSound(['glitchedtones_Door+Bedroom+Open+01', 'glitchedtones_Door+Bedroom+Open+02'], { volume: 0.05 })
 		await house.houseAnimator.playClamped('DoorOpen')
 		await movePlayerTo(new Vector3(0, 0, 50).applyQuaternion(house.rotation).add(house.position))
 		cutSceneState.disable()
@@ -91,7 +91,7 @@ export const leaveHouse = async () => {
 		await house.houseAnimator.playClamped('DoorClose')
 		setSensor(houseQuery, false)
 		setSensor(doorQuery, false)
-		playSound(['zapsplat_household_door_backdoor_close_002_56921', 'zapsplat_household_door_backdoor_close_004_56923'])
+		playSound(['zapsplat_household_door_backdoor_close_002_56921', 'zapsplat_household_door_backdoor_close_004_56923'], { volume: 0.05 })
 	}
 }
 

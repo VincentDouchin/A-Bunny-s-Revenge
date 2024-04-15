@@ -20,7 +20,7 @@ export const honeySplatParticlesBundle = () => {
 		startSize: new IntervalValue(3, 7),
 		worldSpace: true,
 		emissionOverTime: new ConstantValue(5),
-		shape: new GridEmitter({ width: 10, height: 10, row: 10, column: 10 }),
+		shape: new GridEmitter({ width: 20, height: 20, row: 10, column: 10 }),
 		renderOrder: 0,
 		material: mat,
 		emissionBursts: [],

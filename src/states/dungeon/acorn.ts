@@ -27,7 +27,7 @@ export const spawnBouncyItems = (entity: Entity, itemModel: Object3D<Object3DEve
 			...inMap(),
 
 		})
-		playSound(['665181__el_boss__item-or-material-pickup-pop-3-of-3', '665182__el_boss__item-or-material-pickup-pop-2-of-3', '665183__el_boss__item-or-material-pickup-pop-1-of-3'], { volume: -12 })
+		playSound(['665181__el_boss__item-or-material-pickup-pop-3-of-3', '665182__el_boss__item-or-material-pickup-pop-2-of-3', '665183__el_boss__item-or-material-pickup-pop-1-of-3'], { volume: 0.1 })
 		await sleep(50)
 	}
 }
@@ -40,7 +40,7 @@ export const pickupAcorn = () => {
 		for (const acorn of acornQuery) {
 			if (player.position.distanceTo(acorn.position) < 5) {
 				ecs.remove(acorn)
-				playSound('zapsplat_multimedia_alert_action_collect_pick_up_point_or_item_79293', { volume: -20 })
+				playSound('zapsplat_multimedia_alert_action_collect_pick_up_point_or_item_79293', { volume: 0.05 })
 				updateSave(s => s.acorns++)
 			}
 		}

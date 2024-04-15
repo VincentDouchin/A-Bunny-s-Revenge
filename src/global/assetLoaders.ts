@@ -72,9 +72,9 @@ const draco = getDracoLoader()
 export const loadGLB = await cachedLoader('glb', (arrayBuffer: ArrayBuffer) => new GLTFLoader().setDRACOLoader(draco).parseAsync(arrayBuffer, ''))
 
 export const loadAudio = await cachedLoader('glb', async (arrayBuffer: ArrayBuffer) => {
-	const context = new AudioContext()
-	const buffer = await context.decodeAudioData(arrayBuffer)
-	return buffer
+	const audioBlob = await new Blob([arrayBuffer], { type: 'audio/webm' })
+	const url = URL.createObjectURL(audioBlob)
+	return url
 })
 export const loadImage = (path: string) => new Promise<HTMLImageElement>((resolve) => {
 	const img = new Image()

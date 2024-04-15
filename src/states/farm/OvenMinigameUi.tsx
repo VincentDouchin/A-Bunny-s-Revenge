@@ -96,7 +96,7 @@ export const OvenMinigameUi = ({ player }: FarmUiProps) => {
 						setTarget(x => Math.max(0, Math.min(100, x + direction() * 3 * (time.delta / 1000) * (1 + progress() / 20))))
 						if (progress() >= 100) {
 							setProgress(0)
-							playSound('zapsplat_foley_heavy_flat_stone_very_sort_drag_scrape_002_87118', { volume: -12 })
+							playSound('zapsplat_foley_heavy_flat_stone_very_sort_drag_scrape_002_87118', { volume: 0.1 })
 							oven.ovenAnimator.playClamped('Opening').then(async () => {
 								oven.recipesQueued.shift()
 								const position = new Vector3()
@@ -115,7 +115,7 @@ export const OvenMinigameUi = ({ player }: FarmUiProps) => {
 									})
 								}
 								await sleep(500)
-								playSound('zapsplat_foley_rubble_rock_drop_onto_pile_others_medium_sized_006_108147', { volume: -12 })
+								playSound('zapsplat_foley_rubble_rock_drop_onto_pile_others_medium_sized_006_108147', { volume: 0.1 })
 								oven.ovenAnimator.playClamped('Closing')
 							})
 						}

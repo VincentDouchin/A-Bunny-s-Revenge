@@ -224,7 +224,6 @@ export interface Entity {
 	nightLight?: Light
 	emissiveMat?: MeshPhongMaterial
 	ambientLight?: 'night' | 'day'
-	timeOfDay?: number
 	withTimeUniform?: true
 	// ! Basket
 	basket?: With<Entity, 'inventory' | 'inventoryId' | 'inventorySize'>

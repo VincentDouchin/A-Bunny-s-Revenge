@@ -45,7 +45,6 @@ const launchScript = async (filePath?: string) => {
 			dedup(),
 			draco(),
 		)
-		// const newPath = path.replace('glb', `gltf`)
 		await rename(path, path.replace('assets', 'rawAssets\\convertedAssets'))
 		await io.write(path.replace(getFileName(path), `${getFileName(path)}-optimized`), document)
 	}

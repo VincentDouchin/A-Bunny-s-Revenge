@@ -4,9 +4,9 @@ import { playerBehaviorPlugin } from './behaviors/playerBehavior'
 import { debugPlugin } from './debug/debugPlugin'
 import { updateAnimations } from './global/animations'
 import { initCamera, initializeCameraPosition, moveCamera, updateCameraZoom } from './global/camera'
-import { coroutines, inputManager, time, ui } from './global/init'
+import { coroutines, inputManager, musicManager, time, ui } from './global/init'
 import { initThree, renderGame, updateRenderSize } from './global/rendering'
-import { initTone } from './global/sounds'
+import { initHowler } from './global/sounds'
 import { app, campState, coreState, dungeonState, gameState, genDungeonState, mainMenuState, openMenuState, pausedState, setupState } from './global/states'
 import { despawnOfType, hierarchyPlugin, removeStateEntity } from './lib/hierarchy'
 import { updateModels } from './lib/modelsProperties'
@@ -30,7 +30,7 @@ import { rotateStun } from './states/dungeon/stun'
 import { harvestCrop, initPlantableSpotsInteractions, interactablePlantableSpot, plantSeed, updateCropsSave } from './states/farm/farming'
 import { closePlayerInventory, disableInventoryState, enableInventoryState, interact, openPlayerInventory } from './states/farm/openInventory'
 import { addDashDisplay, updateDashDisplay } from './states/game/dash'
-import { dayNight, initTimeOfDay } from './states/game/dayNight'
+import { dayNight, playNightMusic } from './states/game/dayNight'
 import { talkToNPC } from './states/game/dialog'
 import { bobItems, collectItems, popItems, stopItems } from './states/game/items'
 import { canPlayerMove, movePlayer, playerSteps, savePlayerFromTheEmbraceOfTheVoid, savePlayerPosition, stopPlayer } from './states/game/movePlayer'
@@ -49,9 +49,9 @@ import { UI } from './ui/UI'
 
 coreState
 	.addPlugins(hierarchyPlugin, physicsPlugin, transformsPlugin, addToScene('camera', 'light', 'model', 'dialogContainer', 'emitter', 'interactionContainer', 'minigameContainer', 'healthBarContainer', 'dashDisplay', 'stun', 'debuffsContainer'), updateModels, particlesPlugin, tweenPlugin)
-	.onEnter(initThree, initCamera, moveCamera(true), initTimeOfDay)
-	.onEnter(ui.render(UI))
-	.addSubscriber(...target, initTone, resize, disablePortrait, enableFullscreen, stopOnLosingFocus)
+	.onEnter(initThree, initCamera, moveCamera(true))
+	.onEnter(ui.render(UI), initHowler)
+	.addSubscriber(...target, resize, disablePortrait, enableFullscreen, stopOnLosingFocus)
 	.onPreUpdate(coroutines.tick, savePlayerFromTheEmbraceOfTheVoid)
 	.onUpdate(runIf(() => !pausedState.enabled, updateAnimations('enemyAnimator', 'playerAnimator', 'chestAnimator', 'houseAnimator', 'ovenAnimator'), () => time.tick()))
 	.onUpdate(inputManager.update, ui.update, moveCamera())
@@ -82,7 +82,7 @@ campState
 	.addSubscriber(...interactablePlantableSpot)
 	.onEnter(spawnFarm, spawnLevelData, updateCropsSave, initPlantableSpotsInteractions, enableBasketUi)
 	.onEnter(runIf(() => !mainMenuState.enabled, spawnCharacter, spawnBasket), moveCamera(true))
-	.onUpdate(collideWithDoorCamp)
+	.onUpdate(collideWithDoorCamp, playNightMusic)
 	.onUpdate(runIf(canPlayerMove, plantSeed, harvestCrop, openPlayerInventory, savePlayerPosition, basketFollowPlayer()))
 	.onExit(despawnOfType('map'))
 openMenuState
@@ -104,7 +104,9 @@ dungeonState
 	.onUpdate(honeySplat)
 	.onExit(despawnOfType('map'))
 pausedState
-	.onExit(() => time.reset())
+	.onEnter(musicManager.pause)
+
+	.onExit(() => time.reset(), musicManager.play)
 
 const animate = () => {
 	app.update()

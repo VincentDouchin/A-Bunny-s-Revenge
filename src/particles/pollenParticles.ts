@@ -6,7 +6,7 @@ import type { Entity } from '@/global/entity'
 
 export const pollenBundle = () => {
 	const system = new ParticleSystem({
-		duration: between(20, 30),
+		duration: between(50, 70),
 		looping: false,
 		prewarm: true,
 		startColor: new ColorRange(colorToVec4(0xE8D282, 0.7), colorToVec4(0xF7F3B7, 0.7)),

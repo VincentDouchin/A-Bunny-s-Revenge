@@ -1,3 +1,4 @@
+import { between } from 'randomish'
 import { ecs, inputManager } from '@/global/init'
 import { updateSave } from '@/global/save'
 import { playStep } from '@/global/sounds'
@@ -14,7 +15,7 @@ export const playerSteps = () => {
 			for (const [time, foot] of [[12 / 20, 'right'], [3 / 20, 'left']] as const) {
 				if (player.playerAnimator.getTimeRatio() >= time) {
 					if (player.lastStep[foot] === false) {
-						playStep('random', { volume: -12 })
+						playStep('random', { volume: between(0.1, 0.2) })
 						player.lastStep[foot] = true
 						const honey = player.speed.hasModifier('beeBoss')
 						ecs.add({

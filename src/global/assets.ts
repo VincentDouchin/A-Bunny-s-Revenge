@@ -3,8 +3,8 @@ import type { ColorRepresentation, Material, Side } from 'three'
 import { Mesh, MeshBasicMaterial, MeshPhysicalMaterial, MeshStandardMaterial, NearestFilter, RepeatWrapping, SRGBColorSpace, Texture } from 'three'
 
 import assetManifest from '@assets/assetManifest.json'
+import { Howl } from 'howler'
 import type { GLTF } from 'three/examples/jsm/loaders/GLTFLoader'
-import { Player } from 'tone'
 import type { Constructor } from 'type-fest'
 import { getExtension, getFileName, loadAudio, loadGLB, loadImage, loaderProgress, textureLoader, thumbnail } from './assetLoaders'
 import type { crops, fruits } from './entity'
@@ -124,16 +124,16 @@ const buttonsLoader = (loader: (key: string) => void) => async (glob: Record<str
 const loadVoices = (loader: (key: string) => void) => async (glob: GlobEager) => {
 	const sounds = await asyncMapValues(glob, async (src, key) => {
 		const audio = await loadAudio(src, key)
-		const player = new Player(audio)
+		const player = new Howl({ src: audio, pool: 4, format: 'webm' })
 		loader(src)
 		return player
 	})
 	return mapKeys(sounds, k => getFileName(k).split('_')[1])
 }
-const loadSounds = (loader: (key: string) => void) => async (glob: GlobEager) => {
+const loadSounds = (loader: (key: string) => void, pool: number) => async (glob: GlobEager) => {
 	const sounds = await asyncMapValues(glob, async (src, key) => {
 		const audio = await loadAudio(src, key)
-		const player = new Player(audio)
+		const player = new Howl({ src: audio, pool, format: 'webm' })
 		loader(src)
 		return player
 	})
@@ -201,11 +201,13 @@ export const loadAssets = async () => {
 		buttons: buttonsLoader(loader)(import.meta.glob('@assets/buttons/*.*', { eager: true, import: 'default' })),
 
 		// ! audio
-		voices: loadVoices(loader)(import.meta.glob('@assets/voices/*.ogg', { eager: true, import: 'default' })),
+		voices: loadVoices(loader)(import.meta.glob('@assets/voices/*.webm', { eager: true, import: 'default' })),
 
-		steps: loadSounds(loader)(import.meta.glob('@assets/steps/*.ogg', { eager: true, import: 'default' })),
+		steps: loadSounds(loader, 3)(import.meta.glob('@assets/steps/*.webm', { eager: true, import: 'default' })),
 
-		soundEffects: loadSounds(loader)(import.meta.glob('@assets/soundEffects/*.ogg', { eager: true, import: 'default' })),
+		soundEffects: loadSounds(loader, 5)(import.meta.glob('@assets/soundEffects/*.webm', { eager: true, import: 'default' })),
+
+		music: loadSounds(loader, 1)(import.meta.glob('@assets/music/*.webm', { eager: true, import: 'default' })),
 
 		// ! others
 		fonts: fontLoader(loader)(import.meta.glob('@assets/fonts/*.*', { eager: true, import: 'default' })),

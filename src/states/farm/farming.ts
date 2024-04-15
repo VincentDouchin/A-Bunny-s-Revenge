@@ -118,7 +118,7 @@ export const harvestCrop = () => {
 						...bundle,
 						position: position.add(new Vector3(0, bundle.size.y + 5, 0)),
 					})
-					playSound(['zapsplat_foley_fern_pull_from_ground_18385', 'zapsplat_foley_moss_grass_clump_pull_rip_from_ground_70635'], { volume: -12 })
+					playSound(['zapsplat_foley_fern_pull_from_ground_18385', 'zapsplat_foley_moss_grass_clump_pull_rip_from_ground_70635'], { volume: 0.1 })
 					removeEntityRef(spot, 'planted')
 					ecs.update(player, { state: 'idle' })
 				}

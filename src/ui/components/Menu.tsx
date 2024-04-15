@@ -81,7 +81,7 @@ export function Menu(props: MenuProps) {
 						const newSelected = inverseRefs.get(newSelectedElement)
 						if (newSelected !== undefined) {
 							setSelected(() => newSelected)
-							playSound('004_Hover_04', { volume: -12 })
+							playSound('004_Hover_04', { volume: 0.1 })
 						}
 					}
 				}

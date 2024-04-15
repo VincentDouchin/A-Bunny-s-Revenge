@@ -6,7 +6,7 @@ import { debugOptions } from './debugState'
 import { SaveEditor } from './saveEditor'
 import { ToonEditor } from './toonEditor'
 import { params } from '@/global/context'
-import { ecs, ui } from '@/global/init'
+import { dayTime, ecs, ui } from '@/global/init'
 import { cameraQuery, depthQuad, getTargetSize, height, updateRenderSize, width } from '@/global/rendering'
 import { resetSave, updateSave } from '@/global/save'
 import { campState } from '@/global/states'
@@ -152,6 +152,8 @@ export const DebugUi = () => {
 			}
 		}
 	}
+	const dayToNight = ui.sync(() => dayTime.dayToNight)
+	const currentTime = ui.sync(() => dayTime.current)
 	return (
 		<div style={{ position: 'absolute', color: 'white' }}>
 			<Show when={showUi()}>
@@ -223,6 +225,10 @@ export const DebugUi = () => {
 					<input type="checkbox" checked={params.skipMainMenu} onChange={e => setParams(d => ({ ...d, skipMainMenu: e.target.checked }))}></input>
 					Debug Boss
 					<input type="checkbox" checked={params.debugBoss} onChange={e => setParams(d => ({ ...d, debugBoss: e.target.checked }))}></input>
+					Time of day
+					<input type="range" min="0" max="1" step="0.01" value={currentTime()} onChange={e => dayTime.current = e.target.valueAsNumber}></input>
+					<button classList={{ selected: dayToNight() }} onClick={() => dayTime.dayToNight = true}>Day to night</button>
+					<button classList={{ selected: !dayToNight() }} onChange={() => dayTime.dayToNight = false}>Night to day</button>
 				</div>
 				<div style={{ display: 'flex', gap: '1rem', margin: '1rem', width: '20rem' }}>
 					<button onClick={growCrops}>Grow crops</button>

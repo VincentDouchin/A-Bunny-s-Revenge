@@ -84,7 +84,7 @@ export const honeySplat = () => {
 			ecs.add({
 				...honeySplatParticlesBundle(),
 				position: honey.position.clone().setY(1),
-				honeySpot: createModifier('beeBoss', 'speed', -50, ModStage.Total, ModType.Percent, false, 2000),
+				honeySpot: createModifier('beeBoss', 'speed', -50, ModStage.Total, ModType.Percent, false, 5000),
 			})
 		}
 	}
@@ -95,7 +95,7 @@ const honeySpotQuery = ecs.with('honeySpot', 'position')
 export const stepInHoney = () => {
 	for (const honeySpot of honeySpotQuery) {
 		for (const entity of speedQuery) {
-			if (honeySpot.position.distanceTo(entity.position) < 8) {
+			if (honeySpot.position.distanceTo(entity.position) < 15) {
 				entity.speed.addModifier(honeySpot.honeySpot)
 			}
 		}

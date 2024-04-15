@@ -13,12 +13,12 @@ export const PauseUi = () => {
 	const [mute, setMute] = createSignal(save.settings.mute)
 	const muteSound = () => {
 		setMute(x => !x)
-		Destination.mute = mute()
+		Howler.mute(mute())
 		updateSave(s => s.settings.mute = mute())
 	}
 	const setVolume = (volume: number) => {
 		updateSave(s => s.settings.volume = volume)
-		Destination.volume.value = volume / 100
+		Howler.volume(volume / 100)
 	}
 	const toggleFullscreen = () => {
 		updateSave(s => s.settings.fullscreen = !s.settings.fullscreen)

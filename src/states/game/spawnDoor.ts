@@ -53,7 +53,7 @@ export const collideWithDoor: System<DungeonRessources> = ({ dungeon, dungeonLev
 		for (const door of doorToUnlockQuery) {
 			ecs.removeComponent(door, 'doorLocked')
 		}
-		playSound('zapsplat_multimedia_game_tone_twinkle_bright_collect_gain_level_up_50730', { volume: -15 })
+		playSound('zapsplat_multimedia_game_tone_twinkle_bright_collect_gain_level_up_50730', { volume: 0.05 })
 	}
 	for (const door of doorQuery) {
 		for (const player of playerQuery) {
