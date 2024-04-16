@@ -153,7 +153,11 @@ export const DebugUi = () => {
 		}
 	}
 	const dayToNight = ui.sync(() => dayTime.dayToNight)
-	const currentTime = ui.sync(() => dayTime.current)
+	const [currentTime, setCurrentTime] = createSignal(dayTime.current)
+	const [editingTime, setEditingTime] = createSignal(false)
+	ui.updateSync(() => {
+		!editingTime() && setCurrentTime(dayTime.current)
+	})
 	return (
 		<div style={{ position: 'absolute', color: 'white' }}>
 			<Show when={showUi()}>
@@ -226,7 +230,20 @@ export const DebugUi = () => {
 					Debug Boss
 					<input type="checkbox" checked={params.debugBoss} onChange={e => setParams(d => ({ ...d, debugBoss: e.target.checked }))}></input>
 					Time of day
-					<input type="range" min="0" max="1" step="0.01" value={currentTime()} onChange={e => dayTime.current = e.target.valueAsNumber}></input>
+					<input
+						type="range"
+						min="0"
+						max="1"
+						step="0.01"
+						value={currentTime()}
+						onMouseEnter={() => setEditingTime(true)}
+						onMouseLeave={() => setEditingTime(false)}
+						onChange={(e) => {
+							setEditingTime(true)
+							dayTime.current = e.target.valueAsNumber
+						}}
+					>
+					</input>
 					<button classList={{ selected: dayToNight() }} onClick={() => dayTime.dayToNight = true}>Day to night</button>
 					<button classList={{ selected: !dayToNight() }} onClick={() => dayTime.dayToNight = false}>Night to day</button>
 				</div>
