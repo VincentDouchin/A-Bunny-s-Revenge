@@ -8,7 +8,7 @@ export const soundDialog = async (dialog: string) => {
 			await new Promise<void>(resolve => setTimeout(resolve, 50))
 		} else {
 			if (letter in assets.voices) {
-				await playVoice(letter, { playbackRate: 3, offset: -100, volume: 0.1 })
+				await playVoice(letter, { playbackRate: 3, offset: -100, volume: 0.2 })
 			}
 		}
 	}

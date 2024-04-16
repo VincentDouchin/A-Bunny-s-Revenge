@@ -84,7 +84,7 @@ const mainMenuTexture = (mat: MeshStandardMaterial) => {
 			selected = Math.max(selected - 1, 0)
 		}
 		if (selected !== oldSelected) {
-			playSound('004_Hover_04', { volume: 0.1 })
+			playSound('004_Hover_04', { volume: 0.2 })
 		}
 		if (direction || direction === null || offset) {
 			const clone = cloneCanvas(pageRight.canvas)
@@ -248,7 +248,7 @@ export const continueGame = (entities = menuTextureQuery.entities) => {
 	}
 }
 const selectOption = (fn: (offset: number) => void) => new Promise<void>((resolve) => {
-	playSound('020_Confirm_10', { volume: 0.05 })
+	playSound('020_Confirm_10', { volume: 0.1 })
 	ecs.add({
 		tween: new Tween({ f: 0 }).to({ f: 20 }, 200)
 			.onUpdate(({ f }) => fn(f))

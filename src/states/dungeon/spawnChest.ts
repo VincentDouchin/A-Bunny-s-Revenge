@@ -26,8 +26,8 @@ export const spawnChest = (dungeonLevel: number) => {
 		const chest = clone(assets.models.Chest.scene)
 		chest.scale.setScalar(0)
 		chest.rotateY(Math.PI)
-		playSound('085_save_game_02', { volume: 0.1, playbackRate: 1.5 })
-		playSound('202092__spookymodem__chest-opening', { volume: 0.1 })
+		playSound('085_save_game_02', { volume: 0.2, playbackRate: 1.5 })
+		playSound('202092__spookymodem__chest-opening', { volume: 0.2 })
 		const chestEntity = ecs.add({
 			...inMap(),
 			model: chest,

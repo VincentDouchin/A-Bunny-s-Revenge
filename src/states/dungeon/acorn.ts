@@ -27,7 +27,7 @@ export const spawnBouncyItems = (entity: Entity, itemModel: Object3D<Object3DEve
 			...inMap(),
 
 		})
-		playSound(['665181__el_boss__item-or-material-pickup-pop-3-of-3', '665182__el_boss__item-or-material-pickup-pop-2-of-3', '665183__el_boss__item-or-material-pickup-pop-1-of-3'], { volume: 0.1 })
+		playSound(['665181__el_boss__item-or-material-pickup-pop-3-of-3', '665182__el_boss__item-or-material-pickup-pop-2-of-3', '665183__el_boss__item-or-material-pickup-pop-1-of-3'], { volume: 0.2 })
 		await sleep(50)
 	}
 }
