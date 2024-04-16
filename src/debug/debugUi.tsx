@@ -5,6 +5,7 @@ import { LevelEditor } from './LevelEditor'
 import { debugOptions } from './debugState'
 import { SaveEditor } from './saveEditor'
 import { ToonEditor } from './toonEditor'
+import { SoundUi } from './SoundUi'
 import { params } from '@/global/context'
 import { RenderGroup } from '@/global/entity'
 import { dayTime, ecs, ui } from '@/global/init'
@@ -282,6 +283,7 @@ export const DebugUi = () => {
 			</Show>
 			<LevelEditor />
 			<SaveEditor />
+			<SoundUi />
 		</div>
 	)
 }

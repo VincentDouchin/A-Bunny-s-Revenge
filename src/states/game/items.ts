@@ -50,7 +50,7 @@ export const popItems = () => ecs.with('body', 'item', 'collider').onEntityAdded
 	force.x = force.x * 20
 	force.z = force.z * 20
 	e.body.applyImpulse(force, true)
-	playSound(['665181__el_boss__item-or-material-pickup-pop-3-of-3', '665182__el_boss__item-or-material-pickup-pop-2-of-3', '665183__el_boss__item-or-material-pickup-pop-1-of-3'], { volume: 0.05 })
+	playSound(['665181__el_boss__item-or-material-pickup-pop-3-of-3', '665182__el_boss__item-or-material-pickup-pop-2-of-3', '665183__el_boss__item-or-material-pickup-pop-1-of-3'])
 })
 const itemsToStopQuery = ecs.with('item', 'body', 'position')
 export const stopItems = () => {
@@ -80,7 +80,7 @@ export const collectItems = () => {
 				ecs.removeComponent(item, 'tween')
 				ecs.removeComponent(item, 'collider')
 				addItem(player, { name: item.itemLabel, quantity: 1 })
-				playSound('zapsplat_multimedia_alert_action_collect_pick_up_point_or_item_79293', { volume: 0.05 })
+				playSound('zapsplat_multimedia_alert_action_collect_pick_up_point_or_item_79293')
 				ecs.add({
 					parent: item,
 					tween: new Tween(item.position).to({ ...player.position, y: item.position.y }, 500).onComplete(() => {

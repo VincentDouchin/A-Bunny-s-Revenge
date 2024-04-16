@@ -130,7 +130,7 @@ const waitingAttack = (cooldown: number): EnemyState => ({
 const hit: EnemyState = {
 	enter: async (e, setState, { player }) => {
 		if (player) {
-			playSound(['Hit_Metal_on_flesh', 'Hit_Metal_on_leather', 'Hit_Wood_on_flesh', 'Hit_Wood_on_leather'], { volume: 0.2 })
+			playSound(['Hit_Metal_on_flesh', 'Hit_Metal_on_leather', 'Hit_Wood_on_flesh', 'Hit_Wood_on_leather'])
 			// ! damage
 			const [damage, crit] = calculateDamage(player)
 			e.currentHealth -= damage
@@ -250,7 +250,7 @@ export const chargingEnemyBehaviorPlugin = behaviorPlugin(
 			world.contactPairsWith(e.collider, (c) => {
 				for (const tree of treeQuery) {
 					if (tree.collider === c && world.intersectionPair(e.sensorCollider, c)) {
-						playSound('zapsplat_impacts_wood_rotten_tree_trunk_hit_break_crumple_011_102694', { volume: 0.2 })
+						playSound('zapsplat_impacts_wood_rotten_tree_trunk_hit_break_crumple_011_102694')
 						return setState('stun')
 					}
 				}

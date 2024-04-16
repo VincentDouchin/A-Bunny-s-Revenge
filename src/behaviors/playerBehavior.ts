@@ -82,15 +82,15 @@ export const playerBehaviorPlugin = behaviorPlugin(
 	attack: {
 		enter: async (e, setupState) => {
 			if (e.combo.lastAttack === 0) {
-				playSound(['Slash_Attack_Heavy_1', 'Slash_Attack_Heavy_2', 'Slash_Attack_Heavy_3'], { volume: 0.2 })
+				playSound(['Slash_Attack_Heavy_1', 'Slash_Attack_Heavy_2', 'Slash_Attack_Heavy_3'])
 				await e.playerAnimator.playOnce('lightAttack', { timeScale: e.attackSpeed.value * ANIMATION_SPEED }, 0.5)
 			}
 			if (e.combo.lastAttack === 1) {
-				playSound(['Slash_Attack_Light_1', 'Slash_Attack_Light_2'], { volume: 0.2 })
+				playSound(['Slash_Attack_Light_1', 'Slash_Attack_Light_2'])
 				await e.playerAnimator.playOnce('slashAttack', { timeScale: e.attackSpeed.value * 0.8 * ANIMATION_SPEED }, 0.2)
 			}
 			if (e.combo.lastAttack === 2) {
-				playSound(['Slash_Attack_Heavy_1', 'Slash_Attack_Heavy_2', 'Slash_Attack_Heavy_3'], { volume: 0.2 })
+				playSound(['Slash_Attack_Heavy_1', 'Slash_Attack_Heavy_2', 'Slash_Attack_Heavy_3'])
 				await e.playerAnimator.playClamped('heavyAttack', { timeScale: e.attackSpeed.value * ANIMATION_SPEED })
 			}
 			e.combo.lastAttack = 0
@@ -122,7 +122,7 @@ export const playerBehaviorPlugin = behaviorPlugin(
 	picking: {},
 	dash: {
 		enter: async (e, setState) => {
-			playSound('zapsplat_cartoon_whoosh_swipe_fast_grab_dash_007_74748', { volume: 0.2 })
+			playSound('zapsplat_cartoon_whoosh_swipe_fast_grab_dash_007_74748')
 			e.playerAnimator.playAnimation('running')
 			ecs.add({ parent: e, ...dash(1) })
 			await sleep(200)
