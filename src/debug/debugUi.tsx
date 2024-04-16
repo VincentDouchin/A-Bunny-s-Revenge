@@ -1,4 +1,4 @@
-import { For, Show, createSignal, onCleanup, onMount } from 'solid-js'
+import { For, Show, createEffect, createSignal, onCleanup, onMount } from 'solid-js'
 import type { ShaderMaterial } from 'three'
 import { Color, Mesh, OrthographicCamera, PerspectiveCamera } from 'three'
 import { LevelEditor } from './LevelEditor'
@@ -154,6 +154,7 @@ export const DebugUi = () => {
 	}
 	const dayToNight = ui.sync(() => dayTime.dayToNight)
 	const [currentTime, setCurrentTime] = createSignal(dayTime.current)
+
 	return (
 		<div style={{ position: 'absolute', color: 'white' }}>
 			<Show when={showUi()}>
@@ -232,7 +233,10 @@ export const DebugUi = () => {
 						max="1"
 						step="0.01"
 						value={currentTime()}
-						onChange={e => setCurrentTime(e.target.valueAsNumber)}
+						onChange={(e) => {
+							setCurrentTime(e.target.valueAsNumber)
+							dayTime.current = e.target.valueAsNumber
+						}}
 					>
 					</input>
 					<button classList={{ selected: dayToNight() }} onClick={() => dayTime.dayToNight = true}>Day to night</button>
