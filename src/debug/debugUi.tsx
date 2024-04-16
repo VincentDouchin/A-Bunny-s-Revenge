@@ -1,4 +1,4 @@
-import { For, Show, createEffect, createSignal, onCleanup, onMount } from 'solid-js'
+import { For, Show, createSignal, onCleanup, onMount } from 'solid-js'
 import type { ShaderMaterial } from 'three'
 import { Color, Mesh, OrthographicCamera, PerspectiveCamera } from 'three'
 import { LevelEditor } from './LevelEditor'
@@ -6,6 +6,7 @@ import { debugOptions } from './debugState'
 import { SaveEditor } from './saveEditor'
 import { ToonEditor } from './toonEditor'
 import { params } from '@/global/context'
+import { RenderGroup } from '@/global/entity'
 import { dayTime, ecs, ui } from '@/global/init'
 import { cameraQuery, depthQuad, getTargetSize, height, updateRenderSize, width } from '@/global/rendering'
 import { resetSave, updateSave } from '@/global/save'
@@ -14,7 +15,6 @@ import { ModStage, ModType, createModifier } from '@/lib/stats'
 import { weaponBundle } from '@/states/game/weapon'
 import { entries } from '@/utils/mapFunctions'
 import { useLocalStorage } from '@/utils/useLocalStorage'
-import { RenderGroup } from '@/global/entity'
 
 const rendererQuery = ecs.with('renderer', 'scene', 'renderGroup').where(e => e.renderGroup === RenderGroup.Game)
 
