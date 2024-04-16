@@ -154,10 +154,6 @@ export const DebugUi = () => {
 	}
 	const dayToNight = ui.sync(() => dayTime.dayToNight)
 	const [currentTime, setCurrentTime] = createSignal(dayTime.current)
-	const [editingTime, setEditingTime] = createSignal(false)
-	ui.updateSync(() => {
-		!editingTime() && setCurrentTime(dayTime.current)
-	})
 	return (
 		<div style={{ position: 'absolute', color: 'white' }}>
 			<Show when={showUi()}>
@@ -236,12 +232,7 @@ export const DebugUi = () => {
 						max="1"
 						step="0.01"
 						value={currentTime()}
-						onMouseEnter={() => setEditingTime(true)}
-						onMouseLeave={() => setEditingTime(false)}
-						onChange={(e) => {
-							setEditingTime(true)
-							dayTime.current = e.target.valueAsNumber
-						}}
+						onChange={e => setCurrentTime(e.target.valueAsNumber)}
 					>
 					</input>
 					<button classList={{ selected: dayToNight() }} onClick={() => dayTime.dayToNight = true}>Day to night</button>
