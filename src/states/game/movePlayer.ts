@@ -15,7 +15,7 @@ export const playerSteps = () => {
 			for (const [time, foot] of [[12 / 20, 'right'], [3 / 20, 'left']] as const) {
 				if (player.playerAnimator.getTimeRatio() >= time) {
 					if (player.lastStep[foot] === false) {
-						playStep('random', { volume: between(0.1, 0.2) })
+						playStep('random', { volume: between(0.2, 0.3) })
 						player.lastStep[foot] = true
 						const honey = player.speed.hasModifier('beeBoss')
 						ecs.add({
