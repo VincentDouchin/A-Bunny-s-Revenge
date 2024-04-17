@@ -87,7 +87,7 @@ export const beeBossBehaviorPlugin = behaviorPlugin(
 	waitingAttack: {
 		enter: async (e, setState) => {
 			e.enemyAnimator.playAnimation('idle')
-			await sleep(500)
+			await sleep(200)
 			setState('attack')
 		},
 		update: (_e, setState, { touchedByPlayer }) => {
@@ -97,7 +97,7 @@ export const beeBossBehaviorPlugin = behaviorPlugin(
 	attackCooldown: {
 		enter: async (e, setState) => {
 			e.enemyAnimator.playAnimation('running')
-			await sleep(2000)
+			await sleep(1000)
 			setState('idle')
 		},
 		update: (e, setState, { direction, force, touchedByPlayer }) => {
