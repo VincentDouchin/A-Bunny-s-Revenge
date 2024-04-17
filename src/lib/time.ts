@@ -1,23 +1,13 @@
 import { Easing } from '@tweenjs/tween.js'
+import { Clock } from 'three'
 import { clamp } from 'three/src/math/MathUtils'
 
-export class Time {
-	current = Date.now()
+export class Time extends Clock {
 	delta = 0
 	elapsed = 0
-	reset() {
-		this.current = Date.now()
-	}
-
 	tick() {
-		const newTime = Date.now()
-		this.delta = newTime - this.current
-		this.current = newTime
+		this.delta = this.getDelta() * 1000
 		this.elapsed += this.delta
-	}
-
-	get uniform() {
-		return { value: this.current }
 	}
 }
 

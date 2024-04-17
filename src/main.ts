@@ -104,8 +104,8 @@ dungeonState
 	.onUpdate(honeySplat)
 	.onExit(despawnOfType('map'))
 pausedState
-	.onEnter(musicManager.pause)
-	.onExit(() => time.reset(), musicManager.play)
+	.onEnter(() => time.stop(), musicManager.pause)
+	.onExit(() => time.start(), musicManager.play)
 
 const animate = () => {
 	app.update()

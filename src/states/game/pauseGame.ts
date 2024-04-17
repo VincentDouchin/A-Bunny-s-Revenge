@@ -1,4 +1,4 @@
-import { ecs } from '@/global/init'
+import { ecs, time } from '@/global/init'
 import { pausedState } from '@/global/states'
 
 const playerControlsQuery = ecs.with('playerControls')

@@ -29,8 +29,9 @@ export const stopOnLosingFocus = () => {
 	const listener = () => {
 		if (document.hidden) {
 			app.stop()
+			time.stop()
 		} else {
-			time.reset()
+			time.start()
 			app.start()
 		}
 	}
