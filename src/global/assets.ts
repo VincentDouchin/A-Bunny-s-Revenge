@@ -1,5 +1,5 @@
 import type { characters, fruit_trees, icons, items, mainMenuAssets, models, particles, textures, trees, vegetation, weapons } from '@assets/assets'
-import { Mesh, MeshBasicMaterial, MeshPhysicalMaterial, MeshStandardMaterial, NearestFilter, RepeatWrapping, SRGBColorSpace, Texture } from 'three'
+import { DoubleSide, Mesh, MeshBasicMaterial, MeshPhysicalMaterial, MeshStandardMaterial, NearestFilter, RepeatWrapping, SRGBColorSpace, Texture } from 'three'
 import type { ColorRepresentation, Material, Side } from 'three'
 
 import assetManifest from '@assets/assetManifest.json'
@@ -141,7 +141,7 @@ const loadSounds = (loader: (key: string) => void, pool: number) => async (glob:
 }
 
 const loadItems = (loader: (key: string) => void) => async (glob: GlobEager) => {
-	const models = await loadGLBAsToon(loader)(glob)
+	const models = await loadGLBAsToon(loader, { side: DoubleSide })(glob)
 	const modelsAndthumbnails = mapValues(models, model => ({
 		model: model.scene,
 		img: thumbnail.getCanvas(model.scene).toDataURL(),
