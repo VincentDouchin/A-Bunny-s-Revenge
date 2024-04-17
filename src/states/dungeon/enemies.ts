@@ -33,7 +33,7 @@ export const enemyBundle = (name: enemy, level: number) => {
 		faction: Faction.Enemy,
 		enemyName: name,
 		movementForce: new Vector3(),
-		speed: new Stat(70 * enemy.speed),
+		speed: new Stat(50 * enemy.speed),
 		drops: enemy.drops,
 		sensorDesc: ColliderDesc.cuboid(2, 2, 2).setTranslation(0, 1, bundle.size.z / 2 + 2).setSensor(true).setMass(0).setActiveCollisionTypes(ActiveCollisionTypes.ALL),
 		healthBar: true,

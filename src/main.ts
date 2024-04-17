@@ -105,7 +105,6 @@ dungeonState
 	.onExit(despawnOfType('map'))
 pausedState
 	.onEnter(musicManager.pause)
-
 	.onExit(() => time.reset(), musicManager.play)
 
 const animate = () => {

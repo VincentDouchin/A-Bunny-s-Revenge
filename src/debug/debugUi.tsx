@@ -157,9 +157,9 @@ export const DebugUi = () => {
 	const [currentTime, setCurrentTime] = createSignal(dayTime.current)
 
 	return (
-		<div style={{ position: 'absolute', color: 'white' }}>
+		<div style={{ 'position': 'absolute', 'color': 'white', 'z-index': 1000 }}>
 			<Show when={showUi()}>
-				<div style={{ 'background': 'darkgray', 'display': 'grid', 'grid-template-columns': 'auto auto', 'color': 'black', 'font-size': '2rem', 'padding': '1rem', 'margin': '1rem', 'gap': '0.5rem' }}>
+				<div style={{ 'background': 'darkgray', 'display': 'grid', 'grid-template-columns': 'auto auto', 'color': 'black', 'font-size': '20px', 'padding': '1rem', 'margin': '1rem', 'gap': '0.5rem' }}>
 					<div>Perspective</div>
 					<div>
 						<button onClick={changeCameraNormal}>Normal</button>

@@ -25,7 +25,7 @@ export class MusicManager {
 	}
 
 	playAmbience(ambience: music) {
-		if (assets.music[ambience].playing()) return
+		if (assets.music[ambience] === this.ambience) return
 		this.ambience?.fade(0.05, 0, 10)
 		const player = assets.music[ambience]
 		player.play()
