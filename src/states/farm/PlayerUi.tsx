@@ -34,7 +34,7 @@ export const PlayerUi = () => {
 						<Show when={showTouch()}>
 							<TouchControls player={player} />
 						</Show>
-						<Show when={!showTouch()}>
+						<Show when={!isTouch()}>
 							<KeyboardControls player={player} />
 						</Show>
 
