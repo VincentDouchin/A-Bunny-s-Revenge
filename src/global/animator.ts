@@ -1,8 +1,8 @@
-import type { AnimationAction, AnimationClip, Object3D, Object3DEventMap } from 'three'
+import type { AnimationAction, AnimationBlendMode, AnimationClip, Object3D, Object3DEventMap } from 'three'
 import { AnimationMixer, LoopOnce } from 'three'
 import { entries } from '@/utils/mapFunctions'
 
-interface playOptions { timeScale?: number, weight?: number, clamped?: boolean, loopOnce?: boolean }
+interface playOptions { timeScale?: number, weight?: number, clamped?: boolean, loopOnce?: boolean, blending?: AnimationBlendMode }
 export class Animator<K extends string> extends AnimationMixer {
 	current?: K
 	action?: AnimationAction
@@ -67,6 +67,9 @@ export class Animator<K extends string> extends AnimationMixer {
 			if (options.loopOnce === true) {
 				action.setLoop(LoopOnce, 1)
 			}
+			if (options.blending) {
+				action.blendMode = options.blending
+			}
 		}
 
 		action.play()
@@ -97,9 +100,9 @@ export class Animator<K extends string> extends AnimationMixer {
 		return this.play(animation, { ...options, loopOnce: true, clamped: true })
 	}
 
-	playAnimation(animation: K) {
+	playAnimation(animation: K, options?: playOptions) {
 		if (animation !== this.current) {
-			this.play(animation)
+			this.play(animation, options)
 		}
 	}
 }

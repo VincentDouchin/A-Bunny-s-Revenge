@@ -209,7 +209,7 @@ export const assignPlanAndEnemies = (rooms: BlankRoom[]): Room[] => {
 				return p?.data?.direction === dir
 			}))
 		})
-		const enemies = getEnemies(room.type)
+		const enemies = [...getEnemies(room.type)]
 		const doors = {}
 		const plan = getRandom(possibleRooms)
 		if (!plan) throw new Error(`no plan found for connections : ${directions.join(', ')}`)

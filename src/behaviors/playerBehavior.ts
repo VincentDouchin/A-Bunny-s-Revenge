@@ -49,10 +49,10 @@ export const playerBehaviorPlugin = behaviorPlugin(
 				setState('running')
 			}
 			if (!campState.enabled) {
-				if (e.playerControls.get('primary').justPressed) {
+				if (e.playerControls.get('primary').justReleased) {
 					setState('attack')
 				}
-				if (e.playerControls.get('secondary').justPressed && canDash) {
+				if (e.playerControls.get('secondary').justReleased && canDash) {
 					setState('dash')
 				}
 			}
@@ -70,10 +70,10 @@ export const playerBehaviorPlugin = behaviorPlugin(
 				setState('idle')
 			}
 			if (!campState.enabled) {
-				if (e.playerControls.get('primary').justPressed) {
+				if (e.playerControls.get('primary').justReleased) {
 					setState('attack')
 				}
-				if (e.playerControls.get('secondary').justPressed && canDash) {
+				if (e.playerControls.get('secondary').justReleased && canDash) {
 					setState('dash')
 				}
 			}
@@ -143,7 +143,7 @@ export const playerBehaviorPlugin = behaviorPlugin(
 					ecs.remove(touchedByEnemy)
 				}
 				addCameraShake()
-				ecs.update(e, { tween: flash(e) })
+				ecs.update(e, { tween: flash(e, 200, true) })
 				if (e.currentHealth <= 0) setState('dying')
 				await sleep(500)
 				setState('idle')

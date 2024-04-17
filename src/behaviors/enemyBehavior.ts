@@ -118,9 +118,11 @@ const wander: EnemyState = {
 	},
 }
 const waitingAttack = (cooldown: number): EnemyState => ({
-	enter: (e, setState) => {
+	enter: async (e, setState) => {
 		e.enemyAnimator.playAnimation('idle')
-		sleep(cooldown)
+		ecs.update(e, { tween: flash(e, cooldown, false) })
+		await sleep(cooldown)
+
 		return setState('attack')
 	},
 	update: (_e, setState, { touchedByPlayer }) => {
@@ -142,7 +144,7 @@ const hit: EnemyState = {
 			// ! damage flash
 			addTweenTo(e)(
 				new Tween(e.group.scale).to(new Vector3(0.8, 1.2, 0.8), 200).repeat(1).yoyo(true),
-				flash(e),
+				flash(e, 200, true),
 			)
 			await e.enemyAnimator.playClamped('hit')
 			if (e.currentHealth <= 0) {
@@ -183,7 +185,7 @@ export const rangeEnemyBehaviorPlugin = behaviorPlugin(
 	idle,
 	wander,
 	running: running(50),
-	waitingAttack: waitingAttack(2000),
+	waitingAttack: waitingAttack(800),
 	attack: {
 		enter: async (e, setState, { force }) => {
 			applyRotate(e, force)
@@ -213,7 +215,7 @@ export const rangeEnemyBehaviorPlugin = behaviorPlugin(
 		},
 		update: (e, setState, { force, touchedByPlayer }) => {
 			if (touchedByPlayer) return setState('hit')
-			applyMove(e, force)
+			applyMove(e, force.multiplyScalar(0.5))
 			applyRotate(e, force)
 		},
 	},
@@ -230,7 +232,7 @@ export const chargingEnemyBehaviorPlugin = behaviorPlugin(
 )({
 	idle,
 	dying,
-	waitingAttack: waitingAttack(1000),
+	waitingAttack: waitingAttack(500),
 	hit,
 	stun,
 	wander,
@@ -288,7 +290,7 @@ export const meleeEnemyBehaviorPlugin = behaviorPlugin(
 )({
 	idle,
 	dying,
-	waitingAttack: waitingAttack(2000),
+	waitingAttack: waitingAttack(200),
 	hit,
 	stun,
 	wander,

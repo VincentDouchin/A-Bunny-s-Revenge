@@ -66,7 +66,7 @@ export const enemyData: { [k in enemy]: Enemy<k> } = {
 	},
 	Armabee_Evolved: {
 		name: 'Armabee Evolved',
-		health: 10,
+		health: 30,
 		scale: 10,
 		speed: 1,
 		boss: true,

@@ -114,7 +114,7 @@ export const beeBossBehaviorPlugin = behaviorPlugin(
 		enter: async (e, setState, { player }) => {
 			await e.enemyAnimator.playOnce('hit')
 			player && takeDamage(e, player.strength.value)
-			ecs.update(e, { tween: flash(e) })
+			ecs.update(e, { tween: flash(e, 200, true) })
 			setState('idle')
 		},
 	},

@@ -10,16 +10,19 @@ import { Faction } from '@/global/entity'
 import type { Entity } from '@/global/entity'
 import { lootPool } from '@/constants/enemies'
 
-export const flash = (entity: With<Entity, 'model'>) => {
-	const tween = new Tween({ color: 0 })
-		.to({ color: 1 }, 200)
+export const flash = (entity: With<Entity, 'model'>, duration: number, damage: boolean) => {
+	const tween = new Tween({ flash: 0 })
+		.to({ flash: 1 }, duration)
 		.yoyo(true)
 		.repeat(1)
 		.onComplete(() => ecs.removeComponent(entity, 'tween'))
-	tween.onUpdate(({ color }) => {
+	tween.onUpdate(({ flash }) => {
 		entity.model.traverse((node) => {
 			if (node instanceof Mesh && node.material instanceof CharacterMaterial) {
-				node.material.uniforms.flash.value = color
+				node.material.uniforms.flash.value = flash
+				if (damage) {
+					node.material.uniforms.flashColor.value = new Vector3(1, 1 - flash, 1 - flash)
+				}
 			}
 		})
 	})

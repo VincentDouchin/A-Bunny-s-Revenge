@@ -1,4 +1,4 @@
-import { Color, MeshPhongMaterial, Vector2 } from 'three'
+import { Color, MeshPhongMaterial, Vector2, Vector3 } from 'three'
 
 import noise from '@/shaders/glsl/lib/cnoise.glsl?raw'
 
@@ -124,12 +124,14 @@ export const grassExtension = new MaterialExtension({ pos: new Vector2(), time: 
 		`),
 	)
 
-const characterExtension = new MaterialExtension({ flash: 0 }).frag(
-	addUniform('flash', 'float'),
-	override('gl_FragColor', `
-	vec4(outgoingLight2 + vec3(flash), opacity);
+const characterExtension = new MaterialExtension({ flash: 0, flashColor: new Vector3(1, 1, 1) })
+	.frag(
+		addUniform('flash', 'float'),
+		addUniform('flashColor', 'vec3'),
+		override('gl_FragColor', `
+	vec4((outgoingLight2.rgb + vec3(flash)/2.) * flashColor , opacity);
 	`),
-)
+	)
 export const waterExtension = new MaterialExtension({
 	size: null,
 	water_color: new Color(0x36C5F4),
