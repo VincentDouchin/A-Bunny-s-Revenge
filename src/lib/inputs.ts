@@ -122,11 +122,13 @@ export class Input {
 			for (const button of this.buttons) {
 				if (gamepad.buttons[button].pressed) {
 					this.pressed = gamepad.buttons[button].value
+					this.#manager.controls = 'gamepad'
 				}
 			}
 			for (const [axis, direction] of this.axes) {
 				const amount = gamepad.axes[axis]
 				if (Math.abs(amount) > 0.1) {
+					this.#manager.controls = 'gamepad'
 					if (Math.sign(amount) === direction) {
 						this.pressed = Math.abs(amount)
 					} else {
