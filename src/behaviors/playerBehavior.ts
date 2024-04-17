@@ -91,7 +91,7 @@ export const playerBehaviorPlugin = behaviorPlugin(
 			}
 			if (e.combo.lastAttack === 2) {
 				playSound(['Slash_Attack_Heavy_1', 'Slash_Attack_Heavy_2', 'Slash_Attack_Heavy_3'])
-				await e.playerAnimator.playClamped('heavyAttack', { timeScale: e.attackSpeed.value * ANIMATION_SPEED })
+				await e.playerAnimator.playClamped('heavyAttack', { timeScale: 0.8 * e.attackSpeed.value * ANIMATION_SPEED })
 			}
 			e.combo.lastAttack = 0
 			setupState('idle')

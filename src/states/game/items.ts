@@ -4,13 +4,13 @@ import { Easing, Tween } from '@tweenjs/tween.js'
 import { AdditiveBlending, Mesh, MeshBasicMaterial, SphereGeometry, Vector3 } from 'three'
 import type { Entity } from '@/global/entity'
 import { assets, ecs } from '@/global/init'
+import { addItem } from '@/global/save'
 import { playSound } from '@/global/sounds'
 import { inMap } from '@/lib/hierarchy'
 import { modelColliderBundle } from '@/lib/models'
 import { addTweenTo } from '@/lib/updateTween'
-import { addItem } from '@/global/save'
 
-export const itemsQuery = ecs.with('item', 'position', 'model', 'collider', 'itemLabel')
+export const itemsQuery = ecs.with('item', 'position', 'model', 'itemLabel')
 
 export const itemBundle = (item: items) => {
 	const model = assets.items[item].model.clone()
@@ -76,20 +76,21 @@ const playerQuery = ecs.with('player', 'position', 'inventory', 'inventoryId', '
 export const collectItems = () => {
 	for (const player of playerQuery) {
 		for (const item of itemsQuery) {
-			if (item.position.clone().setY(0).distanceTo(player.position.clone().setY(0)) < 3) {
+			if (item.position.clone().setY(0).distanceTo(player.position.clone().setY(0)) < 10) {
 				ecs.removeComponent(item, 'tween')
-				ecs.removeComponent(item, 'collider')
+				ecs.removeComponent(item, 'body')
+				itemsQuery.remove(item)
 				addItem(player, { name: item.itemLabel, quantity: 1 })
 				playSound('zapsplat_multimedia_alert_action_collect_pick_up_point_or_item_79293')
 				ecs.add({
 					parent: item,
-					tween: new Tween(item.position).to({ ...player.position, y: item.position.y }, 500).onComplete(() => {
-						ecs.remove(item)
-					}).easing(Easing.Cubic.Out),
+					tween: new Tween([0]).to([1], 1000).onUpdate(([i]) => {
+						item.position.lerp({ ...player.position, y: 4 }, i)
+					}).onComplete(() => ecs.remove(item)).easing(Easing.Bounce.Out),
 				})
 				ecs.add({
 					parent: item,
-					tween: new Tween(item.model.scale).to(new Vector3(), 500).easing(Easing.Cubic.Out),
+					tween: new Tween(item.model.scale).to(new Vector3(), 1000).easing(Easing.Bounce.Out),
 				})
 			}
 		}
