@@ -1,6 +1,6 @@
 import type { characters, fruit_trees, icons, items, mainMenuAssets, models, particles, textures, trees, vegetation, weapons } from '@assets/assets'
-import type { ColorRepresentation, Material, Side } from 'three'
 import { Mesh, MeshBasicMaterial, MeshPhysicalMaterial, MeshStandardMaterial, NearestFilter, RepeatWrapping, SRGBColorSpace, Texture } from 'three'
+import type { ColorRepresentation, Material, Side } from 'three'
 
 import assetManifest from '@assets/assetManifest.json'
 import { Howl } from 'howler'
@@ -177,7 +177,7 @@ export const loadAssets = async () => {
 
 		models: typeGlob<models>(import.meta.glob('@assets/models/*.glb', { as: 'url', eager: true }))(loadGLBAsToon(loader, { shadow: true })),
 
-		trees: typeGlob<trees>(import.meta.glob('@assets/trees/*.glb', { as: 'url', eager: true }))(loadGLBAsToon(loader, { material: TreeMaterial, shadow: true })),
+		trees: typeGlob<trees>(import.meta.glob('@assets/trees/*.glb', { as: 'url', eager: true }))(loadGLBAsToon(loader, { material: TreeMaterial, shadow: true, transparent: true })),
 
 		crops: cropsLoader<crops>(loader)(import.meta.glob('@assets/crops/*.glb', { as: 'url', eager: true })),
 
