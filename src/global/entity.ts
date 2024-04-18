@@ -1,6 +1,5 @@
 import type { items, weapons } from '@assets/assets'
 import type { Collider, ColliderDesc, KinematicCharacterController, RigidBody, RigidBodyDesc } from '@dimforge/rapier3d-compat'
-import type { Tween } from '@tweenjs/tween.js'
 import type { With } from 'miniplex'
 import type { JSXElement } from 'solid-js'
 import type { BufferGeometry, Camera, Group, Light, Mesh, MeshPhongMaterial, Object3D, Object3DEventMap, Quaternion, Scene, ShaderMaterial, Sprite, Vector3, WebGLRenderer } from 'three'
@@ -16,10 +15,10 @@ import type { MenuInputMap, PlayerInputMap } from '@/global/inputMaps'
 import type { direction } from '@/lib/directions'
 import type { State } from '@/lib/state'
 import type { Modifier, Stat } from '@/lib/stats'
-import type { Room } from '@/states/dungeon/generateDungeon'
-import type { MenuOptions, RenderMainMenuFn } from '@/states/mainMenu/mainMenuRendering'
-import type { Dash } from '@/states/game/dash'
 import type { Timer } from '@/lib/timer'
+import type { Room } from '@/states/dungeon/generateDungeon'
+import type { Dash } from '@/states/game/dash'
+import type { MenuOptions, RenderMainMenuFn } from '@/states/mainMenu/mainMenuRendering'
 
 export type PlayerAnimations = 'idle' | 'running' | 'lightAttack' | 'slashAttack' | 'heavyAttack'
 export type EnemyAnimations = 'idle' | 'running' | 'attacking' | 'hit' | 'dead'
@@ -74,8 +73,6 @@ export type fruits = (typeof fruitNames)[number]
 export interface Entity {
 	// ! Rendering
 	renderGroup?: RenderGroup
-	// ! Tween
-	tween?: Tween<any>
 	// ! Models
 	scale?: number
 	// ! Transforms

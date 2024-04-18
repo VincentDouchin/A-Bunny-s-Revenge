@@ -10,9 +10,8 @@ import { behaviorPlugin } from '../lib/behaviors'
 import { applyMove, applyRotate, getMovementForce } from './behaviorHelpers'
 import type { Entity } from '@/global/entity'
 import { EnemyAttackStyle, Faction } from '@/global/entity'
-import { ecs, time, world } from '@/global/init'
+import { ecs, gameTweens, time, world } from '@/global/init'
 import { playSound } from '@/global/sounds'
-import { addTweenTo } from '@/lib/updateTween'
 import { spawnDamageNumber } from '@/particles/damageNumber'
 import { dash } from '@/particles/dashParticles'
 import { impact } from '@/particles/impact'
@@ -120,7 +119,7 @@ const wander: EnemyState = {
 const waitingAttack = (cooldown: number): EnemyState => ({
 	enter: async (e, setState) => {
 		e.enemyAnimator.playAnimation('idle')
-		ecs.update(e, { tween: flash(e, cooldown, false) })
+		flash(e, cooldown, false)
 		await sleep(cooldown)
 
 		return setState('attack')
@@ -142,10 +141,8 @@ const hit: EnemyState = {
 			const force = player.position.clone().sub(e.position).normalize().multiplyScalar(-50000)
 			e.body.applyImpulse(force, true)
 			// ! damage flash
-			addTweenTo(e)(
-				new Tween(e.group.scale).to(new Vector3(0.8, 1.2, 0.8), 200).repeat(1).yoyo(true),
-				flash(e, 200, true),
-			)
+			gameTweens.add(new Tween(e.group.scale).to(new Vector3(0.8, 1.2, 0.8), 200).repeat(1).yoyo(true))
+			flash(e, 200, true)
 			await e.enemyAnimator.playClamped('hit')
 			if (e.currentHealth <= 0) {
 				return setState('dying')

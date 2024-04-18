@@ -7,7 +7,7 @@ import { playerBundle } from '../game/spawnPlayer'
 import { updateCameraZoom } from '@/global/camera'
 import { params } from '@/global/context'
 import { RenderGroup } from '@/global/entity'
-import { assets, coroutines, ecs } from '@/global/init'
+import { assets, coroutines, ecs, gameTweens } from '@/global/init'
 import { menuInputMap } from '@/global/inputMaps'
 import { getTargetSize, renderer, updateRenderSize } from '@/global/rendering'
 import { cutSceneState, mainMenuState } from '@/global/states'
@@ -216,51 +216,40 @@ export const continueGame = (entities = menuTextureQuery.entities) => {
 		const house = houseQuery.first
 		if (gameCam && house) {
 			const initCameX = gameCam.cameraLookat.x
-			ecs.add({
-				tween: new Tween([0]).to([1], 4000)
-					.easing(Easing.Quadratic.InOut)
-					.onUpdate(([f]) => {
-						const mainMenuCam = mainMenuCameraQuery.first
+			gameTweens.add(new Tween([0]).to([1], 4000)
+				.easing(Easing.Quadratic.InOut)
+				.onUpdate(([f]) => {
+					const mainMenuCam = mainMenuCameraQuery.first
 
-						if (mainMenuCam && mainMenuCam.camera instanceof PerspectiveCamera) {
-							mainMenuCam.position.x = -1.5 * f
-							mainMenuCam.camera.zoom = 10 * f + 1
-							mainMenuCam.camera.updateProjectionMatrix()
-							mainMenu.windowShader.uniforms.parchmentMix.value = 0.3 * f + 0.7
-							mainMenu.windowShader.uniforms.windowSize.value = f * 0.5
-							const newSize = finalResolution.clone().add(new Vector2(window.innerWidth, window.innerHeight).sub(finalResolution).multiplyScalar(1 - f))
-							updateRenderSize(newSize)
-							mainMenu.windowShader.uniforms.resolution.value = newSize
-							mainMenu.windowShader.uniforms.kSize.value = 1 + 4 * (1 - f)
-							updateCameraZoom(params.zoom + ZOOM_OUT * (1 - f))
-						}
+					if (mainMenuCam && mainMenuCam.camera instanceof PerspectiveCamera) {
+						mainMenuCam.position.x = -1.5 * f
+						mainMenuCam.camera.zoom = 10 * f + 1
+						mainMenuCam.camera.updateProjectionMatrix()
+						mainMenu.windowShader.uniforms.parchmentMix.value = 0.3 * f + 0.7
+						mainMenu.windowShader.uniforms.windowSize.value = f * 0.5
+						const newSize = finalResolution.clone().add(new Vector2(window.innerWidth, window.innerHeight).sub(finalResolution).multiplyScalar(1 - f))
+						updateRenderSize(newSize)
+						mainMenu.windowShader.uniforms.resolution.value = newSize
+						mainMenu.windowShader.uniforms.kSize.value = 1 + 4 * (1 - f)
+						updateCameraZoom(params.zoom + ZOOM_OUT * (1 - f))
+					}
 
-						gameCam.cameraLookat.x = initCameX - (initCameX - house.worldPosition.x) * f
-						gameCam.cameraLookat.z = 20 - (20 - house.worldPosition.z) * f
-						gameCam.cameraLookat.y = 20 - (20 - house.worldPosition.y) * f
-					})
-					.onComplete(() => {
-						mainMenuState.disable()
-					}),
-				autoDestroy: true,
-			})
+					gameCam.cameraLookat.x = initCameX - (initCameX - house.worldPosition.x) * f
+					gameCam.cameraLookat.z = 20 - (20 - house.worldPosition.z) * f
+					gameCam.cameraLookat.y = 20 - (20 - house.worldPosition.y) * f
+				})
+				.onComplete(() => {
+					mainMenuState.disable()
+				}))
 		}
 	}
 }
 const selectOption = (fn: (offset: number) => void) => new Promise<void>((resolve) => {
 	playSound('020_Confirm_10')
-	ecs.add({
-		tween: new Tween({ f: 0 }).to({ f: 20 }, 200)
-			.onUpdate(({ f }) => fn(f))
-			.easing(Easing.Quadratic.Out)
-			.chain(
-				new Tween(({ f: 20 }))
-					.to(({ f: 0 }), 200)
-					.onUpdate(({ f }) => fn(f))
-					.easing(Easing.Quadratic.In)
-				,
-			),
-	})
+	gameTweens.add(new Tween({ f: 0 }).to({ f: 20 }, 200)
+		.onUpdate(({ f }) => fn(f))
+		.easing(Easing.Quadratic.Out)
+		.chain(new Tween(({ f: 20 })).to(({ f: 0 }), 200).onUpdate(({ f }) => fn(f)).easing(Easing.Quadratic.In)))
 	setTimeout(resolve, 300)
 })
 export const selectMainMenu = () => {

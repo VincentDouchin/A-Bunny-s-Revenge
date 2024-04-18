@@ -14,7 +14,7 @@ import { ForQuery } from '@/ui/components/ForQuery'
 import { smoke } from '@/particles/smoke'
 import { addTag } from '@/lib/hierarchy'
 import { cameraQuery } from '@/global/rendering'
-import { ecs, inputManager, time, ui } from '@/global/init'
+import { ecs, gameTweens, inputManager, time, ui } from '@/global/init'
 import { MenuType } from '@/global/entity'
 import type { Entity } from '@/global/entity'
 import { getWorldPosition } from '@/lib/transforms'
@@ -35,12 +35,9 @@ export const OvenMinigameUi = ({ player }: FarmUiProps) => {
 				let targetEntity: Entity | null = null
 				let lightEntity: With<Entity, 'light' | 'emitter'> | null = null
 				onMount(() => {
-					ecs.add({
-						tween: new Tween([params.zoom]).to([15], 1000).onUpdate(([zoom]) => {
-							updateCameraZoom(zoom)
-						}),
-						autoDestroy: true,
-					})
+					gameTweens.add(new Tween([params.zoom]).to([15], 1000).onUpdate(([zoom]) => {
+						updateCameraZoom(zoom)
+					}))
 					for (const camera of cameraQuery) {
 						// ecs.removeComponent(camera, 'lockX')
 						ecs.addComponent(camera, 'cameraOffset', new Vector3(0, 30, 80).applyQuaternion(oven.rotation!))
@@ -67,12 +64,9 @@ export const OvenMinigameUi = ({ player }: FarmUiProps) => {
 					lightEntity = ecs.add({ light, parent: oven, position: new Vector3(0, 0, 0), emitter: fireParticles() })
 				})
 				onCleanup(() => {
-					ecs.add({
-						tween: new Tween([15]).to([params.zoom], 1000).onUpdate(([zoom]) => {
-							updateCameraZoom(zoom)
-						}),
-						autoDestroy: true,
-					})
+					gameTweens.add(new Tween([15]).to([params.zoom], 1000).onUpdate(([zoom]) => {
+						updateCameraZoom(zoom)
+					}))
 					targetEntity && ecs.remove(targetEntity)
 					addTag(player, 'cameratarget')
 					for (const camera of cameraQuery) {
@@ -82,15 +76,13 @@ export const OvenMinigameUi = ({ player }: FarmUiProps) => {
 					for (const smokeTrail of smokeTrails) {
 						smokeTrail.emitter.system.looping = false
 					}
-					lightEntity && ecs.update(lightEntity, {
-						tween: new Tween([1]).to([0], 4000).onUpdate(([f]) => {
-							if (lightEntity) {
-								lightEntity.light.intensity = f * 10
-								// @ts-expect-error wrong type
-								lightEntity.emitter.system.emissionOverTime = new ConstantValue(f * 2 / 30)
-							}
-						}),
-					})
+					gameTweens.add(new Tween([1]).to([0], 4000).onUpdate(([f]) => {
+						if (lightEntity) {
+							lightEntity.light.intensity = f * 10
+							// @ts-expect-error wrong type
+							lightEntity.emitter.system.emissionOverTime = new ConstantValue(f * 2 / 30)
+						}
+					}))
 				})
 				const [bar, setBar] = createSignal(50)
 				const height = 30

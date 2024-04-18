@@ -9,7 +9,7 @@ import { itemBundle } from '../game/items'
 import { ItemDisplay } from './InventoryUi'
 import type { Entity } from '@/global/entity'
 import { MenuType } from '@/global/entity'
-import { ecs, inputManager, time, ui } from '@/global/init'
+import { ecs, gameTweens, inputManager, time, ui } from '@/global/init'
 import { cameraQuery } from '@/global/rendering'
 import { playSound } from '@/global/sounds'
 import { addTag } from '@/lib/hierarchy'
@@ -28,24 +28,18 @@ export const CauldronMinigameUi = ({ player }: FarmUiProps) => {
 			{(cauldron) => {
 				let lightEntity: Entity | null = null
 				onMount(() => {
-					ecs.add({
-						tween: new Tween([params.zoom]).to([15], 1000).onUpdate(([zoom]) => {
-							updateCameraZoom(zoom)
-						}),
-						autoDestroy: true,
-					})
+					gameTweens.add(new Tween([params.zoom]).to([15], 1000).onUpdate(([zoom]) => {
+						updateCameraZoom(zoom)
+					}))
 					const light = new PointLight(new Color(0xFF0000), 10, 10)
 					light.position.setY(5)
 					lightEntity = ecs.add({ light, parent: cauldron(), position: new Vector3(0, 0, 0), emitter: fireParticles() })
 				})
 				onCleanup(() => {
 					lightEntity && ecs.remove(lightEntity)
-					ecs.add({
-						tween: new Tween([15]).to([params.zoom], 1000).onUpdate(([zoom]) => {
-							updateCameraZoom(zoom)
-						}),
-						autoDestroy: true,
-					})
+					gameTweens.add(new Tween([15]).to([params.zoom], 1000).onUpdate(([zoom]) => {
+						updateCameraZoom(zoom)
+					}))
 				})
 				const output = ui.sync(() => cauldron().recipesQueued[0]?.output)
 				let targetEntity: Entity | null = null

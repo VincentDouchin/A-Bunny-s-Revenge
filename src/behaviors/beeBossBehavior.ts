@@ -1,8 +1,10 @@
+import { Tween } from '@tweenjs/tween.js'
+import { Vector3 } from 'three'
 import { applyMove, applyRotate, getMovementForce, takeDamage } from './behaviorHelpers'
 import { playerQuery } from './enemyBehavior'
 import { playSound } from '@/global/sounds'
 import { EnemyAttackStyle } from '@/global/entity'
-import { ecs, world } from '@/global/init'
+import { ecs, gameTweens, world } from '@/global/init'
 import { behaviorPlugin } from '@/lib/behaviors'
 import { honeyProjectile, pollenAttack, projectilesCircleAttack } from '@/states/dungeon/attacks'
 import { calculateDamage, flash } from '@/states/dungeon/battle'
@@ -74,7 +76,7 @@ export const beeBossBehaviorPlugin = behaviorPlugin(
 	},
 	rangeAttack: {
 		enter: async (e, setState) => {
-			ecs.update(e, { tween: flash(e, 1000, false) })
+			flash(e, 1000, false)
 			await sleep(1000)
 			const rangeAttack = getRandom(rangedAttacks())
 			rangeAttack(e)
@@ -93,7 +95,7 @@ export const beeBossBehaviorPlugin = behaviorPlugin(
 	waitingAttack: {
 		enter: async (e, setState) => {
 			e.enemyAnimator.playAnimation('idle')
-			ecs.update(e, { tween: flash(e, 200, false) })
+			flash(e, 200, false)
 			await sleep(200)
 			setState('attack')
 		},
@@ -125,7 +127,8 @@ export const beeBossBehaviorPlugin = behaviorPlugin(
 				takeDamage(e, damage)
 				spawnDamageNumber(damage, e, crit)
 			}
-			ecs.update(e, { tween: flash(e, 200, true) })
+			gameTweens.add(new Tween(e.group.scale).to(new Vector3(0.8, 1.2, 0.8), 200).repeat(1).yoyo(true))
+			flash(e, 200, true)
 			await e.enemyAnimator.playOnce('hit')
 			if (e.currentHealth <= 0) {
 				return setState('dying')

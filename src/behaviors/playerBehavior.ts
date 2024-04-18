@@ -143,7 +143,7 @@ export const playerBehaviorPlugin = behaviorPlugin(
 					ecs.remove(touchedByEnemy)
 				}
 				addCameraShake()
-				ecs.update(e, { tween: flash(e, 200, true) })
+				flash(e, 200, true)
 				if (e.currentHealth <= 0) setState('dying')
 				await sleep(500)
 				setState('idle')

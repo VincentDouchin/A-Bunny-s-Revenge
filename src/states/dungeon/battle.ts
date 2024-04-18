@@ -5,7 +5,7 @@ import { Mesh, Vector3 } from 'three'
 import { itemBundle } from '../game/items'
 import { spawnAcorns } from './acorn'
 import { CharacterMaterial } from '@/shaders/materials'
-import { ecs, time } from '@/global/init'
+import { ecs, gameTweens, time } from '@/global/init'
 import { Faction } from '@/global/entity'
 import type { Entity } from '@/global/entity'
 import { lootPool } from '@/constants/enemies'
@@ -15,7 +15,6 @@ export const flash = (entity: With<Entity, 'model'>, duration: number, damage: b
 		.to({ flash: 1 }, duration)
 		.yoyo(true)
 		.repeat(1)
-		.onComplete(() => ecs.removeComponent(entity, 'tween'))
 	tween.onUpdate(({ flash }) => {
 		entity.model.traverse((node) => {
 			if (node instanceof Mesh && node.material instanceof CharacterMaterial) {
@@ -26,6 +25,7 @@ export const flash = (entity: With<Entity, 'model'>, duration: number, damage: b
 			}
 		})
 	})
+	gameTweens.add(tween)
 	return tween
 }
 

@@ -6,7 +6,7 @@ import { itemBundle } from '../game/items'
 import { itemsData } from '@/constants/items'
 import { Sizes } from '@/constants/sizes'
 import { type Entity, Interactable, MenuType, type crops } from '@/global/entity'
-import { assets, ecs } from '@/global/init'
+import { assets, ecs, gameTweens } from '@/global/init'
 import { removeItem, save, updateSave } from '@/global/save'
 import { playSound } from '@/global/sounds'
 import { removeEntityRef } from '@/lib/hierarchy'
@@ -48,7 +48,7 @@ export const cropBundle = (grow: boolean, crop: { name: crops, stage: number }) 
 		const tween = new Tween({ scale: 0 }).to({ scale: 10 }, 1000).easing(Easing.Elastic.Out).onUpdate(({ scale }) => {
 			modelBundle.model.scale.setScalar(scale)
 		})
-		ecs.update(bundle, { tween })
+		gameTweens.add(tween)
 	}
 	if (stage === maxStage(crop.name)) {
 		bundle.interactable = Interactable.Harvest

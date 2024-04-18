@@ -4,7 +4,7 @@ import { playerBehaviorPlugin } from './behaviors/playerBehavior'
 import { debugPlugin } from './debug/debugPlugin'
 import { updateAnimations } from './global/animations'
 import { initCamera, initializeCameraPosition, moveCamera, updateCameraZoom } from './global/camera'
-import { coroutines, inputManager, musicManager, time, ui } from './global/init'
+import { coroutines, gameTweens, inputManager, musicManager, time, ui } from './global/init'
 import { initThree, renderGame, updateRenderSize } from './global/rendering'
 import { initHowler } from './global/sounds'
 import { app, campState, coreState, dungeonState, gameState, genDungeonState, mainMenuState, openMenuState, pausedState, setupState } from './global/states'
@@ -16,7 +16,6 @@ import { addToScene } from './lib/registerComponents'
 import { runIf } from './lib/state'
 import { tickModifiers } from './lib/stats'
 import { transformsPlugin } from './lib/transforms'
-import { tweenPlugin } from './lib/updateTween'
 import { pickupAcorn } from './states/dungeon/acorn'
 import { applyArchingForce, honeySplat, stepInHoney, tickSneeze } from './states/dungeon/attacks'
 import { applyDeathTimer, spawnDrops, tickHitCooldown } from './states/dungeon/battle'
@@ -48,7 +47,7 @@ import { disablePortrait, enableFullscreen, resize, setupGame, stopOnLosingFocus
 import { UI } from './ui/UI'
 
 coreState
-	.addPlugins(hierarchyPlugin, physicsPlugin, transformsPlugin, addToScene('camera', 'light', 'model', 'dialogContainer', 'emitter', 'interactionContainer', 'minigameContainer', 'healthBarContainer', 'dashDisplay', 'stun', 'debuffsContainer'), updateModels, particlesPlugin, tweenPlugin)
+	.addPlugins(hierarchyPlugin, physicsPlugin, transformsPlugin, addToScene('camera', 'light', 'model', 'dialogContainer', 'emitter', 'interactionContainer', 'minigameContainer', 'healthBarContainer', 'dashDisplay', 'stun', 'debuffsContainer'), updateModels, particlesPlugin)
 	.onEnter(initThree, initCamera, moveCamera(true))
 	.onEnter(ui.render(UI), initHowler)
 	.addSubscriber(...target, resize, disablePortrait, enableFullscreen, stopOnLosingFocus)
@@ -66,7 +65,7 @@ gameState
 	.addSubscriber(initializeCameraPosition, bobItems, enableInventoryState, killAnimation, popItems, addHealthBarContainer, ...addOrRemoveWeaponModel, ...doorLocking, addDashDisplay)
 	.onUpdate(
 		runIf(canPlayerMove, movePlayer, updateDashDisplay),
-		runIf(() => !pausedState.enabled, playerSteps, dayNight, updateTimeUniforms, applyDeathTimer),
+		runIf(() => !pausedState.enabled, playerSteps, dayNight, updateTimeUniforms, applyDeathTimer, () => gameTweens.update(time.elapsed)),
 		runIf(() => !openMenuState.enabled, pauseGame, interact),
 	)
 	.addPlugins(playerBehaviorPlugin, rangeEnemyBehaviorPlugin, chargingEnemyBehaviorPlugin, meleeEnemyBehaviorPlugin, beeBossBehaviorPlugin)
@@ -97,10 +96,10 @@ genDungeonState
 	.onExit(despawnOfType('map'))
 
 dungeonState
-	.addSubscriber(spawnDrops, losingBattle, endBattleSpawnChest, removeEnemyFromSpawn, applyArchingForce)
+	.addSubscriber(spawnDrops, losingBattle, removeEnemyFromSpawn, applyArchingForce)
 	.onEnter(spawnDungeon, spawnLevelData, spawnPlayerDungeon, spawnBasket, moveCamera(true), () => updateRenderSize(), () => updateCameraZoom())
 	.onUpdate(runIf(canPlayerMove, allowDoorCollision, collideWithDoor, harvestCrop, killEntities, basketFollowPlayer()))
-	.onUpdate(runIf(() => !pausedState.enabled, tickHitCooldown, tickModifiers('speed')), stepInHoney, tickSneeze)
+	.onUpdate(runIf(() => !pausedState.enabled, tickHitCooldown, tickModifiers('speed')), stepInHoney, tickSneeze, endBattleSpawnChest)
 	.onUpdate(honeySplat)
 	.onExit(despawnOfType('map'))
 pausedState

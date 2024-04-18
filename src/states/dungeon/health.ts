@@ -1,7 +1,7 @@
 import { Tween } from '@tweenjs/tween.js'
 import { Material, Mesh } from 'three'
 import { type Entity, Faction } from '@/global/entity'
-import { ecs } from '@/global/init'
+import { ecs, gameTweens } from '@/global/init'
 import { Stat } from '@/lib/stats'
 import type { ToonMaterial } from '@/shaders/materials'
 
@@ -36,5 +36,5 @@ export const killAnimation = () => deadEntities.onEntityAdded.subscribe((e) => {
 		})
 	}
 	tween.onComplete(() => ecs.remove(e))
-	ecs.add({ tween })
+	gameTweens.add(tween)
 })

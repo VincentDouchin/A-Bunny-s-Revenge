@@ -2,7 +2,7 @@ import { Tween } from '@tweenjs/tween.js'
 import { OrthographicCamera, PerspectiveCamera, Vector3 } from 'three'
 import { params } from './context'
 import { RenderGroup } from './entity'
-import { ecs, levelsData, time } from './init'
+import { ecs, gameTweens, levelsData, time } from './init'
 import { debugState } from '@/debug/debugState'
 
 export const initCamera = () => {
@@ -61,7 +61,7 @@ export const addCameraShake = () => {
 			lastTween.chain(newTween)
 			lastTween = newTween
 		}
-		ecs.add({ tween, autoDestroy: true })
+		gameTweens.add(tween)
 	}
 }
 const OFFSETZ = 30

@@ -3,12 +3,11 @@ import { RigidBodyType } from '@dimforge/rapier3d-compat'
 import { Easing, Tween } from '@tweenjs/tween.js'
 import { AdditiveBlending, Mesh, MeshBasicMaterial, SphereGeometry, Vector3 } from 'three'
 import type { Entity } from '@/global/entity'
-import { assets, ecs } from '@/global/init'
+import { assets, ecs, gameTweens } from '@/global/init'
 import { addItem } from '@/global/save'
 import { playSound } from '@/global/sounds'
 import { inMap } from '@/lib/hierarchy'
 import { modelColliderBundle } from '@/lib/models'
-import { addTweenTo } from '@/lib/updateTween'
 
 export const itemsQuery = ecs.with('item', 'position', 'model', 'itemLabel')
 
@@ -33,15 +32,13 @@ export const itemBundle = (item: items) => {
 	} as const satisfies Entity
 }
 export const bobItems = () => itemsQuery.onEntityAdded.subscribe((entity) => {
-	addTweenTo(entity)(
-		new Tween({ rotation: 0 })
-			.to({ rotation: Math.PI * 2 }, 2000)
-			.repeat(Number.POSITIVE_INFINITY)
-			.onUpdate(({ rotation }) => entity.rotation?.setFromAxisAngle(new Vector3(0, 1, 0), rotation)),
-		new Tween(entity.model.position)
-			.to({ y: 5 }, 2000)
-			.repeat(Number.POSITIVE_INFINITY).yoyo(true).easing(Easing.Quadratic.InOut),
-	)
+	gameTweens.add(new Tween({ rotation: 0 })
+		.to({ rotation: Math.PI * 2 }, 2000)
+		.repeat(Number.POSITIVE_INFINITY)
+		.onUpdate(({ rotation }) => entity.rotation?.setFromAxisAngle(new Vector3(0, 1, 0), rotation)))
+	gameTweens.add(new Tween(entity.model.position)
+		.to({ y: 5 }, 2000)
+		.repeat(Number.POSITIVE_INFINITY).yoyo(true).easing(Easing.Quadratic.InOut))
 })
 
 export const popItems = () => ecs.with('body', 'item', 'collider').onEntityAdded.subscribe((e) => {
@@ -77,25 +74,18 @@ export const collectItems = () => {
 	for (const player of playerQuery) {
 		for (const item of itemsQuery) {
 			if (item.position.clone().setY(0).distanceTo(player.position.clone().setY(0)) < 10) {
-				ecs.removeComponent(item, 'tween')
 				ecs.removeComponent(item, 'body')
 				itemsQuery.remove(item)
 				addItem(player, { name: item.itemLabel, quantity: 1 })
-				ecs.add({
-					parent: item,
-					tween: new Tween([0])
-						.easing(Easing.Bounce.Out)
-						.to([1], 1000).onUpdate(([i]) => {
-							item.position.lerp({ ...player.position, y: 4 }, i)
-						}).onComplete(() => {
-							ecs.remove(item)
-						}),
-				})
+				gameTweens.add(new Tween([0])
+					.easing(Easing.Bounce.Out)
+					.to([1], 1000).onUpdate(([i]) => {
+						item.position.lerp({ ...player.position, y: 4 }, i)
+					}).onComplete(() => {
+						ecs.remove(item)
+					}))
 				setTimeout(() => playSound('zapsplat_multimedia_alert_action_collect_pick_up_point_or_item_79293'), 500)
-				ecs.add({
-					parent: item,
-					tween: new Tween(item.model.scale).to(new Vector3(), 1000).easing(Easing.Bounce.Out),
-				})
+				gameTweens.add(new Tween(item.model.scale).to(new Vector3(), 1000).easing(Easing.Bounce.Out))
 			}
 		}
 	}
