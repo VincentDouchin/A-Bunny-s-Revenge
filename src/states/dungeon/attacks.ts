@@ -1,6 +1,6 @@
 import { ActiveCollisionTypes, ColliderDesc, RigidBodyDesc, RigidBodyType } from '@dimforge/rapier3d-compat'
 import type { With } from 'miniplex'
-import { ConeGeometry, Euler, Mesh, MeshBasicMaterial, MeshToonMaterial, Quaternion, SphereGeometry, Vector3 } from 'three'
+import { ConeGeometry, Mesh, MeshBasicMaterial, MeshToonMaterial, Quaternion, SphereGeometry, Vector3 } from 'three'
 
 import { between } from 'randomish'
 import { type Entity, Faction } from '@/global/entity'
@@ -10,9 +10,9 @@ import { ModStage, ModType, type Stat, createModifier } from '@/lib/stats'
 import { Timer } from '@/lib/timer'
 import { getWorldPosition } from '@/lib/transforms'
 import { honeyDrippingParticles, honeySplatParticlesBundle } from '@/particles/honeySplatParticles'
+import { pollenBundle } from '@/particles/pollenParticles'
 import { projectileTrail } from '@/particles/projectileTrail'
 import { sleep } from '@/utils/sleep'
-import { pollenBundle } from '@/particles/pollenParticles'
 
 const projectileBundle = (rotation: Quaternion, origin: Vector3, strength: Stat) => {
 	const model = new Mesh(new ConeGeometry(1, 4, 7), new MeshToonMaterial({ color: 0x2C1E31 }))
