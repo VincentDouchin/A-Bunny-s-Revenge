@@ -3,9 +3,10 @@ import type { With } from 'miniplex'
 import { between } from 'randomish'
 import { Show, createSignal, onCleanup, onMount } from 'solid-js'
 import { Portal } from 'solid-js/web'
-import { Vector3 } from 'three'
+import { Color, PointLight, Vector3 } from 'three'
 import { ConstantValue } from 'three.quarks'
 import arrowLeft from '@assets/icons/arrow-left-solid.svg?raw'
+import { Tween } from '@tweenjs/tween.js'
 import { itemBundle } from '../game/items'
 import { ItemDisplay } from './InventoryUi'
 import type { FarmUiProps } from '@/ui/types'
@@ -19,6 +20,7 @@ import type { Entity } from '@/global/entity'
 import { getWorldPosition } from '@/lib/transforms'
 import { sleep } from '@/utils/sleep'
 import { playSound } from '@/global/sounds'
+import { fireParticles } from '@/particles/fireParticles'
 
 const ovenQuery = ecs.with('menuType', 'recipesQueued', 'ovenAnimator', 'position').where(({ menuType }) => menuType === MenuType.OvenMinigame)
 
@@ -29,8 +31,10 @@ export const OvenMinigameUi = ({ player }: FarmUiProps) => {
 				const output = ui.sync(() => oven.recipesQueued?.[0]?.output)
 				const smokeTrails: With<Entity, 'emitter'>[] = []
 				let targetEntity: Entity | null = null
+				let lightEntity: With<Entity, 'light' | 'emitter'> | null = null
 				onMount(() => {
 					for (const camera of cameraQuery) {
+						// ecs.removeComponent(camera, 'lockX')
 						ecs.addComponent(camera, 'cameraOffset', new Vector3(0, 30, 80).applyQuaternion(oven.rotation!))
 					}
 					const position = getWorldPosition(oven.group!)
@@ -50,6 +54,9 @@ export const OvenMinigameUi = ({ player }: FarmUiProps) => {
 							smokeTrails.push(smokeTrail)
 						}
 					})
+					const light = new PointLight(new Color(0xFF0000), 10, 20)
+					light.position.setY(5)
+					lightEntity = ecs.add({ light, parent: oven, position: new Vector3(0, 0, 0), emitter: fireParticles() })
 				})
 				onCleanup(() => {
 					targetEntity && ecs.remove(targetEntity)
@@ -61,6 +68,15 @@ export const OvenMinigameUi = ({ player }: FarmUiProps) => {
 					for (const smokeTrail of smokeTrails) {
 						smokeTrail.emitter.system.looping = false
 					}
+					lightEntity && ecs.update(lightEntity, {
+						tween: new Tween([1]).to([0], 4000).onUpdate(([f]) => {
+							if (lightEntity) {
+								lightEntity.light.intensity = f * 10
+								// @ts-expect-error wrong type
+								lightEntity.emitter.system.emissionOverTime = new ConstantValue(f * 2 / 30)
+							}
+						}),
+					})
 				})
 				const [bar, setBar] = createSignal(50)
 				const height = 30

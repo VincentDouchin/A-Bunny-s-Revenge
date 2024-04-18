@@ -30,7 +30,7 @@ export const initCamera = () => {
 	})
 }
 const cameraQuery = ecs.with('camera')
-const gameCameraQuery = ecs.with('camera', 'position', 'mainCamera', 'cameraLookat', 'cameraShake', 'lockX')
+const gameCameraQuery = ecs.with('camera', 'position', 'mainCamera', 'cameraLookat', 'cameraShake')
 const cameraTargetQuery = ecs.with('cameratarget', 'worldPosition')
 const doorsQuery = ecs.with('door', 'position')
 export const updateCameraZoom = (zoom: number = params.zoom) => {

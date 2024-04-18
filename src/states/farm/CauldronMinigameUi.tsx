@@ -3,7 +3,8 @@ import spoonIcon from '@assets/icons/spoon-solid.svg?raw'
 import { between } from 'randomish'
 import { Show, createMemo, createSignal, onCleanup, onMount } from 'solid-js'
 import { Portal } from 'solid-js/web'
-import { Vector3 } from 'three'
+import { Color, PointLight, Vector3 } from 'three'
+import { Tween } from '@tweenjs/tween.js'
 import { itemBundle } from '../game/items'
 import { ItemDisplay } from './InventoryUi'
 import type { Entity } from '@/global/entity'
@@ -15,6 +16,9 @@ import { addTag } from '@/lib/hierarchy'
 import { getWorldPosition } from '@/lib/transforms'
 import { cauldronSparkles } from '@/particles/cauldronSparkles'
 import type { FarmUiProps } from '@/ui/types'
+import { updateCameraZoom } from '@/global/camera'
+import { params } from '@/global/context'
+import { fireParticles } from '@/particles/fireParticles'
 
 const cauldronQuery = ecs.with('menuType', 'interactionContainer', 'group', 'rotation', 'recipesQueued', 'spoon').where(({ menuType }) => menuType === MenuType.CauldronGame)
 export const CauldronMinigameUi = ({ player }: FarmUiProps) => {
@@ -22,6 +26,27 @@ export const CauldronMinigameUi = ({ player }: FarmUiProps) => {
 	return (
 		<Show when={cauldron()}>
 			{(cauldron) => {
+				let lightEntity: Entity | null = null
+				onMount(() => {
+					ecs.add({
+						tween: new Tween([params.zoom]).to([15], 1000).onUpdate(([zoom]) => {
+							updateCameraZoom(zoom)
+						}),
+						autoDestroy: true,
+					})
+					const light = new PointLight(new Color(0xFF0000), 10, 10)
+					light.position.setY(5)
+					lightEntity = ecs.add({ light, parent: cauldron(), position: new Vector3(0, 0, 0), emitter: fireParticles() })
+				})
+				onCleanup(() => {
+					lightEntity && ecs.remove(lightEntity)
+					ecs.add({
+						tween: new Tween([15]).to([params.zoom], 1000).onUpdate(([zoom]) => {
+							updateCameraZoom(zoom)
+						}),
+						autoDestroy: true,
+					})
+				})
 				const output = ui.sync(() => cauldron().recipesQueued[0]?.output)
 				let targetEntity: Entity | null = null
 				const [spot, setSpot] = createSignal(between(0, Math.PI * 2))
