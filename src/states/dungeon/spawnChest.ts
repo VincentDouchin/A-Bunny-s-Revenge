@@ -5,6 +5,7 @@ import { Vector3 } from 'three'
 import { clone } from 'three/examples/jsm/utils/SkeletonUtils'
 import { itemBundle } from '../game/items'
 import { enableBasketUi } from '../game/spawnBasket'
+import { RoomType } from './generateDungeon'
 import type { Drop } from '@/constants/enemies'
 import { lootPool } from '@/constants/enemies'
 import { itemsData } from '@/constants/items'
@@ -67,7 +68,7 @@ const enemiesQuery = ecs.with('faction').where(({ faction }) => faction === Fact
 
 const chestQuery = ecs.with('chestAnimator')
 export const endBattleSpawnChest: System<DungeonRessources> = (ressources) => {
-	if (enemiesQuery.size === 0 && chestQuery.size === 0) {
+	if (enemiesQuery.size === 0 && chestQuery.size === 0 && ![RoomType.Item, RoomType.NPC].includes(ressources.dungeon.type)) {
 		spawnChest(ressources.dungeonLevel)
 		enableBasketUi()
 	}
