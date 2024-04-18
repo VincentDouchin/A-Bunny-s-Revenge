@@ -1,5 +1,5 @@
 import type { characters, fruit_trees, icons, items, mainMenuAssets, models, particles, textures, trees, vegetation, weapons } from '@assets/assets'
-import { DoubleSide, Mesh, MeshBasicMaterial, MeshPhysicalMaterial, MeshStandardMaterial, NearestFilter, RepeatWrapping, SRGBColorSpace, Texture } from 'three'
+import { DoubleSide, FrontSide, Mesh, MeshBasicMaterial, MeshPhysicalMaterial, MeshStandardMaterial, NearestFilter, RepeatWrapping, SRGBColorSpace, Texture } from 'three'
 import type { ColorRepresentation, Material, Side } from 'three'
 
 import assetManifest from '@assets/assetManifest.json'
@@ -47,6 +47,7 @@ const loadGLBAsToon = (
 						color: (options && 'color' in options) ? options.color : node.material.color,
 						map: node.material.map,
 						transparent: options?.transparent ?? node.material.transparent,
+						side: options?.side ?? FrontSide,
 					})
 					if (node.material.map instanceof Texture) {
 						node.material.map.colorSpace = SRGBColorSpace

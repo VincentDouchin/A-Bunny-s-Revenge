@@ -1,5 +1,6 @@
 import type { Query, With } from 'miniplex'
 import { Vector3 } from 'three'
+import type { items } from '@assets/assets'
 import { enumerate, range } from './mapFunctions'
 import { sleep } from './sleep'
 import type { QuestName } from '@/constants/quests'
@@ -140,4 +141,18 @@ export const hasCompletedQuest = (name: QuestName) => {
 
 export const hasQuest = (name: QuestName) => {
 	return name in save.quests && !hasCompletedQuest(name)
+}
+
+export const hasItem = (itemName: items | ((item: Item) => boolean)) => {
+	for (const item of save.inventories.player) {
+		if (typeof itemName === 'string') {
+			if (item.name === itemName) return true
+		} else {
+			if (itemName(item)) return true
+		}
+	}
+	return false
+}
+export const hasEaten = () => {
+	return save.modifiers.length > 0
 }

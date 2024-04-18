@@ -1,7 +1,9 @@
+import { itemsData } from './items'
 import type { Dialog } from '@/global/entity'
 import { cutSceneState } from '@/global/states'
 import { soundDialog } from '@/lib/dialogSound'
-import { addItemToPlayer, addQuest, canCompleteQuest, completeQuest, enterHouse, hasCompletedQuest, hasQuest, leaveHouse, lockPlayer, unlockPlayer } from '@/utils/dialogHelpers'
+import { dialog, t } from '@/translations'
+import { addItemToPlayer, addQuest, canCompleteQuest, completeQuest, enterHouse, hasCompletedQuest, hasEaten, hasItem, hasQuest, leaveHouse, lockPlayer, unlockPlayer } from '@/utils/dialogHelpers'
 
 export const dialogs = {
 
@@ -15,21 +17,29 @@ export const dialogs = {
 	*GrandmasHouse() {
 		while (true) {
 			soundDialog('Hello dear')
-			yield 'Hello dear'
+			yield t(dialog.grandma.hello)
 			soundDialog('How are you doing')
-			yield 'How are you doing?'
-			addItemToPlayer({ name: 'carrot_seeds', quantity: 10 })
+			yield t(dialog.grandma.howareyoudoing)
 			if (hasQuest('grandma_1')) {
 				if (canCompleteQuest('grandma_1')) {
 					yield 'Oh you brought me the roasted carrots I asked for!'
-					yield 'You\'re such a lovely grandson'
+					yield 'You\'re such a lovely granddaughter'
 					completeQuest('grandma_1')
 				} else {
-					yield 'Are you having trouble roasting the carrots?'
+					if (!hasItem(i => Boolean(itemsData[i.name].seed))) {
+						yield 'Oh you don\'t have any seeds!'
+						yield 'Here, let me give you a few'
+						addItemToPlayer({ name: 'carrot_seeds', quantity: 10 })
+					} else {
+						yield 'Are you having trouble roasting the carrots?'
+					}
 				}
 			} else if (!hasCompletedQuest('grandma_1')) {
 				yield 'Could you bring me some roasted carrots?'
 				addQuest('grandma_1')
+			} else if (!hasEaten()) {
+				yield 'Are you hungry? Here, have a cookie'
+				addItemToPlayer({ name: 'cookie', quantity: 1 })
 			} else {
 				soundDialog('Thanks again for these delicious roasted carrots')
 				yield 'Thanks again for these delicious roasted carrots'

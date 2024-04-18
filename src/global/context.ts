@@ -2,7 +2,7 @@ export const context = {
 	save: 'save',
 }
 
-interface Params extends Record<string, number | boolean> {
+interface Params extends Record<string, any> {
 	renderHeight: number
 	cameraOffsetX: number
 	cameraOffsetY: number
@@ -14,6 +14,7 @@ interface Params extends Record<string, number | boolean> {
 	pixelation: boolean
 	skipMainMenu: boolean
 	debugBoss: boolean
+	language: 'en' | 'fr'
 }
 
 export const params: Params = {
@@ -28,4 +29,5 @@ export const params: Params = {
 	dialogSpeed: 1,
 	skipMainMenu: false,
 	debugBoss: false,
+	language: 'en',
 }

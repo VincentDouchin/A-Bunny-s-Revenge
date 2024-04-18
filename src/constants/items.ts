@@ -159,6 +159,12 @@ export const itemsData: Record<items, ItemData> = {
 		},
 	},
 	// ! Meals
+	cookie: {
+		name: 'Cookie',
+		meal: [
+			createModifier('cookie', 'maxHealth', 1, ModStage.Total, ModType.Add, false),
+		],
+	},
 	roasted_carrot: {
 		name: 'Roasted carrot',
 		meal: [

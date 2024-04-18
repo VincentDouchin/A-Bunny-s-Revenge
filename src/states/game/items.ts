@@ -81,13 +81,17 @@ export const collectItems = () => {
 				ecs.removeComponent(item, 'body')
 				itemsQuery.remove(item)
 				addItem(player, { name: item.itemLabel, quantity: 1 })
-				playSound('zapsplat_multimedia_alert_action_collect_pick_up_point_or_item_79293')
 				ecs.add({
 					parent: item,
-					tween: new Tween([0]).to([1], 1000).onUpdate(([i]) => {
-						item.position.lerp({ ...player.position, y: 4 }, i)
-					}).onComplete(() => ecs.remove(item)).easing(Easing.Bounce.Out),
+					tween: new Tween([0])
+						.easing(Easing.Bounce.Out)
+						.to([1], 1000).onUpdate(([i]) => {
+							item.position.lerp({ ...player.position, y: 4 }, i)
+						}).onComplete(() => {
+							ecs.remove(item)
+						}),
 				})
+				setTimeout(() => playSound('zapsplat_multimedia_alert_action_collect_pick_up_point_or_item_79293'), 500)
 				ecs.add({
 					parent: item,
 					tween: new Tween(item.model.scale).to(new Vector3(), 1000).easing(Easing.Bounce.Out),
