@@ -12,7 +12,7 @@ export const honeySplatParticlesBundle = () => {
 	const system = new ParticleSystem({
 		duration: 3,
 		looping: false,
-		prewarm: true,
+		prewarm: false,
 		instancingGeometry: geo,
 		startColor: new ColorRange(colorToVec4(0xE8D282, 0.7), colorToVec4(0xF7F3B7, 0.7)),
 		startLife: new IntervalValue(20, 30),

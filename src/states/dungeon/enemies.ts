@@ -13,6 +13,7 @@ import { inMap } from '@/lib/hierarchy'
 import { modelColliderBundle } from '@/lib/models'
 import type { Subscriber } from '@/lib/state'
 import { Stat } from '@/lib/stats'
+import { Timer } from '@/lib/timer'
 
 export const enemyBundle = (name: enemy, level: number) => {
 	const enemy = enemyData[name]
@@ -34,6 +35,7 @@ export const enemyBundle = (name: enemy, level: number) => {
 		enemyName: name,
 		movementForce: new Vector3(),
 		speed: new Stat(50 * enemy.speed),
+		hitTimer: new Timer(500, false),
 		drops: enemy.drops,
 		sensorDesc: ColliderDesc.cuboid(2, 2, 2).setTranslation(0, 1, bundle.size.z / 2 + 2).setSensor(true).setMass(0).setActiveCollisionTypes(ActiveCollisionTypes.ALL),
 		healthBar: true,

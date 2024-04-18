@@ -1,16 +1,21 @@
 import { applyMove, applyRotate, getMovementForce, takeDamage } from './behaviorHelpers'
 import { playerQuery } from './enemyBehavior'
+import { playSound } from '@/global/sounds'
 import { EnemyAttackStyle } from '@/global/entity'
 import { ecs, world } from '@/global/init'
 import { behaviorPlugin } from '@/lib/behaviors'
 import { honeyProjectile, pollenAttack, projectilesCircleAttack } from '@/states/dungeon/attacks'
-import { flash } from '@/states/dungeon/battle'
+import { calculateDamage, flash } from '@/states/dungeon/battle'
 import { getRandom } from '@/utils/mapFunctions'
 import { sleep } from '@/utils/sleep'
+import { spawnDamageNumber } from '@/particles/damageNumber'
 
-const rangedAttacks = [pollenAttack, honeyProjectile, projectilesCircleAttack]
+const pollenQuery = ecs.with('pollen')
+const rangedAttacks = () => pollenQuery.size > 5
+	? [honeyProjectile, projectilesCircleAttack]
+	: [pollenAttack, honeyProjectile, projectilesCircleAttack]
 const beeBossQuery = ecs
-	.with('boss', 'attackStyle', 'movementForce', 'speed', 'position', 'rotation', 'body', 'enemyAnimator', 'group', 'collider', 'currentHealth', 'maxHealth', 'model', 'strength')
+	.with('boss', 'attackStyle', 'movementForce', 'speed', 'position', 'rotation', 'body', 'enemyAnimator', 'group', 'collider', 'currentHealth', 'maxHealth', 'model', 'strength', 'hitTimer', 'size')
 	.where(e => e.attackStyle === EnemyAttackStyle.BeeBoss)
 export const beeBossBehaviorPlugin = behaviorPlugin(
 	beeBossQuery,
@@ -18,7 +23,7 @@ export const beeBossBehaviorPlugin = behaviorPlugin(
 	(e) => {
 		const player = playerQuery.first
 		const direction = player ? player.position.clone().sub(e.position).normalize() : null
-		const touchedByPlayer = player && player.state === 'attack' && world.intersectionPair(player.sensorCollider, e.collider)
+		const touchedByPlayer = !e.hitTimer.running() && player && player.state === 'attack' && world.intersectionPair(player.sensorCollider, e.collider)
 		return { ...getMovementForce(e), player, direction, touchedByPlayer }
 	},
 )({
@@ -30,7 +35,7 @@ export const beeBossBehaviorPlugin = behaviorPlugin(
 			if (touchedByPlayer) return setState('hit')
 			if (player) {
 				const dist = player.position.distanceTo(e.position)
-				if (dist > 40) {
+				if (dist > 40 || Math.random() > 0.5) {
 					setState('rangeAttack')
 				} else {
 					setState('running')
@@ -69,8 +74,9 @@ export const beeBossBehaviorPlugin = behaviorPlugin(
 	},
 	rangeAttack: {
 		enter: async (e, setState) => {
-			await sleep(2000)
-			const rangeAttack = getRandom(rangedAttacks)
+			ecs.update(e, { tween: flash(e, 1000, false) })
+			await sleep(1000)
+			const rangeAttack = getRandom(rangedAttacks())
 			rangeAttack(e)
 
 			return setState('attackCooldown')
@@ -87,6 +93,7 @@ export const beeBossBehaviorPlugin = behaviorPlugin(
 	waitingAttack: {
 		enter: async (e, setState) => {
 			e.enemyAnimator.playAnimation('idle')
+			ecs.update(e, { tween: flash(e, 200, false) })
 			await sleep(200)
 			setState('attack')
 		},
@@ -112,10 +119,22 @@ export const beeBossBehaviorPlugin = behaviorPlugin(
 	},
 	hit: {
 		enter: async (e, setState, { player }) => {
-			await e.enemyAnimator.playOnce('hit')
-			player && takeDamage(e, player.strength.value)
+			playSound(['Hit_Metal_on_flesh', 'Hit_Metal_on_leather', 'Hit_Wood_on_flesh', 'Hit_Wood_on_leather'])
+			if (player) {
+				const [damage, crit] = calculateDamage(player)
+				takeDamage(e, damage)
+				spawnDamageNumber(damage, e, crit)
+			}
 			ecs.update(e, { tween: flash(e, 200, true) })
-			setState('idle')
+			await e.enemyAnimator.playOnce('hit')
+			if (e.currentHealth <= 0) {
+				return setState('dying')
+			} else {
+				return setState('idle')
+			}
+		},
+		exit: (e) => {
+			e.hitTimer.reset()
 		},
 	},
 	dying: {

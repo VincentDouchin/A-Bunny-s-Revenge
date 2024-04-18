@@ -40,9 +40,10 @@ export const projectileAttack = (rotation: Quaternion) => ({ group, strength }: 
 }
 
 export const projectilesCircleAttack = async ({ group, strength }: With<Entity, 'group' | 'strength'>) => {
+	const initialAngle = Math.random() * Math.PI * 2
 	for (let i = 0; i < 8; i++) {
 		const origin = getWorldPosition(group)
-		const angle = Math.PI * 2 / 8 * i
+		const angle = initialAngle + Math.PI * 2 / 8 * i
 		const rotation = new Quaternion().setFromAxisAngle(new Vector3(0, 1, 0), angle)
 		ecs.add(projectileBundle(rotation, origin, strength))
 		await sleep(100)
@@ -129,7 +130,7 @@ export const tickSneeze = () => {
 			}
 		}
 		if (!closeBy) {
-			entity.sneeze.tick(-time.delta / 2)
+			entity.sneeze.tick(-time.delta / 5)
 		}
 	}
 }

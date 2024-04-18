@@ -22,7 +22,7 @@ import { getWorldPosition } from '@/lib/transforms'
 
 export const playerQuery = ecs.with('position', 'sensorCollider', 'strength', 'body', 'critChance', 'critDamage', 'combo', 'playerAnimator', 'weapon', 'player', 'collider').where(({ faction }) => faction === Faction.Player)
 
-const enemyComponents = ['movementForce', 'body', 'speed', 'enemyAnimator', 'rotation', 'position', 'group', 'strength', 'collider', 'model', 'currentHealth', 'size', 'sensorCollider'] as const satisfies readonly (keyof Entity)[]
+const enemyComponents = ['movementForce', 'body', 'speed', 'enemyAnimator', 'rotation', 'position', 'group', 'strength', 'collider', 'model', 'currentHealth', 'size', 'sensorCollider', 'hitTimer'] as const satisfies readonly (keyof Entity)[]
 
 const enemyQuery = ecs.with(...enemyComponents)
 
@@ -32,7 +32,7 @@ const enemyDecisions = (e: With<Entity, EnemyComponents>) => {
 	const player = playerQuery.first
 	const direction = player ? player.position.clone().sub(e.position).normalize() : null
 	const canSeePlayer = player && player.position.distanceTo(e.position) < 70
-	const touchedByPlayer = player && player.state === 'attack' && world.intersectionPair(player.sensorCollider, e.collider)
+	const touchedByPlayer = !e.hitTimer.running() && player && player.state === 'attack' && world.intersectionPair(player.sensorCollider, e.collider)
 	return { ...getMovementForce(e), player, direction, touchedByPlayer, canSeePlayer }
 }
 
