@@ -109,7 +109,7 @@ const mainMenuTexture = (mat: MeshStandardMaterial) => {
 		return menu[selected]
 	}
 }
-const ZOOM_OUT = -2
+const ZOOM_OUT = -5
 const scene = new Scene()
 export const intiMainMenuRendering = () => {
 	updateCameraZoom(params.zoom + ZOOM_OUT)

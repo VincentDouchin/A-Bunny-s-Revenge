@@ -21,7 +21,7 @@ import { RapierDebugRenderer } from '@/lib/debugRenderer'
 const rendererQuery = ecs.with('renderer', 'scene', 'renderGroup').where(e => e.renderGroup === RenderGroup.Game)
 
 const [localParams, setParams] = useLocalStorage('params', params)
-Object.assign(params, localParams)
+Object.assign(params, { ...localParams, zoom: params.zoom })
 export const getGameRenderGroup = () => {
 	const gameRenderGroup = rendererQuery.first
 	if (gameRenderGroup) {

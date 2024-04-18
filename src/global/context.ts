@@ -23,7 +23,7 @@ export const params: Params = {
 	cameraOffsetX: 0,
 	cameraOffsetY: 75,
 	cameraOffsetZ: -100,
-	zoom: 7,
+	zoom: 9,
 	fov: 50,
 	speedUp: 1,
 	dialogSpeed: 1,

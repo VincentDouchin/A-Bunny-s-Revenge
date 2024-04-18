@@ -4,9 +4,9 @@ import { playerBehaviorPlugin } from './behaviors/playerBehavior'
 import { debugPlugin, debugRendererPlugin } from './debug/debugPlugin'
 import { debugState } from './debug/debugState'
 import { updateAnimations } from './global/animations'
-import { initCamera, initializeCameraPosition, moveCamera, updateCameraZoom } from './global/camera'
+import { initCamera, initializeCameraPosition, moveCamera } from './global/camera'
 import { coroutines, gameTweens, inputManager, musicManager, time, ui } from './global/init'
-import { initThree, renderGame, updateRenderSize } from './global/rendering'
+import { initThree, renderGame } from './global/rendering'
 import { initHowler } from './global/sounds'
 import { app, campState, coreState, dungeonState, gameState, genDungeonState, mainMenuState, openMenuState, pausedState, setupState } from './global/states'
 import { despawnOfType, hierarchyPlugin, removeStateEntity } from './lib/hierarchy'
@@ -99,7 +99,7 @@ genDungeonState
 
 dungeonState
 	.addSubscriber(spawnDrops, losingBattle, removeEnemyFromSpawn, applyArchingForce)
-	.onEnter(spawnDungeon, spawnLevelData, spawnPlayerDungeon, spawnBasket, moveCamera(true), () => updateRenderSize(), () => updateCameraZoom())
+	.onEnter(spawnDungeon, spawnLevelData, spawnPlayerDungeon, spawnBasket, moveCamera(true))
 	.onUpdate(runIf(canPlayerMove, allowDoorCollision, collideWithDoor, harvestCrop, killEntities, basketFollowPlayer()))
 	.onUpdate(runIf(() => !pausedState.enabled, tickHitCooldown, tickModifiers('speed')), stepInHoney, tickSneeze, endBattleSpawnChest)
 	.onUpdate(honeySplat)
