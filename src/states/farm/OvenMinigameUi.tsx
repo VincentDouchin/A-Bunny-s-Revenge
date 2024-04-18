@@ -21,6 +21,8 @@ import { getWorldPosition } from '@/lib/transforms'
 import { sleep } from '@/utils/sleep'
 import { playSound } from '@/global/sounds'
 import { fireParticles } from '@/particles/fireParticles'
+import { params } from '@/global/context'
+import { updateCameraZoom } from '@/global/camera'
 
 const ovenQuery = ecs.with('menuType', 'recipesQueued', 'ovenAnimator', 'position').where(({ menuType }) => menuType === MenuType.OvenMinigame)
 
@@ -33,6 +35,12 @@ export const OvenMinigameUi = ({ player }: FarmUiProps) => {
 				let targetEntity: Entity | null = null
 				let lightEntity: With<Entity, 'light' | 'emitter'> | null = null
 				onMount(() => {
+					ecs.add({
+						tween: new Tween([params.zoom]).to([15], 1000).onUpdate(([zoom]) => {
+							updateCameraZoom(zoom)
+						}),
+						autoDestroy: true,
+					})
 					for (const camera of cameraQuery) {
 						// ecs.removeComponent(camera, 'lockX')
 						ecs.addComponent(camera, 'cameraOffset', new Vector3(0, 30, 80).applyQuaternion(oven.rotation!))
@@ -59,6 +67,12 @@ export const OvenMinigameUi = ({ player }: FarmUiProps) => {
 					lightEntity = ecs.add({ light, parent: oven, position: new Vector3(0, 0, 0), emitter: fireParticles() })
 				})
 				onCleanup(() => {
+					ecs.add({
+						tween: new Tween([15]).to([params.zoom], 1000).onUpdate(([zoom]) => {
+							updateCameraZoom(zoom)
+						}),
+						autoDestroy: true,
+					})
 					targetEntity && ecs.remove(targetEntity)
 					addTag(player, 'cameratarget')
 					for (const camera of cameraQuery) {

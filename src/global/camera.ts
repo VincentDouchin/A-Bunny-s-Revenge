@@ -1,20 +1,19 @@
 import { Tween } from '@tweenjs/tween.js'
-import { OrthographicCamera, PerspectiveCamera, Vector2, Vector3 } from 'three'
+import { OrthographicCamera, PerspectiveCamera, Vector3 } from 'three'
 import { params } from './context'
 import { RenderGroup } from './entity'
-import { ecs, time } from './init'
-import { renderer } from './rendering'
+import { ecs, levelsData, time } from './init'
 import { debugState } from '@/debug/debugState'
 
-const ZOOM_RATIO = window.innerWidth / window.innerHeight
 export const initCamera = () => {
-	const size = new Vector2()
-	renderer.getSize(size)
+	const h = 600
+	const w = h * window.innerWidth / window.innerHeight
+
 	const camera = new OrthographicCamera(
-		-size.x / 2 / params.zoom * ZOOM_RATIO,
-		size.x / 2 / params.zoom * ZOOM_RATIO,
-		size.y / 2 / params.zoom * ZOOM_RATIO,
-		-size.y / 2 / params.zoom * ZOOM_RATIO,
+		-w / 2 / params.zoom,
+		w / 2 / params.zoom,
+		h / 2 / params.zoom,
+		-h / 2 / params.zoom,
 		0.0001,
 		1000,
 	)
@@ -35,13 +34,13 @@ const cameraTargetQuery = ecs.with('cameratarget', 'worldPosition')
 const doorsQuery = ecs.with('door', 'position')
 export const updateCameraZoom = (zoom: number = params.zoom) => {
 	for (const { camera } of cameraQuery) {
-		const size = new Vector2()
-		renderer.getSize(size)
+		const h = 600
+		const w = h * window.innerWidth / window.innerHeight
 		if (camera instanceof OrthographicCamera) {
-			camera.left = -size.x / 2 / zoom * ZOOM_RATIO
-			camera.right = size.x / 2 / zoom * ZOOM_RATIO
-			camera.top = size.y / 2 / zoom * ZOOM_RATIO
-			camera.bottom = -size.y / 2 / zoom * ZOOM_RATIO
+			camera.left = -w / 2 / zoom
+			camera.right = w / 2 / zoom
+			camera.top = h / 2 / zoom
+			camera.bottom = -h / 2 / zoom
 			camera.updateProjectionMatrix()
 		}
 		if (camera instanceof PerspectiveCamera) {
@@ -67,6 +66,8 @@ export const addCameraShake = () => {
 }
 const OFFSETZ = 30
 const OFFSETX = 50
+const MAP_OFFSET = 10
+const levelQuery = ecs.with('map')
 export const moveCamera = (init = false) => () => {
 	for (const { position, camera, cameraLookat, cameraOffset, cameraShake, lockX } of gameCameraQuery) {
 		const target = new Vector3()
@@ -86,7 +87,18 @@ export const moveCamera = (init = false) => () => {
 					target.x = Math.max(target.x, door.position.x + OFFSETX)
 				}
 			}
+			const mapId = levelQuery.first?.map
+			if (mapId) {
+				const levelSize = levelsData.levels.find(level => level.id === mapId)?.size
+				if (levelSize && camera instanceof OrthographicCamera) {
+					target.x = Math.min(target.x, levelSize.x / 2 + camera.left - MAP_OFFSET)
+					target.x = Math.max(target.x, -levelSize.x / 2 + camera.right + MAP_OFFSET)
+					target.z = Math.min(target.z, levelSize.y / 2 + camera.bottom - MAP_OFFSET * 4)
+					target.z = Math.max(target.z, -levelSize.y / 2 + camera.top + MAP_OFFSET * 5)
+				}
+			}
 		}
+
 		if (!debugState.enabled) {
 			const lerpSpeed = time.delta / 1000 * 5
 			if (cameraTargetQuery.size > 0) {
