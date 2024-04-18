@@ -1,6 +1,6 @@
 import { ActiveCollisionTypes, ColliderDesc, RigidBodyDesc, RigidBodyType } from '@dimforge/rapier3d-compat'
 import type { With } from 'miniplex'
-import { ConeGeometry, Mesh, MeshBasicMaterial, MeshToonMaterial, Quaternion, SphereGeometry, Vector3 } from 'three'
+import { ConeGeometry, Euler, Mesh, MeshBasicMaterial, MeshToonMaterial, Quaternion, SphereGeometry, Vector3 } from 'three'
 
 import { between } from 'randomish'
 import { type Entity, Faction } from '@/global/entity'
@@ -30,7 +30,7 @@ const projectileBundle = (rotation: Quaternion, origin: Vector3, strength: Stat)
 		movementForce: new Vector3(0, 0, 1).applyQuaternion(rotation),
 		position: origin.clone().add(new Vector3(0, 5, 10).applyQuaternion(rotation)),
 		bodyDesc: RigidBodyDesc.kinematicVelocityBased().lockRotations().setLinvel(...new Vector3(0, 0, 50).applyQuaternion(rotation).toArray()),
-		colliderDesc: ColliderDesc.cone(2, 1).setActiveCollisionTypes(ActiveCollisionTypes.ALL).setSensor(true),
+		colliderDesc: ColliderDesc.cone(2, 1).setActiveCollisionTypes(ActiveCollisionTypes.ALL).setSensor(true).setRotation(new Quaternion().setFromAxisAngle(new Vector3(1, 0, 0), Math.PI / 2)),
 	} as const satisfies Entity
 }
 

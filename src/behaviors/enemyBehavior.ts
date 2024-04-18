@@ -75,6 +75,7 @@ const running = (range: number): EnemyState => ({
 			if (dist < 70) {
 				e.movementForce.x = direction.x
 				e.movementForce.z = direction.z
+				applyRotate(e, force)
 				if (dist < range) {
 					return setState('waitingAttack')
 				}

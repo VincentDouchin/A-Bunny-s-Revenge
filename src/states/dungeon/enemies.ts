@@ -21,14 +21,14 @@ export const enemyBundle = (name: enemy, level: number) => {
 	model.scene.scale.setScalar(enemy.scale)
 	const bundle = modelColliderBundle(model.scene, RigidBodyType.Dynamic, false, EnemySizes[name] ?? Sizes.character)
 	bundle.bodyDesc.setLinearDamping(20)
-	const boss = enemy.boss ? { boss: true } as const : {}
+
 	bundle.colliderDesc.setMass(100)
-	return {
+	const entity = {
 		...behaviorBundle(enemy.behavior, 'idle'),
 		...bundle,
 		enemyAnimator: new Animator(bundle.model, model.animations, enemy.animationMap),
 		...healthBundle(enemy.health * (level + 1)),
-		...boss,
+
 		strength: new Stat(1 + level),
 		...inMap(),
 		faction: Faction.Enemy,
@@ -37,10 +37,17 @@ export const enemyBundle = (name: enemy, level: number) => {
 		speed: new Stat(50 * enemy.speed),
 		hitTimer: new Timer(500, false),
 		drops: enemy.drops,
-		sensorDesc: ColliderDesc.cuboid(2, 2, 2).setTranslation(0, 1, bundle.size.z / 2 + 2).setSensor(true).setMass(0).setActiveCollisionTypes(ActiveCollisionTypes.ALL),
+		sensorDesc: ColliderDesc.cuboid(3, 2, 2).setTranslation(0, 1, bundle.size.z / 2 + 2).setSensor(true).setMass(0).setActiveCollisionTypes(ActiveCollisionTypes.ALL),
 		healthBar: true,
 		attackStyle: enemy.attackStyle,
 	} as const satisfies Entity
+	if (enemy.boss) {
+		Object.assign(entity, {
+			boss: true,
+			sensorDesc: ColliderDesc.cuboid(5, 2, 5).setTranslation(0, 1, bundle.size.z / 2 + 2).setSensor(true).setMass(0).setActiveCollisionTypes(ActiveCollisionTypes.ALL),
+		} as const satisfies Entity)
+	}
+	return entity
 }
 const enemyQuery = ecs.with('enemyName')
 export const removeEnemyFromSpawn: Subscriber<DungeonRessources> = ({ dungeon }) => enemyQuery.onEntityRemoved.subscribe((entity) => {

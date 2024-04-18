@@ -8,14 +8,15 @@ import { ToonEditor } from './toonEditor'
 import { SoundUi } from './SoundUi'
 import { params } from '@/global/context'
 import { RenderGroup } from '@/global/entity'
-import { dayTime, ecs, ui } from '@/global/init'
-import { cameraQuery, depthQuad, getTargetSize, height, updateRenderSize, width } from '@/global/rendering'
+import { dayTime, ecs, ui, world } from '@/global/init'
+import { cameraQuery, depthQuad, getTargetSize, height, scene, updateRenderSize, width } from '@/global/rendering'
 import { resetSave, updateSave } from '@/global/save'
 import { campState } from '@/global/states'
 import { ModStage, ModType, createModifier } from '@/lib/stats'
 import { weaponBundle } from '@/states/game/weapon'
 import { entries } from '@/utils/mapFunctions'
 import { useLocalStorage } from '@/utils/useLocalStorage'
+import { RapierDebugRenderer } from '@/lib/debugRenderer'
 
 const rendererQuery = ecs.with('renderer', 'scene', 'renderGroup').where(e => e.renderGroup === RenderGroup.Game)
 
@@ -156,6 +157,21 @@ export const DebugUi = () => {
 	const dayToNight = ui.sync(() => dayTime.dayToNight)
 	const [currentTime, setCurrentTime] = createSignal(dayTime.current)
 
+	let debugRenderer: RapierDebugRenderer | null = null
+	const toggleDebugRenderer = (enable: boolean) => {
+		if (enable) {
+			debugRenderer = new RapierDebugRenderer(world)
+			scene.add(debugRenderer.mesh)
+		} else {
+			if (debugRenderer) {
+				debugRenderer.mesh.removeFromParent()
+				debugRenderer = null
+			}
+		}
+	}
+	ui.updateSync(() => {
+		debugRenderer && debugRenderer.update()
+	})
 	return (
 		<div style={{ 'position': 'absolute', 'color': 'white', 'z-index': 1000 }}>
 			<Show when={showUi()}>
@@ -227,6 +243,8 @@ export const DebugUi = () => {
 					<input type="checkbox" checked={params.skipMainMenu} onChange={e => setParams(d => ({ ...d, skipMainMenu: e.target.checked }))}></input>
 					Debug Boss
 					<input type="checkbox" checked={params.debugBoss} onChange={e => setParams(d => ({ ...d, debugBoss: e.target.checked }))}></input>
+					Debug Renderer
+					<input type="checkbox" onChange={e => toggleDebugRenderer(e.target.checked)}></input>
 					Time of day
 					<input
 						type="range"
