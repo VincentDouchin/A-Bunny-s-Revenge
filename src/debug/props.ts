@@ -202,7 +202,7 @@ export const props: PlacableProp<propNames>[] = [
 	},
 	{
 		name: 'Flower/plants',
-		models: ['SM_Env_Flower_01', 'SM_Env_Flower_02', 'SM_Env_Flower_03', 'SM_Env_Flower_05', 'SM_Env_Flower_06', 'SM_Env_Flower_07', 'SM_Env_Flower_08', 'SM_Env_Grass_01', 'SM_Env_Grass_02', 'grass&vines'],
+		models: ['SM_Env_Flower_01', 'SM_Env_Flower_02', 'SM_Env_Flower_03', 'SM_Env_Flower_05', 'SM_Env_Flower_06', 'SM_Env_Flower_07', 'SM_Env_Flower_08', 'SM_Env_Grass_01', 'SM_Env_Grass_02', 'grass&vines', 'SM_Env_Flowers_01', 'SM_Env_Flowers_02', 'SM_Env_Plant_01', 'SM_Env_Plant_02', 'SM_Env_Plant_03'],
 	},
 	{
 		name: 'door',

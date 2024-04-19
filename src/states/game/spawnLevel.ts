@@ -83,7 +83,7 @@ export const spawnTrees = (level: Level, parent: Entity) => {
 }
 export const spawnGrass = (level: Level, parent: Entity) => {
 	const grass = Object.entries(assets.vegetation).filter(([name]) => name.includes('Grass')).map(x => instanceMesh(x[1].scene, true))
-	const flowers = Object.entries(assets.vegetation).filter(([name]) => name.includes('Flower')).map(x => instanceMesh(x[1].scene, true))
+	const flowers = Object.entries(assets.vegetation).filter(([name]) => name.includes('Flower_')).map(x => instanceMesh(x[1].scene, true))
 	const createNoise = (seed: number) => {
 		const noise = new FastNoiseLite(seed)
 		noise.SetNoiseType(FastNoiseLite.NoiseType.OpenSimplex2)
