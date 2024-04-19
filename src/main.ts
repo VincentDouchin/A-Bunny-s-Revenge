@@ -1,8 +1,7 @@
 import { beeBossBehaviorPlugin } from './behaviors/beeBossBehavior'
 import { chargingEnemyBehaviorPlugin, meleeEnemyBehaviorPlugin, rangeEnemyBehaviorPlugin } from './behaviors/enemyBehavior'
 import { playerBehaviorPlugin } from './behaviors/playerBehavior'
-import { debugPlugin, debugRendererPlugin } from './debug/debugPlugin'
-import { debugState } from './debug/debugState'
+import { debugPlugin } from './debug/debugPlugin'
 import { updateAnimations } from './global/animations'
 import { initCamera, initializeCameraPosition, moveCamera } from './global/camera'
 import { coroutines, gameTweens, inputManager, musicManager, time, ui } from './global/init'
@@ -56,7 +55,6 @@ coreState
 	.onUpdate(runIf(() => !pausedState.enabled, updateAnimations('enemyAnimator', 'playerAnimator', 'chestAnimator', 'houseAnimator', 'ovenAnimator'), () => time.tick()))
 	.onUpdate(inputManager.update, ui.update, moveCamera())
 	.enable()
-debugState.addPlugins(debugRendererPlugin)
 setupState
 	.onEnter(setupGame)
 	.enable()
