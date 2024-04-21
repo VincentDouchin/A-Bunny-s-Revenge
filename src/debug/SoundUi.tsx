@@ -39,7 +39,7 @@ export const SoundUi = () => {
 		setLocalSoundData(() => soundsData)
 		setReactiveSoundData(localSoundData)
 	}
-	const soundAssets = ['music', 'soundEffects'] as const satisfies soundAssets[]
+	const soundAssets = ['music', 'soundEffects'] as const satisfies readonly soundAssets[]
 	return (
 		<>
 			<style jsx>

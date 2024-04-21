@@ -1,4 +1,4 @@
-import { DoubleSide, ShaderChunk, ShaderLib, ShaderMaterial } from 'three'
+import { DoubleSide, ShaderMaterial } from 'three'
 
 export const WeaponArcMaterial = new ShaderMaterial({
 	side: DoubleSide,

@@ -1,22 +1,21 @@
 import type { With } from 'miniplex'
 import { Vector3 } from 'three'
-import { flash } from '../states/dungeon/battle'
 import { behaviorPlugin } from '../lib/behaviors'
+import { flash } from '../states/dungeon/battle'
 import { applyMove, applyRotate, getMovementForce, takeDamage } from './behaviorHelpers'
+import { debugOptions } from '@/debug/debugState'
 import { addCameraShake } from '@/global/camera'
 import type { Entity } from '@/global/entity'
 import { EnemyAttackStyle, Faction } from '@/global/entity'
 import { ecs, world } from '@/global/init'
 import { playSound } from '@/global/sounds'
-import { dash } from '@/particles/dashParticles'
-import { sleep } from '@/utils/sleep'
 import { campState } from '@/global/states'
+import { dash } from '@/particles/dashParticles'
 import { stunBundle } from '@/states/dungeon/stun'
-import { params } from '@/global/context'
-import { debugOptions } from '@/debug/debugState'
+import { sleep } from '@/utils/sleep'
 
 const ANIMATION_SPEED = 1.4
-const playerComponents = ['playerAnimator', 'movementForce', 'speed', 'body', 'rotation', 'playerControls', 'combo', 'attackSpeed', 'dash', 'collider', 'currentHealth', 'model', 'hitTimer', 'size', 'sneeze'] as const satisfies readonly (keyof Entity)[]
+const playerComponents = ['playerAnimator', 'movementForce', 'speed', 'body', 'rotation', 'playerControls', 'combo', 'attackSpeed', 'dash', 'collider', 'currentHealth', 'model', 'hitTimer', 'size', 'sneeze', 'targetRotation'] as const satisfies readonly (keyof Entity)[]
 type PlayerComponents = (typeof playerComponents)[number]
 const playerQuery = ecs.with(...playerComponents)
 const enemyQuery = ecs.with('faction', 'state', 'strength', 'collider').where(e => e.faction === Faction.Enemy && e.state === 'attack')
