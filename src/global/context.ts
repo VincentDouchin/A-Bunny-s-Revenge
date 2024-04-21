@@ -14,6 +14,7 @@ interface Params extends Record<string, any> {
 	pixelation: boolean
 	skipMainMenu: boolean
 	debugBoss: boolean
+	debugEnemies: boolean
 	language: 'en' | 'fr'
 }
 
@@ -29,5 +30,6 @@ export const params: Params = {
 	dialogSpeed: 1,
 	skipMainMenu: false,
 	debugBoss: false,
+	debugEnemies: false,
 	language: 'en',
 }

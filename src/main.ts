@@ -17,11 +17,11 @@ import { runIf } from './lib/state'
 import { tickModifiers } from './lib/stats'
 import { transformsPlugin } from './lib/transforms'
 import { pickupAcorn } from './states/dungeon/acorn'
-import { applyArchingForce, honeySplat, stepInHoney, tickSneeze } from './states/dungeon/attacks'
+import { applyArchingForce, detroyProjectiles, honeySplat, stepInHoney, tickSneeze } from './states/dungeon/attacks'
 import { applyDeathTimer, spawnDrops, tickHitCooldown } from './states/dungeon/battle'
 import { dropBerriesOnHit } from './states/dungeon/bushes'
 import { spawnWeaponsChoice } from './states/dungeon/chooseWeapon'
-import { removeEnemyFromSpawn } from './states/dungeon/enemies'
+import { removeEnemyFromSpawn, spawnEnemies } from './states/dungeon/enemies'
 import { killAnimation, killEntities } from './states/dungeon/health'
 import { addHealthBarContainer } from './states/dungeon/healthBar'
 import { endBattleSpawnChest } from './states/dungeon/spawnChest'
@@ -37,7 +37,7 @@ import { pauseGame } from './states/game/pauseGame'
 import { target } from './states/game/sensor'
 import { basketFollowPlayer, enableBasketUi, spawnBasket } from './states/game/spawnBasket'
 import { allowDoorCollision, collideWithDoor, collideWithDoorCamp, collideWithDoorClearing, doorLocking, unlockDoorClearing } from './states/game/spawnDoor'
-import { spawnCrossRoad, spawnDungeon, spawnFarm, spawnLevelData, updateTimeUniforms } from './states/game/spawnLevel'
+import { generatenavGrid, spawnCrossRoad, spawnDungeon, spawnFarm, spawnLevelData, updateTimeUniforms } from './states/game/spawnLevel'
 import { losingBattle, spawnCharacter, spawnPlayerClearing, spawnPlayerDungeon } from './states/game/spawnPlayer'
 import { touchItem } from './states/game/touchItem'
 import { addOrRemoveWeaponModel } from './states/game/weapon'
@@ -97,8 +97,8 @@ genDungeonState
 
 dungeonState
 	.addSubscriber(spawnDrops, losingBattle, removeEnemyFromSpawn, applyArchingForce)
-	.onEnter(spawnDungeon, spawnLevelData, spawnPlayerDungeon, spawnBasket, moveCamera(true))
-	.onUpdate(runIf(canPlayerMove, allowDoorCollision, collideWithDoor, harvestCrop, killEntities, basketFollowPlayer()))
+	.onEnter(spawnDungeon, spawnLevelData, generatenavGrid, spawnEnemies, spawnPlayerDungeon, spawnBasket, moveCamera(true))
+	.onUpdate(runIf(canPlayerMove, allowDoorCollision, collideWithDoor, harvestCrop, killEntities, basketFollowPlayer()), detroyProjectiles)
 	.onUpdate(runIf(() => !pausedState.enabled, tickHitCooldown, tickModifiers('speed')), stepInHoney, tickSneeze, endBattleSpawnChest)
 	.onUpdate(honeySplat)
 	.onExit(despawnOfType('map'))

@@ -75,6 +75,7 @@ export const playerBundle = (health: number, addHealth: boolean, weapon: weapons
 		hitTimer: new Timer(500, true),
 		dash: new Dash(1000),
 		sneeze: new Timer(2000, false),
+		targetRotation: new Quaternion(),
 		combo: {
 			lastAttack: 0,
 			heavyAttack: 0,
@@ -83,6 +84,7 @@ export const playerBundle = (health: number, addHealth: boolean, weapon: weapons
 	if (weapon !== null) {
 		ecs.update(player, { weapon: weaponBundle(weapon) })
 	}
+
 	for (const modKey of save.modifiers) {
 		const mod = Object.values(itemsData).flatMap(i => i.meal).find(m => m?.key === modKey)
 		if (mod) {

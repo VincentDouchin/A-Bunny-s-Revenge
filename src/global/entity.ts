@@ -19,6 +19,7 @@ import type { Timer } from '@/lib/timer'
 import type { Room } from '@/states/dungeon/generateDungeon'
 import type { Dash } from '@/states/game/dash'
 import type { MenuOptions, RenderMainMenuFn } from '@/states/mainMenu/mainMenuRendering'
+import type { NavGrid } from '@/lib/navGrid'
 
 export type PlayerAnimations = 'idle' | 'running' | 'lightAttack' | 'slashAttack' | 'heavyAttack'
 export type EnemyAnimations = 'idle' | 'running' | 'attacking' | 'hit' | 'dead'
@@ -77,10 +78,12 @@ export interface Entity {
 	scale?: number
 	// ! Transforms
 	movementForce?: Vector3
+	acceleration?: number
 	speed?: Stat
 	position?: Vector3
 	worldPosition?: Vector3
 	rotation?: Quaternion
+	targetRotation?: Quaternion
 	// ! Camera
 	cameratarget?: true
 	cameraShake?: Vector3
@@ -144,6 +147,7 @@ export interface Entity {
 	doorLevel?: number
 	doorLocked?: true
 	tree?: true
+	obstacle?: true
 	grass?: true
 	instanceHandle?: InstanceHandle
 	// ! Dungeon
@@ -197,6 +201,8 @@ export interface Entity {
 	attackStyle?: EnemyAttackStyle
 	sneeze?: Timer<false>
 	pollen?: true
+	// ! AI
+	navGrid?: NavGrid
 	// ! Particles
 	emitter?: ParticleEmitter<Object3DEventMap>
 	autoDestroy?: true

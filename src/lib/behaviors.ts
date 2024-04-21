@@ -1,10 +1,9 @@
 import type { Query, With } from 'miniplex'
 import type { Entity, States } from '@/global/entity'
 import { ecs } from '@/global/init'
-import { type State, runIf } from '@/lib/state'
+import type { State } from '@/lib/state'
 import { entries } from '@/utils/mapFunctions'
 import { sleep } from '@/utils/sleep'
-import { pausedState } from '@/global/states'
 
 export type StateDecisions<C extends keyof Entity> = (e: StateEntity<C>) => any
 export type StateFn<C extends keyof Entity, B extends keyof States, F extends StateDecisions<C>> = (
@@ -42,11 +41,11 @@ export const behaviorPlugin = <C extends keyof Entity, B extends keyof States, F
 				}))
 			}
 			if (update) {
-				state.onPostUpdate(runIf(() => !pausedState.enabled, () => {
+				state.onPostUpdate(() => {
 					for (const entity of stateQuery) {
 						update(entity, setState(entity, entityState), fn(entity))
 					}
-				}))
+				})
 			}
 			if (exit) {
 				state.addSubscriber(() => stateQuery.onEntityRemoved.subscribe(async (e) => {

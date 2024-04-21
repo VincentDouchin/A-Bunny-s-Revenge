@@ -12,6 +12,8 @@ import { dash } from '@/particles/dashParticles'
 import { sleep } from '@/utils/sleep'
 import { campState } from '@/global/states'
 import { stunBundle } from '@/states/dungeon/stun'
+import { params } from '@/global/context'
+import { debugOptions } from '@/debug/debugState'
 
 const ANIMATION_SPEED = 1.4
 const playerComponents = ['playerAnimator', 'movementForce', 'speed', 'body', 'rotation', 'playerControls', 'combo', 'attackSpeed', 'dash', 'collider', 'currentHealth', 'model', 'hitTimer', 'size', 'sneeze'] as const satisfies readonly (keyof Entity)[]
@@ -48,7 +50,7 @@ export const playerBehaviorPlugin = behaviorPlugin(
 				applyRotate(e, force)
 				setState('running')
 			}
-			if (!campState.enabled) {
+			if (!campState.enabled || debugOptions.attackInFarm) {
 				if (e.playerControls.get('primary').justReleased) {
 					setState('attack')
 				}
@@ -69,7 +71,7 @@ export const playerBehaviorPlugin = behaviorPlugin(
 			} else {
 				setState('idle')
 			}
-			if (!campState.enabled) {
+			if (!campState.enabled || debugOptions.attackInFarm) {
 				if (e.playerControls.get('primary').justReleased) {
 					setState('attack')
 				}
@@ -103,7 +105,7 @@ export const playerBehaviorPlugin = behaviorPlugin(
 				applyRotate(e, force)
 				applyMove(e, force.multiplyScalar(0.5))
 			}
-			if (e.playerControls.get('primary').justReleased) {
+			if (e.playerControls.get('primary').justPressed) {
 				if (e.combo.lastAttack === 0 && e.playerAnimator.current === 'lightAttack') {
 					e.combo.lastAttack = 1
 				} else if (e.combo.lastAttack === 1 && e.playerAnimator.current === 'slashAttack') {

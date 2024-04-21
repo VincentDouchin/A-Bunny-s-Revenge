@@ -1,10 +1,8 @@
 import { ColliderDesc, RigidBodyDesc, RigidBodyType } from '@dimforge/rapier3d-compat'
 import FastNoiseLite from 'fastnoise-lite'
-import { between } from 'randomish'
 import type { Vec2, Vector4Like } from 'three'
 import { CanvasTexture, Euler, Group, Mesh, PlaneGeometry, Quaternion, Vector2, Vector3 } from 'three'
 import { encounters } from '../dungeon/encounters'
-import { enemyBundle } from '../dungeon/enemies'
 import { RoomType } from '../dungeon/generateDungeon'
 import { spawnLight } from './spawnLights'
 import type { Level } from '@/debug/LevelEditor'
@@ -16,6 +14,7 @@ import { assets, ecs, levelsData, time } from '@/global/init'
 import type { DungeonRessources, FarmRessources } from '@/global/states'
 import { inMap } from '@/lib/hierarchy'
 import { getBoundingBox, getSize } from '@/lib/models'
+import { NavGrid } from '@/lib/navGrid'
 import type { System } from '@/lib/state'
 import { GroundMaterial, WaterMaterial } from '@/shaders/materials'
 import { getScreenBuffer, scaleCanvas } from '@/utils/buffer'
@@ -65,7 +64,8 @@ export const spawnTrees = (level: Level, parent: Entity) => {
 				bodyDesc: RigidBodyDesc.fixed().lockRotations().setSleeping(true),
 				colliderDesc: ColliderDesc.cylinder(treeSize.y / 2, treeSize.x / 2),
 				tree: true,
-				withTimeUniform: true,
+				obstable: true,
+				// withTimeUniform: true,
 				parent,
 			})
 		}
@@ -227,9 +227,9 @@ export const spawnGroundAndTrees = (level: Level) => {
 	const heights = canvasToArray(heightfieldMap).map(pixel => pixel.x / 255)
 	const heightfield = new Float32Array(heights.length)
 	heightfield.set(heights)
-
 	const ground = ecs.add({
 		model: groundMesh,
+
 		...inMap(),
 		position: new Vector3(0, 0, 0),
 		bodyDesc: new RigidBodyDesc(RigidBodyType.Fixed),
@@ -265,18 +265,13 @@ export const spawnCrossRoad = () => {
 	ecs.add({ map: level.id })
 	spawnGroundAndTrees(level)
 }
-export const spawnDungeon: System<DungeonRessources> = ({ dungeon, dungeonLevel }) => {
+export const spawnDungeon: System<DungeonRessources> = ({ dungeon }) => {
 	ecs.add({ map: dungeon.plan.id, dungeon })
-	for (const enemy of dungeon.enemies) {
-		ecs.add({
-			...enemyBundle(enemy, dungeonLevel),
-			position: new Vector3(between(-20, 20), 0, between(-20, 20)),
-		})
-	}
+	spawnGroundAndTrees(dungeon.plan)
+
 	if (dungeon.type === RoomType.NPC && dungeon.encounter) {
 		encounters[dungeon.encounter]()
 	}
-	spawnGroundAndTrees(dungeon.plan)
 }
 
 const mapQuery = ecs.with('map')
@@ -318,4 +313,12 @@ export const updateTimeUniforms = () => {
 			entity.instanceHandle.setUniform('time', time.elapsed / 1000)
 		}
 	}
+}
+
+export const generatenavGrid = () => {
+	const mapId = mapQuery.first?.map
+	const map = levelsData.levels.find(level => level.id === mapId)
+	if (!map) throw new Error('map not found')
+	const navGrid = new NavGrid(map)
+	ecs.add({ navGrid, ...inMap() })
 }

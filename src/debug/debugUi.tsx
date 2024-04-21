@@ -172,10 +172,18 @@ export const DebugUi = () => {
 	ui.updateSync(() => {
 		debugRenderer && debugRenderer.update()
 	})
+	const navgridQuery = ecs.with('navGrid')
+	const isNavGridRenderered = ui.sync(() => !!navgridQuery.first?.navGrid?.mesh?.parent)
+	const toggleNavGrid = (render: boolean) => {
+		const navgrid = navgridQuery.first?.navGrid
+		if (navgrid) {
+			navgrid.render(render)
+		}
+	}
 	return (
 		<div style={{ 'position': 'absolute', 'color': 'white', 'z-index': 1000 }}>
 			<Show when={showUi()}>
-				<div style={{ 'background': 'darkgray', 'display': 'grid', 'grid-template-columns': 'auto auto', 'color': 'black', 'font-size': '20px', 'padding': '1rem', 'margin': '1rem', 'gap': '0.5rem' }}>
+				<div style={{ 'background': 'darkgray', 'display': 'grid', 'grid-template-columns': 'auto auto', 'color': 'black', 'font-size': '20px', 'padding': '10px', 'margin': '10px', 'gap': '10px', 'max-height': '80vh', 'overflow-y': 'auto' }}>
 					<div>Perspective</div>
 					<div>
 						<button onClick={changeCameraNormal}>Normal</button>
@@ -243,8 +251,12 @@ export const DebugUi = () => {
 					<input type="checkbox" checked={params.skipMainMenu} onChange={e => setParams(d => ({ ...d, skipMainMenu: e.target.checked }))}></input>
 					Debug Boss
 					<input type="checkbox" checked={params.debugBoss} onChange={e => setParams(d => ({ ...d, debugBoss: e.target.checked }))}></input>
+					Debug Enemies
+					<input type="checkbox" checked={params.debugEnemies} onChange={e => setParams(d => ({ ...d, debugEnemies: e.target.checked }))}></input>
 					Debug Renderer
 					<input type="checkbox" onChange={e => toggleDebugRenderer(e.target.checked)}></input>
+					nav grid
+					<input type="checkbox" checked={isNavGridRenderered()} onChange={e => toggleNavGrid(e.target.checked)}></input>
 					Time of day
 					<input
 						type="range"

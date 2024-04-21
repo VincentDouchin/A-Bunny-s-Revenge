@@ -1,5 +1,5 @@
 import { ActiveCollisionTypes, ColliderDesc, RigidBodyType } from '@dimforge/rapier3d-compat'
-import { Vector3 } from 'three'
+import { Quaternion, Vector3 } from 'three'
 import { behaviorBundle } from '../../lib/behaviors'
 import { healthBundle } from './health'
 import type { enemy } from '@/constants/enemies'
@@ -11,9 +11,10 @@ import { assets, ecs } from '@/global/init'
 import type { DungeonRessources } from '@/global/states'
 import { inMap } from '@/lib/hierarchy'
 import { modelColliderBundle } from '@/lib/models'
-import type { Subscriber } from '@/lib/state'
+import type { Subscriber, System } from '@/lib/state'
 import { Stat } from '@/lib/stats'
 import { Timer } from '@/lib/timer'
+import { getRandom } from '@/utils/mapFunctions'
 
 export const enemyBundle = (name: enemy, level: number) => {
 	const enemy = enemyData[name]
@@ -28,7 +29,7 @@ export const enemyBundle = (name: enemy, level: number) => {
 		...bundle,
 		enemyAnimator: new Animator(bundle.model, model.animations, enemy.animationMap),
 		...healthBundle(enemy.health * (level + 1)),
-
+		targetRotation: new Quaternion(),
 		strength: new Stat(1 + level),
 		...inMap(),
 		faction: Faction.Enemy,
@@ -53,3 +54,15 @@ const enemyQuery = ecs.with('enemyName')
 export const removeEnemyFromSpawn: Subscriber<DungeonRessources> = ({ dungeon }) => enemyQuery.onEntityRemoved.subscribe((entity) => {
 	dungeon.enemies.splice(dungeon.enemies.indexOf(entity.enemyName), 1)
 })
+const navGridQuery = ecs.with('navGrid')
+export const spawnEnemies: System<DungeonRessources> = ({ dungeon, dungeonLevel }) => {
+	const navGrid = navGridQuery.first?.navGrid
+	if (!navGrid) throw new Error('navGrid not generated')
+	const possiblePoints = navGrid.spawnPoints
+	for (const enemy of dungeon.enemies) {
+		ecs.add({
+			...enemyBundle(enemy, dungeonLevel),
+			position: getRandom([...possiblePoints]),
+		})
+	}
+}

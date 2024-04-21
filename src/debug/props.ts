@@ -58,10 +58,18 @@ export const props: PlacableProp<propNames>[] = [
 	{
 		name: 'log',
 		models: ['WoodLog', 'WoodLog_Moss', 'TreeStump', 'TreeStump_Moss'],
+		bundle: entity => ({
+			...entity,
+			obstacle: true,
+		}),
 	},
 	{
 		name: 'rock',
 		models: ['Rock_1', 'Rock_2', 'Rock_3', 'Rock_4', 'Rock_5', 'Rock_6', 'Rock_7'],
+		bundle: entity => ({
+			...entity,
+			obstacle: true,
+		}),
 	},
 	{
 		name: 'bush',

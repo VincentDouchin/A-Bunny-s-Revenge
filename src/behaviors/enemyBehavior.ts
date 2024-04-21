@@ -1,38 +1,57 @@
+import { ShapeType } from '@dimforge/rapier3d-compat'
 import { Tween } from '@tweenjs/tween.js'
 import type { With } from 'miniplex'
-import { Vector3 } from 'three'
 import { between } from 'randomish'
+import { Vector3 } from 'three'
+import type { EntityState } from '../lib/behaviors'
+import { behaviorPlugin } from '../lib/behaviors'
 import { projectileAttack } from '../states/dungeon/attacks'
 import { calculateDamage, flash } from '../states/dungeon/battle'
 import { stunBundle } from '../states/dungeon/stun'
-import type { EntityState } from '../lib/behaviors'
-import { behaviorPlugin } from '../lib/behaviors'
 import { applyMove, applyRotate, getMovementForce } from './behaviorHelpers'
-import type { Entity } from '@/global/entity'
-import { EnemyAttackStyle, Faction } from '@/global/entity'
-import { ecs, gameTweens, time, world } from '@/global/init'
-import { playSound } from '@/global/sounds'
-import { spawnDamageNumber } from '@/particles/damageNumber'
-import { dash } from '@/particles/dashParticles'
-import { impact } from '@/particles/impact'
 import { sleep } from '@/utils/sleep'
-import { Timer } from '@/lib/timer'
+import { impact } from '@/particles/impact'
+import { dash } from '@/particles/dashParticles'
+import { spawnDamageNumber } from '@/particles/damageNumber'
 import { getWorldPosition } from '@/lib/transforms'
+import { Timer } from '@/lib/timer'
+import { playSound } from '@/global/sounds'
+import { ecs, gameTweens, time, world } from '@/global/init'
+import { EnemyAttackStyle, Faction } from '@/global/entity'
+import type { Entity } from '@/global/entity'
 
 export const playerQuery = ecs.with('position', 'sensorCollider', 'strength', 'body', 'critChance', 'critDamage', 'combo', 'playerAnimator', 'weapon', 'player', 'collider').where(({ faction }) => faction === Faction.Player)
 
-const enemyComponents = ['movementForce', 'body', 'speed', 'enemyAnimator', 'rotation', 'position', 'group', 'strength', 'collider', 'model', 'currentHealth', 'size', 'sensorCollider', 'hitTimer'] as const satisfies readonly (keyof Entity)[]
+const enemyComponents = ['movementForce', 'body', 'speed', 'enemyAnimator', 'rotation', 'position', 'group', 'strength', 'collider', 'model', 'currentHealth', 'size', 'sensorCollider', 'hitTimer', 'targetRotation'] as const satisfies readonly (keyof Entity)[]
 
 const enemyQuery = ecs.with(...enemyComponents)
 
 type EnemyComponents = (typeof enemyComponents)[number]
+const navGridQuery = ecs.with('navGrid')
 
+const getPlayerDirection = (e: With<Entity, EnemyComponents>, player: With<Entity, 'position'> | undefined) => {
+	if (!player) return null
+
+	const direction = player.position.clone().sub(e.position).normalize()
+	const hit = world.castShape(e.position, e.rotation, direction, e.collider.shape, 20, true, undefined, undefined, e.collider, undefined, c => !c.isSensor() && c.shape.type !== ShapeType.HeightField)
+	const obstacle = hit && hit?.collider !== player.collider
+	const navGrid = navGridQuery.first?.navGrid
+	const canSeePlayer = player.position.distanceTo(e.position) < 70
+	if (obstacle && navGrid) {
+		const navPoint = navGrid.findPath(e.position, player.position)?.clone()?.sub(e.position).normalize()
+		return {
+			direction: navPoint ? new Vector3().copy(navPoint) : null,
+			canSeePlayer,
+			canShootPlayer: !obstacle,
+		}
+	}
+	return { direction, canSeePlayer, canShootPlayer: !obstacle }
+}
 const enemyDecisions = (e: With<Entity, EnemyComponents>) => {
 	const player = playerQuery.first
-	const direction = player ? player.position.clone().sub(e.position).normalize() : null
-	const canSeePlayer = player && player.position.distanceTo(e.position) < 70
+	const playerData = getPlayerDirection(e, player)
 	const touchedByPlayer = !e.hitTimer.running() && player && player.state === 'attack' && world.intersectionPair(player.sensorCollider, e.collider)
-	return { ...getMovementForce(e), player, direction, touchedByPlayer, canSeePlayer }
+	return { ...getMovementForce(e), player, touchedByPlayer, ...playerData }
 }
 
 type EnemyState = EntityState<EnemyComponents, 'enemy', typeof enemyDecisions>
@@ -68,7 +87,7 @@ const idle: EnemyState = {
 }
 const running = (range: number): EnemyState => ({
 	enter: e => e.enemyAnimator.playAnimation('running'),
-	update: (e, setState, { force, direction, player, touchedByPlayer }) => {
+	update: (e, setState, { force, direction, player, touchedByPlayer, canShootPlayer }) => {
 		if (touchedByPlayer) return setState('hit')
 		if (direction && player) {
 			const dist = player.position.distanceTo(e.position)
@@ -76,7 +95,7 @@ const running = (range: number): EnemyState => ({
 				e.movementForce.x = direction.x
 				e.movementForce.z = direction.z
 				applyRotate(e, force)
-				if (dist < range) {
+				if (dist < range && canShootPlayer) {
 					return setState('waitingAttack')
 				}
 			} else {
@@ -125,8 +144,9 @@ const waitingAttack = (cooldown: number): EnemyState => ({
 
 		return setState('attack')
 	},
-	update: (_e, setState, { touchedByPlayer }) => {
+	update: (e, setState, { touchedByPlayer, force }) => {
 		if (touchedByPlayer) return setState('hit')
+		applyRotate(e, force)
 	},
 })
 const hit: EnemyState = {
@@ -175,11 +195,12 @@ const stun: EnemyState = {
 	},
 }
 // ! RANGE
-export const rangeEnemyBehaviorPlugin = behaviorPlugin(
-	enemyQuery.where(e => e.attackStyle === EnemyAttackStyle.Range),
+const enemyBehavior = (attackStyle: EnemyAttackStyle) => behaviorPlugin(
+	enemyQuery.where(e => e.attackStyle === attackStyle),
 	'enemy',
 	enemyDecisions,
-)({
+)
+export const rangeEnemyBehaviorPlugin = enemyBehavior(EnemyAttackStyle.Range)({
 	idle,
 	wander,
 	running: running(50),
@@ -218,16 +239,11 @@ export const rangeEnemyBehaviorPlugin = behaviorPlugin(
 		},
 	},
 
-},
-)
+})
 
 // ! CHARGING
-const treeQuery = ecs.with('collider', 'tree', 'position')
-export const chargingEnemyBehaviorPlugin = behaviorPlugin(
-	enemyQuery.where(e => e.attackStyle === EnemyAttackStyle.Charging),
-	'enemy',
-	enemyDecisions,
-)({
+const obstableQuery = ecs.with('collider', 'obstacle', 'position')
+export const chargingEnemyBehaviorPlugin = enemyBehavior(EnemyAttackStyle.Charging)({
 	idle,
 	dying,
 	waitingAttack: waitingAttack(500),
@@ -248,8 +264,8 @@ export const chargingEnemyBehaviorPlugin = behaviorPlugin(
 			applyMove(e, force.multiplyScalar(2))
 			if (touchedByPlayer) return setState('hit')
 			world.contactPairsWith(e.collider, (c) => {
-				for (const tree of treeQuery) {
-					if (tree.collider === c && world.intersectionPair(e.sensorCollider, c)) {
+				for (const obstacle of obstableQuery) {
+					if (obstacle.collider === c && world.intersectionPair(e.sensorCollider, c)) {
 						playSound('zapsplat_impacts_wood_rotten_tree_trunk_hit_break_crumple_011_102694')
 						return setState('stun')
 					}
@@ -276,16 +292,10 @@ export const chargingEnemyBehaviorPlugin = behaviorPlugin(
 			}
 		},
 	},
-},
-
-)
+})
 
 // ! MELEE
-export const meleeEnemyBehaviorPlugin = behaviorPlugin(
-	enemyQuery.where(e => e.attackStyle === EnemyAttackStyle.Melee),
-	'enemy',
-	enemyDecisions,
-)({
+export const meleeEnemyBehaviorPlugin = enemyBehavior(EnemyAttackStyle.Melee)({
 	idle,
 	dying,
 	waitingAttack: waitingAttack(200),
@@ -322,6 +332,4 @@ export const meleeEnemyBehaviorPlugin = behaviorPlugin(
 			}
 		},
 	},
-},
-
-)
+})

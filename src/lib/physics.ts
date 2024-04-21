@@ -8,12 +8,14 @@ const addBodies = () => ecs.with('bodyDesc', 'position').onEntityAdded.subscribe
 	if (entity.rotation) {
 		body.setRotation(entity.rotation, true)
 	}
+	body.userData = entity
 	ecs.addComponent(entity, 'body', body)
 	ecs.removeComponent(entity, 'bodyDesc')
 })
 
 const addColliders = () => ecs.with('body', 'colliderDesc').onEntityAdded.subscribe((entity) => {
 	const collider = world.createCollider(entity.colliderDesc, entity.body)
+
 	ecs.addComponent(entity, 'collider', collider)
 	ecs.removeComponent(entity, 'colliderDesc')
 })

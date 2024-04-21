@@ -14,6 +14,7 @@
 	"dependencies": {
 		"@dimforge/rapier3d-compat": "^0.12.0",
 		"@tweenjs/tween.js": "^21.0.0",
+		"astar-typescript": "^1.2.7",
 		"fastnoise-lite": "^1.1.1",
 		"howler": "^2.2.4",
 		"idb-keyval": "^6.2.1",

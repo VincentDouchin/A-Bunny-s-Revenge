@@ -1,6 +1,6 @@
 import type { weapons } from '@assets/assets'
-import { assets, ecs } from '@/global/init'
 import { weaponsData } from '@/constants/weapons'
+import { assets, ecs } from '@/global/init'
 
 const weaponQuery = ecs.with('weapon', 'model')
 export const addOrRemoveWeaponModel = [

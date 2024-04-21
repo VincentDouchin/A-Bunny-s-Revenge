@@ -4,7 +4,7 @@ import { ConeGeometry, Mesh, MeshBasicMaterial, MeshToonMaterial, Quaternion, Sp
 
 import { between } from 'randomish'
 import { type Entity, Faction } from '@/global/entity'
-import { ecs, time } from '@/global/init'
+import { ecs, time, world } from '@/global/init'
 import { modelColliderBundle } from '@/lib/models'
 import { ModStage, ModType, type Stat, createModifier } from '@/lib/stats'
 import { Timer } from '@/lib/timer'
@@ -131,6 +131,18 @@ export const tickSneeze = () => {
 		}
 		if (!closeBy) {
 			entity.sneeze.tick(-time.delta / 5)
+		}
+	}
+}
+
+const projectilesQuery = ecs.with('projectile', 'collider')
+const obstaclesQuery = ecs.with('obstacle', 'collider')
+export const detroyProjectiles = () => {
+	for (const projectile of projectilesQuery) {
+		for (const obstacle of obstaclesQuery) {
+			if (world.intersectionPair(projectile.collider, obstacle.collider)) {
+				ecs.remove(projectile)
+			}
 		}
 	}
 }
