@@ -1,11 +1,11 @@
 import type { weapons } from '@assets/assets'
-import { LinearSRGBColorSpace, Mesh, NearestFilter, Quaternion, Vector3 } from 'three'
-import { clone } from 'three/examples/jsm/utils/SkeletonUtils'
 import { ActiveCollisionTypes, ColliderDesc } from '@dimforge/rapier3d-compat'
+import { LinearSRGBColorSpace, Mesh, NearestFilter, Quaternion, Vector3 } from 'three'
 import { CSS2DObject } from 'three/examples/jsm/renderers/CSS2DRenderer'
+import { clone } from 'three/examples/jsm/utils/SkeletonUtils'
+import { behaviorBundle } from '../../lib/behaviors'
 import { RoomType } from '../dungeon/generateDungeon'
 import { healthBundle } from '../dungeon/health'
-import { behaviorBundle } from '../../lib/behaviors'
 import { inventoryBundle } from './inventory'
 import { weaponBundle } from './weapon'
 
@@ -34,7 +34,9 @@ const playerAnimationMap: Record<PlayerAnimations, Animations['Bunny']> = {
 	lightAttack: 'FIGHT_ACTION1',
 	slashAttack: 'SLASH',
 	heavyAttack: 'HEAVYATTACK',
+	hit: 'HURT',
 }
+
 export const playerBundle = (health: number, addHealth: boolean, weapon: weapons | null) => {
 	const model = clone(assets.characters.Bunny.scene)
 	model.traverse((node) => {

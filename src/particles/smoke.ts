@@ -5,7 +5,7 @@ export const smoke = () => {
 	const system = new ParticleSystem({
 		duration: 30,
 		looping: true,
-		prewarm: false,
+		prewarm: true,
 		instancingGeometry: new CircleGeometry(1, 8),
 		startLife: new IntervalValue(20.0, 10.0),
 		startSpeed: new ConstantValue(0.5),

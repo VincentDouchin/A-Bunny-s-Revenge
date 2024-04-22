@@ -13,15 +13,16 @@ import type { Item } from '@/constants/items'
 import type { Recipe } from '@/constants/recipes'
 import type { MenuInputMap, PlayerInputMap } from '@/global/inputMaps'
 import type { direction } from '@/lib/directions'
+import type { NavGrid } from '@/lib/navGrid'
 import type { State } from '@/lib/state'
 import type { Modifier, Stat } from '@/lib/stats'
 import type { Timer } from '@/lib/timer'
+import type { WeaponArc } from '@/shaders/weaponArc'
 import type { Room } from '@/states/dungeon/generateDungeon'
 import type { Dash } from '@/states/game/dash'
 import type { MenuOptions, RenderMainMenuFn } from '@/states/mainMenu/mainMenuRendering'
-import type { NavGrid } from '@/lib/navGrid'
 
-export type PlayerAnimations = 'idle' | 'running' | 'lightAttack' | 'slashAttack' | 'heavyAttack'
+export type PlayerAnimations = 'idle' | 'running' | 'lightAttack' | 'slashAttack' | 'heavyAttack' | 'hit'
 export type EnemyAnimations = 'idle' | 'running' | 'attacking' | 'hit' | 'dead'
 export type Dialog = Generator<string | string[] | void | false, void, number | void>
 export enum Faction {
@@ -43,6 +44,8 @@ export enum Interactable {
 }
 export enum MenuType {
 	Oven,
+	Bench,
+	BenchGame,
 	Cauldron,
 	Chest,
 	Player,
@@ -233,7 +236,8 @@ export interface Entity {
 	following?: boolean
 	followTarget?: With<Entity, 'position'>
 	// ! Weapon
-	weapon?: With<Entity, 'model' | 'weaponName'>
+	weapon?: With<Entity, 'model' | 'weaponName' | 'weaponArc'>
+	weaponArc?: WeaponArc
 	weaponName?: weapons
 	weaponStand?: weapons
 	// ! Main menu

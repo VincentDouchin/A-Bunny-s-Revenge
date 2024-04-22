@@ -7,6 +7,7 @@ import { assets, ecs } from '@/global/init'
 import { inMap } from '@/lib/hierarchy'
 import { modelColliderBundle } from '@/lib/models'
 import { Stat } from '@/lib/stats'
+import { Animator } from '@/global/animator'
 
 const playerQuery = ecs.with('player', 'position', 'rotation', 'inventory', 'inventoryId', 'inventorySize')
 export const spawnBasket = () => {
@@ -20,7 +21,7 @@ export const spawnBasket = () => {
 		return ecs.add({
 			position,
 			...inMap(),
-			// basketAnimator: new Animator(bundle.model, assets.characters.Basket.animations),
+			basketAnimator: new Animator(bundle.model, assets.characters.Basket.animations),
 			movementForce: new Vector3(),
 			following: false,
 			followTarget: player,

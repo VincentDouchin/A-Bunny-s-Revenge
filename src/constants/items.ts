@@ -60,6 +60,10 @@ export const itemsData: Record<items, ItemData> = {
 		name: 'Ham',
 		ingredient: true,
 	},
+	steak: {
+		name: 'Slime Steak',
+		ingredient: true,
+	},
 	slime_dough: {
 		name: 'Slime Dough',
 		ingredient: true,

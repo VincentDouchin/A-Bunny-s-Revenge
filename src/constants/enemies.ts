@@ -110,7 +110,7 @@ export const enemyData: { [k in enemy]: Enemy<k> } = {
 		scale: 1.4,
 		speed: 1,
 		boss: false,
-		drops: [],
+		drops: [{ name: 'steak', quantity: 1, rarity: Rarity.Common }],
 		behavior: 'enemy',
 		attackStyle: EnemyAttackStyle.Charging,
 		animationMap: genericEnemyAnimationMap,

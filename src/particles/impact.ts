@@ -19,7 +19,7 @@ export const impact = () => {
 		startSpeed: new ConstantValue(0.6),
 		startRotation: new RandomQuatGenerator(),
 		worldSpace: true,
-		emissionOverTime: new ConstantValue(2),
+		emissionOverTime: new ConstantValue(3),
 		emissionBursts: [],
 		shape: new SphereEmitter({ radius: 10 }),
 		material: mat,

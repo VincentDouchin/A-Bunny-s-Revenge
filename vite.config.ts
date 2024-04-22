@@ -2,6 +2,7 @@ import path from 'node:path'
 import type { UserConfig } from 'vite'
 import { defineConfig } from 'vite'
 import solidPlugin from 'vite-plugin-solid'
+import solidStyledPlugin from 'vite-plugin-solid-styled'
 
 import { VitePWA } from 'vite-plugin-pwa'
 import generateAssetNames from './scripts/generateAssetNamesPlugin'
@@ -21,6 +22,12 @@ export default defineConfig(() => {
 			convertAudioFiles(),
 			optimizeAssets(),
 			solidPlugin(),
+			solidStyledPlugin({
+				filter: {
+					include: 'src/**/*.{tsx,jsx}',
+					exclude: 'node_modules/**/*.{ts,js,tsx,jsx}',
+				},
+			}),
 			VitePWA({
 				registerType: 'autoUpdate',
 

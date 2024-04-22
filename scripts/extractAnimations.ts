@@ -21,14 +21,18 @@ const launchScript = async (filePath?: string) => {
 				'draco3d.encoder': await draco3d.createEncoderModule(), // Optional.
 			})
 		for (const path of Array.from(glbs.values()).sort((a, b) => a.localeCompare(b))) {
-			const glb = await io.read(path)
-			const root = glb.getRoot()
-			const animationNames = root.listAnimations().map(animation => animation.getName())
-			if (animationNames.filter(x => !x.toLowerCase().includes('meta')).length) {
-				animations += `
+			try {
+				const glb = await io.read(path)
+				const root = glb.getRoot()
+				const animationNames = root.listAnimations().map(animation => animation.getName())
+				if (animationNames.filter(x => !x.toLowerCase().includes('meta')).length) {
+					animations += `
 				\n
 				'${getFileName(path).replace('-optimized', '')}' : ${animationNames.map(x => ` '${x}' `).join(` | `)}
 				`
+				}
+			} catch (e) {
+				console.log('couldn\'t open path to extract animations')
 			}
 		}
 		await writeFileSync('./assets/animations.d.ts', `${animations}}`)

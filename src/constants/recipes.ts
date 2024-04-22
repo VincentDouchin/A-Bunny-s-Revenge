@@ -31,7 +31,7 @@ export const recipes: Array<Recipe> = [
 	{
 		input: [{ name: 'beet', quantity: 2 }, { name: 'lettuce', quantity: 2 }],
 		output: { name: 'beetroot_salad', quantity: 1 },
-		processor: MenuType.Oven,
+		processor: MenuType.Bench,
 	},
 	{
 		input: [{ name: 'ham', quantity: 1 }, { name: 'honey', quantity: 2 }],

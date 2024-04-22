@@ -1,5 +1,6 @@
 import type { With } from 'miniplex'
 import { createMemo, onCleanup } from 'solid-js'
+import { css } from 'solid-styled'
 import type { Entity } from '@/global/entity'
 import { assets, coroutines, ui } from '@/global/init'
 import { save } from '@/global/save'
@@ -26,84 +27,76 @@ export const HealthUi = (props: { player: With<Entity, 'maxHealth' | 'currentHea
 		}
 	})
 	onCleanup(clear)
+	css/* css */`
+	#health-ui{
+		position: fixed;
+		top: 1rem;
+		left: 1rem;
+		display: grid;
+		gap: 0.5rem;
+	}
+	#health-ui .wrapper{
+		height: 4rem;
+		width: calc(${String(max())}rem * 2); 
+		border-radius: 1.5rem; 
+		background: hsl(0,0%, 100%, 30%);
+		overflow: hidden; 
+		position: relative;
+	}
+	#health-ui .health-amount{
+		height: 100%;
+		width: ${String(health() * 100)}%;
+		box-shadow: hsl(0,0%,0%, 30%) 0rem -0.5rem 0rem 0rem inset;
+		position:absolute;
+		top:0;
+		left:0;
+		transition: width 0.5s ease-in;
+	}
+	#health-ui .front{
+		background: red;
+		z-index:1;
+	}
+	#health-ui .back{
+		background: darkred;
+		transition-delay: 0.3s
+	}
+	#health-ui .health-text{
+		position: absolute;
+		color: white;
+		top: 50%;
+		left: 50%;
+		translate: -50% -50%;
+		font-size: 2rem;
+		white-space: nowrap;
+		z-index: 1;
+	}
+	#health-ui .acorn {
+		padding:0.2rem;
+		border-radius: 1.5rem; 
+		background: hsl(0,0%, 100%, 30%);
+		display:grid;
+		width: fit-content;
+		grid-template-columns: auto auto;
+		place-items: center;
+		gap:1rem;
+		padding-right:1rem;
+		font-size: 3rem;
+	}
+	#health-ui .acorn canvas{
+		width: 4rem;
+		height: 4rem;
+	}`
 	return (
-
-		<>
-			<style jsx dynamic>
-				{/* css */`
-				#health-ui{
-					position: fixed;
-					top: 1rem;
-					left: 1rem;
-					display: grid;
-					gap: 0.5rem;
-				}
-				#health-ui .wrapper{
-					height: 4rem;
-					width: calc(${max()}rem * 2); 
-					border-radius: 1.5rem; 
-					background: hsl(0,0%, 100%, 30%);
-					overflow: hidden; 
-					position: relative;
-				}
-				#health-ui .health-amount{
-					height: 100%;
-					width: ${health() * 100}%;
-					box-shadow: hsl(0,0%,0%, 30%) 0rem -0.5rem 0rem 0rem inset;
-					position:absolute;
-					top:0;
-					left:0;
-					transition: width 0.5s ease-in;
-				}
-				#health-ui .front{
-					background: red;
-					z-index:1;
-				}
-				#health-ui .back{
-					background: darkred;
-					transition-delay: 0.3s
-				}
-				#health-ui .health-text{
-					position: absolute;
-					color: white;
-					top: 50%;
-					left: 50%;
-					translate: -50% -50%;
-					font-size: 2rem;
-					white-space: nowrap;
-					z-index: 1;
-				}
-				#health-ui .acorn {
-					padding:0.2rem;
-					border-radius: 1.5rem; 
-					background: hsl(0,0%, 100%, 30%);
-					display:grid;
-					width: fit-content;
-					grid-template-columns: auto auto;
-					place-items: center;
-					gap:1rem;
-					padding-right:1rem;
-					font-size: 3rem;
-				}
-				#health-ui .acorn canvas{
-					width: 4rem;
-					height: 4rem;
-				}
-				
-			`}
-			</style>
-			<div id="health-ui">
-				<div class="wrapper">
-					<div class="health-amount front"></div>
-					<div class="health-amount back"></div>
-					<div class="health-text">{healthDisplay()}</div>
-				</div>
-				<div class="acorn">
-					{element}
-					{acorns()}
-				</div>
+		<div id="health-ui">
+			<div class="wrapper">
+				<div class="health-amount front"></div>
+				<div class="health-amount back"></div>
+				<div class="health-text">{healthDisplay()}</div>
 			</div>
-		</>
-
+			<div class="acorn">
+				{element}
+				{acorns()}
+			</div>
+		</div>
 	)
 }

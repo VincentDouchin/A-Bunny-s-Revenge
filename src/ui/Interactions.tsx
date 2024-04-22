@@ -35,6 +35,7 @@ export const getInteractables = (
 		]
 		case Interactable.Cauldron: return ['Prepare', 'Cook']
 		case Interactable.Oven: return ['Prepare', 'Cook']
+		case Interactable.Chop: return ['Prepare', 'Cook']
 		case Interactable.WeaponStand :return ['Equip']
 		default: return [entity?.interactable]
 	}

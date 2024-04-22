@@ -53,7 +53,7 @@ export interface PlacableProp<N extends string> {
 	data?: N extends keyof ExtraData ? ExtraData[N] : undefined
 	bundle?: BundleFn<EntityData<N extends keyof ExtraData ? NonNullable<ExtraData[N]> : never>>
 }
-type propNames = 'log' | 'door' | 'rock' | 'board' | 'oven' | 'CookingPot' | 'stove' | 'Flower/plants' | 'sign' | 'plots' | 'bush' | 'fence' | 'house' | 'mushrooms' | 'lamp' | 'Kitchen' | 'berry bushes'
+type propNames = 'log' | 'door' | 'rock' | 'board' | 'oven' | 'CookingPot' | 'stove' | 'Flower/plants' | 'sign' | 'plots' | 'bush' | 'fence' | 'house' | 'mushrooms' | 'lamp' | 'Kitchen' | 'berry bushes' | 'bench'
 export const props: PlacableProp<propNames>[] = [
 	{
 		name: 'log',
@@ -162,6 +162,20 @@ export const props: PlacableProp<propNames>[] = [
 			recipesQueued: [],
 
 		}),
+	},
+	{
+		name: 'bench',
+		models: ['bench'],
+		bundle: (entity) => {
+			return {
+				...entity,
+				...menuInputMap(),
+				interactable: Interactable.Chop,
+				onPrimary: e => ecs.addComponent(e, 'menuType', MenuType.Bench),
+				onSecondary: e => ecs.addComponent(e, 'menuType', MenuType.BenchGame),
+				recipesQueued: [],
+			}
+		},
 	},
 	{
 		name: 'stove',
@@ -276,7 +290,7 @@ export const props: PlacableProp<propNames>[] = [
 	},
 	{
 		name: 'Kitchen',
-		models: ['KitchenSet1', 'bench', 'table', 'stringLights', 'Bucket', 'well'],
+		models: ['KitchenSet1', 'table', 'stringLights', 'Bucket', 'well'],
 	},
 	{
 		name: 'berry bushes',

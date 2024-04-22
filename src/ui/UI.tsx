@@ -9,7 +9,6 @@ import { LoseUi } from '@/states/dungeon/LoseUi'
 import { MiniMapUi } from '@/states/dungeon/MinimapUi'
 import { FullscreenUi } from '@/states/game/FullscreenUi'
 import { OverlayUi } from '@/states/game/overlayUi'
-import type { } from 'solid-styled-jsx'
 
 export const UI = () => (
 	<>

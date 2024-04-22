@@ -7,6 +7,7 @@ import { CauldronMinigameUi } from './CauldronMinigameUi'
 import { OvenMinigameUi } from './OvenMinigameUi'
 import { QuestUi } from './QuestUi'
 import { RecipesUi } from './RecipesUi'
+import { CuttingBoardMinigameUi } from './CuttingBoardMiniGameUi'
 import { inputManager, ui } from '@/global/init'
 import { campState, dungeonState, openMenuState, pausedState } from '@/global/states'
 import { ChestUi } from '@/states/farm/ChestUi'
@@ -44,6 +45,7 @@ export const PlayerUi = () => {
 							<RecipesUi player={player} />
 							<OvenMinigameUi player={player} />
 							<CauldronMinigameUi player={player} />
+							<CuttingBoardMinigameUi player={player} />
 							<InventoryUi player={player} />
 							<SeedUi player={player} />
 							<QuestUi player={player} />

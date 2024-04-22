@@ -14,7 +14,7 @@ import { dash } from '@/particles/dashParticles'
 import { stunBundle } from '@/states/dungeon/stun'
 import { sleep } from '@/utils/sleep'
 
-const ANIMATION_SPEED = 1.4
+const ANIMATION_SPEED = 1
 const playerComponents = ['playerAnimator', 'movementForce', 'speed', 'body', 'rotation', 'playerControls', 'combo', 'attackSpeed', 'dash', 'collider', 'currentHealth', 'model', 'hitTimer', 'size', 'sneeze', 'targetRotation'] as const satisfies readonly (keyof Entity)[]
 type PlayerComponents = (typeof playerComponents)[number]
 const playerQuery = ecs.with(...playerComponents)
@@ -145,8 +145,8 @@ export const playerBehaviorPlugin = behaviorPlugin(
 				}
 				addCameraShake()
 				flash(e, 200, true)
+				await e.playerAnimator.playOnce('hit', { timeScale: 1.3 })
 				if (e.currentHealth <= 0) setState('dying')
-				await sleep(500)
 				setState('idle')
 			}
 		},

@@ -15,11 +15,12 @@ import { Modal } from '@/ui/components/Modal'
 import type { FarmUiProps } from '@/ui/types'
 import { range } from '@/utils/mapFunctions'
 
-const recipeQuery = ecs.with('menuType', 'menuInputs', 'recipesQueued').where(({ menuType }) => [MenuType.Oven, MenuType.Cauldron].includes(menuType))
+const recipeQuery = ecs.with('menuType', 'menuInputs', 'recipesQueued').where(({ menuType }) => [MenuType.Oven, MenuType.Cauldron, MenuType.Bench].includes(menuType))
 const getMenuName = (menuType: MenuType) => {
 	switch (menuType) {
 		case MenuType.Oven :return 'Oven'
 		case MenuType.Cauldron :return 'Cauldron'
+		case MenuType.Bench :return 'Cutting Board'
 	}
 	return ''
 }

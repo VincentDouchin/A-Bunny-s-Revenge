@@ -27,7 +27,7 @@
 				
 				
 
-				'Bunny' :  'IDLE_NEW'  |  'RUN_ALT'  |  'FIGHT_ACTION1'  |  'HEAVYATTACK'  |  'CHEER'  |  'SLASH' 
+				'Bunny' :  'IDLE_NEW'  |  'RUN_ALT'  |  'FIGHT_ACTION1'  |  'HEAVYATTACK'  |  'CHEER'  |  'SLASH'  |  'HURT' 
 				
 				
 
