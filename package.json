@@ -21,9 +21,10 @@
 		"jsoneditor": "^10.0.0",
 		"miniplex": "^2.0.0",
 		"randomish": "^0.1.6",
-		"solid-js": "^1.8.6",
+		"solid-js": "^1.8.17",
 		"solid-styled": "^0.11.1",
 		"solid-transition-group": "^0.2.3",
+		"solid-use": "^0.8.0",
 		"three": "^0.161.0",
 		"three-instanced-uniforms-mesh": "^0.49.0",
 		"three.quarks": "^0.11.2"

@@ -65,7 +65,7 @@ export const spawnTrees = (level: Level, parent: Entity) => {
 				colliderDesc: ColliderDesc.cylinder(treeSize.y / 2, treeSize.x / 2),
 				tree: true,
 				obstable: true,
-				// withTimeUniform: true,
+				withTimeUniform: true,
 				parent,
 			})
 		}

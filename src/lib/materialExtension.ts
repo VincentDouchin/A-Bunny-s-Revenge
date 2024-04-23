@@ -13,7 +13,9 @@ export const importLib = (part: string) => (shader: string) => {
 export const insertBefore = (before: string, part: string) => (shader: string) => {
 	return shader.replace(before, `${before}\n${part}`)
 }
-
+export const insertAfer = (after: string, part: string) => (shader: string) => {
+	return shader.replace(after, `${part}\n${after}`)
+}
 export const replaceInclude = (include: string, part: string) => (shader: string) => {
 	return shader.replace(`#include <${include}>`, part)
 }

@@ -16,6 +16,7 @@ import { addToScene } from './lib/registerComponents'
 import { runIf } from './lib/state'
 import { tickModifiers } from './lib/stats'
 import { transformsPlugin } from './lib/transforms'
+import { spawnGodRay } from './shaders/godrays'
 import { pickupAcorn } from './states/dungeon/acorn'
 import { applyArchingForce, detroyProjectiles, honeySplat, stepInHoney, tickSneeze } from './states/dungeon/attacks'
 import { applyDeathTimer, spawnDrops, tickHitCooldown } from './states/dungeon/battle'
@@ -79,7 +80,7 @@ mainMenuState
 	.onExit(removeStateEntity(mainMenuState), spawnPlayerContinueGame)
 campState
 	.addSubscriber(...interactablePlantableSpot)
-	.onEnter(spawnFarm, spawnLevelData, updateCropsSave, initPlantableSpotsInteractions, enableBasketUi)
+	.onEnter(spawnFarm, spawnLevelData, updateCropsSave, initPlantableSpotsInteractions, enableBasketUi, spawnGodRay)
 	.onEnter(runIf(() => !mainMenuState.enabled, spawnCharacter, spawnBasket), moveCamera(true))
 	.onUpdate(collideWithDoorCamp, playNightMusic)
 	.onUpdate(runIf(canPlayerMove, plantSeed, harvestCrop, openPlayerInventory, savePlayerPosition, basketFollowPlayer()))

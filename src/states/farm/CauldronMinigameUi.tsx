@@ -5,6 +5,7 @@ import { Show, createMemo, createSignal, onCleanup, onMount } from 'solid-js'
 import { Portal } from 'solid-js/web'
 import { Color, PointLight, Vector3 } from 'three'
 import { Tween } from '@tweenjs/tween.js'
+import { css } from 'solid-styled'
 import { itemBundle } from '../game/items'
 import { ItemDisplay } from './InventoryUi'
 import type { Entity } from '@/global/entity'
@@ -55,7 +56,7 @@ export const CauldronMinigameUi = ({ player }: FarmUiProps) => {
 				onMount(() => {
 					targetEntity = ecs.add({
 						cameratarget: true,
-						worldPosition: cauldronPosition,
+						worldPosition: new Vector3(0, 0, 1).add(cauldronPosition),
 					})
 					for (const camera of cameraQuery) {
 						ecs.addComponent(camera, 'cameraOffset', new Vector3(0, 40, -1).applyQuaternion(cauldron().rotation))
@@ -126,33 +127,123 @@ export const CauldronMinigameUi = ({ player }: FarmUiProps) => {
 				const interact = (value: number, input: 'primary' | 'secondary' | 'pause') => () => {
 					playerInputs()?.set(input, value)
 				}
+				css/* css */`
+				.button {
+					position: fixed;
+					height: 80%;
+					left: 0;
+					width: 5rem;
+					margin: 3rem 2rem;
+					display: flex;
+					justify-content: center;
+					flex-direction: column;
+				}
+				.exit-icon{
+					width: 2rem;
+				}
+				.spoon{
+					position: fixed;
+					width: 8rem;
+					height: 8rem;
+					background: hsl(0, 0%, 0%, 20%);
+					border-radius: 8rem;
+					border: solid hsl(0, 0%, 100%, 30%);
+					bottom: 0%;
+					right: 0%;
+					display: grid;
+					place-items: center;
+					margin: 7rem;
+					border:${`solid ${isPrimaryPressed() ? '0.3rem' : '0.1rem'} hsl(0, 0%,100%, 30% )`}
+				}
+				.spoon-icon{
+					color: white;
+					width: 50%;
+					height: 50%;
+				}
+				.progress-container{
+					display: grid;
+					grid-template-columns: 1fr auto 1fr;
+					place-items: center;
+					gap: 3rem;
+				}
+				.progress{
+					position: relative;
+				}
+				.progress-label {
+					position: absolute;
+					transform: translate(-50%, -100%);
+					font-size: 2rem;
+					color: white;
+					left: 50%;
+				}
+				.progress-bar {
+					width: 2rem;
+					height: 20rem;
+					border: solid 0.5rem hsl(0, 0%, 0%, 0.7);
+					border-radius: 1rem;
+					overflow: hidden;
+					position: relative;
+				}
+				.progress-fill {
+					background: linear-gradient(0, #5ab552, #9de64e);
+					margin-top: auto;
+					position: absolute;
+					bottom: 0;
+					width: 100%;
+					height:${`${progress()}%`}
+				}
+				.output-container{
+					width: 20rem;
+					height: 20rem;
+					border-radius: 200rem;
+					position: relative;
+				}
+				.output{
+					position: absolute;
+					left: 50%;
+					translate: -50%;
+					bottom: calc(100% + 2rem);
+				}
+				.spot {
+					position: absolute;
+					width: 5rem;
+					height: 5rem;
+					border-radius: 300rem;
+					top: 50%;
+					left: 50%;
+					box-sizing: content-box;
+					transform: translate(-50%,-50%);
+					border:  ${`solid ${spotColor()} ${spotSize()}`};
+					translate: ${`calc(10rem * ${spotCoordinates().x}) calc(10rem * ${spotCoordinates().y})`};
+				}
+				`
 				return (
 					<>
 						<Show when={isTouch()}>
-							<button class="button" style={{ 'position': 'fixed', 'height': '80%', 'left': 0, 'width': '5rem', 'margin': '3rem 2rem', 'display': 'flex', 'justify-content': 'center', 'flex-direction': 'column' }} onClick={close}>
-								<div style={{ width: '2rem' }} innerHTML={arrowLeft}></div>
+							<button class="button exit-button" onClick={close}>
+								<div class="exit-icon" innerHTML={arrowLeft}></div>
 								<div>Exit</div>
 							</button>
-							<div style={{ 'position': 'fixed', 'width': '8rem', 'height': '8rem', 'background': 'hsl(0,0%,0%, 20%)', 'border-radius': '8rem', 'border': `solid ${isPrimaryPressed() ? '0.3rem' : '0.1rem'} hsl(0, 0%,100%, 30% )`, 'bottom': '0%', 'right': '0%', 'display': 'grid', 'place-items': 'center', 'margin': '7rem' }} onTouchStart={interact(1, 'primary')} onTouchEnd={interact(0, 'primary')}>
-								<div innerHTML={spoonIcon} style={{ color: 'white', width: '50%', height: '50%' }}></div>
+							<div class="spoon" onTouchStart={interact(1, 'primary')} onTouchEnd={interact(0, 'primary')}>
+								<div class="spoon-icon" innerHTML={spoonIcon}></div>
 							</div>
 						</Show>
 						<Portal mount={cauldron().interactionContainer.element}>
-							<div style={{ 'display': 'grid', 'grid-template-columns': '1fr auto 1fr', 'place-items': 'center', 'gap': '3rem' }}>
-								<div style={{ position: 'relative' }}>
-									<div style={{ 'position': 'absolute', 'translate': '-50% -100%', 'font-size': '2rem', 'color': 'white', 'left': '50%' }}>Progress</div>
-									<div style={{ 'width': '2rem', 'height': '20rem', 'border': 'solid 0.5rem hsl(0,0%,0%,0.7)', 'border-radius': '1rem', 'overflow': 'hidden', 'position': 'relative' }}>
-										<div style={{ 'height': `${progress()}%`, 'width': '100%', 'background': 'linear-gradient(0, #5ab552,#9de64e)', 'margin-top': 'auto', 'position': 'absolute', 'bottom': 0 }}></div>
+							<div class="progress-container">
+								<div class="progress">
+									<div class="progress-label">Progress</div>
+									<div class="progress-bar">
+										<div class="progress-fill"></div>
 									</div>
 								</div>
-								<div style={{ 'width': '20rem', 'height': '20rem', 'border-radius': '200rem', 'position': 'relative' }}>
+								<div class="output-container">
 									<Show when={output()}>
 										{output => (
 											<>
-												<div style={{ position: 'absolute', left: '50%', translate: '-50%', bottom: 'calc(100% + 2rem)' }}>
+												<div class="output">
 													<ItemDisplay item={output()}></ItemDisplay>
 												</div>
-												<div style={{ 'position': 'absolute', 'width': '5rem', 'height': '5rem', 'border': `solid ${spotColor()} ${spotSize()}`, 'border-radius': '300rem', 'transform': 'translate(-50%,-50%)', 'top': '50%', 'left': '50%', 'translate': `calc(10rem * ${spotCoordinates().x}) calc(10rem * ${spotCoordinates().y})`, 'box-sizing': 'content-box' }}></div>
+												<div class="spot"></div>
 											</>
 										)}
 									</Show>

@@ -167,9 +167,12 @@ export const props: PlacableProp<propNames>[] = [
 		name: 'bench',
 		models: ['bench'],
 		bundle: (entity) => {
+			const minigameContainer = new CSS2DObject(document.createElement('div'))
+			minigameContainer.position.set(0, 5, 0)
 			return {
 				...entity,
 				...menuInputMap(),
+				minigameContainer,
 				interactable: Interactable.Chop,
 				onPrimary: e => ecs.addComponent(e, 'menuType', MenuType.Bench),
 				onSecondary: e => ecs.addComponent(e, 'menuType', MenuType.BenchGame),
