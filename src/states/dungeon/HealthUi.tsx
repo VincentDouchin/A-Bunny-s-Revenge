@@ -7,8 +7,9 @@ import { save } from '@/global/save'
 import { thumbnailRenderer } from '@/lib/thumbnailRenderer'
 
 export const HealthUi = (props: { player: With<Entity, 'maxHealth' | 'currentHealth'> }) => {
-	const health = ui.sync(() => props.player.currentHealth / props.player.maxHealth.value)
+	const health = ui.sync(() => `${props.player.currentHealth / props.player.maxHealth.value * 100}%`)
 	const max = ui.sync(() => Math.floor(props.player.maxHealth.value))
+	const maxWidth = createMemo(() => `${max()}rem`)
 	const current = ui.sync(() => Math.floor(props.player.currentHealth))
 	const healthDisplay = createMemo(() => `${current()} / ${max()}`)
 	const acornRenderer = thumbnailRenderer(64)
@@ -37,7 +38,7 @@ export const HealthUi = (props: { player: With<Entity, 'maxHealth' | 'currentHea
 	}
 	#health-ui .wrapper{
 		height: 4rem;
-		width: calc(${String(max())}rem * 2); 
+		width: calc(${maxWidth()} * 2); 
 		border-radius: 1.5rem; 
 		background: hsl(0,0%, 100%, 30%);
 		overflow: hidden; 
@@ -45,7 +46,7 @@ export const HealthUi = (props: { player: With<Entity, 'maxHealth' | 'currentHea
 	}
 	#health-ui .health-amount{
 		height: 100%;
-		width: ${String(health() * 100)}%;
+		width: ${health()};
 		box-shadow: hsl(0,0%,0%, 30%) 0rem -0.5rem 0rem 0rem inset;
 		position:absolute;
 		top:0;
