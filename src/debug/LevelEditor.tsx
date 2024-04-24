@@ -106,7 +106,7 @@ export const LevelEditor = () => {
 	})
 
 	css/* css */`
-	.thumbnail canvas{
+	:global(.thumbnail canvas){
 		width:50px;
 	}`
 
