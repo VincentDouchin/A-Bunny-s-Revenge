@@ -302,7 +302,7 @@ export const meleeEnemyBehaviorPlugin = enemyBehavior(EnemyAttackStyle.Melee)({
 	hit,
 	stun,
 	wander,
-	running: running(30),
+	running: running(10),
 	dead: {},
 	attack: {
 		enter: async (e, setState) => {
