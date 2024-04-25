@@ -13,12 +13,13 @@ import { honeyDrippingParticles, honeySplatParticlesBundle } from '@/particles/h
 import { pollenBundle } from '@/particles/pollenParticles'
 import { projectileTrail } from '@/particles/projectileTrail'
 import { sleep } from '@/utils/sleep'
+import { inMap } from '@/lib/hierarchy'
 
 const projectileBundle = (rotation: Quaternion, origin: Vector3, strength: Stat) => {
 	const model = new Mesh(new ConeGeometry(1, 4, 7), new MeshToonMaterial({ color: 0x2C1E31 }))
 	model.rotateX(Math.PI / 2)
-
 	return {
+		...inMap(),
 		projectile: true,
 		deathTimer: new Timer(3000, false),
 		model,
@@ -64,6 +65,7 @@ export const honeyProjectile = ({ group, rotation }: With<Entity, 'group' | 'rot
 	bundle.colliderDesc.setMass(1)
 	ecs.add ({
 		...bundle,
+		...inMap(),
 		rotation: rotation.clone(),
 		position: new Vector3(0, 5, 0).add(origin),
 		honeyProjectile: true,
@@ -83,6 +85,7 @@ export const honeySplat = () => {
 		if (honey.position.y <= 1) {
 			ecs.remove(honey)
 			ecs.add({
+				...inMap(),
 				...honeySplatParticlesBundle(),
 				position: honey.position.clone().setY(1),
 				honeySpot: createModifier('beeBoss', 'speed', -50, ModStage.Total, ModType.Percent, false, 5000),
@@ -110,6 +113,7 @@ export const pollenAttack = async ({ group }: With<Entity, 'group'>) => {
 		const angle = i / max * Math.PI * 2 + (Math.random() - 0.5)
 		const distance = between(20, 70)
 		ecs.add({
+			...inMap(),
 			position: new Vector3(Math.cos(angle) * distance, 0, Math.sin(angle) * distance).add(origin),
 			...pollenBundle(),
 			pollen: true,

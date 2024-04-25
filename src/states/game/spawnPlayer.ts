@@ -72,7 +72,7 @@ export const playerBundle = (health: number, addHealth: boolean, weapon: weapons
 		critDamage: new Stat(0.20),
 		attackSpeed: new Stat(1),
 		lastStep: { right: false, left: false },
-		...healthBundle(5, health),
+		...healthBundle(10, health),
 		...behaviorBundle('player', 'idle'),
 		hitTimer: new Timer(500, true),
 		dash: new Dash(1000),
