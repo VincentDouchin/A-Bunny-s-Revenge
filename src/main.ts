@@ -1,5 +1,5 @@
 import { beeBossBehaviorPlugin } from './behaviors/beeBossBehavior'
-import { chargingEnemyBehaviorPlugin, meleeEnemyBehaviorPlugin, rangeEnemyBehaviorPlugin } from './behaviors/enemyBehavior'
+import { chargingEnemyBehaviorPlugin, jumpingEnemyBehaviorPlugin, meleeEnemyBehaviorPlugin, rangeEnemyBehaviorPlugin } from './behaviors/enemyBehavior'
 import { playerBehaviorPlugin } from './behaviors/playerBehavior'
 import { debugPlugin } from './debug/debugPlugin'
 import { updateAnimations } from './global/animations'
@@ -69,7 +69,7 @@ gameState
 		runIf(() => !pausedState.enabled, playerSteps, dayNight, updateTimeUniforms, applyDeathTimer, () => gameTweens.update(time.elapsed)),
 		runIf(() => !openMenuState.enabled, pauseGame, interact),
 	)
-	.addPlugins(playerBehaviorPlugin, rangeEnemyBehaviorPlugin, chargingEnemyBehaviorPlugin, meleeEnemyBehaviorPlugin, beeBossBehaviorPlugin)
+	.addPlugins(playerBehaviorPlugin, rangeEnemyBehaviorPlugin, chargingEnemyBehaviorPlugin, meleeEnemyBehaviorPlugin, beeBossBehaviorPlugin, jumpingEnemyBehaviorPlugin)
 	.onUpdate(collectItems, touchItem, talkToNPC, stopItems, pickupAcorn, dropBerriesOnHit, updateWeaponArc)
 	.onPostUpdate(renderGame, rotateStun)
 	.enable()

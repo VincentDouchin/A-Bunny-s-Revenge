@@ -123,7 +123,7 @@ export const enemyData: { [k in enemy]: Enemy<k> } = {
 		boss: false,
 		drops: [{ name: 'slime_dough', quantity: 1, rarity: Rarity.Common }],
 		behavior: 'enemy',
-		attackStyle: EnemyAttackStyle.Melee,
+		attackStyle: EnemyAttackStyle.Jumping,
 		animationMap: genericEnemyAnimationMap,
 	},
 	Racco_A: {

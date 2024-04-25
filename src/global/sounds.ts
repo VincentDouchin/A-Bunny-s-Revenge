@@ -21,7 +21,7 @@ export const playSFX = <K extends string = string>(soundAsset: soundAssets) => (
 			? getRandom(sound)
 			: sound
 	const soundPlayer = assets[soundAsset][selectedSound]
-	const volume = localSoundData[soundAsset][selectedSound].volume
+	const volume = localSoundData[soundAsset][selectedSound]?.volume ?? 1
 	soundPlayer.volume(volume)
 	if (options?.playbackRate) {
 		soundPlayer.rate(options.playbackRate)

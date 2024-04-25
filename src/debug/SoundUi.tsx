@@ -120,7 +120,7 @@ export const SoundUi = () => {
 																if (isPlaying()) {
 																	howl.pause()
 																} else {
-																	howl.volume(reactiveSoundData()[soundAsset][key].volume)
+																	howl.volume(reactiveSoundData()[soundAsset][key]?.volume ?? 1)
 																	howl.play()
 																	howl.once('end', () => {
 																		setIsPlaying(false)
@@ -136,7 +136,7 @@ export const SoundUi = () => {
 																	{key}
 																	<button onClick={play}>{isPlaying() ? 'pause' : 'play'}</button>
 																	<input
-																		value={reactiveSoundData()[soundAsset][key].volume}
+																		value={reactiveSoundData()[soundAsset][key]?.volume ?? 1}
 																		onChange={updateVolume}
 																		type="number"
 																		min="0"
@@ -145,7 +145,7 @@ export const SoundUi = () => {
 																	>
 																	</input>
 																	<input
-																		value={reactiveSoundData()[soundAsset][key].volume}
+																		value={reactiveSoundData()[soundAsset][key]?.volume ?? 1}
 																		type="range"
 																		min="0"
 																		max="2"
@@ -183,7 +183,7 @@ export const SoundUi = () => {
 										<div class="part-container">
 											<div class="part-title">{soundAsset}</div>
 											<input
-												value={reactiveSoundData()[soundAsset][keys[0]].volume}
+												value={reactiveSoundData()[soundAsset][keys[0]]?.volume ?? 1}
 												onChange={updateVolume}
 												type="number"
 												min="0"
@@ -192,7 +192,7 @@ export const SoundUi = () => {
 											>
 											</input>
 											<input
-												value={reactiveSoundData()[soundAsset][keys[0]].volume}
+												value={reactiveSoundData()[soundAsset][keys[0]]?.volume ?? 1}
 												type="range"
 												min="0"
 												max="2"

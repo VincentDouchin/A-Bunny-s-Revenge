@@ -62,7 +62,7 @@ export const spawnTrees = (level: Level, parent: Entity) => {
 				group: new Group(),
 				size: treeSize,
 				bodyDesc: RigidBodyDesc.fixed().lockRotations().setSleeping(true),
-				colliderDesc: ColliderDesc.cylinder(treeSize.y / 2, treeSize.x / 2),
+				colliderDesc: ColliderDesc.cylinder(treeSize.y / 2, treeSize.x / 2).setTranslation(0, treeSize.y / 2, 0),
 				tree: true,
 				obstable: true,
 				withTimeUniform: true,

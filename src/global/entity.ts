@@ -63,6 +63,7 @@ export enum EnemyAttackStyle {
 	Charging,
 	Range,
 	Melee,
+	Jumping,
 	BeeBoss,
 }
 export interface States {

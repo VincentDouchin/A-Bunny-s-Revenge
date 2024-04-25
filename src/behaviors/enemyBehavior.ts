@@ -1,8 +1,8 @@
-import { ShapeType } from '@dimforge/rapier3d-compat'
+import { ColliderDesc, RigidBodyDesc, ShapeType } from '@dimforge/rapier3d-compat'
 import { Tween } from '@tweenjs/tween.js'
 import type { With } from 'miniplex'
 import { between } from 'randomish'
-import { Vector3 } from 'three'
+import { AdditiveBlending, Mesh, MeshBasicMaterial, PlaneGeometry, Vector3 } from 'three'
 import type { EntityState } from '../lib/behaviors'
 import { behaviorPlugin } from '../lib/behaviors'
 import { projectileAttack } from '../states/dungeon/attacks'
@@ -16,7 +16,7 @@ import { spawnDamageNumber } from '@/particles/damageNumber'
 import { getWorldPosition } from '@/lib/transforms'
 import { Timer } from '@/lib/timer'
 import { playSound } from '@/global/sounds'
-import { ecs, gameTweens, time, world } from '@/global/init'
+import { assets, coroutines, ecs, gameTweens, time, world } from '@/global/init'
 import { EnemyAttackStyle, Faction } from '@/global/entity'
 import type { Entity } from '@/global/entity'
 
@@ -302,7 +302,7 @@ export const meleeEnemyBehaviorPlugin = enemyBehavior(EnemyAttackStyle.Melee)({
 	hit,
 	stun,
 	wander,
-	running: running(10),
+	running: running(30),
 	dead: {},
 	attack: {
 		enter: async (e, setState) => {
@@ -320,6 +320,79 @@ export const meleeEnemyBehaviorPlugin = enemyBehavior(EnemyAttackStyle.Melee)({
 		enter: async (e, setState) => {
 			e.enemyAnimator.playAnimation('running')
 			await sleep(2000)
+			return setState('idle')
+		},
+		update: (e, setState, { touchedByPlayer, force, direction }) => {
+			if (touchedByPlayer) return setState('hit')
+			if (direction) {
+				e.movementForce.x = direction.x
+				e.movementForce.z = direction.z
+				applyRotate(e, force)
+				applyMove(e, force.multiplyScalar(0.5))
+			}
+		},
+	},
+})
+
+// ! JUMPING
+
+export const jumpingEnemyBehaviorPlugin = enemyBehavior(EnemyAttackStyle.Jumping)({
+	idle,
+	dying,
+	waitingAttack: waitingAttack(200),
+	hit,
+	stun,
+	wander,
+	running: running(30),
+	dead: {},
+	attack: {
+		enter: async (e, setState) => {
+			e.enemyAnimator.playAnimation('idle')
+			coroutines.add(function*() {
+				while (e.position.y < 25) {
+					e.movementForce.copy(new Vector3(0, 3, e.position.y / 10).applyQuaternion(e.rotation))
+					yield
+				}
+				while (e.position.y > 5) {
+					e.movementForce.copy(new Vector3(0, -3, 1).applyQuaternion(e.rotation))
+					yield
+				}
+				setState('attackCooldown')
+				e.movementForce.copy(new Vector3(0, 0, 0))
+				playSound('zapsplat_multimedia_game_sound_thump_hit_bubble_deep_underwater_88732')
+				const impact = new Mesh(new PlaneGeometry(2, 2), new MeshBasicMaterial({ map: assets.textures.circle_01, transparent: true, blending: AdditiveBlending, depthWrite: false }))
+				impact.rotateX(-Math.PI / 2)
+				const impactEntity = ecs.add({
+					model: impact,
+					faction: Faction.Enemy,
+					state: 'attack',
+					bodyDesc: RigidBodyDesc.fixed(),
+					strength: e.strength,
+					colliderDesc: ColliderDesc.cylinder(1, 1).setSensor(true),
+					position: e.position.clone(),
+				})
+				gameTweens.add(new Tween([2]).to([30], 300)
+					.onUpdate(([s]) => {
+						impact.scale.setScalar(s)
+						if (impactEntity.collider) {
+							impactEntity.collider.setRadius(s * 0.8)
+						}
+					})
+					.onComplete(() => {
+						ecs.remove(impactEntity)
+					}))
+			})
+		},
+		update: (e, setState, { force, touchedByPlayer }) => {
+			applyRotate(e, force)
+			applyMove(e, force)
+			if (touchedByPlayer) return setState('hit')
+		},
+	},
+	attackCooldown: {
+		enter: async (e, setState) => {
+			e.enemyAnimator.playAnimation('running')
+			await sleep(4000)
 			return setState('idle')
 		},
 		update: (e, setState, { touchedByPlayer, force, direction }) => {
