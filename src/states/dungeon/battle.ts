@@ -1,7 +1,7 @@
 import { Tween } from '@tweenjs/tween.js'
 import type { With } from 'miniplex'
 import { between } from 'randomish'
-import { Mesh, Vector3 } from 'three'
+import { Color, Mesh, Vector3 } from 'three'
 import { itemBundle } from '../game/items'
 import { spawnAcorns } from './acorn'
 import { CharacterMaterial } from '@/shaders/materials'
@@ -10,7 +10,7 @@ import { Faction } from '@/global/entity'
 import type { Entity } from '@/global/entity'
 import { lootPool } from '@/constants/enemies'
 
-export const flash = (entity: With<Entity, 'model'>, duration: number, damage: boolean) => {
+export const flash = (entity: With<Entity, 'model'>, duration: number, type: 'preparing' | 'damage' | 'poisoned' = 'preparing') => {
 	const tween = new Tween({ flash: 0 })
 		.to({ flash: 1 }, duration)
 		.yoyo(true)
@@ -19,8 +19,14 @@ export const flash = (entity: With<Entity, 'model'>, duration: number, damage: b
 		entity.model.traverse((node) => {
 			if (node instanceof Mesh && node.material instanceof CharacterMaterial) {
 				node.material.uniforms.flash.value = flash
-				if (damage) {
-					node.material.uniforms.flashColor.value = new Vector3(1, 1 - flash, 1 - flash)
+				if (type === 'preparing') {
+					node.material.uniforms.flashColor.value = new Vector3(1, 1, 1)
+				}
+				if (type === 'damage') {
+					node.material.uniforms.flashColor.value = new Vector3(1, 0, 0)
+				}
+				if (type === 'poisoned') {
+					node.material.uniforms.flashColor.value = new Vector3(...new Color(0x9DE64E).toArray())
 				}
 			}
 		})

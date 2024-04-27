@@ -76,7 +76,7 @@ export const beeBossBehaviorPlugin = behaviorPlugin(
 	},
 	rangeAttack: {
 		enter: async (e, setState) => {
-			flash(e, 1000, false)
+			flash(e, 1000, 'preparing')
 			await sleep(1000)
 			const rangeAttack = getRandom(rangedAttacks())
 			rangeAttack(e)
@@ -95,7 +95,7 @@ export const beeBossBehaviorPlugin = behaviorPlugin(
 	waitingAttack: {
 		enter: async (e, setState) => {
 			e.enemyAnimator.playAnimation('idle')
-			flash(e, 200, false)
+			flash(e, 200, 'preparing')
 			await sleep(200)
 			setState('attack')
 		},
@@ -128,7 +128,7 @@ export const beeBossBehaviorPlugin = behaviorPlugin(
 				spawnDamageNumber(damage, e, crit)
 			}
 			gameTweens.add(new Tween(e.group.scale).to(new Vector3(0.8, 1.2, 0.8), 200).repeat(1).yoyo(true))
-			flash(e, 200, true)
+			flash(e, 200, 'damage')
 			await e.enemyAnimator.playOnce('hit')
 			if (e.currentHealth <= 0) {
 				return setState('dying')

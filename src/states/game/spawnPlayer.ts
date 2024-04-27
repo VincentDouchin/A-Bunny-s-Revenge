@@ -77,6 +77,7 @@ export const playerBundle = (health: number, addHealth: boolean, weapon: weapons
 		hitTimer: new Timer(500, true),
 		dash: new Dash(1000),
 		sneeze: new Timer(2000, false),
+		poisoned: new Timer(500, false),
 		targetRotation: new Quaternion(),
 		combo: {
 			lastAttack: 0,

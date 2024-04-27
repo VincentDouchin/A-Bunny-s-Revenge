@@ -128,8 +128,8 @@ const characterExtension = new MaterialExtension({ flash: 0, flashColor: new Vec
 	.frag(
 		addUniform('flash', 'float'),
 		addUniform('flashColor', 'vec3'),
-		override('gl_FragColor', `
-	vec4((outgoingLight2.rgb + vec3(flash)/2.) * flashColor , opacity);
+		override('gl_FragColor', /* glsl */`
+			vec4(mix(outgoingLight2.rgb,flashColor,flash/2. ), opacity);
 	`),
 	)
 export const waterExtension = new MaterialExtension({

@@ -3,7 +3,9 @@ import type { With } from 'miniplex'
 import { ConeGeometry, Mesh, MeshBasicMaterial, MeshToonMaterial, Quaternion, SphereGeometry, Vector3 } from 'three'
 
 import { between } from 'randomish'
-import { type Entity, Faction } from '@/global/entity'
+import { Faction } from '@/global/entity'
+import type { ComponentsOfType, Entity } from '@/global/entity'
+
 import { ecs, time, world } from '@/global/init'
 import { modelColliderBundle } from '@/lib/models'
 import { ModStage, ModType, type Stat, createModifier } from '@/lib/stats'
@@ -122,22 +124,26 @@ export const pollenAttack = async ({ group }: With<Entity, 'group'>) => {
 	}
 }
 
-const sneezeQuery = ecs.with('sneeze', 'position')
-const pollenQuery = ecs.with('pollen', 'position')
-export const tickSneeze = () => {
-	for (const entity of sneezeQuery) {
-		let closeBy = false
-		for (const pollen of pollenQuery) {
-			if (entity.position.distanceTo(pollen.position) < 10) {
-				entity.sneeze.tick(time.delta)
-				closeBy = true
+const tickDebuff = (timer: ComponentsOfType<Timer<false>>, affect: ComponentsOfType<true>, distance: number) => {
+	const affectedQuery = ecs.with(timer, 'position')
+	const affectQuery = ecs.with(affect, 'position')
+	return () => {
+		for (const entity of affectedQuery) {
+			let closeBy = false
+			for (const affectEntity of affectQuery) {
+				if (entity.position.distanceTo(affectEntity.position) < distance) {
+					entity[timer].tick(time.delta)
+					closeBy = true
+				}
 			}
-		}
-		if (!closeBy) {
-			entity.sneeze.tick(-time.delta / 5)
+			if (!closeBy && !entity[timer].finished()) {
+				entity[timer].tick(-time.delta / 5)
+			}
 		}
 	}
 }
+export const tickSneeze = tickDebuff('sneeze', 'pollen', 10)
+export const tickPoison = tickDebuff('poisoned', 'poison', 4)
 
 const projectilesQuery = ecs.with('projectile', 'collider')
 const obstaclesQuery = ecs.with('obstacle', 'collider')

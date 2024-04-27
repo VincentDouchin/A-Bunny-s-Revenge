@@ -1,6 +1,7 @@
 export class Timer<F extends boolean> {
 	current: number
 	duration: number
+	enabled = true
 	constructor(duration: number, start: F) {
 		this.duration = duration
 		this.current = start ? duration : 0
@@ -8,10 +9,13 @@ export class Timer<F extends boolean> {
 
 	reset() {
 		this.current = 0
+		this.enabled = true
 	}
 
 	tick(delta: number) {
-		this.current = Math.max(0, Math.min(this.duration, this.current + delta))
+		if (this.enabled) {
+			this.current = Math.max(0, Math.min(this.duration, this.current + delta))
+		}
 	}
 
 	percent() {
@@ -19,7 +23,7 @@ export class Timer<F extends boolean> {
 	}
 
 	finished() {
-		return this.current === this.duration
+		return this.current === this.duration && this.enabled
 	}
 
 	running() {

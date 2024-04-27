@@ -67,7 +67,7 @@ export enum EnemyAttackStyle {
 	BeeBoss,
 }
 export interface States {
-	player: 'idle' | 'running' | 'attack' | 'dying' | 'dead' | 'picking' | 'dash' | 'hit' | 'stun'
+	player: 'idle' | 'running' | 'attack' | 'dying' | 'dead' | 'picking' | 'dash' | 'hit' | 'stun' | 'poisoned'
 	enemy: 'idle' | 'running' | 'attack' | 'hit' | 'dying' | 'dead' | 'waitingAttack' | 'attackCooldown' | 'stun' | 'wander'
 	boss: 'idle' | 'running' | 'rangeAttack' | 'attack' | 'dying' | 'dead' | 'waitingAttack' | 'attackCooldown' | 'hit'
 }
@@ -204,6 +204,7 @@ export interface Entity {
 	attackPattern?: 'melee' | 'distance'
 	attackStyle?: EnemyAttackStyle
 	sneeze?: Timer<false>
+	poisoned?: Timer<false>
 	pollen?: true
 	// ! AI
 	navGrid?: NavGrid
@@ -255,11 +256,16 @@ export interface Entity {
 	dashDisplay?: Sprite
 	// ! Stun
 	stun?: Group
-	hitTimer?: Timer<false>
+	hitTimer?: Timer<true>
 	// ! Wander
 	wander?: { target: Vector3, cooldown: Timer<false> }
 	// ! Debuffs
 	debuffsContainer?: CSS2DObject
+	// ! Trail
+	trailMaker?: true
+	trail?: { origin: Entity, timer: Timer<false> }
+	poison?: true
+
 }
 export type Bundle<C extends keyof Entity> = () => With<Entity, C>
 

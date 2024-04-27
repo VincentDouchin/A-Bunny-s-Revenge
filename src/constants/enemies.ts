@@ -2,8 +2,8 @@ import type { characters } from '@assets/assets'
 import type { Item } from './items'
 import { Rarity } from './items'
 
+import type { EnemyAnimations, Entity, States } from '@/global/entity'
 import { EnemyAttackStyle } from '@/global/entity'
-import type { EnemyAnimations, States } from '@/global/entity'
 import { getRandom, range } from '@/utils/mapFunctions'
 
 export const lootPool = (lootQuantity: number, lootRarity: number, drops: Drop[]) => {
@@ -33,8 +33,9 @@ export interface Enemy<Name extends keyof Animations> {
 	attackStyle: EnemyAttackStyle
 	drops: Drop[]
 	animationMap: Record<EnemyAnimations, Animations[Name]>
+	components?: () => Entity
 }
-const enemyNames = ['Armabee', 'Armabee_Evolved', 'Shaga_A', 'Big_Boar_A', 'Snailo_A', 'Porin_A', 'Forest_Butterfly_A', 'Racco_A', 'Platopo_A'] as const satisfies readonly characters[]
+const enemyNames = ['Armabee', 'Armabee_Evolved', 'Shaga_A', 'Big_Boar_A', 'Snailo_A', 'Snailo_B', 'Porin_A', 'Forest_Butterfly_A', 'Racco_A', 'Platopo_A'] as const satisfies readonly characters[]
 
 export type enemy = (typeof enemyNames)[number]
 
@@ -115,6 +116,20 @@ export const enemyData: { [k in enemy]: Enemy<k> } = {
 		attackStyle: EnemyAttackStyle.Charging,
 		animationMap: genericEnemyAnimationMap,
 	},
+	Snailo_B: {
+		name: 'Snailo',
+		health: 3,
+		scale: 1.4,
+		speed: 1,
+		boss: false,
+		drops: [{ name: 'steak', quantity: 1, rarity: Rarity.Common }],
+		behavior: 'enemy',
+		attackStyle: EnemyAttackStyle.Charging,
+		animationMap: genericEnemyAnimationMap,
+		components: () => ({
+			trailMaker: true,
+		}),
+	},
 	Porin_A: {
 		name: 'Porin',
 		health: 4,
@@ -167,7 +182,7 @@ export interface EnemyGroup {
 }
 export const enemyGroups: EnemyGroup[] = [
 	{
-		enemies: ['Armabee', 'Armabee', 'Armabee'],
+		enemies: ['Armabee', 'Armabee', 'Armabee', 'Armabee', 'Armabee'],
 	},
 	{
 		enemies: [],
@@ -177,15 +192,15 @@ export const enemyGroups: EnemyGroup[] = [
 		enemies: ['Shaga_A', 'Shaga_A', 'Snailo_A'],
 	},
 	{
-		enemies: ['Big_Boar_A', 'Porin_A', 'Porin_A'],
+		enemies: ['Shaga_A', 'Shaga_A', 'Porin_A', 'Porin_A'],
 	},
 	{
 		enemies: ['Snailo_A', 'Racco_A', 'Racco_A'],
 	},
 	{
-		enemies: ['Platopo_A', 'Racco_A', 'Shaga_A'],
+		enemies: ['Platopo_A', 'Racco_A', 'Racco_A'],
 	},
 	{
-		enemies: ['Forest_Butterfly_A', 'Snailo_A', 'Porin_A'],
+		enemies: ['Forest_Butterfly_A', 'Snailo_B', 'Forest_Butterfly_A', 'Forest_Butterfly_A'],
 	},
 ]

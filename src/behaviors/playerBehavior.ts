@@ -13,9 +13,11 @@ import { campState } from '@/global/states'
 import { dash } from '@/particles/dashParticles'
 import { stunBundle } from '@/states/dungeon/stun'
 import { sleep } from '@/utils/sleep'
+import { poisonBubbles } from '@/states/dungeon/poisonTrail'
+import { spawnDamageNumber } from '@/particles/damageNumber'
 
 const ANIMATION_SPEED = 1
-const playerComponents = ['playerAnimator', 'movementForce', 'speed', 'body', 'rotation', 'playerControls', 'combo', 'attackSpeed', 'dash', 'collider', 'currentHealth', 'model', 'hitTimer', 'size', 'sneeze', 'targetRotation'] as const satisfies readonly (keyof Entity)[]
+const playerComponents = ['playerAnimator', 'movementForce', 'speed', 'body', 'rotation', 'playerControls', 'combo', 'attackSpeed', 'dash', 'collider', 'currentHealth', 'model', 'hitTimer', 'size', 'sneeze', 'targetRotation', 'poisoned', 'size', 'position'] as const satisfies readonly (keyof Entity)[]
 type PlayerComponents = (typeof playerComponents)[number]
 const playerQuery = ecs.with(...playerComponents)
 const enemyQuery = ecs.with('faction', 'state', 'strength', 'collider').where(e => e.faction === Faction.Enemy && e.state === 'attack')
@@ -36,15 +38,17 @@ export const playerBehaviorPlugin = behaviorPlugin(
 	(e) => {
 		const attackingEnemy = getAttackingEnemy(e)
 		const sneezing = e.sneeze.finished()
+		const poisoned = e.poisoned.finished()
 		const canDash = e.dash.finished() && !e.speed.hasModifier('beeBoss')
-		return { ...getMovementForce(e), touchedByEnemy: attackingEnemy, sneezing, canDash }
+		return { ...getMovementForce(e), touchedByEnemy: attackingEnemy, sneezing, poisoned, canDash }
 	},
 )({
 	idle: {
 		enter: e => e.playerAnimator.playAnimation('idle'),
-		update: (e, setState, { isMoving, force, touchedByEnemy, sneezing, canDash }) => {
+		update: (e, setState, { isMoving, force, touchedByEnemy, sneezing, canDash, poisoned }) => {
 			if (touchedByEnemy) return setState('hit')
 			if (sneezing) return setState('stun')
+			if (poisoned) return setState('poisoned')
 			if (isMoving) {
 				applyRotate(e, force)
 				setState('running')
@@ -61,9 +65,10 @@ export const playerBehaviorPlugin = behaviorPlugin(
 	},
 	running: {
 		enter: e => e.playerAnimator.playAnimation('running'),
-		update: (e, setState, { isMoving, force, touchedByEnemy, sneezing, canDash }) => {
+		update: (e, setState, { isMoving, force, touchedByEnemy, sneezing, canDash, poisoned }) => {
 			if (touchedByEnemy) return setState('hit')
 			if (sneezing) return setState('stun')
+			if (poisoned) return setState('poisoned')
 			if (isMoving) {
 				applyRotate(e, force)
 				applyMove(e, force)
@@ -97,9 +102,10 @@ export const playerBehaviorPlugin = behaviorPlugin(
 			e.combo.lastAttack = 0
 			setupState('idle')
 		},
-		update: (e, setState, { isMoving, force, touchedByEnemy, sneezing }) => {
+		update: (e, setState, { isMoving, force, touchedByEnemy, sneezing, poisoned }) => {
 			if (touchedByEnemy) return setState('hit')
 			if (sneezing) return setState('stun')
+			if (poisoned) return setState('poisoned')
 			if (isMoving) {
 				applyRotate(e, force)
 				applyMove(e, force.multiplyScalar(0.5))
@@ -144,7 +150,7 @@ export const playerBehaviorPlugin = behaviorPlugin(
 					ecs.remove(touchedByEnemy)
 				}
 				addCameraShake()
-				flash(e, 200, true)
+				flash(e, 200, 'damage')
 				await e.playerAnimator.playOnce('hit', { timeScale: 1.3 })
 				if (e.currentHealth <= 0) setState('dying')
 				setState('idle')
@@ -158,9 +164,27 @@ export const playerBehaviorPlugin = behaviorPlugin(
 		enter: async (e, setState) => {
 			ecs.update(e, stunBundle(e.size.y))
 			await sleep(1000)
-			ecs.removeComponent(e, 'stun')
 			e.sneeze.reset()
 			setState('idle')
+		},
+	},
+	poisoned: {
+		enter: (e, setState) => {
+			e.poisoned.enabled = false
+			flash(e, 500, 'poisoned')
+			setState('idle')
+			ecs.add({
+				parent: e,
+				position: new Vector3(0, 10, 0),
+				emitter: poisonBubbles(false),
+				autoDestroy: true,
+			})
+			takeDamage(e, 1)
+			addCameraShake()
+			spawnDamageNumber(1, e, false)
+			sleep(2000).then(() => {
+				e.poisoned.reset()
+			})
 		},
 	},
 },

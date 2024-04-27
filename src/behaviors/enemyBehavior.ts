@@ -139,7 +139,7 @@ const wander: EnemyState = {
 const waitingAttack = (cooldown: number): EnemyState => ({
 	enter: async (e, setState) => {
 		e.enemyAnimator.playAnimation('idle')
-		flash(e, cooldown, false)
+		flash(e, cooldown, 'preparing')
 		await sleep(cooldown)
 
 		return setState('attack')
@@ -163,7 +163,7 @@ const hit: EnemyState = {
 			e.body.applyImpulse(force, true)
 			// ! damage flash
 			gameTweens.add(new Tween(e.group.scale).to(new Vector3(0.8, 1.2, 0.8), 200).repeat(1).yoyo(true))
-			flash(e, 200, true)
+			flash(e, 200, 'damage')
 			await e.enemyAnimator.playClamped('hit')
 			if (e.currentHealth <= 0) {
 				return setState('dying')

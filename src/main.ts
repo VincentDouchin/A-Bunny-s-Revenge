@@ -18,13 +18,14 @@ import { tickModifiers } from './lib/stats'
 import { transformsPlugin } from './lib/transforms'
 import { spawnGodRay } from './shaders/godrays'
 import { pickupAcorn } from './states/dungeon/acorn'
-import { applyArchingForce, detroyProjectiles, honeySplat, stepInHoney, tickSneeze } from './states/dungeon/attacks'
+import { applyArchingForce, detroyProjectiles, honeySplat, stepInHoney, tickPoison, tickSneeze } from './states/dungeon/attacks'
 import { applyDeathTimer, spawnDrops, tickHitCooldown } from './states/dungeon/battle'
 import { dropBerriesOnHit } from './states/dungeon/bushes'
 import { spawnWeaponsChoice } from './states/dungeon/chooseWeapon'
 import { removeEnemyFromSpawn, spawnEnemies } from './states/dungeon/enemies'
 import { killAnimation, killEntities } from './states/dungeon/health'
 import { addHealthBarContainer } from './states/dungeon/healthBar'
+import { spawnPoisonTrail } from './states/dungeon/poisonTrail'
 import { endBattleSpawnChest } from './states/dungeon/spawnChest'
 import { rotateStun } from './states/dungeon/stun'
 import { harvestCrop, initPlantableSpotsInteractions, interactablePlantableSpot, plantSeed, updateCropsSave } from './states/farm/farming'
@@ -100,7 +101,7 @@ dungeonState
 	.addSubscriber(spawnDrops, losingBattle, removeEnemyFromSpawn, applyArchingForce)
 	.onEnter(spawnDungeon, spawnLevelData, generatenavGrid, spawnEnemies, spawnPlayerDungeon, spawnBasket, moveCamera(true))
 	.onUpdate(runIf(canPlayerMove, allowDoorCollision, collideWithDoor, harvestCrop, killEntities, basketFollowPlayer()), detroyProjectiles)
-	.onUpdate(runIf(() => !pausedState.enabled, tickHitCooldown, tickModifiers('speed')), stepInHoney, tickSneeze, endBattleSpawnChest)
+	.onUpdate(runIf(() => !pausedState.enabled, tickHitCooldown, tickModifiers('speed'), tickSneeze, tickPoison), stepInHoney, endBattleSpawnChest, spawnPoisonTrail)
 	.onUpdate(honeySplat)
 	.onExit(despawnOfType('map'))
 pausedState
