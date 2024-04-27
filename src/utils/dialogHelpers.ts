@@ -13,7 +13,6 @@ import { addTag } from '@/lib/hierarchy'
 import type { Item } from '@/constants/items'
 import { addItem, removeItem, save, updateSave } from '@/global/save'
 import { playSound } from '@/global/sounds'
-import { basketFollowPlayer } from '@/states/game/spawnBasket'
 
 const playerQuery = ecs.with('player', 'position', 'collider')
 const movingPlayerQuery = playerQuery.with('movementForce')
@@ -41,7 +40,6 @@ export const movePlayerTo = (dest: Vector3) => {
 			coroutines.add(function* () {
 				while (player.position.distanceTo(dest) > 2) {
 					player.movementForce = dest.clone().sub(player.position).normalize()
-					basketFollowPlayer()
 					yield
 				}
 				player.movementForce.setScalar(0)

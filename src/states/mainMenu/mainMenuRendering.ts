@@ -2,21 +2,21 @@ import { Easing, Tween } from '@tweenjs/tween.js'
 import type { MeshStandardMaterial } from 'three'
 import { CanvasTexture, Group, Mesh, MeshBasicMaterial, PerspectiveCamera, Raycaster, Scene, Vector2, Vector3 } from 'three'
 
-import { basketFollowPlayer, spawnBasket } from '../game/spawnBasket'
+import { enableBasketUi, spawnBasket } from '../game/spawnBasket'
 import { playerBundle } from '../game/spawnPlayer'
 import { updateCameraZoom } from '@/global/camera'
 import { params } from '@/global/context'
 import { RenderGroup } from '@/global/entity'
-import { assets, coroutines, ecs, gameTweens } from '@/global/init'
+import { assets, ecs, gameTweens } from '@/global/init'
 import { menuInputMap } from '@/global/inputMaps'
 import { getTargetSize, renderer, updateRenderSize } from '@/global/rendering'
+import { playSound } from '@/global/sounds'
 import { cutSceneState, mainMenuState } from '@/global/states'
 import type { direction } from '@/lib/directions'
 import { windowEvent } from '@/lib/uiManager'
 import { drawnHouseShader } from '@/shaders/drawnHouseShader'
 import { cloneCanvas, imgToCanvas } from '@/utils/buffer'
 import { doorQuery, leaveHouse, setSensor } from '@/utils/dialogHelpers'
-import { playSound } from '@/global/sounds'
 
 export type MenuOptions = 'Continue' | 'New Game' | 'Settings' | 'Credits'
 
@@ -309,15 +309,9 @@ export const spawnPlayerContinueGame = async () => {
 			position: house.worldPosition.clone(),
 			rotation: house.rotation.clone(),
 		})
-		const basket = spawnBasket()
-		basket?.collider?.setSensor(true)
-		const backetFollow = basketFollowPlayer(1, 2)
-		coroutines.add(function*() {
-			while (cutSceneState.enabled) {
-				backetFollow()
-				yield
-			}
-		})
+		spawnBasket()
+
+		enableBasketUi()
 		await leaveHouse()
 	}
 	cutSceneState.disable()

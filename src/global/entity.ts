@@ -67,6 +67,7 @@ export enum EnemyAttackStyle {
 	BeeBoss,
 }
 export interface States {
+	basket: 'idle' | 'running'
 	player: 'idle' | 'running' | 'attack' | 'dying' | 'dead' | 'picking' | 'dash' | 'hit' | 'stun' | 'poisoned'
 	enemy: 'idle' | 'running' | 'attack' | 'hit' | 'dying' | 'dead' | 'waitingAttack' | 'attackCooldown' | 'stun' | 'wander'
 	boss: 'idle' | 'running' | 'rangeAttack' | 'attack' | 'dying' | 'dead' | 'waitingAttack' | 'attackCooldown' | 'hit'
@@ -123,6 +124,7 @@ export interface Entity {
 	behaviorController?: keyof States
 	// ! Animations
 	playerAnimator?: Animator<PlayerAnimations>
+	basketAnimator?: Animator<Animations['Basket']>
 	enemyAnimator?: Animator<EnemyAnimations>
 	ovenAnimator?: Animator<Animations['BunnyOvenPacked']>
 	houseAnimator?: Animator<Animations['House']>

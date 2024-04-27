@@ -1,3 +1,4 @@
+import { basketBehaviorPlugin } from './behaviors/basketBehavior'
 import { beeBossBehaviorPlugin } from './behaviors/beeBossBehavior'
 import { chargingEnemyBehaviorPlugin, jumpingEnemyBehaviorPlugin, meleeEnemyBehaviorPlugin, rangeEnemyBehaviorPlugin } from './behaviors/enemyBehavior'
 import { playerBehaviorPlugin } from './behaviors/playerBehavior'
@@ -37,7 +38,7 @@ import { bobItems, collectItems, popItems, stopItems } from './states/game/items
 import { canPlayerMove, movePlayer, playerSteps, savePlayerFromTheEmbraceOfTheVoid, savePlayerPosition, stopPlayer } from './states/game/movePlayer'
 import { pauseGame } from './states/game/pauseGame'
 import { target } from './states/game/sensor'
-import { basketFollowPlayer, enableBasketUi, spawnBasket } from './states/game/spawnBasket'
+import { enableBasketUi, spawnBasket } from './states/game/spawnBasket'
 import { allowDoorCollision, collideWithDoor, collideWithDoorCamp, collideWithDoorClearing, doorLocking, unlockDoorClearing } from './states/game/spawnDoor'
 import { generatenavGrid, spawnCrossRoad, spawnDungeon, spawnFarm, spawnLevelData, updateTimeUniforms } from './states/game/spawnLevel'
 import { losingBattle, spawnCharacter, spawnPlayerClearing, spawnPlayerDungeon } from './states/game/spawnPlayer'
@@ -54,7 +55,7 @@ coreState
 	.onEnter(ui.render(UI), initHowler)
 	.addSubscriber(...target, resize, disablePortrait, enableFullscreen, stopOnLosingFocus)
 	.onPreUpdate(coroutines.tick, savePlayerFromTheEmbraceOfTheVoid)
-	.onUpdate(runIf(() => !pausedState.enabled, updateAnimations('enemyAnimator', 'playerAnimator', 'chestAnimator', 'houseAnimator', 'ovenAnimator'), () => time.tick()))
+	.onUpdate(runIf(() => !pausedState.enabled, updateAnimations('enemyAnimator', 'playerAnimator', 'chestAnimator', 'houseAnimator', 'ovenAnimator', 'basketAnimator'), () => time.tick()))
 	.onUpdate(inputManager.update, ui.update, moveCamera())
 	.enable()
 setupState
@@ -70,7 +71,7 @@ gameState
 		runIf(() => !pausedState.enabled, playerSteps, dayNight, updateTimeUniforms, applyDeathTimer, () => gameTweens.update(time.elapsed)),
 		runIf(() => !openMenuState.enabled, pauseGame, interact),
 	)
-	.addPlugins(playerBehaviorPlugin, rangeEnemyBehaviorPlugin, chargingEnemyBehaviorPlugin, meleeEnemyBehaviorPlugin, beeBossBehaviorPlugin, jumpingEnemyBehaviorPlugin)
+	.addPlugins(playerBehaviorPlugin, rangeEnemyBehaviorPlugin, chargingEnemyBehaviorPlugin, meleeEnemyBehaviorPlugin, beeBossBehaviorPlugin, jumpingEnemyBehaviorPlugin, basketBehaviorPlugin)
 	.onUpdate(collectItems, touchItem, talkToNPC, stopItems, pickupAcorn, dropBerriesOnHit, updateWeaponArc)
 	.onPostUpdate(renderGame, rotateStun)
 	.enable()
@@ -84,7 +85,7 @@ campState
 	.onEnter(spawnFarm, spawnLevelData, updateCropsSave, initPlantableSpotsInteractions, enableBasketUi, spawnGodRay)
 	.onEnter(runIf(() => !mainMenuState.enabled, spawnCharacter, spawnBasket), moveCamera(true))
 	.onUpdate(collideWithDoorCamp, playNightMusic)
-	.onUpdate(runIf(canPlayerMove, plantSeed, harvestCrop, openPlayerInventory, savePlayerPosition, basketFollowPlayer()))
+	.onUpdate(runIf(canPlayerMove, plantSeed, harvestCrop, openPlayerInventory, savePlayerPosition))
 	.onExit(despawnOfType('map'))
 openMenuState
 	.onEnter(playOpenSound, stopPlayer)
@@ -100,7 +101,7 @@ genDungeonState
 dungeonState
 	.addSubscriber(spawnDrops, losingBattle, removeEnemyFromSpawn, applyArchingForce)
 	.onEnter(spawnDungeon, spawnLevelData, generatenavGrid, spawnEnemies, spawnPlayerDungeon, spawnBasket, moveCamera(true))
-	.onUpdate(runIf(canPlayerMove, allowDoorCollision, collideWithDoor, harvestCrop, killEntities, basketFollowPlayer()), detroyProjectiles)
+	.onUpdate(runIf(canPlayerMove, allowDoorCollision, collideWithDoor, harvestCrop, killEntities), detroyProjectiles)
 	.onUpdate(runIf(() => !pausedState.enabled, tickHitCooldown, tickModifiers('speed'), tickSneeze, tickPoison), stepInHoney, endBattleSpawnChest, spawnPoisonTrail)
 	.onUpdate(honeySplat)
 	.onExit(despawnOfType('map'))

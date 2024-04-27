@@ -22,23 +22,26 @@ export const getInteractables = (
 		return itemsData[item.name].seed === save.selectedSeed && item.quantity > 0
 	})
 
+	if (entity) {
+		switch (entity?.interactable) {
+			case Interactable.Plant: return [
+				hasSelectedSeed ? `plant ${save.selectedSeed}` : undefined,
+				hasSeedInInventory ? 'select seed' : undefined,
+			]
+			case Interactable.Talk: return [
+				entity.currentDialog ? undefined : 'talk',
+			]
+			case Interactable.Cauldron: return ['Prepare', 'Cook']
+			case Interactable.Oven: return ['Prepare', 'Cook']
+			case Interactable.Chop: return ['Prepare', 'Cook']
+			case Interactable.WeaponStand: return ['Equip']
+			default: return [entity?.interactable]
+		}
+	}
 	if (dungeonState.enabled) {
 		return ['Attack', 'Dash']
 	}
-	switch (entity?.interactable) {
-		case Interactable.Plant:return [
-			hasSelectedSeed ? `plant ${save.selectedSeed}` : undefined,
-			hasSeedInInventory ? 'select seed' : undefined,
-		]
-		case Interactable.Talk:return [
-			entity.currentDialog ? undefined : 'talk',
-		]
-		case Interactable.Cauldron: return ['Prepare', 'Cook']
-		case Interactable.Oven: return ['Prepare', 'Cook']
-		case Interactable.Chop: return ['Prepare', 'Cook']
-		case Interactable.WeaponStand :return ['Equip']
-		default: return [entity?.interactable]
-	}
+	return []
 }
 
 const interactionQuery = ecs.with('interactable', 'interactionContainer', 'position').without('currentDialog', 'menuType')

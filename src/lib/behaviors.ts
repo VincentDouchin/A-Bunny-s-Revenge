@@ -5,8 +5,8 @@ import type { State } from '@/lib/state'
 import { entries } from '@/utils/mapFunctions'
 import { sleep } from '@/utils/sleep'
 
-export type StateDecisions<C extends keyof Entity> = (e: StateEntity<C>) => any
-export type StateFn<C extends keyof Entity, B extends keyof States, F extends StateDecisions<C>> = (
+export type StateParameters<C extends keyof Entity> = (e: StateEntity<C>) => any
+export type StateFn<C extends keyof Entity, B extends keyof States, F extends StateParameters<C>> = (
 	e: StateEntity<C>,
 	setState: (newState: States[B]) => void,
 	decisions: ReturnType<F>
@@ -14,13 +14,13 @@ export type StateFn<C extends keyof Entity, B extends keyof States, F extends St
 
 type StateEntity<C extends keyof Entity> = With<With<Entity, C>, 'behaviorController' | 'state'>
 
-export interface EntityState<C extends keyof Entity, B extends keyof States, F extends StateDecisions<C>> {
+export interface EntityState<C extends keyof Entity, B extends keyof States, F extends StateParameters<C>> {
 	enter?: StateFn<C, B, F>
 	update?: StateFn<C, B, F>
 	exit?: StateFn<C, B, F>
 }
 
-export const behaviorPlugin = <C extends keyof Entity, B extends keyof States, F extends StateDecisions<C>>(
+export const behaviorPlugin = <C extends keyof Entity, B extends keyof States, F extends StateParameters<C>>(
 	initalQuery: Query<With<Entity, C>>,
 	behaviorController: B,
 	fn: F,

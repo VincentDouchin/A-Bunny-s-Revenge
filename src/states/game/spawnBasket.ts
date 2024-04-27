@@ -1,13 +1,14 @@
 import { RigidBodyType } from '@dimforge/rapier3d-compat'
-import { Vector3 } from 'three'
+import { Quaternion, Vector3 } from 'three'
 import { clone } from 'three/examples/jsm/utils/SkeletonUtils'
 import { inventoryBundle } from './inventory'
+import { Animator } from '@/global/animator'
 import { Interactable, MenuType } from '@/global/entity'
 import { assets, ecs } from '@/global/init'
+import { behaviorBundle } from '@/lib/behaviors'
 import { inMap } from '@/lib/hierarchy'
 import { modelColliderBundle } from '@/lib/models'
 import { Stat } from '@/lib/stats'
-import { Animator } from '@/global/animator'
 
 const playerQuery = ecs.with('player', 'position', 'rotation', 'inventory', 'inventoryId', 'inventorySize')
 export const spawnBasket = () => {
@@ -23,11 +24,11 @@ export const spawnBasket = () => {
 			...inMap(),
 			basketAnimator: new Animator(bundle.model, assets.characters.Basket.animations),
 			movementForce: new Vector3(),
-			following: false,
-			followTarget: player,
+			targetRotation: new Quaternion(),
 			...bundle,
 			basket: player,
 			speed: new Stat(100),
+			...behaviorBundle('basket', 'idle'),
 		})
 	}
 }
@@ -40,26 +41,5 @@ export const enableBasketUi = () => {
 				ecs.update(entity, { menuType: MenuType.Basket })
 			},
 		})
-	}
-}
-
-const followQuery = ecs.with('followTarget', 'following', 'position', 'movementForce')
-
-export const basketFollowPlayer = (min = 20, max = 40) => () => {
-	for (const basket of followQuery) {
-		const player = basket.followTarget
-		if (player) {
-			basket.movementForce.setScalar(0)
-			const dist = player.position.distanceTo(basket.position)
-			if (basket.following && dist < min) {
-				basket.following = false
-			}
-			if (!basket.following && dist > max) {
-				basket.following = true
-			}
-			if (basket.following) {
-				basket.movementForce.add(player.position.clone().sub(basket.position).normalize())
-			}
-		}
 	}
 }
