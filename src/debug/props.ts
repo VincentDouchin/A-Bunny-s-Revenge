@@ -2,7 +2,7 @@ import type { models, vegetation } from '@assets/assets'
 import { ActiveCollisionTypes, ColliderDesc, RigidBodyDesc } from '@dimforge/rapier3d-compat'
 import type { With } from 'miniplex'
 import type { BufferGeometry, Object3D, Object3DEventMap } from 'three'
-import { Color, Group, Mesh, MeshPhongMaterial, PointLight, Quaternion, Vector3 } from 'three'
+import { Color, DoubleSide, Group, Mesh, MeshPhongMaterial, PointLight, Quaternion, Vector3 } from 'three'
 
 import { CSS2DObject } from 'three/examples/jsm/renderers/CSS2DRenderer'
 import { clone } from 'three/examples/jsm/utils/SkeletonUtils'
@@ -96,10 +96,13 @@ export const props: PlacableProp<propNames>[] = [
 						node.add(nightLight)
 						ecs.add({ parent, nightLight })
 					}
-					if (node.name.includes('bulb') && node instanceof Mesh && node.material instanceof MeshPhongMaterial) {
-						node.material.emissive = new Color(0xFFFF00)
-						node.material.emissiveIntensity = 1
-						ecs.add({ parent, emissiveMat: node.material })
+					if (node instanceof Mesh && node.material instanceof MeshPhongMaterial) {
+						node.material.side = DoubleSide
+						if (node.name.includes('bulb')) {
+							node.material.emissive = new Color(0xFFFF00)
+							node.material.emissiveIntensity = 1
+							ecs.add({ parent, emissiveMat: node.material })
+						}
 					}
 				})
 			}
