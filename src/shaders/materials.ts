@@ -160,4 +160,4 @@ export const CharacterMaterial = extendMaterial(MeshPhongMaterial, [toonExtensio
 export const GroundMaterial = extendMaterial(MeshPhongMaterial, [toonExtension, groundExtension])
 export const WaterMaterial = extendMaterial(MeshPhongMaterial, [toonExtension, waterExtension])
 export const TreeMaterial = extendMaterial(MeshPhongMaterial, [toonExtension, treeExtension])
-export const GrassMaterial = extendMaterial(MeshPhongMaterial, [toonExtension, grassExtension])
+export const GrassMaterial = extendMaterial(MeshPhongMaterial, [toonExtension, grassExtension], { name: 'vegetation' })

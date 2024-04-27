@@ -288,7 +288,7 @@ export const spawnLevelData: System<FarmRessources | DungeonRessources | void> =
 				const entity = {
 					rotation,
 					position,
-					...getBoundingBox(entityData.model, model, colliderData),
+					...getBoundingBox(entityData.model, model, colliderData, entityData.scale ?? 1),
 					entityId,
 					model,
 					...inMap(),
@@ -304,11 +304,17 @@ export const spawnLevelData: System<FarmRessources | DungeonRessources | void> =
 	}
 }
 
-const withTimeUniformQuery = ecs.with('withTimeUniform')
+const withTimeUniformQuery = ecs.with('withTimeUniform', 'position')
 export const updateTimeUniforms = () => {
 	for (const entity of withTimeUniformQuery) {
-		if (entity.model instanceof Mesh)
-			entity.model.material.uniforms.time.value = time.elapsed / 1000
+		if (entity.model) {
+			entity.model.traverse((node) => {
+				if (node instanceof Mesh) {
+					node.material.uniforms.time.value = time.elapsed / 1000
+					node.material.uniforms.needsUpdate = true
+				}
+			})
+		}
 		if (entity.instanceHandle) {
 			entity.instanceHandle.setUniform('time', time.elapsed / 1000)
 		}

@@ -82,8 +82,8 @@ mainMenuState
 	.onExit(removeStateEntity(mainMenuState), spawnPlayerContinueGame)
 campState
 	.addSubscriber(...interactablePlantableSpot)
-	.onEnter(spawnFarm, spawnLevelData, updateCropsSave, initPlantableSpotsInteractions, enableBasketUi, spawnGodRay)
-	.onEnter(runIf(() => !mainMenuState.enabled, spawnCharacter, spawnBasket), moveCamera(true))
+	.onEnter(spawnFarm, spawnLevelData, updateCropsSave, initPlantableSpotsInteractions, spawnGodRay)
+	.onEnter(runIf(() => !mainMenuState.enabled, spawnCharacter, spawnBasket, enableBasketUi), moveCamera(true))
 	.onUpdate(collideWithDoorCamp, playNightMusic)
 	.onUpdate(runIf(canPlayerMove, plantSeed, harvestCrop, openPlayerInventory, savePlayerPosition))
 	.onExit(despawnOfType('map'))

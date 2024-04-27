@@ -33,7 +33,7 @@ export const getModel = (key: models | customModel | vegetation) => {
 	}
 	if (key in assets.vegetation) {
 		// @ts-expect-error okok
-		return clone(assets.vegetation[key].scene)
+		return assets.vegetation[key].scene.clone()
 	}
 	// @ts-expect-error okok
 	return clone(assets.models[key].scene)
@@ -74,6 +74,17 @@ export const props: PlacableProp<propNames>[] = [
 	{
 		name: 'bush',
 		models: ['Bush_1', 'Bush_2', 'SM_Env_Bush_01', 'SM_Env_Bush_02', 'SM_Env_Bush_03', 'SM_Env_Bush_04'],
+		bundle: (entity) => {
+			entity.model.traverse((node) => {
+				if (node instanceof Mesh) {
+					node.material.uniforms.pos.value = entity.position.clone()
+				}
+			})
+			return {
+				...entity,
+				withTimeUniform: true,
+			}
+		},
 	},
 	{
 		name: 'board',

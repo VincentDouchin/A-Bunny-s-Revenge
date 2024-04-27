@@ -57,9 +57,10 @@ export class MaterialExtension {
 	}
 }
 
-export const extendMaterial = <M extends Constructor<Material>, E extends MaterialExtension[]>(Base: M, extensions: E, options?: { debug: 'fragment' | 'vertex', unpack?: boolean }) => {
+export const extendMaterial = <M extends Constructor<Material>, E extends MaterialExtension[]>(Base: M, extensions: E, options?: { debug?: 'fragment' | 'vertex', unpack?: boolean, name?: string }) => {
 	return class extends Base {
 		uniforms = {} as any
+		name = options?.name ?? ''
 		customProgramCacheKey() {
 			return Base.name + extensions.map(ext => ext.key).join('-')
 		}

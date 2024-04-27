@@ -40,21 +40,21 @@ export const EntityEditor = ({ entity, levelData, setLevelData, setSelectedEntit
 				const updateScale = (newScale: number) => {
 					setScale(newScale)
 					if (defaultScale()) {
-						setColliderData({
-							...colliderData(),
+						setColliderData(x => ({
+							...x,
 							[entityData().model]: {
 								...modelCollider(),
 								scale: newScale,
 							},
-						})
+						}))
 					} else {
-						setColliderData({
-							...colliderData(),
+						setColliderData(x => ({
+							...x,
 							[entityData().model]: {
 								...modelCollider(),
 								scale: null,
 							},
-						})
+						}))
 					}
 					updateEntity({ scale: scale() })
 				}
@@ -99,13 +99,14 @@ export const EntityEditor = ({ entity, levelData, setLevelData, setSelectedEntit
 						const size = new Vector3()
 						if (collider.size) {
 							size.set(...collider.size)
+							size.multiplyScalar(scale())
 						} else {
 							const boxSize = new Box3().setFromObject(model)
 							boxSize.getSize(size)
 						}
 						ecs.update(entity(), {
 							bodyDesc: new RigidBodyDesc(collider.type).lockRotations(),
-							colliderDesc: ColliderDesc.cuboid(size.x / 2, size.y / 2, size.z / 2).setSensor(collider.sensor).setTranslation(...collider.offset),
+							colliderDesc: ColliderDesc.cuboid(size.x / 2, size.y / 2, size.z / 2).setSensor(collider.sensor).setTranslation(...new Vector3(...(collider.offset ?? [0, 0, 0])).multiplyScalar(scale()).toArray()),
 							size,
 						})
 					}
@@ -130,13 +131,15 @@ export const EntityEditor = ({ entity, levelData, setLevelData, setSelectedEntit
 				onCleanup(() => document.body.removeEventListener('keydown', deleteListener))
 				const colliderTransformListener = (box: Mesh) => () => {
 					const size = new Vector3()
-					new Box3().setFromObject(box).getSize(size)
+					const cloneBox = box.clone()
+					cloneBox.rotation.set(0, 0, 0)
+					new Box3().setFromObject(cloneBox).getSize(size)
 					setColliderData({
 						...colliderData(),
 						[entityData().model]: {
 							...modelCollider(),
-							offset: box.position.clone().toArray(),
-							size: size.toArray(),
+							offset: box.position.clone().divideScalar(scale()).toArray(),
+							size: size.divideScalar(scale()).toArray(),
 							scale: scale(),
 						},
 					})
@@ -266,16 +269,16 @@ export const EntityEditor = ({ entity, levelData, setLevelData, setSelectedEntit
 								checked={Boolean(modelCollider()?.offset)}
 								onChange={() => {
 									if (modelCollider()) {
-										setColliderData({ ...colliderData(), [entityData().model]: null })
+										setColliderData(x => ({ ...x, [entityData().model]: null }))
 									} else {
-										setColliderData({
-											...colliderData(),
+										setColliderData(x => ({
+											...x,
 											[entityData().model]: {
 												type: RigidBodyType.Fixed,
 												sensor: false,
 												offset: [0, 0, 0],
 											},
-										})
+										}))
 									}
 								}}
 							>
@@ -303,7 +306,7 @@ export const EntityEditor = ({ entity, levelData, setLevelData, setSelectedEntit
 										new MeshBasicMaterial({ color: `red`, opacity: 0.5, transparent: true }),
 									)
 
-									box.position.set(...modelCollider()!.offset)
+									box.position.copy(new Vector3(...modelCollider()!.offset).multiplyScalar(scale()))
 									scene.add(colliderTransform)
 									entity().group!.add(box)
 									colliderTransform.attach(box)
@@ -327,13 +330,13 @@ export const EntityEditor = ({ entity, levelData, setLevelData, setSelectedEntit
 										</For>
 										<div>
 											collider type
-											<select onChange={e => setColliderData({
-												...colliderData(),
+											<select onChange={e => setColliderData(x => ({
+												...x,
 												[entityData().model]: {
 													...modelCollider(),
 													type: Number(e.target.value),
 												},
-											})}
+											}))}
 											>
 												<option value={RigidBodyType.Fixed}>Fixed</option>
 												<option value={RigidBodyType.Dynamic}>Dynamic</option>
@@ -344,13 +347,13 @@ export const EntityEditor = ({ entity, levelData, setLevelData, setSelectedEntit
 											<input
 												type="checkbox"
 												checked={modelCollider()?.sensor}
-												onChange={e => setColliderData({
-													...colliderData(),
+												onChange={e => setColliderData(x => ({
+													...x,
 													[entityData().model]: {
 														...modelCollider(),
 														sensor: e.target.checked,
 													},
-												})}
+												}))}
 											>
 
 											</input>

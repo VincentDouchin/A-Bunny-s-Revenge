@@ -23,20 +23,22 @@ export const getSize = (model: Object3D<Object3DEventMap>) => {
 	boxSize.getSize(size)
 	return size
 }
-export const getBoundingBox = (modelName: models | customModel | vegetation, model: Object3D<Object3DEventMap>, colliderData: CollidersData): Entity => {
+export const getBoundingBox = (modelName: models | customModel | vegetation, model: Object3D<Object3DEventMap>, colliderData: CollidersData, scale: number): Entity => {
 	const collider = colliderData[modelName]
 	if (collider) {
 		const size = new Vector3()
 		if (collider.size) {
 			size.set(...collider.size)
+			size.multiplyScalar(scale)
 		} else {
 			const boxSize = new Box3().setFromObject(model)
 			boxSize.getSize(size)
 		}
 		if (collider.offset) {
+			const offset = new Vector3(...collider.offset)
 			return {
 				bodyDesc: new RigidBodyDesc(collider.type).lockRotations(),
-				colliderDesc: ColliderDesc.cuboid(size.x / 2, size.y / 2, size.z / 2).setTranslation(...collider.offset).setSensor(collider.sensor).setActiveCollisionTypes(ActiveCollisionTypes.ALL),
+				colliderDesc: ColliderDesc.cuboid(size.x / 2, size.y / 2, size.z / 2).setTranslation(...offset.multiplyScalar(scale).toArray()).setSensor(collider.sensor).setActiveCollisionTypes(ActiveCollisionTypes.ALL),
 				size,
 			}
 		}
