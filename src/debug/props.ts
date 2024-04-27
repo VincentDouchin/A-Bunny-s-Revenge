@@ -111,7 +111,6 @@ export const props: PlacableProp<propNames>[] = [
 						node.material.side = DoubleSide
 						if (node.name.includes('bulb')) {
 							node.material.emissive = new Color(0xFFFF00)
-							node.material.emissiveIntensity = 1
 							ecs.add({ parent, emissiveMat: node.material })
 						}
 					}
@@ -288,6 +287,7 @@ export const props: PlacableProp<propNames>[] = [
 							})
 						} else if (node instanceof Mesh) {
 							ecs.add({ parent, emissiveMat: node.material })
+							node.material.emissive = new Color(0xFFFF00)
 						}
 					})
 				},
@@ -295,9 +295,6 @@ export const props: PlacableProp<propNames>[] = [
 				npcName: 'Grandma',
 				houseAnimator: new Animator(entity.model, assets.models.House.animations),
 				dialog: dialogs.GrandmasHouse(),
-				// cameratarget: true,
-				// initialCameratarget: true,
-
 			}
 		},
 	},

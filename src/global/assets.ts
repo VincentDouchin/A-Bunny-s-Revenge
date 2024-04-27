@@ -48,6 +48,7 @@ const loadGLBAsToon = (
 						map: node.material.map,
 						transparent: options?.transparent ?? node.material.transparent,
 						side: options?.side ?? FrontSide,
+						emissiveMap: node.material.emissiveMap,
 					})
 					if (node.material.map instanceof Texture) {
 						node.material.map.colorSpace = SRGBColorSpace
