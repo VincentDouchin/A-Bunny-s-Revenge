@@ -14,19 +14,23 @@ export const setupGame = async () => {
 	if (params.debugBoss) {
 		const bossRoom = assignPlanAndEnemies([{ position: { x: 0, y: 0 }, connections: { north: 1, south: null }, type: RoomType.Boss }])
 		dungeonState.enable({ dungeon: bossRoom[0], direction: 'south', firstEntry: true, playerHealth: 5, dungeonLevel: 0, weapon: 'Hoe' })
+		updateRenderSize()
+		updateCameraZoom()
 	} else if (params.debugEnemies) {
 		const enemiesRoom = assignPlanAndEnemies([{ position: { x: 0, y: 0 }, connections: { north: 1, south: null }, type: RoomType.Battle }])
 		enemiesRoom[0].enemies = ['Snailo_B', 'Snailo_B']
 		dungeonState.enable({ dungeon: enemiesRoom[0], direction: 'south', firstEntry: true, playerHealth: 5, dungeonLevel: 0, weapon: 'SwordWeapon' })
+		updateRenderSize()
+		updateCameraZoom()
 	} else if (!params.skipMainMenu) {
 		mainMenuState.enable()
 		setMainCameraPosition()
 		campState.enable({})
 	} else {
 		campState.enable({})
+		updateRenderSize()
+		updateCameraZoom()
 	}
-	updateRenderSize()
-	updateCameraZoom()
 }
 
 export const stopOnLosingFocus = () => {
