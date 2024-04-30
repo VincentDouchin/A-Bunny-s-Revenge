@@ -1,12 +1,10 @@
-import { subtle } from 'node:crypto'
-import { access, mkdir, rename } from 'node:fs/promises'
-import type { PluginOption } from 'vite'
-import type { Document } from '@gltf-transform/core'
+import { rename } from 'node:fs/promises'
 import { Logger, NodeIO } from '@gltf-transform/core'
 import { ALL_EXTENSIONS } from '@gltf-transform/extensions'
+import { TextureResizeFilter, dedup, draco, resample, textureCompress } from '@gltf-transform/functions'
 import draco3d from 'draco3dgltf'
-import { dedup, draco, meshopt, partition, prune, resample, textureCompress } from '@gltf-transform/functions'
 import { glob } from 'glob'
+import type { PluginOption } from 'vite'
 
 export const getFileName = (path: string) => {
 	return path.split(/[./\\]/g).at(-2) ?? ''
@@ -40,6 +38,7 @@ const launchScript = async (filePath?: string) => {
 			textureCompress({
 				targetFormat: 'webp',
 				resize: [512, 512],
+				resizeFilter: TextureResizeFilter.LANCZOS2,
 			}),
 			resample(),
 			dedup(),

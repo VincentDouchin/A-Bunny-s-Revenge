@@ -25,10 +25,12 @@ const launchScript = async (filePath?: string) => {
 			folders[folder] ??= new Set()
 			folders[folder].add(fileName)
 		}
-
+		const sortedFolders = Object.entries(folders).sort(([a], [b]) => a.localeCompare(b)).map(([folder, files]) => {
+			return [folder, [...files].sort((a, b) => a.localeCompare(b))]
+		})
 		let result = ''
 
-		for (const [folder, files] of Object.entries(folders)) {
+		for (const [folder, files] of sortedFolders) {
 			result += `export type ${folder} = ${[...files].map(x => `\'${x}'`).join(` | `)}\n`
 		}
 
