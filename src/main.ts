@@ -29,8 +29,9 @@ import { addHealthBarContainer } from './states/dungeon/healthBar'
 import { spawnPoisonTrail } from './states/dungeon/poisonTrail'
 import { endBattleSpawnChest } from './states/dungeon/spawnChest'
 import { rotateStun } from './states/dungeon/stun'
-import { harvestCrop, initPlantableSpotsInteractions, interactablePlantableSpot, plantSeed, updateCropsSave } from './states/farm/farming'
+import { growCrops, harvestCrop, initPlantableSpotsInteractions, interactablePlantableSpot, plantSeed, updateCropsSave } from './states/farm/farming'
 import { closePlayerInventory, disableInventoryState, enableInventoryState, interact, openPlayerInventory } from './states/farm/openInventory'
+import { addWateringCan, waterCrops } from './states/farm/wateringCan'
 import { addDashDisplay, updateDashDisplay } from './states/game/dash'
 import { dayNight, playNightMusic } from './states/game/dayNight'
 import { talkToNPC } from './states/game/dialog'
@@ -81,10 +82,10 @@ mainMenuState
 	.addSubscriber(clickOnMenuButton, initMainMenuCamPos)
 	.onExit(removeStateEntity(mainMenuState), spawnPlayerContinueGame)
 campState
-	.addSubscriber(...interactablePlantableSpot)
+	.addSubscriber(...interactablePlantableSpot, addWateringCan)
 	.onEnter(spawnFarm, spawnLevelData, updateCropsSave, initPlantableSpotsInteractions, spawnGodRay)
 	.onEnter(runIf(() => !mainMenuState.enabled, spawnCharacter, spawnBasket, enableBasketUi), moveCamera(true))
-	.onUpdate(collideWithDoorCamp, playNightMusic)
+	.onUpdate(collideWithDoorCamp, playNightMusic, waterCrops, growCrops)
 	.onUpdate(runIf(canPlayerMove, plantSeed, harvestCrop, openPlayerInventory, savePlayerPosition))
 	.onExit(despawnOfType('map'))
 openMenuState

@@ -1,9 +1,10 @@
-import type { models, vegetation } from '@assets/assets'
+import type { fruit_trees, gardenPlots, models, vegetation } from '@assets/assets'
 import { ActiveCollisionTypes, ColliderDesc, RigidBodyDesc } from '@dimforge/rapier3d-compat'
 import type { With } from 'miniplex'
 import type { BufferGeometry, Object3D, Object3DEventMap } from 'three'
 import { Color, DoubleSide, Group, Mesh, MeshPhongMaterial, PointLight, Quaternion, Vector3 } from 'three'
 
+import FastNoiseLite from 'fastnoise-lite'
 import { CSS2DObject } from 'three/examples/jsm/renderers/CSS2DRenderer'
 import { clone } from 'three/examples/jsm/utils/SkeletonUtils'
 import type { EntityData } from './LevelEditor'
@@ -17,23 +18,29 @@ import type { DungeonRessources, FarmRessources } from '@/global/states'
 import { dungeonState, genDungeonState } from '@/global/states'
 
 import type { direction } from '@/lib/directions'
+import { GardenPlotMaterial } from '@/shaders/materials'
 import { RoomType } from '@/states/dungeon/generateDungeon'
 import { cropBundle } from '@/states/farm/farming'
 import { openMenu } from '@/states/farm/openInventory'
+import { wateringCanBundle } from '@/states/farm/wateringCan'
 import { doorSide } from '@/states/game/spawnDoor'
+import { lockPlayer, unlockPlayer } from '@/utils/dialogHelpers'
+import { sleep } from '@/utils/sleep'
 
 export const customModels = {
 	door: doorSide,
 } as const satisfies Record<string, () => Object3D<Object3DEventMap>>
 export type customModel = keyof typeof customModels
-export const getModel = (key: models | customModel | vegetation) => {
+export const getModel = (key: models | customModel | vegetation | gardenPlots | fruit_trees) => {
 	if (key in customModels) {
 		// @ts-expect-error okok
 		return customModels[key]()
 	}
-	if (key in assets.vegetation) {
+	for (const model of ['vegetation', 'gardenPlots', 'fruitTrees'] as const) {
+		if (key in assets[model]) {
 		// @ts-expect-error okok
-		return assets.vegetation[key].scene.clone()
+			return clone(assets[model][key].scene)
+		}
 	}
 	// @ts-expect-error okok
 	return clone(assets.models[key].scene)
@@ -49,11 +56,11 @@ type BundleFn<E extends EntityData<any>> = (entity: With<Entity, 'entityId' | 'm
 
 export interface PlacableProp<N extends string> {
 	name: N
-	models: (models | customModel | vegetation)[]
+	models: (models | customModel | vegetation | gardenPlots | fruit_trees)[]
 	data?: N extends keyof ExtraData ? ExtraData[N] : undefined
 	bundle?: BundleFn<EntityData<N extends keyof ExtraData ? NonNullable<ExtraData[N]> : never>>
 }
-type propNames = 'log' | 'door' | 'rock' | 'board' | 'oven' | 'CookingPot' | 'stove' | 'Flower/plants' | 'sign' | 'plots' | 'bush' | 'fence' | 'house' | 'mushrooms' | 'lamp' | 'Kitchen' | 'berry bushes' | 'bench'
+type propNames = 'log' | 'door' | 'rock' | 'board' | 'oven' | 'CookingPot' | 'stove' | 'Flower/plants' | 'sign' | 'plots' | 'bush' | 'fence' | 'house' | 'mushrooms' | 'lamp' | 'Kitchen' | 'berry bushes' | 'bench' | 'well' | 'fruit trees'
 export const props: PlacableProp<propNames>[] = [
 	{
 		name: 'log',
@@ -215,26 +222,39 @@ export const props: PlacableProp<propNames>[] = [
 		models: ['gardenPlot1', 'gardenPlot2', 'gardenPlot3'],
 		bundle: (entity, _, ressources) => {
 			const crop = save.crops[entity.entityId]
+			const noise = new FastNoiseLite(Number(entity.entityId.replace(/\D/g, '')))
+			noise.SetNoiseType(FastNoiseLite.NoiseType.OpenSimplex2S)
+			entity.model.traverse((node) => {
+				if (node instanceof Mesh && node.material) {
+					node.material = new GardenPlotMaterial().copy(node.material)
+					if (node.name.includes('rock')) {
+						const noiseValue = noise.GetNoise(...node.position.toArray())
+						if (noiseValue < 0) {
+							node.visible = false
+						}
+					} else if (crop?.watered) {
+						node.material.uniforms.water.value = 1
+					}
+				}
+			})
 			const newEntity: Entity = {
 				...entity,
 				plantableSpot: entity.entityId,
 				bodyDesc: RigidBodyDesc.fixed().lockRotations(),
 				colliderDesc: ColliderDesc.cuboid(3, 3, 3).setSensor(true),
 			}
+
 			if (crop && ressources) {
 				const grow = 'previousState' in ressources && ressources.previousState === 'dungeon'
 				newEntity.withChildren = (parent) => {
 					const planted = ecs.add({
 						parent,
 						...cropBundle(grow, crop),
-						position: new Vector3(),
 					})
-					const model = assets.models.plantedHole.scene.clone()
-					model.scale.setScalar(15)
-
 					ecs.update(parent, { planted })
 				}
 			}
+
 			return newEntity
 		},
 	},
@@ -304,7 +324,28 @@ export const props: PlacableProp<propNames>[] = [
 	},
 	{
 		name: 'Kitchen',
-		models: ['KitchenSet1', 'table', 'stringLights', 'Bucket', 'well'],
+		models: ['KitchenSet1', 'table', 'stringLights', 'Bucket'],
+	},
+	{
+		name: 'well',
+		models: ['well'],
+		bundle: (entity) => {
+			return {
+				...entity,
+				interactable: Interactable.FillWateringCan,
+				size: new Vector3(0, 5, 0),
+				onPrimary(_e, player) {
+					const wateringCan = player.wateringCan ?? wateringCanBundle()
+					ecs.update(player, { wateringCan })
+					lockPlayer()
+					wateringCan.waterAmount = 0
+					sleep(100).then(() => {
+						wateringCan.waterAmount = 1
+					})
+					sleep(2000).then(unlockPlayer)
+				},
+			}
+		},
 	},
 	{
 		name: 'berry bushes',
@@ -333,5 +374,9 @@ export const props: PlacableProp<propNames>[] = [
 				berries,
 			}
 		},
+	},
+	{
+		name: 'fruit trees',
+		models: ['Apple_Tree'],
 	},
 ]

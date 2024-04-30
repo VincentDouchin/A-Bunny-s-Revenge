@@ -28,6 +28,7 @@ export const getInteractables = (
 				hasSelectedSeed ? `plant ${save.selectedSeed}` : undefined,
 				hasSeedInInventory ? 'select seed' : undefined,
 			]
+			case Interactable.Water:return (player.wateringCan?.waterAmount ?? 0) > 0 ? [Interactable.Water] : []
 			case Interactable.Talk: return [
 				entity.currentDialog ? undefined : 'talk',
 			]

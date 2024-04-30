@@ -155,9 +155,22 @@ export const waterExtension = new MaterialExtension({
 
 	)
 
+export const gardenPlotExtention = new MaterialExtension({
+	water: 0,
+})
+	.defines('USE_UV')
+	.frag(
+		addUniform('water', 'float'),
+		importLib(noise),
+		replace('gl_FragColor = vec4(outgoingLight2,opacity);', /* glsl */`
+		vec3 watered_color =  mix( outgoingLight2, outgoingLight2 * 0.5,water); 
+		gl_FragColor = vec4(watered_color, opacity);
+	`),
+	)
 export const ToonMaterial = extendMaterial(MeshPhongMaterial, [toonExtension])
 export const CharacterMaterial = extendMaterial(MeshPhongMaterial, [toonExtension, characterExtension])
 export const GroundMaterial = extendMaterial(MeshPhongMaterial, [toonExtension, groundExtension])
 export const WaterMaterial = extendMaterial(MeshPhongMaterial, [toonExtension, waterExtension])
 export const TreeMaterial = extendMaterial(MeshPhongMaterial, [toonExtension, treeExtension])
-export const GrassMaterial = extendMaterial(MeshPhongMaterial, [toonExtension, grassExtension], { name: 'vegetation' })
+export const GrassMaterial = extendMaterial(MeshPhongMaterial, [toonExtension, grassExtension])
+export const GardenPlotMaterial = extendMaterial(MeshPhongMaterial, [toonExtension, gardenPlotExtention])

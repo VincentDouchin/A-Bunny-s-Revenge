@@ -1,5 +1,5 @@
 import type { With } from 'miniplex'
-import { createMemo, onCleanup } from 'solid-js'
+import { Show, createMemo, onCleanup } from 'solid-js'
 import { css } from 'solid-styled'
 import type { Entity } from '@/global/entity'
 import { assets, coroutines, ui } from '@/global/init'
@@ -27,16 +27,17 @@ export const HealthUi = (props: { player: With<Entity, 'maxHealth' | 'currentHea
 			oldAmount = save.acorns
 		}
 	})
+	const wateringCan = ui.sync(() => props.player.wateringCan)
 	onCleanup(clear)
 	css/* css */`
-	#health-ui{
+	.health-ui{
 		position: fixed;
 		top: 1rem;
 		left: 1rem;
 		display: grid;
 		gap: 0.5rem;
 	}
-	#health-ui .wrapper{
+	.wrapper{
 		height: 4rem;
 		width: calc(${maxWidth()} * 2); 
 		border-radius: 1.5rem; 
@@ -44,7 +45,7 @@ export const HealthUi = (props: { player: With<Entity, 'maxHealth' | 'currentHea
 		overflow: hidden; 
 		position: relative;
 	}
-	#health-ui .health-amount{
+	.health-amount{
 		height: 100%;
 		width: ${health()};
 		box-shadow: hsl(0,0%,0%, 30%) 0rem -0.5rem 0rem 0rem inset;
@@ -53,17 +54,17 @@ export const HealthUi = (props: { player: With<Entity, 'maxHealth' | 'currentHea
 		left:0;
 		transition: width 0.5s ease-in;
 	}
-	#health-ui .front{
+	.front{
 		background: red;
 		z-index:1;
 	}
-	#health-ui .back{
+	.back{
 		background: darkred;
 		transition-delay: 0.3s
 	}
-	#health-ui .health-text{
+	.health-text{
 		position: absolute;
-		color: white;
+		color: black;
 		top: 50%;
 		left: 50%;
 		translate: -50% -50%;
@@ -71,7 +72,7 @@ export const HealthUi = (props: { player: With<Entity, 'maxHealth' | 'currentHea
 		white-space: nowrap;
 		z-index: 1;
 	}
-	#health-ui .acorn {
+	.acorn {
 		padding:0.2rem;
 		border-radius: 1.5rem; 
 		background: hsl(0,0%, 100%, 30%);
@@ -83,12 +84,38 @@ export const HealthUi = (props: { player: With<Entity, 'maxHealth' | 'currentHea
 		padding-right:1rem;
 		font-size: 3rem;
 	}
-	#health-ui .acorn canvas{
+	.acorn canvas{
 		width: 4rem;
 		height: 4rem;
-	}`
+	}
+	.watering-container{
+		width:5rem;
+		height: 5rem;
+		background: hsl(0,0%, 100%, 30%);
+		padding: 1rem;
+		display: grid;
+		place-items: center;
+		border-radius: 100%;
+		overflow:hidden;
+		position: relative;
+	}
+	.watering{
+		width: 90%;
+		height: 90%;
+		z-index:1;
+	}
+	.water-overlay{
+		background: #36c5f4;
+		position: absolute;
+		left:0;
+		right:0;
+		height: var(--water);
+		transition: height 1.5s ease;
+		bottom:0;
+	}
+	`
 	return (
-		<div id="health-ui">
+		<div class="health-ui">
 			<div class="wrapper">
 				<div class="health-amount front"></div>
 				<div class="health-amount back"></div>
@@ -98,6 +125,19 @@ export const HealthUi = (props: { player: With<Entity, 'maxHealth' | 'currentHea
 				{element}
 				{acorns()}
 			</div>
+			<Show when={wateringCan()}>
+				{
+			(_) => {
+				const waterAmount = ui.sync(() => props.player.wateringCan?.waterAmount)
+				return (
+					<div class="watering-container">
+						<div class="watering" innerHTML={assets.icons['droplet-solid']} />
+						<div class="water-overlay" style={{ '--water': `${(waterAmount() ?? 0) * 100}%` }}></div>
+					</div>
+				)
+			}
+}
+			</Show>
 		</div>
 	)
 }

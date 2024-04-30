@@ -14,7 +14,7 @@ const initBatchRender = () => {
 		initiated = true
 	})
 }
-const batchRendererQuery = ecs.with('batchRenderer')
+export const batchRendererQuery = ecs.with('batchRenderer')
 const updateParticles = () => batchRendererQuery.first && batchRendererQuery.first.batchRenderer.update(time.delta * 1000)
 const emittersQuery = ecs.with('emitter')
 const addParticles = () => emittersQuery.onEntityAdded.subscribe((entity) => {

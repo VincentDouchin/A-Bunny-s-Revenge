@@ -7,7 +7,7 @@ import type { QuestName } from '@/constants/quests'
 import type { Item } from '@/constants/items'
 
 export interface SaveData {
-	crops: Record<string, { stage: number, name: crops }>
+	crops: Record<string, NonNullable<Entity['crop']>>
 	playerPosition: number[]
 	playerRotation: number[]
 	quests: Partial<Record<QuestName, Array<boolean>>>
@@ -17,6 +17,7 @@ export interface SaveData {
 	settings: { volume: number, mute: boolean, fullscreen: boolean | null }
 	unlockedPaths: number
 	acorns: number
+	daytime: { current: number, dayToNight: boolean, timePassed: number, dayLight: number }
 }
 
 const blankSave = (): SaveData => ({
@@ -30,6 +31,7 @@ const blankSave = (): SaveData => ({
 	settings: { volume: 100, mute: false, fullscreen: null },
 	unlockedPaths: 1,
 	acorns: 0,
+	daytime: { current: 0, dayToNight: true, timePassed: 0, dayLight: 0 },
 })
 
 export const save: Readonly<SaveData> = blankSave()

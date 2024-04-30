@@ -1,4 +1,4 @@
-import { World as RapierWrold, init } from '@dimforge/rapier3d-compat'
+import { World as RapierWorld, init } from '@dimforge/rapier3d-compat'
 import { World as MiniplexWorld } from 'miniplex'
 import { loadAssets } from './assets'
 import type { Entity } from './entity'
@@ -12,7 +12,8 @@ import { TweenGroup } from '@/lib/tweens'
 import { UIManager } from '@/lib/uiManager'
 
 await init()
-export const world = new RapierWrold({ x: 0, y: -9.81 * 20, z: 0 })
+await getSave()
+export const world = new RapierWorld({ x: 0, y: -9.81 * 20, z: 0 })
 export const assets = await loadAssets()
 export const time = new Time()
 export const ecs = new MiniplexWorld<Entity>()
@@ -23,4 +24,3 @@ export const levelsData = await loadLevelData()
 export const dayTime = new DayTime(600_000)
 export const musicManager = new MusicManager()
 export const gameTweens = new TweenGroup()
-await getSave()

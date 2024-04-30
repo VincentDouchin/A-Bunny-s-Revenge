@@ -1,16 +1,16 @@
 import type { characters, fruit_trees, icons, items, mainMenuAssets, models, particles, textures, trees, vegetation, weapons } from '@assets/assets'
-import { DoubleSide, FrontSide, Mesh, MeshBasicMaterial, MeshPhysicalMaterial, MeshStandardMaterial, NearestFilter, RepeatWrapping, SRGBColorSpace, Texture } from 'three'
 import type { ColorRepresentation, Material, Side } from 'three'
+import { DoubleSide, FrontSide, Mesh, MeshBasicMaterial, MeshPhysicalMaterial, MeshStandardMaterial, NearestFilter, RepeatWrapping, SRGBColorSpace, Texture } from 'three'
 
 import assetManifest from '@assets/assetManifest.json'
 import { Howl } from 'howler'
 import type { GLTF } from 'three/examples/jsm/loaders/GLTFLoader'
 import type { Constructor } from 'type-fest'
 import { getExtension, getFileName, loadAudio, loadGLB, loadImage, loaderProgress, textureLoader, thumbnail } from './assetLoaders'
-import type { crops, fruits } from './entity'
+import type { crops } from './entity'
 import { asyncMapValues, entries, groupByObject, mapKeys, mapValues } from '@/utils/mapFunctions'
 import { getScreenBuffer } from '@/utils/buffer'
-import { CharacterMaterial, GrassMaterial, ToonMaterial, TreeMaterial } from '@/shaders/materials'
+import { CharacterMaterial, GardenPlotMaterial, GrassMaterial, ToonMaterial, TreeMaterial } from '@/shaders/materials'
 import { keys } from '@/constants/keys'
 
 type Glob = Record<string, () => Promise<any>>
@@ -97,9 +97,10 @@ const texturesLoader = (loader: (key: string) => void) => async (glob: GlobEager
 		return texture
 	}), getFileName)
 }
-const iconsLoader = (loader: (key: string) => void) => (glob: GlobEager) => {
+const iconsLoader = (loader: (key: string) => void) => (glob: GlobEager<string>) => {
 	Object.keys(glob).forEach(loader)
-	return mapKeys(glob, getFileName)
+	const icons = mapValues(glob, svg => svg.replace('<path', '<path '))
+	return mapKeys(icons, getFileName)
 }
 
 interface PackedJSON {
@@ -152,12 +153,6 @@ const loadItems = (loader: (key: string) => void) => async (glob: GlobEager) => 
 	return modelsAndthumbnails
 }
 
-const fruitTreeLoader = (loader: (key: string) => void) => async (glob: GlobEager) => {
-	const glbs = await loadGLBAsToon(loader)(glob)
-	const perFruit = groupByObject(glbs, key => key.split('_')[0].toLowerCase())
-	return mapValues(perFruit, x => mapKeys(x, key => key.split('_')[1].toLowerCase())) as Record<fruits, Record<'Tree' | 'Harvested', GLTF>>
-}
-
 const loadMainMenuAssets = async (glob: GlobEager) => {
 	return mapKeys(await asyncMapValues(glob, async (src, key) => {
 		const glb = await loadGLB(src, key)
@@ -183,13 +178,15 @@ export const loadAssets = async () => {
 
 		crops: cropsLoader<crops>(loader)(import.meta.glob('@assets/crops/*.glb', { as: 'url', eager: true })),
 
+		gardenPlots: typeGlob<models>(import.meta.glob('@assets/gardenPlots/*.glb', { as: 'url', eager: true }))(loadGLBAsToon(loader, { material: GardenPlotMaterial })),
+
 		weapons: typeGlob<weapons>(import.meta.glob('@assets/weapons/*.*', { as: 'url', eager: true }))(loadGLBAsToon(loader, { shadow: true })),
 
 		vegetation: typeGlob<vegetation>(import.meta.glob('@assets/vegetation/*.glb', { as: 'url', eager: true }))(loadGLBAsToon(loader, { material: GrassMaterial, shadow: true })),
 
 		mainMenuAssets: typeGlob<mainMenuAssets>(import.meta.glob('@assets/mainMenuAssets/*.glb', { as: 'url', eager: true }))(loadMainMenuAssets),
 
-		fruitTrees: typeGlob<fruit_trees>(import.meta.glob('@assets/fruit_trees/*.glb', { as: 'url', eager: true }))(fruitTreeLoader(loader)),
+		fruitTrees: typeGlob<fruit_trees>(import.meta.glob('@assets/fruit_trees/*.glb', { as: 'url', eager: true }))(loadGLBAsToon(loader)),
 
 		items: typeGlob<items>(import.meta.glob('@assets/items/*.*', { as: 'url', eager: true }))(loadItems(loader)),
 

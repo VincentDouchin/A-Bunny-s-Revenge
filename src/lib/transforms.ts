@@ -10,6 +10,11 @@ export const getWorldPosition = (obj: Object3D<Object3DEventMap>) => {
 	obj.getWorldPosition(pos)
 	return pos
 }
+export const getWorldRotation = (obj: Object3D<Object3DEventMap>) => {
+	const pos = new Quaternion()
+	obj.getWorldQuaternion(pos)
+	return pos
+}
 
 const positionQuery = ecs.with('position', 'group')
 export const getRotationFromDirection = (direction: direction) => {

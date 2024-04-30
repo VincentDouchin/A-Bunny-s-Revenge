@@ -2,19 +2,22 @@ import { RigidBodyType } from '@dimforge/rapier3d-compat'
 import { Easing, Tween } from '@tweenjs/tween.js'
 import type { With } from 'miniplex'
 import { Vector3 } from 'three'
+import { randFloat } from 'three/src/math/MathUtils'
 import { itemBundle } from '../game/items'
+import { updateSpotWatered } from './wateringCan'
 import { itemsData } from '@/constants/items'
 import { Sizes } from '@/constants/sizes'
 import { type Entity, Interactable, MenuType, type crops } from '@/global/entity'
-import { assets, ecs, gameTweens } from '@/global/init'
+import { assets, dayTime, ecs, gameTweens } from '@/global/init'
 import { removeItem, save, updateSave } from '@/global/save'
 import { playSound } from '@/global/sounds'
 import { removeEntityRef } from '@/lib/hierarchy'
 import { modelColliderBundle } from '@/lib/models'
 import { getWorldPosition } from '@/lib/transforms'
+import { sleep } from '@/utils/sleep'
 
 const playerQuery = ecs.with('playerControls', 'sensorCollider', 'movementForce', 'inventory', 'inventoryId', 'inventorySize')
-const plantedSpotQuery = ecs.with('plantableSpot', 'planted', 'group')
+const plantedSpotQuery = ecs.with('plantableSpot', 'planted', 'group', 'model')
 
 export const updateCropsSave = () => {
 	updateSave((s) => {
@@ -23,18 +26,24 @@ export const updateCropsSave = () => {
 		}, {})
 	})
 }
-const maxStage = (name: crops) => assets.crops[name].stages.length - 1
-export const cropBundle = (grow: boolean, crop: { name: crops, stage: number }) => {
+export const maxStage = (name: crops) => assets.crops[name].stages.length - 1
+export const cropBundle = (grow: boolean, crop: NonNullable<Entity['crop']>) => {
 	const increaseStage = grow ? 1 : 0
-
 	const stage = Math.min(crop.stage + increaseStage, maxStage(crop.name))
 	const model = assets.crops[crop.name].stages[stage].scene.clone()
 	model.scale.setScalar(10)
 	const hole = assets.models.plantedHole.scene.clone()
 	const modelBundle = modelColliderBundle(model, RigidBodyType.Fixed, true, Sizes.small)
 	const bundle: With<Entity, 'crop'> = {
-		crop: { name: crop.name, stage },
+		crop: {
+			name: crop.name,
+			stage,
+			luck: crop.luck,
+			watered: grow ? false : crop.watered,
+			planted: grow ? dayTime.dayLight : crop.planted,
+		},
 		...modelBundle,
+		position: new Vector3(),
 		withChildren(parent) {
 			ecs.add({
 				parent,
@@ -52,6 +61,8 @@ export const cropBundle = (grow: boolean, crop: { name: crops, stage: number }) 
 	}
 	if (stage === maxStage(crop.name)) {
 		bundle.interactable = Interactable.Harvest
+	} else {
+		bundle.interactable = Interactable.Water
 	}
 	return bundle
 }
@@ -67,7 +78,7 @@ export const plantSeed = () => {
 				if (spot.interactionContainer && save.selectedSeed && seed) {
 					if (save.crops[spot.plantableSpot] === undefined) {
 						const planted = ecs.add({
-							...cropBundle(false, { name: save.selectedSeed, stage: 0 }),
+							...cropBundle(false, { name: save.selectedSeed, stage: 0, watered: false, luck: 0, planted: dayTime.dayLight }),
 							parent: spot,
 							position: new Vector3(),
 						})
@@ -98,7 +109,7 @@ export const interactablePlantableSpot = [
 
 const touchedPlantablespotQuery = plantableSpotsQuery.with('interactionContainer')
 
-export const harvestCrop = () => {
+export const harvestCrop = async () => {
 	for (const player of playerQuery) {
 		const { playerControls } = player
 		if (playerControls.get('secondary').justPressed) {
@@ -111,18 +122,50 @@ export const harvestCrop = () => {
 		if (playerControls.get('primary').justPressed) {
 			for (const spot of plantedSpotQuery) {
 				if (spot.planted.interactionContainer && maxStage(spot.planted.crop.name) === spot.planted.crop.stage) {
-					ecs.update(player, { state: 'picking' })
-					const bundle = itemBundle(spot.planted.crop.name)
-					const position = getWorldPosition(spot.group)
-					ecs.add({
-						...bundle,
-						position: position.add(new Vector3(0, bundle.size.y + 5, 0)),
-					})
+					const extraDrops = Math.floor(spot.planted.crop.luck)
+					const extraChance = Math.random() < (spot.planted.crop.luck % 1) ? 1 : 0
+					const totalDrops = 1 + extraDrops + extraChance
+					for (let i = 0; i < totalDrops; i++) {
+						const bundle = itemBundle(spot.planted.crop.name)
+						const position = getWorldPosition(spot.group)
+						ecs.add({
+							...bundle,
+							position: position.add(new Vector3(0, bundle.size.y + randFloat(4, 6), 0)),
+						})
+						await sleep(100)
+					}
 					playSound(['zapsplat_foley_fern_pull_from_ground_18385', 'zapsplat_foley_moss_grass_clump_pull_rip_from_ground_70635'])
 					removeEntityRef(spot, 'planted')
-					ecs.update(player, { state: 'idle' })
 				}
 			}
 		}
+	}
+}
+const cropsQuery = ecs.with('crop')
+export const growCrops = () => {
+	const changed: With<Entity, 'crop'>[] = []
+	for (const entity of cropsQuery) {
+		const stages = Math.floor((dayTime.dayLight - entity.crop.planted) / (dayTime.dayLength / 2))
+		if (stages > 0 && entity.crop.stage < maxStage(entity.crop.name)) {
+			changed.push(entity)
+		}
+	}
+	if (changed.length > 0) {
+		for (const plot of plantedSpotQuery) {
+			for (const toGrow of changed) {
+				if (plot.planted === toGrow) {
+					removeEntityRef(plot, 'planted')
+					const planted = ecs.add({
+						parent: plot,
+						...cropBundle(true, toGrow.crop),
+					})
+					if (toGrow.crop.watered) {
+						updateSpotWatered(plot, false, false)
+					}
+					ecs.update(plot, { planted })
+				}
+			}
+		}
+		updateCropsSave()
 	}
 }

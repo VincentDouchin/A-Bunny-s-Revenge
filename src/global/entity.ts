@@ -41,6 +41,8 @@ export enum Interactable {
 	Open = 'open',
 	BulletinBoard = 'quests',
 	WeaponStand = 'weaponStand',
+	FillWateringCan = 'fill watering can',
+	Water = 'water',
 }
 export enum MenuType {
 	Oven,
@@ -136,9 +138,11 @@ export interface Entity {
 	// ! Farming
 	sensorDesc?: ColliderDesc
 	sensorCollider?: Collider
-	crop?: { stage: number, name: crops }
+	crop?: { stage: number, name: crops, watered: boolean, luck: number, planted: number }
 	plantableSpot?: string
 	planted?: With<Entity, 'crop'>
+	wateringCan?: With<Entity, 'model' | 'waterAmount'>
+	waterAmount?: number
 	// ! Game
 	map?: string
 	ground?: true

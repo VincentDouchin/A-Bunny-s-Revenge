@@ -5,37 +5,31 @@ import path from 'node:path'
 import process from 'node:process'
 import type { PluginOption } from 'vite'
 
+import { glob } from 'glob'
+
 export const getFileName = (path: string) => {
 	return	path.split(/[./\\]/g).at(-2) ?? ''
 }
 export const getFolderName = (path: string) => {
-	return	path.split(/[./]/g).at(-3) ?? ''
+	return	path.split(/[./\\]/g).at(-3) ?? ''
 }
 
 const launchScript = async (filePath?: string) => {
 	if (!filePath || (filePath.includes('assets\\'))) {
 		console.log('generating asset names')
-		const folders: Record<string, string[]> = {}
-		const assetsDir = await readdir('./assets', { recursive: true, withFileTypes: true })
-
-		for (const dir of assetsDir) {
-			if (dir.isDirectory() && dir.name[0] !== '_') {
-				try {
-					const files = (await readdir(`./assets/${dir.name}`))
-					const fileNames = [...new Set(files.map(x => x.split('.')[0].replace('-optimized', '')))]
-					if (fileNames.length) {
-						folders[dir.name] = fileNames
-					}
-				} catch {
-					console.warn(`couldn't read folder ${dir.name}`)
-				}
-			}
+		const folders: Record<string, Set<string>> = {}
+		const assets = await glob('./assets/*/**.*')
+		for (const asset of assets) {
+			const fileName = getFileName(asset).replace('-optimized', '')
+			const folder = getFolderName(asset)
+			folders[folder] ??= new Set()
+			folders[folder].add(fileName)
 		}
 
 		let result = ''
 
 		for (const [folder, files] of Object.entries(folders)) {
-			result += `export type ${folder} = ${files.map(x => `\'${x}'`).join(` | `)}\n`
+			result += `export type ${folder} = ${[...files].map(x => `\'${x}'`).join(` | `)}\n`
 		}
 
 		await writeFile(path.join(process.cwd(), 'assets', 'assets.ts'), result)
