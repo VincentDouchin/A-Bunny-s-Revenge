@@ -1,4 +1,4 @@
-import type { models, vegetation } from '@assets/assets'
+import type { fruit_trees, gardenPlots, models, vegetation } from '@assets/assets'
 import type { RigidBodyType } from '@dimforge/rapier3d-compat'
 import { delMany, get, set } from 'idb-keyval'
 import type { With } from 'miniplex'
@@ -30,8 +30,9 @@ import { inMap } from '@/lib/hierarchy'
 import { updateRenderSize } from '@/global/rendering'
 import { thumbnailRenderer } from '@/lib/thumbnailRenderer'
 
+export type ModelName = models | customModel | vegetation | gardenPlots | fruit_trees
 export interface EntityData<T extends Record<string, any>> {
-	model: models | customModel | vegetation
+	model: ModelName
 	scale: number
 	position: [number, number, number]
 	rotation: [number, number, number, number]
@@ -40,7 +41,7 @@ export interface EntityData<T extends Record<string, any>> {
 }
 
 export type LevelData = Record<string, EntityData<any> | null>
-export type CollidersData = Partial<Record<models | customModel | vegetation, {
+export type CollidersData = Partial<Record<ModelName, {
 	type: RigidBodyType
 	size?: [number, number, number]
 	sensor: boolean
@@ -120,7 +121,7 @@ export const LevelEditor = () => {
 					const [random, setRandom] = createSignal(false)
 					const [selectedProp, setSelectedProp] = createSignal<PlacableProp<any> | null>(null)
 					const [selectedEntity, setSelectedEntity] = createSignal<With<Entity, 'entityId' | 'model' | 'position' | 'rotation'> | null>(null)
-					const [selectedModel, setSelectedModel] = createSignal<null | models | customModel | vegetation>(null)
+					const [selectedModel, setSelectedModel] = createSignal<null | ModelName>(null)
 					const [levelData, setLevelData] = createSignal<LevelData>(levelsData.levelData)
 					const [colliderData, setColliderData] = createSignal<CollidersData>(levelsData.colliderData)
 					// ! LEVELS

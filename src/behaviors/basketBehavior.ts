@@ -6,7 +6,7 @@ import type { StateParameters } from '@/lib/behaviors'
 import { behaviorPlugin } from '@/lib/behaviors'
 import { mainMenuState } from '@/global/states'
 
-const basketComponents = ['basket', 'basketAnimator', 'position', 'body', 'movementForce', 'targetRotation', 'rotation', 'speed'] as const satisfies (keyof Entity)[]
+const basketComponents = ['basket', 'basketAnimator', 'position', 'body', 'movementForce', 'targetRotation', 'rotation', 'speed'] as const satisfies readonly (keyof Entity)[]
 const basketQuery = ecs.with(...basketComponents)
 const playerQuery = ecs.with('player', 'position')
 const basketParameters: StateParameters<(typeof basketComponents)[number]> = (e) => {

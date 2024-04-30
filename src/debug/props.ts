@@ -7,7 +7,7 @@ import { Color, DoubleSide, Group, Mesh, MeshPhongMaterial, PointLight, Quaterni
 import FastNoiseLite from 'fastnoise-lite'
 import { CSS2DObject } from 'three/examples/jsm/renderers/CSS2DRenderer'
 import { clone } from 'three/examples/jsm/utils/SkeletonUtils'
-import type { EntityData } from './LevelEditor'
+import type { EntityData, ModelName } from './LevelEditor'
 import { dialogs } from '@/constants/dialogs'
 import { Animator } from '@/global/animator'
 import { type Entity, Interactable, MenuType } from '@/global/entity'
@@ -31,7 +31,7 @@ export const customModels = {
 	door: doorSide,
 } as const satisfies Record<string, () => Object3D<Object3DEventMap>>
 export type customModel = keyof typeof customModels
-export const getModel = (key: models | customModel | vegetation | gardenPlots | fruit_trees) => {
+export const getModel = (key: ModelName) => {
 	if (key in customModels) {
 		// @ts-expect-error okok
 		return customModels[key]()
