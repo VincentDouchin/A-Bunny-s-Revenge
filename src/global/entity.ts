@@ -85,6 +85,7 @@ export interface Entity {
 	scale?: number
 	// ! Transforms
 	movementForce?: Vector3
+	targetMovementForce?: Vector3
 	acceleration?: number
 	speed?: Stat
 	position?: Vector3

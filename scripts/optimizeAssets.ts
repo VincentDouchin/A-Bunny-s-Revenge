@@ -38,7 +38,6 @@ const launchScript = async (filePath?: string) => {
 			textureCompress({
 				targetFormat: 'webp',
 				resize: [512, 512],
-				resizeFilter: TextureResizeFilter.LANCZOS2,
 			}),
 			resample(),
 			dedup(),
