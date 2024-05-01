@@ -36,7 +36,7 @@ export const getInteractables = (
 			case Interactable.Oven: return ['Prepare', 'Cook']
 			case Interactable.Chop: return ['Prepare', 'Cook']
 			case Interactable.WeaponStand: return ['Equip']
-			case Interactable.Buy: return [`Buy ${entity.price}`]
+			case Interactable.Buy: return [`Buy (${entity.price})`]
 			default: return [entity?.interactable]
 		}
 	}
