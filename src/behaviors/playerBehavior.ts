@@ -108,7 +108,7 @@ export const playerBehaviorPlugin = behaviorPlugin(
 			if (poisoned) return setState('poisoned')
 			if (isMoving) {
 				applyRotate(e, force)
-				applyMove(e, force.multiplyScalar(0.5))
+				applyMove(e, force.multiplyScalar(0.8))
 			}
 			if (e.playerControls.get('primary').justPressed) {
 				if (e.combo.lastAttack === 0 && e.playerAnimator.current === 'lightAttack') {
