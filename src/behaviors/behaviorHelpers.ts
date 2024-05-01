@@ -8,7 +8,7 @@ import { pausedState } from '@/global/states'
 
 export const getMovementForce = ({ movementForce, speed, targetMovementForce }: With<Entity, 'movementForce' | 'speed' >) => {
 	const targetForce = movementForce.clone().multiplyScalar(speed.value * params.speedUp * time.delta / 1000)
-	const force = targetMovementForce ? targetMovementForce.lerp(targetForce, time.delta / 200) : targetForce
+	const force = targetMovementForce ? targetMovementForce.lerp(targetForce, time.delta / 100) : targetForce
 
 	return {
 		force,
