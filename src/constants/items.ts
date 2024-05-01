@@ -1,6 +1,7 @@
 import type { items } from '@assets/assets'
 import type { crops } from '@/global/entity'
 import { ModStage, ModType, type Modifier, createModifier } from '@/lib/stats'
+import { entries } from '@/utils/mapFunctions'
 
 export interface Item {
 	name: items
@@ -20,6 +21,7 @@ export interface ItemData {
 		rarity: Rarity
 		level: 0 | 1 | 2 | 3
 	}
+	price?: number
 }
 
 export const itemsData: Record<items, ItemData> = {
@@ -79,6 +81,7 @@ export const itemsData: Record<items, ItemData> = {
 	milk: {
 		name: 'Milk',
 		ingredient: true,
+		price: 7,
 	},
 	wheat: {
 		name: 'Wheat',
@@ -87,10 +90,12 @@ export const itemsData: Record<items, ItemData> = {
 	flour: {
 		name: 'Flour',
 		ingredient: true,
+		price: 5,
 	},
 	butter: {
 		name: 'Butter',
 		ingredient: true,
+		price: 10,
 	},
 	sugar: {
 		name: 'Sugar',
@@ -241,5 +246,6 @@ export const itemsData: Record<items, ItemData> = {
 		name: 'Strawberry pie',
 		meal: [],
 	},
-
 }
+
+export const sellableItems = entries(itemsData).reduce((acc, [name, { price }]) => price ? [...acc, name] : acc, [] as items[])

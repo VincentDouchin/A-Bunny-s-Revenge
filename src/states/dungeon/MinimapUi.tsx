@@ -21,6 +21,7 @@ const RoomUi = ({ room, direction, previous, current }: { room: Room, direction?
 		[RoomType.Entrance]: assets.icons['door-closed-solid'],
 		[RoomType.Item]: assets.icons.pouch,
 		[RoomType.NPC]: assets.icons.pawn,
+		[RoomType.Seller]: assets.icons['store-solid'],
 	}
 	const borderStyle = 'solid 0.2rem black'
 	const connectorSize: Record<direction, any> = {

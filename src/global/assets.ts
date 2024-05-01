@@ -1,5 +1,5 @@
 import type { characters, fruit_trees, icons, items, mainMenuAssets, models, particles, textures, trees, vegetation, weapons } from '@assets/assets'
-import type { ColorRepresentation, Material, Side } from 'three'
+import type { ColorRepresentation, Material, Side, TextureFilter } from 'three'
 import { DoubleSide, FrontSide, Mesh, MeshBasicMaterial, MeshPhysicalMaterial, MeshStandardMaterial, NearestFilter, RepeatWrapping, SRGBColorSpace, Texture } from 'three'
 
 import assetManifest from '@assets/assetManifest.json'
@@ -31,6 +31,7 @@ const loadGLBAsToon = (
 		side?: Side
 		transparent?: true
 		shadow?: true
+		filter?: TextureFilter
 	},
 ) => async (glob: GlobEager) => {
 	const loaded = await asyncMapValues(glob, async (path, key) => {
@@ -52,6 +53,8 @@ const loadGLBAsToon = (
 					})
 					if (node.material.map instanceof Texture) {
 						node.material.map.colorSpace = SRGBColorSpace
+						node.material.map.minFilter = options?.filter ?? node.material.map.minFilter
+						node.material.map.magFilter = options?.filter ?? node.material.map.magFilter
 					}
 				}
 				node.castShadow = options?.shadow ?? false
@@ -99,7 +102,7 @@ const texturesLoader = (loader: (key: string) => void) => async (glob: GlobEager
 }
 const iconsLoader = (loader: (key: string) => void) => (glob: GlobEager<string>) => {
 	Object.keys(glob).forEach(loader)
-	const icons = mapValues(glob, svg => svg.replace('<path', '<path '))
+	const icons = mapValues(glob, svg => svg.replace('<path', '<path fill="currentColor"'))
 	return mapKeys(icons, getFileName)
 }
 
@@ -170,7 +173,7 @@ export const loadAssets = async () => {
 	const { loader, clear } = loaderProgress(assetManifest)
 	const assets = {
 		// ! models
-		characters: typeGlob<characters>(import.meta.glob('@assets/characters/*.glb', { as: 'url', eager: true }))(loadGLBAsToon(loader, { material: CharacterMaterial, shadow: true })),
+		characters: typeGlob<characters>(import.meta.glob('@assets/characters/*.glb', { as: 'url', eager: true }))(loadGLBAsToon(loader, { material: CharacterMaterial, shadow: true, filter: NearestFilter })),
 
 		models: typeGlob<models>(import.meta.glob('@assets/models/*.glb', { as: 'url', eager: true }))(loadGLBAsToon(loader, { shadow: true })),
 

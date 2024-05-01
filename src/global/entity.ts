@@ -43,6 +43,7 @@ export enum Interactable {
 	WeaponStand = 'weaponStand',
 	FillWateringCan = 'fill watering can',
 	Water = 'water',
+	Buy = 'buy',
 }
 export enum MenuType {
 	Oven,
@@ -191,7 +192,6 @@ export interface Entity {
 	dialog?: Dialog
 	dialogHeight?: number
 	activeDialog?: true
-	currentDialog?: string | string[]
 	dialogContainer?: CSS2DObject
 	// ! Health
 	currentHealth?: number
@@ -272,6 +272,8 @@ export interface Entity {
 	trailMaker?: true
 	trail?: { origin: Entity, timer: Timer<false> }
 	poison?: true
+	// ! Stall
+	price?: number
 
 }
 export type Bundle<C extends keyof Entity> = () => With<Entity, C>

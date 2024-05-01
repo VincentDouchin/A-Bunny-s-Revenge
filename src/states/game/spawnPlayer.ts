@@ -1,6 +1,6 @@
 import type { weapons } from '@assets/assets'
 import { ActiveCollisionTypes, ColliderDesc } from '@dimforge/rapier3d-compat'
-import { LinearSRGBColorSpace, Mesh, NearestFilter, Quaternion, Vector3 } from 'three'
+import { LinearSRGBColorSpace, Mesh, Quaternion, Vector3 } from 'three'
 import { CSS2DObject } from 'three/examples/jsm/renderers/CSS2DRenderer'
 import { clone } from 'three/examples/jsm/utils/SkeletonUtils'
 import { behaviorBundle } from '../../lib/behaviors'
@@ -42,8 +42,6 @@ export const playerBundle = (health: number, addHealth: boolean, weapon: weapons
 	model.traverse((node) => {
 		if (node instanceof Mesh && node.material.map) {
 			node.material.map.colorSpace = LinearSRGBColorSpace
-			node.material.map.minFilter = NearestFilter
-			node.material.map.magFilter = NearestFilter
 			node.material.opacity = 1
 		}
 	})

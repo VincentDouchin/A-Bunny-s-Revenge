@@ -22,6 +22,7 @@ import { pickupAcorn } from './states/dungeon/acorn'
 import { applyArchingForce, detroyProjectiles, honeySplat, stepInHoney, tickPoison, tickSneeze } from './states/dungeon/attacks'
 import { applyDeathTimer, spawnDrops, tickHitCooldown } from './states/dungeon/battle'
 import { dropBerriesOnHit } from './states/dungeon/bushes'
+import { buyItems } from './states/dungeon/buyItems'
 import { spawnWeaponsChoice } from './states/dungeon/chooseWeapon'
 import { removeEnemyFromSpawn, spawnEnemies } from './states/dungeon/enemies'
 import { killAnimation, killEntities } from './states/dungeon/health'
@@ -103,8 +104,8 @@ dungeonState
 	.addSubscriber(spawnDrops, losingBattle, removeEnemyFromSpawn, applyArchingForce)
 	.onEnter(spawnDungeon, spawnLevelData, generatenavGrid, spawnEnemies, spawnPlayerDungeon, spawnBasket, moveCamera(true))
 	.onUpdate(runIf(canPlayerMove, allowDoorCollision, collideWithDoor, harvestCrop, killEntities), detroyProjectiles)
-	.onUpdate(runIf(() => !pausedState.enabled, tickHitCooldown, tickModifiers('speed'), tickSneeze, tickPoison), stepInHoney, endBattleSpawnChest, spawnPoisonTrail)
-	.onUpdate(honeySplat)
+	.onUpdate(runIf(() => !pausedState.enabled, tickHitCooldown, tickModifiers('speed'), tickSneeze, tickPoison, buyItems))
+	.onUpdate(honeySplat, stepInHoney, endBattleSpawnChest, spawnPoisonTrail)
 	.onExit(despawnOfType('map'))
 pausedState
 	.onEnter(() => time.stop(), musicManager.pause)

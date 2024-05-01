@@ -1,11 +1,9 @@
-import fire from '@assets/icons/fire-solid.svg?raw'
 import type { With } from 'miniplex'
 import { between } from 'randomish'
 import { Show, createSignal, onCleanup, onMount } from 'solid-js'
 import { Portal } from 'solid-js/web'
 import { Color, PointLight, Vector3 } from 'three'
 import { ConstantValue } from 'three.quarks'
-import arrowLeft from '@assets/icons/arrow-left-solid.svg?raw'
 import { Tween } from '@tweenjs/tween.js'
 import { itemBundle } from '../game/items'
 import { ItemDisplay } from './InventoryUi'
@@ -14,7 +12,7 @@ import { ForQuery } from '@/ui/components/ForQuery'
 import { smoke } from '@/particles/smoke'
 import { addTag } from '@/lib/hierarchy'
 import { cameraQuery } from '@/global/rendering'
-import { ecs, gameTweens, inputManager, time, ui } from '@/global/init'
+import { assets, ecs, gameTweens, inputManager, time, ui } from '@/global/init'
 import { MenuType } from '@/global/entity'
 import type { Entity } from '@/global/entity'
 import { getWorldPosition } from '@/lib/transforms'
@@ -154,13 +152,13 @@ export const OvenMinigameUi = ({ player }: FarmUiProps) => {
 					<>
 						<Show when={isTouch()}>
 							<button class="button" style={{ 'position': 'fixed', 'height': '80%', 'left': 0, 'width': '5rem', 'margin': '3rem 2rem', 'display': 'flex', 'justify-content': 'center', 'flex-direction': 'column' }} onClick={close}>
-								<div style={{ width: '2rem' }} innerHTML={arrowLeft}></div>
+								<div style={{ width: '2rem' }} innerHTML={assets.icons['arrow-left-solid']}></div>
 								<div>Exit</div>
 							</button>
 						</Show>
 						<Show when={isTouch()}>
 							<div style={{ 'position': 'fixed', 'width': '8rem', 'height': '8rem', 'background': 'hsl(0,0%,0%, 20%)', 'border-radius': '8rem', 'border': `solid ${isPrimaryPressed() ? '0.3rem' : '0.1rem'} hsl(0, 0%,100%, 30% )`, 'bottom': '0%', 'right': '0%', 'display': 'grid', 'place-items': 'center', 'margin': '7rem' }} onTouchStart={interact(1, 'primary')} onTouchEnd={interact(0, 'primary')}>
-								<div innerHTML={fire} style={{ color: 'white', width: '50%', height: '50%' }}></div>
+								<div innerHTML={assets.icons['fire-solid']} style={{ color: 'white', width: '50%', height: '50%' }}></div>
 							</div>
 						</Show>
 						<Portal mount={oven.minigameContainer?.element}>

@@ -1,8 +1,6 @@
-import volumeOn from '@assets/icons/volume-high-solid.svg?raw'
-import volumeOff from '@assets/icons/volume-xmark-solid.svg?raw'
 import { Show, createSignal } from 'solid-js'
 import { Modal } from './components/Modal'
-import { ui } from '@/global/init'
+import { assets, ui } from '@/global/init'
 import { save, updateSave } from '@/global/save'
 import { pausedState } from '@/global/states'
 import { isStandalone } from '@/states/game/FullscreenUi'
@@ -30,7 +28,7 @@ export const PauseUi = () => {
 				<div>
 					<div style={{ 'text-align': 'center', 'font-size': '2rem', 'color': 'white' }}>Volume</div>
 					<div style={{ 'display': 'grid', 'grid-template-columns': 'auto 1fr', 'gap': '1rem' }}>
-						<div style={{ width: '2rem', height: '2rem', color: 'white' }} innerHTML={mute() ? volumeOff : volumeOn} onClick={muteSound}></div>
+						<div style={{ width: '2rem', height: '2rem', color: 'white' }} innerHTML={mute() ? assets.icons['volume-xmark-solid'] : assets.icons['volume-high-solid']} onClick={muteSound}></div>
 						<input type="range" class="input-range" value={save.settings.volume} onChange={e => setVolume(e.target.valueAsNumber)}></input>
 					</div>
 					<Show when={!isStandalone()}>

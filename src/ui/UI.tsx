@@ -1,5 +1,4 @@
 import { PlayerUi } from '../states/farm/PlayerUi'
-import { DialogUi } from './DialogUi'
 import { PauseUi } from './PauseUI'
 import { StateUi } from './components/StateUi'
 import { DebugUi } from '@/debug/debugUi'
@@ -21,7 +20,6 @@ export const UI = () => (
 			<EnemyHealthBarUi />
 			<MiniMapUi />
 		</StateUi>
-		<DialogUi />
 		<OverlayUi />
 	</>
 )

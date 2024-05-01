@@ -1,5 +1,3 @@
-import arrowLeft from '@assets/icons/arrow-left-solid.svg?raw'
-import spoonIcon from '@assets/icons/spoon-solid.svg?raw'
 import { between } from 'randomish'
 import { Show, createMemo, createSignal, onCleanup, onMount } from 'solid-js'
 import { Portal } from 'solid-js/web'
@@ -10,7 +8,7 @@ import { itemBundle } from '../game/items'
 import { ItemDisplay } from './InventoryUi'
 import type { Entity } from '@/global/entity'
 import { MenuType } from '@/global/entity'
-import { ecs, gameTweens, inputManager, time, ui } from '@/global/init'
+import { assets, ecs, gameTweens, inputManager, time, ui } from '@/global/init'
 import { cameraQuery } from '@/global/rendering'
 import { playSound } from '@/global/sounds'
 import { addTag } from '@/lib/hierarchy'
@@ -221,11 +219,11 @@ export const CauldronMinigameUi = ({ player }: FarmUiProps) => {
 					<>
 						<Show when={isTouch()}>
 							<button class="button exit-button" onClick={close}>
-								<div class="exit-icon" innerHTML={arrowLeft}></div>
+								<div class="exit-icon" innerHTML={assets.icons['arrow-left-solid']}></div>
 								<div>Exit</div>
 							</button>
 							<div class="spoon" onTouchStart={interact(1, 'primary')} onTouchEnd={interact(0, 'primary')}>
-								<div class="spoon-icon" innerHTML={spoonIcon}></div>
+								<div class="spoon-icon" innerHTML={assets.icons['spoon-solid']}></div>
 							</div>
 						</Show>
 						<Portal mount={cauldron().interactionContainer.element}>

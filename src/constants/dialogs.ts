@@ -74,4 +74,13 @@ export const dialogs = {
 		}
 		unlockPlayer()
 	},
+	*Seller() {
+		while (true) {
+			lockPlayer()
+			yield 'Want to buy something?'
+			yield 'Have a look at what I have available!'
+			unlockPlayer()
+			yield false
+		}
+	},
 } as const satisfies Partial<Record<string, () => Dialog>>

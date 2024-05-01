@@ -4,9 +4,8 @@ import { ecs, world } from '@/global/init'
 import type { Entity } from '@/global/entity'
 
 const playerQuery = ecs.with('playerControls', 'sensorCollider', 'position', 'rotation')
-const items = ecs.with('collider', 'interactable', 'position')
-const interactingQuery = items
-const losingInteractionQuery = items.with('interactionContainer')
+const interactingQuery = ecs.with('collider', 'interactable', 'position')
+const losingInteractionQuery = interactingQuery.with('interactionContainer')
 
 export const touchItem = () => {
 	for (const player of playerQuery) {

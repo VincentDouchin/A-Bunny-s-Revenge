@@ -17,6 +17,7 @@ import { save } from '@/global/save'
 import type { DungeonRessources, FarmRessources } from '@/global/states'
 import { dungeonState, genDungeonState } from '@/global/states'
 
+import { itemsData, sellableItems } from '@/constants/items'
 import type { direction } from '@/lib/directions'
 import { GardenPlotMaterial } from '@/shaders/materials'
 import { RoomType } from '@/states/dungeon/generateDungeon'
@@ -25,7 +26,9 @@ import { openMenu } from '@/states/farm/openInventory'
 import { wateringCanBundle } from '@/states/farm/wateringCan'
 import { doorSide } from '@/states/game/spawnDoor'
 import { lockPlayer, unlockPlayer } from '@/utils/dialogHelpers'
+import { getRandom, range } from '@/utils/mapFunctions'
 import { sleep } from '@/utils/sleep'
+import { dialogBundle } from '@/states/game/dialog'
 
 export const customModels = {
 	door: doorSide,
@@ -60,7 +63,7 @@ export interface PlacableProp<N extends string> {
 	data?: N extends keyof ExtraData ? ExtraData[N] : undefined
 	bundle?: BundleFn<EntityData<N extends keyof ExtraData ? NonNullable<ExtraData[N]> : never>>
 }
-type propNames = 'log' | 'door' | 'rock' | 'board' | 'oven' | 'CookingPot' | 'stove' | 'Flower/plants' | 'sign' | 'plots' | 'bush' | 'fence' | 'house' | 'mushrooms' | 'lamp' | 'Kitchen' | 'berry bushes' | 'bench' | 'well' | 'fruit trees'
+type propNames = 'log' | 'door' | 'rock' | 'board' | 'oven' | 'CookingPot' | 'stove' | 'Flower/plants' | 'sign' | 'plots' | 'bush' | 'fence' | 'house' | 'mushrooms' | 'lamp' | 'Kitchen' | 'berry bushes' | 'bench' | 'well' | 'fruit trees' | 'stall'
 export const props: PlacableProp<propNames>[] = [
 	{
 		name: 'log',
@@ -378,5 +381,51 @@ export const props: PlacableProp<propNames>[] = [
 	{
 		name: 'fruit trees',
 		models: ['Apple_Tree'],
+	},
+	{
+		name: 'stall',
+		models: ['stall'],
+		bundle: (entity, _data, ressources) => {
+			if (ressources && 'dungeon' in ressources && ressources.dungeon.type === RoomType.Seller) {
+				const items = range(0, 3, () => getRandom(sellableItems))
+
+				return {
+					...entity,
+					withChildren(parent) {
+						for (let i = 0; i < items.length; i++) {
+							const x = [-1, 0, 1][i]
+							const item = items[i]
+							const model = assets.items[item].model.clone()
+							model.scale.multiplyScalar(5)
+							const itemData = itemsData[item]
+							ecs.add({
+								parent,
+								model,
+								colliderDesc: ColliderDesc.ball(4),
+								bodyDesc: RigidBodyDesc.fixed(),
+								interactable: Interactable.Buy,
+								position: new Vector3(x * 7, 4, 0),
+								price: itemData.price,
+								itemLabel: item,
+							})
+						}
+						const owl = assets.characters.owl.scene.clone()
+						owl.scale.multiplyScalar(5)
+						ecs.add({
+							parent,
+							model: owl,
+							...dialogBundle('Seller'),
+							rotation: new Quaternion().setFromAxisAngle(new Vector3(0, 1, 0), -0.6),
+							position: new Vector3(-18, 0, -5),
+							bodyDesc: RigidBodyDesc.fixed(),
+							colliderDesc: ColliderDesc.cylinder(5, 3),
+							npcName: 'Owl',
+						})
+					},
+				}
+			} else {
+				return {}
+			}
+		},
 	},
 ]

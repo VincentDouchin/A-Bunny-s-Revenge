@@ -1,6 +1,6 @@
 import type { With } from 'miniplex'
 import type { Accessor } from 'solid-js'
-import { createMemo, createSignal, onMount } from 'solid-js'
+import { createSignal, onMount } from 'solid-js'
 import { Portal, Show } from 'solid-js/web'
 import { Transition } from 'solid-transition-group'
 import { InputIcon } from './InputIcon'
@@ -8,7 +8,7 @@ import { ForQuery } from './components/ForQuery'
 import { itemsData } from '@/constants/items'
 import type { Entity } from '@/global/entity'
 import { Interactable } from '@/global/entity'
-import { ecs } from '@/global/init'
+import { ecs, ui } from '@/global/init'
 import { save } from '@/global/save'
 import { dungeonState } from '@/global/states'
 import { WeaponStatsUi } from '@/states/dungeon/WeaponStatsUi'
@@ -30,12 +30,13 @@ export const getInteractables = (
 			]
 			case Interactable.Water:return (player.wateringCan?.waterAmount ?? 0) > 0 ? [Interactable.Water] : []
 			case Interactable.Talk: return [
-				entity.currentDialog ? undefined : 'talk',
+				entity.dialogContainer ? undefined : 'talk',
 			]
 			case Interactable.Cauldron: return ['Prepare', 'Cook']
 			case Interactable.Oven: return ['Prepare', 'Cook']
 			case Interactable.Chop: return ['Prepare', 'Cook']
 			case Interactable.WeaponStand: return ['Equip']
+			case Interactable.Buy: return [`Buy ${entity.price}`]
 			default: return [entity?.interactable]
 		}
 	}
@@ -45,19 +46,20 @@ export const getInteractables = (
 	return []
 }
 
-const interactionQuery = ecs.with('interactable', 'interactionContainer', 'position').without('currentDialog', 'menuType')
+const interactionQuery = ecs.with('interactable', 'interactionContainer', 'position')
 
 export const InteractionUi = ({ player, isTouch }: {
 	player: With<Entity, 'playerControls' | 'inventory'>
 	isTouch: Accessor<boolean>
 }) => {
+	ui.updateSync(() => interactionQuery.size)
 	return (
 		<ForQuery query={interactionQuery}>
 			{(entity) => {
 				if (entity.size) {
 					entity.interactionContainer.position.y = entity.size.y - entity.position.y
 				}
-				const interactables = createMemo(() => getInteractables(player, entity))
+				const interactables = ui.sync(() => getInteractables(player, entity))
 				const [visible, setVisible] = createSignal(false)
 				onMount(() => {
 					setTimeout(() => setVisible(true), 10)

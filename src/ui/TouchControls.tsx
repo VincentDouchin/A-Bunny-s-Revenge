@@ -1,5 +1,3 @@
-import basket from '@assets/icons/basket-shopping-solid.svg?raw'
-import pause from '@assets/icons/pause-solid.svg?raw'
 import type { With } from 'miniplex'
 import { For, Show, createMemo, createSignal, onCleanup } from 'solid-js'
 import { Vector2 } from 'three'
@@ -8,7 +6,7 @@ import { css } from 'solid-styled'
 import { getInteractables } from './Interactions'
 import { StateUi } from './components/StateUi'
 import { campState, pausedState } from '@/global/states'
-import { ecs, ui } from '@/global/init'
+import { assets, ecs, ui } from '@/global/init'
 import { type Entity, MenuType } from '@/global/entity'
 
 export const TouchControls = ({ player }: { player: With<Entity, 'playerControls' | 'inventory'> }) => {
@@ -145,9 +143,9 @@ export const TouchControls = ({ player }: { player: With<Entity, 'playerControls
 	return (
 		<div>
 			<div class="top-buttons-container">
-				<div class="icon-container top-button" innerHTML={pause} onTouchStart={() => pausedState.enable()}></div>
+				<div class="icon-container top-button" innerHTML={assets.icons['pause-solid']} onTouchStart={() => pausedState.enable()}></div>
 				<StateUi state={campState}>
-					<div class="icon-container top-button" innerHTML={basket} onTouchStart={openInventory}></div>
+					<div class="icon-container top-button" innerHTML={assets.icons['basket-shopping-solid']} onTouchStart={openInventory}></div>
 				</StateUi>
 			</div>
 			<div class="joystick-container">

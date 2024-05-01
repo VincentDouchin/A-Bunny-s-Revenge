@@ -16,6 +16,7 @@ export enum RoomType {
 	Entrance,
 	Item,
 	NPC,
+	Seller,
 }
 export interface Room {
 	plan: Level
@@ -201,6 +202,7 @@ const getEnemies = (type: RoomType): enemy[] => {
 
 export const assignPlanAndEnemies = (rooms: BlankRoom[]): Room[] => {
 	const dungeons = levelsData.levels.filter(level => level.dungeon)
+	let hasSeller = false
 	const filledRooms = rooms.map((room) => {
 		const directions = Object.keys(room.connections) as direction[]
 		const possibleRooms = dungeons.filter((dungeon) => {
@@ -209,7 +211,6 @@ export const assignPlanAndEnemies = (rooms: BlankRoom[]): Room[] => {
 				return p?.data?.direction === dir
 			}))
 		})
-		const enemies = [...getEnemies(room.type)]
 		const doors = {}
 		const plan = getRandom(possibleRooms)
 		if (!plan) throw new Error(`no plan found for connections : ${directions.join(', ')}`)
@@ -217,10 +218,23 @@ export const assignPlanAndEnemies = (rooms: BlankRoom[]): Room[] => {
 		if (room.type === RoomType.NPC) {
 			encounter = getRandom(Object.keys(encounters) as (keyof typeof encounters)[])
 		}
+		if (
+			!hasSeller
+			&& Object.values(levelsData.levelData).filter(x => x && x.map === plan.id).some(x => x && x.model === 'stall')
+			&& [RoomType.NPC, RoomType.Battle].includes(room.type)
+		) {
+			room.type = RoomType.Seller
+
+			hasSeller = true
+		}
+		const enemies = [...getEnemies(room.type)]
 		return { ...room, plan, enemies, doors, encounter }
 	})
 	for (let i = 0; i < filledRooms.length; i++) {
-		filledRooms[i].doors = mapValues(rooms[i].connections, index => typeof index === 'number' ? filledRooms[index] : null)
+		filledRooms[i].doors = mapValues(
+			rooms[i].connections,
+			index => typeof index === 'number' ? filledRooms[index] : null,
+		)
 	}
 	return filledRooms
 }

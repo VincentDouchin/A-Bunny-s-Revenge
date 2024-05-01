@@ -18,6 +18,7 @@ import { TouchControls } from '@/ui/TouchControls'
 import { ForQuery } from '@/ui/components/ForQuery'
 import { playerInventoryQuery } from '@/utils/dialogHelpers'
 import { KeyboardControls } from '@/ui/KeyboardControl'
+import { DialogUi } from '@/ui/DialogUi'
 
 const playerQuery = playerInventoryQuery.with('playerControls', 'maxHealth', 'currentHealth', 'maxHealth', 'currentHealth', 'strength', 'menuInputs', 'sneeze', 'debuffsContainer', 'poisoned')
 export const PlayerUi = () => {
@@ -40,7 +41,7 @@ export const PlayerUi = () => {
 						</Show>
 
 						<InteractionUi player={player} isTouch={showTouch} />
-
+						<DialogUi player={player} />
 						<StateUi state={campState}>
 							<RecipesUi player={player} />
 							<OvenMinigameUi player={player} />
