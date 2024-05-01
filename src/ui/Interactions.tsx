@@ -46,7 +46,7 @@ export const getInteractables = (
 	return []
 }
 
-const interactionQuery = ecs.with('interactable', 'interactionContainer', 'position')
+const interactionQuery = ecs.with('interactable', 'interactionContainer', 'position').without('menuType')
 
 export const InteractionUi = ({ player, isTouch }: {
 	player: With<Entity, 'playerControls' | 'inventory'>
