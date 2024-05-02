@@ -3,6 +3,7 @@ import { Material, Mesh } from 'three'
 import { type Entity, Faction } from '@/global/entity'
 import { ecs, gameTweens } from '@/global/init'
 import { Stat } from '@/lib/stats'
+import { enemyDefeated } from '@/particles/enemyDefeated'
 import type { ToonMaterial } from '@/shaders/materials'
 
 export const healthBundle = (health: number, current?: number) => ({
@@ -23,6 +24,11 @@ export const killAnimation = () => deadEntities.onEntityAdded.subscribe((e) => {
 	ecs.removeComponent(e, 'body')
 	const tween = new Tween([1]).to([0])
 	if (e.faction === Faction.Enemy) {
+		ecs.add({
+			position: e.position?.clone(),
+			emitter: enemyDefeated(),
+			autoDestroy: true,
+		})
 		e.model.traverse((node) => {
 			if (node instanceof Mesh) {
 				node.castShadow = false

@@ -24,6 +24,15 @@ export const lootPlayerQuery = ecs.with('player', 'lootQuantity', 'lootChance')
 
 export const spawnChest = (dungeonLevel: number) => {
 	for (const player of lootPlayerQuery) {
+		const possibleDrops: Drop[] = []
+		for (const [name, data] of entries(itemsData)) {
+			if (data.drop && data.drop.level <= dungeonLevel) {
+				possibleDrops.push({ name, rarity: data.drop.rarity, quantity: 1 })
+			}
+		}
+		const drops = range(0, between(3, 5), () => getRandom(possibleDrops))
+		const items = lootPool(player.lootQuantity.value, player.lootChance.value, drops)
+		if (items.length === 0) return
 		const chest = clone(assets.models.Chest.scene)
 		chest.scale.setScalar(0)
 		chest.rotateY(Math.PI)
@@ -41,19 +50,11 @@ export const spawnChest = (dungeonLevel: number) => {
 		gameTweens.add(new Tween(chest.scale).to(new Vector3(8, 8, 8)).onComplete(async () => {
 			chestEntity.chestAnimator.playClamped('chest_open')
 
-			const possibleDrops: Drop[] = []
-			for (const [name, data] of entries(itemsData)) {
-				if (data.drop && data.drop.level <= dungeonLevel) {
-					possibleDrops.push({ name, rarity: data.drop.rarity, quantity: 1 })
-				}
-			}
-			const drops = range(0, between(3, 5), () => getRandom(possibleDrops))
-			const items = lootPool(player.lootQuantity.value, player.lootChance.value, drops)
 			await sleep(200)
 			for (let i = 0; i < items.length; i++) {
 				const seed = items[i]
 				await sleep(100)
-				const angle = Math.PI * i / (items.length - 1)
+				const angle = Math.PI / 2 + ((0.5 * Math.random()) * (Math.random() < 0.5 ? 1 : -1))
 				ecs.add({
 					...itemBundle(seed.name),
 					position: new Vector3(0, 5, 0),

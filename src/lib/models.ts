@@ -43,14 +43,18 @@ export const getBoundingBox = (modelName: ModelName, model: Object3D<Object3DEve
 	}
 	return {}
 }
-export const modelColliderBundle = (model: Object3D<Object3DEventMap>, type = RigidBodyType.Dynamic, sensor = false, size?: Vector3) => {
+export const modelColliderBundle = (model: Object3D<Object3DEventMap>, type = RigidBodyType.Dynamic, sensor = false, size?: Vector3, shape: 'ball' | 'cuboid' = 'cuboid') => {
 	const cloneModel = clone(model)
 	cloneMaterials(cloneModel)
 	size ??= getSize(cloneModel)
+	const collideDesc = {
+		ball: ColliderDesc.ball(Math.max(Math.abs(size.x), Math.abs(size.z)) / 2),
+		cuboid: ColliderDesc.cuboid(size.x / 2, size.y / 2, size.z / 2),
+	}[shape]
 	return {
 		model: cloneModel,
 		bodyDesc: new RigidBodyDesc(type).lockRotations(),
-		colliderDesc: ColliderDesc.cuboid(size.x / 2, size.y / 2, size.z / 2).setTranslation(0, size.y / 2, 0).setSensor(sensor).setActiveCollisionTypes(ActiveCollisionTypes.ALL),
+		colliderDesc: collideDesc.setTranslation(0, size.y / 2, 0).setSensor(sensor).setActiveCollisionTypes(ActiveCollisionTypes.ALL),
 		rotation: new Quaternion(),
 		size,
 	} as const satisfies Entity

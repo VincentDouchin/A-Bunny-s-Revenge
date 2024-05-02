@@ -20,9 +20,9 @@ export const enemyBundle = (name: enemy, level: number) => {
 	const enemy = enemyData[name]
 	const model = assets.characters[name]
 	model.scene.scale.setScalar(enemy.scale)
-	const bundle = modelColliderBundle(model.scene, RigidBodyType.Dynamic, false, EnemySizes[name] ?? Sizes.character)
+	const bundle = modelColliderBundle(model.scene, RigidBodyType.Dynamic, false, EnemySizes[name] ?? Sizes.character, 'ball')
 	bundle.bodyDesc.setLinearDamping(20)
-
+	bundle.bodyDesc.setCcdEnabled(true)
 	bundle.colliderDesc.setMass(100)
 	const entity = {
 		...behaviorBundle(enemy.behavior, 'idle'),
