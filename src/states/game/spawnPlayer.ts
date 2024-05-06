@@ -35,6 +35,7 @@ const playerAnimationMap: Record<PlayerAnimations, Animations['Bunny']> = {
 	slashAttack: 'SLASH',
 	heavyAttack: 'HEAVYATTACK',
 	hit: 'HURT',
+	dying: 'DEATH',
 }
 
 export const playerBundle = (health: number, addHealth: boolean, weapon: weapons | null) => {

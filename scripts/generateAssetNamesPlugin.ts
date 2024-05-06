@@ -1,6 +1,6 @@
 /// <reference types="vite/client" />
 import { exec } from 'node:child_process'
-import { readdir, writeFile } from 'node:fs/promises'
+import { writeFile } from 'node:fs/promises'
 import path from 'node:path'
 import process from 'node:process'
 import type { PluginOption } from 'vite'

@@ -120,8 +120,8 @@ export const playerBehaviorPlugin = behaviorPlugin(
 		},
 	},
 	dying: {
-		enter: async (_, setState) => {
-			sleep(1000)
+		enter: async (e, setState) => {
+			await e.playerAnimator.playClamped('dying')
 			setState('dead')
 		},
 	},

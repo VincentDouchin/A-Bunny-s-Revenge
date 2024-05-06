@@ -31,7 +31,7 @@
 				
 				
 
-				'Bunny' :  'IDLE_NEW'  |  'RUN_ALT'  |  'FIGHT_ACTION1'  |  'HEAVYATTACK'  |  'CHEER'  |  'SLASH'  |  'HURT' 
+				'Bunny' :  '[Action Stash]'  |  'IDLE_NEW'  |  'RUN_ALT'  |  'FIGHT_ACTION1'  |  'HEAVYATTACK'  |  'CHEER'  |  'SLASH'  |  'HURT'  |  'DEATH' 
 				
 				
 

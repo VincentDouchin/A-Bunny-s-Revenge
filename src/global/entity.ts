@@ -22,7 +22,7 @@ import type { Room } from '@/states/dungeon/generateDungeon'
 import type { Dash } from '@/states/game/dash'
 import type { MenuOptions, RenderMainMenuFn } from '@/states/mainMenu/mainMenuRendering'
 
-export type PlayerAnimations = 'idle' | 'running' | 'lightAttack' | 'slashAttack' | 'heavyAttack' | 'hit'
+export type PlayerAnimations = 'idle' | 'running' | 'lightAttack' | 'slashAttack' | 'heavyAttack' | 'hit' | 'dying'
 export type EnemyAnimations = 'idle' | 'running' | 'attacking' | 'hit' | 'dead'
 export type Dialog = Generator<string | string[] | void | false, void, number | void>
 export enum Faction {

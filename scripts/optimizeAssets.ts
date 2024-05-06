@@ -1,7 +1,7 @@
 import { rename } from 'node:fs/promises'
 import { Logger, NodeIO } from '@gltf-transform/core'
 import { ALL_EXTENSIONS } from '@gltf-transform/extensions'
-import { TextureResizeFilter, dedup, draco, resample, textureCompress } from '@gltf-transform/functions'
+import { dedup, draco, resample, textureCompress } from '@gltf-transform/functions'
 import draco3d from 'draco3dgltf'
 import { glob } from 'glob'
 import type { PluginOption } from 'vite'
