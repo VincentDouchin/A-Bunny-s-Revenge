@@ -6,11 +6,12 @@ import assetManifest from '@assets/assetManifest.json'
 import { Howl } from 'howler'
 import type { GLTF } from 'three/examples/jsm/loaders/GLTFLoader'
 import type { Constructor } from 'type-fest'
-import { getExtension, getFileName, loadAudio, loadGLB, loadImage, loaderProgress, textureLoader, thumbnail } from './assetLoaders'
-import { asyncMapValues, entries, groupByObject, mapKeys, mapValues } from '@/utils/mapFunctions'
-import { getScreenBuffer } from '@/utils/buffer'
-import { CharacterMaterial, GardenPlotMaterial, GrassMaterial, ToonMaterial, TreeMaterial } from '@/shaders/materials'
+import { getExtension, getFileName, loadAudio, loadGLB, loadImage, loaderProgress, textureLoader } from './assetLoaders'
 import type { crops } from '@/constants/items'
+import { thumbnailRenderer } from '@/lib/thumbnailRenderer'
+import { CharacterMaterial, GardenPlotMaterial, GrassMaterial, ToonMaterial, TreeMaterial } from '@/shaders/materials'
+import { getScreenBuffer } from '@/utils/buffer'
+import { asyncMapValues, entries, groupByObject, mapKeys, mapValues } from '@/utils/mapFunctions'
 
 type Glob = Record<string, () => Promise<any>>
 type GlobEager<T = string> = Record<string, T>
@@ -152,11 +153,12 @@ const loadSounds = (loader: (key: string) => void, pool: number) => async (glob:
 
 const loadItems = (loader: (key: string) => void) => async (glob: GlobEager) => {
 	const models = await loadGLBAsToon(loader, { side: DoubleSide })(glob)
+	const thumbnail = thumbnailRenderer()
 	const modelsAndthumbnails = mapValues(models, model => ({
 		model: model.scene,
 		img: thumbnail.getCanvas(model.scene).toDataURL(),
 	}))
-
+	thumbnail.dispose()
 	return modelsAndthumbnails
 }
 

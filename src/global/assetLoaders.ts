@@ -10,7 +10,6 @@ import { DRACOLoader } from 'three/examples/jsm/loaders/DRACOLoader'
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader'
 import { useLocalStorage } from '@/utils/useLocalStorage'
 import { getScreenBuffer } from '@/utils/buffer'
-import { thumbnailRenderer } from '@/lib/thumbnailRenderer'
 
 export type stringCaster<K extends string> = (s: string) => K
 export const getFileName = <K extends string>(path: string) => {
@@ -25,7 +24,6 @@ export const getExtension = (path: string) => {
 export const getPathPart = (part: number) => (path: string) => {
 	return	path.split(/[./]/g).at(part) ?? ''
 }
-export const thumbnail = thumbnailRenderer()
 
 export const textureLoader = new TextureLoader()
 

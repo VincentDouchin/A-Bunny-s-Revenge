@@ -13,9 +13,6 @@ export const HealthUi = (props: { player: With<Entity, 'maxHealth' | 'currentHea
 	const maxWidth = createMemo(() => `${max()}rem`)
 	const current = ui.sync(() => Math.floor(props.player.currentHealth))
 	const healthDisplay = createMemo(() => `${current()} / ${max()}`)
-	onCleanup(() => {
-		acornRenderer.dispose()
-	})
 	const model = assets.items.acorn.model.clone()
 	model.rotateY(Math.PI / 2)
 	const { element, setSpinAmount } = acornRenderer.spin(model)
