@@ -1,8 +1,9 @@
-import type { JSXElement } from 'solid-js'
+import type { JSX } from 'solid-js'
 import { Show, createMemo, onCleanup } from 'solid-js'
 
-import { Transition } from 'solid-transition-group'
 import { css } from 'solid-styled'
+import { Transition } from 'solid-transition-group'
+import atom from 'solid-use/atom'
 import { assets, ecs, inputManager, ui } from '@/global/init'
 
 const playercontrolsQuery = ecs.with('player', 'menuInputs')
@@ -46,7 +47,7 @@ const CloseButton = () => {
 	)
 }
 
-export function Modal<T>(props: { children: JSXElement, open: T, showClose?: boolean }) {
+export function Modal<T>(props: { children: JSX.Element, open: T, showClose?: boolean }) {
 	css/* css */`
 	.modal{
 		
@@ -59,8 +60,27 @@ export function Modal<T>(props: { children: JSXElement, open: T, showClose?: boo
 		
 	}
 	`
+	const styleCache = atom<Node[]>([])
+	const beforeEnter = (el: Element) => {
+		const styles = document.querySelectorAll('[s\\:id]')
+		for (const style of styles) {
+			const childs = el.querySelector(`[s\\:${style.getAttribute('s:id')?.replace('-1', '')}]`)
+			if (childs) {
+				const clone = style.cloneNode(true)
+				styleCache([...styleCache(), clone])
+				document.head.appendChild(clone)
+			}
+		}
+	}
+	const afterExit = () => {
+		for (const style of styleCache()) {
+			style.parentNode?.removeChild(style)
+		}
+		styleCache([])
+	}
+
 	return (
-		<Transition name="slide">
+		<Transition name="slide" onEnter={beforeEnter} onAfterExit={afterExit}>
 			<Show when={props.open}>
 				<div class="modal styled-container">
 					{(props.showClose ?? true) && <CloseButton />}

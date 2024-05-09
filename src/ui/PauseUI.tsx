@@ -24,7 +24,7 @@ export const PauseUi = () => {
 	return (
 		<Modal open={paused()} showClose={false}>
 			<Show when={paused()}>
-				<div style={{ 'color': 'white', 'font-size': '4rem', 'text-align': 'center' }}>Paused</div>
+				<div style={{ 'color': 'white', 'font-size': '4rem', 'text-align': 'center' }} class="outline-text">Paused</div>
 				<div>
 					<div style={{ 'text-align': 'center', 'font-size': '2rem', 'color': 'white' }}>Volume</div>
 					<div style={{ 'display': 'grid', 'grid-template-columns': 'auto 1fr', 'gap': '1rem' }}>

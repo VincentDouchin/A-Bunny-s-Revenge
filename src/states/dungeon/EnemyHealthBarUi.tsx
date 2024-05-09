@@ -24,6 +24,7 @@ export const EnemyHealthBarUi = () => {
 		height: 2rem;
 		background: hsl(0, 0%, 0%, 50%);
 		border-radius: 1rem;
+		position:relative;
 	}
 	.enemy-health-bar{
 		width: 10rem;
@@ -79,6 +80,7 @@ export const EnemyHealthBarUi = () => {
 								<div class="boss-name">{enemyData[entity.enemyName].name}</div>
 								<div class="boss-health-bar">
 									<div class="health-bar-inner" style={{ width: `${healthPercent() * 100}%` }}></div>
+									<div class="health-bar-inner health-bar-back" style={{ width: `${healthPercent() * 100}%` }}></div>
 								</div>
 							</div>
 						</Show>

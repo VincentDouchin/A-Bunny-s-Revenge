@@ -1,6 +1,5 @@
 import { Show } from 'solid-js'
-import { InventorySlots } from './InventoryUi'
-import { InventoryTitle } from './CookingUi'
+import { InventorySlots, InventoryTitle } from './InventoryUi'
 import { MenuType } from '@/global/entity'
 import { ecs, ui } from '@/global/init'
 import { Menu } from '@/ui/components/Menu'

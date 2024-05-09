@@ -3,7 +3,6 @@ import type { Accessor, JSX, Setter } from 'solid-js'
 import { For, Show, createEffect, createMemo, createSignal, onCleanup } from 'solid-js'
 import { css } from 'solid-styled'
 import type { icons } from '@assets/assets'
-import { InventoryTitle } from './CookingUi'
 import { MealBuffs } from './RecipesUi'
 import { itemsData } from '@/constants/items'
 import type { Item, ItemData } from '@/constants/items'
@@ -22,6 +21,17 @@ import type { FarmUiProps } from '@/ui/types'
 import { removeItemFromPlayer } from '@/utils/dialogHelpers'
 import { range } from '@/utils/mapFunctions'
 
+export const InventoryTitle = (props: { children: string }) => {
+	css/* css */`
+	.inventory-title{
+		font-size: 3rem;
+		color: white;
+		font-family: NanoPlus;
+		text-transform: capitalize;
+	}	
+	`
+	return <div class="inventory-title outline-text">{props.children}</div>
+}
 const thumbnail = thumbnailRenderer()
 export const ItemBox = (props: { children: JSX.Element, selected?: boolean, completed?: boolean }) => {
 	css/* css */`

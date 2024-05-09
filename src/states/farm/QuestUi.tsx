@@ -1,8 +1,7 @@
 import { For, Show, createEffect, onMount } from 'solid-js'
 import { css } from 'solid-styled'
 import atom from 'solid-use/atom'
-import { InventoryTitle } from './CookingUi'
-import { IconDisplay, ItemDisplay } from './InventoryUi'
+import { IconDisplay, InventoryTitle, ItemDisplay } from './InventoryUi'
 import { quests } from '@/constants/quests'
 import type { Quest, QuestName } from '@/constants/quests'
 
