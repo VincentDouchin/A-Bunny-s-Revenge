@@ -30,7 +30,6 @@ export const applyMove = (entity: With<Entity, 'body' >, force: Vector3) => {
 }
 export const applyRotate = (entity: With<Entity, 'rotation' | 'targetRotation'>, force: Vector3) => {
 	entity.targetRotation.setFromAxisAngle(new Vector3(0, 1, 0), Math.atan2(force.x, force.z))
-	entity.rotation.slerp(entity.targetRotation, time.delta / 70)
 }
 export const takeDamage = (entity: With<Entity, 'currentHealth'>, damage: number) => {
 	entity.currentHealth = Math.max(0, entity.currentHealth - damage)

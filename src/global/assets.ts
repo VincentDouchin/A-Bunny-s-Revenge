@@ -7,11 +7,11 @@ import { Howl } from 'howler'
 import type { GLTF } from 'three/examples/jsm/loaders/GLTFLoader'
 import type { Constructor } from 'type-fest'
 import { getExtension, getFileName, loadAudio, loadGLB, loadImage, loaderProgress, textureLoader, thumbnail } from './assetLoaders'
-import type { crops } from './entity'
 import { asyncMapValues, entries, groupByObject, mapKeys, mapValues } from '@/utils/mapFunctions'
 import { getScreenBuffer } from '@/utils/buffer'
 import { CharacterMaterial, GardenPlotMaterial, GrassMaterial, ToonMaterial, TreeMaterial } from '@/shaders/materials'
 import { keys } from '@/constants/keys'
+import type { crops } from '@/constants/items'
 
 type Glob = Record<string, () => Promise<any>>
 type GlobEager<T = string> = Record<string, T>
@@ -50,6 +50,7 @@ const loadGLBAsToon = (
 						transparent: options?.transparent ?? node.material.transparent,
 						side: options?.side ?? FrontSide,
 						emissiveMap: node.material.emissiveMap,
+						opacity: node.material.opacity,
 					})
 					if (node.material.map instanceof Texture) {
 						node.material.map.colorSpace = SRGBColorSpace

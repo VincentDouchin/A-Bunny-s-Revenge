@@ -28,19 +28,55 @@
 					"additionalProperties": {
 						"additionalProperties": false,
 						"properties": {
+							"luck": {
+								"type": "number"
+							},
 							"name": {
 								"$ref": "#/definitions/crops"
 							},
+							"planted": {
+								"type": "number"
+							},
 							"stage": {
 								"type": "number"
+							},
+							"watered": {
+								"type": "boolean"
 							}
 						},
 						"required": [
+							"luck",
+							"name",
+							"planted",
 							"stage",
-							"name"
+							"watered"
 						],
 						"type": "object"
 					},
+					"type": "object"
+				},
+				"daytime": {
+					"additionalProperties": false,
+					"properties": {
+						"current": {
+							"type": "number"
+						},
+						"dayLight": {
+							"type": "number"
+						},
+						"dayToNight": {
+							"type": "boolean"
+						},
+						"timePassed": {
+							"type": "number"
+						}
+					},
+					"required": [
+						"current",
+						"dayToNight",
+						"timePassed",
+						"dayLight"
+					],
 					"type": "object"
 				},
 				"inventories": {
@@ -73,6 +109,12 @@
 				"quests": {
 					"additionalProperties": false,
 					"properties": {
+						"alice_1": {
+							"items": {
+								"type": "boolean"
+							},
+							"type": "array"
+						},
 						"grandma_1": {
 							"items": {
 								"type": "boolean"
@@ -135,7 +177,8 @@
 				"modifiers",
 				"settings",
 				"unlockedPaths",
-				"acorns"
+				"acorns",
+				"daytime"
 			],
 			"type": "object"
 		},
@@ -146,7 +189,9 @@
 				"tomato",
 				"lettuce",
 				"pumpkin",
-				"wheat"
+				"wheat",
+				"haricot",
+				"magic_bean"
 			],
 			"type": "string"
 		},
@@ -154,8 +199,8 @@
 			"enum": [
 				"acorn",
 				"beet",
-				"beetroot_salad",
 				"beet_seeds",
+				"beetroot_salad",
 				"butter",
 				"carrot",
 				"carrot_cake",
@@ -168,8 +213,10 @@
 				"flour",
 				"ham",
 				"ham_honey",
+				"haricot",
 				"honey",
 				"honey_glazed_carrot",
+				"hummus",
 				"lettuce",
 				"lettuce_seeds",
 				"magic_bean",

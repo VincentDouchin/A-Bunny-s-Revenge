@@ -6,7 +6,7 @@ interface playOptions { timeScale?: number, weight?: number, clamped?: boolean, 
 export class Animator<K extends string> extends AnimationMixer {
 	current?: K
 	action?: AnimationAction
-	#animationClips: Record<K, AnimationClip>
+	animationClips: Record<K, AnimationClip>
 	delay: number = 0
 	constructor(scene: Object3D<Object3DEventMap>, animations: AnimationClip[], animationMap?: Record<K, string>) {
 		super(scene)
@@ -23,11 +23,11 @@ export class Animator<K extends string> extends AnimationMixer {
 				clips[clip.name as K] = clip
 			}
 		}
-		this.#animationClips = clips
+		this.animationClips = clips
 	}
 
 	#getClip(animation: K) {
-		const clip = this.#animationClips[animation]
+		const clip = this.animationClips[animation]
 		if (!clip) {
 			throw new Error(`clip ${animation} not found`)
 		}

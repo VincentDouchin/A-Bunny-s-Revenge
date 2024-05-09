@@ -2,6 +2,7 @@ import type { JSXElement } from 'solid-js'
 import { Show, createMemo, onCleanup } from 'solid-js'
 
 import { Transition } from 'solid-transition-group'
+import { css } from 'solid-styled'
 import { assets, ecs, inputManager, ui } from '@/global/init'
 
 const playercontrolsQuery = ecs.with('player', 'menuInputs')
@@ -16,19 +17,52 @@ const CloseButton = () => {
 		menuTouchController()?.set('cancel', 0)
 	}
 	onCleanup(reset)
-
+	css/* CSS */`
+	.close-button{
+		width: 4rem;
+		height: 4rem;
+		background: hsla(0, 0%, 0%, 0.2);
+		position: absolute;
+		top: 0;
+		right: 0;
+		margin: 1rem;
+		border-radius: 1rem;
+		border: solid 0.1rem hsla(0, 0%, 100%, 0.3);
+		font-size: 3rem;
+		color: white;
+		display: grid;
+		place-items: center;
+	}
+	`
 	return (
 		<Show when={isTouch()}>
-			<div style={{ 'width': '4rem', 'height': '4rem', 'background': 'hsl(0,0%,0%, 20%)', 'position': 'absolute', 'top': '0', 'right': '0', 'margin': '1rem', 'border-radius': '1rem', 'border': `solid 0.1rem hsl(0, 0%,100%, 30% )`, 'font-size': '3rem', 'color': 'white', 'display': 'grid', 'place-items': 'center' }} innerHTML={assets.icons['xmark-solid']} class="icon-container" onTouchStart={closeInventory} onTouchEnd={reset}></div>
+			<div
+				class="close-button icon-container"
+				innerHTML={assets.icons['xmark-solid']}
+				onTouchStart={closeInventory}
+				onTouchEnd={reset}
+			/>
 		</Show>
 	)
 }
 
 export function Modal<T>(props: { children: JSXElement, open: T, showClose?: boolean }) {
+	css/* css */`
+	.modal{
+		
+		place-self: center;
+		padding: 2rem;
+		border-radius: 1rem;
+		display: grid;
+		gap: 2rem;
+		position: relative;
+		
+	}
+	`
 	return (
 		<Transition name="slide">
 			<Show when={props.open}>
-				<div style={{ 'background': 'hsla(0 0% 0% / 50%)', 'place-self': 'center', 'padding': '2rem', 'border-radius': '1rem', 'display': 'grid', 'gap': '2rem', 'position': 'relative' }}>
+				<div class="modal styled-container">
 					{(props.showClose ?? true) && <CloseButton />}
 					{props.children}
 				</div>

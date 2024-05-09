@@ -53,6 +53,7 @@ interface MenuProps {
 }
 export type getProps = (first?: boolean) => {
 	ref: (el: HTMLElement) => void
+	getRef: () => HTMLElement
 	onPointerDown: () => void
 	selected: Accessor<boolean>
 }
@@ -106,6 +107,7 @@ export function Menu(props: MenuProps) {
 				refs.set(id, el)
 				inverseRefs.set(el, id)
 			},
+			getRef: () => refs.get(id)!,
 			onPointerDown: () => setSelected(() => id),
 			selected: isSelected,
 		}

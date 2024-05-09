@@ -1,18 +1,24 @@
+import type { items } from '@assets/assets'
+import { ActiveCollisionTypes, ShapeType } from '@dimforge/rapier3d-compat'
+import { Easing, Tween } from '@tweenjs/tween.js'
 import type { Query, With } from 'miniplex'
 import { Vector3 } from 'three'
-import type { items } from '@assets/assets'
 import { enumerate, range } from './mapFunctions'
 import { sleep } from './sleep'
-import type { QuestName } from '@/constants/quests'
-import { quests } from '@/constants/quests'
-import type { Entity } from '@/global/entity'
-import { coroutines, ecs } from '@/global/init'
-import { cutSceneState } from '@/global/states'
 import { addTag } from '@/lib/hierarchy'
+import { cutSceneState } from '@/global/states'
+import { assets, coroutines, ecs, gameTweens } from '@/global/init'
+import type { Entity } from '@/global/entity'
+import { quests } from '@/constants/quests'
+import type { QuestName, QuestStep, QuestStepKey } from '@/constants/quests'
 
+import { dialogs } from '@/constants/dialogs'
 import type { Item } from '@/constants/items'
 import { addItem, removeItem, save, updateSave } from '@/global/save'
 import { playSound } from '@/global/sounds'
+import { getWorldPosition } from '@/lib/transforms'
+import { addToHand } from '@/states/game/weapon'
+import { addToast } from '@/ui/Toaster'
 
 const playerQuery = ecs.with('player', 'position', 'collider')
 const movingPlayerQuery = playerQuery.with('movementForce')
@@ -54,13 +60,93 @@ export const addItemToPlayer = (item: Item) => {
 	const player = playerInventoryQuery.first
 	if (player) {
 		addItem(player, item)
+		addToast({ addedItem: item.name })
 	}
 }
 export const removeItemFromPlayer = (item: Item) => {
 	const player = playerInventoryQuery.first
 	if (player) {
 		removeItem(player, item)
+		addToast({ removedItem: item.name })
 	}
+}
+
+// ! Quests
+
+export const canCompleteQuest = (name: QuestName) => {
+	const player = playerInventoryQuery.first
+	if (player) {
+		return quests[name].steps.every((step, i) => {
+			return save.quests[name]?.[i] === true || step.items?.every((item) => {
+				return player.inventory.some((saveItem) => {
+					return saveItem && saveItem.name === item.name && saveItem.quantity >= item.quantity
+				})
+			})
+		})
+	}
+}
+
+export const completeQuest = <Q extends QuestName>(name: Q) => {
+	if (canCompleteQuest(name)) {
+		updateSave((s) => {
+			const quest = s.quests[name]
+			if (quest) {
+				for (const [step, i] of enumerate(quests[name].steps as QuestStep[])) {
+					for (const item of step.items ?? []) {
+						removeItemFromPlayer(item)
+					}
+					quest[i] = true
+				}
+			}
+		})
+	}
+}
+
+export const addQuest = (name: QuestName) => {
+	if (!(name in save.quests)) {
+		updateSave((s) => {
+			s.quests[name] = range(0, quests[name].steps.length, () => false)
+		})
+		addToast({ quest: name })
+	}
+}
+
+export const completeQuestStep = <Q extends QuestName>(questName: Q, step: QuestStepKey<Q>) => {
+	updateSave((s) => {
+		const quest = s.quests[questName]
+		if (quest) {
+			const index = quests[questName].steps.findIndex(s => s.key === step)
+			quest[index] = true
+			addToast({ step: quests[questName].steps[index] })
+		}
+	})
+}
+
+export const hasCompletedQuest = (name: QuestName) => {
+	return save.quests[name]?.every(step => step === true)
+}
+
+export const hasCompletedStep = <Q extends QuestName>(questName: Q, step: QuestStepKey<Q>) => {
+	const index = quests[questName]?.steps.findIndex(s => s.key === step)
+	return save.quests[questName]?.[index]
+}
+
+export const hasQuest = (name: QuestName) => {
+	return name in save.quests && !hasCompletedQuest(name)
+}
+
+export const hasItem = (itemName: items | ((item: Item) => boolean)) => {
+	for (const item of save.inventories.player) {
+		if (typeof itemName === 'string') {
+			if (item.name === itemName) return true
+		} else {
+			if (itemName(item)) return true
+		}
+	}
+	return false
+}
+export const hasEaten = () => {
+	return save.modifiers.length > 0
 }
 
 export const enterHouse = async () => {
@@ -94,63 +180,39 @@ export const leaveHouse = async () => {
 	}
 }
 
-// ! Quests
+// ! Alice
+const aliceQuery = ecs.with('npcName', 'kayAnimator', 'position', 'rotation', 'model', 'group', 'collider', 'body').where(e => e.npcName === 'Alice')
 
-export const canCompleteQuest = (name: QuestName) => {
-	const player = playerInventoryQuery.first
-	if (player) {
-		return quests[name].steps.every((step, i) => {
-			return save.quests[name]?.[i] === true || step.items?.every((item) => {
-				return player.inventory.some((saveItem) => {
-					return saveItem && saveItem.name === item.name && saveItem.quantity >= item.quantity
-				})
-			})
-		})
-	}
-}
-
-export const completeQuest = (name: QuestName) => {
-	if (canCompleteQuest(name)) {
-		updateSave((s) => {
-			const quest = s.quests[name]
-			if (quest) {
-				for (const [step, i] of enumerate(quests[name].steps)) {
-					for (const item of step.items ?? []) {
-						removeItemFromPlayer(item)
-					}
-					quest[i] = true
-				}
-			}
-		})
-	}
-}
-
-export const addQuest = (name: QuestName) => {
-	if (!(name in save.quests)) {
-		updateSave((s) => {
-			s.quests[name] = range(0, quests[name].steps.length, () => false)
-		})
-	}
-}
-
-export const hasCompletedQuest = (name: QuestName) => {
-	return save.quests[name]?.every(step => step === true)
-}
-
-export const hasQuest = (name: QuestName) => {
-	return name in save.quests && !hasCompletedQuest(name)
-}
-
-export const hasItem = (itemName: items | ((item: Item) => boolean)) => {
-	for (const item of save.inventories.player) {
-		if (typeof itemName === 'string') {
-			if (item.name === itemName) return true
-		} else {
-			if (itemName(item)) return true
+export const aliceJumpDown = async () => {
+	for (const alice of aliceQuery) {
+		const followPosition = () => {
+			alice.body.setTranslation(getWorldPosition(alice.group).add(new Vector3(0, 10, 0)), true)
 		}
+		gameTweens.add(new Tween(alice.position).to(new Vector3(0, -15, 5).applyQuaternion(alice.rotation).add(alice.position), alice.kayAnimator.animationClips.Jump_Full_Long.duration * 1000 / 2 - 200))
+		followPosition()
+		await alice.kayAnimator.playClamped('Jump_Full_Long', { timeScale: 2 })
+		alice.kayAnimator.playAnimation('Idle')
+		const hummus = assets.items.hummus.model.clone()
+		hummus.rotateZ(Math.PI / 2 * 1.3)
+		addToHand(alice, hummus)
+		await sleep(1000)
+		await alice.kayAnimator.playOnce('Use_Item')
+		removeItemFromPlayer({ name: 'hummus', quantity: 1 })
+		hummus.removeFromParent()
+		alice.kayAnimator.playAnimation('Idle')
+		alice.collider.setSensor(false)
+		alice.collider.setActiveCollisionTypes(ActiveCollisionTypes.ALL)
+		gameTweens.add(new Tween(alice.group.scale).to(alice.group.scale.clone().multiplyScalar(8), 2000).easing(Easing.Bounce.InOut).onUpdate((scale) => {
+			if (alice.collider.shape.type === ShapeType.Cylinder) {
+				alice.collider.setRadius(scale.length())
+			}
+		}).onComplete(() => {
+			ecs.removeComponent(alice, 'dialog')
+			completeQuestStep('alice_1', 'makeHummus')
+			ecs.update(alice, {
+				dialog: dialogs.AliceBig(),
+				activeDialog: true,
+			})
+		}))
 	}
-	return false
-}
-export const hasEaten = () => {
-	return save.modifiers.length > 0
 }

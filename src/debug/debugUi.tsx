@@ -1,6 +1,7 @@
 import { For, Show, createSignal, onCleanup, onMount } from 'solid-js'
 import type { ShaderMaterial } from 'three'
 import { Color, Mesh, OrthographicCamera, PerspectiveCamera } from 'three'
+import atom from 'solid-use/atom'
 import { LevelEditor } from './LevelEditor'
 import { debugOptions } from './debugState'
 import { SaveEditor } from './saveEditor'
@@ -14,9 +15,10 @@ import { resetSave, updateSave } from '@/global/save'
 import { campState } from '@/global/states'
 import { ModStage, ModType, createModifier } from '@/lib/stats'
 import { weaponBundle } from '@/states/game/weapon'
-import { entries } from '@/utils/mapFunctions'
+import { entries, objectKeys } from '@/utils/mapFunctions'
 import { useLocalStorage } from '@/utils/useLocalStorage'
 import { RapierDebugRenderer } from '@/lib/debugRenderer'
+import { encounters } from '@/states/dungeon/encounters'
 
 const rendererQuery = ecs.with('renderer', 'scene', 'renderGroup').where(e => e.renderGroup === RenderGroup.Game)
 
@@ -180,6 +182,8 @@ export const DebugUi = () => {
 			navgrid.render(render)
 		}
 	}
+	const showToonEditor = atom(false)
+	const showGroundEditor = atom(false)
 	return (
 		<div style={{ 'position': 'absolute', 'color': 'white', 'z-index': 1000 }}>
 			<Show when={showUi()}>
@@ -285,29 +289,45 @@ export const DebugUi = () => {
 
 				<div style={{ position: 'fixed', right: 0, top: 0 }}>
 					<div style={{ 'background': 'darkgray', 'margin': '1rem', 'padding': '1rem', 'color': 'black', 'font-size': '2rem' }}>
-						<For each={entries(groundColors)}>
-							{([name, color]) => {
-								return (
-									<div>
-										{name}
-										<input type="color" value={color} onChange={e => updateGroundColor(name, e.target.value)}></input>
-										{color}
-									</div>
-								)
-							}}
-						</For>
-						<div>
-							<button onClick={() => {
-								resetGroundColors()
-								window.location.reload() }}
-							>
-								reset ground colors
-							</button>
-						</div>
+						<button onClick={() => showGroundEditor(!showGroundEditor())}>Edit ground colors</button>
+						<Show when={showGroundEditor()}>
+							<For each={entries(groundColors)}>
+								{([name, color]) => {
+									return (
+										<div>
+											{name}
+											<input type="color" value={color} onChange={e => updateGroundColor(name, e.target.value)}></input>
+											{color}
+										</div>
+									)
+								}}
+							</For>
+							<div>
+								<button onClick={() => {
+									resetGroundColors()
+									window.location.reload() }}
+								>
+									reset ground colors
+								</button>
+							</div>
+						</Show>
 					</div>
 					<div style={{ 'background': 'darkgray', 'margin': '1rem', 'padding': '1rem', 'color': 'black', 'font-size': '2rem' }}>
-						<ToonEditor />
-
+						<button onClick={() => showToonEditor(!showToonEditor())}>Edit toon shader</button>
+						<Show when={showToonEditor()}>
+							<ToonEditor />
+						</Show>
+					</div>
+					<div style={{ 'background': 'darkgray', 'margin': '1rem', 'padding': '1rem', 'color': 'black', 'font-size': '2rem' }}>
+						<div>Debug NPC encounters</div>
+						<For each={objectKeys(encounters)}>
+							{encounter => (
+								<div>
+									{encounter}
+									<button onClick={() => encounters[encounter]()}>enable</button>
+								</div>
+							)}
+						</For>
 					</div>
 				</div>
 			</Show>

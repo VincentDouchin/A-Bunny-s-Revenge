@@ -22,6 +22,7 @@ export class DayTime {
 		this.current = save.daytime.current
 		this.dayToNight = save.daytime.dayToNight
 		this.timePassed = save.daytime.timePassed
+		this.dayLight = save.daytime.dayLight
 	}
 
 	saveTime = throttle(1000, () => {

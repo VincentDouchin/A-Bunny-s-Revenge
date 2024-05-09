@@ -9,12 +9,6 @@ const healthBarQuery = ecs.with('healthBarContainer', 'maxHealth', 'currentHealt
 
 export const EnemyHealthBarUi = () => {
 	css/* css */`
-	.enemy-health-bar{
-		width: 10rem;
-		height: 0.5rem;
-		background: hsl(0, 0%, 0%, 50%);
-		border-radius: 1rem;
-	}
 	.boss-health-container{
 		position: fixed;
 		bottom: 3rem;
@@ -31,11 +25,25 @@ export const EnemyHealthBarUi = () => {
 		background: hsl(0, 0%, 0%, 50%);
 		border-radius: 1rem;
 	}
+	.enemy-health-bar{
+		width: 10rem;
+		height: 0.5rem;
+		background: hsl(0, 0%, 0%, 50%);
+		border-radius: 1rem;
+		position:relative;
+	}
 	.health-bar-inner{
+		position:absolute;
 		background: #ec273f;
 		height: 100%;
 		border-radius: 1rem;
 		transition: width 0.2s ease-in;
+		z-index: 1;
+	}
+	.health-bar-back {
+		background: white;
+		transition-delay: 500ms;
+		z-index: 0;
 	}
 	@keyframes disappear{
 		from{
@@ -62,6 +70,7 @@ export const EnemyHealthBarUi = () => {
 							<Portal mount={entity.healthBarContainer.element}>
 								<div class="enemy-health-bar" classList={{ disappear: dead() }}>
 									<div class="health-bar-inner" style={{ width: `${healthPercent() * 100}%` }}></div>
+									<div class="health-bar-inner health-bar-back" style={{ width: `${healthPercent() * 100}%` }}></div>
 								</div>
 							</Portal>
 						</Show>

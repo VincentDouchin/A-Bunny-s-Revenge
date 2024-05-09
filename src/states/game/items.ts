@@ -8,6 +8,7 @@ import { addItem } from '@/global/save'
 import { playSound } from '@/global/sounds'
 import { inMap } from '@/lib/hierarchy'
 import { modelColliderBundle } from '@/lib/models'
+import { addToast } from '@/ui/Toaster'
 
 export const itemsQuery = ecs.with('item', 'position', 'model', 'itemLabel')
 
@@ -83,6 +84,7 @@ export const collectItems = () => {
 						item.position.lerp({ ...player.position, y: 4 }, i)
 					}).onComplete(() => {
 						ecs.remove(item)
+						addToast({ addedItem: item.itemLabel })
 					}))
 				setTimeout(() => playSound('zapsplat_multimedia_alert_action_collect_pick_up_point_or_item_79293'), 500)
 				gameTweens.add(new Tween(item.model.scale).to(new Vector3(), 1000).easing(Easing.Bounce.Out))

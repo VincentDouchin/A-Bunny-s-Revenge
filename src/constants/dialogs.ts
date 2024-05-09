@@ -3,11 +3,11 @@ import type { Dialog } from '@/global/entity'
 import { cutSceneState } from '@/global/states'
 import { soundDialog } from '@/lib/dialogSound'
 import { dialog, t } from '@/translations'
-import { addItemToPlayer, addQuest, canCompleteQuest, completeQuest, enterHouse, hasCompletedQuest, hasEaten, hasItem, hasQuest, leaveHouse, lockPlayer, unlockPlayer } from '@/utils/dialogHelpers'
+import { addItemToPlayer, addQuest, aliceJumpDown, canCompleteQuest, completeQuest, enterHouse, hasCompletedQuest, hasEaten, hasItem, hasQuest, leaveHouse, lockPlayer, unlockPlayer } from '@/utils/dialogHelpers'
 
 export const dialogs = {
 
-	*GrandmasDoor() {
+	async *GrandmasDoor() {
 		while (true) {
 			cutSceneState.enable()
 			enterHouse()
@@ -49,30 +49,29 @@ export const dialogs = {
 		}
 	},
 	*Jack() {
-		lockPlayer()
-
-		if (hasCompletedQuest('jack_1')) {
-			yield 'The soup was delicious!'
-		} else {
-			if (!hasQuest('jack_1')) {
-				yield 'Hello! I am a placeholder for jack'
+		while (true) {
+			lockPlayer()
+			if (hasCompletedQuest('jack_1')) {
+				yield 'The soup was delicious!'
+			} else if (!hasQuest('jack_1')) {
+				yield 'Hello!'
 				yield 'I am so hungry but all I have is this lousy bean'
 				yield 'The guy who sold it to me said it was magic'
 				yield 'but so far nothing happened'
 				yield 'Tell you what, bring me some food and I\'ll give you the bean.'
 				yield 'Deal?'
 				addQuest('jack_1')
-			}
-			if (canCompleteQuest('jack_1')) {
+			} else if (canCompleteQuest('jack_1')) {
 				completeQuest('jack_1')
 				yield 'Oh thank you for the carrot soup!'
 				yield 'I was so hungry'
 				yield 'Here is the magic bean'
-				yield 'Maybe you can grow something with it?'
 				addItemToPlayer({ name: 'magic_bean', quantity: 1 })
+				yield 'Maybe you can grow something with it?'
 			}
+			unlockPlayer()
+			yield false
 		}
-		unlockPlayer()
 	},
 	*Seller() {
 		while (true) {
@@ -80,6 +79,49 @@ export const dialogs = {
 			yield 'Want to buy something?'
 			yield 'Have a look at what I have available!'
 			unlockPlayer()
+			yield false
+		}
+	},
+	*Alice() {
+		if (!hasQuest('alice_1')) {
+			yield 'Hello!'
+			yield 'I seem to have drank the wrong potion and it made me tiny'
+			yield 'I can\'t do anything when I\'m this size!'
+			yield 'Do you know how I could get to my regular size?'
+		}
+		if (!hasItem('hummus')) {
+			if (hasCompletedQuest('jack_1') && !hasQuest('alice_1')) {
+				yield 'oh you found a magic bean?'
+				yield 'maybe that could help me get to my regular size!'
+				addQuest('alice_1')
+				yield false
+			}
+			while (true) {
+				yield 'have you found anything?'
+				yield 'Being this tiny is actually really dangerous'
+				yield 'The other day a caterpillar almost stepped on me!'
+				yield false
+			}
+		} else {
+			yield 'this looks really good!'
+			yield 'let me have a taste'
+			aliceJumpDown()
+		}
+	},
+	*AliceBig() {
+		yield 'Oh no, this won\'t do!'
+		yield 'I\'m as big as a house!'
+		yield 'do you think you could try another meal to bring me to a regular size?'
+		yield false
+		while (true) {
+			yield 'be careful down there, I don\'t want to step on you'
+			yield false
+		}
+	},
+	*AliceBigAfter() {
+		while (true) {
+			yield 'Being this huge is not much better'
+			yield 'I keep stomping on everything!'
 			yield false
 		}
 	},

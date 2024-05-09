@@ -1,8 +1,11 @@
 import type { items } from '@assets/assets'
-import type { crops } from '@/global/entity'
 import { ModStage, ModType, type Modifier, createModifier } from '@/lib/stats'
 import { entries } from '@/utils/mapFunctions'
 
+export const cropNames = ['carrot', 'beet', 'tomato', 'lettuce', 'pumpkin', 'wheat', 'haricot', 'magic_bean'] as const satisfies items[]
+export const fruitNames = ['apple'] as const
+export type crops = (typeof cropNames)[number]
+export type fruits = (typeof fruitNames)[number]
 export interface Item {
 	name: items
 	quantity: number
@@ -11,17 +14,19 @@ export interface Item {
 export enum Rarity {
 	Common = 50,
 	Rare = 25,
+	Always = 100,
 }
 export interface ItemData {
-	name: string
-	seed?: crops
-	meal?: Modifier<any>[]
-	ingredient?: true
-	drop?: {
+	'name': string
+	'seed'?: crops
+	'meal'?: Modifier<any>[]
+	'ingredient'?: true
+	'drop'?: {
 		rarity: Rarity
 		level: 0 | 1 | 2 | 3
 	}
-	price?: number
+	'key item'?: true
+	'price'?: number
 }
 
 export const itemsData: Record<items, ItemData> = {
@@ -29,6 +34,10 @@ export const itemsData: Record<items, ItemData> = {
 		name: 'Acorn',
 	},
 	// ! Ingredients
+	haricot: {
+		name: 'Haricot',
+		ingredient: true,
+	},
 	strawberry: {
 		name: 'Strawberry',
 		ingredient: true,
@@ -72,10 +81,6 @@ export const itemsData: Record<items, ItemData> = {
 	},
 	pumpkin: {
 		name: 'Pumpkin',
-		ingredient: true,
-	},
-	magic_bean: {
-		name: '"Magic" bean',
 		ingredient: true,
 	},
 	milk: {
@@ -245,6 +250,14 @@ export const itemsData: Record<items, ItemData> = {
 	strawberry_pie: {
 		name: 'Strawberry pie',
 		meal: [],
+	},
+	hummus: {
+		name: 'Hummus',
+		meal: [],
+	},
+	magic_bean: {
+		'name': '"Magic" bean',
+		'key item': true,
 	},
 }
 

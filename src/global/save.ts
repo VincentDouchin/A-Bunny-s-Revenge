@@ -2,12 +2,12 @@ import { get, set } from 'idb-keyval'
 import { Quaternion, Vector3 } from 'three'
 import type { With } from 'miniplex'
 import { context } from './context'
-import type { Entity, crops } from './entity'
+import type { Crop, Entity } from './entity'
 import type { QuestName } from '@/constants/quests'
-import type { Item } from '@/constants/items'
+import type { Item, crops } from '@/constants/items'
 
 export interface SaveData {
-	crops: Record<string, NonNullable<Entity['crop']>>
+	crops: Record<string, NonNullable<Crop>>
 	playerPosition: number[]
 	playerRotation: number[]
 	quests: Partial<Record<QuestName, Array<boolean>>>

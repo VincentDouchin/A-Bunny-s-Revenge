@@ -9,7 +9,7 @@ import type { Animator } from './animator'
 import type { InstanceHandle } from './assetLoaders'
 import type { NPC } from '@/constants/NPC'
 import type { Drop, enemy } from '@/constants/enemies'
-import type { Item } from '@/constants/items'
+import type { Item, crops } from '@/constants/items'
 import type { Recipe } from '@/constants/recipes'
 import type { MenuInputMap, PlayerInputMap } from '@/global/inputMaps'
 import type { direction } from '@/lib/directions'
@@ -24,7 +24,7 @@ import type { MenuOptions, RenderMainMenuFn } from '@/states/mainMenu/mainMenuRe
 
 export type PlayerAnimations = 'idle' | 'running' | 'lightAttack' | 'slashAttack' | 'heavyAttack' | 'hit' | 'dying'
 export type EnemyAnimations = 'idle' | 'running' | 'attacking' | 'hit' | 'dead'
-export type Dialog = Generator<string | string[] | void | false, void, number | void>
+export type Dialog = Generator<string | string[] | void | false, void, number | void> | AsyncGenerator<string | string[] | void | false, void, number | void>
 export enum Faction {
 	Player,
 	Enemy,
@@ -44,6 +44,7 @@ export enum Interactable {
 	FillWateringCan = 'fill watering can',
 	Water = 'water',
 	Buy = 'buy',
+	MagicBean = 'Plant magic bean',
 }
 export enum MenuType {
 	Oven,
@@ -75,10 +76,14 @@ export interface States {
 	enemy: 'idle' | 'running' | 'attack' | 'hit' | 'dying' | 'dead' | 'waitingAttack' | 'attackCooldown' | 'stun' | 'wander'
 	boss: 'idle' | 'running' | 'rangeAttack' | 'attack' | 'dying' | 'dead' | 'waitingAttack' | 'attackCooldown' | 'hit'
 }
-export const cropNames = ['carrot', 'beet', 'tomato', 'lettuce', 'pumpkin', 'wheat'] as const
-export const fruitNames = ['apple'] as const
-export type crops = (typeof cropNames)[number]
-export type fruits = (typeof fruitNames)[number]
+export interface Crop {
+	stage: number
+	name: crops
+	watered: boolean
+	luck: number
+	planted: number
+}
+
 export interface Entity {
 	// ! Rendering
 	renderGroup?: RenderGroup
@@ -133,6 +138,7 @@ export interface Entity {
 	ovenAnimator?: Animator<Animations['BunnyOvenPacked']>
 	houseAnimator?: Animator<Animations['House']>
 	chestAnimator?: Animator<Animations['Chest']>
+	kayAnimator?: Animator<Animations['ALICE_animated']>
 	template?: () => JSXElement
 	el?: HTMLElement
 	cssObject?: true
@@ -140,7 +146,7 @@ export interface Entity {
 	// ! Farming
 	sensorDesc?: ColliderDesc
 	sensorCollider?: Collider
-	crop?: { stage: number, name: crops, watered: boolean, luck: number, planted: number }
+	crop?: Crop
 	plantableSpot?: string
 	planted?: With<Entity, 'crop'>
 	wateringCan?: With<Entity, 'model' | 'waterAmount'>
@@ -274,6 +280,9 @@ export interface Entity {
 	poison?: true
 	// ! Stall
 	price?: number
+	// ! Alice
+	beanstalk?: true
+	magicHaricot?: Entity
 
 }
 export type Bundle<C extends keyof Entity> = () => With<Entity, C>

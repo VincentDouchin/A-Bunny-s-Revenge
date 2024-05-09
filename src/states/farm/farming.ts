@@ -5,9 +5,11 @@ import { Vector3 } from 'three'
 import { randFloat } from 'three/src/math/MathUtils'
 import { itemBundle } from '../game/items'
 import { updateSpotWatered } from './wateringCan'
+import type { crops } from '@/constants/items'
 import { itemsData } from '@/constants/items'
 import { Sizes } from '@/constants/sizes'
-import { type Entity, Interactable, MenuType, type crops } from '@/global/entity'
+import { type Crop, type Entity, Interactable, MenuType } from '@/global/entity'
+
 import { assets, dayTime, ecs, gameTweens } from '@/global/init'
 import { removeItem, save, updateSave } from '@/global/save'
 import { playSound } from '@/global/sounds'
@@ -26,7 +28,7 @@ export const updateCropsSave = () => {
 		}, {})
 	})
 }
-export const maxStage = (name: crops) => assets.crops[name].stages.length - 1
+export const maxStage = (name: crops) => (assets.crops[name]?.stages.length ?? 1) - 1
 export const cropBundle = (grow: boolean, crop: NonNullable<Entity['crop']>) => {
 	const increaseStage = grow ? 1 : 0
 	const stage = Math.min(crop.stage + increaseStage, maxStage(crop.name))
@@ -141,11 +143,12 @@ export const harvestCrop = async () => {
 		}
 	}
 }
+export const getGrowthStages = (crop: Crop) => Math.floor((dayTime.dayLight - crop.planted) / (dayTime.dayLength / 2))
 const cropsQuery = ecs.with('crop')
 export const growCrops = () => {
 	const changed: With<Entity, 'crop'>[] = []
 	for (const entity of cropsQuery) {
-		const stages = Math.floor((dayTime.dayLight - entity.crop.planted) / (dayTime.dayLength / 2))
+		const stages = getGrowthStages(entity.crop)
 		if (stages > 0 && entity.crop.stage < maxStage(entity.crop.name)) {
 			changed.push(entity)
 		}

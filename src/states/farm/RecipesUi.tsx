@@ -1,5 +1,6 @@
 import type { Accessor } from 'solid-js'
 import { For, Show, createEffect, createMemo, createSignal } from 'solid-js'
+import { css } from 'solid-styled'
 import { InventoryTitle } from './CookingUi'
 import { ItemDisplay } from './InventoryUi'
 import { itemsData } from '@/constants/items'
@@ -43,7 +44,28 @@ export const MealBuffs = ({ meals }: { meals: Accessor<Modifier<any>[]> }) => {
 }
 export const RecipesUi = ({ player }: FarmUiProps) => {
 	const recipeEntity = ui.sync(() => recipeQuery.first)
-
+	css/* css */`
+	.recipes-container{
+		display: flex;
+		gap: 2rem;
+		min-height: 20rem;
+	}
+	.output{
+		display: flex;
+		gap: 0.5rem;
+		width: fit-content;
+		place-self: center;
+	}
+	.recipes{
+		display: grid;
+		gap: 1rem;
+		grid-template-columns: repeat(5, 1fr);
+		height: fit-content;
+	}
+	.description{
+		width: 20rem
+	}
+	`
 	return (
 		<Modal open={recipeEntity()}>
 			<Show when={recipeEntity()}>
@@ -60,14 +82,14 @@ export const RecipesUi = ({ player }: FarmUiProps) => {
 					return (
 						<div>
 							<InventoryTitle>{getMenuName(entity().menuType)}</InventoryTitle>
-							<div style={{ 'display': 'flex', 'gap': '2rem', 'min-height': '20rem' }}>
+							<div class="recipes-container">
 
 								<div>
 									<Menu inputs={entity().menuInputs}>
 										{({ getProps }) => {
 											return (
 												<div style={{ display: 'grid', gap: '1rem' }}>
-													<div style={{ 'display': 'flex', 'gap': '0.5rem', 'background': 'hsl(0,0%,100%,0.3)', 'padding': '0.5rem', 'border-radius': '1rem', 'width': 'fit-content', 'place-self': 'center' }}>
+													<div class="output">
 														<For each={range(0, 4, i => i)}>
 															{(i) => {
 																const props = getProps()
@@ -81,7 +103,7 @@ export const RecipesUi = ({ player }: FarmUiProps) => {
 															}}
 														</For>
 													</div>
-													<div style={{ 'display': 'grid', 'gap': '1rem', 'grid-template-columns': '1fr 1fr 1fr 1fr 1fr', 'height': 'fit-content' }}>
+													<div class="recipes">
 														<For each={recipesFiltered()}>
 															{(recipe, i) => {
 																const props = getProps(i() === 0)
@@ -105,7 +127,7 @@ export const RecipesUi = ({ player }: FarmUiProps) => {
 										}}
 									</Menu>
 								</div>
-								<div style={{ 'width': '20rem', 'background': 'hsl(0,0%,100%,0.3)', 'border-radius': '2rem', 'display': 'grid', 'padding': '1rem' }}>
+								<div class="description">
 									<Show when={selectedRecipe()}>
 										{(recipe) => {
 											const output = createMemo(() => itemsData[recipe().output.name])

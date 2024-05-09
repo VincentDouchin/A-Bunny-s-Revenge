@@ -1,63 +1,119 @@
-import { For, Show } from 'solid-js'
-import { ItemDisplay } from './InventoryUi'
+import { For, Show, createEffect, onMount } from 'solid-js'
+import { css } from 'solid-styled'
+import atom from 'solid-use/atom'
 import { InventoryTitle } from './CookingUi'
+import { IconDisplay, ItemDisplay } from './InventoryUi'
 import { quests } from '@/constants/quests'
 import type { Quest, QuestName } from '@/constants/quests'
 
-import { assets, ecs, ui } from '@/global/init'
-import { save } from '@/global/save'
 import { MenuType } from '@/global/entity'
+import { ecs, ui } from '@/global/init'
+import { save } from '@/global/save'
+import { ForQuery } from '@/ui/components/ForQuery'
+import { Menu } from '@/ui/components/Menu'
 import { Modal } from '@/ui/components/Modal'
 import type { FarmUiProps } from '@/ui/types'
 
 const openBulletinBoardQuery = ecs.with('menuType').where(e => e.menuType === MenuType.Quest)
 
 export const QuestUi = ({ player }: FarmUiProps) => {
-	const questsToComplete = ui.sync(() => Object.entries(save.quests) as [QuestName, boolean[]][])
-	const open = ui.sync(() => openBulletinBoardQuery.first)
-
 	return (
-		<Modal open={open()}>
-			<Show when={open()}>
-				{(board) => {
-					ui.updateSync(() => {
-						if (player.menuInputs.get('cancel').justReleased) {
-							ecs.removeComponent(board(), 'menuType')
-						}
-					})
-					return (
-						<>
+		<ForQuery query={openBulletinBoardQuery}>
+			{(board) => {
+				const visible = atom(false)
+				onMount(() => setTimeout(() => visible(true), 100))
+				const questsToComplete = Object.entries(save.quests).toReversed() as [QuestName, boolean[]][]
+				ui.updateSync(() => {
+					if (player.menuInputs.get('cancel').justReleased) {
+						ecs.removeComponent(board, 'menuType')
+					}
+				})
+				css/* css */`
+				.quest-container{
+					max-height: 30rem;
+					overflow: hidden;
+					display: grid;
+					gap: 0.5rem
+				}
+				.quest{
+					color: white;
+					background: hsl(0, 0%, 0%, 0.3);
+					padding: 1rem;
+					border-radius:1rem;
+					margin: 0.2rem;
+					box-sizing: border-box;
+				}	
+				.step{
+					display: flex;
+					gap: 1rem;
+				}
+				.quest-description{
+					font-size: 1.5rem;
+				}
+				.step-container{
+					display: grid;
+					gap: 0.5rem;
+				}
+				`
+				return (
+					<Modal open={visible()}>
+						<Show when={visible()}>
 							<InventoryTitle>Quests</InventoryTitle>
-							<For each={questsToComplete()}>
-								{([questName, compltetedSteps]) => {
-									const quest = quests[questName] as Quest
-									return (
-										<div style={{ 'color': 'white', 'background': 'hsl(0, 0%, 0%, 0.3)', 'padding': '1rem', 'border-radius': '1rem' }}>
-											<div style={{ 'font-size': '2rem' }}>{quest.name}</div>
-											<For each={quest.steps}>
-												{(step, i) => {
-													const isCompleted = compltetedSteps[i()]
+							<div class="quest-container scroll-container">
+								<Menu inputs={player.menuInputs}>
+									{({ getProps }) => {
+										return (
+											<For each={questsToComplete}>
+												{([questName, completedSteps], i) => {
+													const quest = quests[questName] as Quest
+													const props = getProps(i() === 0)
+													createEffect(() => {
+														if (props.selected()) {
+															props.getRef().scrollIntoView({ behavior: 'smooth' })
+														}
+													})
 													return (
-														<div>
-															{step?.description && <div>{step.description}</div>}
-															{step.items?.map(item => (
-																<div style={{ position: 'relative' }}>
-																	<div innerHTML={assets.icons[isCompleted ? 'circle-check-solid' : 'circle-xmark-solid']} style={{ 'position': 'absolute', 'z-index': 1, 'top': '0.5rem', 'left': '0.5rem', 'color': isCompleted ? '#33cc33' : 'red' }}></div>
-																	<ItemDisplay item={item} selected={() => false}></ItemDisplay>
-																</div>
-															))}
+														<div class="quest" {...props} style={{ border: `solid 0.2rem ${props.selected() ? 'white' : 'transparent'}` }}>
+															<div style={{ 'font-size': '2rem' }}>{quest.name}</div>
+															<div class="step-container">
+																<For each={quest.steps}>
+																	{(step, i) => {
+																		const isCompleted = Boolean(completedSteps[i()])
+																		return (
+																			<div class="step">
+																				<For each={step.items}>
+																					{item => (
+																						<ItemDisplay
+																							completed={isCompleted}
+																							item={item}
+																							selected={() => false}
+																						/>
+																					)}
+																				</For>
+																				<Show when={step.icon}>
+																					{icon => <IconDisplay completed={isCompleted} icon={icon()} />}
+																				</Show>
+																				<Show when={step.description}>
+																					{description => <div class="quest-description">{description()}</div>}
+																				</Show>
+																			</div>
+																		)
+																	}}
+																</For>
+															</div>
 														</div>
 													)
 												}}
 											</For>
-										</div>
-									)
-								}}
-							</For>
-						</>
-					)
-				}}
-			</Show>
-		</Modal>
+										)
+									}}
+								</Menu>
+							</div>
+
+						</Show>
+					</Modal>
+				)
+			}}
+		</ForQuery>
 	)
 }

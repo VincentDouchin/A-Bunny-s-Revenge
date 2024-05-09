@@ -1,6 +1,8 @@
 import type { With } from 'miniplex'
-import type { Accessor, Setter } from 'solid-js'
+import type { Accessor, JSX, Setter } from 'solid-js'
 import { For, Show, createEffect, createMemo, createSignal, onCleanup } from 'solid-js'
+import { css } from 'solid-styled'
+import type { icons } from '@assets/assets'
 import { InventoryTitle } from './CookingUi'
 import { MealBuffs } from './RecipesUi'
 import { itemsData } from '@/constants/items'
@@ -21,7 +23,60 @@ import { removeItemFromPlayer } from '@/utils/dialogHelpers'
 import { range } from '@/utils/mapFunctions'
 
 const thumbnail = thumbnailRenderer()
-export const ItemDisplay = (props: { item: Item | null, selected?: Accessor<boolean>, disabled?: boolean, onSelected?: () => void }) => {
+export const ItemBox = (props: { children: JSX.Element, selected?: boolean, completed?: boolean }) => {
+	css/* css */`
+	.item-display{
+		border-radius: 1rem;
+		background: var(--black-transparent);
+		width: 5rem;
+		height: 5rem;
+		display: grid;
+		place-items: center;
+		position: relative;
+		box-shadow: 0 0.2rem 0.2rem 0 black;
+	}
+	.completed{
+		position: absolute;
+		z-index: 1;
+		top: 0.5rem;
+		left: 0.5rem;
+	}
+	`
+	return (
+		<div
+			class="item-display"
+			use:solid-styled
+			style={{ border: props.selected ? 'solid 0.2rem white' : '' }}
+		>
+			{props.children}
+			<Show when={props.completed !== undefined}>
+				<div
+					class="completed"
+					innerHTML={assets.icons[props.completed ? 'circle-check-solid' : 'circle-xmark-solid']}
+					style={{ color: props.completed ? '#33cc33' : 'red' }}
+				/>
+			</Show>
+		</div>
+	)
+}
+
+export const IconDisplay = (props: { icon: icons, completed?: boolean }) => (
+	<ItemBox completed={props.completed}>
+		<div
+			style={{ width: '80%', display: 'grid' }}
+			innerHTML={assets.icons[props.icon]}
+		>
+		</div>
+	</ItemBox>
+)
+
+export const ItemDisplay = (props: {
+	item: Item | null
+	selected?: Accessor<boolean>
+	disabled?: boolean
+	onSelected?: () => void
+	completed?: boolean
+}) => {
 	const isDisabled = createMemo(() => props.disabled ?? false)
 	const disabledStyles = createMemo(() => {
 		return isDisabled()
@@ -30,7 +85,7 @@ export const ItemDisplay = (props: { item: Item | null, selected?: Accessor<bool
 	})
 	const [delay, setDelay] = createSignal(false)
 
-	const isSelected = createMemo(() => props.selected && props.selected())
+	const isSelected = createMemo(() => Boolean(props.selected && props.selected()))
 	createEffect(() => {
 		if (isSelected()) {
 			props.onSelected && props.onSelected()
@@ -38,8 +93,46 @@ export const ItemDisplay = (props: { item: Item | null, selected?: Accessor<bool
 		}
 	})
 	const quantity = createMemo(() => props.item?.quantity)
+	css/* css */`
+	@global{
+	.quantity{
+		color: white;
+		position: absolute;
+		width: 1rem;
+		bottom: 0.5rem;
+		right: 0.5rem;
+		text-align: center;
+	}
+	.name{
+		color: white;
+		position: absolute;
+		top: 100%;
+		font-size: 1.5rem;
+		z-index: 2;
+		white-space: nowrap;
+	}
+	@keyframes item-selected {
+		from {
+			transform: scale(1.2);
+		}
+		to {
+			transform: scale(1);
+		}
+	}
+
+	.item-selected {
+		animation-name: item-selected;
+		animation-duration: 0.4s;
+		animation-timing-function: ease-in;
+	}
+	}
+	`
+
 	return (
-		<div style={{ 'border-radius': '1rem', 'background': 'hsla(0 0% 100% / 50%)', 'width': '5rem', 'height': '5rem', 'display': 'grid', 'place-items': 'center', 'position': 'relative', 'border': isSelected() ? 'solid 0.2rem white' : '' }}>
+		<ItemBox
+			selected={isSelected()}
+			completed={props.completed}
+		>
 			<Show when={props.item?.name && itemsData[props.item.name]}>
 				{(item) => {
 					return (
@@ -56,18 +149,18 @@ export const ItemDisplay = (props: { item: Item | null, selected?: Accessor<bool
 								}}
 							</Show>
 							<Show when={!(isSelected() && delay())}>
-								<img src={assets.items[props.item!.name].img} style={{ width: '80%', ...disabledStyles() }} classList={{ 'item-selected': isSelected() }}></img>
+								<img src={assets.items[props.item!.name].img} style={disabledStyles()} class="item" classList={{ 'item-selected': isSelected() }}></img>
 							</Show>
-							<div style={{ 'color': 'white', 'position': 'absolute', 'width': '1rem', 'bottom': '0.5rem', 'right': '0.5rem', 'text-align': 'center' }}>{quantity()}</div>
+							<div class="quantity">{quantity()}</div>
 							<Show when={isSelected()}>
-								<div style={{ 'color': 'white', 'position': 'absolute', 'top': '100%', 'font-size': '1.5rem', 'z-index': 2, 'white-space': 'nowrap' }}>{item().name}</div>
+								<div class="name">{item().name}</div>
 							</Show>
 						</>
 					)
 				}}
 			</Show>
 
-		</div>
+		</ItemBox>
 	)
 }
 
@@ -115,33 +208,32 @@ export const InventorySlots = (props: {
 type ItemCategory = Exclude<keyof ItemData, 'name'>
 const PlayerInventory = ({ player, getProps, setSelectedItem }: { player: With<Entity, 'inventory' | 'inventoryId'>, getProps: getProps, setSelectedItem: Setter<Item | null> }) => {
 	const inventory = ui.sync(() => player.inventory.filter(Boolean))
-	const categories = createMemo(() => ['meal', 'ingredient', 'seed'].filter((category) => {
+	const categories = createMemo(() => ['meal', 'ingredient', 'seed', 'key item'].filter((category) => {
 		return inventory().some(item => category in itemsData[item.name])
 	}) as ItemCategory[])
+	css/* css */`
+	.inventory-container{
+		height:25rem;
+		overflow-y: scroll;
+		scroll-behavior:smooth;
+		scrollbar-width: none;
+		display: grid;
+		gap: 1rem;
+	}
+	.inventory-category{
+		display:grid;
+		grid-template-columns: repeat(8, 1fr);
+		gap: 1rem;
+	}
+	.category-title{
+		font-size:2.1rem;
+		color: white;
+		text-transform: capitalize;
+	}
+	`
 	return (
 		<>
-			<style jsx>
-				{/* css */`
-				.inventory-container{
-					height:25rem;
-					overflow-y: scroll;
-					scroll-behavior:smooth;
-					scrollbar-width: none;
-					display: grid;
-					gap: 1rem
-				}
-				.inventory-category{
-					display:grid;
-					grid-template-columns: repeat(8, 1fr);
-					gap: 1rem
-				}
-				.category-title{
-					font-size:2rem;
-					color: white;
-					text-transform: capitalize;
-				}
-				`}
-			</style>
+
 			<div class="inventory-container">
 				<For each={categories()}>
 					{(category) => {
@@ -155,7 +247,7 @@ const PlayerInventory = ({ player, getProps, setSelectedItem }: { player: With<E
 						}
 						return (
 							<div>
-								<div ref={setRef}class="category-title">
+								<div ref={setRef}class="category-title outline-text">
 									{category}
 									s
 								</div>
@@ -183,7 +275,6 @@ export const InventoryUi = ({ player }: FarmUiProps) => {
 			ecs.removeComponent(player, 'menuType')
 		}
 	})
-	// const [tab, setTab] = createSignal<'inventory' | 'quests'>('inventory')
 	const open = ui.sync(() => player.menuType === MenuType.Player)
 	const [selectedItem, setSelectedItem] = createSignal<Item | null>(null)
 	const item = createMemo(() => {
@@ -200,14 +291,32 @@ export const InventoryUi = ({ player }: FarmUiProps) => {
 			}
 		}
 	}
+	css/* css */`
+	.inventory-container{
+		display: grid;
+		grid-template-columns: 47rem 15rem;
+		gap: 1rem;
+	}
+		.modal{
+
+		place-self: center;
+		padding: 2rem;
+		border-radius: 1rem;
+		display: grid;
+		gap: 2rem;
+		position: relative;
+
+	}
+	`
 
 	return (
+
 		<Modal open={open()}>
 			<Show when={open()}>
 				<div>
 
 					<InventoryTitle>Inventory</InventoryTitle>
-					<div style={{ 'display': 'grid', 'grid-template-columns': 'auto 15rem', 'gap': '1rem' }}>
+					<div class="inventory-container">
 						<div>
 							<Menu
 								inputs={player.menuInputs}
@@ -223,7 +332,7 @@ export const InventoryUi = ({ player }: FarmUiProps) => {
 								}}
 							</Menu>
 						</div>
-						<div style={{ 'background': 'hsl(0,0%,100%,0.5)', 'padding': '1rem', 'border-radius': '1rem' }}>
+						<div class="description">
 							<Show when={selectedItem()}>
 								{(item) => {
 									const data = createMemo(() => itemsData[item().name])
@@ -244,8 +353,7 @@ export const InventoryUi = ({ player }: FarmUiProps) => {
 														<div style={{ 'color': 'white', 'padding': '1rem', 'font-size': '1.3rem' }}>
 															<button
 																onClick={() => consumeMeal(item(), mods())}
-																class="button"
-																style={{ 'font-size': '1rem', 'width': '3rem', 'display': 'flex', 'gap': '0.5rem', 'margin': '0 auto' }}
+																class="styled"
 															>
 																<InputIcon input={player.playerControls.get('secondary')}></InputIcon>
 																Eat

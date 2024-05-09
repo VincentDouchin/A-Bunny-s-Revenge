@@ -24,18 +24,20 @@ import { applyDeathTimer, spawnDrops, tickHitCooldown } from './states/dungeon/b
 import { dropBerriesOnHit } from './states/dungeon/bushes'
 import { buyItems } from './states/dungeon/buyItems'
 import { spawnWeaponsChoice } from './states/dungeon/chooseWeapon'
+import { encounters } from './states/dungeon/encounters'
 import { removeEnemyFromSpawn, spawnEnemies } from './states/dungeon/enemies'
 import { killAnimation, killEntities } from './states/dungeon/health'
 import { addHealthBarContainer } from './states/dungeon/healthBar'
 import { spawnPoisonTrail } from './states/dungeon/poisonTrail'
 import { endBattleSpawnChest } from './states/dungeon/spawnChest'
 import { rotateStun } from './states/dungeon/stun'
-import { growCrops, harvestCrop, initPlantableSpotsInteractions, interactablePlantableSpot, plantSeed, updateCropsSave } from './states/farm/farming'
+import { addBeanStalkHole, growMagicBean, harvestMagicBean } from './states/farm/beanStalk'
+import { growCrops, harvestCrop, initPlantableSpotsInteractions, interactablePlantableSpot, plantSeed } from './states/farm/farming'
 import { closePlayerInventory, disableInventoryState, enableInventoryState, interact, openPlayerInventory } from './states/farm/openInventory'
 import { addWateringCan, waterCrops } from './states/farm/wateringCan'
 import { addDashDisplay, updateDashDisplay } from './states/game/dash'
 import { dayNight, playNightMusic } from './states/game/dayNight'
-import { talkToNPC } from './states/game/dialog'
+import { talkToNPC, turnNPCHead } from './states/game/dialog'
 import { bobItems, collectItems, popItems, stopItems } from './states/game/items'
 import { canPlayerMove, movePlayer, playerSteps, savePlayerFromTheEmbraceOfTheVoid, savePlayerPosition, stopPlayer } from './states/game/movePlayer'
 import { pauseGame } from './states/game/pauseGame'
@@ -57,7 +59,7 @@ coreState
 	.onEnter(ui.render(UI), initHowler)
 	.addSubscriber(...target, resize, disablePortrait, enableFullscreen, stopOnLosingFocus)
 	.onPreUpdate(coroutines.tick, savePlayerFromTheEmbraceOfTheVoid)
-	.onUpdate(runIf(() => !pausedState.enabled, updateAnimations('enemyAnimator', 'playerAnimator', 'chestAnimator', 'houseAnimator', 'ovenAnimator', 'basketAnimator'), () => time.tick()))
+	.onUpdate(runIf(() => !pausedState.enabled, updateAnimations('enemyAnimator', 'playerAnimator', 'chestAnimator', 'houseAnimator', 'ovenAnimator', 'basketAnimator', 'kayAnimator'), () => time.tick()))
 	.onUpdate(inputManager.update, ui.update, moveCamera())
 	.enable()
 setupState
@@ -74,7 +76,7 @@ gameState
 		runIf(() => !openMenuState.enabled, pauseGame, interact),
 	)
 	.addPlugins(playerBehaviorPlugin, rangeEnemyBehaviorPlugin, chargingEnemyBehaviorPlugin, meleeEnemyBehaviorPlugin, beeBossBehaviorPlugin, jumpingEnemyBehaviorPlugin, basketBehaviorPlugin)
-	.onUpdate(collectItems, touchItem, talkToNPC, stopItems, pickupAcorn, dropBerriesOnHit, updateWeaponArc)
+	.onUpdate(collectItems, touchItem, talkToNPC, turnNPCHead, stopItems, pickupAcorn, dropBerriesOnHit, updateWeaponArc)
 	.onPostUpdate(renderGame, rotateStun)
 	.enable()
 mainMenuState
@@ -84,9 +86,9 @@ mainMenuState
 	.onExit(removeStateEntity(mainMenuState), spawnPlayerContinueGame)
 campState
 	.addSubscriber(...interactablePlantableSpot, addWateringCan)
-	.onEnter(spawnFarm, spawnLevelData, updateCropsSave, initPlantableSpotsInteractions, spawnGodRay)
+	.onEnter(spawnFarm, spawnLevelData, initPlantableSpotsInteractions, spawnGodRay, addBeanStalkHole)
 	.onEnter(runIf(() => !mainMenuState.enabled, spawnCharacter, spawnBasket, enableBasketUi), moveCamera(true))
-	.onUpdate(collideWithDoorCamp, playNightMusic, waterCrops, growCrops)
+	.onUpdate(collideWithDoorCamp, playNightMusic, waterCrops, growCrops, growMagicBean, harvestMagicBean)
 	.onUpdate(runIf(canPlayerMove, plantSeed, harvestCrop, openPlayerInventory, savePlayerPosition))
 	.onExit(despawnOfType('map'))
 openMenuState

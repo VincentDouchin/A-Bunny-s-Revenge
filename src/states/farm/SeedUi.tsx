@@ -1,6 +1,7 @@
 import { For, Portal, Show } from 'solid-js/web'
 import { createSignal, onMount } from 'solid-js'
 import { Transition } from 'solid-transition-group'
+import { css } from 'solid-styled'
 import { ItemDisplay } from './InventoryUi'
 import type { Item } from '@/constants/items'
 import { itemsData } from '@/constants/items'
@@ -23,6 +24,14 @@ export const SeedUi = ({ player }: FarmUiProps) => {
 			ecs.removeComponent(entity, 'menuType')
 		}
 	}
+	css/* css */`
+	.seeds{
+		display: flex;
+		padding: 1rem 1rem 2rem 1rem;
+		border-radius: 1rem;
+		gap: 1rem;
+	}
+	`
 	return (
 		<Show when={inputs()}>
 			{inputs => (
@@ -42,7 +51,7 @@ export const SeedUi = ({ player }: FarmUiProps) => {
 										<Portal mount={entity.interactionContainer.element}>
 											<Transition name="popup">
 												<Show when={visible()}>
-													<div style={{ 'display': 'flex', 'background': 'hsl(0,0%,0%,0.3)', 'padding': '1rem', 'border-radius': '1rem', 'gap': '1rem' }}>
+													<div class="seeds styled-container">
 														<For each={seeds()}>
 															{(seed, i) => {
 																const props = getProps(i() === 0)

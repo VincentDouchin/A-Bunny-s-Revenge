@@ -1,6 +1,7 @@
 import { PlayerUi } from '../states/farm/PlayerUi'
 import { PauseUi } from './PauseUI'
 import { StateUi } from './components/StateUi'
+import { Toaster } from './Toaster'
 import { DebugUi } from '@/debug/debugUi'
 import { dungeonState } from '@/global/states'
 import { EnemyHealthBarUi } from '@/states/dungeon/EnemyHealthBarUi'
@@ -21,5 +22,6 @@ export const UI = () => (
 			<MiniMapUi />
 		</StateUi>
 		<OverlayUi />
+		<Toaster />
 	</>
 )

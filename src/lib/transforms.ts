@@ -3,7 +3,7 @@ import { Quaternion, Vector3 } from 'three'
 import type { Collider } from '@dimforge/rapier3d-compat'
 import type { State } from './state'
 import type { direction } from './directions'
-import { ecs, world } from '@/global/init'
+import { ecs, time, world } from '@/global/init'
 
 export const getWorldPosition = (obj: Object3D<Object3DEventMap>) => {
 	const pos = new Vector3()
@@ -68,6 +68,9 @@ const updateRotation = () => {
 		}
 		if (entity.group) {
 			entity.group.setRotationFromQuaternion(entity.rotation)
+		}
+		if (entity.targetRotation) {
+			entity.rotation.slerp(entity.targetRotation, time.delta / 70)
 		}
 	}
 }

@@ -108,4 +108,12 @@ export const recipes: Array<Recipe> = [
 		output: { name: 'strawberry_pie', quantity: 1 },
 		processor: MenuType.Oven,
 	},
+	{
+		input: [
+			{ name: 'magic_bean', quantity: 1 },
+			{ name: 'carrot', quantity: 2 },
+		],
+		output: { name: 'hummus', quantity: 1 },
+		processor: MenuType.Oven,
+	},
 ]

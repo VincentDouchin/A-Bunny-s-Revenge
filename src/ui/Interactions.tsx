@@ -12,6 +12,7 @@ import { ecs, ui } from '@/global/init'
 import { save } from '@/global/save'
 import { dungeonState } from '@/global/states'
 import { WeaponStatsUi } from '@/states/dungeon/WeaponStatsUi'
+import { getMagicBeanInteractable } from '@/states/farm/beanStalk'
 
 export const getInteractables = (
 	player: With<Entity, 'inventory'>,
@@ -21,7 +22,6 @@ export const getInteractables = (
 	const hasSelectedSeed = player.inventory?.filter(Boolean).some((item) => {
 		return itemsData[item.name].seed === save.selectedSeed && item.quantity > 0
 	})
-
 	if (entity) {
 		switch (entity?.interactable) {
 			case Interactable.Plant: return [
@@ -30,13 +30,14 @@ export const getInteractables = (
 			]
 			case Interactable.Water:return (player.wateringCan?.waterAmount ?? 0) > 0 ? [Interactable.Water] : []
 			case Interactable.Talk: return [
-				entity.dialogContainer ? undefined : 'talk',
+				entity.activeDialog ? undefined : 'talk',
 			]
 			case Interactable.Cauldron: return ['Prepare', 'Cook']
 			case Interactable.Oven: return ['Prepare', 'Cook']
 			case Interactable.Chop: return ['Prepare', 'Cook']
 			case Interactable.WeaponStand: return ['Equip']
 			case Interactable.Buy: return [`Buy (${entity.price})`]
+			case Interactable.MagicBean:return getMagicBeanInteractable()
 			default: return [entity?.interactable]
 		}
 	}

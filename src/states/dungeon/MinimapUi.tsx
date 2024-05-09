@@ -1,4 +1,5 @@
 import { For, Show } from 'solid-js'
+import { css } from 'solid-styled'
 import type { Room } from './generateDungeon'
 import { RoomType } from './generateDungeon'
 import { assets, ecs } from '@/global/init'
@@ -63,34 +64,31 @@ const RoomUi = ({ room, direction, previous, current }: { room: Room, direction?
 
 const dungeonQuery = ecs.with('dungeon')
 export const MiniMapUi = () => {
+	css/* css */`
+	.minimap{
+		position: fixed;
+		top: 0;
+		right: 0;
+		margin: 2rem;
+		width: 15rem;
+		height: 10rem;
+		background: hsla(0, 0%, 100%, 0.3);
+		/* border: 0.5rem solid hsla(0, 0%, 100%, 0.5); */
+		border-radius: 2rem;
+		display: grid;
+		place-items: center;
+		overflow: hidden;
+	}
+	`
 	return (
 		<ForQuery query={dungeonQuery}>
 			{(dungeon) => {
 				return (
-					<>
-						<style jsx>
-							{/* css */`
-							.minimap{
-								position: fixed;
-								top: 0;
-								right: 0;
-								margin: 2rem;
-								width: 15rem;
-								height: 10rem;
-								background: hsla(0, 0%, 100%, 0.3);
-								/* border: 0.5rem solid hsla(0, 0%, 100%, 0.5); */
-								border-radius: 2rem;
-								display: grid;
-								place-items: center;
-								overflow: hidden;
-							}
-						`}
 
-						</style>
-						<div class="minimap">
-							<RoomUi room={dungeon.dungeon} current={true} />
-						</div>
-					</>
+					<div class="minimap">
+						<RoomUi room={dungeon.dungeon} current={true} />
+					</div>
+
 				)
 			}}
 		</ForQuery>

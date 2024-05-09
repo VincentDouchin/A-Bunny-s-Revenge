@@ -70,5 +70,8 @@ export const thumbnailRenderer = (size = 24) => {
 		return { element: renderer.domElement, clear, setSpinAmount }
 	}
 
-	return { getCanvas, spin }
+	const dispose = () => {
+		renderer.dispose()
+	}
+	return { getCanvas, spin, dispose }
 }

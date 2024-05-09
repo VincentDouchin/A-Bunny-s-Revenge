@@ -1,5 +1,6 @@
 import type { With } from 'miniplex'
 import { Show, createMemo } from 'solid-js'
+import { css } from 'solid-styled'
 import { InventorySlots } from '../farm/InventoryUi'
 import { InventoryTitle } from '../farm/CookingUi'
 import type { Entity } from '@/global/entity'
@@ -18,6 +19,22 @@ const playerToHeal = ecs.with('player', 'currentHealth', 'maxHealth')
 const basketQuery = ecs.with('menuType', 'inventory', 'inventoryId', 'inventorySize', 'basket').where(e => e.menuType === MenuType.Basket)
 export const BasketUi = ({ player }: { player: With<Entity, 'menuInputs' | 'inventory'> }) => {
 	const entity = ui.sync(() => basketQuery.first)
+	css/* css */`
+	.basket-ui-container{
+		display: grid;
+		gap: 2rem;
+		place-items: center;
+	}
+	.basket-inventory{
+		display: flex;
+		gap: 1rem;
+	}
+	.meals-inventory{
+		display: grid;
+		gap: 1rem;
+		grid-template-columns: repeat(8, 1fr)
+	}
+	`
 	return (
 		<Modal open={entity()}>
 			<Show when={entity()}>
@@ -52,30 +69,12 @@ export const BasketUi = ({ player }: { player: With<Entity, 'menuInputs' | 'inve
 					}
 					return (
 						<>
-							<style jsx>
-								{/* css */`
-								.basket-ui-container{
-									display: grid;
-									gap: 2rem;
-									place-items: center;
-								}
-								.basket-inventory{
-									display: flex;
-									gap: 1rem;
-								}
-								.meals-inventory{
-									display: grid;
-									gap: 1rem;
-									grid-template-columns: repeat(8, 1fr)
-								}
-								`}
-							</style>
 							<InventoryTitle>Basket</InventoryTitle>
 							<Menu inputs={player.menuInputs}>
 								{({ getProps }) => {
 									return (
 										<div class="basket-ui-container">
-											<div class="basket-inventory">
+											<div class="basket-inventory output">
 												<InventorySlots getProps={getProps} entity={basket()} click={removeMealFromBasket} />
 											</div>
 											<StateUi state={campState}>

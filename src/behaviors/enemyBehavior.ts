@@ -371,7 +371,7 @@ export const jumpingEnemyBehaviorPlugin = enemyBehavior(EnemyAttackStyle.Jumping
 					colliderDesc: ColliderDesc.cylinder(1, 1).setSensor(true),
 					position: e.position.clone(),
 				})
-				gameTweens.add(new Tween([2]).to([30], 300)
+				gameTweens.add(new Tween([2]).to([15], 300)
 					.onUpdate(([s]) => {
 						impact.scale.setScalar(s)
 						if (impactEntity.collider) {

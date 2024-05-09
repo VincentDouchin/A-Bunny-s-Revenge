@@ -1,15 +1,17 @@
 import type { With } from 'miniplex'
-import { For, Show, createEffect, createSignal, onCleanup } from 'solid-js'
+import { For, Show, createEffect, createMemo, onCleanup, onMount } from 'solid-js'
 import { Portal } from 'solid-js/web'
 import { css } from 'solid-styled'
+import type { Atom } from 'solid-use/atom'
 import atom from 'solid-use/atom'
+import { Quaternion, Vector3 } from 'three'
 import { CSS2DObject } from 'three/examples/jsm/renderers/CSS2DRenderer'
 import { ForQuery } from './components/ForQuery'
 import { ecs, ui } from '@/global/init'
 import type { Entity } from '@/global/entity'
 import { params } from '@/global/context'
 
-export const DialogText = (props: { text: string }) => {
+export const DialogText = (props: { text: string, finished: Atom<boolean> }) => {
 	css/* css */`
 	@keyframes letter-pop {
 		from {
@@ -32,32 +34,52 @@ export const DialogText = (props: { text: string }) => {
 	.space {
 		width: 0.5rem;
 	}
+	.word{
+		display: flex
+	}
 	`
-	let now = Date.now()
-	const [time, setTime] = createSignal(0)
-	const cleanUpTimeout = setInterval(() => {
-		setTime(Math.floor((Date.now() - now) / 20 * params.dialogSpeed))
-	})
+	const letterVisible = atom(0)
 	createEffect((val) => {
 		if (props.text !== val) {
-			setTime(0)
-			now = Date.now()
+			letterVisible(0)
+			props.finished(false)
 		}
 		return props.text
 	})
-	onCleanup(() => clearInterval(cleanUpTimeout))
-
+	onMount(() => {
+		const interval = setInterval(() => {
+			letterVisible(letterVisible() + 1)
+			if (letterVisible() >= props.text.split('').length) {
+				props.finished(true)
+			}
+		}, 20 * params.dialogSpeed)
+		onCleanup(() => {
+			clearInterval(interval)
+		})
+	})
+	const words = createMemo(() => props.text.split(' '))
 	return (
-		<For each={props.text.split('')}>
-			{(ch, i) => {
-				return <div class={`${time() >= i() ? 'letter-visible' : 'letter-hidden'} letter ${ch === ' ' ? 'space' : ''}`}>{ch}</div>
+		<For each={words()}>
+			{(word, wi) => {
+				const length = createMemo(() => words().reduce((acc, v, j) => j < wi() ? acc + v.split('').length : acc, 0))
+
+				return (
+					<div class="word">
+						<For each={word.split('')}>
+							{(ch, i) => {
+								return <div class={`${(letterVisible() > (i() + 1 + length()) || props.finished()) ? 'letter-visible' : 'letter-hidden'}`}>{ch}</div>
+							}}
+						</For>
+						<div class="space"></div>
+					</div>
+				)
 			}}
 		</For>
 	)
 }
 
 const dialogQuery = ecs.with('dialog', 'activeDialog')
-export const DialogUi = ({ player }: { player: With<Entity, 'playerControls'> }) => {
+export const DialogUi = ({ player }: { player: With<Entity, 'playerControls' | 'position'> }) => {
 	css/* css */`
 	.dialog-container {
 		color: white;
@@ -67,7 +89,9 @@ export const DialogUi = ({ player }: { player: With<Entity, 'playerControls'> })
 		border-radius: 1rem;
 		padding: 1rem;
 		display: flex;
-		min-width: 15rem;
+		max-width: 15rem;
+		flex-wrap:wrap;
+		min-width: 20rem;
 	}
 	.npc-name{
 		color: white;
@@ -82,18 +106,32 @@ export const DialogUi = ({ player }: { player: With<Entity, 'playerControls'> })
 			{(entity) => {
 				const currentDialog = atom<IteratorResult<string | string[] | void | false> | null>(null)
 				const element = atom<HTMLElement | null>(null)
-				ui.updateSync(() => {
+				const finished = atom(false)
+				onMount(() => {
+					if (entity.targetRotation && entity.position) {
+						const rot = player.position.clone().sub(entity.position)
+						const angle = Math.atan2(rot.x, rot.z)
+						entity.targetRotation.copy(new Quaternion().setFromAxisAngle(new Vector3(0, 1, 0), angle))
+					}
+				})
+				ui.updateSync(async () => {
 					if (player.playerControls.get('primary').justReleased) {
 						if (!entity.dialogContainer) {
 							const dialogContainer = new CSS2DObject(document.createElement('div'))
 							dialogContainer.position.y = entity.dialogHeight ?? entity.size?.y ?? 4
 							element(dialogContainer.element)
 							ecs.update(entity, { dialogContainer })
-						}
-						currentDialog(entity.dialog.next())
-						if (!currentDialog()?.value || currentDialog()?.done) {
-							ecs.removeComponent(entity, 'dialogContainer')
-							ecs.removeComponent(entity, 'activeDialog')
+							currentDialog(await entity.dialog.next())
+						} else {
+							if (finished()) {
+								currentDialog(await entity.dialog.next())
+								if (!currentDialog()?.value || currentDialog()?.done) {
+									ecs.removeComponent(entity, 'dialogContainer')
+									ecs.removeComponent(entity, 'activeDialog')
+								}
+							} else {
+								finished(true)
+							}
 						}
 					}
 				})
@@ -112,7 +150,7 @@ export const DialogUi = ({ player }: { player: With<Entity, 'playerControls'> })
 										<div class="npc-name">{entity.npcName}</div>
 									</Show>
 									<div class="dialog-container">
-										<DialogText text={text()} />
+										<DialogText text={text()} finished={finished} />
 									</div>
 								</Portal>
 							)
@@ -122,22 +160,4 @@ export const DialogUi = ({ player }: { player: With<Entity, 'playerControls'> })
 			}}
 		</ForQuery>
 	)
-	// const dialogs = ui.sync(() => [...dialogQuery])
-	// const input = playerInputMap().playerControls.get('primary')
-	// return (
-	// 	<For each={dialogs()}>
-	// 		{ (entity) => {
-	// 			const dialog = ui.sync(() => entity.currentDialog)
-	// 			return (
-	// 				<Portal mount={entity.dialogContainer.element}>
-	//
-	// 					<div style={{ 'position': 'absolute', 'right': 0, 'translate': '-1rem -50%', 'display': 'flex', 'color': 'white', 'gap': '0.5rem', 'font-size': '1.5rem', 'align-items': 'center' }}>
-	// 						<InputIcon input={input}></InputIcon>
-	// 						<div>Continue</div>
-	// 					</div>
-	// 				</Portal>
-	// 			)
-	// 		}}
-	// 	</For>
-	// )
 }

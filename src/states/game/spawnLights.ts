@@ -4,6 +4,8 @@ import type { Entity } from '@/global/entity'
 import { ecs } from '@/global/init'
 
 export const spawnLight = ({ x, y }: Vec2, parent: Entity) => {
+	x /= 2
+	y /= 2
 	const light = new DirectionalLight(0xFFFFFF, 0.6)
 	light.lookAt(new Vector3(0, 0, 0))
 	light.shadow.mapSize.set(x * 2, y * 2)

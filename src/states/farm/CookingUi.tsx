@@ -3,6 +3,8 @@
 // import { type Item, itemsData } from '@/constants/items'
 // import { MenuType } from '@/global/entity'
 
+import { css } from 'solid-styled'
+
 // import { recipes } from '@/constants/recipes'
 // import { ecs, ui } from '@/global/init'
 // import { addItem, removeItem } from '@/global/save'
@@ -12,7 +14,16 @@
 // import { addItemToPlayer } from '@/utils/dialogHelpers'
 
 // const inventoryQuery = ecs.with('inventory', 'menuType', 'menuInputs', 'inventorySize', 'inventoryId')
-export const InventoryTitle = (props: { children: string }) => <div style={{ 'font-size': '3rem', 'color': 'white', 'font-family': 'NanoPlus', 'text-transform': 'capitalize' }}>{props.children}</div>
+export const InventoryTitle = (props: { children: string }) => {
+	css/* css */`
+	.inventory-title{
+		font-size: 3rem;
+		color: white;
+		font-family: NanoPlus;
+		text-transform: capitalize;
+	}
+	`
+	return <div class="inventory-title outline-text">{props.children}</div> }
 
 // const ovenQuery = inventoryQuery.with('menuOpen').where(e => e.menuType === MenuType.Oven)
 // export const OvenUi = ({ player }: FarmUiProps) => {
