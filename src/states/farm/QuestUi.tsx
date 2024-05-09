@@ -13,6 +13,7 @@ import { ForQuery } from '@/ui/components/ForQuery'
 import { Menu } from '@/ui/components/Menu'
 import { Modal } from '@/ui/components/Modal'
 import type { FarmUiProps } from '@/ui/types'
+import { entries } from '@/utils/mapFunctions'
 
 const openBulletinBoardQuery = ecs.with('menuType').where(e => e.menuType === MenuType.Quest)
 
@@ -22,7 +23,7 @@ export const QuestUi = ({ player }: FarmUiProps) => {
 			{(board) => {
 				const visible = atom(false)
 				onMount(() => setTimeout(() => visible(true), 100))
-				const questsToComplete = Object.entries(save.quests).toReversed() as [QuestName, boolean[]][]
+				const questsToComplete = entries(save.quests).toReversed() as [QuestName, boolean[]][]
 				ui.updateSync(() => {
 					if (player.menuInputs.get('cancel').justReleased) {
 						ecs.removeComponent(board, 'menuType')

@@ -3,14 +3,14 @@ import { ActiveCollisionTypes, ShapeType } from '@dimforge/rapier3d-compat'
 import { Easing, Tween } from '@tweenjs/tween.js'
 import type { Query, With } from 'miniplex'
 import { Vector3 } from 'three'
-import { enumerate, range } from './mapFunctions'
+import { range } from './mapFunctions'
 import { sleep } from './sleep'
 import { addTag } from '@/lib/hierarchy'
 import { cutSceneState } from '@/global/states'
 import { assets, coroutines, ecs, gameTweens } from '@/global/init'
 import type { Entity } from '@/global/entity'
 import { quests } from '@/constants/quests'
-import type { QuestName, QuestStep, QuestStepKey } from '@/constants/quests'
+import type { QuestName, QuestStepKey } from '@/constants/quests'
 
 import { dialogs } from '@/constants/dialogs'
 import type { Item } from '@/constants/items'
@@ -91,7 +91,8 @@ export const completeQuest = <Q extends QuestName>(name: Q) => {
 		updateSave((s) => {
 			const quest = s.quests[name]
 			if (quest) {
-				for (const [step, i] of enumerate(quests[name].steps as QuestStep[])) {
+				for (let i = 0; i < quests[name].steps.length; i++) {
+					const step = quests[name].steps[i]
 					for (const item of step.items ?? []) {
 						removeItemFromPlayer(item)
 					}

@@ -1,5 +1,3 @@
-import { Euler, Quaternion, Vector3 } from 'three'
-import { clamp, radToDeg } from 'three/src/math/MathUtils'
 import { dialogs } from '@/constants/dialogs'
 import { type Entity, Interactable } from '@/global/entity'
 import { ecs } from '@/global/init'

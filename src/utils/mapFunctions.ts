@@ -79,7 +79,7 @@ export const getRandom = <T>(arr: T[]) => arr[Math.floor(Math.random() * arr.len
 
 export const between = (min: number, max: number) => Math.random() * (max - min) + min
 
-export const enumerate = <T>(arr: T[] | readonly T[]): [T, number][] => arr.map((el, i) => ([el, i]))
+export const enumerate = <T>(arr: T[] | ReadonlyArray<T>): [T, number][] => arr.map((el, i) => ([el, i]))
 
 export function memo<T extends any[], R>(func: (...args: T) => R): (...args: T) => R {
 	const cache = new Map<string, R>()

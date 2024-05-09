@@ -20,7 +20,7 @@ import { playerInventoryQuery } from '@/utils/dialogHelpers'
 import { KeyboardControls } from '@/ui/KeyboardControl'
 import { DialogUi } from '@/ui/DialogUi'
 
-const playerQuery = playerInventoryQuery.with('playerControls', 'maxHealth', 'currentHealth', 'maxHealth', 'currentHealth', 'strength', 'menuInputs', 'sneeze', 'debuffsContainer', 'poisoned')
+const playerQuery = playerInventoryQuery.with('playerControls', 'maxHealth', 'currentHealth', 'maxHealth', 'currentHealth', 'strength', 'menuInputs', 'sneeze', 'debuffsContainer', 'poisoned', 'position')
 export const PlayerUi = () => {
 	const controls = ui.sync(() => inputManager.controls)
 	const isMenuOpen = ui.sync(() => openMenuState.enabled)

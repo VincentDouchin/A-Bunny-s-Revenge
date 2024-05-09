@@ -8,9 +8,9 @@ export interface QuestStep {
 	key: string
 }
 export interface Quest {
-	name: string
-	description?: string
-	steps: Array<QuestStep>
+	readonly name: string
+	readonly description?: string
+	readonly steps: ReadonlyArray<QuestStep>
 }
 
 export const quests = {

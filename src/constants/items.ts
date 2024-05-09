@@ -2,7 +2,7 @@ import type { items } from '@assets/assets'
 import { ModStage, ModType, type Modifier, createModifier } from '@/lib/stats'
 import { entries } from '@/utils/mapFunctions'
 
-export const cropNames = ['carrot', 'beet', 'tomato', 'lettuce', 'pumpkin', 'wheat', 'haricot', 'magic_bean'] as const satisfies items[]
+export const cropNames = ['carrot', 'beet', 'tomato', 'lettuce', 'pumpkin', 'wheat', 'haricot', 'magic_bean'] as const satisfies readonly items[]
 export const fruitNames = ['apple'] as const
 export type crops = (typeof cropNames)[number]
 export type fruits = (typeof fruitNames)[number]

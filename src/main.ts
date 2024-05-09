@@ -24,7 +24,6 @@ import { applyDeathTimer, spawnDrops, tickHitCooldown } from './states/dungeon/b
 import { dropBerriesOnHit } from './states/dungeon/bushes'
 import { buyItems } from './states/dungeon/buyItems'
 import { spawnWeaponsChoice } from './states/dungeon/chooseWeapon'
-import { encounters } from './states/dungeon/encounters'
 import { removeEnemyFromSpawn, spawnEnemies } from './states/dungeon/enemies'
 import { killAnimation, killEntities } from './states/dungeon/health'
 import { addHealthBarContainer } from './states/dungeon/healthBar'
