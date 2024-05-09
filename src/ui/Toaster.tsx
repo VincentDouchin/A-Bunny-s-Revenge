@@ -51,6 +51,7 @@ export const Toaster = () => {
 		gap: 1rem;
 		place-items: center;
 		transition: all 1s ease;
+		width: fit-content;
 	}
 	`
 	return (
