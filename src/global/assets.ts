@@ -10,7 +10,6 @@ import { getExtension, getFileName, loadAudio, loadGLB, loadImage, loaderProgres
 import { asyncMapValues, entries, groupByObject, mapKeys, mapValues } from '@/utils/mapFunctions'
 import { getScreenBuffer } from '@/utils/buffer'
 import { CharacterMaterial, GardenPlotMaterial, GrassMaterial, ToonMaterial, TreeMaterial } from '@/shaders/materials'
-import { keys } from '@/constants/keys'
 import type { crops } from '@/constants/items'
 
 type Glob = Record<string, () => Promise<any>>
@@ -124,7 +123,11 @@ const buttonsLoader = (loader: (key: string) => void) => async (glob: Record<str
 	const frames = mapKeys(packed.frames, val => val.replace('folder/', ''))
 
 	return (key: string) => {
-		return getImg(frames[keys[key]].frame)
+		const frame = frames[key]?.frame
+		if (frame) {
+			return getImg(frame)
+		}
+		return getScreenBuffer(16, 16).canvas
 	}
 }
 

@@ -1,4 +1,4 @@
-import { metaKeys } from '@/constants/keys'
+import { keys, metaKeys } from '@/constants/keys'
 
 export const GAMEPAD_AXIS = {
 	LEFT_X: 0,
@@ -62,7 +62,10 @@ export class InputManager {
 	}
 
 	getKeyName(input: Input) {
-		return input.keys.map(key => this.layoutMap?.get(key) ?? metaKeys[key])
+		return input.keys.map((key) => {
+			const keyName = this.layoutMap?.get(key) ?? metaKeys[key]
+			return keys[keyName]
+		})
 	}
 
 	update = () => {

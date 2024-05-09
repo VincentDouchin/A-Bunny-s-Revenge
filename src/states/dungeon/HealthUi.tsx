@@ -6,13 +6,13 @@ import { assets, coroutines, ui } from '@/global/init'
 import { save } from '@/global/save'
 import { thumbnailRenderer } from '@/lib/thumbnailRenderer'
 
+const acornRenderer = thumbnailRenderer(64)
 export const HealthUi = (props: { player: With<Entity, 'maxHealth' | 'currentHealth'> }) => {
 	const health = ui.sync(() => `${props.player.currentHealth / props.player.maxHealth.value * 100}%`)
 	const max = ui.sync(() => Math.floor(props.player.maxHealth.value))
 	const maxWidth = createMemo(() => `${max()}rem`)
 	const current = ui.sync(() => Math.floor(props.player.currentHealth))
 	const healthDisplay = createMemo(() => `${current()} / ${max()}`)
-	const acornRenderer = thumbnailRenderer(64)
 	onCleanup(() => {
 		acornRenderer.dispose()
 	})
