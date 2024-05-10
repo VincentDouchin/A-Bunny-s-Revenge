@@ -3,32 +3,41 @@ import { Quaternion, Vector3 } from 'three'
 import { clone } from 'three/examples/jsm/utils/SkeletonUtils'
 import { dialogs } from '@/constants/dialogs'
 import { Sizes } from '@/constants/sizes'
+import { Animator } from '@/global/animator'
 import { Interactable } from '@/global/entity'
 import { assets, ecs } from '@/global/init'
-import { modelColliderBundle } from '@/lib/models'
 import { inMap } from '@/lib/hierarchy'
-import { Animator } from '@/global/animator'
+import { modelColliderBundle } from '@/lib/models'
 import { hasCompletedQuest } from '@/utils/dialogHelpers'
 
 export const encounters = {
 	jack: () => {
+		const rockModel = assets.models.Rock_5.scene.clone()
+		rockModel.scale.setScalar(30)
+		const rockBundle = modelColliderBundle(rockModel, RigidBodyType.Fixed, false)
+		const rock = ecs.add({
+			...rockBundle,
+			position: new Vector3(),
+			...inMap(),
+		})
 		const model = assets.characters.JACK_animated
 		const bundle = modelColliderBundle(model.scene, RigidBodyType.Fixed, false, Sizes.character)
 		bundle.model.scale.setScalar(6)
 		const jack = ecs.add({
 			...bundle,
-			...inMap(),
+			parent: rock,
 			npcName: 'Jack',
 			npc: true,
 			dialog: dialogs.Jack(),
 			kayAnimator: new Animator(bundle.model, model.animations),
-			position: new Vector3(20, 0, 0),
+			position: new Vector3(10, 0, -9),
 			rotation: new Quaternion(),
 			interactable: Interactable.Talk,
-			targetRotation: new Quaternion().setFromAxisAngle(new Vector3(0, 1, 0), Math.PI / 3),
-
+			targetRotation: new Quaternion().setFromAxisAngle(new Vector3(0, 1, 0), 1.8),
+			questMarker: 'jack_1',
 		})
-		jack.kayAnimator.playAnimation('Idle')
+
+		jack.kayAnimator.playAnimation('Sit_Floor_Pose')
 	},
 	alice: () => {
 		const aliceModel = assets.characters.ALICE_animated
@@ -58,6 +67,7 @@ export const encounters = {
 				npcName: 'Alice',
 				dialog: dialogs.Alice(),
 				interactable: Interactable.Talk,
+				questMarker: 'alice_1',
 			})
 			alice.kayAnimator.playAnimation('Sit_Chair_Idle')
 		} else {

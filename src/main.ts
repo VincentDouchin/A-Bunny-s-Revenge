@@ -36,7 +36,7 @@ import { closePlayerInventory, disableInventoryState, enableInventoryState, inte
 import { addWateringCan, waterCrops } from './states/farm/wateringCan'
 import { addDashDisplay, updateDashDisplay } from './states/game/dash'
 import { dayNight, playNightMusic } from './states/game/dayNight'
-import { talkToNPC, turnNPCHead } from './states/game/dialog'
+import { addQuestMarkers, talkToNPC, turnNPCHead } from './states/game/dialog'
 import { bobItems, collectItems, popItems, stopItems } from './states/game/items'
 import { canPlayerMove, movePlayer, playerSteps, savePlayerFromTheEmbraceOfTheVoid, savePlayerPosition, stopPlayer } from './states/game/movePlayer'
 import { pauseGame } from './states/game/pauseGame'
@@ -53,7 +53,7 @@ import { disablePortrait, enableFullscreen, resize, setupGame, stopOnLosingFocus
 import { UI } from './ui/UI'
 
 coreState
-	.addPlugins(hierarchyPlugin, physicsPlugin, transformsPlugin, addToScene('camera', 'light', 'model', 'dialogContainer', 'emitter', 'interactionContainer', 'minigameContainer', 'healthBarContainer', 'dashDisplay', 'stun', 'debuffsContainer', 'weaponArc'), updateModels, particlesPlugin)
+	.addPlugins(hierarchyPlugin, physicsPlugin, transformsPlugin, addToScene('camera', 'light', 'model', 'dialogContainer', 'emitter', 'interactionContainer', 'minigameContainer', 'healthBarContainer', 'dashDisplay', 'stun', 'debuffsContainer', 'weaponArc', 'questMarkerContainer'), updateModels, particlesPlugin)
 	.onEnter(initThree, initCamera, moveCamera(true))
 	.onEnter(ui.render(UI), initHowler)
 	.addSubscriber(...target, resize, disablePortrait, enableFullscreen, stopOnLosingFocus)
@@ -68,7 +68,7 @@ setupState
 gameState
 	.addPlugins(debugPlugin)
 
-	.addSubscriber(initializeCameraPosition, bobItems, enableInventoryState, killAnimation, popItems, addHealthBarContainer, ...addOrRemoveWeaponModel, ...doorLocking, addDashDisplay)
+	.addSubscriber(initializeCameraPosition, bobItems, enableInventoryState, killAnimation, popItems, addHealthBarContainer, ...addOrRemoveWeaponModel, ...doorLocking, addDashDisplay, addQuestMarkers)
 	.onUpdate(
 		runIf(canPlayerMove, movePlayer, updateDashDisplay),
 		runIf(() => !pausedState.enabled, playerSteps, dayNight, updateTimeUniforms, applyDeathTimer, () => gameTweens.update(time.elapsed)),

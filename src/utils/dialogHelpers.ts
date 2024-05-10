@@ -102,12 +102,19 @@ export const completeQuest = <Q extends QuestName>(name: Q) => {
 		})
 	}
 }
-
+const questMarkersQuery = ecs.with('questMarker', 'questMarkerContainer')
 export const addQuest = (name: QuestName) => {
 	if (!(name in save.quests)) {
 		updateSave((s) => {
 			s.quests[name] = range(0, quests[name].steps.length, () => false)
 		})
+		for (const npc of questMarkersQuery) {
+			if (npc.questMarker === name) {
+				ecs.removeComponent(npc, 'questMarker')
+				ecs.removeComponent(npc, 'questMarkerContainer')
+			}
+		}
+
 		addToast({ quest: name })
 	}
 }
@@ -124,7 +131,7 @@ export const completeQuestStep = <Q extends QuestName>(questName: Q, step: Quest
 }
 
 export const hasCompletedQuest = (name: QuestName) => {
-	return save.quests[name]?.every(step => step === true)
+	return Boolean(save.quests[name]?.every(step => step === true))
 }
 
 export const hasCompletedStep = <Q extends QuestName>(questName: Q, step: QuestStepKey<Q>) => {
@@ -133,7 +140,13 @@ export const hasCompletedStep = <Q extends QuestName>(questName: Q, step: QuestS
 }
 
 export const hasQuest = (name: QuestName) => {
-	return name in save.quests && !hasCompletedQuest(name)
+	return name in save.quests
+}
+
+export const questsUnlocks: Record<QuestName, () => boolean> = {
+	grandma_1: () => true,
+	jack_1: () => true,
+	alice_1: () => hasCompletedQuest('jack_1'),
 }
 
 export const hasItem = (itemName: items | ((item: Item) => boolean)) => {

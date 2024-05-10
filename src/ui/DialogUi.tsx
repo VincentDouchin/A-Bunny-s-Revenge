@@ -4,7 +4,6 @@ import { Portal } from 'solid-js/web'
 import { css } from 'solid-styled'
 import type { Atom } from 'solid-use/atom'
 import atom from 'solid-use/atom'
-import { Quaternion, Vector3 } from 'three'
 import { CSS2DObject } from 'three/examples/jsm/renderers/CSS2DRenderer'
 import { ForQuery } from './components/ForQuery'
 import { ecs, ui } from '@/global/init'
@@ -108,11 +107,11 @@ export const DialogUi = ({ player }: { player: With<Entity, 'playerControls' | '
 				const element = atom<HTMLElement | null>(null)
 				const finished = atom(false)
 				onMount(() => {
-					if (entity.targetRotation && entity.position) {
-						const rot = player.position.clone().sub(entity.position)
-						const angle = Math.atan2(rot.x, rot.z)
-						entity.targetRotation.copy(new Quaternion().setFromAxisAngle(new Vector3(0, 1, 0), angle))
-					}
+					// if (entity.targetRotation && entity.position) {
+					// 	const rot = player.position.clone().sub(entity.position)
+					// 	const angle = Math.atan2(rot.x, rot.z)
+					// 	entity.targetRotation.copy(new Quaternion().setFromAxisAngle(new Vector3(0, 1, 0), angle))
+					// }
 				})
 				ui.updateSync(async () => {
 					if (player.playerControls.get('primary').justReleased) {

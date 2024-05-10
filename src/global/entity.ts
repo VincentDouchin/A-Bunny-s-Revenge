@@ -21,6 +21,7 @@ import type { WeaponArc } from '@/shaders/weaponArc'
 import type { Room } from '@/states/dungeon/generateDungeon'
 import type { Dash } from '@/states/game/dash'
 import type { MenuOptions, RenderMainMenuFn } from '@/states/mainMenu/mainMenuRendering'
+import type { QuestName } from '@/constants/quests'
 
 export type PlayerAnimations = 'idle' | 'running' | 'lightAttack' | 'slashAttack' | 'heavyAttack' | 'hit' | 'dying'
 export type EnemyAnimations = 'idle' | 'running' | 'attacking' | 'hit' | 'dead'
@@ -194,6 +195,8 @@ export interface Entity {
 	// ! NPC
 	npc?: true
 	npcName?: (typeof NPC)[number]
+	questMarker?: QuestName
+	questMarkerContainer?: Group
 	// ! Dialog
 	dialog?: Dialog
 	dialogHeight?: number
