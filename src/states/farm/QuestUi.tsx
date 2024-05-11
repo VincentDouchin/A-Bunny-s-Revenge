@@ -1,4 +1,4 @@
-import { For, Show, createEffect, onMount } from 'solid-js'
+import { For, Show, createEffect, createSignal, onMount } from 'solid-js'
 import { css } from 'solid-styled'
 import atom from 'solid-use/atom'
 import { IconDisplay, InventoryTitle, ItemDisplay } from './InventoryUi'
@@ -9,11 +9,12 @@ import { MenuType } from '@/global/entity'
 import { ecs, ui } from '@/global/init'
 import { save } from '@/global/save'
 import { ForQuery } from '@/ui/components/ForQuery'
-import { Menu } from '@/ui/components/Menu'
+import { Menu, menuItem } from '@/ui/components/Menu'
 import { Modal } from '@/ui/components/Modal'
 import type { FarmUiProps } from '@/ui/types'
 import { entries } from '@/utils/mapFunctions'
-
+// eslint-disable-next-line no-unused-expressions
+menuItem
 const openBulletinBoardQuery = ecs.with('menuType').where(e => e.menuType === MenuType.Quest)
 
 export const QuestUi = ({ player }: FarmUiProps) => {
@@ -61,19 +62,25 @@ export const QuestUi = ({ player }: FarmUiProps) => {
 							<InventoryTitle>Quests</InventoryTitle>
 							<div class="quest-container scroll-container">
 								<Menu inputs={player.menuInputs}>
-									{({ getProps }) => {
+									{({ menu }) => {
 										return (
 											<For each={questsToComplete}>
 												{([questName, completedSteps], i) => {
 													const quest = quests[questName] as Quest
-													const props = getProps(i() === 0)
+													const selected = atom(false)
+													const [ref, setRef] = createSignal<HTMLElement>()
 													createEffect(() => {
-														if (props.selected()) {
-															props.getRef().scrollIntoView({ behavior: 'smooth' })
+														if (selected()) {
+															ref()?.scrollIntoView({ behavior: 'smooth' })
 														}
 													})
 													return (
-														<div class="quest" {...props} style={{ border: `solid 0.2rem ${props.selected() ? 'white' : 'transparent'}` }}>
+														<div
+															ref={setRef}
+															class="quest"
+															use:menuItem={[menu, i() === 0, selected]}
+															style={{ border: `solid 0.2rem ${selected() ? 'white' : 'transparent'}` }}
+														>
 															<div style={{ 'font-size': '2rem' }}>{quest.name}</div>
 															<div class="step-container">
 																<For each={quest.steps}>

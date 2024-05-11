@@ -1,6 +1,7 @@
 import type { Accessor } from 'solid-js'
 import { For, Show, createEffect, createMemo, createSignal } from 'solid-js'
 import { css } from 'solid-styled'
+import atom from 'solid-use/atom'
 import { InventoryTitle, ItemDisplay } from './InventoryUi'
 import { itemsData } from '@/constants/items'
 import type { Recipe } from '@/constants/recipes'
@@ -10,11 +11,13 @@ import { assets, ecs, ui } from '@/global/init'
 import { removeItem } from '@/global/save'
 import { ModType, type Modifier } from '@/lib/stats'
 import { InputIcon } from '@/ui/InputIcon'
-import { Menu } from '@/ui/components/Menu'
+import { Menu, menuItem } from '@/ui/components/Menu'
 import { Modal } from '@/ui/components/Modal'
 import type { FarmUiProps } from '@/ui/types'
 import { range } from '@/utils/mapFunctions'
 
+// eslint-disable-next-line no-unused-expressions
+menuItem
 const recipeQuery = ecs.with('menuType', 'menuInputs', 'recipesQueued').where(({ menuType }) => [MenuType.Oven, MenuType.Cauldron, MenuType.Bench].includes(menuType))
 const getMenuName = (menuType: MenuType) => {
 	switch (menuType) {
@@ -85,17 +88,17 @@ export const RecipesUi = ({ player }: FarmUiProps) => {
 
 								<div>
 									<Menu inputs={entity().menuInputs}>
-										{({ getProps }) => {
+										{({ menu }) => {
 											return (
 												<div style={{ display: 'grid', gap: '1rem' }}>
 													<div class="output">
 														<For each={range(0, 4, i => i)}>
 															{(i) => {
-																const props = getProps()
+																const selected = atom(false)
 																return (
 																	<div style={{ color: 'white' }}>
-																		<div {...props} style={{ 'display': 'grid', 'align-items': 'center' }}>
-																			<ItemDisplay selected={props.selected} item={recipeQueued()[i]?.output} />
+																		<div use:menuItem={[menu, false, selected]} style={{ 'display': 'grid', 'align-items': 'center' }}>
+																			<ItemDisplay selected={selected} item={recipeQueued()[i]?.output} />
 																		</div>
 																	</div>
 																)
@@ -105,16 +108,16 @@ export const RecipesUi = ({ player }: FarmUiProps) => {
 													<div class="recipes">
 														<For each={recipesFiltered()}>
 															{(recipe, i) => {
-																const props = getProps(i() === 0)
+																const selected = atom(false)
 																createEffect(() => {
-																	if (props.selected()) {
+																	if (selected()) {
 																		setSelectedRecipe(recipe)
 																	}
 																})
 																return (
 																	<div style={{ color: 'white' }}>
-																		<div {...props} style={{ 'display': 'grid', 'align-items': 'center' }}>
-																			<ItemDisplay selected={props.selected} item={recipe.output} />
+																		<div use:menuItem={[menu, i() === 0, selected]} style={{ 'display': 'grid', 'align-items': 'center' }}>
+																			<ItemDisplay selected={selected} item={recipe.output} />
 																		</div>
 																	</div>
 																)

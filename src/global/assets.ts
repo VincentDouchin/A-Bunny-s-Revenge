@@ -25,40 +25,51 @@ const typeGlobEager = <K extends string>(glob: GlobEager) => <F extends (glob: G
 
 const loadGLBAsToon = (
 	loader: (key: string) => void,
-	options?: {
+	getOptions?: (key: string, name: string)=>({
 		color?: ColorRepresentation
 		material?: Constructor<Material>
 		side?: Side
 		transparent?: true
 		shadow?: true
 		filter?: TextureFilter
-	},
+		depthWrite?: boolean
+	}),
 ) => async (glob: GlobEager) => {
 	const loaded = await asyncMapValues(glob, async (path, key) => {
 		const glb = await loadGLB(path, key)
 		loader(key)
 		return glb
 	})
-	const toons = mapValues(loaded, (glb) => {
+	const materials = new Map<string, Material>()
+	const toons = mapValues(loaded, (glb, key) => {
 		glb.scene.traverse((node) => {
 			if (node instanceof Mesh) {
 				if (node.material instanceof MeshStandardMaterial || node.material instanceof MeshPhysicalMaterial) {
-					const Mat = options?.material ?? ToonMaterial
-					node.material = new Mat({
-						color: (options && 'color' in options) ? options.color : node.material.color,
-						map: node.material.map,
-						transparent: options?.transparent ?? node.material.transparent,
-						side: options?.side ?? FrontSide,
-						emissiveMap: node.material.emissiveMap,
-						opacity: node.material.opacity,
-					})
-					if (node.material.map instanceof Texture) {
-						node.material.map.colorSpace = SRGBColorSpace
-						node.material.map.minFilter = options?.filter ?? node.material.map.minFilter
-						node.material.map.magFilter = options?.filter ?? node.material.map.magFilter
+					if (!materials.has(node.material.uuid)) {
+						const options = getOptions ? getOptions(key, node.material.name) : {}
+						const Mat = options?.material ?? ToonMaterial
+
+						const newMaterial = new Mat({
+							color: (options && 'color' in options) ? options.color : node.material.color,
+							map: node.material.map,
+							transparent: options?.transparent ?? node.material.transparent,
+							side: node.material.side ?? options?.side ?? FrontSide,
+							emissiveMap: node.material.emissiveMap,
+							opacity: node.material.opacity,
+							depthWrite: options?.depthWrite ?? true,
+						})
+						if ('map' in newMaterial && newMaterial.map instanceof Texture) {
+							newMaterial.map.colorSpace = SRGBColorSpace
+							const minFilter = options?.filter ?? node.material.map?.minFilter
+							if (minFilter) {
+								newMaterial.map.minFilter = minFilter
+							}
+						}
+						materials.set(node.material.uuid, newMaterial)
 					}
+					node.material = materials.get(node.material.uuid)
 				}
-				node.castShadow = options?.shadow ?? false
+				node.castShadow = false
 				node.receiveShadow = false
 			}
 		})
@@ -68,7 +79,7 @@ const loadGLBAsToon = (
 }
 
 const cropsLoader = <K extends string>(loader: (key: string) => void) => async (glob: Glob) => {
-	const models = await typeGlob<crops>(glob)(loadGLBAsToon(loader, { shadow: true }))
+	const models = await typeGlob<crops>(glob)(loadGLBAsToon(loader, () => ({ shadow: true })))
 	const grouped = groupByObject(models, key => key.split('_')[0].toLowerCase() as K)
 	return mapValues(grouped, (group) => {
 		const stages = new Array<GLTF>()
@@ -152,7 +163,7 @@ const loadSounds = (loader: (key: string) => void, pool: number) => async (glob:
 }
 
 const loadItems = (loader: (key: string) => void) => async (glob: GlobEager) => {
-	const models = await loadGLBAsToon(loader, { side: DoubleSide })(glob)
+	const models = await loadGLBAsToon(loader, () => ({ side: DoubleSide }))(glob)
 	const thumbnail = thumbnailRenderer()
 	const modelsAndthumbnails = mapValues(models, model => ({
 		model: model.scene,
@@ -179,19 +190,19 @@ export const loadAssets = async () => {
 	const { loader, clear } = loaderProgress(assetManifest)
 	const assets = {
 		// ! models
-		characters: typeGlob<characters>(import.meta.glob('@assets/characters/*.glb', { as: 'url', eager: true }))(loadGLBAsToon(loader, { material: CharacterMaterial, shadow: true, filter: NearestFilter })),
+		characters: typeGlob<characters>(import.meta.glob('@assets/characters/*.glb', { as: 'url', eager: true }))(loadGLBAsToon(loader, () => ({ material: CharacterMaterial, shadow: true, filter: NearestFilter }))),
 
-		models: typeGlob<models>(import.meta.glob('@assets/models/*.glb', { as: 'url', eager: true }))(loadGLBAsToon(loader, { shadow: true })),
+		models: typeGlob<models>(import.meta.glob('@assets/models/*.glb', { as: 'url', eager: true }))(loadGLBAsToon(loader, (_key, name) => ({ shadow: true, depthWrite: name !== 'Leaves' }))),
 
-		trees: typeGlob<trees>(import.meta.glob('@assets/trees/*.glb', { as: 'url', eager: true }))(loadGLBAsToon(loader, { material: TreeMaterial, shadow: true, transparent: true })),
+		trees: typeGlob<trees>(import.meta.glob('@assets/trees/*.glb', { as: 'url', eager: true }))(loadGLBAsToon(loader, () => ({ material: TreeMaterial, shadow: true, transparent: true }))),
 
 		crops: cropsLoader<crops>(loader)(import.meta.glob('@assets/crops/*.glb', { as: 'url', eager: true })),
 
-		gardenPlots: typeGlob<models>(import.meta.glob('@assets/gardenPlots/*.glb', { as: 'url', eager: true }))(loadGLBAsToon(loader, { material: GardenPlotMaterial })),
+		gardenPlots: typeGlob<models>(import.meta.glob('@assets/gardenPlots/*.glb', { as: 'url', eager: true }))(loadGLBAsToon(loader, () => ({ material: GardenPlotMaterial }))),
 
-		weapons: typeGlob<weapons>(import.meta.glob('@assets/weapons/*.*', { as: 'url', eager: true }))(loadGLBAsToon(loader, { shadow: true })),
+		weapons: typeGlob<weapons>(import.meta.glob('@assets/weapons/*.*', { as: 'url', eager: true }))(loadGLBAsToon(loader, () => ({ shadow: true }))),
 
-		vegetation: typeGlob<vegetation>(import.meta.glob('@assets/vegetation/*.glb', { as: 'url', eager: true }))(loadGLBAsToon(loader, { material: GrassMaterial, shadow: true })),
+		vegetation: typeGlob<vegetation>(import.meta.glob('@assets/vegetation/*.glb', { as: 'url', eager: true }))(loadGLBAsToon(loader, () => ({ material: GrassMaterial, shadow: true }))),
 
 		mainMenuAssets: typeGlob<mainMenuAssets>(import.meta.glob('@assets/mainMenuAssets/*.glb', { as: 'url', eager: true }))(loadMainMenuAssets),
 

@@ -18,15 +18,17 @@ export const ChestUi = () => {
 						{(player) => {
 							return (
 								<Menu inputs={chest().menuInputs}>
-									{({ getProps }) => {
+									{({ menu }) => {
+										const inventory = ui.sync(() => chest().inventory)
+										const playerInventory = ui.sync(() => player().inventory)
 										return (
 											<>
 												<InventoryTitle>Chest</InventoryTitle>
 												<div style={{ 'display': 'grid', 'grid-template-columns': 'repeat(8, 1fr)', 'gap': '1rem' }}>
-													<InventorySlots getProps={getProps} entity={chest()} />
+													<InventorySlots menu={menu} inventory={inventory} inventorySize={chest().inventorySize} />
 												</div>
 												<div style={{ 'display': 'grid', 'grid-template-columns': 'repeat(8, 1fr)', 'gap': '1rem' }}>
-													<InventorySlots getProps={getProps} entity={player()} />
+													<InventorySlots menu={menu} inventory={playerInventory} />
 												</div>
 											</>
 										)

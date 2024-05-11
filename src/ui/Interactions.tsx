@@ -3,8 +3,10 @@ import type { Accessor } from 'solid-js'
 import { createSignal, onMount } from 'solid-js'
 import { Portal, Show } from 'solid-js/web'
 import { Transition } from 'solid-transition-group'
+import { css } from 'solid-styled'
 import { InputIcon } from './InputIcon'
 import { ForQuery } from './components/ForQuery'
+import { OutlineText } from './components/styledComponents'
 import { itemsData } from '@/constants/items'
 import type { Entity } from '@/global/entity'
 import { Interactable } from '@/global/entity'
@@ -54,6 +56,22 @@ export const InteractionUi = ({ player, isTouch }: {
 	isTouch: Accessor<boolean>
 }) => {
 	ui.updateSync(() => interactionQuery.size)
+	css/* css */`
+		.interaction{
+			background: var(--black-transparent);
+			padding: 0.25rem 0.5rem;
+			color: white;
+			border-radius: 1rem;
+			display: grid;
+			gap: 0.5rem;
+			place-items: center;
+		}
+		.interaction-text{
+			display: flex;
+			gap: 0.5rem;
+			font-size: 1.5rem;
+		}
+	`
 	return (
 		<ForQuery query={interactionQuery}>
 			{(entity) => {
@@ -69,21 +87,21 @@ export const InteractionUi = ({ player, isTouch }: {
 					<Portal mount={entity.interactionContainer.element}>
 						<Transition name="popup">
 							<Show when={visible() && (!isTouch() || entity.weaponStand)}>
-								<div style={{ 'background': 'hsl(0,0%,0%,0.3)', 'padding': '0.25rem 0.5rem', 'color': 'white', 'border-radius': '1rem', 'display': 'grid', 'gap': '0.5rem', 'place-items': 'center' }}>
+								<div class="interaction">
 									<Show when={entity.weaponStand}>
 										{weaponName => <WeaponStatsUi name={weaponName()} />}
 									</Show>
 									<Show when={!isTouch()}>
 										<Show when={interactables()[1]}>
-											<div style={{ 'display': 'flex', 'gap': '0.5rem', 'font-size': '1.5rem' }}>
+											<div class="interaction-text">
 												<InputIcon input={player.playerControls.get('secondary')} />
-												<div>{interactables()[1]}</div>
+												<OutlineText>{interactables()[1]}</OutlineText>
 											</div>
 										</Show>
 										<Show when={interactables()[0]}>
-											<div style={{ 'display': 'flex', 'gap': '0.5rem', 'font-size': '1.5rem' }}>
+											<div class="interaction-text">
 												<InputIcon input={player.playerControls.get('primary')}></InputIcon>
-												<div>{interactables()[0]}</div>
+												<OutlineText>{interactables()[0]}</OutlineText>
 											</div>
 										</Show>
 									</Show>

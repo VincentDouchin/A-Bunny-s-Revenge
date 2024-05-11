@@ -13,6 +13,7 @@
 	},
 	"dependencies": {
 		"@dimforge/rapier3d-compat": "^0.12.0",
+		"@floating-ui/dom": "^1.6.5",
 		"@tweenjs/tween.js": "^21.0.0",
 		"astar-typescript": "^1.2.7",
 		"fastnoise-lite": "^1.1.1",
@@ -21,7 +22,9 @@
 		"jsoneditor": "^10.0.0",
 		"miniplex": "^2.0.0",
 		"randomish": "^0.1.6",
+		"solid-floating-ui": "^0.3.1",
 		"solid-js": "^1.8.17",
+		"solid-popper": "^0.3.0",
 		"solid-styled": "^0.11.1",
 		"solid-transition-group": "^0.2.3",
 		"solid-use": "^0.8.0",

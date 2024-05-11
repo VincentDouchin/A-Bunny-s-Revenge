@@ -1,5 +1,6 @@
 import { Show, createSignal } from 'solid-js'
 import { Modal } from './components/Modal'
+import { OutlineText } from './components/styledComponents'
 import { assets, ui } from '@/global/init'
 import { save, updateSave } from '@/global/save'
 import { pausedState } from '@/global/states'
@@ -24,7 +25,11 @@ export const PauseUi = () => {
 	return (
 		<Modal open={paused()} showClose={false}>
 			<Show when={paused()}>
-				<div style={{ 'color': 'white', 'font-size': '4rem', 'text-align': 'center' }} class="outline-text">Paused</div>
+				<div style={{ 'color': 'white', 'font-size': '4rem', 'text-align': 'center' }}>
+					<OutlineText>
+						Paused
+					</OutlineText>
+				</div>
 				<div>
 					<div style={{ 'text-align': 'center', 'font-size': '2rem', 'color': 'white' }}>Volume</div>
 					<div style={{ 'display': 'grid', 'grid-template-columns': 'auto 1fr', 'gap': '1rem' }}>

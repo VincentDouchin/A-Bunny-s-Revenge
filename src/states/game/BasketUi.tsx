@@ -1,16 +1,16 @@
 import type { With } from 'miniplex'
-import { Show, createMemo } from 'solid-js'
+import { Show } from 'solid-js'
 import { css } from 'solid-styled'
 import { InventorySlots, InventoryTitle } from '../farm/InventoryUi'
+import type { Item } from '@/constants/items'
+import { itemsData } from '@/constants/items'
 import type { Entity } from '@/global/entity'
 import { MenuType } from '@/global/entity'
 import { ecs, ui } from '@/global/init'
-import { Modal } from '@/ui/components/Modal'
-import { Menu } from '@/ui/components/Menu'
-import type { Item } from '@/constants/items'
-import { itemsData } from '@/constants/items'
 import { addItem, removeItem } from '@/global/save'
 import { campState } from '@/global/states'
+import { Menu } from '@/ui/components/Menu'
+import { Modal } from '@/ui/components/Modal'
 import { StateUi } from '@/ui/components/StateUi'
 
 const playerToHeal = ecs.with('player', 'currentHealth', 'maxHealth')
@@ -38,9 +38,9 @@ export const BasketUi = ({ player }: { player: With<Entity, 'menuInputs' | 'inve
 		<Modal open={entity()}>
 			<Show when={entity()}>
 				{(basket) => {
-					const playerInventory = ui.sync(() => basket().basket.inventory)
-					const playerMeals = createMemo(() => playerInventory().filter(Boolean).filter(item => itemsData[item.name].meal !== undefined))
-					const playerEntity = createMemo(() => ({ inventoryId: basket().basket.inventoryId, inventory: playerMeals(), inventorySize: playerMeals().length }))
+					const playerMeals = ui.sync(() => player.inventory.filter(Boolean).filter(item => itemsData[item.name].meal !== undefined))
+
+					const basketInventory = ui.sync(() => basket().inventory)
 					ui.updateSync(() => {
 						if (player.menuInputs.get('cancel').justReleased) {
 							ecs.removeComponent(basket(), 'menuType')
@@ -70,15 +70,24 @@ export const BasketUi = ({ player }: { player: With<Entity, 'menuInputs' | 'inve
 						<>
 							<InventoryTitle>Basket</InventoryTitle>
 							<Menu inputs={player.menuInputs}>
-								{({ getProps }) => {
+								{({ menu }) => {
 									return (
 										<div class="basket-ui-container">
 											<div class="basket-inventory output">
-												<InventorySlots getProps={getProps} entity={basket()} click={removeMealFromBasket} />
+												<InventorySlots
+													menu={menu}
+													inventory={basketInventory}
+													inventorySize={basket().inventorySize}
+													click={removeMealFromBasket}
+												/>
 											</div>
 											<StateUi state={campState}>
 												<div class="meals-inventory">
-													<InventorySlots getProps={getProps} entity={playerEntity()} click={sendMealToBasket} />
+													<InventorySlots
+														menu={menu}
+														inventory={playerMeals}
+														click={sendMealToBasket}
+													/>
 												</div>
 											</StateUi>
 										</div>

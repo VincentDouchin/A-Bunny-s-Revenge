@@ -49,10 +49,15 @@ export const getModel = (key: ModelName) => {
 	return clone(assets.models[key].scene)
 }
 export interface ExtraData {
-	door: {
+	'door': {
 		direction: direction
 		doorLevel: number
 	}
+	'Vine Gate': {
+		direction: direction
+		doorLevel: number
+	}
+
 }
 
 type BundleFn<E extends EntityData<any>> = (entity: With<Entity, 'entityId' | 'model' | 'position' | 'rotation'>, data: NonNullable<E>, ressources: FarmRessources | DungeonRessources | void) => Entity
@@ -63,7 +68,7 @@ export interface PlacableProp<N extends string> {
 	data?: N extends keyof ExtraData ? ExtraData[N] : undefined
 	bundle?: BundleFn<EntityData<N extends keyof ExtraData ? NonNullable<ExtraData[N]> : never>>
 }
-type propNames = 'log' | 'door' | 'rock' | 'board' | 'oven' | 'CookingPot' | 'stove' | 'Flower/plants' | 'sign' | 'plots' | 'bush' | 'fence' | 'house' | 'mushrooms' | 'lamp' | 'Kitchen' | 'berry bushes' | 'bench' | 'well' | 'fruit trees' | 'stall'
+type propNames = 'log' | 'door' | 'rock' | 'board' | 'oven' | 'CookingPot' | 'stove' | 'Flower/plants' | 'sign' | 'plots' | 'bush' | 'fence' | 'house' | 'mushrooms' | 'lamp' | 'Kitchen' | 'berry bushes' | 'bench' | 'well' | 'fruit trees' | 'stall' | 'Vine gate'
 export const props: PlacableProp<propNames>[] = [
 	{
 		name: 'log',
@@ -281,6 +286,27 @@ export const props: PlacableProp<propNames>[] = [
 			}
 
 			return { door: data.data.direction, ...entity }
+		},
+	},
+	{
+		name: 'Vine gate',
+		models: ['Gate_Vines'],
+		bundle(entity, { data }, ressources) {
+			if (dungeonState.enabled && ressources && 'dungeon' in ressources) {
+				if (![RoomType.NPC, RoomType.Item].includes(ressources.dungeon.type)) {
+					entity.doorLocked = true
+				}
+			}
+			if (genDungeonState.enabled && data.direction === 'north') {
+				entity.doorLevel = data.doorLevel
+				entity.doorLocked = true
+			}
+
+			return {
+				...entity,
+				vineGate: true,
+				door: data.direction,
+			}
 		},
 	},
 	{

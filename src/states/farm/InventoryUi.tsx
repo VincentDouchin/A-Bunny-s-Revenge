@@ -1,8 +1,11 @@
-import type { With } from 'miniplex'
-import type { Accessor, JSX, Setter } from 'solid-js'
-import { For, Show, createEffect, createMemo, createSignal, onCleanup } from 'solid-js'
-import { css } from 'solid-styled'
 import type { icons } from '@assets/assets'
+import { autoUpdate } from '@floating-ui/dom'
+import type { With } from 'miniplex'
+import { useFloating } from 'solid-floating-ui'
+import type { Accessor, JSX, Setter } from 'solid-js'
+import { For, Show, createEffect, createMemo, createSignal, onCleanup, onMount } from 'solid-js'
+import { css } from 'solid-styled'
+import atom from 'solid-use/atom'
 import { MealBuffs } from './RecipesUi'
 import { itemsData } from '@/constants/items'
 import type { Item, ItemData } from '@/constants/items'
@@ -14,13 +17,15 @@ import type { Modifier } from '@/lib/stats'
 import { addModifier } from '@/lib/stats'
 import { thumbnailRenderer } from '@/lib/thumbnailRenderer'
 import { InputIcon } from '@/ui/InputIcon'
-import type { getProps } from '@/ui/components/Menu'
-import { Menu } from '@/ui/components/Menu'
+import type { MenuDir } from '@/ui/components/Menu'
+import { Menu, menuItem } from '@/ui/components/Menu'
 import { Modal } from '@/ui/components/Modal'
+import { OutlineText } from '@/ui/components/styledComponents'
 import type { FarmUiProps } from '@/ui/types'
 import { removeItemFromPlayer } from '@/utils/dialogHelpers'
 import { range } from '@/utils/mapFunctions'
-
+// eslint-disable-next-line no-unused-expressions
+menuItem
 export const InventoryTitle = (props: { children: string }) => {
 	css/* css */`
 	.inventory-title{
@@ -30,7 +35,13 @@ export const InventoryTitle = (props: { children: string }) => {
 		text-transform: capitalize;
 	}	
 	`
-	return <div class="inventory-title outline-text">{props.children}</div>
+	return (
+		<div class="inventory-title">
+			<OutlineText>
+				{props.children}
+			</OutlineText>
+		</div>
+	)
 }
 const thumbnail = thumbnailRenderer()
 export const ItemBox = (props: { children: JSX.Element, selected?: boolean, completed?: boolean }) => {
@@ -55,7 +66,6 @@ export const ItemBox = (props: { children: JSX.Element, selected?: boolean, comp
 	return (
 		<div
 			class="item-display"
-			use:solid-styled
 			style={{ border: props.selected ? 'solid 0.2rem white' : '' }}
 		>
 			{props.children}
@@ -87,6 +97,10 @@ export const ItemDisplay = (props: {
 	onSelected?: () => void
 	completed?: boolean
 }) => {
+	const showName = atom(false)
+	onMount(() => {
+		setTimeout(() => showName(true), 500)
+	})
 	const isDisabled = createMemo(() => props.disabled ?? false)
 	const disabledStyles = createMemo(() => {
 		return isDisabled()
@@ -102,9 +116,8 @@ export const ItemDisplay = (props: {
 			setTimeout(() => setDelay(true), 100)
 		}
 	})
-	const quantity = createMemo(() => props.item?.quantity)
+	const quantity = ui.sync(() => props.item?.quantity)
 	css/* css */`
-	@global{
 	.quantity{
 		color: white;
 		position: absolute;
@@ -115,11 +128,17 @@ export const ItemDisplay = (props: {
 	}
 	.name{
 		color: white;
-		position: absolute;
-		top: 100%;
 		font-size: 1.5rem;
-		z-index: 2;
 		white-space: nowrap;
+		z-index:1;
+		padding: 0.5rem;
+	}
+	.item {
+		width: 80%;
+	}
+	.item > canvas {
+		width: 100% !important;
+		height: 100% !important;
 	}
 	@keyframes item-selected {
 		from {
@@ -135,7 +154,6 @@ export const ItemDisplay = (props: {
 		animation-duration: 0.4s;
 		animation-timing-function: ease-in;
 	}
-	}
 	`
 
 	return (
@@ -143,7 +161,7 @@ export const ItemDisplay = (props: {
 			selected={isSelected()}
 			completed={props.completed}
 		>
-			<Show when={props.item?.name && itemsData[props.item.name]}>
+			<Show when={Boolean(quantity()) && props.item?.name && itemsData[props.item.name]}>
 				{(item) => {
 					return (
 						<>
@@ -155,16 +173,47 @@ export const ItemDisplay = (props: {
 										setDelay(false)
 										clear()
 									})
-									return <div class="item">{element}</div>
+									const [reference, setReference] = createSignal<HTMLElement | null>(null)
+									const [floating, setFloating] = createSignal<HTMLElement | null>(null)
+									const position = useFloating(reference, floating, {
+										whileElementsMounted: autoUpdate,
+										placement: 'bottom',
+										strategy: 'fixed',
+									})
+									return (
+										<>
+											<div ref={setReference} class="item">{element}</div>
+											<Show when={showName()}>
+												<div
+													ref={setFloating}
+													style={{
+														position: position.strategy,
+														top: `${position.y}px`,
+														left: `${position.x}px`,
+													}}
+													class="name"
+												>
+													<OutlineText>{item().name}</OutlineText>
+												</div>
+											</Show>
+										</>
+									)
 								}}
+
 							</Show>
 							<Show when={!(isSelected() && delay())}>
-								<img src={assets.items[props.item!.name].img} style={disabledStyles()} class="item" classList={{ 'item-selected': isSelected() }}></img>
+								<img
+									src={assets.items[props.item!.name].img}
+									style={disabledStyles()}
+									class="item"
+									classList={{ 'item-selected': isSelected() }}
+								>
+								</img>
 							</Show>
-							<div class="quantity">{quantity()}</div>
-							<Show when={isSelected()}>
-								<div class="name">{item().name}</div>
-							</Show>
+							<div class="quantity">
+								<OutlineText>{quantity()}</OutlineText>
+							</div>
+
 						</>
 					)
 				}}
@@ -173,40 +222,43 @@ export const ItemDisplay = (props: {
 		</ItemBox>
 	)
 }
-
-export const InventorySlots = (props: {
-	getProps: getProps
+export const InventorySlots = ({ first, disabled, click, setSelectedItem, menu, onSelected, inventorySize, inventory }: {
+	menu: MenuDir
 	setSelectedItem?: Setter<Item | null>
 	click?: (item: Item | null, index: number) => void
 	disabled?: (item: Item | null) => boolean | undefined
 	first?: (item: Item | null) => boolean
 	onSelected?: () => void
-	entity: With<Entity, 'inventorySize' | 'inventory' | 'inventoryId'>
+	inventorySize?: number
+	inventory: Accessor <(Item | null)[]>
 }) => {
+	const size = createMemo(() => inventorySize ?? inventory().length)
 	return (
-		<For each={range(0, props.entity.inventorySize)}>
+		<For each={range(0, size())}>
 			{(_, i) => {
-				const slotProps = props.getProps(props.first ? props.first(props.entity.inventory[i()]) : i() === 0)
-				const itemSynced = ui.sync(() => props.entity.inventory[i()])
-				const disabled = props.disabled && props.disabled(itemSynced())
+				const itemSynced = ui.sync(() => inventory()[i()])
+
+				const isDisabled = disabled && disabled(itemSynced())
+				const selected = atom(false)
+				const isFirst = first ? first(inventory()[i()]) : i() === 0
 				createEffect(() => {
-					if (props.setSelectedItem && slotProps.selected()) {
+					if (setSelectedItem && selected()) {
 						const item = itemSynced()
-						props.setSelectedItem(item)
+						setSelectedItem(item)
 					}
 				})
 				return (
 					<div
-						{...slotProps}
+						use:menuItem={[menu, isFirst, selected]}
 						class="item-drag"
-						onClick={() => props.click && !disabled && props.click(itemSynced(), i())}
+						onClick={() => click && !isDisabled && click(itemSynced(), i())}
 
 					>
 						<ItemDisplay
-							disabled={disabled}
+							disabled={isDisabled}
 							item={itemSynced()}
-							onSelected={props.onSelected}
-							selected={slotProps.selected}
+							onSelected={onSelected}
+							selected={selected}
 						/>
 					</div>
 				)
@@ -216,7 +268,11 @@ export const InventorySlots = (props: {
 	)
 }
 type ItemCategory = Exclude<keyof ItemData, 'name'>
-const PlayerInventory = ({ player, getProps, setSelectedItem }: { player: With<Entity, 'inventory' | 'inventoryId'>, getProps: getProps, setSelectedItem: Setter<Item | null> }) => {
+const PlayerInventory = ({ player, setSelectedItem, menu }: {
+	player: With<Entity, 'inventory' | 'inventoryId'>
+	menu: MenuDir
+	setSelectedItem: Setter<Item | null>
+}) => {
 	const inventory = ui.sync(() => player.inventory.filter(Boolean))
 	const categories = createMemo(() => ['meal', 'ingredient', 'seed', 'key item'].filter((category) => {
 		return inventory().some(item => category in itemsData[item.name])
@@ -250,22 +306,23 @@ const PlayerInventory = ({ player, getProps, setSelectedItem }: { player: With<E
 						const items = createMemo(() => inventory().filter((item) => {
 							return category in itemsData[item.name]
 						}))
-						const fakeEntity = createMemo(() => ({ inventorySize: items().length, inventory: items(), inventoryId: player.inventoryId }))
 						const [ref, setRef] = createSignal<HTMLElement>()
 						const select = () => {
 							ref()?.scrollIntoView()
 						}
 						return (
 							<div>
-								<div ref={setRef}class="category-title outline-text">
-									{category}
-									s
+								<div ref={setRef}class="category-title">
+									<OutlineText>
+										{category}
+										s
+									</OutlineText>
 								</div>
 								<div class="inventory-category">
 									<InventorySlots
+										menu={menu}
 										first={(item: Item | null) => category === categories()[0] && item === items()[0]}
-										getProps={getProps}
-										entity={fakeEntity()}
+										inventory={items}
 										onSelected={select}
 										setSelectedItem={setSelectedItem}
 									/>
@@ -278,7 +335,6 @@ const PlayerInventory = ({ player, getProps, setSelectedItem }: { player: With<E
 		</>
 	)
 }
-
 export const InventoryUi = ({ player }: FarmUiProps) => {
 	ui.updateSync(() => {
 		if (player?.menuInputs?.get('cancel').justReleased) {
@@ -331,11 +387,11 @@ export const InventoryUi = ({ player }: FarmUiProps) => {
 							<Menu
 								inputs={player.menuInputs}
 							>
-								{({ getProps }) => {
+								{({ menu }) => {
 									return (
 										<PlayerInventory
+											menu={menu}
 											setSelectedItem={setSelectedItem}
-											getProps={getProps}
 											player={player}
 										/>
 									)

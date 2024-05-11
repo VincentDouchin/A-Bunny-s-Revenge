@@ -1,7 +1,6 @@
 import type { items, weapons } from '@assets/assets'
 import type { Collider, ColliderDesc, KinematicCharacterController, RigidBody, RigidBodyDesc } from '@dimforge/rapier3d-compat'
 import type { With } from 'miniplex'
-import type { JSXElement } from 'solid-js'
 import type { BufferGeometry, Camera, Group, Light, Mesh, MeshPhongMaterial, Object3D, Object3DEventMap, Quaternion, Scene, ShaderMaterial, Sprite, Vector3, WebGLRenderer } from 'three'
 import type { BatchedRenderer, ParticleEmitter } from 'three.quarks'
 import type { CSS2DObject } from 'three/examples/jsm/renderers/CSS2DRenderer'
@@ -10,6 +9,7 @@ import type { InstanceHandle } from './assetLoaders'
 import type { NPC } from '@/constants/NPC'
 import type { Drop, enemy } from '@/constants/enemies'
 import type { Item, crops } from '@/constants/items'
+import type { QuestName } from '@/constants/quests'
 import type { Recipe } from '@/constants/recipes'
 import type { MenuInputMap, PlayerInputMap } from '@/global/inputMaps'
 import type { direction } from '@/lib/directions'
@@ -21,7 +21,6 @@ import type { WeaponArc } from '@/shaders/weaponArc'
 import type { Room } from '@/states/dungeon/generateDungeon'
 import type { Dash } from '@/states/game/dash'
 import type { MenuOptions, RenderMainMenuFn } from '@/states/mainMenu/mainMenuRendering'
-import type { QuestName } from '@/constants/quests'
 
 export type PlayerAnimations = 'idle' | 'running' | 'lightAttack' | 'slashAttack' | 'heavyAttack' | 'hit' | 'dying'
 export type EnemyAnimations = 'idle' | 'running' | 'attacking' | 'hit' | 'dead'
@@ -140,10 +139,6 @@ export interface Entity {
 	houseAnimator?: Animator<Animations['House']>
 	chestAnimator?: Animator<Animations['Chest']>
 	kayAnimator?: Animator<Animations['ALICE_animated']>
-	template?: () => JSXElement
-	el?: HTMLElement
-	cssObject?: true
-	uiRoot?: true
 	// ! Farming
 	sensorDesc?: ColliderDesc
 	sensorCollider?: Collider
@@ -163,6 +158,7 @@ export interface Entity {
 	outline?: With<Entity, 'model'>
 	// ! Camp
 	door?: direction
+	vineGate?: true
 	doorLevel?: number
 	doorLocked?: true
 	tree?: true

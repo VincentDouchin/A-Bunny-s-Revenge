@@ -8,13 +8,13 @@ import water from '@/shaders/glsl/water.glsl?raw'
 import { useLocalStorage } from '@/utils/useLocalStorage'
 
 const toonExtension = new MaterialExtension({ }).frag(
-	override('vec4 diffuseColor ', 'vec4(1.)'),
+	override('vec4 diffuseColor ', 'vec4(1.,1.,1.,opacity)'),
 	importLib(gradient),
 	replaceInclude('map_fragment', ''),
 	unpack('lights_phong_pars_fragment'),
 	replace('vec3 irradiance = dotNL * directLight.color;', 'vec3 irradiance = floor(dotNL * directLight.color * 3.)/3.;\n'),
 	replaceInclude('opaque_fragment', /* glsl */`
-	vec4 color = vec4(1.);
+	vec4 color = vec4(1.,1.,1.,opacity);
 	#ifdef USE_MAP
 		vec4 sampledDiffuseColor = texture2D( map, vMapUv );
 		color *= sampledDiffuseColor;
@@ -24,7 +24,7 @@ const toonExtension = new MaterialExtension({ }).frag(
 	color.rgb *= outgoingLight;
 	float max_light = max(outgoingLight.z,max(outgoingLight.x,outgoingLight.y)) * 12.;
 	vec3 outgoingLight2 = colorRamp(color.xyz, max_light);
-	gl_FragColor = vec4(outgoingLight2,opacity);`),
+	gl_FragColor = vec4(outgoingLight2,color.a);`),
 )
 const [groundColors] = useLocalStorage('groundColor', {
 	topColor: '#5AB552',
@@ -53,7 +53,7 @@ const groundExtension = new MaterialExtension({
 		addUniform(`grassColor`, 'vec3'),
 		addUniform(`ground`, 'sampler2D'),
 		remove('color.rgb *= diffuse;'),
-		replace('vec4 color = vec4(1.);', /* glsl */`
+		replace('vec4 color = vec4(1.,1.,1.,opacity);', /* glsl */`
 			vec4 color = vec4(1.);
 			vec2 scaled_uv = vUv*size/10.;
 			float noise = cnoise(scaled_uv.xyx);
@@ -90,7 +90,7 @@ export const treeExtension = new MaterialExtension({ playerZ: 0, pos: new Vector
 
 	.frag(
 		addUniform('playerZ', 'float'),
-		replace('gl_FragColor = vec4(outgoingLight2,opacity);', /* glsl */`
+		replace('gl_FragColor = vec4(outgoingLight2,color.a);', /* glsl */`
 	vec2 view = vViewPosition.xy ;
 	float new_opacity = playerZ == 1. ? smoothstep(15.,25.,abs(length(view))) : opacity;
 	gl_FragColor = vec4(outgoingLight2, new_opacity);
@@ -145,7 +145,7 @@ export const waterExtension = new MaterialExtension({
 		addUniform('water_color', 'vec3'),
 		addUniform('foam_color', 'vec3'),
 		addUniform('size', 'vec2'),
-		replace('gl_FragColor = vec4(outgoingLight2,opacity);', /* glsl */`
+		replace('gl_FragColor = vec4(outgoingLight2,color.a);', /* glsl */`
 			if (sampledDiffuseColor.r == 0.){
 				discard;
 			}
@@ -162,7 +162,7 @@ export const gardenPlotExtention = new MaterialExtension({
 	.frag(
 		addUniform('water', 'float'),
 		importLib(noise),
-		replace('gl_FragColor = vec4(outgoingLight2,opacity);', /* glsl */`
+		replace('gl_FragColor = vec4(outgoingLight2,color.a);', /* glsl */`
 		vec3 watered_color =  mix( outgoingLight2, outgoingLight2 * 0.5,water); 
 		gl_FragColor = vec4(watered_color, opacity);
 	`),

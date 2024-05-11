@@ -1,7 +1,8 @@
-import { DoubleSide, Group, Mesh, MeshBasicMaterial, PlaneGeometry, ShaderMaterial } from 'three'
+import { DoubleSide, Group, Mesh, MeshBasicMaterial, PlaneGeometry, ShaderMaterial, Vector3 } from 'three'
+import { Tween } from '@tweenjs/tween.js'
 import { RoomType, genDungeon } from '../dungeon/generateDungeon'
 import { Faction } from '@/global/entity'
-import { ecs, world } from '@/global/init'
+import { ecs, gameTweens, world } from '@/global/init'
 import { save } from '@/global/save'
 import { playSound } from '@/global/sounds'
 import type { DungeonRessources } from '@/global/states'
@@ -43,14 +44,14 @@ export const doorSide = () => {
 	return door
 }
 
-const doorQuery = ecs.with('collider', 'door', 'collider')
+const doorQuery = ecs.with('collider', 'door')
 const playerQuery = ecs.with('collider', 'playerControls', 'currentHealth').without('ignoreDoor')
 const enemyQuery = ecs.with('faction').where(({ faction }) => faction === Faction.Enemy)
 const doorToLockQuery = doorQuery.with('doorLocked')
-const doorToUnlockQuery = doorToLockQuery.with('emitter')
+const doorToUnlockQuery = doorQuery.without('doorLocked')
 export const collideWithDoor: System<DungeonRessources> = ({ dungeon, dungeonLevel, weapon }) => {
-	if (doorToUnlockQuery.size > 0 && enemyQuery.size === 0) {
-		for (const door of doorToUnlockQuery) {
+	if (doorToLockQuery.size > 0 && enemyQuery.size === 0) {
+		for (const door of doorToLockQuery) {
 			ecs.removeComponent(door, 'doorLocked')
 		}
 		playSound('zapsplat_multimedia_game_tone_twinkle_bright_collect_gain_level_up_50730')
@@ -120,10 +121,24 @@ export const allowDoorCollision: System<DungeonRessources> = () => {
 
 const lockDoors = () => doorToLockQuery.onEntityAdded.subscribe((e) => {
 	e.collider.setSensor(false)
-	ecs.update(e, { emitter: doorClosed() })
+	if (!e.vineGate) {
+		ecs.update(e, { emitter: doorClosed() })
+	}
 })
-const unlockDoors = () => doorToUnlockQuery.onEntityRemoved.subscribe((e) => {
+const unlockDoors = () => doorToUnlockQuery.onEntityAdded.subscribe((e) => {
 	e.collider.setSensor(true)
-	e.emitter.system.looping = false
+
+	if (e.vineGate) {
+		const vinesBottom = e.model?.getObjectByName('Vines_Gate_Bottom')
+		if (vinesBottom) {
+			gameTweens.add(
+				new Tween(vinesBottom.position)
+					.to(vinesBottom.position.clone().add(new Vector3(0, -30, 0)), 2000),
+			)
+		}
+	}
+	if (e.emitter) {
+		e.emitter.system.looping = false
+	}
 })
 export const doorLocking = [lockDoors, unlockDoors]

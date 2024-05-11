@@ -9,7 +9,7 @@ import { QuestUi } from './QuestUi'
 import { RecipesUi } from './RecipesUi'
 import { CuttingBoardMinigameUi } from './CuttingBoardMiniGameUi'
 import { inputManager, ui } from '@/global/init'
-import { campState, dungeonState, openMenuState, pausedState } from '@/global/states'
+import { campState, dungeonState, genDungeonState, openMenuState, pausedState } from '@/global/states'
 import { ChestUi } from '@/states/farm/ChestUi'
 import { InventoryUi } from '@/states/farm/InventoryUi'
 import { SeedUi } from '@/states/farm/SeedUi'
@@ -51,11 +51,14 @@ export const PlayerUi = () => {
 							<SeedUi player={player} />
 							<QuestUi player={player} />
 							<ChestUi />
-							<HealthUi player={player}></HealthUi>
+							<HealthUi player={player} />
 						</StateUi>
 						<StateUi state={dungeonState}>
 							<SneezeUi player={player} />
-							<HealthUi player={player}></HealthUi>
+							<HealthUi player={player} />
+						</StateUi>
+						<StateUi state={genDungeonState}>
+							<HealthUi player={player} />
 						</StateUi>
 						<BasketUi player={player} />
 					</>

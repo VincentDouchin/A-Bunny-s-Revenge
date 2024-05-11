@@ -4,6 +4,7 @@ import { css } from 'solid-styled'
 import { TransitionGroup } from 'solid-transition-group'
 import atom from 'solid-use/atom'
 import { generateUUID } from 'three/src/math/MathUtils'
+import { OutlineText } from './components/styledComponents'
 import { assets } from '@/global/init'
 import { type QuestName, type QuestStep, quests } from '@/constants/quests'
 
@@ -65,7 +66,7 @@ export const Toaster = () => {
 									{step => (
 										<div class="toast">
 											<div class="toast-icon" style={{ color: '#33cc33' }} innerHTML={assets.icons['circle-check-solid']} />
-											<div class="outline">{`Completed: ${step().description}`}</div>
+											<OutlineText>{`Completed: ${step().description}`}</OutlineText>
 										</div>
 									)}
 								</Show>
@@ -73,7 +74,7 @@ export const Toaster = () => {
 									{quest => (
 										<div class="toast">
 											<div class="toast-icon" innerHTML={assets.icons['circle-exclamation-solid']} />
-											<div class="outline">{`New Quest: ${quests[quest()].name}`}</div>
+											<OutlineText>{`New Quest: ${quests[quest()].name}`}</OutlineText>
 										</div>
 									)}
 								</Show>
@@ -81,7 +82,7 @@ export const Toaster = () => {
 									{item => (
 										<div class="toast">
 											<img class="toast-icon" src={assets.items[item()].img} />
-											<div class="outline">{`Item removed: ${itemsData[item()].name}`}</div>
+											<OutlineText>{`Item removed: ${itemsData[item()].name}`}</OutlineText>
 										</div>
 									)}
 								</Show>
@@ -89,7 +90,7 @@ export const Toaster = () => {
 									{item => (
 										<div class="toast">
 											<img class="toast-icon" src={assets.items[item()].img} />
-											<div class="outline">{`Item added: ${itemsData[item()].name}`}</div>
+											<OutlineText>{`Item added: ${itemsData[item()].name}`}</OutlineText>
 										</div>
 									)}
 								</Show>

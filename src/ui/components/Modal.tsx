@@ -3,6 +3,7 @@ import { Show, createMemo, onCleanup } from 'solid-js'
 
 import { css } from 'solid-styled'
 import { Transition } from 'solid-transition-group'
+import type { Atom } from 'solid-use/atom'
 import atom from 'solid-use/atom'
 import { assets, ecs, inputManager, ui } from '@/global/init'
 
@@ -47,7 +48,7 @@ const CloseButton = () => {
 	)
 }
 
-export function Modal<T>(props: { children: JSX.Element, open: T, showClose?: boolean }) {
+export function Modal<T>(props: { children: JSX.Element, open: T, showClose?: boolean, finished?: Atom<boolean> }) {
 	css/* css */`
 	.modal{
 		
@@ -73,6 +74,7 @@ export function Modal<T>(props: { children: JSX.Element, open: T, showClose?: bo
 		}
 	}
 	const afterExit = () => {
+		props.finished && props.finished(true)
 		for (const style of styleCache()) {
 			style.parentNode?.removeChild(style)
 		}

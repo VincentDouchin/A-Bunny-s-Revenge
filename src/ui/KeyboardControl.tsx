@@ -1,8 +1,11 @@
 import type { With } from 'miniplex'
-import { Show } from 'solid-js'
+import { Show, onMount } from 'solid-js'
 import { css } from 'solid-styled'
+import atom from 'solid-use/atom'
+import { Transition } from 'solid-transition-group'
 import { InputIcon } from './InputIcon'
 import { getInteractables } from './Interactions'
+import { OutlineText } from './components/styledComponents'
 import type { Entity } from '@/global/entity'
 
 export const KeyboardControls = ({
@@ -21,6 +24,7 @@ export const KeyboardControls = ({
 		overflow: hidden;
 		padding: 1rem;
 		gap:1rem;
+		background:var(--black-transparent);
 	}
 	.keyboard-controls{
 		font-size:2rem;
@@ -33,40 +37,45 @@ export const KeyboardControls = ({
 		gap:0.2rem;
 	}
 	`
+	const visible = atom(false)
+	onMount(() => setTimeout(() => visible(true), 100))
 	return (
+		<Transition name="traverse-up">
+			<Show when={visible()}>
+				<div class="controls-container">
+					<div class="keyboard-controls">
+						<div class="controls-icons">
+							<InputIcon input={player.playerControls.get('forward')}></InputIcon>
+							<InputIcon input={player.playerControls.get('left')}></InputIcon>
+							<InputIcon input={player.playerControls.get('backward')}></InputIcon>
+							<InputIcon input={player.playerControls.get('right')}></InputIcon>
+						</div>
+						<OutlineText>Move</OutlineText>
+					</div>
+					<Show when={interactables[0]}>
+						{(interactable) => {
+							return (
+								<div class="keyboard-controls">
+									<InputIcon input={player.playerControls.get('primary')}></InputIcon>
+									<OutlineText>{interactable()}</OutlineText>
 
-		<div class="controls-container styled-container">
-			<div class="keyboard-controls">
-				<div class="controls-icons">
-					<InputIcon input={player.playerControls.get('forward')}></InputIcon>
-					<InputIcon input={player.playerControls.get('left')}></InputIcon>
-					<InputIcon input={player.playerControls.get('backward')}></InputIcon>
-					<InputIcon input={player.playerControls.get('right')}></InputIcon>
+								</div>
+							)
+						}}
+					</Show>
+					<Show when={interactables[1]}>
+						{(interactable) => {
+							return (
+								<div class="keyboard-controls">
+									<InputIcon input={player.playerControls.get('secondary')}></InputIcon>
+									<OutlineText>{interactable()}</OutlineText>
+
+								</div>
+							)
+						}}
+					</Show>
 				</div>
-				<div>Move</div>
-			</div>
-			<Show when={interactables[0]}>
-				{(interactable) => {
-					return (
-						<div class="keyboard-controls">
-							<InputIcon input={player.playerControls.get('primary')}></InputIcon>
-							{interactable()}
-
-						</div>
-					)
-				}}
 			</Show>
-			<Show when={interactables[1]}>
-				{(interactable) => {
-					return (
-						<div class="keyboard-controls">
-							<InputIcon input={player.playerControls.get('secondary')}></InputIcon>
-							{interactable()}
-
-						</div>
-					)
-				}}
-			</Show>
-		</div>
+		</Transition>
 	)
 }

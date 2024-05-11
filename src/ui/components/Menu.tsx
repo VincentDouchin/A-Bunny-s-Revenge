@@ -1,6 +1,7 @@
-import type { Accessor, Component } from 'solid-js'
-import { createMemo, createRoot, createSignal } from 'solid-js'
+import type { Accessor, Component, JSX } from 'solid-js'
+import { createEffect, createRoot, createSignal, onCleanup } from 'solid-js'
 
+import type { Atom } from 'solid-use/atom'
 import { generateUUID } from 'three/src/math/MathUtils'
 import { ui } from '@/global/init'
 import type { MenuInputMap } from '@/global/inputMaps'
@@ -47,32 +48,55 @@ const findClosest = (selected: HTMLElement, neighbors: IterableIterator<HTMLElem
 	}
 	return closest
 }
-interface MenuProps {
-	children: Component<MenuItemProps>
-	inputs?: MenuInputMap
-}
-export type getProps = (first?: boolean) => {
-	ref: (el: HTMLElement) => void
-	getRef: () => HTMLElement
-	onPointerDown: () => void
-	selected: Accessor<boolean>
-}
-export interface MenuItemProps {
-	getProps: getProps
-	selected: Accessor<any>
+export interface MenuItemProps extends JSX.HTMLAttributes<HTMLDivElement> {
+	menu: MenuDir
 }
 
-export function Menu(props: MenuProps) {
+export type MenuItem = (el: HTMLElement, selected: () => [MenuDir, boolean, Atom<boolean>]) => void
+declare module 'solid-js' {
+	// eslint-disable-next-line ts/no-namespace
+	namespace JSX {
+		interface DirectiveFunctions { // use:model
+			menuItem: MenuItem
+		}
+	}
+}
+
+export interface MenuDir {
+	refs: Map<string, HTMLElement>
+	inverseRefs: Map<HTMLElement, string>
+	setSelected: (id: string) => void
+	selected: Accessor<string>
+}
+export const menuItem: MenuItem = (el, init) => {
+	const id = generateUUID()
+	const [menu, first, isSelected] = init()
+	if (first) {
+		menu.setSelected(id)
+	}
+	menu.refs.set(id, el)
+	menu.inverseRefs.set(el, id)
+	const clickListener = () => {
+		menu.setSelected(id)
+	}
+	el.addEventListener('pointerdown', clickListener)
+	onCleanup(() => {
+		el.removeEventListener('click', clickListener)
+	})
+	createEffect(() => {
+		isSelected(id === menu.selected())
+	})
+}
+
+export function Menu(props: { children: Component<MenuItemProps>, inputs?: MenuInputMap }) {
 	const [selected, setSelected] = createSignal('')
 
 	const refs = new Map<string, HTMLElement>()
 	const inverseRefs = new Map<HTMLElement, string>()
 
-	const inputs = ui.sync(() => props.inputs)
-
 	const update = () => {
 		for (const direction of ['up', 'down', 'left', 'right'] as const) {
-			if (inputs()?.get(direction).justPressed) {
+			if (props.inputs?.get(direction).justPressed) {
 				const selectedId = createRoot(selected)
 				const selectedElement = refs.get(selectedId)
 				if (selectedElement) {
@@ -88,7 +112,7 @@ export function Menu(props: MenuProps) {
 				}
 			}
 		}
-		if (inputs()?.get('validate').justPressed) {
+		if (props.inputs?.get('validate').justPressed) {
 			const selectedElement = refs.get(selected())
 			if (selectedElement) {
 				selectedElement.click()
@@ -96,26 +120,11 @@ export function Menu(props: MenuProps) {
 		}
 	}
 	ui.updateSync(update)
-	const getProps = (first = false) => {
-		const id = generateUUID()
-		if (first) {
-			setSelected(id)
-		}
-		const isSelected = createMemo(() => id === selected())
-		return {
-			ref: (el: HTMLElement) => {
-				refs.set(id, el)
-				inverseRefs.set(el, id)
-			},
-			getRef: () => refs.get(id)!,
-			onPointerDown: () => setSelected(() => id),
-			selected: isSelected,
-		}
-	}
-	// createEffect(() => {
-	// 	if (selected()) {
-	// 		refs.get(selected())?.scrollIntoView()
-	// 	}
-	// })
-	return <props.children getProps={getProps} selected={selected}></props.children>
+	const menu: MenuDir = { refs, inverseRefs, setSelected, selected }
+	return (
+		<props.children
+			menu={menu}
+		>
+		</props.children>
+	)
 }

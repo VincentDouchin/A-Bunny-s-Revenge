@@ -20,7 +20,7 @@ export const dialogs = {
 			yield t(dialog.grandma.hello)
 			soundDialog('How are you doing')
 			yield t(dialog.grandma.howareyoudoing)
-			if (hasQuest('grandma_1')) {
+			if (hasQuest('grandma_1') && !hasCompletedQuest('grandma_1')) {
 				if (canCompleteQuest('grandma_1')) {
 					yield 'Oh you brought me the roasted carrots I asked for!'
 					yield 'You\'re such a lovely granddaughter'

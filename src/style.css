@@ -12,7 +12,11 @@
 	font-size: 2vh;
 	--brown-dark: #29201e;
 	--gold: #f3a833;
-	--black-transparent: hsla(0, 0%, 0%, 0.3);
+	--black-transparent: linear-gradient(
+		to bottom,
+		hsla(0, 0%, 0%, 0.4),
+		hsla(0, 0%, 0%, 0.2)
+	);
 }
 html,
 body,
@@ -24,7 +28,7 @@ body,
 }
 .styled-container {
 	box-shadow: inset 0px 0px 1rem 0px black;
-	border: solid 0.5rem var(--gold);
+	border: solid 0.3rem var(--gold);
 	background: var(--brown-dark);
 }
 .description {
@@ -39,22 +43,6 @@ body,
 	border-bottom: solid 0.2rem var(--gold);
 	padding: 1rem;
 	border-radius: 1rem;
-}
-.outline-text {
-	line-height: 1.2;
-	padding: var(--size);
-	letter-spacing: calc(0.5 * var(--size));
-	--size: 0.1em;
-	--size-minus: calc(-1 * var(--size));
-	text-shadow:
-		0 var(--size) black,
-		var(--size) var(--size) black,
-		var(--size) 0 black,
-		0 var(--size-minus) black,
-		var(--size-minus) var(--size-minus) black,
-		var(--size-minus) var(--size) black,
-		var(--size) var(--size-minus) black,
-		var(--size-minus) 0 black;
 }
 
 .icon-container svg {
@@ -101,6 +89,16 @@ canvas.main {
 .slide-exit-to {
 	transform: translateY(100vh);
 }
+/* ! APPEAR */
+.appear-enter-active,
+.appear-exit-active {
+	transition: all 0.2s ease;
+	opacity: 1;
+}
+.appear-enter,
+.appear-exit-to {
+	opacity: 0;
+}
 /* ! TOAST */
 .toast-enter-active,
 .toast-exit-active {
@@ -123,6 +121,29 @@ canvas.main {
 .slide-down-exit-to {
 	opacity: 0;
 	transform: translateY(-100px);
+}
+
+/* ! TRAVERSE DOWN */
+.traverse-down-enter-active,
+.traverse-down-exit-active {
+	transition: all 0.3s ease;
+}
+.traverse-down-enter {
+	transform: translateY(-100vh);
+}
+.traverse-down-exit-to {
+	transform: translateY(100vh);
+}
+/* ! TRAVERSE UP */
+.traverse-up-enter-active,
+.traverse-up-exit-active {
+	transition: all 0.3s ease;
+}
+.traverse-up-enter {
+	transform: translateY(100vh);
+}
+.traverse-up-exit-to {
+	transform: translateY(-100vh);
 }
 
 /* ! POPUP */
@@ -149,6 +170,12 @@ button.styled {
 	border: solid 0.2rem var(--gold);
 	border-radius: 0.5rem;
 	box-shadow: 0 0.5rem 0.2rem 0.2rem black;
+	transition: all 0.5s;
+}
+
+button.styled:hover {
+	transform: translateY(0.5rem);
+	box-shadow: 0 0rem 0.2rem 0.2rem black;
 }
 
 button.button {

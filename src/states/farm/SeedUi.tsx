@@ -2,6 +2,7 @@ import { For, Portal, Show } from 'solid-js/web'
 import { createSignal, onMount } from 'solid-js'
 import { Transition } from 'solid-transition-group'
 import { css } from 'solid-styled'
+import atom from 'solid-use/atom'
 import { ItemDisplay } from './InventoryUi'
 import type { Item } from '@/constants/items'
 import { itemsData } from '@/constants/items'
@@ -9,9 +10,10 @@ import type { Entity } from '@/global/entity'
 import { ecs, ui } from '@/global/init'
 import { updateSave } from '@/global/save'
 import { ForQuery } from '@/ui/components/ForQuery'
-import { Menu } from '@/ui/components/Menu'
+import { Menu, menuItem } from '@/ui/components/Menu'
 import type { FarmUiProps } from '@/ui/types'
-
+// eslint-disable-next-line no-unused-expressions
+menuItem
 const query = ecs.with('menuType', 'interactionContainer', 'plantableSpot')
 const playerMenuInputs = ecs.with('player', 'menuInputs')
 export const SeedUi = ({ player }: FarmUiProps) => {
@@ -36,7 +38,7 @@ export const SeedUi = ({ player }: FarmUiProps) => {
 		<Show when={inputs()}>
 			{inputs => (
 				<Menu inputs={inputs()}>
-					{({ getProps }) => {
+					{({ menu }) => {
 						return (
 							<ForQuery query={query}>
 								{(entity) => {
@@ -54,10 +56,10 @@ export const SeedUi = ({ player }: FarmUiProps) => {
 													<div class="seeds styled-container">
 														<For each={seeds()}>
 															{(seed, i) => {
-																const props = getProps(i() === 0)
+																const selected = atom(false)
 																return (
-																	<div {...props} onClick={() => chooseSeed(seed, entity)}>
-																		<ItemDisplay item={seed} selected={props.selected}></ItemDisplay>
+																	<div use:menuItem={[menu, i() === 0, selected]} onClick={() => chooseSeed(seed, entity)}>
+																		<ItemDisplay item={seed} selected={selected}></ItemDisplay>
 																	</div>
 																)
 															}}
