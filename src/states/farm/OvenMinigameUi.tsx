@@ -1,10 +1,11 @@
 import type { With } from 'miniplex'
 import { between } from 'randomish'
-import { Show, createSignal, onCleanup, onMount } from 'solid-js'
+import { Show, createMemo, createSignal, onCleanup, onMount } from 'solid-js'
 import { Portal } from 'solid-js/web'
 import { Color, PointLight, Vector3 } from 'three'
 import { ConstantValue } from 'three.quarks'
 import { Tween } from '@tweenjs/tween.js'
+import { css } from 'solid-styled'
 import { itemBundle } from '../game/items'
 import { ItemDisplay } from './InventoryUi'
 import type { FarmUiProps } from '@/ui/types'
@@ -148,30 +149,142 @@ export const OvenMinigameUi = ({ player }: FarmUiProps) => {
 				}
 				const isTouch = ui.sync(() => inputManager.controls === 'touch')
 				const close = () => ecs.removeComponent(oven, 'menuType')
+				css/* css */`
+				.exit{
+					position: fixed;
+					height: 80%;
+					left: 0;
+					width: 5rem;
+					margin: 3rem 2rem;
+					display: flex;
+					justify-content: center;
+					flex-direction: column;
+				}
+				.fire{
+					position: fixed;
+					width: 8rem;
+					height: 8rem;
+					background: hsla(0, 0%, 0%, 20%);
+					border-radius: 8rem;
+					border: ${isPrimaryPressed() ? 'solid 0.3rem hsla(0, 0%, 100%, 30%)' : 'solid 0.1rem hsla(0, 0%, 100%, 30%)'};
+					bottom: 0%;
+					right: 0%;
+					display: grid;
+					place-items: center;
+					margin: 7rem;
+				}
+				.fire-icon{
+					color: white;
+					width: 50%;
+					height: 50%;
+				}
+				.minigame-container{
+					display: grid;
+					grid-template-columns: auto auto auto;
+					gap: 1rem 3rem;
+					transform: translate(0%, -80%);
+					position: absolute;
+				}
+				.progress-text{
+					position: absolute;
+					transform: translate(-50%, -100%);
+					font-size: 2rem;
+					color: white;
+					left: 50%;
+				}
+				.progress-container{
+					width: 2rem;
+					height: 20rem;
+					border: solid 0.5rem hsla(0, 0%, 0%, 0.7);
+					border-radius: 1rem;
+					overflow: hidden;
+					position: relative;
+				}
+				.progress-bar{
+					height: ${`${progress()}%`};
+					width: 100%;
+					background: linear-gradient(0, #5ab552, #9de64e);
+					margin-top: auto;
+					position: absolute;
+					bottom: 0;
+				}
+				.target-container{
+					width: 5rem;
+					height: 20rem;
+					background: hsla(0, 0%, 100%, 0.7);
+					border-radius: 1rem;
+					outline: solid 0.5rem hsla(0, 0%, 0%, 0.7);
+					display: grid;
+					overflow: hidden;
+					position: relative;
+				}
+				.target{
+					height: ${`${height}%`};
+					width: 100%;
+					position: absolute;
+					background: linear-gradient(0deg, transparent, #f3a833, #e98537, #f3a833, transparent);
+					transform: translate(0, -50%);
+					top: ${`${target()}%`};
+				}
+				.target-bar{
+					height: 0.5rem;
+					background: black;
+					top: ${`${bar()}%`};
+					position: relative;
+					width: 100%;
+					transition: all 200ms ease;
+				}
+				.relative{
+					position: relative;
+				}
+				.heat-text{
+					position: absolute;
+					transform: translate(-50%, -100%);
+					font-size: 2rem;
+					color: white;
+					left: 50%;
+				}
+				.heat-container{
+					width: 2rem;
+					height: 20rem;
+					border: solid 0.5rem hsla(0, 0%, 0%, 0.7);
+					border-radius: 1rem;
+					overflow: hidden;
+					position: relative;
+				}
+				.heat-bar{
+					height: ${`${heat()}%`};
+					width: 100%;
+					background: linear-gradient(0, #ec273f, #de5d3a, #e98537, #f3a833);
+					margin-top: auto;
+					position: absolute;
+					bottom: 0;
+				}
+				`
 				return (
 					<>
 						<Show when={isTouch()}>
-							<button class="button" style={{ 'position': 'fixed', 'height': '80%', 'left': 0, 'width': '5rem', 'margin': '3rem 2rem', 'display': 'flex', 'justify-content': 'center', 'flex-direction': 'column' }} onClick={close}>
+							<button class="button exit" onClick={close}>
 								<div style={{ width: '2rem' }} innerHTML={assets.icons['arrow-left-solid']}></div>
 								<div>Exit</div>
 							</button>
 						</Show>
 						<Show when={isTouch()}>
-							<div style={{ 'position': 'fixed', 'width': '8rem', 'height': '8rem', 'background': 'hsl(0,0%,0%, 20%)', 'border-radius': '8rem', 'border': `solid ${isPrimaryPressed() ? '0.3rem' : '0.1rem'} hsl(0, 0%,100%, 30% )`, 'bottom': '0%', 'right': '0%', 'display': 'grid', 'place-items': 'center', 'margin': '7rem' }} onTouchStart={interact(1, 'primary')} onTouchEnd={interact(0, 'primary')}>
-								<div innerHTML={assets.icons['fire-solid']} style={{ color: 'white', width: '50%', height: '50%' }}></div>
+							<div class="fire" onTouchStart={interact(1, 'primary')} onTouchEnd={interact(0, 'primary')}>
+								<div innerHTML={assets.icons['fire-solid']} class="fire-icon"></div>
 							</div>
 						</Show>
 						<Portal mount={oven.minigameContainer?.element}>
-							<div style={{ 'display': 'grid', 'grid-template-columns': 'auto auto auto', 'gap': '1rem 3rem', 'translate': '0% -80%', 'position': 'absolute' }}>
+							<div class="minigame-container">
 								{/*  progress */}
-								<div style={{ position: 'relative' }}>
-									<div style={{ 'position': 'absolute', 'translate': '-50% -100%', 'font-size': '2rem', 'color': 'white', 'left': '50%' }}>Progress</div>
-									<div style={{ 'width': '2rem', 'height': '20rem', 'border': 'solid 0.5rem hsl(0,0%,0%,0.7)', 'border-radius': '1rem', 'overflow': 'hidden', 'position': 'relative' }}>
-										<div style={{ 'height': `${progress()}%`, 'width': '100%', 'background': 'linear-gradient(0, #5ab552,#9de64e)', 'margin-top': 'auto', 'position': 'absolute', 'bottom': 0 }}></div>
+								<div class="relative">
+									<div class="progress-text">Progress</div>
+									<div class="progress-container">
+										<div class="progress-bar"></div>
 									</div>
 								</div>
 								{/* middle */}
-								<div style={{ position: 'relative' }}>
+								<div class="relative">
 									<Show when={output()}>
 										{output => (
 											<div style={{ position: 'absolute', bottom: 'calc(100% + 2rem)' }}>
@@ -179,18 +292,18 @@ export const OvenMinigameUi = ({ player }: FarmUiProps) => {
 											</div>
 										)}
 									</Show>
-									<div style={{ 'width': '5rem', 'height': '20rem', 'background': 'hsl(0,0%,100%,0.7)', 'border-radius': '1rem', 'outline': 'solid 0.5rem hsl(0,0%,0%,0.7)', 'display': 'grid', 'overflow': 'hidden', 'position': 'relative' }}>
+									<div class="target-container">
 										{/* target */}
-										<div style={{ height: `${height}%`, width: '100%', position: 'absolute', background: 'linear-gradient(0deg, transparent, #f3a833, #e98537, #f3a833, transparent)', translate: '0 -50%', top: `${target()}%` }}></div>
+										<div class="target"></div>
 										{/* bar */}
-										<div style={{ height: '0.5rem', background: 'black', top: `${bar()}%`, position: 'relative', width: '100%', transition: 'all 200ms ease' }}></div>
+										<div class="target-bar"></div>
 									</div>
 								</div>
 								{/* heat */}
-								<div style={{ position: 'relative' }}>
-									<div style={{ 'position': 'absolute', 'translate': '-50% -100%', 'font-size': '2rem', 'color': 'white', 'left': '50%' }}>Heat</div>
-									<div style={{ 'width': '2rem', 'height': '20rem', 'border': 'solid 0.5rem hsl(0,0%,0%,0.7)', 'border-radius': '1rem', 'overflow': 'hidden', 'position': 'relative' }}>
-										<div style={{ 'height': `${heat()}%`, 'width': '100%', 'background': 'linear-gradient(0, #ec273f,#de5d3a,#e98537,#f3a833)', 'margin-top': 'auto', 'position': 'absolute', 'bottom': 0 }}></div>
+								<div class="relative">
+									<div class="heat-text">Heat</div>
+									<div class="heat-container">
+										<div class="heat-bar"></div>
 									</div>
 								</div>
 

@@ -7,7 +7,7 @@ const playerQuery = ecs.with('player', 'playerControls')
 export const buyItems = () => {
 	for (const player of playerQuery) {
 		for (const item of sellableItemsQuery) {
-			if (save.acorns >= item.price && player.playerControls.get('primary').justPressed) {
+			if (save.acorns >= item.price && player.playerControls.get('primary').justReleased) {
 				ecs.remove(item)
 				addItemToPlayer({ name: item.itemLabel, quantity: 1 })
 				updateSave(s => s.acorns -= item.price)

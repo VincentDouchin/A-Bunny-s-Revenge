@@ -7,7 +7,7 @@ export interface Recipe {
 	processor: MenuType
 }
 
-export const recipes: Array<Recipe> = [
+export const recipes = [
 	{
 		input: [{ name: 'carrot', quantity: 3 }],
 		output: { name: 'carrot_soup', quantity: 1 },
@@ -116,4 +116,4 @@ export const recipes: Array<Recipe> = [
 		output: { name: 'hummus', quantity: 1 },
 		processor: MenuType.Oven,
 	},
-]
+] as const satisfies Array<Recipe>

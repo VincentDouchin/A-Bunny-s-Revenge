@@ -105,8 +105,9 @@ dungeonState
 	.addSubscriber(spawnDrops, losingBattle, removeEnemyFromSpawn, applyArchingForce)
 	.onEnter(spawnDungeon, spawnLevelData, generatenavGrid, spawnEnemies, spawnPlayerDungeon, spawnBasket, moveCamera(true))
 	.onUpdate(runIf(canPlayerMove, allowDoorCollision, collideWithDoor, harvestCrop, killEntities), detroyProjectiles)
-	.onUpdate(runIf(() => !pausedState.enabled, tickHitCooldown, tickModifiers('speed'), tickSneeze, tickPoison, buyItems))
+	.onUpdate(runIf(() => !pausedState.enabled, tickHitCooldown, tickModifiers('speed'), tickSneeze, tickPoison))
 	.onUpdate(honeySplat, stepInHoney, endBattleSpawnChest, spawnPoisonTrail)
+	.onPostUpdate(buyItems)
 	.onExit(despawnOfType('map'))
 pausedState
 	.onEnter(() => time.stop(), musicManager.pause)

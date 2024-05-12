@@ -259,6 +259,10 @@ export const itemsData: Record<items, ItemData> = {
 		'name': '"Magic" bean',
 		'key item': true,
 	},
+	recipe: {
+		'name': 'Recipe',
+		'key item': true,
+	},
 }
 
 export const sellableItems = entries(itemsData).reduce((acc, [name, { price }]) => price ? [...acc, name] : acc, [] as items[])

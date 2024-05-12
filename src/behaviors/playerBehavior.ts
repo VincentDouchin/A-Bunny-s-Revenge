@@ -10,17 +10,18 @@ import { EnemyAttackStyle, Faction } from '@/global/entity'
 import { ecs, world } from '@/global/init'
 import { playSound } from '@/global/sounds'
 import { campState } from '@/global/states'
+import { spawnDamageNumber } from '@/particles/damageNumber'
 import { dash } from '@/particles/dashParticles'
+import { poisonBubbles } from '@/states/dungeon/poisonTrail'
 import { stunBundle } from '@/states/dungeon/stun'
 import { sleep } from '@/utils/sleep'
-import { poisonBubbles } from '@/states/dungeon/poisonTrail'
-import { spawnDamageNumber } from '@/particles/damageNumber'
 
 const ANIMATION_SPEED = 1
 const playerComponents = ['playerAnimator', 'movementForce', 'speed', 'body', 'rotation', 'playerControls', 'combo', 'attackSpeed', 'dash', 'collider', 'currentHealth', 'model', 'hitTimer', 'size', 'sneeze', 'targetRotation', 'poisoned', 'size', 'position', 'targetMovementForce'] as const satisfies readonly (keyof Entity)[]
 type PlayerComponents = (typeof playerComponents)[number]
 const playerQuery = ecs.with(...playerComponents)
 const enemyQuery = ecs.with('faction', 'state', 'strength', 'collider').where(e => e.faction === Faction.Enemy && e.state === 'attack')
+const interactionQuery = ecs.with('interactionContainer')
 const getAttackingEnemy = (player: With<Entity, PlayerComponents>) => {
 	if (player.hitTimer.running()) return null
 	for (const enemy of enemyQuery) {
@@ -54,7 +55,7 @@ export const playerBehaviorPlugin = behaviorPlugin(
 				setState('running')
 			}
 			if (!campState.enabled || debugOptions.attackInFarm) {
-				if (e.playerControls.get('primary').justReleased) {
+				if (e.playerControls.get('primary').justReleased && e.weapon && interactionQuery.size === 0) {
 					setState('attack')
 				}
 				if (e.playerControls.get('secondary').justReleased && canDash) {
@@ -75,8 +76,8 @@ export const playerBehaviorPlugin = behaviorPlugin(
 			} else {
 				setState('idle')
 			}
-			if (!campState.enabled || debugOptions.attackInFarm) {
-				if (e.playerControls.get('primary').justReleased) {
+			if ((!campState.enabled || debugOptions.attackInFarm)) {
+				if (e.playerControls.get('primary').justReleased && e.weapon) {
 					setState('attack')
 				}
 				if (e.playerControls.get('secondary').justReleased && canDash) {

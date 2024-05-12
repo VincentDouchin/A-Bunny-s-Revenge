@@ -98,7 +98,10 @@ export const RecipesUi = ({ player }: FarmUiProps) => {
 																return (
 																	<div style={{ color: 'white' }}>
 																		<div use:menuItem={[menu, false, selected]} style={{ 'display': 'grid', 'align-items': 'center' }}>
-																			<ItemDisplay selected={selected} item={recipeQueued()[i]?.output} />
+																			<ItemDisplay
+																				selected={selected}
+																				item={recipeQueued()[i]?.output}
+																			/>
 																		</div>
 																	</div>
 																)
@@ -114,10 +117,24 @@ export const RecipesUi = ({ player }: FarmUiProps) => {
 																		setSelectedRecipe(recipe)
 																	}
 																})
+																const canCraft = createMemo(() => {
+																	if (recipe.input.some((item) => {
+																		return !player.inventory.find((playerItem) => {
+																			return playerItem?.name === item.name && playerItem.quantity >= item.quantity
+																		})
+																	})) {
+																		return { completed: false }
+																	}
+																	return {}
+																})
 																return (
 																	<div style={{ color: 'white' }}>
 																		<div use:menuItem={[menu, i() === 0, selected]} style={{ 'display': 'grid', 'align-items': 'center' }}>
-																			<ItemDisplay selected={selected} item={recipe.output} />
+																			<ItemDisplay
+																				selected={selected}
+																				item={recipe.output}
+																				{...canCraft()}
+																			/>
 																		</div>
 																	</div>
 																)

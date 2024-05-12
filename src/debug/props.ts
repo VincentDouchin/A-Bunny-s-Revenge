@@ -2,7 +2,7 @@ import type { fruit_trees, gardenPlots, models, vegetation } from '@assets/asset
 import { ActiveCollisionTypes, ColliderDesc, RigidBodyDesc } from '@dimforge/rapier3d-compat'
 import type { With } from 'miniplex'
 import type { BufferGeometry, Object3D, Object3DEventMap } from 'three'
-import { Color, DoubleSide, Group, Mesh, MeshPhongMaterial, PointLight, Quaternion, Vector3 } from 'three'
+import { Color, DoubleSide, Euler, Group, Mesh, MeshPhongMaterial, PointLight, Quaternion, Vector3 } from 'three'
 
 import FastNoiseLite from 'fastnoise-lite'
 import { CSS2DObject } from 'three/examples/jsm/renderers/CSS2DRenderer'
@@ -29,6 +29,7 @@ import { lockPlayer, unlockPlayer } from '@/utils/dialogHelpers'
 import { getRandom, range } from '@/utils/mapFunctions'
 import { sleep } from '@/utils/sleep'
 import { dialogBundle } from '@/states/game/dialog'
+import { inMap } from '@/lib/hierarchy'
 
 export const customModels = {
 	door: doorSide,
@@ -435,18 +436,25 @@ export const props: PlacableProp<propNames>[] = [
 								itemLabel: item,
 							})
 						}
-						const owl = assets.characters.owl.scene.clone()
-						owl.scale.multiplyScalar(5)
-						ecs.add({
-							parent,
-							model: owl,
+						const owlModel = clone(assets.characters.OWL_animated.scene)
+						owlModel.scale.multiplyScalar(6)
+						const rot = new Euler().setFromQuaternion(entity.rotation)
+						rot.y += Math.PI
+						const targetRotation = new Quaternion().setFromEuler(rot)
+						const owl = ecs.add({
+							...inMap(),
+							model: owlModel,
 							...dialogBundle('Seller'),
-							rotation: new Quaternion().setFromAxisAngle(new Vector3(0, 1, 0), -0.6),
-							position: new Vector3(-18, 0, -5),
+							kayAnimator: new Animator(owlModel, assets.characters.OWL_animated.animations),
+							rotation: new Quaternion(),
+							targetRotation,
+							position: new Vector3(-18, 0, -5).applyQuaternion(entity.rotation).add(entity.position),
 							bodyDesc: RigidBodyDesc.fixed(),
 							colliderDesc: ColliderDesc.cylinder(5, 3),
 							npcName: 'Owl',
+							npc: true,
 						})
+						owl.kayAnimator.playAnimation('Idle')
 					},
 				}
 			} else {
