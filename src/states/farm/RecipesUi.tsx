@@ -150,7 +150,7 @@ export const RecipesUi = ({ player }: FarmUiProps) => {
 									<Show when={selectedRecipe()}>
 										{(recipe) => {
 											const output = createMemo(() => itemsData[recipe().output.name])
-											const buffs = createMemo(() => output().meal)
+											const buffs = createMemo(() => output().meal?.modifiers)
 											const cook = () => {
 												if (recipe().input.every(input => player.inventory.some((item) => {
 													return item?.name === input.name && item.quantity >= input.quantity

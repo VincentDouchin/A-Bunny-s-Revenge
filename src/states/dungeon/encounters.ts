@@ -1,7 +1,6 @@
 import { ColliderDesc, RigidBodyDesc, RigidBodyType } from '@dimforge/rapier3d-compat'
 import { Quaternion, Vector3 } from 'three'
 import { clone } from 'three/examples/jsm/utils/SkeletonUtils'
-import { dialogBundle } from '../game/dialog'
 import { dialogs } from '@/constants/dialogs'
 import { Sizes } from '@/constants/sizes'
 import { Animator } from '@/global/animator'

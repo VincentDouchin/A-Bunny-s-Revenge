@@ -88,9 +88,9 @@ export const playerBundle = (health: number, addHealth: boolean, weapon: weapons
 		ecs.update(player, { weapon: weaponBundle(weapon) })
 	}
 
-	for (const modKey of save.modifiers) {
-		const mod = Object.values(itemsData).flatMap(i => i.meal).find(m => m?.key === modKey)
-		if (mod) {
+	for (const item of save.modifiers) {
+		const mods = itemsData[item]?.meal?.modifiers ?? []
+		for (const mod of mods) {
 			addModifier(mod, player, addHealth)
 		}
 	}

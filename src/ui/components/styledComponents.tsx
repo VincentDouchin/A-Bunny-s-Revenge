@@ -1,7 +1,11 @@
 import type { JSX } from 'solid-js'
 import { css } from 'solid-styled'
 
-export const OutlineText = (props: { children: JSX.Element, size?: string }) => {
+interface OutlineTextProps {
+	children: JSX.Element
+	size?: string
+}
+export const OutlineText = (props: OutlineTextProps) => {
 	css/* css */`
 	.outline-text {
 		line-height: 1.2;
@@ -20,5 +24,5 @@ export const OutlineText = (props: { children: JSX.Element, size?: string }) => 
 			var(--size-minus) 0 black;
 	}
 	`
-	return <div class="outline-text">{props.children}</div>
+	return <div class="outline-text" use:solid-styled>{props.children}</div>
 }

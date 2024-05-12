@@ -12,11 +12,13 @@
 	font-size: 2vh;
 	--brown-dark: #29201e;
 	--gold: #f3a833;
+	--gold-tarnished: #a26d3f;
 	--black-transparent: linear-gradient(
 		to bottom,
 		hsla(0, 0%, 0%, 0.4),
 		hsla(0, 0%, 0%, 0.2)
 	);
+	--meal-color: #f3a833;
 }
 html,
 body,
@@ -166,13 +168,16 @@ button.styled {
 	place-items: center;
 	background: #2c1e31;
 	padding: 0.2rem 0.5rem;
-	margin: 0.5rem auto;
+	margin: 1rem auto;
 	border: solid 0.2rem var(--gold);
 	border-radius: 0.5rem;
 	box-shadow: 0 0.5rem 0.2rem 0.2rem black;
 	transition: all 0.5s;
 }
-
+button.styled.disabled {
+	border: solid 0.2rem var(--gold-tarnished);
+}
+button.styled.disabled,
 button.styled:hover {
 	transform: translateY(0.5rem);
 	box-shadow: 0 0rem 0.2rem 0.2rem black;

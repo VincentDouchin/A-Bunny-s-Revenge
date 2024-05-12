@@ -1,14 +1,103 @@
 import type { With } from 'miniplex'
-import { Show, createMemo, onCleanup, onMount } from 'solid-js'
+import type { Accessor } from 'solid-js'
+import { For, Show, createMemo, onCleanup, onMount } from 'solid-js'
 import { css } from 'solid-styled'
 import { Transition } from 'solid-transition-group'
 import atom from 'solid-use/atom'
+import { itemsData } from '@/constants/items'
 import type { Entity } from '@/global/entity'
 import { assets, coroutines, ui } from '@/global/init'
 import { save } from '@/global/save'
 import { thumbnailRenderer } from '@/lib/thumbnailRenderer'
 import { OutlineText } from '@/ui/components/styledComponents'
+import { range } from '@/utils/mapFunctions'
 
+export const MealAmount = (props: { amount: Accessor<number>, size?: 'small' | 'big', extra?: Accessor<number> }) => {
+	const small = (props.size ?? 'big') === 'small'
+	css/* css */`
+	.meal-container{
+		display:flex;
+		gap: ${small ? '0.5rem' : '1rem'};
+	}
+	.meal{
+		width: ${small ? '2rem' : '4rem'};
+		height: ${small ? '1rem' : '2rem'};
+		background: var(--black-transparent);
+		border-radius: ${small ? '0.25rem' : '0.5rem'};
+		overflow:hidden;
+		position: relative;
+	}
+	.pill{
+		position:absolute;
+		height: 100%;
+		box-shadow: inset 0 -.5rem rgba(0,0,0,.3);
+	}
+	.eaten{
+		background: var(--meal-color);
+		z-index:1;
+	}
+	.filled{
+		width: 100%;
+	}
+	@keyframes alert{
+		0%{background:var(--meal-color);}
+		50%{background:red;}
+		100%{background:var(--meal-color);}
+	}
+	@keyframes ok{
+		0%{background:var(--meal-color);}
+		50%{background:transparent;}
+		100%{background:var(--meal-color);}
+	}
+	.alert{
+		animation-name: alert;
+	}
+	.ok{
+		animation-name: ok;
+	}
+	.pill.animated{
+		animation-duration: 1s;
+		animation-timing-function: ease-in-out;
+		animation-iteration-count:infinite;
+		z-index:0;
+	}
+	.half{
+		width: 50%;
+	}
+	`
+	const extraTotal = createMemo(() => props.amount() + (props.extra ? props.extra() : 0))
+	const pills = createMemo(() => Math.max(5, extraTotal()))
+	return (
+		<div class="meal-container">
+			<For each={range(0, pills(), i => i)}>
+				{(i) => {
+					return (
+						<div class="meal">
+							<div
+								class="pill eaten"
+								classList={{
+									filled: props.amount() > i,
+									half: props.amount() === (i + 0.5),
+								}}
+							/>
+							<div
+								class="pill animated"
+								classList={{
+									alert: extraTotal() > 5,
+									ok: extraTotal() <= 5,
+									filled: extraTotal() > i,
+									half: extraTotal() === (i + 0.5),
+								}}
+							/>
+						</div>
+					)
+				}}
+			</For>
+		</div>
+	)
+}
+export const extra = atom(0)
+export const getAmountEaten = () => save.modifiers.reduce((acc, v) => acc + (itemsData[v]?.meal?.amount ?? 0), 0)
 const acornRenderer = thumbnailRenderer(64)
 export const HealthUi = (props: { player: With<Entity, 'maxHealth' | 'currentHealth'> }) => {
 	const health = ui.sync(() => `${props.player.currentHealth / props.player.maxHealth.value * 100}%`)
@@ -109,7 +198,6 @@ export const HealthUi = (props: { player: With<Entity, 'maxHealth' | 'currentHea
 		z-index:1;
 		color:white;
 	}
-
 	.water-overlay{
 		background: #36c5f4;
 		position: absolute;
@@ -122,6 +210,7 @@ export const HealthUi = (props: { player: With<Entity, 'maxHealth' | 'currentHea
 	`
 	const visible = atom(false)
 	onMount(() => setTimeout(() => visible(true), 100))
+	const amount = ui.sync(getAmountEaten)
 	return (
 		<Transition name="traverse-down">
 			<Show when={visible()}>
@@ -130,11 +219,10 @@ export const HealthUi = (props: { player: With<Entity, 'maxHealth' | 'currentHea
 						<div class="health-amount front"></div>
 						<div class="health-amount back"></div>
 						<div class="health-text">
-							<OutlineText>
-								{healthDisplay()}
-							</OutlineText>
+							<OutlineText>{healthDisplay()}</OutlineText>
 						</div>
 					</div>
+					<MealAmount amount={amount} extra={extra} />
 					<div class="acorn">
 						{element}
 						<OutlineText>{acorns()}</OutlineText>

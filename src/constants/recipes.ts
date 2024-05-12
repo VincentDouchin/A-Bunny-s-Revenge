@@ -2,9 +2,9 @@ import type { Item } from './items'
 import { MenuType } from '@/global/entity'
 
 export interface Recipe {
-	input: Item[]
-	output: Item
-	processor: MenuType
+	input: ReadonlyArray<Readonly<Item>>
+	readonly output: Item
+	readonly processor: MenuType
 }
 
 export const recipes = [
@@ -116,4 +116,4 @@ export const recipes = [
 		output: { name: 'hummus', quantity: 1 },
 		processor: MenuType.Oven,
 	},
-] as const satisfies Array<Recipe>
+] as const satisfies ReadonlyArray<Recipe>

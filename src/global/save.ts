@@ -1,6 +1,7 @@
 import { get, set } from 'idb-keyval'
 import { Quaternion, Vector3 } from 'three'
 import type { With } from 'miniplex'
+import type { items } from '@assets/assets'
 import { context } from './context'
 import type { Crop, Entity } from './entity'
 import type { QuestName } from '@/constants/quests'
@@ -13,7 +14,7 @@ export interface SaveData {
 	quests: Partial<Record<QuestName, Array<boolean>>>
 	selectedSeed: null | crops
 	inventories: Record<string, Item[]>
-	modifiers: string[]
+	modifiers: items[]
 	settings: { volume: number, mute: boolean, fullscreen: boolean | null }
 	unlockedPaths: number
 	acorns: number

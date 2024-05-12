@@ -6,6 +6,7 @@ import type { Accessor, JSX, Setter } from 'solid-js'
 import { For, Show, createEffect, createMemo, createSignal, onCleanup, onMount } from 'solid-js'
 import { css } from 'solid-styled'
 import atom from 'solid-use/atom'
+import { MealAmount, extra, getAmountEaten } from '../dungeon/HealthUi'
 import { MealBuffs } from './RecipesUi'
 import { itemsData } from '@/constants/items'
 import type { Item, ItemData } from '@/constants/items'
@@ -335,6 +336,7 @@ const PlayerInventory = ({ player, setSelectedItem, menu }: {
 		</>
 	)
 }
+
 export const InventoryUi = ({ player }: FarmUiProps) => {
 	ui.updateSync(() => {
 		if (player?.menuInputs?.get('cancel').justReleased) {
@@ -352,7 +354,7 @@ export const InventoryUi = ({ player }: FarmUiProps) => {
 		if (item) {
 			removeItemFromPlayer({ name: item.name, quantity: 1 })
 			for (const mod of mods) {
-				updateSave(s => s.modifiers.push(mod.key))
+				updateSave(s => s.modifiers.push(item.name))
 				addModifier(mod, player, true)
 			}
 		}
@@ -363,18 +365,28 @@ export const InventoryUi = ({ player }: FarmUiProps) => {
 		grid-template-columns: 47rem 15rem;
 		gap: 1rem;
 	}
-		.modal{
-
+	.modal{
 		place-self: center;
 		padding: 2rem;
 		border-radius: 1rem;
 		display: grid;
 		gap: 2rem;
 		position: relative;
-
+	}
+	.item-name{
+		color: white;
+		text-align: center;
+		font-size: 1.5rem;
+	}
+	.eating-button-container{
+	 	color: white;
+		padding: 1rem;
+		font-size: 1.3rem;
+	}
+	.disabled{
+		color:grey;
 	}
 	`
-
 	return (
 
 		<Modal open={open()}>
@@ -405,27 +417,38 @@ export const InventoryUi = ({ player }: FarmUiProps) => {
 
 									return (
 										<>
-											<div style={{ 'color': 'white', 'text-align': 'center', 'font-size': '1.5rem' }}>
-												{data().name}
-											</div>
+											<OutlineText><div class="item-name">{data().name}</div></OutlineText>
+
 											<Show when={meal()}>
 												{(mods) => {
+													const disabled = createMemo(() => (getAmountEaten() + mods().amount) > 5)
 													ui.updateSync(() => {
-														if (player.playerControls.get('secondary').justPressed) {
-															consumeMeal(item(), mods())
+														if (
+															player.playerControls.get('secondary').justPressed
+															&& !disabled()
+														) {
+															consumeMeal(item(), mods().modifiers)
 														}
 													})
+													createEffect(() => extra(mods().amount))
+													onCleanup(() => extra(0))
+													const modifiers = createMemo(() => mods().modifiers)
+													const amount = createMemo(() => mods().amount)
 													return (
-														<div style={{ 'color': 'white', 'padding': '1rem', 'font-size': '1.3rem' }}>
-															<button
-																onClick={() => consumeMeal(item(), mods())}
-																class="styled"
-															>
-																<InputIcon input={player.playerControls.get('secondary')}></InputIcon>
-																Eat
-															</button>
-															<MealBuffs meals={mods} />
-														</div>
+														<>
+															<div class="eating-button-container">
+																<MealAmount size="small" amount={amount} />
+																<button
+																	onClick={() => consumeMeal(item(), mods().modifiers)}
+																	class="styled"
+																	classList={{ disabled: disabled() }}
+																>
+																	<InputIcon input={player.playerControls.get('secondary')}></InputIcon>
+																	Eat
+																</button>
+																<MealBuffs meals={modifiers} />
+															</div>
+														</>
 													) }}
 											</Show>
 										</>
