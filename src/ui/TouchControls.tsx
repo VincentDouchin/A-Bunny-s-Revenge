@@ -1,22 +1,25 @@
 import type { With } from 'miniplex'
-import { For, Show, createMemo, createSignal, onCleanup } from 'solid-js'
-import { Vector2 } from 'three'
-import { Transition } from 'solid-transition-group'
+import { For, Show, createMemo, onCleanup } from 'solid-js'
 import { css } from 'solid-styled'
+import { Transition } from 'solid-transition-group'
+import type { Vec2 } from 'three'
+import { Vector2 } from 'three'
 import { getInteractables } from './Interactions'
 import { StateUi } from './components/StateUi'
+import { atom } from '@/lib/uiManager'
 import { campState, pausedState } from '@/global/states'
 import { assets, ecs, ui } from '@/global/init'
 import { type Entity, MenuType } from '@/global/entity'
 
 export const TouchControls = ({ player }: { player: With<Entity, 'playerControls' | 'inventory'> }) => {
 	const playerInputs = () => player.playerControls.touchController
-	const [pixelOffset, setPixelOffset] = createSignal(new Vector2(0, 0))
+	const pixelOffset = atom(new Vector2(0, 0))
 	const centerPostion = createMemo(() => `translate(calc(-50% + ${pixelOffset().x}px),calc(-50% + ${pixelOffset().y}px) )`)
-	const [container, setContainer] = createSignal<null | HTMLDivElement>(null)
-	const [isJoystickPressed, setIsJoystickPressed] = createSignal(false)
+	const container = atom<null | HTMLDivElement>(null)
+	const isJoystickPressed = atom(false)
+	const initialPos = atom<null | Vec2>(null)
 	const moveCenter = (e: TouchEvent) => {
-		setIsJoystickPressed(true)
+		isJoystickPressed(true)
 		const cont = container()
 		if (cont) {
 			const containerBoundingBox = cont.getBoundingClientRect()
@@ -31,7 +34,7 @@ export const TouchControls = ({ player }: { player: With<Entity, 'playerControls
 				if (newPos.length() >= max) {
 					newPos.clampLength(max, max)
 				}
-				setPixelOffset(newPos)
+				pixelOffset(newPos)
 				const input = newPos.clone().normalize().multiplyScalar(newPos.length() / max)
 				const touchController = playerInputs()
 				if (touchController) {
@@ -45,8 +48,9 @@ export const TouchControls = ({ player }: { player: With<Entity, 'playerControls
 	}
 
 	const resetCenter = () => {
-		setIsJoystickPressed(false)
-		setPixelOffset(new Vector2(0, 0))
+		isJoystickPressed(false)
+		initialPos(null)
+		pixelOffset(new Vector2(0, 0))
 		playerInputs()?.set('backward', 0)
 		playerInputs()?.set('forward', 0)
 		playerInputs()?.set('right', 0)
@@ -69,6 +73,27 @@ export const TouchControls = ({ player }: { player: With<Entity, 'playerControls
 		playerInputs()?.set(input, value)
 	}
 	const isPressed = (input: 'primary' | 'secondary') => playerInputs()?.get(input)
+	const setInitialPos = (e: TouchEvent) => {
+		const joystick = container()
+		if (joystick) {
+			const size = joystick.getBoundingClientRect()
+			initialPos({
+				x: e.changedTouches[0].clientX - size.width / 2,
+				y: e.changedTouches[0].clientY - size.height / 2,
+			})
+		}
+	}
+	const defaultPos = createMemo(() => {
+		const pos = initialPos()
+		if (pos) {
+			return {
+				top: `${pos.y}px`,
+				left: `${pos.x}px`,
+			} as const
+		} else {
+			return { bottom: '9rem', left: '9rem', position: 'fixed' } as const
+		}
+	})
 	css/* css */`
 	.top-buttons-container{
 		position: fixed;
@@ -77,6 +102,7 @@ export const TouchControls = ({ player }: { player: With<Entity, 'playerControls
 		gap: 1rem;
 		top: 0;
 		right: 0;
+
 	}
 	.top-button{
 		width: 4rem;
@@ -91,10 +117,11 @@ export const TouchControls = ({ player }: { player: With<Entity, 'playerControls
 	}
 	.joystick-container{
 		position: fixed;
-		margin: 9rem;
 		left: 0;
 		bottom: 0;
-		right: 0;
+		top:0;
+		right: 50%;
+		z-index: 2;
 	}
 	.joystick{
 		position: relative;
@@ -148,15 +175,25 @@ export const TouchControls = ({ player }: { player: With<Entity, 'playerControls
 					<div class="icon-container top-button" innerHTML={assets.icons['basket-shopping-solid']} onTouchStart={openInventory}></div>
 				</StateUi>
 			</div>
-			<div class="joystick-container">
+			<div
+				class="joystick-container"
+				onTouchStart={setInitialPos}
+				onTouchMove={moveCenter}
+				onTouchEnd={resetCenter}
+			>
 				<div
 					class="joystick"
-					ref={el => setContainer(el)}
-					onTouchMove={moveCenter}
-					onTouchEnd={resetCenter}
-					style={{ border: `solid ${isJoystickPressed() ? '0.3rem' : '0.1rem'} hsl(0, 0%,100%)` }}
+					ref={container}
+					style={{
+						border: `solid ${isJoystickPressed() ? '0.3rem' : '0.1rem'} hsl(0, 0%,100%)`,
+						...defaultPos(),
+					}}
 				>
-					<div class="joystick-center" style={{ transform: centerPostion() }}></div>
+					<div
+						class="joystick-center"
+						style={{ transform: centerPostion() }}
+					>
+					</div>
 				</div>
 			</div>
 			<div class="inputs-container">

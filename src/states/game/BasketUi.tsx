@@ -12,6 +12,7 @@ import { campState } from '@/global/states'
 import { Menu } from '@/ui/components/Menu'
 import { Modal } from '@/ui/components/Modal'
 import { StateUi } from '@/ui/components/StateUi'
+import { GoldContainer } from '@/ui/components/styledComponents'
 
 const playerToHeal = ecs.with('player', 'currentHealth', 'maxHealth')
 
@@ -67,7 +68,7 @@ export const BasketUi = ({ player }: { player: With<Entity, 'menuInputs' | 'inve
 						}
 					}
 					return (
-						<>
+						<GoldContainer>
 							<InventoryTitle>Basket</InventoryTitle>
 							<Menu inputs={player.menuInputs}>
 								{({ menu }) => {
@@ -94,7 +95,7 @@ export const BasketUi = ({ player }: { player: With<Entity, 'menuInputs' | 'inve
 									)
 								}}
 							</Menu>
-						</>
+						</GoldContainer>
 					)
 				}}
 			</Show>

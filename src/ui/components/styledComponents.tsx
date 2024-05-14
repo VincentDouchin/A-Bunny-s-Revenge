@@ -1,4 +1,4 @@
-import type { JSX } from 'solid-js'
+import type { JSX, JSXElement } from 'solid-js'
 import { css } from 'solid-styled'
 
 interface OutlineTextProps {
@@ -25,4 +25,17 @@ export const OutlineText = (props: OutlineTextProps) => {
 	}
 	`
 	return <div class="outline-text" use:solid-styled>{props.children}</div>
+}
+
+export const GoldContainer = (props: { children: JSXElement | JSXElement [] }) => {
+	css/* css */`
+	.styled-container {
+		box-shadow: inset 0px 0px 1rem 0px black;
+		border: solid 0.3rem var(--gold);
+		padding: 2rem;
+		border-radius: 1rem;
+		background: var(--brown-dark);
+	}
+	`
+	return <div class="styled-container">{props.children}</div>
 }

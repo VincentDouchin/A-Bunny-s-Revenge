@@ -1,6 +1,6 @@
 import type { With } from 'miniplex'
 import type { Accessor } from 'solid-js'
-import { For, Show, createMemo, onCleanup, onMount } from 'solid-js'
+import { For, Show, createEffect, createMemo, onCleanup, onMount } from 'solid-js'
 import { css } from 'solid-styled'
 import { Transition } from 'solid-transition-group'
 import atom from 'solid-use/atom'
@@ -14,6 +14,16 @@ import { range } from '@/utils/mapFunctions'
 
 export const MealAmount = (props: { amount: Accessor<number>, size?: 'small' | 'big', extra?: Accessor<number> }) => {
 	const small = (props.size ?? 'big') === 'small'
+	const reset = atom(true)
+	// ! sync animation
+	createEffect((prev) => {
+		const extra = props.extra ? props.extra() : 0
+		if (prev !== extra) {
+			reset(false)
+			setTimeout(() => reset(true), 10)
+		}
+		return extra
+	}, (props.extra ? props.extra() : 0))
 	css/* css */`
 	.meal-container{
 		display:flex;
@@ -40,14 +50,12 @@ export const MealAmount = (props: { amount: Accessor<number>, size?: 'small' | '
 		width: 100%;
 	}
 	@keyframes alert{
-		0%{background:var(--meal-color);}
-		50%{background:red;}
-		100%{background:var(--meal-color);}
+		0%{background:red;}
+		100%{background:transparent;}
 	}
 	@keyframes ok{
 		0%{background:var(--meal-color);}
-		50%{background:transparent;}
-		100%{background:var(--meal-color);}
+		100%{background:transparent;}
 	}
 	.alert{
 		animation-name: alert;
@@ -56,10 +64,10 @@ export const MealAmount = (props: { amount: Accessor<number>, size?: 'small' | '
 		animation-name: ok;
 	}
 	.pill.animated{
-		animation-duration: 1s;
-		animation-timing-function: ease-in-out;
-		animation-iteration-count:infinite;
-		z-index:0;
+		animation-duration: 0.5s;
+		animation-iteration-count: infinite;
+		animation-direction: alternate;
+		z-index: 0;
 	}
 	.half{
 		width: 50%;
@@ -83,8 +91,8 @@ export const MealAmount = (props: { amount: Accessor<number>, size?: 'small' | '
 							<div
 								class="pill animated"
 								classList={{
-									alert: extraTotal() > 5,
-									ok: extraTotal() <= 5,
+									alert: reset() && extraTotal() > 5,
+									ok: reset() && extraTotal() <= 5,
 									filled: extraTotal() > i,
 									half: extraTotal() === (i + 0.5),
 								}}

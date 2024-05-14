@@ -51,14 +51,9 @@ const CloseButton = () => {
 export function Modal<T>(props: { children: JSX.Element, open: T, showClose?: boolean, finished?: Atom<boolean> }) {
 	css/* css */`
 	.modal{
-		
 		place-self: center;
-		padding: 2rem;
-		border-radius: 1rem;
-		display: grid;
-		gap: 2rem;
-		position: relative;
-		
+		position:relative;
+
 	}
 	`
 	const styleCache = atom<Node[]>([])
@@ -84,7 +79,7 @@ export function Modal<T>(props: { children: JSX.Element, open: T, showClose?: bo
 	return (
 		<Transition name="slide" onEnter={beforeEnter} onAfterExit={afterExit}>
 			<Show when={props.open}>
-				<div class="modal styled-container">
+				<div class="modal">
 					{(props.showClose ?? true) && <CloseButton />}
 					{props.children}
 				</div>

@@ -21,7 +21,7 @@ import { InputIcon } from '@/ui/InputIcon'
 import type { MenuDir } from '@/ui/components/Menu'
 import { Menu, menuItem } from '@/ui/components/Menu'
 import { Modal } from '@/ui/components/Modal'
-import { OutlineText } from '@/ui/components/styledComponents'
+import { GoldContainer, OutlineText } from '@/ui/components/styledComponents'
 import type { FarmUiProps } from '@/ui/types'
 import { removeItemFromPlayer } from '@/utils/dialogHelpers'
 import { range } from '@/utils/mapFunctions'
@@ -350,15 +350,7 @@ export const InventoryUi = ({ player }: FarmUiProps) => {
 		return name ? itemsData[name] : null
 	})
 	const meal = createMemo(() => item()?.meal)
-	const consumeMeal = (item: Item, mods: Modifier<'maxHealth' | 'strength'>[]) => {
-		if (item) {
-			removeItemFromPlayer({ name: item.name, quantity: 1 })
-			for (const mod of mods) {
-				updateSave(s => s.modifiers.push(item.name))
-				addModifier(mod, player, true)
-			}
-		}
-	}
+
 	css/* css */`
 	.inventory-container{
 		display: grid;
@@ -391,9 +383,9 @@ export const InventoryUi = ({ player }: FarmUiProps) => {
 
 		<Modal open={open()}>
 			<Show when={open()}>
-				<div>
-
+				<GoldContainer>
 					<InventoryTitle>Inventory</InventoryTitle>
+
 					<div class="inventory-container">
 						<div>
 							<Menu
@@ -421,11 +413,19 @@ export const InventoryUi = ({ player }: FarmUiProps) => {
 
 											<Show when={meal()}>
 												{(mods) => {
-													const disabled = createMemo(() => (getAmountEaten() + mods().amount) > 5)
+													const disabled = ui.sync(() => (getAmountEaten() + mods().amount) > 5)
+													const consumeMeal = (item: Item, mods: Modifier<'maxHealth' | 'strength'>[]) => {
+														if (item && !disabled()) {
+															removeItemFromPlayer({ name: item.name, quantity: 1 })
+															for (const mod of mods) {
+																updateSave(s => s.modifiers.push(item.name))
+																addModifier(mod, player, true)
+															}
+														}
+													}
 													ui.updateSync(() => {
 														if (
 															player.playerControls.get('secondary').justPressed
-															&& !disabled()
 														) {
 															consumeMeal(item(), mods().modifiers)
 														}
@@ -439,7 +439,7 @@ export const InventoryUi = ({ player }: FarmUiProps) => {
 															<div class="eating-button-container">
 																<MealAmount size="small" amount={amount} />
 																<button
-																	onClick={() => consumeMeal(item(), mods().modifiers)}
+																	onPointerDown={() => consumeMeal(item(), mods().modifiers)}
 																	class="styled"
 																	classList={{ disabled: disabled() }}
 																>
@@ -457,7 +457,7 @@ export const InventoryUi = ({ player }: FarmUiProps) => {
 							</Show>
 						</div>
 					</div>
-				</div>
+				</GoldContainer>
 			</Show>
 		</Modal>
 	)

@@ -66,11 +66,11 @@ const loadGLBAsToon = (
 							}
 						}
 						materials.set(node.material.uuid, newMaterial)
+						node.castShadow = options.shadow ?? false
+						node.receiveShadow = false
 					}
 					node.material = materials.get(node.material.uuid)
 				}
-				node.castShadow = false
-				node.receiveShadow = false
 			}
 		})
 		return glb

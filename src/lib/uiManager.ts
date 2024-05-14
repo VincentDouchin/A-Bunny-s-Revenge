@@ -53,3 +53,13 @@ export const mediaEvent = (event: string, listener: (e: MediaQueryListEvent) => 
 	mediaMatch.addEventListener('change', listener)
 	return () => mediaMatch.removeEventListener('change', listener)
 }
+export const atom = <T>(initialValue: T) => {
+	const [value, setValue] = createSignal<T>(initialValue)
+	return (...newValue: Parameters<typeof setValue> | unknown[]): T => {
+		if (newValue.length > 0) {
+			// @ts-expect-error hack
+			setValue(...newValue)
+		}
+		return value()
+	}
+}

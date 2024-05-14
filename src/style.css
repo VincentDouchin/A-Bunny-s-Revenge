@@ -24,15 +24,12 @@ html,
 body,
 * {
 	touch-action: none;
+	user-select: none;
 }
 * {
 	box-sizing: border-box;
 }
-.styled-container {
-	box-shadow: inset 0px 0px 1rem 0px black;
-	border: solid 0.3rem var(--gold);
-	background: var(--brown-dark);
-}
+
 .description {
 	box-shadow: 0 0 0.5rem 0 black;
 	background: var(--black-transparent);

@@ -15,6 +15,7 @@ import { Menu, menuItem } from '@/ui/components/Menu'
 import { Modal } from '@/ui/components/Modal'
 import type { FarmUiProps } from '@/ui/types'
 import { range } from '@/utils/mapFunctions'
+import { GoldContainer } from '@/ui/components/styledComponents'
 
 // eslint-disable-next-line no-unused-expressions
 menuItem
@@ -82,7 +83,7 @@ export const RecipesUi = ({ player }: FarmUiProps) => {
 					const [selectedRecipe, setSelectedRecipe] = createSignal<null | Recipe>(null)
 
 					return (
-						<div>
+						<GoldContainer>
 							<InventoryTitle>{getMenuName(entity().menuType)}</InventoryTitle>
 							<div class="recipes-container">
 
@@ -202,7 +203,7 @@ export const RecipesUi = ({ player }: FarmUiProps) => {
 
 								</div>
 							</div>
-						</div>
+						</GoldContainer>
 					)
 				}}
 			</Show>

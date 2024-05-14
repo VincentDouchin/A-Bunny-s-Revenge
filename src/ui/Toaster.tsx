@@ -37,6 +37,7 @@ export const Toaster = () => {
 		display: flex;
 		gap: 1rem;
 		flex-direction: column-reverse;
+		z-index:1
 	}
 	.toast-icon{
 		height: 2rem;
