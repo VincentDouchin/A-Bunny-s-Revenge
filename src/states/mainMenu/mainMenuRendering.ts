@@ -17,6 +17,7 @@ import { windowEvent } from '@/lib/uiManager'
 import { drawnHouseShader } from '@/shaders/drawnHouseShader'
 import { cloneCanvas, imgToCanvas } from '@/utils/buffer'
 import { doorQuery, leaveHouse, setSensor } from '@/utils/dialogHelpers'
+import { resetSave, updateSave } from '@/global/save'
 
 export type MenuOptions = 'Continue' | 'New Game' | 'Settings' | 'Credits'
 
@@ -281,6 +282,9 @@ export const clickOnMenuButton = () => {
 				if (intsersect.length) {
 					if (menuButton === 'Continue') {
 						continueGame()
+					}
+					if (menuButton === 'New Game') {
+						resetSave().then(() => continueGame())
 					}
 				}
 			}

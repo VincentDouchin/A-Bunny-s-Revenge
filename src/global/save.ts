@@ -51,6 +51,7 @@ export const updateSave = async (saveFn: (save: SaveData) => void, saved = true)
 	saved && await set(context.save, save)
 }
 export const resetSave = async (newSave?: SaveData) => {
+	Object.assign(save, blankSave())
 	await set(context.save, newSave ?? blankSave())
 }
 
