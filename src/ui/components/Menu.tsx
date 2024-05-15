@@ -1,5 +1,5 @@
 import type { Accessor, Component, JSX } from 'solid-js'
-import { createEffect, createRoot, createSignal, onCleanup, onMount } from 'solid-js'
+import { createEffect, createRoot, createSignal, onCleanup } from 'solid-js'
 
 import type { Atom } from 'solid-use/atom'
 import { generateUUID } from 'three/src/math/MathUtils'

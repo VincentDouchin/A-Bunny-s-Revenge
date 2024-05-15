@@ -6,7 +6,7 @@ import type { Level } from '@/debug/LevelEditor'
 import { levelsData } from '@/global/init'
 import type { direction } from '@/lib/directions'
 import { otherDirection } from '@/lib/directions'
-import { getRandom, mapValues, range } from '@/utils/mapFunctions'
+import { getRandom, mapValues } from '@/utils/mapFunctions'
 
 // ! ROOMS
 type Connections = Partial<Record<direction, number | null>>
