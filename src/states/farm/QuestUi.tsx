@@ -1,7 +1,7 @@
 import { For, Show, createEffect, createSignal, onMount } from 'solid-js'
 import { css } from 'solid-styled'
 import atom from 'solid-use/atom'
-import { IconDisplay, InventoryTitle, ItemDisplay } from './InventoryUi'
+import { IconDisplay, ItemDisplay } from './InventoryUi'
 import { quests } from '@/constants/quests'
 import type { Quest, QuestName } from '@/constants/quests'
 
@@ -13,7 +13,7 @@ import { Menu, menuItem } from '@/ui/components/Menu'
 import { Modal } from '@/ui/components/Modal'
 import type { FarmUiProps } from '@/ui/types'
 import { entries } from '@/utils/mapFunctions'
-import { GoldContainer } from '@/ui/components/styledComponents'
+import { GoldContainer, InventoryTitle } from '@/ui/components/styledComponents'
 // eslint-disable-next-line no-unused-expressions
 menuItem
 const openBulletinBoardQuery = ecs.with('menuType').where(e => e.menuType === MenuType.Quest)

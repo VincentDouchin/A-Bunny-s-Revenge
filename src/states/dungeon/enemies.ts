@@ -37,7 +37,6 @@ export const enemyBundle = (name: enemy, level: number) => {
 		movementForce: new Vector3(),
 		speed: new Stat(50 * enemy.speed),
 		hitTimer: new Timer(500, false),
-		drops: enemy.drops,
 		sensorDesc: ColliderDesc.cuboid(3, 2, 2).setTranslation(0, 1, bundle.size.z / 2 + 2).setSensor(true).setMass(0).setActiveCollisionTypes(ActiveCollisionTypes.ALL),
 		healthBar: true,
 		attackStyle: enemy.attackStyle,

@@ -87,7 +87,7 @@ export const collideWithDoorClearing = () => {
 		for (const player of playerQuery) {
 			if (world.intersectionPair(door.collider, player.collider)) {
 				if (door.doorLevel !== undefined && player.weapon) {
-					const dungeon = genDungeon(5 + door.doorLevel * 5, true).find(room => room.type === RoomType.Entrance)!
+					const dungeon = genDungeon(7 + door.doorLevel * 5, true).find(room => room.type === RoomType.Entrance)!
 					dungeonState.enable({ dungeon, direction: 'south', firstEntry: true, playerHealth: 10, dungeonLevel: door.doorLevel, weapon: player.weapon.weaponName })
 				}
 				if (door.doorLevel === undefined) {

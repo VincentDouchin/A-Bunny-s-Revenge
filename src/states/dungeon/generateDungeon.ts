@@ -1,11 +1,12 @@
 import { encounters } from './encounters'
 import type { enemy } from '@/constants/enemies'
 import { enemyGroups } from '@/constants/enemies'
+import { type Item, getSellableItems } from '@/constants/items'
 import type { Level } from '@/debug/LevelEditor'
 import { levelsData } from '@/global/init'
 import type { direction } from '@/lib/directions'
 import { otherDirection } from '@/lib/directions'
-import { getRandom, mapValues } from '@/utils/mapFunctions'
+import { getRandom, mapValues, range } from '@/utils/mapFunctions'
 
 // ! ROOMS
 type Connections = Partial<Record<direction, number | null>>
@@ -24,6 +25,7 @@ export interface Room {
 	doors: Partial<Record<direction, Room | null>>
 	type: RoomType
 	encounter: keyof typeof encounters | null
+	items?: (Item | null)[]
 }
 interface Position {
 	x: number
@@ -190,7 +192,6 @@ const getEnemies = (type: RoomType): enemy[] => {
 	switch (type) {
 		case RoomType.Battle:
 		case RoomType.Entrance: return getRandom(enemyGroups.filter(group => !group.boss)).enemies
-		case RoomType.Item: return []
 		case RoomType.Boss: {
 			const possibleGroups = enemyGroups.filter(group => group.boss !== undefined)
 			const group = getRandom(possibleGroups)
@@ -218,17 +219,20 @@ export const assignPlanAndEnemies = (rooms: BlankRoom[]): Room[] => {
 		if (room.type === RoomType.NPC) {
 			encounter = getRandom(Object.keys(encounters) as (keyof typeof encounters)[])
 		}
+		const enemies = [...getEnemies(room.type)]
+		const newRoom: Room = { ...room, plan, enemies, doors, encounter }
 		if (
 			!hasSeller
 			&& Object.values(levelsData.levelData).filter(x => x && x.map === plan.id).some(x => x && x.model === 'stall')
 			&& [RoomType.NPC, RoomType.Battle].includes(room.type)
 		) {
-			room.type = RoomType.Seller
-
+			newRoom.enemies = []
+			newRoom.type = RoomType.Seller
+			newRoom.items = getSellableItems(3)
 			hasSeller = true
 		}
-		const enemies = [...getEnemies(room.type)]
-		return { ...room, plan, enemies, doors, encounter }
+
+		return newRoom
 	})
 	for (let i = 0; i < filledRooms.length; i++) {
 		filledRooms[i].doors = mapValues(

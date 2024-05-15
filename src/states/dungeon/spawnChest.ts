@@ -1,14 +1,10 @@
 import { ColliderDesc, RigidBodyDesc } from '@dimforge/rapier3d-compat'
 import { Easing, Tween } from '@tweenjs/tween.js'
-import { between } from 'randomish'
 import { Vector3 } from 'three'
 import { clone } from 'three/examples/jsm/utils/SkeletonUtils'
-import { itemBundle } from '../game/items'
 import { enableBasketUi } from '../game/spawnBasket'
 import { RoomType } from './generateDungeon'
-import type { Drop } from '@/constants/enemies'
-import { lootPool } from '@/constants/enemies'
-import { itemsData } from '@/constants/items'
+import { chestLootPool, dropBundle } from './lootPool'
 import { Animator } from '@/global/animator'
 import { Faction } from '@/global/entity'
 import { assets, ecs, gameTweens } from '@/global/init'
@@ -17,21 +13,13 @@ import type { DungeonRessources } from '@/global/states'
 import { inMap } from '@/lib/hierarchy'
 import type { System } from '@/lib/state'
 import { chestAppearing } from '@/particles/chestAppearing'
-import { entries, getRandom, range } from '@/utils/mapFunctions'
 import { sleep } from '@/utils/sleep'
 
 export const lootPlayerQuery = ecs.with('player', 'lootQuantity', 'lootChance')
 
-export const spawnChest = (dungeonLevel: number) => {
+export const spawnChest = (dungeonLevel: number, boss: boolean) => {
 	for (const player of lootPlayerQuery) {
-		const possibleDrops: Drop[] = []
-		for (const [name, data] of entries(itemsData)) {
-			if (data.drop && data.drop.level <= dungeonLevel) {
-				possibleDrops.push({ name, rarity: data.drop.rarity, quantity: 1 })
-			}
-		}
-		const drops = range(0, between(3, 5), () => getRandom(possibleDrops))
-		const items = lootPool(player.lootQuantity.value, player.lootChance.value, drops)
+		const items = chestLootPool(dungeonLevel, boss, player)
 		if (items.length === 0) return
 		const chest = clone(assets.models.Chest.scene)
 		chest.scale.setScalar(0)
@@ -52,11 +40,11 @@ export const spawnChest = (dungeonLevel: number) => {
 
 			await sleep(200)
 			for (let i = 0; i < items.length; i++) {
-				const seed = items[i]
+				const item = items[i]
 				await sleep(100)
 				const angle = Math.PI / 2 + ((0.5 * Math.random()) * (Math.random() < 0.5 ? 1 : -1))
 				ecs.add({
-					...itemBundle(seed.name),
+					...dropBundle(item),
 					position: new Vector3(0, 5, 0),
 					popDirection: new Vector3(Math.cos(angle), 1, -Math.sin(angle)).multiplyScalar(2),
 				})
@@ -70,7 +58,7 @@ const enemiesQuery = ecs.with('faction').where(({ faction }) => faction === Fact
 const chestQuery = ecs.with('chestAnimator')
 export const endBattleSpawnChest: System<DungeonRessources> = (ressources) => {
 	if (enemiesQuery.size === 0 && chestQuery.size === 0 && [RoomType.Battle, RoomType.Boss].includes(ressources.dungeon.type)) {
-		spawnChest(ressources.dungeonLevel)
+		spawnChest(ressources.dungeonLevel, ressources.dungeon.type === RoomType.Boss)
 		enableBasketUi()
 	}
 }

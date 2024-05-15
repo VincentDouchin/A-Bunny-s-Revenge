@@ -6,9 +6,10 @@ import type { Vec2 } from 'three'
 import { Vector2 } from 'three'
 import { getInteractables } from './Interactions'
 import { StateUi } from './components/StateUi'
+import { Icon } from './components/styledComponents'
 import { atom } from '@/lib/uiManager'
 import { campState, pausedState } from '@/global/states'
-import { assets, ecs, ui } from '@/global/init'
+import { ecs, ui } from '@/global/init'
 import { type Entity, MenuType } from '@/global/entity'
 
 export const TouchControls = ({ player }: { player: With<Entity, 'playerControls' | 'inventory'> }) => {
@@ -95,15 +96,6 @@ export const TouchControls = ({ player }: { player: With<Entity, 'playerControls
 		}
 	})
 	css/* css */`
-	.top-buttons-container{
-		position: fixed;
-		margin: 1rem;
-		display: flex;
-		gap: 1rem;
-		top: 0;
-		right: 0;
-
-	}
 	.top-button{
 		width: 4rem;
 		height: 4rem;
@@ -166,15 +158,35 @@ export const TouchControls = ({ player }: { player: With<Entity, 'playerControls
 		padding-top: 0.5rem;
 		white-space: nowrap;
 		font-size: 3rem;
+	}
+	.pause-button {
+		position: fixed;
+		top: 1rem;
+		left: 50%;
+		transform: translateX(-50%);
+		color: white;
+		display: flex;
+		align-items:center;
+		gap:1rem;
+		font-size: 2rem
+	}
+	.inventory-button{
+		opacity: 20%;
+		color:white;
+		display: grid;
+		place-items:center;
+		position: fixed;
+		bottom: 15rem;
+		right: 14.5rem;
+		border: solid 0.1rem hsl(0, 0%,100%);
 	}`
 	return (
 		<div>
-			<div class="top-buttons-container">
-				<div class="icon-container top-button" innerHTML={assets.icons['pause-solid']} onTouchStart={() => pausedState.enable()}></div>
-				<StateUi state={campState}>
-					<div class="icon-container top-button" innerHTML={assets.icons['basket-shopping-solid']} onTouchStart={openInventory}></div>
-				</StateUi>
-			</div>
+			<button class="pause-button button" onTouchStart={() => pausedState.enable()}>
+				<Icon icon="pause-solid" />
+				Pause
+			</button>
+
 			<div
 				class="joystick-container"
 				onTouchStart={setInitialPos}
@@ -196,6 +208,11 @@ export const TouchControls = ({ player }: { player: With<Entity, 'playerControls
 					</div>
 				</div>
 			</div>
+			<StateUi state={campState}>
+				<div onTouchStart={openInventory} class="inventory-button touch-input">
+					<Icon icon="basket-shopping-solid" />
+				</div>
+			</StateUi>
 			<div class="inputs-container">
 				<For each={['primary', 'secondary'] as const}>
 					{(input, index) => {

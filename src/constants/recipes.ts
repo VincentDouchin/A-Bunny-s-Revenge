@@ -6,7 +6,6 @@ export interface Recipe {
 	readonly output: Item
 	readonly processor: MenuType
 }
-
 export const recipes = [
 	{
 		input: [{ name: 'carrot', quantity: 3 }],
@@ -44,7 +43,10 @@ export const recipes = [
 		processor: MenuType.Oven,
 	},
 	{
-		input: [{ name: 'slime_dough', quantity: 1 }, { name: 'ham', quantity: 2 }],
+		input: [
+			{ name: 'slime_dough', quantity: 1 },
+			{ name: 'ham', quantity: 1 },
+		],
 		output: { name: 'slime_dumpling', quantity: 1 },
 		processor: MenuType.Oven,
 	},
@@ -96,6 +98,9 @@ export const recipes = [
 	{
 		input: [
 			{ name: 'pumpkin', quantity: 1 },
+			{ name: 'parsley', quantity: 1 },
+			{ name: 'lettuce', quantity: 1 },
+			{ name: 'ham', quantity: 1 },
 		],
 		output: { name: 'pumpkin_bowl', quantity: 1 },
 		processor: MenuType.Oven,
@@ -114,6 +119,8 @@ export const recipes = [
 			{ name: 'carrot', quantity: 2 },
 		],
 		output: { name: 'hummus', quantity: 1 },
-		processor: MenuType.Oven,
+		processor: MenuType.Cauldron,
 	},
 ] as const satisfies ReadonlyArray<Recipe>
+
+export type RecipesOutputs = (typeof recipes)[number]['output']['name']

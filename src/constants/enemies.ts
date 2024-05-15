@@ -1,27 +1,13 @@
-import type { characters } from '@assets/assets'
+import type { characters, items } from '@assets/assets'
 import type { Item } from './items'
 import { Rarity } from './items'
 
 import type { EnemyAnimations, Entity, States } from '@/global/entity'
 import { EnemyAttackStyle } from '@/global/entity'
-import { getRandom, range } from '@/utils/mapFunctions'
 
-export const lootPool = (lootQuantity: number, lootRarity: number, drops: Drop[]) => {
-	const pool = drops.flatMap(drop => range(0, drop.quantity, () => ({ name: drop.name, rarity: drop.rarity })))
-	const extraLoot = Math.floor(lootQuantity) + Math.random() < lootQuantity % 1 ? 1 : 0
-	pool.push(...range(0, extraLoot).map(() => getRandom(drops)))
-	const loot: Item[] = []
-	for (const possibleLoot of pool) {
-		const roll = Math.random() * 100
-		const chance = possibleLoot.rarity + (lootRarity * 100)
-		if (roll < chance) {
-			loot.push({ name: possibleLoot.name, quantity: 1 })
-		}
-	}
-	return loot
-}
 export interface Drop extends Item {
 	rarity: Rarity
+	recipe?: items
 }
 export interface Enemy<Name extends keyof Animations> {
 	name: string
@@ -89,7 +75,7 @@ export const enemyData: { [k in enemy]: Enemy<k> } = {
 		scale: 2,
 		speed: 1,
 		boss: false,
-		drops: [{ name: 'parsley', quantity: 2, rarity: Rarity.Common }],
+		drops: [{ name: 'parsley', quantity: 1, rarity: Rarity.Common }],
 		behavior: 'enemy',
 		attackStyle: EnemyAttackStyle.Melee,
 		animationMap: genericEnemyAnimationMap,
@@ -136,7 +122,7 @@ export const enemyData: { [k in enemy]: Enemy<k> } = {
 		scale: 2,
 		speed: 1,
 		boss: false,
-		drops: [{ name: 'slime_dough', quantity: 1, rarity: Rarity.Common }],
+		drops: [{ name: 'slime_dough', quantity: 2, rarity: Rarity.Common }],
 		behavior: 'enemy',
 		attackStyle: EnemyAttackStyle.Jumping,
 		animationMap: genericEnemyAnimationMap,
@@ -182,23 +168,17 @@ export interface EnemyGroup {
 }
 export const enemyGroups: EnemyGroup[] = [
 	{
-		enemies: ['Armabee', 'Armabee', 'Armabee', 'Armabee', 'Armabee'],
+		enemies: ['Armabee', 'Armabee', 'Armabee', 'Big_Boar_A', 'Big_Boar_A'],
 	},
 	{
 		enemies: [],
 		boss: 'Armabee_Evolved',
 	},
 	{
-		enemies: ['Shaga_A', 'Shaga_A', 'Snailo_A'],
-	},
-	{
 		enemies: ['Shaga_A', 'Shaga_A', 'Porin_A', 'Porin_A'],
 	},
 	{
-		enemies: ['Snailo_A', 'Racco_A', 'Racco_A'],
-	},
-	{
-		enemies: ['Platopo_A', 'Racco_A', 'Racco_A'],
+		enemies: ['Platopo_A', 'Racco_A', 'Racco_A', 'Snailo_A'],
 	},
 	{
 		enemies: ['Forest_Butterfly_A', 'Snailo_B', 'Forest_Butterfly_A', 'Forest_Butterfly_A'],

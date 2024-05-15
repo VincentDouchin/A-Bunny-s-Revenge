@@ -1,12 +1,11 @@
 import { PlayerUi } from '../states/farm/PlayerUi'
 import { PauseUi } from './PauseUI'
+import { TopRight } from './TopRight'
 import { StateUi } from './components/StateUi'
-import { Toaster } from './Toaster'
 import { DebugUi } from '@/debug/debugUi'
 import { dungeonState } from '@/global/states'
 import { EnemyHealthBarUi } from '@/states/dungeon/EnemyHealthBarUi'
 import { LoseUi } from '@/states/dungeon/LoseUi'
-import { MiniMapUi } from '@/states/dungeon/MinimapUi'
 import { FullscreenUi } from '@/states/game/FullscreenUi'
 import { OverlayUi } from '@/states/game/overlayUi'
 
@@ -19,9 +18,8 @@ export const UI = () => (
 		<PlayerUi />
 		<StateUi state={dungeonState}>
 			<EnemyHealthBarUi />
-			<MiniMapUi />
 		</StateUi>
+		<TopRight />
 		<OverlayUi />
-		<Toaster />
 	</>
 )

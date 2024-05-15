@@ -19,6 +19,7 @@ import { entries, objectKeys } from '@/utils/mapFunctions'
 import { useLocalStorage } from '@/utils/useLocalStorage'
 import { RapierDebugRenderer } from '@/lib/debugRenderer'
 import { encounters } from '@/states/dungeon/encounters'
+import { recipes } from '@/constants/recipes'
 
 const rendererQuery = ecs.with('renderer', 'scene', 'renderGroup').where(e => e.renderGroup === RenderGroup.Game)
 
@@ -325,6 +326,17 @@ export const DebugUi = () => {
 								<div>
 									{encounter}
 									<button onClick={() => encounters[encounter]()}>enable</button>
+								</div>
+							)}
+						</For>
+					</div>
+					<div style={{ 'background': 'darkgray', 'margin': '1rem', 'padding': '1rem', 'color': 'black', 'font-size': '2rem', 'height': '20rem', 'overflow-y': 'scroll' }}>
+						<div>Unlock recipes</div>
+						<For each={recipes.map(r => r.output.name)}>
+							{recipe => (
+								<div>
+									{recipe}
+									<button onClick={() => updateSave(s => s.unlockedRecipes.push(recipe))}>enable</button>
 								</div>
 							)}
 						</For>

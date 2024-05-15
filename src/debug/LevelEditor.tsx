@@ -23,7 +23,7 @@ import { campState, dungeonState } from '@/global/states'
 import { throttle } from '@/lib/state'
 import { ToonMaterial } from '@/shaders/materials'
 import { HEIGHT, getdisplacementMap, setDisplacement, spawnGroundAndTrees, spawnLevelData } from '@/states/game/spawnLevel'
-import { playerBundle } from '@/states/game/spawnPlayer'
+import { PLAYER_DEFAULT_HEALTH, playerBundle } from '@/states/game/spawnPlayer'
 import { getScreenBuffer } from '@/utils/buffer'
 import { entries, getRandom } from '@/utils/mapFunctions'
 import { inMap } from '@/lib/hierarchy'
@@ -201,7 +201,7 @@ export const LevelEditor = () => {
 						ecs.add({ map: level.id })
 						spawnGroundAndTrees(level)
 						spawnLevelData({})
-						ecs.add({ ...playerBundle(5, true, null), position: new Vector3(0, 10, 0) })
+						ecs.add({ ...playerBundle(PLAYER_DEFAULT_HEALTH, true, null), position: new Vector3(0, 10, 0) })
 					}
 					const draw = createMemo(() => selectedTab() === 'draw map')
 					const uploadModel = () => {

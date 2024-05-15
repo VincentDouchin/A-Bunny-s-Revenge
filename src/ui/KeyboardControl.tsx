@@ -18,7 +18,7 @@ export const KeyboardControls = ({
 	.controls-container{
 		position: fixed;
 		bottom:0;
-		right: 0;
+		left: 0;
 		margin: 1rem;
 		border-radius: 1rem;
 		overflow: hidden;
@@ -27,7 +27,7 @@ export const KeyboardControls = ({
 		background:var(--black-transparent);
 	}
 	.keyboard-controls{
-		font-size:2rem;
+		font-size:1.5rem;
 		display:flex;
 		gap:0.5rem;
 		color: white;	

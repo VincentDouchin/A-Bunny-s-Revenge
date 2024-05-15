@@ -17,19 +17,18 @@ import { save } from '@/global/save'
 import type { DungeonRessources, FarmRessources } from '@/global/states'
 import { dungeonState, genDungeonState } from '@/global/states'
 
-import { itemsData, sellableItems } from '@/constants/items'
+import { itemsData } from '@/constants/items'
 import type { direction } from '@/lib/directions'
+import { inMap } from '@/lib/hierarchy'
 import { GardenPlotMaterial } from '@/shaders/materials'
 import { RoomType } from '@/states/dungeon/generateDungeon'
 import { cropBundle } from '@/states/farm/farming'
 import { openMenu } from '@/states/farm/openInventory'
 import { wateringCanBundle } from '@/states/farm/wateringCan'
+import { dialogBundle } from '@/states/game/dialog'
 import { doorSide } from '@/states/game/spawnDoor'
 import { lockPlayer, unlockPlayer } from '@/utils/dialogHelpers'
-import { getRandom, range } from '@/utils/mapFunctions'
 import { sleep } from '@/utils/sleep'
-import { dialogBundle } from '@/states/game/dialog'
-import { inMap } from '@/lib/hierarchy'
 
 export const customModels = {
 	door: doorSide,
@@ -413,28 +412,35 @@ export const props: PlacableProp<propNames>[] = [
 		name: 'stall',
 		models: ['stall'],
 		bundle: (entity, _data, ressources) => {
-			if (ressources && 'dungeon' in ressources && ressources.dungeon.type === RoomType.Seller) {
-				const items = range(0, 3, () => getRandom(sellableItems))
-
+			if (ressources && 'dungeon' in ressources && ressources.dungeon.type === RoomType.Seller && ressources.dungeon.items) {
+				const items = ressources.dungeon.items
 				return {
 					...entity,
 					withChildren(parent) {
 						for (let i = 0; i < items.length; i++) {
 							const x = [-1, 0, 1][i]
 							const item = items[i]
-							const model = assets.items[item].model.clone()
+							if (!item) continue
+							const model = assets.items[item.name].model.clone()
 							model.scale.multiplyScalar(5)
-							const itemData = itemsData[item]
-							ecs.add({
+							const itemData = itemsData[item.name]
+							const itemEntity: Entity = {
 								parent,
 								model,
 								colliderDesc: ColliderDesc.ball(4),
 								bodyDesc: RigidBodyDesc.fixed(),
 								interactable: Interactable.Buy,
 								position: new Vector3(x * 7, 4, 0),
-								price: itemData.price,
-								itemLabel: item,
-							})
+								stallPosition: i,
+								itemLabel: item.name,
+							}
+							if (item.recipe) {
+								itemEntity.recipe = item.recipe
+								itemEntity.price = itemsData[item.recipe].price
+							} else {
+								itemEntity.price = itemData.price
+							}
+							ecs.add(itemEntity)
 						}
 						const owlModel = clone(assets.characters.OWL_animated.scene)
 						owlModel.scale.multiplyScalar(6)

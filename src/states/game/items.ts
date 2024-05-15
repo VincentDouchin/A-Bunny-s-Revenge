@@ -4,11 +4,10 @@ import { Easing, Tween } from '@tweenjs/tween.js'
 import { AdditiveBlending, Mesh, MeshBasicMaterial, SphereGeometry, Vector3 } from 'three'
 import type { Entity } from '@/global/entity'
 import { assets, ecs, gameTweens } from '@/global/init'
-import { addItem } from '@/global/save'
 import { playSound } from '@/global/sounds'
 import { inMap } from '@/lib/hierarchy'
 import { modelColliderBundle } from '@/lib/models'
-import { addToast } from '@/ui/Toaster'
+import { addItemToPlayer } from '@/utils/dialogHelpers'
 
 export const itemsQuery = ecs.with('item', 'position', 'model', 'itemLabel')
 
@@ -77,14 +76,13 @@ export const collectItems = () => {
 			if (item.position.clone().setY(0).distanceTo(player.position.clone().setY(0)) < 10) {
 				ecs.removeComponent(item, 'body')
 				itemsQuery.remove(item)
-				addItem(player, { name: item.itemLabel, quantity: 1 })
+				addItemToPlayer({ name: item.itemLabel, quantity: 1, recipe: item.recipe })
 				gameTweens.add(new Tween([0])
 					.easing(Easing.Bounce.Out)
 					.to([1], 1000).onUpdate(([i]) => {
 						item.position.lerp({ ...player.position, y: 4 }, i)
 					}).onComplete(() => {
 						ecs.remove(item)
-						addToast({ addedItem: item.itemLabel })
 					}))
 				setTimeout(() => playSound('zapsplat_multimedia_alert_action_collect_pick_up_point_or_item_79293'), 500)
 				gameTweens.add(new Tween(item.model.scale).to(new Vector3(), 1000).easing(Easing.Bounce.Out))

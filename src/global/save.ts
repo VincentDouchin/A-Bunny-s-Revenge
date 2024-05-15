@@ -16,6 +16,7 @@ export interface SaveData {
 	inventories: Record<string, Item[]>
 	modifiers: items[]
 	settings: { volume: number, mute: boolean, fullscreen: boolean | null }
+	unlockedRecipes: items[]
 	unlockedPaths: number
 	acorns: number
 	daytime: { current: number, dayToNight: boolean, timePassed: number, dayLight: number }
@@ -30,6 +31,7 @@ const blankSave = (): SaveData => ({
 	inventories: {},
 	modifiers: [],
 	settings: { volume: 100, mute: false, fullscreen: null },
+	unlockedRecipes: [],
 	unlockedPaths: 1,
 	acorns: 0,
 	daytime: { current: 0, dayToNight: true, timePassed: 0, dayLight: 0 },

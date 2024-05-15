@@ -1,7 +1,7 @@
 import type { With } from 'miniplex'
 import { Show } from 'solid-js'
 import { css } from 'solid-styled'
-import { InventorySlots, InventoryTitle } from '../farm/InventoryUi'
+import { InventorySlots } from '../farm/InventoryUi'
 import type { Item } from '@/constants/items'
 import { itemsData } from '@/constants/items'
 import type { Entity } from '@/global/entity'
@@ -12,7 +12,7 @@ import { campState } from '@/global/states'
 import { Menu } from '@/ui/components/Menu'
 import { Modal } from '@/ui/components/Modal'
 import { StateUi } from '@/ui/components/StateUi'
-import { GoldContainer } from '@/ui/components/styledComponents'
+import { GoldContainer, InventoryTitle } from '@/ui/components/styledComponents'
 
 const playerToHeal = ecs.with('player', 'currentHealth', 'maxHealth')
 

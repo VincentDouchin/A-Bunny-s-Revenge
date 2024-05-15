@@ -1,5 +1,5 @@
 import type { Accessor, Component, JSX } from 'solid-js'
-import { createEffect, createRoot, createSignal, onCleanup } from 'solid-js'
+import { createEffect, createRoot, createSignal, onCleanup, onMount } from 'solid-js'
 
 import type { Atom } from 'solid-use/atom'
 import { generateUUID } from 'three/src/math/MathUtils'
@@ -74,8 +74,13 @@ export const menuItem: MenuItem = (el, init) => {
 	if (first) {
 		menu.setSelected(id)
 	}
+	onCleanup(() => {
+		menu.refs.delete(id)
+		menu.inverseRefs.delete(el)
+	})
 	menu.refs.set(id, el)
 	menu.inverseRefs.set(el, id)
+
 	const clickListener = () => {
 		menu.setSelected(id)
 	}
@@ -121,10 +126,11 @@ export function Menu(props: { children: Component<MenuItemProps>, inputs?: MenuI
 	}
 	ui.updateSync(update)
 	const menu: MenuDir = { refs, inverseRefs, setSelected, selected }
+
 	return (
+
 		<props.children
 			menu={menu}
-		>
-		</props.children>
+		/>
 	)
 }

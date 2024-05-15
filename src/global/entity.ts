@@ -7,7 +7,7 @@ import type { CSS2DObject } from 'three/examples/jsm/renderers/CSS2DRenderer'
 import type { Animator } from './animator'
 import type { InstanceHandle } from './assetLoaders'
 import type { NPC } from '@/constants/NPC'
-import type { Drop, enemy } from '@/constants/enemies'
+import type { enemy } from '@/constants/enemies'
 import type { Item, crops } from '@/constants/items'
 import type { QuestName } from '@/constants/quests'
 import type { Recipe } from '@/constants/recipes'
@@ -172,6 +172,7 @@ export interface Entity {
 	// ! Items
 	item?: true
 	itemLabel?: items
+	recipe?: items
 	popDirection?: Vector3
 	groundLevel?: number
 	bounce?: { amount: number, force: Vector3, touchedGround: boolean }
@@ -204,7 +205,6 @@ export interface Entity {
 
 	// ! Enemies
 	enemyName?: enemy
-	drops?: Drop[]
 	healthBar?: true
 	healthBarContainer?: CSS2DObject
 	boss?: true
@@ -279,6 +279,7 @@ export interface Entity {
 	poison?: true
 	// ! Stall
 	price?: number
+	stallPosition?: number
 	// ! Alice
 	beanstalk?: true
 	magicHaricot?: Entity

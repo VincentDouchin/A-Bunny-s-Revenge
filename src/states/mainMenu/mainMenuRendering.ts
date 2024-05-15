@@ -3,7 +3,7 @@ import type { MeshStandardMaterial } from 'three'
 import { CanvasTexture, Group, Mesh, MeshBasicMaterial, PerspectiveCamera, Raycaster, Scene, Vector2, Vector3 } from 'three'
 
 import { enableBasketUi, spawnBasket } from '../game/spawnBasket'
-import { playerBundle } from '../game/spawnPlayer'
+import { PLAYER_DEFAULT_HEALTH, playerBundle } from '../game/spawnPlayer'
 import { updateCameraZoom } from '@/global/camera'
 import { params } from '@/global/context'
 import { RenderGroup } from '@/global/entity'
@@ -305,7 +305,7 @@ export const spawnPlayerContinueGame = async () => {
 		setSensor(houseQuery, true)
 		setSensor(doorQuery, true)
 		ecs.add({
-			...playerBundle(5, true, null),
+			...playerBundle(PLAYER_DEFAULT_HEALTH, true, null),
 			position: house.worldPosition.clone(),
 			rotation: house.rotation.clone(),
 		})

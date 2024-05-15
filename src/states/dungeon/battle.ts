@@ -1,14 +1,9 @@
 import { Tween } from '@tweenjs/tween.js'
 import type { With } from 'miniplex'
-import { between } from 'randomish'
 import { Color, Mesh, Vector3 } from 'three'
-import { itemBundle } from '../game/items'
-import { spawnAcorns } from './acorn'
-import { CharacterMaterial } from '@/shaders/materials'
-import { ecs, gameTweens, time } from '@/global/init'
-import { Faction } from '@/global/entity'
 import type { Entity } from '@/global/entity'
-import { lootPool } from '@/constants/enemies'
+import { ecs, gameTweens, time } from '@/global/init'
+import { CharacterMaterial } from '@/shaders/materials'
 
 export const flash = (entity: With<Entity, 'model'>, duration: number, type: 'preparing' | 'damage' | 'poisoned' = 'preparing') => {
 	const tween = new Tween({ flash: 0 })
@@ -49,19 +44,6 @@ export const calculateDamage = (entity: With<Entity, 'strength' | 'critChance' |
 	}
 	return [damage, isCrit] as const
 }
-const entities = ecs.with('faction', 'position', 'rotation', 'body', 'collider', 'movementForce', 'state', 'sensorCollider', 'currentHealth', 'model', 'size', 'group')
-
-const playerQuery = entities.with('playerControls', 'strength', 'body', 'critChance', 'critDamage', 'speed', 'state', 'combo', 'playerAnimator', 'weapon', 'lootQuantity', 'lootChance').where(({ faction }) => faction === Faction.Player)
-
-export const spawnDrops = () => ecs.with('drops', 'position').onEntityRemoved.subscribe((e) => {
-	const player = playerQuery.first
-	if (player) {
-		spawnAcorns(between(2, 5), e.position)
-		for (const drop of lootPool(player.lootQuantity.value, player.lootChance.value, e.drops)) {
-			ecs.add({ ...itemBundle(drop.name), position: e.position.clone().add(new Vector3(0, 5, 0)) })
-		}
-	}
-})
 
 const hitTimerQuery = ecs.with('hitTimer')
 

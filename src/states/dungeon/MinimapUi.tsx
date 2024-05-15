@@ -103,9 +103,6 @@ const dungeonQuery = ecs.with('dungeon')
 export const MiniMapUi = () => {
 	css/* css */`
 	.minimap{
-		position: fixed;
-		top: 0;
-		right: 0;
 		margin: 1rem;
 		width: 15rem;
 		height: 10rem;
@@ -114,6 +111,7 @@ export const MiniMapUi = () => {
 		display: grid;
 		place-items: center;
 		overflow: hidden;
+		position:relative;
 	}
 	`
 	return (

@@ -357,6 +357,7 @@ export const jumpingEnemyBehaviorPlugin = enemyBehavior(EnemyAttackStyle.Jumping
 					e.movementForce.copy(new Vector3(0, -3, 1).applyQuaternion(e.rotation))
 					yield
 				}
+				sleep(5).then(() => setState('idle'))
 				setState('attackCooldown')
 				e.movementForce.copy(new Vector3(0, 0, 0))
 				playSound('zapsplat_multimedia_game_sound_thump_hit_bubble_deep_underwater_88732')

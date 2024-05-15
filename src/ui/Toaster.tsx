@@ -1,52 +1,81 @@
 import type { items } from '@assets/assets'
-import { For, Show } from 'solid-js'
+import { For, Match, Switch } from 'solid-js'
+import { createObject, createSet } from 'solid-proxies'
 import { css } from 'solid-styled'
 import { TransitionGroup } from 'solid-transition-group'
-import atom from 'solid-use/atom'
-import { generateUUID } from 'three/src/math/MathUtils'
 import { OutlineText } from './components/styledComponents'
-import { assets } from '@/global/init'
+import { assets, time, ui } from '@/global/init'
 import { type QuestName, type QuestStep, quests } from '@/constants/quests'
 
 import { itemsData } from '@/constants/items'
 
 type Toast = {
+	type: 'quest'
 	quest: QuestName
 } | {
-	removedItem: items
+	type: 'removedItem'
+	item: items
+	quantity: number
 } | {
-	addedItem: items
+	type: 'addedItem'
+	item: items
+	quantity: number
 } | {
+	type: 'questStep'
 	step: QuestStep
+} | {
+	type: 'recipe'
+	recipe: items
 }
-const toasts = atom<(Toast & { id: string })[]>([])
+const toasts = createSet<(Toast & { time: number })>([])
+const toastsQueue = createSet<Toast>([])
 export const addToast = (toast: Toast) => {
-	const id = generateUUID()
-	toasts([{ ...toast, id }, ...toasts()])
-	setTimeout(() => {
-		toasts(toasts().filter(t => t.id !== id))
-	}, 10000)
+	const existingItem = [...toasts].find(t => t.type === toast.type && 'item' in toast && 'item' in t && t.item === toast.item)
+	if (
+		(toast.type === 'addedItem' || toast.type === 'removedItem')
+		&& (existingItem?.type === 'addedItem' || existingItem?.type === 'removedItem')
+		&& existingItem
+	) {
+		existingItem.time = 10_000
+		existingItem.quantity += toast.quantity
+	} else if (toasts.size < 5) {
+		toasts.add(createObject({ ...toast, time: 10_000 }))
+	} else {
+		toastsQueue.add(toast)
+	}
 }
 
 export const Toaster = () => {
+	ui.updateSync(() => {
+		for (const toast of toasts) {
+			toast.time -= time.delta
+			if (toast.time <= 0) {
+				toasts.delete(toast)
+				if (toastsQueue.size > 0) {
+					const lateToast = [...toastsQueue][0]
+					toastsQueue.delete(lateToast)
+					addToast(lateToast)
+				}
+			}
+		}
+	})
 	css/* css */`
 	.toast-container{
-		position: fixed;
-		bottom: 1rem;
-		left: 1rem;
 		display: flex;
 		gap: 1rem;
 		flex-direction: column-reverse;
-		z-index:1
+		z-index:1;
+		padding: 1rem;
+		align-items: flex-end;
 	}
 	.toast-icon{
-		height: 2rem;
+		height: 1.5rem;
 		aspect-ratio: 1;
 	}
 	.toast{
 		color: white;
-		font-size: 2rem;
-		padding: 1rem 2rem;
+		font-size: 1.5rem;
+		padding: 0.5rem 1rem;
 		background: var(--black-transparent);
 		border-radius: 1rem;
 		display: flex;
@@ -55,47 +84,66 @@ export const Toaster = () => {
 		transition: all 1s ease;
 		width: fit-content;
 	}
+	.toast-enter-active,
+	.toast-exit-active {
+		transition: all 1s ease;
+	}
+	.toast-enter {
+		transform: translateY(-100%);
+	}
+	.toast-exit-to {
+		transform: translateY(100%);
+		opacity: 0;
+	}
 	`
 	return (
 		<div class="toast-container">
 			<TransitionGroup name="toast">
-				<For each={toasts()}>
+				<For each={[...toasts]}>
 					{(toast) => {
 						return (
-							<>
-								<Show when={'step' in toast && toast.step}>
+							<Switch>
+								<Match when={toast.type === 'questStep' && toast.step}>
 									{step => (
 										<div class="toast">
 											<div class="toast-icon" style={{ color: '#33cc33' }} innerHTML={assets.icons['circle-check-solid']} />
 											<OutlineText>{`Completed: ${step().description}`}</OutlineText>
 										</div>
 									)}
-								</Show>
-								<Show when={'quest' in toast && !('step' in toast) && toast.quest}>
+								</Match>
+								<Match when={toast.type === 'quest' && toast.quest}>
 									{quest => (
 										<div class="toast">
 											<div class="toast-icon" innerHTML={assets.icons['circle-exclamation-solid']} />
 											<OutlineText>{`New Quest: ${quests[quest()].name}`}</OutlineText>
 										</div>
 									)}
-								</Show>
-								<Show when={'removedItem' in toast && toast.removedItem}>
+								</Match>
+								<Match when={toast.type === 'removedItem' && toast}>
+									{item => (
+										<div class="toast">
+											<img class="toast-icon" src={assets.items[item().item].img} />
+											<OutlineText>{`Item removed: ${item().quantity} ${itemsData[item().item].name}`}</OutlineText>
+										</div>
+									)}
+								</Match>
+								<Match when={toast.type === 'addedItem' && toast}>
+									{item => (
+										<div class="toast">
+											<img class="toast-icon" src={assets.items[item().item].img} />
+											<OutlineText>{`Item added: ${item().quantity} ${itemsData[item().item].name}`}</OutlineText>
+										</div>
+									)}
+								</Match>
+								<Match when={'recipe' in toast && toast.recipe}>
 									{item => (
 										<div class="toast">
 											<img class="toast-icon" src={assets.items[item()].img} />
-											<OutlineText>{`Item removed: ${itemsData[item()].name}`}</OutlineText>
+											<OutlineText>{`Recipe unlocked: ${itemsData[item()].name}`}</OutlineText>
 										</div>
 									)}
-								</Show>
-								<Show when={'addedItem' in toast && toast.addedItem}>
-									{item => (
-										<div class="toast">
-											<img class="toast-icon" src={assets.items[item()].img} />
-											<OutlineText>{`Item added: ${itemsData[item()].name}`}</OutlineText>
-										</div>
-									)}
-								</Show>
-							</>
+								</Match>
+							</Switch>
 						)
 					}}
 				</For>

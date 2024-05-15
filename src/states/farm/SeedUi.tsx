@@ -12,6 +12,7 @@ import { updateSave } from '@/global/save'
 import { ForQuery } from '@/ui/components/ForQuery'
 import { Menu, menuItem } from '@/ui/components/Menu'
 import type { FarmUiProps } from '@/ui/types'
+import { GoldContainer } from '@/ui/components/styledComponents'
 // eslint-disable-next-line no-unused-expressions
 menuItem
 const query = ecs.with('menuType', 'interactionContainer', 'plantableSpot')
@@ -53,18 +54,20 @@ export const SeedUi = ({ player }: FarmUiProps) => {
 										<Portal mount={entity.interactionContainer.element}>
 											<Transition name="popup">
 												<Show when={visible()}>
-													<div class="seeds styled-container">
-														<For each={seeds()}>
-															{(seed, i) => {
-																const selected = atom(false)
-																return (
-																	<div use:menuItem={[menu, i() === 0, selected]} onClick={() => chooseSeed(seed, entity)}>
-																		<ItemDisplay item={seed} selected={selected}></ItemDisplay>
-																	</div>
-																)
-															}}
-														</For>
-													</div>
+													<GoldContainer padding="0.5rem 1rem">
+														<div class="seeds">
+															<For each={seeds()}>
+																{(seed, i) => {
+																	const selected = atom(false)
+																	return (
+																		<div use:menuItem={[menu, i() === 0, selected]} onClick={() => chooseSeed(seed, entity)}>
+																			<ItemDisplay item={seed} selected={selected}></ItemDisplay>
+																		</div>
+																	)
+																}}
+															</For>
+														</div>
+													</GoldContainer>
 												</Show>
 											</Transition>
 										</Portal>

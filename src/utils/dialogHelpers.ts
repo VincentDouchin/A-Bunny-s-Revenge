@@ -55,19 +55,26 @@ export const movePlayerTo = (dest: Vector3) => {
 	})
 }
 export const playerInventoryQuery = ecs.with('inventoryId', 'inventory', 'inventorySize', 'player')
-
+export const unlockRecipe = (item: items) => {
+	updateSave(s => s.unlockedRecipes.push(item))
+	addToast({ type: 'recipe', recipe: item })
+}
 export const addItemToPlayer = (item: Item) => {
 	const player = playerInventoryQuery.first
 	if (player) {
-		addItem(player, item)
-		addToast({ addedItem: item.name })
+		if (item.recipe) {
+			unlockRecipe(item.recipe)
+		} else {
+			addItem(player, item)
+			addToast({ type: 'addedItem', item: item.name, quantity: item.quantity })
+		}
 	}
 }
 export const removeItemFromPlayer = (item: Item) => {
 	const player = playerInventoryQuery.first
 	if (player) {
 		removeItem(player, item)
-		addToast({ removedItem: item.name })
+		addToast({ type: 'removedItem', item: item.name, quantity: item.quantity })
 	}
 }
 
@@ -102,12 +109,22 @@ export const completeQuest = <Q extends QuestName>(name: Q) => {
 		})
 	}
 }
+
 const questMarkersQuery = ecs.with('questMarker', 'questMarkerContainer')
-export const addQuest = (name: QuestName) => {
+export const addQuest = async (name: QuestName) => {
 	if (!(name in save.quests)) {
-		updateSave((s) => {
-			s.quests[name] = range(0, quests[name].steps.length, () => false)
-		})
+		await updateSave(s => s.quests[name] = range(0, quests[name].steps.length, () => false))
+		const toUnlock: items[] = []
+		for (const step of quests[name].steps) {
+			for (const item of step.items) {
+				if (!save.unlockedRecipes.includes(item.name)) {
+					toUnlock.push(item.name)
+				}
+			}
+		}
+		for (const unlockedRecipe of toUnlock) {
+			await unlockRecipe(unlockedRecipe)
+		}
 		for (const npc of questMarkersQuery) {
 			if (npc.questMarker === name) {
 				ecs.removeComponent(npc, 'questMarker')
@@ -115,7 +132,7 @@ export const addQuest = (name: QuestName) => {
 			}
 		}
 
-		addToast({ quest: name })
+		addToast({ type: 'quest', quest: name })
 	}
 }
 
@@ -125,7 +142,7 @@ export const completeQuestStep = <Q extends QuestName>(questName: Q, step: Quest
 		if (quest) {
 			const index = quests[questName].steps.findIndex(s => s.key === step)
 			quest[index] = true
-			addToast({ step: quests[questName].steps[index] })
+			addToast({ type: 'questStep', step: quests[questName].steps[index] })
 		}
 	})
 }

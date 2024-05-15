@@ -155,11 +155,11 @@ export const HealthUi = (props: { player: With<Entity, 'maxHealth' | 'currentHea
 		transition: width 0.5s ease-in;
 	}
 	.front{
-		background: red;
+		background: #ec273f;
 		z-index:1;
 	}
 	.back{
-		background: darkred;
+		background: white;
 		transition-delay: 0.3s
 	}
 	.health-text{
@@ -182,12 +182,12 @@ export const HealthUi = (props: { player: With<Entity, 'maxHealth' | 'currentHea
 		place-items: center;
 		gap:1rem;
 		padding-right:1rem;
-		font-size: 3rem;
+		font-size: 2rem;
 		background:var(--black-transparent);
 	}
-	.acorn canvas{
-		width: 4rem;
-		height: 4rem;
+	:global(.acorn canvas){
+		width: 4rem !important;
+		height: 4rem !important;
 	}
 	.watering-container{
 		width:5rem;

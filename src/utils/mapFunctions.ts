@@ -96,3 +96,11 @@ export function memo<T extends any[], R>(func: (...args: T) => R): (...args: T) 
 		return result
 	}
 }
+export const shuffle = <T>(array: T[]) => {
+	const arr = [...array]
+	for (let i = arr.length - 1; i > 0; i--) {
+		const rand = Math.floor(Math.random() * (i + 1));
+		[arr[i], arr[rand]] = [arr[rand], arr[i]]
+	}
+	return arr
+}

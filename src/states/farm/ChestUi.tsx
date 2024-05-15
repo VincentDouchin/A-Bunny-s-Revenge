@@ -1,10 +1,11 @@
 import { Show } from 'solid-js'
-import { InventorySlots, InventoryTitle } from './InventoryUi'
+import { InventorySlots } from './InventoryUi'
 import { MenuType } from '@/global/entity'
 import { ecs, ui } from '@/global/init'
 import { Menu } from '@/ui/components/Menu'
 import { Modal } from '@/ui/components/Modal'
 import { playerInventoryQuery } from '@/utils/dialogHelpers'
+import { InventoryTitle } from '@/ui/components/styledComponents'
 
 const chestQuery = ecs.with('menuType', 'menuInputs', 'inventory', 'inventorySize', 'inventoryId').where(e => e.menuType === MenuType.Chest)
 export const ChestUi = () => {

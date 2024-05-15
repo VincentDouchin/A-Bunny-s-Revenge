@@ -1,19 +1,21 @@
 import type { icons } from '@assets/assets'
 import { autoUpdate } from '@floating-ui/dom'
-import type { With } from 'miniplex'
 import { useFloating } from 'solid-floating-ui'
-import type { Accessor, JSX, Setter } from 'solid-js'
+import type { Accessor, JSX, JSXElement, Setter } from 'solid-js'
 import { For, Show, createEffect, createMemo, createSignal, onCleanup, onMount } from 'solid-js'
 import { css } from 'solid-styled'
+import type { Atom } from 'solid-use/atom'
 import atom from 'solid-use/atom'
 import { MealAmount, extra, getAmountEaten } from '../dungeon/HealthUi'
-import { MealBuffs } from './RecipesUi'
+import { MealBuffs, RecipeDescription } from './RecipesUi'
 import { itemsData } from '@/constants/items'
-import type { Item, ItemData } from '@/constants/items'
+import type { Item } from '@/constants/items'
 
-import { type Entity, MenuType } from '@/global/entity'
+import type { Recipe } from '@/constants/recipes'
+import { recipes } from '@/constants/recipes'
+import { MenuType } from '@/global/entity'
 import { assets, ecs, ui } from '@/global/init'
-import { updateSave } from '@/global/save'
+import { save, updateSave } from '@/global/save'
 import type { Modifier } from '@/lib/stats'
 import { addModifier } from '@/lib/stats'
 import { thumbnailRenderer } from '@/lib/thumbnailRenderer'
@@ -21,31 +23,15 @@ import { InputIcon } from '@/ui/InputIcon'
 import type { MenuDir } from '@/ui/components/Menu'
 import { Menu, menuItem } from '@/ui/components/Menu'
 import { Modal } from '@/ui/components/Modal'
-import { GoldContainer, OutlineText } from '@/ui/components/styledComponents'
+import { GoldContainer, InventoryTitle, OutlineText } from '@/ui/components/styledComponents'
 import type { FarmUiProps } from '@/ui/types'
 import { removeItemFromPlayer } from '@/utils/dialogHelpers'
 import { range } from '@/utils/mapFunctions'
 // eslint-disable-next-line no-unused-expressions
 menuItem
-export const InventoryTitle = (props: { children: string }) => {
-	css/* css */`
-	.inventory-title{
-		font-size: 3rem;
-		color: white;
-		font-family: NanoPlus;
-		text-transform: capitalize;
-	}	
-	`
-	return (
-		<div class="inventory-title">
-			<OutlineText>
-				{props.children}
-			</OutlineText>
-		</div>
-	)
-}
+
 const thumbnail = thumbnailRenderer()
-export const ItemBox = (props: { children: JSX.Element, selected?: boolean, completed?: boolean }) => {
+export const ItemBox = (props: { children: JSX.Element, selected?: boolean, completed?: boolean, hidden?: boolean }) => {
 	css/* css */`
 	.item-display{
 		border-radius: 1rem;
@@ -63,15 +49,20 @@ export const ItemBox = (props: { children: JSX.Element, selected?: boolean, comp
 		top: 0.5rem;
 		left: 0.5rem;
 	}
+	.hidden{
+		filter: contrast(0%) brightness(0%);
+	}
 	`
 	return (
 		<div
 			class="item-display"
 			style={{ border: props.selected ? 'solid 0.2rem white' : '' }}
+			classList={{ hidden: props.hidden ?? false }}
 		>
 			{props.children}
 			<Show when={props.completed !== undefined}>
 				<div
+
 					class="completed"
 					innerHTML={assets.icons[props.completed ? 'circle-check-solid' : 'circle-xmark-solid']}
 					style={{ color: props.completed ? '#33cc33' : 'red' }}
@@ -97,6 +88,7 @@ export const ItemDisplay = (props: {
 	disabled?: boolean
 	onSelected?: () => void
 	completed?: boolean
+	hidden?: boolean
 }) => {
 	const showName = atom(false)
 	onMount(() => {
@@ -159,6 +151,7 @@ export const ItemDisplay = (props: {
 
 	return (
 		<ItemBox
+			hidden={props.hidden ?? false}
 			selected={isSelected()}
 			completed={props.completed}
 		>
@@ -184,7 +177,7 @@ export const ItemDisplay = (props: {
 									return (
 										<>
 											<div ref={setReference} class="item">{element}</div>
-											<Show when={showName()}>
+											<Show when={!props.hidden && showName()}>
 												<div
 													ref={setFloating}
 													style={{
@@ -211,9 +204,11 @@ export const ItemDisplay = (props: {
 								>
 								</img>
 							</Show>
-							<div class="quantity">
-								<OutlineText>{quantity()}</OutlineText>
-							</div>
+							<Show when={!props.hidden}>
+								<div class="quantity">
+									<OutlineText>{quantity()}</OutlineText>
+								</div>
+							</Show>
 
 						</>
 					)
@@ -223,7 +218,7 @@ export const ItemDisplay = (props: {
 		</ItemBox>
 	)
 }
-export const InventorySlots = ({ first, disabled, click, setSelectedItem, menu, onSelected, inventorySize, inventory }: {
+export const InventorySlots = ({ first, disabled, click, setSelectedItem, menu, onSelected, inventorySize, inventory, hidden }: {
 	menu: MenuDir
 	setSelectedItem?: Setter<Item | null>
 	click?: (item: Item | null, index: number) => void
@@ -232,6 +227,7 @@ export const InventorySlots = ({ first, disabled, click, setSelectedItem, menu, 
 	onSelected?: () => void
 	inventorySize?: number
 	inventory: Accessor <(Item | null)[]>
+	hidden?: (item: Item | null) => boolean
 }) => {
 	const size = createMemo(() => inventorySize ?? inventory().length)
 	return (
@@ -248,14 +244,15 @@ export const InventorySlots = ({ first, disabled, click, setSelectedItem, menu, 
 						setSelectedItem(item)
 					}
 				})
+				const isHidden = hidden ? hidden(itemSynced()) : false
 				return (
 					<div
 						use:menuItem={[menu, isFirst, selected]}
 						class="item-drag"
 						onClick={() => click && !isDisabled && click(itemSynced(), i())}
-
 					>
 						<ItemDisplay
+							hidden={isHidden}
 							disabled={isDisabled}
 							item={itemSynced()}
 							onSelected={onSelected}
@@ -268,19 +265,19 @@ export const InventorySlots = ({ first, disabled, click, setSelectedItem, menu, 
 		</For>
 	)
 }
-type ItemCategory = Exclude<keyof ItemData, 'name'>
-const PlayerInventory = ({ player, setSelectedItem, menu }: {
-	player: With<Entity, 'inventory' | 'inventoryId'>
+
+const ItemCategories = <T,>({ items, setSelectedItem, menu, categories, filter, categoryName, hidden }: {
+	items: Accessor<Item[]>
 	menu: MenuDir
 	setSelectedItem: Setter<Item | null>
+	categories: Accessor<T[]>
+	filter: (category: T, item: Item) => boolean
+	categoryName?: (category: T) => string
+	hidden?: (item: Item | null) => boolean
 }) => {
-	const inventory = ui.sync(() => player.inventory.filter(Boolean))
-	const categories = createMemo(() => ['meal', 'ingredient', 'seed', 'key item'].filter((category) => {
-		return inventory().some(item => category in itemsData[item.name])
-	}) as ItemCategory[])
+	const getName = categoryName ?? ((key: T) => `${key}s`)
 	css/* css */`
 	.inventory-container{
-		height:25rem;
 		overflow-y: scroll;
 		scroll-behavior:smooth;
 		scrollbar-width: none;
@@ -289,7 +286,7 @@ const PlayerInventory = ({ player, setSelectedItem, menu }: {
 	}
 	.inventory-category{
 		display:grid;
-		grid-template-columns: repeat(8, 1fr);
+		grid-template-columns: repeat(6, 5rem);
 		gap: 1rem;
 	}
 	.category-title{
@@ -299,41 +296,65 @@ const PlayerInventory = ({ player, setSelectedItem, menu }: {
 	}
 	`
 	return (
-		<>
-
-			<div class="inventory-container">
-				<For each={categories()}>
-					{(category) => {
-						const items = createMemo(() => inventory().filter((item) => {
-							return category in itemsData[item.name]
-						}))
-						const [ref, setRef] = createSignal<HTMLElement>()
-						const select = () => {
-							ref()?.scrollIntoView()
-						}
-						return (
-							<div>
-								<div ref={setRef}class="category-title">
-									<OutlineText>
-										{category}
-										s
-									</OutlineText>
-								</div>
-								<div class="inventory-category">
-									<InventorySlots
-										menu={menu}
-										first={(item: Item | null) => category === categories()[0] && item === items()[0]}
-										inventory={items}
-										onSelected={select}
-										setSelectedItem={setSelectedItem}
-									/>
-								</div>
+		<div class="inventory-container">
+			<For each={categories()}>
+				{(category) => {
+					const categoryItems = createMemo(() => items().filter((item) => {
+						return filter(category, item)
+					}))
+					const [ref, setRef] = createSignal<HTMLElement>()
+					const select = () => {
+						ref()?.scrollIntoView()
+					}
+					return (
+						<div>
+							<div ref={setRef}class="category-title">
+								<OutlineText>
+									{getName(category)}
+								</OutlineText>
 							</div>
-						)
-					}}
-				</For>
-			</div>
-		</>
+							<div class="inventory-category">
+								<InventorySlots
+									menu={menu}
+									hidden={hidden}
+									first={(item: Item | null) => category === categories()[0] && item === items()[0]}
+									inventory={categoryItems}
+									onSelected={select}
+									setSelectedItem={setSelectedItem}
+								/>
+							</div>
+						</div>
+					)
+				}}
+			</For>
+		</div>
+	)
+}
+interface TabsProps<T extends string> {
+	tabs: T[]
+	selectedTab: Atom<T>
+	children: (tab: T, selected: boolean) => JSXElement
+	menu: MenuDir
+}
+const Tabs = <T extends string,>(props: TabsProps<T>) => {
+	return (
+		<For each={props.tabs}>
+			{(tab, i) => {
+				const isSelected = createMemo(() => props.selectedTab() === tab)
+				const selected = atom(i() === 0)
+				createEffect(() => {
+					if (selected()) {
+						props.selectedTab(tab)
+					}
+				})
+				return (
+					<div use:menuItem={[props.menu, isSelected(), selected]}>
+						{props.children(tab, selected())}
+					</div>
+				)
+			}}
+
+		</For>
 	)
 }
 
@@ -354,8 +375,9 @@ export const InventoryUi = ({ player }: FarmUiProps) => {
 	css/* css */`
 	.inventory-container{
 		display: grid;
-		grid-template-columns: 47rem 15rem;
+		grid-template-columns: calc(6 * 5rem + 5 * 1rem) 20rem;
 		gap: 1rem;
+		height:25rem;
 	}
 	.modal{
 		place-self: center;
@@ -378,86 +400,181 @@ export const InventoryUi = ({ player }: FarmUiProps) => {
 	.disabled{
 		color:grey;
 	}
+	.tabs-container{
+		display: flex;
+		gap: 1rem;
+		padding: 0 1rem;
+	}
+	.tab{
+		border-left: solid 0.3rem var(--gold-tarnished);
+		border-right: solid 0.3rem var(--gold-tarnished);
+		border-top: solid 0.3rem var(--gold-tarnished);
+		border-radius: 1rem 1rem 0 0;
+		background:color-mix(in srgb, var(--brown-dark), black 50%);
+		padding: 0.5rem;
+		transition: all 0.5s ease;
+		position: relative
+	}
+	.tab-selected{
+		position: relative;
+	}
+	.tab-selected::before{
+		content: '';
+		position: absolute;
+		bottom:0;
+		width: 100%;
+		height: 0.2rem;
+		background: var(--gold);
+	}
+	.active{
+		background:var(--brown-dark);
+		border-color:var(--gold);
+	}
+	.active::after{
+		position: absolute;
+		content: '';
+		width: 100%;
+		height: 2rem;
+		top: 100%;
+		transform: translate(-0.5rem,0rem);
+		background:var(--brown-dark)
+	}
+	.category{
+		display:grid;
+		grid-template-columns: repeat(8, 1fr);
+		gap: 1rem;
+	}
 	`
+	const tabs = ['inventory', 'recipes']
+	const selectedTab = atom('inventory')
+	const recipesOutput = createMemo(() => recipes.map(r => r.output))
+	const playerInventory = ui.sync(() => player.inventory.filter(Boolean))
+	const categories = createMemo(() => ['meal', 'ingredient', 'seed', 'key item'].filter((category) => {
+		return playerInventory().some(item => category in itemsData[item.name])
+	}))
+	const selectedRecipe = atom<null | Recipe>(null)
+	const isRecipeHidden = (i: Item | null) => i?.name ? !save.unlockedRecipes.includes(i.name) : false
 	return (
 
 		<Modal open={open()}>
 			<Show when={open()}>
-				<GoldContainer>
-					<InventoryTitle>Inventory</InventoryTitle>
+				<Menu
+					inputs={player.menuInputs}
+				>
+					{({ menu }) => {
+						return (
+							<>
+								<div class="tabs-container">
+									<Tabs tabs={tabs} menu={menu} selectedTab={selectedTab}>
+										{(tab, selected) => (
+											<div class="tab" classList={{ active: selectedTab() === tab }}>
+												<OutlineText>
+													<InventoryTitle color={selectedTab() === tab ? 'white' : 'grey'}>
+														<div classList={{ 'tab-selected': selected }}>{tab}</div>
+													</InventoryTitle>
+												</OutlineText>
+											</div>
+										)}
+									</Tabs>
+								</div>
 
-					<div class="inventory-container">
-						<div>
-							<Menu
-								inputs={player.menuInputs}
-							>
-								{({ menu }) => {
-									return (
-										<PlayerInventory
-											menu={menu}
-											setSelectedItem={setSelectedItem}
-											player={player}
-										/>
-									)
-								}}
-							</Menu>
-						</div>
-						<div class="description">
-							<Show when={selectedItem()}>
-								{(item) => {
-									const data = createMemo(() => itemsData[item().name])
-
-									return (
-										<>
-											<OutlineText><div class="item-name">{data().name}</div></OutlineText>
-
-											<Show when={meal()}>
-												{(mods) => {
-													const disabled = ui.sync(() => (getAmountEaten() + mods().amount) > 5)
-													const consumeMeal = (item: Item, mods: Modifier<'maxHealth' | 'strength'>[]) => {
-														if (item && !disabled()) {
-															removeItemFromPlayer({ name: item.name, quantity: 1 })
-															for (const mod of mods) {
-																updateSave(s => s.modifiers.push(item.name))
-																addModifier(mod, player, true)
-															}
-														}
+								<GoldContainer>
+									<Show when={selectedTab() === 'inventory'}>
+										<div class="inventory-container">
+											<ItemCategories
+												items={playerInventory}
+												setSelectedItem={setSelectedItem}
+												categories={categories}
+												menu={menu}
+												filter={(c, i) => c in itemsData[i.name]}
+											/>
+											<div class="description">
+												<Show when={selectedItem()}>
+													{(item) => {
+														const data = createMemo(() => itemsData[item().name])
+														return (
+															<>
+																<OutlineText><div class="item-name">{data().name}</div></OutlineText>
+																<Show when={meal()}>
+																	{(mods) => {
+																		const disabled = ui.sync(() => (getAmountEaten() + mods().amount) > 5)
+																		const consumeMeal = (item: Item, mods: Modifier<'maxHealth' | 'strength'>[]) => {
+																			if (item && !disabled()) {
+																				removeItemFromPlayer({ name: item.name, quantity: 1 })
+																				updateSave(s => s.modifiers.push(item.name))
+																				for (const mod of mods) {
+																					addModifier(mod, player, true)
+																				}
+																			}
+																		}
+																		ui.updateSync(() => {
+																			if (
+																				player.playerControls.get('secondary').justPressed
+																			) {
+																				consumeMeal(item(), mods().modifiers)
+																			}
+																		})
+																		createEffect(() => extra(mods().amount))
+																		onCleanup(() => extra(0))
+																		const modifiers = createMemo(() => mods().modifiers)
+																		const amount = createMemo(() => mods().amount)
+																		return (
+																			<>
+																				<div class="eating-button-container">
+																					<MealAmount size="small" amount={amount} />
+																					<button
+																						onPointerDown={() => consumeMeal(item(), mods().modifiers)}
+																						class="styled"
+																						classList={{ disabled: disabled() }}
+																					>
+																						<InputIcon input={player.playerControls.get('secondary')}></InputIcon>
+																						Eat
+																					</button>
+																					<MealBuffs meals={modifiers} />
+																				</div>
+																			</>
+																		)
+																	}}
+																</Show>
+															</>
+														)
+													}}
+												</Show>
+											</div>
+										</div>
+									</Show>
+									<Show when={selectedTab() === 'recipes'}>
+										<div class="inventory-container">
+											<ItemCategories
+												items={recipesOutput}
+												setSelectedItem={i => selectedRecipe(recipes.find(r => r.output === i) ?? null)}
+												categories={() => [MenuType.Oven, MenuType.Cauldron]}
+												menu={menu}
+												filter={(c, i) => recipes.find(r => r.output === i)?.processor === c}
+												categoryName={(c) => {
+													switch (c) {
+														case MenuType.Oven:return 'Oven'
+														case MenuType.Cauldron:return 'Cauldron'
+														default: return ''
 													}
-													ui.updateSync(() => {
-														if (
-															player.playerControls.get('secondary').justPressed
-														) {
-															consumeMeal(item(), mods().modifiers)
-														}
-													})
-													createEffect(() => extra(mods().amount))
-													onCleanup(() => extra(0))
-													const modifiers = createMemo(() => mods().modifiers)
-													const amount = createMemo(() => mods().amount)
-													return (
-														<>
-															<div class="eating-button-container">
-																<MealAmount size="small" amount={amount} />
-																<button
-																	onPointerDown={() => consumeMeal(item(), mods().modifiers)}
-																	class="styled"
-																	classList={{ disabled: disabled() }}
-																>
-																	<InputIcon input={player.playerControls.get('secondary')}></InputIcon>
-																	Eat
-																</button>
-																<MealBuffs meals={modifiers} />
-															</div>
-														</>
-													) }}
-											</Show>
-										</>
-									)
-								}}
-							</Show>
-						</div>
-					</div>
-				</GoldContainer>
+												}}
+												hidden={isRecipeHidden}
+											/>
+											<div class="description">
+												<Show when={!isRecipeHidden(selectedRecipe()?.output ?? null) && selectedRecipe()}>
+													{(recipe) => {
+														return <RecipeDescription recipe={recipe} player={player} />
+													}}
+												</Show>
+											</div>
+										</div>
+									</Show>
+								</GoldContainer>
+
+							</>
+						)
+					}}
+				</Menu>
 			</Show>
 		</Modal>
 	)

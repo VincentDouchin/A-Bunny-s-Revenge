@@ -1,21 +1,25 @@
+import type { With } from 'miniplex'
 import type { Accessor } from 'solid-js'
 import { For, Show, createEffect, createMemo, createSignal } from 'solid-js'
 import { css } from 'solid-styled'
 import atom from 'solid-use/atom'
-import { InventoryTitle, ItemDisplay } from './InventoryUi'
+import { MealAmount } from '../dungeon/HealthUi'
+import { ItemDisplay } from './InventoryUi'
 import { itemsData } from '@/constants/items'
 import type { Recipe } from '@/constants/recipes'
 import { recipes } from '@/constants/recipes'
+import type { Entity } from '@/global/entity'
 import { MenuType } from '@/global/entity'
 import { assets, ecs, ui } from '@/global/init'
-import { removeItem } from '@/global/save'
+import { save } from '@/global/save'
 import { ModType, type Modifier } from '@/lib/stats'
 import { InputIcon } from '@/ui/InputIcon'
 import { Menu, menuItem } from '@/ui/components/Menu'
 import { Modal } from '@/ui/components/Modal'
+import { GoldContainer, InventoryTitle } from '@/ui/components/styledComponents'
 import type { FarmUiProps } from '@/ui/types'
+import { removeItemFromPlayer } from '@/utils/dialogHelpers'
 import { range } from '@/utils/mapFunctions'
-import { GoldContainer } from '@/ui/components/styledComponents'
 
 // eslint-disable-next-line no-unused-expressions
 menuItem
@@ -34,7 +38,7 @@ export const MealBuffs = ({ meals }: { meals: Accessor<Modifier<any>[]> }) => {
 			{mod => (
 				<div>
 					{Math.sign(mod.value) > 0 && <span>+</span>}
-					<span>{mod.value}</span>
+					<span>{mod.value * (mod.type === ModType.Percent ? 100 : 1)}</span>
 					{mod.type === ModType.Percent && <span>%</span>}
 					<span>
 						{' '}
@@ -43,6 +47,96 @@ export const MealBuffs = ({ meals }: { meals: Accessor<Modifier<any>[]> }) => {
 				</div>
 			)}
 		</For>
+	)
+}
+export const RecipeDescription = ({ recipe, player, onClick }: {
+	recipe: Accessor<Recipe>
+	player: With<Entity, 'inventory' | 'playerControls'>
+	onClick?: () => void
+}) => {
+	const output = createMemo(() => itemsData[recipe().output.name])
+	const meal = createMemo(() => output().meal)
+	css/* css */`
+	.meal-description-container{
+		font-size: 1.5rem;
+		display: grid;
+		height: fit-content;
+	}
+	.description-items{
+		display: grid;
+		gap:1rem;
+		justify-content:center;
+	}
+	.meal-amount{
+		margin: auto;
+	}
+	.name{
+		text-align: center;
+		display: grid;
+		font-size:2rem;
+		padding-bottom:1.5rem;
+	}
+	.ingredients-container{
+		display: grid;
+		grid-template-columns: 1fr 1fr;
+		gap:0.5rem 2rem;
+		width: 100%;
+	}
+	.ingredient{
+		display: flex;
+		align-items: center;
+		gap: 1rem;
+	}
+	.ingredient-img{
+		width: 2rem;
+		height: 2rem;
+	}
+	.ingredient-name{
+		font-size: 1.5rem;
+	}
+	`
+	return (
+		<div class="meal-description-container">
+			<div class="name">{output().name}</div>
+			<Show when={meal()}>
+				{(meal) => {
+					const modifiers = createMemo(() => meal().modifiers)
+					const amount = createMemo(() => meal().amount)
+					return (
+
+						<div class="description-items">
+							<div class="meal-amount">
+								<MealAmount amount={amount} size="small" />
+							</div>
+							<div class="ingredients-container">
+								<For each={recipe().input}>
+									{(input) => {
+										const amount = ui.sync(() => player.inventory.reduce((acc, v) => v?.name === input.name ? acc + v.quantity : acc, 0))
+										const color = createMemo(() => amount() < input.quantity ? { color: 'red' } : {})
+										return (
+											<div class="ingredient">
+												<img class="ingredient-img" src={assets.items[input.name].img}>{ }</img>
+												<span class="ingredient-name" style={color()}>{` X ${input.quantity} (${amount()})`}</span>
+											</div>
+										)
+									}}
+								</For>
+							</div>
+							<div>
+								<MealBuffs meals={modifiers} />
+							</div>
+						</div>
+					) }}
+			</Show>
+
+			<Show when={onClick}>
+				<button onClick={onClick} style={{ 'font-size': '1.2rem', 'display': 'flex', 'gap': '0.5rem', 'justify-self': 'center' }} class="button">
+					<InputIcon input={player.playerControls.get('secondary')} />
+					Cook
+				</button>
+			</Show>
+
+		</div>
 	)
 }
 export const RecipesUi = ({ player }: FarmUiProps) => {
@@ -81,7 +175,26 @@ export const RecipesUi = ({ player }: FarmUiProps) => {
 					const recipeQueued = ui.sync(() => recipeEntity()?.recipesQueued ?? [])
 					const recipesFiltered = createMemo(() => recipes.filter(recipe => recipe.processor === entity().menuType))
 					const [selectedRecipe, setSelectedRecipe] = createSignal<null | Recipe>(null)
-
+					const cook = () => {
+						const recipe = selectedRecipe()
+						if (recipe) {
+							if (recipe.input.every(input => player.inventory.some((item) => {
+								return item?.name === input.name && item.quantity >= input.quantity
+							}))) {
+								if (recipeQueued().length < 4) {
+									for (const input of recipe.input) {
+										removeItemFromPlayer(input)
+									}
+									recipeEntity()?.recipesQueued.push(recipe)
+								}
+							}
+						}
+					}
+					ui.updateSync(() => {
+						if (player.playerControls.get('secondary').justReleased) {
+							cook()
+						}
+					})
 					return (
 						<GoldContainer>
 							<InventoryTitle>{getMenuName(entity().menuType)}</InventoryTitle>
@@ -128,6 +241,7 @@ export const RecipesUi = ({ player }: FarmUiProps) => {
 																	}
 																	return {}
 																})
+																const hidden = !save.unlockedRecipes.includes(recipe.output.name)
 																return (
 																	<div style={{ color: 'white' }}>
 																		<div use:menuItem={[menu, i() === 0, selected]} style={{ 'display': 'grid', 'align-items': 'center' }}>
@@ -135,6 +249,7 @@ export const RecipesUi = ({ player }: FarmUiProps) => {
 																				selected={selected}
 																				item={recipe.output}
 																				{...canCraft()}
+																				hidden={hidden}
 																			/>
 																		</div>
 																	</div>
@@ -150,53 +265,12 @@ export const RecipesUi = ({ player }: FarmUiProps) => {
 								<div class="description">
 									<Show when={selectedRecipe()}>
 										{(recipe) => {
-											const output = createMemo(() => itemsData[recipe().output.name])
-											const buffs = createMemo(() => output().meal?.modifiers)
-											const cook = () => {
-												if (recipe().input.every(input => player.inventory.some((item) => {
-													return item?.name === input.name && item.quantity >= input.quantity
-												}))) {
-													if (recipeQueued().length < 4) {
-														for (const input of recipe().input) {
-															removeItem(player, input)
-														}
-														recipeEntity()?.recipesQueued.push(recipe())
-													}
-												}
-											}
-											ui.updateSync(() => {
-												if (player.playerControls.get('secondary').justReleased) {
-													cook()
-												}
-											})
 											return (
-												<div style={{ 'font-size': '1.5rem', 'display': 'grid', 'height': 'fit-content' }}>
-													<div style={{ 'text-align': 'center', 'display': 'grid' }}>{output().name}</div>
-													<div style={{ 'display': 'grid', 'grid-template-columns': '1fr 1fr' }}>
-														<For each={recipe().input}>
-															{(input) => {
-																const amount = ui.sync(() => player.inventory.reduce((acc, v) => v?.name === input.name ? acc + v.quantity : acc, 0))
-																const color = createMemo(() => amount() < input.quantity ? { color: 'red' } : {})
-																return (
-																	<div style={{ 'display': 'flex', 'align-items': 'center', 'gap': '1rem' }}>
-																		<img style={{ width: '2rem', height: '2rem' }} src={assets.items[input.name].img}>{}</img>
-																		<span style={{ 'font-size': '1.5rem', ...color() }}>{` X ${input.quantity} (${amount()})`}</span>
-																	</div>
-																)
-															}}
-														</For>
-													</div>
-													<div>
-														<Show when={buffs()}>
-															{mods => <MealBuffs meals={mods} />}
-														</Show>
-													</div>
-													<button onClick={() => cook()} style={{ 'font-size': '1.2rem', 'display': 'flex', 'gap': '0.5rem', 'justify-self': 'center' }} class="button">
-														<InputIcon input={player.playerControls.get('secondary')} />
-														Cook
-													</button>
-
-												</div>
+												<RecipeDescription
+													recipe={recipe}
+													player={player}
+													onClick={cook}
+												/>
 											)
 										}}
 									</Show>

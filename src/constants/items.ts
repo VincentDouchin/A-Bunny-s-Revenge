@@ -1,6 +1,7 @@
 import type { items } from '@assets/assets'
 import { ModStage, ModType, type Modifier, createModifier } from '@/lib/stats'
-import { entries } from '@/utils/mapFunctions'
+import { entries, shuffle } from '@/utils/mapFunctions'
+import { save } from '@/global/save'
 
 export const cropNames = ['carrot', 'beet', 'tomato', 'lettuce', 'pumpkin', 'wheat', 'haricot', 'magic_bean'] as const satisfies readonly items[]
 export const fruitNames = ['apple'] as const
@@ -9,6 +10,7 @@ export type fruits = (typeof fruitNames)[number]
 export interface Item {
 	name: items
 	quantity: number
+	recipe?: items
 }
 
 export enum Rarity {
@@ -27,6 +29,8 @@ export interface ItemData {
 	'drop'?: {
 		rarity: Rarity
 		level: 0 | 1 | 2 | 3
+		recipe?: true
+		boss?: true
 	}
 	'key item'?: true
 	'price'?: number
@@ -145,10 +149,7 @@ export const itemsData: Record<items, ItemData> = {
 	pumpkin_seeds: {
 		name: 'Pumpkin seeds',
 		seed: 'pumpkin',
-		drop: {
-			rarity: Rarity.Common,
-			level: 1,
-		},
+		price: 10,
 	},
 	wheat_seeds: {
 		name: 'Wheat seeds',
@@ -163,7 +164,7 @@ export const itemsData: Record<items, ItemData> = {
 		name: 'Egg',
 		ingredient: true,
 		drop: {
-			level: 1,
+			level: 0,
 			rarity: Rarity.Common,
 		},
 	},
@@ -171,9 +172,10 @@ export const itemsData: Record<items, ItemData> = {
 		name: 'Cinnamon',
 		ingredient: true,
 		drop: {
-			level: 1,
+			level: 0,
 			rarity: Rarity.Rare,
 		},
+		price: 10,
 	},
 	// ! Meals
 	cookie: {
@@ -185,43 +187,54 @@ export const itemsData: Record<items, ItemData> = {
 			],
 		},
 	},
+	// ? GRANDMA QUEST
 	roasted_carrot: {
 		name: 'Roasted carrot',
 		meal: {
 			amount: 1,
 			modifiers: [
-				createModifier('roasted_carrot', 'strength', 1, ModStage.Base, ModType.Percent, true),
+				createModifier('roasted_carrot', 'strength', 0.2, ModStage.Base, ModType.Add, true),
 			],
 		},
 	},
+	// ? JACk QUEST
 	carrot_soup: {
 		name: 'Carrot soup',
 		meal: {
-			amount: 1.5,
+			amount: 2,
 			modifiers: [
-				createModifier('carrot_soup', 'maxHealth', 20, ModStage.Add, ModType.Percent, true),
-				createModifier('carrot_soup', 'strength', -2, ModStage.Total, ModType.Percent, true),
+				createModifier('carrot_soup', 'lootChance', 0.5, ModStage.Base, ModType.Percent, true),
 			],
 		},
 	},
 	tomato_soup: {
 		name: 'Tomato soup',
 		meal: {
-			amount: 1.5,
+			amount: 2,
 			modifiers: [
-				createModifier('tomato_soup', 'maxHealth', 20, ModStage.Add, ModType.Percent, true),
-				createModifier('tomato_soup', 'strength', -2, ModStage.Total, ModType.Percent, true),
+				createModifier('carrot_soup', 'lootQuantity', 1, ModStage.Base, ModType.Add, true),
 			],
 		},
+		drop: {
+			rarity: Rarity.Common,
+			level: 0,
+			recipe: true,
+		},
+
 	},
 	honey_glazed_carrot: {
 		name: 'Honey glazed carrot',
 		meal: {
-			amount: 1.5,
+			amount: 1,
 			modifiers: [
-				createModifier('honey_glazed_carrot', 'strength', 2, ModStage.Base, ModType.Percent, true),
+				createModifier('honey_glazed_carrot', 'strength', -0.5, ModStage.Base, ModType.Add, true),
 				createModifier('honey_glazed_carrot', 'maxHealth', 1, ModStage.Total, ModType.Add, true),
 			],
+		},
+		drop: {
+			rarity: Rarity.Common,
+			level: 0,
+			recipe: true,
 		},
 	},
 	beetroot_salad: {
@@ -237,26 +250,44 @@ export const itemsData: Record<items, ItemData> = {
 	ham_honey: {
 		name: 'Honey Ham',
 		meal: {
-			amount: 1,
+			amount: 2,
 			modifiers: [
 				createModifier('ham_honey', 'maxHealth', 3, ModStage.Base, ModType.Add, true),
 			],
+		},
+		drop: {
+			rarity: Rarity.Rare,
+			level: 0,
+			recipe: true,
 		},
 	},
 	slime_bread: {
 		name: 'Slime Bread',
 		meal: {
-			amount: 1,
+			amount: 1.5,
 			modifiers: [
-				createModifier('slime_bread', 'critChance', 0.5, ModStage.Total, ModType.Add, false),
+				createModifier('slime_dumpling', 'maxHealth', 1, ModStage.Base, ModType.Add, true),
 			],
+		},
+		drop: {
+			rarity: Rarity.Common,
+			level: 0,
+			recipe: true,
 		},
 	},
 	slime_dumpling: {
 		name: 'Slime Dumpling',
 		meal: {
-			amount: 1,
-			modifiers: [],
+			amount: 2,
+			modifiers: [
+				createModifier('slime_dumpling', 'strength', 0.5, ModStage.Base, ModType.Add, true),
+				createModifier('slime_dumpling', 'maxHealth', -2, ModStage.Base, ModType.Add, true),
+			],
+		},
+		drop: {
+			rarity: Rarity.Common,
+			level: 0,
+			recipe: true,
 		},
 	},
 	carrot_cake: {
@@ -270,15 +301,20 @@ export const itemsData: Record<items, ItemData> = {
 		name: 'Pumpkin bread',
 		meal: {
 			amount: 1.5,
-			modifiers: [],
+			modifiers: [
+				createModifier('pumpkin_bowl', 'strength', 2, ModStage.Base, ModType.Add, true),
+				createModifier('pumpkin_bowl', 'maxHealth', -1, ModStage.Base, ModType.Add, true),
+				createModifier('pumpkin_bowl', 'lootChance', -1, ModStage.Base, ModType.Add, true),
+			],
 		},
+		price: 30,
 	},
 	flan: {
 		name: 'Pudding',
 		meal: {
 			amount: 1.5,
 			modifiers: [
-				createModifier('pudding', 'attackSpeed', 0.1, ModStage.Total, ModType.Add, false),
+				// createModifier('pudding', 'attackSpeed', 0.1, ModStage.Total, ModType.Add, false),
 			],
 		},
 	},
@@ -286,8 +322,13 @@ export const itemsData: Record<items, ItemData> = {
 		name: 'Stuffed pumpkin',
 		meal: {
 			amount: 3,
-			modifiers: [],
+			modifiers: [
+				createModifier('pumpkin_bowl', 'strength', 1, ModStage.Base, ModType.Add, true),
+				createModifier('pumpkin_bowl', 'maxHealth', 2, ModStage.Base, ModType.Add, true),
+				createModifier('pumpkin_bowl', 'critChance', -0.5, ModStage.Base, ModType.Percent, true),
+			],
 		},
+		price: 50,
 	},
 	strawberry_pie: {
 		name: 'Strawberry pie',
@@ -300,7 +341,16 @@ export const itemsData: Record<items, ItemData> = {
 		name: 'Hummus',
 		meal: {
 			amount: 3,
-			modifiers: [],
+			modifiers: [
+				createModifier('pumpkin_bowl', 'lootQuantity', 1, ModStage.Base, ModType.Add, true),
+				createModifier('pumpkin_bowl', 'lootChance', 0.5, ModStage.Base, ModType.Percent, true),
+			],
+		},
+		drop: {
+			rarity: Rarity.Rare,
+			level: 0,
+			boss: true,
+			recipe: true,
 		},
 	},
 	magic_bean: {
@@ -313,4 +363,18 @@ export const itemsData: Record<items, ItemData> = {
 	},
 }
 
-export const sellableItems = entries(itemsData).reduce((acc, [name, { price }]) => price ? [...acc, name] : acc, [] as items[])
+export const getSellableItems = (amount: number) => {
+	const items: Item[] = []
+	for (const [name, { price, meal }] of entries(itemsData)) {
+		if (!price) continue
+		if (meal) {
+			if (!save.unlockedRecipes.includes(name)) {
+				items.push({ name: 'recipe', quantity: 1, recipe: name })
+			}
+		} else {
+			items.push({ name, quantity: 1 })
+		}
+	}
+	const shuffled = shuffle(items)
+	return shuffled.splice(0, amount)
+}

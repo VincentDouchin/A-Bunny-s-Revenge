@@ -98,18 +98,6 @@ canvas.main {
 .appear-exit-to {
 	opacity: 0;
 }
-/* ! TOAST */
-.toast-enter-active,
-.toast-exit-active {
-	transition: all 1s ease;
-}
-.toast-enter {
-	transform: translateY(100%);
-}
-.toast-exit-to {
-	transform: translateY(-100%);
-	opacity: 0;
-}
 
 /* ! SLIDE DOWN */
 .slide-down-enter-active,
@@ -184,7 +172,7 @@ button.button {
 	all: unset;
 	display: grid;
 	place-items: center;
-	padding: 0.2rem 0.5rem;
+	padding: 0.2em 0.5em;
 	background: hsl(0, 0%, 0%, 0.3);
 	color: white;
 	font-size: 2rem;

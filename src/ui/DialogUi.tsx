@@ -7,6 +7,7 @@ import atom from 'solid-use/atom'
 import { CSS2DObject } from 'three/examples/jsm/renderers/CSS2DRenderer'
 import { Quaternion, Vector3 } from 'three'
 import { ForQuery } from './components/ForQuery'
+import { OutlineText } from './components/styledComponents'
 import { ecs, ui } from '@/global/init'
 import type { Entity } from '@/global/entity'
 import { params } from '@/global/context'
@@ -147,7 +148,9 @@ export const DialogUi = ({ player }: { player: With<Entity, 'playerControls' | '
 							return (
 								<Portal mount={el()}>
 									<Show when={entity.npcName}>
-										<div class="npc-name">{entity.npcName}</div>
+										<OutlineText>
+											<div class="npc-name">{entity.npcName}</div>
+										</OutlineText>
 									</Show>
 									<div class="dialog-container">
 										<DialogText text={text()} finished={finished} />

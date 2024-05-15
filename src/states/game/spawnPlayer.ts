@@ -38,6 +38,8 @@ const playerAnimationMap: Record<PlayerAnimations, Animations['Bunny']> = {
 	dying: 'DEATH',
 }
 
+export const PLAYER_DEFAULT_HEALTH = 10
+
 export const playerBundle = (health: number, addHealth: boolean, weapon: weapons | null) => {
 	const model = clone(assets.characters.Bunny.scene)
 	model.traverse((node) => {
@@ -105,7 +107,7 @@ export const spawnCharacter: System<FarmRessources> = (ressources) => {
 		updateSave(s => s.modifiers = [])
 	}
 	ecs.add({
-		...playerBundle(5, true, null),
+		...playerBundle(PLAYER_DEFAULT_HEALTH, true, null),
 		position,
 		rotation,
 	})
@@ -128,7 +130,7 @@ export const spawnPlayerClearing = () => {
 	for (const door of doorQuery) {
 		if (door.door === 'south') {
 			ecs.add({
-				...playerBundle(5, true, null),
+				...playerBundle(PLAYER_DEFAULT_HEALTH, true, null),
 				position: new Vector3(...door.position.toArray()).add(new Vector3(0, 0, -20).applyQuaternion(door.rotation)),
 				rotation: door.rotation.clone().multiply(new Quaternion().setFromAxisAngle(new Vector3(0, 1, 0), Math.PI)),
 			})
