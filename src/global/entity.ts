@@ -244,7 +244,7 @@ export interface Entity {
 	nightLight?: Light
 	emissiveMat?: MeshPhongMaterial
 	ambientLight?: 'night' | 'day'
-	withTimeUniform?: true
+	withTimeUniform?: true | (ShaderMaterial | MeshPhongMaterial)[]
 	// ! Basket
 	basket?: With<Entity, 'inventory' | 'inventoryId' | 'inventorySize'>
 	following?: boolean

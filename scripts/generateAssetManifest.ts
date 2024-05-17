@@ -1,35 +1,34 @@
-import { stat, writeFile } from 'node:fs/promises'
-import path from 'node:path'
-import process from 'node:process'
-import { glob } from 'glob'
-import type { PluginOption } from 'vite'
+import type { Stats } from 'node:fs'
+import { AssetTransformer, type PathInfo } from './assetPipeline'
 
-const launchScript = async (filePath?: string) => {
-	if (!filePath || filePath.includes('assets\\')) {
-		console.log('generating asset manifest')
-		const modified: Record<string, { size: number, modified: number }> = {}
-		const assets = await glob('./assets/*/**.*')
-		for (const path of assets) {
-			try {
-				const file = await stat(path)
-				modified[path.replace('assets\\', '/assets/').replace(/\\/g, '/')] = { size: Math.round(file.size), modified: Math.round(file.mtimeMs) }
-			} catch (e) {
-				console.error(`file ${path} not present`)
-			}
-		}
-		await writeFile(path.join(process.cwd(), 'assets', 'assetManifest.json'), JSON.stringify(modified))
+export class GenerateAssetManifest extends AssetTransformer {
+	on = ['add', 'remove', 'init'] as const
+	modified = new Map<string, { size: number, modified: number }>()
+	path = ['assets', 'assetManifest.json']
+	folder: 'assets'
+
+	convertPath(path: string) {
+		return path.replace('assets\\', '/assets/').replace(/\\/g, '/')
 	}
-}
 
-export const generateAssetManifest = (): PluginOption => {
-	launchScript()
-	return {
-		name: 'watch-assets',
-		apply: 'serve',
-		configureServer(server) {
-			server.watcher.on('add', launchScript)
-			server.watcher.on('unlink', launchScript)
-		},
+	async add(path: PathInfo, getStats: Promise<Stats>) {
+		if (path.folder === 'assets') return
+		const stats = await getStats
+		this.modified.set(this.convertPath(path.path), {
+			size: Math.round(stats.size),
+			modified: Math.round(stats.mtimeMs),
+		})
+	}
 
+	remove(path: PathInfo) {
+		delete this.modified[this.convertPath(path.path)]
+	}
+
+	generate() {
+		return JSON.stringify(
+			Array.from(this.modified.entries())
+				.sort(([a], [b]) => a.localeCompare(b))
+				.reduce((acc, [key, val]) => ({ ...acc, [key]: val }), {}),
+		)
 	}
 }

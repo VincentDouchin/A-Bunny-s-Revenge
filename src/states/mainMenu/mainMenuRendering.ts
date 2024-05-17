@@ -1,13 +1,13 @@
 import { Easing, Tween } from '@tweenjs/tween.js'
 import type { MeshStandardMaterial } from 'three'
-import { CanvasTexture, Group, Mesh, MeshBasicMaterial, PerspectiveCamera, Raycaster, Scene, Vector2, Vector3 } from 'three'
+import { CanvasTexture, Group, Mesh, MeshBasicMaterial, PerspectiveCamera, PlaneGeometry, Raycaster, Scene, Vector2, Vector3 } from 'three'
 
 import { enableBasketUi, spawnBasket } from '../game/spawnBasket'
 import { PLAYER_DEFAULT_HEALTH, playerBundle } from '../game/spawnPlayer'
 import { updateCameraZoom } from '@/global/camera'
 import { params } from '@/global/context'
 import { RenderGroup } from '@/global/entity'
-import { assets, ecs, gameTweens } from '@/global/init'
+import { assets, coroutines, ecs, gameTweens } from '@/global/init'
 import { menuInputMap } from '@/global/inputMaps'
 import { getTargetSize, renderer, updateRenderSize } from '@/global/rendering'
 import { resetSave } from '@/global/save'
@@ -16,6 +16,7 @@ import { cutSceneState, mainMenuState } from '@/global/states'
 import type { direction } from '@/lib/directions'
 import { windowEvent } from '@/lib/uiManager'
 import { drawnHouseShader } from '@/shaders/drawnHouseShader'
+import { mainMenuBackgound } from '@/shaders/mainMenuBackground'
 import { cloneCanvas, imgToCanvas } from '@/utils/buffer'
 import { doorQuery, leaveHouse, setSensor } from '@/utils/dialogHelpers'
 
@@ -139,13 +140,26 @@ export const intiMainMenuRendering = () => {
 	bookModel.rotateX(-Math.PI / 2)
 	bookModel.rotateY(Math.PI / 2)
 	scene.add(bookModel)
+	const background = new Mesh(new PlaneGeometry(20, 10), mainMenuBackgound)
+	const coroutine = coroutines.add(function*() {
+		const now = Date.now()
+		while (true) {
+			mainMenuBackgound.uniforms.time.value = now - Date.now()
+			mainMenuBackgound.uniforms.resolution.value = new Vector2(window.innerWidth, window.innerHeight)
+			mainMenuBackgound.needsUpdate = true
+			yield
+		}
+	})
+	background.addEventListener('removed', coroutine)
+	background.rotateX(-Math.PI / 2)
+	scene.add(background)
 	const windowShader = drawnHouseShader()
 	bookModel.traverse((node) => {
 		if (node instanceof Mesh && node.name === 'pageleft') {
 			node.material = windowShader
 			ecs.add({
 				model: node,
-				withTimeUniform: true,
+				withTimeUniform: [windowShader],
 				stateEntity: mainMenuState,
 			})
 		}

@@ -179,7 +179,7 @@ const waterBundle = (level: Level) => {
 	return {
 		model: waterMesh,
 		position: new Vector3(0, -3, 0),
-		withTimeUniform: true,
+		withTimeUniform: [waterMesh.material],
 		rotation: new Quaternion().setFromAxisAngle(new Vector3(1, 0, 0), -Math.PI / 2),
 	} as const satisfies Entity
 }
@@ -304,16 +304,13 @@ export const spawnLevelData: System<FarmRessources | DungeonRessources | void> =
 	}
 }
 
-const withTimeUniformQuery = ecs.with('withTimeUniform', 'position')
+const withTimeUniformQuery = ecs.with('withTimeUniform')
 export const updateTimeUniforms = () => {
 	for (const entity of withTimeUniformQuery) {
-		if (entity.model) {
-			entity.model.traverse((node) => {
-				if (node instanceof Mesh) {
-					node.material.uniforms.time.value = time.elapsed / 1000
-					node.material.uniforms.needsUpdate = true
-				}
-			})
+		if (Array.isArray(entity.withTimeUniform)) {
+			for (const mat of entity.withTimeUniform) {
+				(mat as any).uniforms.time.value = time.elapsed / 1000
+			}
 		}
 		if (entity.instanceHandle) {
 			entity.instanceHandle.setUniform('time', time.elapsed / 1000)

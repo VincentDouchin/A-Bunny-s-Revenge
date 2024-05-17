@@ -5,22 +5,25 @@ import solidPlugin from 'vite-plugin-solid'
 import solidStyledPlugin from 'vite-plugin-solid-styled'
 
 import { VitePWA } from 'vite-plugin-pwa'
-import generateAssetNames from './scripts/generateAssetNamesPlugin'
-import { autoConvertFBXtoGLB } from './scripts/convertFbx2GLB'
-import { extractAnimations } from './scripts/extractAnimations'
-import { generateAssetManifest } from './scripts/generateAssetManifest'
-import { convertAudioFiles } from './scripts/convertAudioFiles'
-import { optimizeAssets } from './scripts/optimizeAssets'
+import { assetPipeline } from './scripts/assetPipeline'
+import { ConverAudioFiles } from './scripts/convertAudioFiles'
+import { ExtractAnimations } from './scripts/extractAnimations'
+import { GenerateAssetManifest } from './scripts/generateAssetManifest'
+import { GenerateAssetNames } from './scripts/generateAssetNames'
+import { OptimizeAssets } from './scripts/optimizeAssets'
+import { ConverFBXToGLB } from './scripts/convertFbx2GLB'
 
-export default defineConfig(() => {
+export default defineConfig(async () => {
 	const config: UserConfig = {
 		plugins: [
-			generateAssetNames(),
-			autoConvertFBXtoGLB(),
-			extractAnimations(),
-			generateAssetManifest(),
-			convertAudioFiles(),
-			optimizeAssets(),
+			await assetPipeline('./assets/**/*.*', [
+				new GenerateAssetNames(),
+				new GenerateAssetManifest(),
+				new OptimizeAssets(),
+				new ExtractAnimations(),
+				new ConverAudioFiles(),
+				new ConverFBXToGLB(),
+			]),
 			solidPlugin(),
 			solidStyledPlugin({
 				filter: {
