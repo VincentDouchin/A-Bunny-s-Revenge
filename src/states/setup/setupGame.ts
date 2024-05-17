@@ -17,8 +17,8 @@ export const setupGame = async () => {
 		updateRenderSize()
 		updateCameraZoom()
 	} else if (params.debugEnemies) {
-		const enemiesRoom = assignPlanAndEnemies([{ position: { x: 0, y: 0 }, connections: { north: 1, south: null, east: null }, type: RoomType.Seller }])
-		// enemiesRoom[0].enemies = ['Armabee']
+		const enemiesRoom = assignPlanAndEnemies([{ position: { x: 0, y: 0 }, connections: { north: 1, south: null, east: null }, type: RoomType.Battle }])
+		enemiesRoom[0].enemies = ['Porin_A', 'Porin_A', 'Porin_A']
 		dungeonState.enable({ dungeon: enemiesRoom[0], direction: 'south', firstEntry: true, playerHealth: 5, dungeonLevel: 0, weapon: 'SwordWeapon' })
 		updateRenderSize()
 		updateCameraZoom()

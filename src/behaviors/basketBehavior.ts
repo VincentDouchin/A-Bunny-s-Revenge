@@ -4,7 +4,7 @@ import type { Entity } from '@/global/entity'
 import { ecs } from '@/global/init'
 import type { StateParameters } from '@/lib/behaviors'
 import { behaviorPlugin } from '@/lib/behaviors'
-import { mainMenuState } from '@/global/states'
+import { cutSceneState, mainMenuState } from '@/global/states'
 
 const basketComponents = ['basket', 'basketAnimator', 'position', 'body', 'movementForce', 'targetRotation', 'rotation', 'speed'] as const satisfies readonly (keyof Entity)[]
 const basketQuery = ecs.with(...basketComponents)
@@ -25,7 +25,7 @@ export const basketBehaviorPlugin = behaviorPlugin(basketQuery, 'basket', basket
 			e.basketAnimator.playAnimation('WingFlap_Rocking')
 		},
 		update: (_e, setState, { dist }) => {
-			if (dist > (mainMenuState.enabled ? 2 : 40)) {
+			if (dist > (mainMenuState.enabled ? 2 : 40) && !cutSceneState.enabled) {
 				setState('running')
 			}
 		},
@@ -39,6 +39,7 @@ export const basketBehaviorPlugin = behaviorPlugin(basketQuery, 'basket', basket
 			if (dist < (mainMenuState.enabled ? 0 : 20)) {
 				setState('idle')
 			}
+
 			e.movementForce.x = direction.x
 			e.movementForce.z = direction.z
 			applyMove(e, force)

@@ -52,7 +52,7 @@ const drawUnderline = (ctx: CanvasRenderingContext2D, x: number, y: number, w: n
 	ctx.globalAlpha = 0.8
 }
 export type RenderMainMenuFn = (direction?: direction, offset?: number) => MenuOptions
-const menu = ['Continue', 'New Game', 'Settings', 'Credits'] as const
+const menu = ['Continue', 'New Game'] as const
 const mainMenuTexture = (mat: MeshStandardMaterial) => {
 	let selected = 0
 	const optionsDimensions: Partial<Record<MenuOptions, { y: number, w: number }>> = {}
@@ -169,7 +169,7 @@ export const intiMainMenuRendering = () => {
 			ecs.add({ menuSelected: 'Continue', menuTexture, ...menuInputMap(), windowShader, stateEntity: mainMenuState })
 			menuTexture(null)
 		}
-		for (const text of menu) {
+		for (const text of ['Continue', 'New Game', 'Settings', 'Credits'] as const) {
 			if (node.name === text.replace(' ', '_') && node instanceof Mesh) {
 				node.material = new MeshBasicMaterial({ transparent: true, opacity: 0 })
 				ecs.add({ menuButton: text, model: node, stateEntity: mainMenuState })

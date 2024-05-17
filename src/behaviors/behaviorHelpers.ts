@@ -29,6 +29,7 @@ export const applyMove = (entity: With<Entity, 'body' >, force: Vector3) => {
 	}
 }
 export const applyRotate = (entity: With<Entity, 'rotation' | 'targetRotation'>, force: Vector3) => {
+	if (pausedState.enabled) return
 	entity.targetRotation.setFromAxisAngle(new Vector3(0, 1, 0), Math.atan2(force.x, force.z))
 }
 export const takeDamage = (entity: With<Entity, 'currentHealth'>, damage: number) => {

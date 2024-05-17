@@ -75,7 +75,7 @@ const idle: EnemyState = {
 	},
 	update: (e, setState, { player, direction, touchedByPlayer, canSeePlayer }) => {
 		if (touchedByPlayer) return setState('hit')
-		if (direction && player && canSeePlayer) {
+		if (direction && player && canSeePlayer && !e.inactive) {
 			e.movementForce.x = direction.x
 			e.movementForce.z = direction.z
 			ecs.removeComponent(e, 'wander')
@@ -112,10 +112,10 @@ const wander: EnemyState = {
 		ecs.update(e, wanderBundle(e))
 	},
 	update: (e, setState, { canSeePlayer, force }) => {
-		if (canSeePlayer) return setState('idle')
+		if (canSeePlayer && !e.inactive) return setState('idle')
 
 		if (e.wander) {
-			if (e.wander.cooldown.finished()) {
+			if (e.wander.cooldown.finished() || e.inactive?.running()) {
 				e.enemyAnimator.playAnimation('running')
 				const direction = e.wander.target.clone().sub(e.position).normalize()
 				e.movementForce.x = direction.x
@@ -350,14 +350,14 @@ export const jumpingEnemyBehaviorPlugin = enemyBehavior(EnemyAttackStyle.Jumping
 			e.enemyAnimator.playAnimation('idle')
 			coroutines.add(function*() {
 				while (e.position.y < 25) {
-					e.movementForce.copy(new Vector3(0, 3, e.position.y / 10).applyQuaternion(e.rotation))
+					e.movementForce.copy(new Vector3(0, 3, e.position.y / 10).applyQuaternion(e.targetRotation))
 					yield
 				}
 				while (e.position.y > 5) {
-					e.movementForce.copy(new Vector3(0, -3, 1).applyQuaternion(e.rotation))
+					e.movementForce.copy(new Vector3(0, -3, 1).applyQuaternion(e.targetRotation))
 					yield
 				}
-				sleep(5).then(() => setState('idle'))
+
 				setState('attackCooldown')
 				e.movementForce.copy(new Vector3(0, 0, 0))
 				playSound('zapsplat_multimedia_game_sound_thump_hit_bubble_deep_underwater_88732')

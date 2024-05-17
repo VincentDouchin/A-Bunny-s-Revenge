@@ -280,7 +280,7 @@ export const props: PlacableProp<propNames>[] = [
 		models: ['door'],
 		bundle: (entity, data, ressources) => {
 			if (dungeonState.enabled && ressources && 'dungeon' in ressources) {
-				if (![RoomType.NPC, RoomType.Item].includes(ressources.dungeon.type)) {
+				if ([RoomType.Battle, RoomType.Boss, RoomType.Entrance].includes(ressources.dungeon.type)) {
 					entity.doorLocked = true
 				}
 			}

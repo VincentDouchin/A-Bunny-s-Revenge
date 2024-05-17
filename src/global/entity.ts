@@ -205,6 +205,7 @@ export interface Entity {
 
 	// ! Enemies
 	enemyName?: enemy
+	inactive?: Timer<false>
 	healthBar?: true
 	healthBarContainer?: CSS2DObject
 	boss?: true

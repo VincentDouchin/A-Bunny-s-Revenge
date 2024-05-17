@@ -24,7 +24,7 @@ import { applyDeathTimer, tickHitCooldown } from './states/dungeon/battle'
 import { dropBerriesOnHit } from './states/dungeon/bushes'
 import { buyItems } from './states/dungeon/buyItems'
 import { spawnWeaponsChoice } from './states/dungeon/chooseWeapon'
-import { removeEnemyFromSpawn, spawnEnemies } from './states/dungeon/enemies'
+import { removeEnemyFromSpawn, spawnEnemies, tickInactiveTimer } from './states/dungeon/enemies'
 import { killAnimation, killEntities } from './states/dungeon/health'
 import { addHealthBarContainer } from './states/dungeon/healthBar'
 import { spawnDrops } from './states/dungeon/lootPool'
@@ -105,9 +105,11 @@ genDungeonState
 dungeonState
 	.addSubscriber(spawnDrops, losingBattle, removeEnemyFromSpawn, applyArchingForce)
 	.onEnter(spawnDungeon, spawnLevelData, generatenavGrid, spawnEnemies, spawnPlayerDungeon, spawnBasket, moveCamera(true))
-	.onUpdate(runIf(canPlayerMove, allowDoorCollision, collideWithDoor, harvestCrop, killEntities), detroyProjectiles)
-	.onUpdate(runIf(() => !pausedState.enabled, tickHitCooldown, tickModifiers('speed'), tickSneeze, tickPoison))
-	.onUpdate(honeySplat, stepInHoney, endBattleSpawnChest, spawnPoisonTrail)
+	.onUpdate(
+		runIf(canPlayerMove, allowDoorCollision, collideWithDoor, harvestCrop, killEntities),
+		runIf(() => !pausedState.enabled, tickHitCooldown, tickModifiers('speed'), tickSneeze, tickPoison, tickInactiveTimer),
+	)
+	.onUpdate(detroyProjectiles, honeySplat, stepInHoney, endBattleSpawnChest, spawnPoisonTrail)
 	.onPostUpdate(buyItems)
 	.onExit(despawnOfType('map'))
 pausedState

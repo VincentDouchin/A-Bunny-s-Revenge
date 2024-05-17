@@ -7,7 +7,7 @@ import { enemyData } from '@/constants/enemies'
 import { EnemySizes, Sizes } from '@/constants/sizes'
 import { Animator } from '@/global/animator'
 import { type Entity, Faction } from '@/global/entity'
-import { assets, ecs } from '@/global/init'
+import { assets, ecs, time } from '@/global/init'
 import type { DungeonRessources } from '@/global/states'
 import { inMap } from '@/lib/hierarchy'
 import { modelColliderBundle } from '@/lib/models'
@@ -29,9 +29,10 @@ export const enemyBundle = (name: enemy, level: number) => {
 		...bundle,
 		enemyAnimator: new Animator(bundle.model, model.animations, enemy.animationMap),
 		...healthBundle(enemy.health * (level + 1)),
-		targetRotation: new Quaternion(),
+		targetRotation: new Quaternion().setFromAxisAngle(new Vector3(0, 1, 0), Math.PI * 2 * Math.random()),
 		strength: new Stat(1 + level),
 		...inMap(),
+		inactive: new Timer(2000, false),
 		faction: Faction.Enemy,
 		enemyName: name,
 		movementForce: new Vector3(),
@@ -64,5 +65,14 @@ export const spawnEnemies: System<DungeonRessources> = ({ dungeon, dungeonLevel 
 			...enemyBundle(enemy, dungeonLevel),
 			position: getRandom([...possiblePoints]),
 		})
+	}
+}
+const inactiveQuery = ecs.with('inactive')
+export const tickInactiveTimer = () => {
+	for (const entity of inactiveQuery) {
+		entity.inactive.tick(time.delta)
+		if (entity.inactive.finished()) {
+			ecs.removeComponent(entity, 'inactive')
+		}
 	}
 }
