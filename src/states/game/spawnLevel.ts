@@ -168,7 +168,7 @@ export const getdisplacementMap = (level: Level, invert = true) => {
 	return ctx.canvas
 }
 
-const waterBundle = (level: Level) => {
+const waterBundle = (level: Level): Entity => {
 	const waterMap = new CanvasTexture(level.water)
 	waterMap.flipY = false
 	const waterMesh = new Mesh(
@@ -181,7 +181,7 @@ const waterBundle = (level: Level) => {
 		position: new Vector3(0, -3, 0),
 		withTimeUniform: [waterMesh.material],
 		rotation: new Quaternion().setFromAxisAngle(new Vector3(1, 0, 0), -Math.PI / 2),
-	} as const satisfies Entity
+	}
 }
 export const setDisplacement = (geo: PlaneGeometry, canvas: HTMLCanvasElement) => {
 	const width = geo.parameters.widthSegments + 1

@@ -21,7 +21,7 @@ export class GenerateAssetManifest extends AssetTransformer {
 	}
 
 	remove(path: PathInfo) {
-		delete this.modified[this.convertPath(path.path)]
+		this.modified.delete(this.convertPath(path.path))
 	}
 
 	generate() {
