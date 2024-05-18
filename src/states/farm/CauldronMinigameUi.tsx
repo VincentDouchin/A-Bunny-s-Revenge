@@ -18,10 +18,11 @@ import type { FarmUiProps } from '@/ui/types'
 import { updateCameraZoom } from '@/global/camera'
 import { params } from '@/global/context'
 import { fireParticles } from '@/particles/fireParticles'
+import { useQuery } from '@/ui/store'
 
-const cauldronQuery = ecs.with('menuType', 'interactionContainer', 'group', 'rotation', 'recipesQueued', 'spoon').where(({ menuType }) => menuType === MenuType.CauldronGame)
+const cauldronQuery = useQuery(ecs.with('menuType', 'interactionContainer', 'group', 'rotation', 'recipesQueued', 'spoon').where(({ menuType }) => menuType === MenuType.CauldronGame))
 export const CauldronMinigameUi = ({ player }: FarmUiProps) => {
-	const cauldron = ui.sync(() => cauldronQuery.first)
+	const cauldron = createMemo(() => cauldronQuery()?.[0])
 	return (
 		<Show when={cauldron()}>
 			{(cauldron) => {
@@ -118,11 +119,11 @@ export const CauldronMinigameUi = ({ player }: FarmUiProps) => {
 				const spotSize = createMemo(() => {
 					return `calc(0.5rem + ${percentSynced()}rem)`
 				})
-				const isTouch = ui.sync(() => inputManager.controls === 'touch')
+				const isTouch = createMemo(() => inputManager.controls() === 'touch')
 				const close = () => ecs.removeComponent(cauldron(), 'menuType')
 				const playerInputs = () => player.playerControls.touchController
 				const isPrimaryPressed = ui.sync(() => playerInputs()?.get('primary'))
-				const interact = (value: number, input: 'primary' | 'secondary' | 'pause') => () => {
+				const interact = (value: number, input: 'primary' | 'secondary') => () => {
 					playerInputs()?.set(input, value)
 				}
 				css/* css */`

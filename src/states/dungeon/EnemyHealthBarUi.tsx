@@ -1,11 +1,11 @@
-import { createMemo } from 'solid-js'
+import { For, createMemo } from 'solid-js'
 import { Portal, Show } from 'solid-js/web'
 import { css } from 'solid-styled'
 import { enemyData } from '@/constants/enemies'
 import { ecs, ui } from '@/global/init'
-import { ForQuery } from '@/ui/components/ForQuery'
+import { useQuery } from '@/ui/store'
 
-const healthBarQuery = ecs.with('healthBarContainer', 'maxHealth', 'currentHealth', 'enemyName')
+const healthBarQuery = useQuery(ecs.with('healthBarContainer', 'maxHealth', 'currentHealth', 'enemyName'))
 
 export const EnemyHealthBarUi = () => {
 	css/* css */`
@@ -60,7 +60,7 @@ export const EnemyHealthBarUi = () => {
 		animation-fill-mode: forwards;
 	}`
 	return (
-		<ForQuery query={healthBarQuery}>
+		<For each={healthBarQuery()}>
 			{(entity) => {
 				const healthPercent = ui.sync(() => Math.max(0, entity.currentHealth / entity.maxHealth.value))
 				const dead = createMemo(() => healthPercent() === 0)
@@ -87,6 +87,6 @@ export const EnemyHealthBarUi = () => {
 					</>
 				)
 			}}
-		</ForQuery>
+		</For>
 	)
 }

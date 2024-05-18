@@ -6,8 +6,8 @@ import type { Atom } from 'solid-use/atom'
 import atom from 'solid-use/atom'
 import { CSS2DObject } from 'three/examples/jsm/renderers/CSS2DRenderer'
 import { Quaternion, Vector3 } from 'three'
-import { ForQuery } from './components/ForQuery'
 import { OutlineText } from './components/styledComponents'
+import { useQuery } from './store'
 import { ecs, ui } from '@/global/init'
 import type { Entity } from '@/global/entity'
 import { params } from '@/global/context'
@@ -79,7 +79,7 @@ export const DialogText = (props: { text: string, finished: Atom<boolean> }) => 
 	)
 }
 
-const dialogQuery = ecs.with('dialog', 'activeDialog')
+const dialogQuery = useQuery(ecs.with('dialog', 'activeDialog'))
 export const DialogUi = ({ player }: { player: With<Entity, 'playerControls' | 'position'> }) => {
 	css/* css */`
 	.dialog-container {
@@ -103,7 +103,7 @@ export const DialogUi = ({ player }: { player: With<Entity, 'playerControls' | '
 	}
 `
 	return (
-		<ForQuery query={dialogQuery}>
+		<For each={dialogQuery()}>
 			{(entity) => {
 				const currentDialog = atom<IteratorResult<string | string[] | void | false> | null>(null)
 				const element = atom<HTMLElement | null>(null)
@@ -161,6 +161,6 @@ export const DialogUi = ({ player }: { player: With<Entity, 'playerControls' | '
 					</Show>
 				)
 			}}
-		</ForQuery>
+		</For>
 	)
 }

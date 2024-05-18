@@ -1,13 +1,15 @@
 import { For, Show, createMemo } from 'solid-js'
+import { useGame } from './store'
 import { XBOXSeries } from '@/constants/keys'
 import { assets, inputManager } from '@/global/init'
 import type { Input } from '@/lib/inputs'
+import { save } from '@/global/save'
 
-export const InputIcon = (props: { input: Input }) => {
-	const controls = inputManager.controls
+export const InputIcon = (props: { input: Input, size?: number }) => {
+	const context = useGame()
 	const icons = createMemo(() => {
-		if (controls === 'keyboard') {
-			return inputManager.getKeyName(props.input).map(key => assets.buttons(key))
+		if (context?.controls() === 'keyboard') {
+			return inputManager.getKeyName(props.input, save.settings.controls).map(key => assets.buttons(key))
 		} else if (props.input.axes.length > 0) {
 			return props.input.axes.map(([axis]) => assets.buttons(XBOXSeries.axes[Math.floor(axis / 2)]))
 		} else if (props.input.buttons.length > 0) {
@@ -19,7 +21,7 @@ export const InputIcon = (props: { input: Input }) => {
 			{(iconsTextures) => {
 				return (
 					<For each={iconsTextures()}>
-						{icon => <div style={{ 'width': '1.5em', 'overflow': 'hidden', 'aspect-ratio': 1 }} class="input-icon">{icon}</div>}
+						{icon => <div style={{ 'width': `calc(1.5em * ${props.size ?? 1})`, 'overflow': 'hidden', 'aspect-ratio': 1 }} class="input-icon">{icon}</div>}
 					</For>
 				)
 			}}

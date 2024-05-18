@@ -8,19 +8,19 @@ import type { Quest, QuestName } from '@/constants/quests'
 import { MenuType } from '@/global/entity'
 import { ecs, ui } from '@/global/init'
 import { save } from '@/global/save'
-import { ForQuery } from '@/ui/components/ForQuery'
 import { Menu, menuItem } from '@/ui/components/Menu'
 import { Modal } from '@/ui/components/Modal'
 import type { FarmUiProps } from '@/ui/types'
 import { entries } from '@/utils/mapFunctions'
 import { GoldContainer, InventoryTitle } from '@/ui/components/styledComponents'
+import { useQuery } from '@/ui/store'
 // eslint-disable-next-line no-unused-expressions
 menuItem
-const openBulletinBoardQuery = ecs.with('menuType').where(e => e.menuType === MenuType.Quest)
+const openBulletinBoardQuery = useQuery(ecs.with('menuType').where(e => e.menuType === MenuType.Quest))
 
 export const QuestUi = ({ player }: FarmUiProps) => {
 	return (
-		<ForQuery query={openBulletinBoardQuery}>
+		<For each={openBulletinBoardQuery()}>
 			{(board) => {
 				const visible = atom(false)
 				onMount(() => setTimeout(() => visible(true), 100))
@@ -124,6 +124,6 @@ export const QuestUi = ({ player }: FarmUiProps) => {
 					</Modal>
 				)
 			}}
-		</ForQuery>
+		</For>
 	)
 }

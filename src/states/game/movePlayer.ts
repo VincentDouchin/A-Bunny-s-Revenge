@@ -40,7 +40,7 @@ export const movePlayer = () => {
 		movementForce.x -= playerControls.get('right').pressed
 		movementForce.z -= playerControls.get('backward').pressed
 		movementForce.z += playerControls.get('forward').pressed
-		if (inputManager.controls === 'keyboard') {
+		if (inputManager.controls() === 'keyboard') {
 			movementForce.normalize()
 		}
 	}

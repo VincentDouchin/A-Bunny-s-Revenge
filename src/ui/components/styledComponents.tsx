@@ -1,5 +1,5 @@
 import type { icons } from '@assets/assets'
-import type { JSX, JSXElement } from 'solid-js'
+import { type Accessor, For, type JSX, type JSXElement } from 'solid-js'
 import { css } from 'solid-styled'
 import { assets } from '@/global/init'
 
@@ -64,6 +64,49 @@ export const InventoryTitle = (props: { children: JSXElement, color?: string }) 
 			<OutlineText>
 				{props.children}
 			</OutlineText>
+		</div>
+	)
+}
+
+export const SwitchButtons = <T extends string,>(props: { options: T[], value: Accessor<T>, setValue: (value: T) => void }) => {
+	css/* css */`
+	.container{
+		display:grid;
+		grid-template-columns: repeat(${String(props.options.length)}, 1fr);
+		align-items: center;
+		gap: 2rem;
+	}
+	.switch-button{
+		text-align: center;
+		width:100%;
+		border-radius: 1rem;
+		position: relative;
+		overflow: hidden;
+	}
+	.selected{
+		border: solid 2px var(--gold);
+		box-shadow:inset 0 0 1rem 0 black;
+	}
+
+	.unselected{
+		border: solid 2px var(--gold-tarnished);
+		color: grey;
+	}
+	`
+	return (
+		<div class="container">
+			<For each={props.options}>
+				{(option) => {
+					return (
+						<div
+							onClick={() => props.setValue(option)}
+							class={`${props.value() === option ? 'selected' : 'unselected'} switch-button`}
+						>
+							{option}
+						</div>
+					)
+				}}
+			</For>
 		</div>
 	)
 }

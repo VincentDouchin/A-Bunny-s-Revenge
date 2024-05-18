@@ -56,7 +56,7 @@ import { UI } from './ui/UI'
 coreState
 	.addPlugins(hierarchyPlugin, physicsPlugin, transformsPlugin, addToScene('camera', 'light', 'model', 'dialogContainer', 'emitter', 'interactionContainer', 'minigameContainer', 'healthBarContainer', 'dashDisplay', 'stun', 'debuffsContainer', 'weaponArc', 'questMarkerContainer'), updateModels, particlesPlugin)
 	.onEnter(initThree, initCamera, moveCamera(true))
-	.onEnter(ui.render(UI), initHowler)
+	.onEnter(() => ui.render(UI), initHowler)
 	.addSubscriber(...target, resize, disablePortrait, enableFullscreen, stopOnLosingFocus)
 	.onPreUpdate(coroutines.tick, savePlayerFromTheEmbraceOfTheVoid)
 	.onUpdate(runIf(() => !pausedState.enabled, updateAnimations('enemyAnimator', 'playerAnimator', 'chestAnimator', 'houseAnimator', 'ovenAnimator', 'basketAnimator', 'kayAnimator'), () => time.tick()))

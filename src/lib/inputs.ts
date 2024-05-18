@@ -1,4 +1,5 @@
-import { keys, metaKeys } from '@/constants/keys'
+import atom from 'solid-use/atom'
+import { keys, metaKeys, mouse } from '@/constants/keys'
 
 export const GAMEPAD_AXIS = {
 	LEFT_X: 0,
@@ -31,28 +32,44 @@ export const GAMEPAD_BUTTON = {
 	LEFT: 14,
 	RIGHT: 15,
 } as const
-
+export enum MOUSE_BUTTONS {
+	LEFT = 0,
+	RIGHT = 2,
+}
+export type ControlType = 'gamepad' | 'touch' | 'keyboard'
 export class InputManager {
 	keys: Record<string, 0 | 1> = {}
-	controls: 'gamepad' | 'touch' | 'keyboard' = 'keyboard'
+	controls = atom<ControlType>('keyboard')
 	#maps = new Set<InputMap<any>>()
+	mouse: Record<number, boolean> = {}
 	layoutMap: KeyboardLayoutMap | null = null
 	constructor() {
 		window.addEventListener('keydown', (e) => {
 			if (e.code in this.keys) {
+				e.preventDefault()
 				this.keys[e.code] = 1
 			}
 		})
 		window.addEventListener('keyup', (e) => {
 			if (e.code in this.keys) {
+				e.preventDefault()
 				this.keys[e.code] = 0
 			}
 		})
 		window.addEventListener('keydown', () => {
-			this.controls = 'keyboard'
+			this.controls('keyboard')
 		})
 		window.addEventListener('touchstart', () => {
-			this.controls = 'touch'
+			this.controls('touch')
+		})
+		window.addEventListener('mousedown', (e) => {
+			this.mouse[e.button] = true
+		})
+		window.addEventListener('contextmenu', (e) => {
+			e.preventDefault()
+		})
+		window.addEventListener('mouseup', (e) => {
+			this.mouse[e.button] = false
 		})
 		if (navigator.keyboard) {
 			navigator.keyboard.getLayoutMap().then((map) => {
@@ -61,11 +78,16 @@ export class InputManager {
 		}
 	}
 
-	getKeyName(input: Input) {
-		return input.keys.map((key) => {
+	getKeyName(input: Input, controls: 'mouse' | 'keyboard') {
+		const keyNames = input.keys.map((key) => {
 			const keyName = this.layoutMap?.get(key) ?? metaKeys[key]
 			return keys[keyName]
 		})
+		const mouseButtons = input.mouse.map(m => mouse[m])
+		if (mouseButtons.length && controls === 'mouse') {
+			return mouseButtons
+		}
+		return keyNames
 	}
 
 	update = () => {
@@ -88,7 +110,9 @@ export class Input {
 	keys: string[] = []
 	buttons: number[] = []
 	axes: [number, 1 | -1][] = []
+	mouse: number[] = []
 	#manager: InputManager
+
 	constructor(manager: InputManager) {
 		this.#manager = manager
 	}
@@ -99,6 +123,10 @@ export class Input {
 			this.#manager.keys[key] = 0
 		}
 		return this
+	}
+
+	setMouse(...buttons: MOUSE_BUTTONS[]) {
+		this.mouse.push(...buttons)
 	}
 
 	setButtons(...buttons: number[]) {
@@ -121,17 +149,22 @@ export class Input {
 			if (this.#manager.keys[key])
 				this.pressed = 1
 		}
+		for (const bubtton of this.mouse) {
+			if (this.#manager.mouse[bubtton]) {
+				this.pressed = 1
+			}
+		}
 		for (const gamepad of gamepads) {
 			for (const button of this.buttons) {
 				if (gamepad.buttons[button].pressed) {
 					this.pressed = gamepad.buttons[button].value
-					this.#manager.controls = 'gamepad'
+					this.#manager.controls('gamepad')
 				}
 			}
 			for (const [axis, direction] of this.axes) {
 				const amount = gamepad.axes[axis]
 				if (Math.abs(amount) > 0.1) {
-					this.#manager.controls = 'gamepad'
+					this.#manager.controls('gamepad')
 					if (Math.sign(amount) === direction) {
 						this.pressed = Math.abs(amount)
 					} else {

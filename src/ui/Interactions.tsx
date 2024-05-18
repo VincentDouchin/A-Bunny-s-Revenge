@@ -1,12 +1,11 @@
 import type { With } from 'miniplex'
-import type { Accessor } from 'solid-js'
-import { createSignal, onMount } from 'solid-js'
+import { For, createSignal, onMount } from 'solid-js'
 import { Portal, Show } from 'solid-js/web'
-import { Transition } from 'solid-transition-group'
 import { css } from 'solid-styled'
+import { Transition } from 'solid-transition-group'
 import { InputIcon } from './InputIcon'
-import { ForQuery } from './components/ForQuery'
 import { OutlineText } from './components/styledComponents'
+import { useGame, useQuery } from './store'
 import { itemsData } from '@/constants/items'
 import type { Entity } from '@/global/entity'
 import { Interactable } from '@/global/entity'
@@ -51,11 +50,9 @@ export const getInteractables = (
 
 const interactionQuery = ecs.with('interactable', 'interactionContainer', 'position').without('menuType')
 
-export const InteractionUi = ({ player, isTouch }: {
-	player: With<Entity, 'playerControls' | 'inventory'>
-	isTouch: Accessor<boolean>
-}) => {
-	ui.updateSync(() => interactionQuery.size)
+export const InteractionUi = () => {
+	const query = useQuery(interactionQuery)
+	const context = useGame()
 	css/* css */`
 		.interaction{
 			background: var(--black-transparent);
@@ -73,44 +70,50 @@ export const InteractionUi = ({ player, isTouch }: {
 		}
 	`
 	return (
-		<ForQuery query={interactionQuery}>
-			{(entity) => {
-				if (entity.size) {
-					entity.interactionContainer.position.y = entity.size.y - entity.position.y
-				}
-				const interactables = ui.sync(() => getInteractables(player, entity))
-				const [visible, setVisible] = createSignal(false)
-				onMount(() => {
-					setTimeout(() => setVisible(true), 10)
-				})
+		<Show when={context?.player()}>
+			{(player) => {
 				return (
-					<Portal mount={entity.interactionContainer.element}>
-						<Transition name="popup">
-							<Show when={visible() && (!isTouch() || entity.weaponStand)}>
-								<div class="interaction">
-									<Show when={entity.weaponStand}>
-										{weaponName => <WeaponStatsUi name={weaponName()} />}
-									</Show>
-									<Show when={!isTouch()}>
-										<Show when={interactables()[1]}>
-											<div class="interaction-text">
-												<InputIcon input={player.playerControls.get('secondary')} />
-												<OutlineText>{interactables()[1]}</OutlineText>
+					<For each={query()}>
+						{(entity) => {
+							if (entity.size) {
+								entity.interactionContainer.position.y = entity.size.y - entity.position.y
+							}
+							const interactables = ui.sync(() => getInteractables(player(), entity))
+							const [visible, setVisible] = createSignal(false)
+							onMount(() => {
+								setTimeout(() => setVisible(true), 10)
+							})
+							return (
+								<Portal mount={entity.interactionContainer.element}>
+									<Transition name="popup">
+										<Show when={visible() && (!context?.usingTouch() || entity.weaponStand)}>
+											<div class="interaction">
+												<Show when={entity.weaponStand}>
+													{weaponName => <WeaponStatsUi name={weaponName()} />}
+												</Show>
+												<Show when={!context?.usingTouch()}>
+													<Show when={interactables()[1]}>
+														<div class="interaction-text">
+															<InputIcon input={player().playerControls.get('secondary')} />
+															<OutlineText>{interactables()[1]}</OutlineText>
+														</div>
+													</Show>
+													<Show when={interactables()[0]}>
+														<div class="interaction-text">
+															<InputIcon input={player().playerControls.get('primary')}></InputIcon>
+															<OutlineText>{interactables()[0]}</OutlineText>
+														</div>
+													</Show>
+												</Show>
 											</div>
 										</Show>
-										<Show when={interactables()[0]}>
-											<div class="interaction-text">
-												<InputIcon input={player.playerControls.get('primary')}></InputIcon>
-												<OutlineText>{interactables()[0]}</OutlineText>
-											</div>
-										</Show>
-									</Show>
-								</div>
-							</Show>
-						</Transition>
-					</Portal>
+									</Transition>
+								</Portal>
+							)
+						}}
+					</For>
 				)
 			}}
-		</ForQuery>
+		</Show>
 	)
 }

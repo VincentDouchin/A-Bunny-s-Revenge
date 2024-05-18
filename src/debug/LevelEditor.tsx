@@ -3,32 +3,33 @@ import type { RigidBodyType } from '@dimforge/rapier3d-compat'
 import { delMany, get, set } from 'idb-keyval'
 import type { With } from 'miniplex'
 import { For, Show, createEffect, createMemo, createSignal, onCleanup, onMount } from 'solid-js'
+import { css } from 'solid-styled'
 import { Mesh, MeshBasicMaterial, MeshStandardMaterial, PlaneGeometry, Quaternion, Raycaster, Vector2, Vector3 } from 'three'
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls'
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader'
 import { generateUUID } from 'three/src/math/MathUtils'
-import { css } from 'solid-styled'
 import { EntityEditor } from './EntityEditor'
-import type { PlacableProp, customModel } from './props'
-import { getModel, props } from './props'
 import { MapEditor } from './MapEditor'
 import { debugState } from './debugState'
 import { getGameRenderGroup } from './debugUi'
+import type { PlacableProp, customModel } from './props'
+import { getModel, props } from './props'
 import { getFileName } from '@/global/assetLoaders'
 import { params } from '@/global/context'
 import type { Entity } from '@/global/entity'
 import { assets, ecs, levelsData, ui } from '@/global/init'
 import { loadLevelData } from '@/global/levelData'
+import { updateRenderSize } from '@/global/rendering'
 import { campState, dungeonState } from '@/global/states'
+import { inMap } from '@/lib/hierarchy'
 import { throttle } from '@/lib/state'
+import { thumbnailRenderer } from '@/lib/thumbnailRenderer'
 import { ToonMaterial } from '@/shaders/materials'
 import { HEIGHT, getdisplacementMap, setDisplacement, spawnGroundAndTrees, spawnLevelData } from '@/states/game/spawnLevel'
 import { PLAYER_DEFAULT_HEALTH, playerBundle } from '@/states/game/spawnPlayer'
+import { useQuery } from '@/ui/store'
 import { getScreenBuffer } from '@/utils/buffer'
 import { entries, getRandom } from '@/utils/mapFunctions'
-import { inMap } from '@/lib/hierarchy'
-import { updateRenderSize } from '@/global/rendering'
-import { thumbnailRenderer } from '@/lib/thumbnailRenderer'
 
 export type ModelName = models | customModel | vegetation | gardenPlots | fruit_trees
 export interface EntityData<T extends Record<string, any>> {
@@ -66,7 +67,7 @@ export interface Level {
 	size: { x: number, y: number }
 }
 const addedEntitiesQuery = ecs.with('entityId', 'model', 'group', 'position', 'rotation')
-const mapQuery = ecs.with('map')
+const mapQuery = useQuery(ecs.with('map'))
 const cameraQuery = ecs.with('mainCamera', 'camera')
 const groundQuery = ecs.with('ground', 'model')
 const thumbnail = thumbnailRenderer(256)
@@ -79,7 +80,7 @@ export const LevelEditor = () => {
 	})
 	const [disableSave, setDisableSave] = createSignal(false, { equals: false })
 	const [open, setOpen] = createSignal(false)
-	const map = ui.sync(() => mapQuery.first?.map)
+	const map = createMemo(() => mapQuery()?.[0]?.map)
 	const download = async () => {
 		const data = await loadLevelData()
 		// @ts-expect-error okok

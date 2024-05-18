@@ -16,7 +16,7 @@ export class GenerateAssetNames extends AssetTransformer {
 		if (path.name && path.folder) {
 			const folder = this.folders[path.folder]
 			const name = path.name?.replace('-optimized', '')
-			name && folder.delete(name)
+			name && folder.has(name) && folder.delete(name)
 		}
 	}
 
@@ -28,7 +28,9 @@ export class GenerateAssetNames extends AssetTransformer {
 			})
 		let result = ''
 		for (const [folder, files] of sortedFolders) {
-			result += `export type ${folder} = ${[...files].map(x => `\'${x}'`).join(` | `)}\n`
+			if (files.length > 0) {
+				result += `export type ${folder} = ${[...files].map(x => `\'${x}'`).join(` | `)}\n`
+			}
 		}
 		return result
 	}

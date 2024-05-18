@@ -1,6 +1,6 @@
 import type { JSXElement } from 'solid-js'
 import { createSignal, onCleanup } from 'solid-js'
-import { render } from 'solid-js/web'
+import { Dynamic, render } from 'solid-js/web'
 
 export class UIManager {
 	root: HTMLElement
@@ -18,7 +18,8 @@ export class UIManager {
 	listeners = new Set<() => void>()
 
 	render(ui: () => JSXElement) {
-		return () => render(() => ui(), this.root)
+		return render(() =>
+			<Dynamic component={ui}></Dynamic>, this.root)
 	}
 
 	sync<T>(data: () => T) {
@@ -53,7 +54,7 @@ export const mediaEvent = (event: string, listener: (e: MediaQueryListEvent) => 
 	mediaMatch.addEventListener('change', listener)
 	return () => mediaMatch.removeEventListener('change', listener)
 }
-export const atom = <T>(initialValue: T) => {
+export const atom = <T,>(initialValue: T) => {
 	const [value, setValue] = createSignal<T>(initialValue)
 	return (...newValue: Parameters<typeof setValue> | unknown[]): T => {
 		if (newValue.length > 0) {

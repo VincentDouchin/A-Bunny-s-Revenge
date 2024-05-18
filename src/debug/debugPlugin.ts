@@ -11,12 +11,12 @@ const enableDebugState = () => windowEvent('keydown', (e) => {
 })
 
 const attackInFarm = () => {
-	if (debugOptions.attackInFarm) {
+	if (debugOptions.attackInFarm()) {
 		// playerAttack()
 	}
 }
 const godMode = () => {
-	if (debugOptions.godMode) {
+	if (debugOptions.godMode()) {
 		for (const player of ecs.with('player', 'currentHealth', 'maxHealth')) {
 			player.currentHealth = player.maxHealth.value
 		}

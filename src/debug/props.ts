@@ -12,7 +12,6 @@ import { dialogs } from '@/constants/dialogs'
 import { Animator } from '@/global/animator'
 import { type Entity, Interactable, MenuType } from '@/global/entity'
 import { assets, ecs } from '@/global/init'
-import { menuInputMap } from '@/global/inputMaps'
 import { save } from '@/global/save'
 import type { DungeonRessources, FarmRessources } from '@/global/states'
 import { dungeonState, genDungeonState } from '@/global/states'
@@ -112,7 +111,6 @@ export const props: PlacableProp<propNames>[] = [
 			...entity,
 			interactable: Interactable.BulletinBoard,
 			onPrimary: openMenu(MenuType.Quest),
-			...menuInputMap(),
 		}),
 	},
 	{
@@ -146,7 +144,6 @@ export const props: PlacableProp<propNames>[] = [
 			minigameContainer.position.setX(-30)
 			return {
 				...entity,
-				...menuInputMap(),
 				recipesQueued: [],
 				ovenAnimator: new Animator(entity.model, assets.models.BunnyOvenPacked.animations),
 				minigameContainer,
@@ -169,7 +166,6 @@ export const props: PlacableProp<propNames>[] = [
 		models: ['CookingPot'],
 		bundle: entity => ({
 			...entity,
-			...menuInputMap(),
 			interactable: Interactable.Cauldron,
 			onPrimary: e => ecs.addComponent(e, 'menuType', MenuType.Cauldron),
 			onSecondary: e => ecs.addComponent(e, 'menuType', MenuType.CauldronGame),
@@ -203,7 +199,6 @@ export const props: PlacableProp<propNames>[] = [
 			minigameContainer.position.set(0, 5, 0)
 			return {
 				...entity,
-				...menuInputMap(),
 				minigameContainer,
 				interactable: Interactable.Chop,
 				onPrimary: e => ecs.addComponent(e, 'menuType', MenuType.Bench),
@@ -217,7 +212,6 @@ export const props: PlacableProp<propNames>[] = [
 		models: ['Stove1'],
 		bundle: entity => ({
 			...entity,
-			...menuInputMap(),
 			recipesQueued: [],
 		}),
 	},

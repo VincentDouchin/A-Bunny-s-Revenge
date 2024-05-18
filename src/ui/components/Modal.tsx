@@ -1,16 +1,16 @@
 import type { JSX } from 'solid-js'
-import { Show, createMemo, onCleanup } from 'solid-js'
+import { Show, onCleanup } from 'solid-js'
 
 import { css } from 'solid-styled'
 import { Transition } from 'solid-transition-group'
 import type { Atom } from 'solid-use/atom'
 import atom from 'solid-use/atom'
-import { assets, ecs, inputManager, ui } from '@/global/init'
+import { useGame } from '../store'
+import { assets, ecs, ui } from '@/global/init'
 
 const playercontrolsQuery = ecs.with('player', 'menuInputs')
 const CloseButton = () => {
-	const controls = ui.sync(() => inputManager.controls)
-	const isTouch = createMemo(() => controls() === 'touch')
+	const context = useGame()
 	const menuTouchController = ui.sync(() => playercontrolsQuery.first?.menuInputs.touchController)
 	const closeInventory = () => {
 		menuTouchController()?.set('cancel', 1)
@@ -37,7 +37,7 @@ const CloseButton = () => {
 	}
 	`
 	return (
-		<Show when={isTouch()}>
+		<Show when={context?.usingTouch()}>
 			<div
 				class="close-button icon-container"
 				innerHTML={assets.icons['xmark-solid']}

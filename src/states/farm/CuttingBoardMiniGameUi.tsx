@@ -1,25 +1,25 @@
 import { Tween } from '@tweenjs/tween.js'
-import { Vector3 } from 'three'
 import { For, Show, createMemo, onCleanup, onMount } from 'solid-js'
 import { Portal } from 'solid-js/web'
 import { css } from 'solid-styled'
 import atom from 'solid-use/atom'
+import { Vector3 } from 'three'
+import { updateCameraZoom } from '@/global/camera'
 import { params } from '@/global/context'
 import type { Entity } from '@/global/entity'
 import { MenuType } from '@/global/entity'
 import { ecs, gameTweens, time, ui } from '@/global/init'
-import { ForQuery } from '@/ui/components/ForQuery'
-import type { FarmUiProps } from '@/ui/types'
-import { updateCameraZoom } from '@/global/camera'
 import { cameraQuery } from '@/global/rendering'
-import { getWorldPosition } from '@/lib/transforms'
 import { addTag } from '@/lib/hierarchy'
+import { getWorldPosition } from '@/lib/transforms'
+import { useQuery } from '@/ui/store'
+import type { FarmUiProps } from '@/ui/types'
 
-const boardQuery = ecs.with('menuType', 'recipesQueued', 'position', 'rotation', 'group', 'minigameContainer').where(({ menuType }) => menuType === MenuType.BenchGame)
+const boardQuery = useQuery(ecs.with('menuType', 'recipesQueued', 'position', 'rotation', 'group', 'minigameContainer').where(({ menuType }) => menuType === MenuType.BenchGame))
 
 export const CuttingBoardMinigameUi = ({ player }: FarmUiProps) => {
 	return (
-		<ForQuery query={boardQuery}>
+		<For each={boardQuery()}>
 			{(board) => {
 				// const output = ui.sync(() => board.recipesQueued?.[0]?.output)
 				let targetEntity: Entity | null = null
@@ -129,6 +129,6 @@ export const CuttingBoardMinigameUi = ({ player }: FarmUiProps) => {
 					</Portal>
 				)
 			}}
-		</ForQuery>
+		</For>
 	)
 }

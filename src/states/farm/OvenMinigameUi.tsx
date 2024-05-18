@@ -1,7 +1,7 @@
 import { Tween } from '@tweenjs/tween.js'
 import type { With } from 'miniplex'
 import { between } from 'randomish'
-import { Show, createSignal, onCleanup, onMount } from 'solid-js'
+import { For, Show, createSignal, onCleanup, onMount } from 'solid-js'
 import { Portal } from 'solid-js/web'
 import { css } from 'solid-styled'
 import { Color, PointLight, Vector3 } from 'three'
@@ -12,22 +12,23 @@ import { updateCameraZoom } from '@/global/camera'
 import { params } from '@/global/context'
 import type { Entity } from '@/global/entity'
 import { MenuType } from '@/global/entity'
-import { assets, ecs, gameTweens, inputManager, time, ui } from '@/global/init'
+import { assets, ecs, gameTweens, time, ui } from '@/global/init'
 import { cameraQuery } from '@/global/rendering'
 import { playSound } from '@/global/sounds'
 import { addTag } from '@/lib/hierarchy'
 import { getWorldPosition } from '@/lib/transforms'
 import { fireParticles } from '@/particles/fireParticles'
 import { smoke } from '@/particles/smoke'
-import { ForQuery } from '@/ui/components/ForQuery'
+import { useGame, useQuery } from '@/ui/store'
 import type { FarmUiProps } from '@/ui/types'
 import { sleep } from '@/utils/sleep'
 
-const ovenQuery = ecs.with('menuType', 'recipesQueued', 'ovenAnimator', 'position').where(({ menuType }) => menuType === MenuType.OvenMinigame)
+const ovenQuery = useQuery(ecs.with('menuType', 'recipesQueued', 'ovenAnimator', 'position').where(({ menuType }) => menuType === MenuType.OvenMinigame))
 
 export const OvenMinigameUi = ({ player }: FarmUiProps) => {
+	const context = useGame()
 	return (
-		<ForQuery query={ovenQuery}>
+		<For each={ovenQuery()}>
 			{(oven) => {
 				const output = ui.sync(() => oven.recipesQueued?.[0]?.output)
 				const smokeTrails: With<Entity, 'emitter'>[] = []
@@ -144,10 +145,9 @@ export const OvenMinigameUi = ({ player }: FarmUiProps) => {
 				})
 				const playerInputs = () => player.playerControls.touchController
 				const isPrimaryPressed = ui.sync(() => playerInputs()?.get('primary'))
-				const interact = (value: number, input: 'primary' | 'secondary' | 'pause') => () => {
+				const interact = (value: number, input: 'primary' | 'secondary') => () => {
 					playerInputs()?.set(input, value)
 				}
-				const isTouch = ui.sync(() => inputManager.controls === 'touch')
 				const close = () => ecs.removeComponent(oven, 'menuType')
 				css/* css */`
 				.exit{
@@ -263,13 +263,13 @@ export const OvenMinigameUi = ({ player }: FarmUiProps) => {
 				`
 				return (
 					<>
-						<Show when={isTouch()}>
+						<Show when={context?.usingTouch()}>
 							<button class="button exit" onClick={close}>
 								<div style={{ width: '2rem' }} innerHTML={assets.icons['arrow-left-solid']}></div>
 								<div>Exit</div>
 							</button>
 						</Show>
-						<Show when={isTouch()}>
+						<Show when={context?.usingTouch()}>
 							<div class="fire" onTouchStart={interact(1, 'primary')} onTouchEnd={interact(0, 'primary')}>
 								<div innerHTML={assets.icons['fire-solid']} class="fire-icon"></div>
 							</div>
@@ -312,6 +312,6 @@ export const OvenMinigameUi = ({ player }: FarmUiProps) => {
 					</>
 				)
 			}}
-		</ForQuery>
+		</For>
 	)
 }

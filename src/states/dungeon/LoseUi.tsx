@@ -1,12 +1,13 @@
-import { Show } from 'solid-js'
+import { Show, createMemo } from 'solid-js'
 import { css } from 'solid-styled'
-import { ecs, ui } from '@/global/init'
+import { ecs } from '@/global/init'
 import { campState, openMenuState } from '@/global/states'
 import { StateUi } from '@/ui/components/StateUi'
+import { useQuery } from '@/ui/store'
 
-const playerUi = ecs.with('player')
+const playerUi = useQuery(ecs.with('player'))
 export const LoseUi = () => {
-	const noPlayer = ui.sync(() => playerUi.size === 0)
+	const noPlayer = createMemo(() => playerUi().length === 0)
 	const retry = () => {
 		openMenuState.disable()
 		campState.enable({})

@@ -54,7 +54,7 @@ export const playerBehaviorPlugin = behaviorPlugin(
 				applyRotate(e, force)
 				setState('running')
 			}
-			if (!campState.enabled || debugOptions.attackInFarm) {
+			if (!campState.enabled || debugOptions.attackInFarm()) {
 				if (e.playerControls.get('primary').justReleased && e.weapon && interactionQuery.size === 0) {
 					setState('attack')
 				}
@@ -76,7 +76,7 @@ export const playerBehaviorPlugin = behaviorPlugin(
 			} else {
 				setState('idle')
 			}
-			if ((!campState.enabled || debugOptions.attackInFarm)) {
+			if ((!campState.enabled || debugOptions.attackInFarm())) {
 				if (e.playerControls.get('primary').justReleased && e.weapon) {
 					setState('attack')
 				}

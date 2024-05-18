@@ -1,4 +1,3 @@
-import type { With } from 'miniplex'
 import { For, Show, createMemo, onCleanup } from 'solid-js'
 import { css } from 'solid-styled'
 import { Transition } from 'solid-transition-group'
@@ -7,95 +6,100 @@ import { Vector2 } from 'three'
 import { getInteractables } from './Interactions'
 import { StateUi } from './components/StateUi'
 import { Icon } from './components/styledComponents'
+import { useGame } from './store'
 import { atom } from '@/lib/uiManager'
 import { campState, pausedState } from '@/global/states'
 import { ecs, ui } from '@/global/init'
-import { type Entity, MenuType } from '@/global/entity'
+import { MenuType } from '@/global/entity'
 
-export const TouchControls = ({ player }: { player: With<Entity, 'playerControls' | 'inventory'> }) => {
-	const playerInputs = () => player.playerControls.touchController
-	const pixelOffset = atom(new Vector2(0, 0))
-	const centerPostion = createMemo(() => `translate(calc(-50% + ${pixelOffset().x}px),calc(-50% + ${pixelOffset().y}px) )`)
-	const container = atom<null | HTMLDivElement>(null)
-	const isJoystickPressed = atom(false)
-	const initialPos = atom<null | Vec2>(null)
-	const moveCenter = (e: TouchEvent) => {
-		isJoystickPressed(true)
-		const cont = container()
-		if (cont) {
-			const containerBoundingBox = cont.getBoundingClientRect()
-			const center = new Vector2(
-				containerBoundingBox.left + containerBoundingBox.width / 2,
-				containerBoundingBox.top + containerBoundingBox.height / 2,
-			)
-			const touch = e.targetTouches[0]
-			const max = containerBoundingBox.width / 2
-			if (touch) {
-				const newPos = new Vector2(touch.clientX - center.x, touch.clientY - center.y)
-				if (newPos.length() >= max) {
-					newPos.clampLength(max, max)
+export const TouchControls = () => {
+	const context = useGame()
+	return (
+		<Show when={context?.showTouch() && context?.player()}>
+			{(player) => {
+				const playerInputs = () => player().playerControls.touchController
+				const pixelOffset = atom(new Vector2(0, 0))
+				const centerPostion = createMemo(() => `translate(calc(-50% + ${pixelOffset().x}px),calc(-50% + ${pixelOffset().y}px) )`)
+				const container = atom<null | HTMLDivElement>(null)
+				const isJoystickPressed = atom(false)
+				const initialPos = atom<null | Vec2>(null)
+				const moveCenter = (e: TouchEvent) => {
+					isJoystickPressed(true)
+					const cont = container()
+					if (cont) {
+						const containerBoundingBox = cont.getBoundingClientRect()
+						const center = new Vector2(
+							containerBoundingBox.left + containerBoundingBox.width / 2,
+							containerBoundingBox.top + containerBoundingBox.height / 2,
+						)
+						const touch = e.targetTouches[0]
+						const max = containerBoundingBox.width / 2
+						if (touch) {
+							const newPos = new Vector2(touch.clientX - center.x, touch.clientY - center.y)
+							if (newPos.length() >= max) {
+								newPos.clampLength(max, max)
+							}
+							pixelOffset(newPos)
+							const input = newPos.clone().normalize().multiplyScalar(newPos.length() / max)
+							const touchController = playerInputs()
+							if (touchController) {
+								touchController.set('left', input.x < 0 ? -input.x : 0)
+								touchController.set('right', input.x > 0 ? input.x : 0)
+								touchController.set('forward', input.x > 0 ? -input.y : 0)
+								touchController.set('backward', input.x < 0 ? input.y : 0)
+							}
+						}
+					}
 				}
-				pixelOffset(newPos)
-				const input = newPos.clone().normalize().multiplyScalar(newPos.length() / max)
-				const touchController = playerInputs()
-				if (touchController) {
-					touchController.set('left', input.x < 0 ? -input.x : 0)
-					touchController.set('right', input.x > 0 ? input.x : 0)
-					touchController.set('forward', input.x > 0 ? -input.y : 0)
-					touchController.set('backward', input.x < 0 ? input.y : 0)
-				}
-			}
-		}
-	}
 
-	const resetCenter = () => {
-		isJoystickPressed(false)
-		initialPos(null)
-		pixelOffset(new Vector2(0, 0))
-		playerInputs()?.set('backward', 0)
-		playerInputs()?.set('forward', 0)
-		playerInputs()?.set('right', 0)
-		playerInputs()?.set('left', 0)
-	}
-	onCleanup(() => {
-		playerInputs()?.set('backward', 0)
-		playerInputs()?.set('forward', 0)
-		playerInputs()?.set('left', 0)
-		playerInputs()?.set('right', 0)
-		playerInputs()?.set('primary', 0)
-	})
-	const openInventory = () => {
-		ecs.addComponent(player, 'menuType', MenuType.Player)
-	}
-	const interactableQuery = ecs.with('interactable', 'interactionContainer')
-	const interactableEntity = ui.sync(() => interactableQuery.first)
-	const interactables = createMemo(() => getInteractables(player, interactableEntity()))
-	const interact = (value: number, input: 'primary' | 'secondary') => () => {
-		playerInputs()?.set(input, value)
-	}
-	const isPressed = (input: 'primary' | 'secondary') => playerInputs()?.get(input)
-	const setInitialPos = (e: TouchEvent) => {
-		const joystick = container()
-		if (joystick) {
-			const size = joystick.getBoundingClientRect()
-			initialPos({
-				x: e.changedTouches[0].clientX - size.width / 2,
-				y: e.changedTouches[0].clientY - size.height / 2,
-			})
-		}
-	}
-	const defaultPos = createMemo(() => {
-		const pos = initialPos()
-		if (pos) {
-			return {
-				top: `${pos.y}px`,
-				left: `${pos.x}px`,
-			} as const
-		} else {
-			return { bottom: '9rem', left: '9rem', position: 'fixed' } as const
-		}
-	})
-	css/* css */`
+				const resetCenter = () => {
+					isJoystickPressed(false)
+					initialPos(null)
+					pixelOffset(new Vector2(0, 0))
+					playerInputs()?.set('backward', 0)
+					playerInputs()?.set('forward', 0)
+					playerInputs()?.set('right', 0)
+					playerInputs()?.set('left', 0)
+				}
+				onCleanup(() => {
+					playerInputs()?.set('backward', 0)
+					playerInputs()?.set('forward', 0)
+					playerInputs()?.set('left', 0)
+					playerInputs()?.set('right', 0)
+					playerInputs()?.set('primary', 0)
+				})
+				const openInventory = () => {
+					ecs.addComponent(player(), 'menuType', MenuType.Player)
+				}
+				const interactableQuery = ecs.with('interactable', 'interactionContainer')
+				const interactableEntity = ui.sync(() => interactableQuery.first)
+				const interactables = createMemo(() => getInteractables(player(), interactableEntity()))
+				const interact = (value: number, input: 'primary' | 'secondary') => () => {
+					playerInputs()?.set(input, value)
+				}
+				const isPressed = (input: 'primary' | 'secondary') => playerInputs()?.get(input)
+				const setInitialPos = (e: TouchEvent) => {
+					const joystick = container()
+					if (joystick) {
+						const size = joystick.getBoundingClientRect()
+						initialPos({
+							x: e.changedTouches[0].clientX - size.width / 2,
+							y: e.changedTouches[0].clientY - size.height / 2,
+						})
+					}
+				}
+				const defaultPos = createMemo(() => {
+					const pos = initialPos()
+					if (pos) {
+						return {
+							top: `${pos.y}px`,
+							left: `${pos.x}px`,
+						} as const
+					} else {
+						return { bottom: '9rem', left: '9rem', position: 'fixed' } as const
+					}
+				})
+				css/* css */`
 	.top-button{
 		width: 4rem;
 		height: 4rem;
@@ -180,64 +184,67 @@ export const TouchControls = ({ player }: { player: With<Entity, 'playerControls
 		right: 14.5rem;
 		border: solid 0.1rem hsl(0, 0%,100%);
 	}`
-	return (
-		<div>
-			<button class="pause-button button" onTouchStart={() => pausedState.enable()}>
-				<Icon icon="pause-solid" />
-				Pause
-			</button>
+				return (
+					<div>
+						<button class="pause-button button" onTouchStart={() => pausedState.enable()}>
+							<Icon icon="pause-solid" />
+							Pause
+						</button>
 
-			<div
-				class="joystick-container"
-				onTouchStart={setInitialPos}
-				onTouchMove={moveCenter}
-				onTouchEnd={resetCenter}
-			>
-				<div
-					class="joystick"
-					ref={container}
-					style={{
-						border: `solid ${isJoystickPressed() ? '0.3rem' : '0.1rem'} hsl(0, 0%,100%)`,
-						...defaultPos(),
-					}}
-				>
-					<div
-						class="joystick-center"
-						style={{ transform: centerPostion() }}
-					>
-					</div>
-				</div>
-			</div>
-			<StateUi state={campState}>
-				<div onTouchStart={openInventory} class="inventory-button touch-input">
-					<Icon icon="basket-shopping-solid" />
-				</div>
-			</StateUi>
-			<div class="inputs-container">
-				<For each={['primary', 'secondary'] as const}>
-					{(input, index) => {
-						return (
+						<div
+							class="joystick-container"
+							onTouchStart={setInitialPos}
+							onTouchMove={moveCenter}
+							onTouchEnd={resetCenter}
+						>
 							<div
+								class="joystick"
+								ref={container}
 								style={{
-									border: `solid ${isPressed(input) ? '0.3rem' : '0.1rem'} hsl(0, 0%,100%)`,
-									opacity: interactables()[index()] ? '50%' : '20%',
+									border: `solid ${isJoystickPressed() ? '0.3rem' : '0.1rem'} hsl(0, 0%,100%)`,
+									...defaultPos(),
 								}}
-								class="touch-input"
-								onTouchStart={interact(1, input)}
-								onTouchEnd={interact(0, input)}
 							>
-								<Transition name="popup">
-									<Show when={interactables()[index()]}>
-										{(interactable) => {
-											return <div class="interactable-text">{interactable()}</div>
-										}}
-									</Show>
-								</Transition>
+								<div
+									class="joystick-center"
+									style={{ transform: centerPostion() }}
+								>
+								</div>
 							</div>
-						)
-					}}
-				</For>
-			</div>
-		</div>
+						</div>
+						<StateUi state={campState}>
+							<div onTouchStart={openInventory} class="inventory-button touch-input">
+								<Icon icon="basket-shopping-solid" />
+							</div>
+						</StateUi>
+						<div class="inputs-container">
+							<For each={['primary', 'secondary'] as const}>
+								{(input, index) => {
+									return (
+										<div
+											style={{
+												border: `solid ${isPressed(input) ? '0.3rem' : '0.1rem'} hsl(0, 0%,100%)`,
+												opacity: interactables()[index()] ? '50%' : '20%',
+											}}
+											class="touch-input"
+											onTouchStart={interact(1, input)}
+											onTouchEnd={interact(0, input)}
+										>
+											<Transition name="popup">
+												<Show when={interactables()[index()]}>
+													{(interactable) => {
+														return <div class="interactable-text">{interactable()}</div>
+													}}
+												</Show>
+											</Transition>
+										</div>
+									)
+								}}
+							</For>
+						</div>
+					</div>
+				)
+			}}
+		</Show>
 	)
 }

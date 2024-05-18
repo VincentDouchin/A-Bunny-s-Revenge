@@ -1,12 +1,14 @@
+import type { Atom } from 'solid-use/atom'
+import atom from 'solid-use/atom'
 import { app } from '@/global/states'
 
 interface DebugOptions {
-	attackInFarm: boolean
-	godMode: boolean
+	attackInFarm: Atom<boolean>
+	godMode: Atom<boolean>
 }
 export const debugOptions: DebugOptions = {
-	attackInFarm: false,
-	godMode: false,
+	attackInFarm: atom(false),
+	godMode: atom(false),
 
 }
 

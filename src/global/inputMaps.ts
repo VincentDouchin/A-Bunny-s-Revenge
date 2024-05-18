@@ -1,9 +1,9 @@
 import type { Entity } from './entity'
 import { inputManager } from './init'
 import type { InputMap } from '@/lib/inputs'
-import { GAMEPAD_AXIS, GAMEPAD_BUTTON } from '@/lib/inputs'
+import { GAMEPAD_AXIS, GAMEPAD_BUTTON, MOUSE_BUTTONS } from '@/lib/inputs'
 
-const playerInputs = ['left', 'right', 'forward', 'backward', 'inventory', 'primary', 'pause', 'secondary'] as const
+const playerInputs = ['left', 'right', 'forward', 'backward', 'inventory', 'primary', 'secondary', 'pause'] as const
 export type PlayerInputMap = InputMap<typeof playerInputs[number]>
 export const playerInputMap = () => {
 	const map = inputManager.createMap(playerInputs, true).setGamepads(0)
@@ -12,13 +12,13 @@ export const playerInputMap = () => {
 	map.get('forward').setKeys('KeyW').setAxes(GAMEPAD_AXIS.LEFT_Y, -1)
 	map.get('backward').setKeys('KeyS').setAxes(GAMEPAD_AXIS.LEFT_Y, 1)
 	map.get('inventory').setKeys('KeyE').setButtons(GAMEPAD_BUTTON.Y)
-	map.get('primary').setKeys('Space').setButtons(GAMEPAD_BUTTON.A)
-	map.get('secondary').setKeys('ShiftLeft').setButtons(GAMEPAD_BUTTON.X)
-	map.get('pause').setKeys('Escape').setButtons(GAMEPAD_BUTTON.START)
+	map.get('primary').setKeys('Space').setButtons(GAMEPAD_BUTTON.A).setMouse(MOUSE_BUTTONS.LEFT)
+	map.get('secondary').setKeys('ShiftLeft').setButtons(GAMEPAD_BUTTON.X).setMouse(MOUSE_BUTTONS.RIGHT)
+	map.get('pause').setKeys('Tab', 'Escape').setButtons(GAMEPAD_BUTTON.START)
 	return { playerControls: map } as const satisfies Entity
 }
 
-const menuInputs = ['up', 'down', 'left', 'right', 'validate', 'cancel'] as const
+const menuInputs = ['up', 'down', 'left', 'right', 'validate', 'cancel', 'tab', 'tabLeft', 'tabRight'] as const
 export type MenuInputMap = InputMap<typeof menuInputs[number]>
 export const menuInputMap = () => {
 	const map = inputManager.createMap(menuInputs, true).setGamepads(0)
@@ -27,6 +27,9 @@ export const menuInputMap = () => {
 	map.get('left').setKeys('KeyA').setButtons(GAMEPAD_BUTTON.LEFT)
 	map.get('right').setKeys('KeyD').setButtons(GAMEPAD_BUTTON.RIGHT)
 	map.get('validate').setKeys('Enter', 'Space').setButtons(GAMEPAD_BUTTON.A)
-	map.get('cancel').setKeys('Escape').setButtons(GAMEPAD_BUTTON.B)
+	map.get('cancel').setKeys('Tab', 'Escape').setButtons(GAMEPAD_BUTTON.B)
+	map.get('tab').setKeys('ControlLeft')
+	map.get('tabLeft').setButtons(GAMEPAD_BUTTON.L)
+	map.get('tabRight').setButtons(GAMEPAD_BUTTON.R)
 	return { menuInputs: map } as const satisfies Entity
 }

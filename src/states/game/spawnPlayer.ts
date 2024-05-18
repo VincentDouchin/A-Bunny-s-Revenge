@@ -16,7 +16,7 @@ import type { Entity, PlayerAnimations } from '@/global/entity'
 import { Faction } from '@/global/entity'
 
 import { assets, ecs } from '@/global/init'
-import { playerInputMap } from '@/global/inputMaps'
+import { menuInputMap, playerInputMap } from '@/global/inputMaps'
 import { save, updateSave } from '@/global/save'
 import type { DungeonRessources, FarmRessources } from '@/global/states'
 import { openMenuState } from '@/global/states'
@@ -54,6 +54,7 @@ export const playerBundle = (health: number, addHealth: boolean, weapon: weapons
 	debuffsContainer.position.setY(15)
 	const player = {
 		debuffsContainer,
+		...menuInputMap(),
 		...playerInputMap(),
 		...inventoryBundle(Number.POSITIVE_INFINITY, 'player'),
 		...bundle,

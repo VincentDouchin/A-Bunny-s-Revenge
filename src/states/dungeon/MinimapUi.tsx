@@ -5,7 +5,7 @@ import atom from 'solid-use/atom'
 import type { Room } from './generateDungeon'
 import { RoomType } from './generateDungeon'
 import { entries } from '@/utils/mapFunctions'
-import { ForQuery } from '@/ui/components/ForQuery'
+import { useQuery } from '@/ui/store'
 import type { direction } from '@/lib/directions'
 import { assets, ecs } from '@/global/init'
 
@@ -99,7 +99,7 @@ const RoomUi = ({ room, direction, previous, current }: { room: Room, direction?
 	)
 }
 
-const dungeonQuery = ecs.with('dungeon')
+const dungeonQuery = useQuery(ecs.with('dungeon'))
 export const MiniMapUi = () => {
 	css/* css */`
 	.minimap{
@@ -115,7 +115,7 @@ export const MiniMapUi = () => {
 	}
 	`
 	return (
-		<ForQuery query={dungeonQuery}>
+		<For each={dungeonQuery()}>
 			{(dungeon) => {
 				const visible = atom(false)
 				onMount(() => setTimeout(() => visible(true), 100))
@@ -131,6 +131,6 @@ export const MiniMapUi = () => {
 
 				)
 			}}
-		</ForQuery>
+		</For>
 	)
 }

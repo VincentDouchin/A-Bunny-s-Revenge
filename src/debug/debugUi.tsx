@@ -132,22 +132,20 @@ export const DebugUi = () => {
 			camera.camera.updateProjectionMatrix()
 		}
 	}
-	const attackInFarm = ui.sync(() => debugOptions.attackInFarm)
 	const enableAttackAnimations = () => {
-		debugOptions.attackInFarm = !debugOptions.attackInFarm
+		debugOptions.attackInFarm(!debugOptions.attackInFarm())
 		for (const player of ecs.with('model', 'player')) {
-			if (debugOptions.attackInFarm) {
+			if (debugOptions.attackInFarm()) {
 				ecs.update(player, { weapon: weaponBundle('SwordWeapon') })
 			} else {
 				ecs.removeComponent(player, 'weapon')
 			}
 		}
 	}
-	const godMode = ui.sync(() => debugOptions.godMode)
 	const modifier = createModifier('debug', 'strength', 999, ModStage.Base, ModType.Add, false)
 	const toggleGodMode = () => {
-		debugOptions.godMode = !debugOptions.godMode
-		if (debugOptions.godMode) {
+		debugOptions.godMode(!debugOptions.godMode())
+		if (debugOptions.godMode()) {
 			for (const player of ecs.with('player', 'strength')) {
 				player.strength.addModifier(modifier)
 			}
@@ -282,10 +280,10 @@ export const DebugUi = () => {
 					<button onClick={growCrops}>Grow crops</button>
 					<button onClick={destroyCrops}>Destroy crops</button>
 					<button onClick={reset}>Reset Save</button>
-					<button classList={{ selected: attackInFarm() }} onClick={enableAttackAnimations}>
-						{attackInFarm() ? 'Disable attack animations' : 'Enable attack animations'}
+					<button classList={{ selected: debugOptions.attackInFarm() }} onClick={enableAttackAnimations}>
+						{debugOptions.attackInFarm() ? 'Disable attack animations' : 'Enable attack animations'}
 					</button>
-					<button classList={{ selected: godMode() }} onClick={toggleGodMode}>{godMode() ? 'Disable god mode' : 'Enable god mode'}</button>
+					<button classList={{ selected: debugOptions.godMode() }} onClick={toggleGodMode}>{debugOptions.godMode() ? 'Disable god mode' : 'Enable god mode'}</button>
 				</div>
 
 				<div style={{ position: 'fixed', right: 0, top: 0 }}>

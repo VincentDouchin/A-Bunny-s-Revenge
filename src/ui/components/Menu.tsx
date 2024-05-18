@@ -52,7 +52,7 @@ export interface MenuItemProps extends JSX.HTMLAttributes<HTMLDivElement> {
 	menu: MenuDir
 }
 
-export type MenuItem = (el: HTMLElement, selected: () => [MenuDir, boolean, Atom<boolean>]) => void
+export type MenuItem = (el: HTMLElement, selected: () => [MenuDir, boolean, Atom<boolean>, ('up' | 'down' | 'left' | 'right')[]] | [MenuDir, boolean, Atom<boolean>]) => void
 declare module 'solid-js' {
 	// eslint-disable-next-line ts/no-namespace
 	namespace JSX {
@@ -66,13 +66,18 @@ export interface MenuDir {
 	refs: Map<string, HTMLElement>
 	inverseRefs: Map<HTMLElement, string>
 	setSelected: (id: string) => void
+	setSelectedRef: (el: HTMLElement) => void
 	selected: Accessor<string>
+	disabledDirections: Map<string, ('up' | 'down' | 'left' | 'right')[]>
 }
 export const menuItem: MenuItem = (el, init) => {
 	const id = generateUUID()
-	const [menu, first, isSelected] = init()
+	const [menu, first, isSelected, disabledDirections] = init()
 	if (first) {
 		menu.setSelected(id)
+	}
+	if (disabledDirections) {
+		menu.disabledDirections.set(id, disabledDirections)
 	}
 	onCleanup(() => {
 		menu.refs.delete(id)
@@ -98,11 +103,13 @@ export function Menu(props: { children: Component<MenuItemProps>, inputs?: MenuI
 
 	const refs = new Map<string, HTMLElement>()
 	const inverseRefs = new Map<HTMLElement, string>()
-
+	const disabledDirections = new Map<string, ('up' | 'down' | 'left' | 'right')[]>()
 	const update = () => {
 		for (const direction of ['up', 'down', 'left', 'right'] as const) {
 			if (props.inputs?.get(direction).justPressed) {
 				const selectedId = createRoot(selected)
+				const forbiddenDir = disabledDirections.get(selectedId)
+				if (forbiddenDir && forbiddenDir.includes(direction)) continue
 				const selectedElement = refs.get(selectedId)
 				if (selectedElement) {
 					const finder = findClosest(selectedElement, refs.values())
@@ -110,7 +117,7 @@ export function Menu(props: { children: Component<MenuItemProps>, inputs?: MenuI
 					if (newSelectedElement) {
 						const newSelected = inverseRefs.get(newSelectedElement)
 						if (newSelected !== undefined) {
-							setSelected(() => newSelected)
+							setSelected(newSelected)
 							playSound('004_Hover_04')
 						}
 					}
@@ -124,8 +131,14 @@ export function Menu(props: { children: Component<MenuItemProps>, inputs?: MenuI
 			}
 		}
 	}
+	const setSelectedRef = (el: HTMLElement) => {
+		const id = inverseRefs.get(el)
+		if (id) {
+			setSelected(id)
+		}
+	}
 	ui.updateSync(update)
-	const menu: MenuDir = { refs, inverseRefs, setSelected, selected }
+	const menu: MenuDir = { refs, inverseRefs, setSelected, selected, setSelectedRef, disabledDirections }
 
 	return (
 

@@ -1,31 +1,3 @@
-// export const imgs = [
-// 	'PS5/PS5_Circle',
-// 	'PS5/PS5_Cross',
-// 	'PS5/PS5_Dpad',
-// 	'PS5/PS5_Dpad_Down',
-// 	'PS5/PS5_Dpad_Left',
-// 	'PS5/PS5_Dpad_Right',
-// 	'PS5/PS5_Dpad_Up',
-// 	'PS5/PS5_L1',
-// 	'PS5/PS5_L2',
-// 	'PS5/PS5_Left_Stick',
-// 	'PS5/PS5_Left_Stick_Click',
-// 	'PS5/PS5_Microphone',
-// 	'PS5/PS5_Options',
-// 	'PS5/PS5_Options_Alt',
-// 	'PS5/PS5_R1',
-// 	'PS5/PS5_R2',
-// 	'PS5/PS5_Right_Stick',
-// 	'PS5/PS5_Right_Stick_Click',
-// 	'PS5/PS5_Share',
-// 	'PS5/PS5_Share_Alt',
-// 	'PS5/PS5_Square',
-// 	'PS5/PS5_Touch_Pad',
-// 	'PS5/PS5_Triangle',
-// 	'Xbox Series/XboxSeriesX_Dpad',
-// 	'Xbox Series/XboxSeriesX_Share',
-
-// ] as const
 export const XBOXSeries = {
 	buttons: [
 		'Xbox Series/XboxSeriesX_A',
@@ -128,6 +100,12 @@ export const keys: Record<string, string> = {
 	'x': 'Keyboard/X_Key_Light',
 	'y': 'Keyboard/Y_Key_Light',
 	'z': 'Keyboard/Z_Key_Light',
+}
+
+export const mouse: Record<number, string> = {
+	0: 'Keyboard/Mouse_Left_Key_Light',
+	1: 'Keyboard/Mouse_Middle_Key_Light',
+	2: 'Keyboard/Mouse_Right_Key_Light',
 }
 export const metaKeys: Record<string, string> = {
 	Enter: 'Enter',

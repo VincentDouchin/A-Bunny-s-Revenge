@@ -1,10 +1,9 @@
 import type { icons } from '@assets/assets'
 import { autoUpdate } from '@floating-ui/dom'
 import { useFloating } from 'solid-floating-ui'
-import type { Accessor, JSX, JSXElement, Setter } from 'solid-js'
+import type { Accessor, JSX, Setter } from 'solid-js'
 import { For, Show, createEffect, createMemo, createSignal, onCleanup, onMount } from 'solid-js'
 import { css } from 'solid-styled'
-import type { Atom } from 'solid-use/atom'
 import atom from 'solid-use/atom'
 import { MealAmount, extra, getAmountEaten } from '../dungeon/HealthUi'
 import { MealBuffs, RecipeDescription } from './RecipesUi'
@@ -24,9 +23,11 @@ import type { MenuDir } from '@/ui/components/Menu'
 import { Menu, menuItem } from '@/ui/components/Menu'
 import { Modal } from '@/ui/components/Modal'
 import { GoldContainer, InventoryTitle, OutlineText } from '@/ui/components/styledComponents'
+import { Tabs } from '@/ui/components/tabs'
 import type { FarmUiProps } from '@/ui/types'
 import { removeItemFromPlayer } from '@/utils/dialogHelpers'
 import { range } from '@/utils/mapFunctions'
+import { Settings } from '@/ui/settings'
 // eslint-disable-next-line no-unused-expressions
 menuItem
 
@@ -330,33 +331,6 @@ const ItemCategories = <T,>({ items, setSelectedItem, menu, categories, filter, 
 		</div>
 	)
 }
-interface TabsProps<T extends string> {
-	tabs: T[]
-	selectedTab: Atom<T>
-	children: (tab: T, selected: boolean) => JSXElement
-	menu: MenuDir
-}
-const Tabs = <T extends string,>(props: TabsProps<T>) => {
-	return (
-		<For each={props.tabs}>
-			{(tab, i) => {
-				const isSelected = createMemo(() => props.selectedTab() === tab)
-				const selected = atom(i() === 0)
-				createEffect(() => {
-					if (selected()) {
-						props.selectedTab(tab)
-					}
-				})
-				return (
-					<div use:menuItem={[props.menu, isSelected(), selected]}>
-						{props.children(tab, selected())}
-					</div>
-				)
-			}}
-
-		</For>
-	)
-}
 
 export const InventoryUi = ({ player }: FarmUiProps) => {
 	ui.updateSync(() => {
@@ -373,6 +347,10 @@ export const InventoryUi = ({ player }: FarmUiProps) => {
 	const meal = createMemo(() => item()?.meal)
 
 	css/* css */`
+	.container{
+		width: 56rem;
+		height: 25rem;
+	}
 	.inventory-container{
 		display: grid;
 		grid-template-columns: calc(6 * 5rem + 5 * 1rem) 20rem;
@@ -401,9 +379,11 @@ export const InventoryUi = ({ player }: FarmUiProps) => {
 		color:grey;
 	}
 	.tabs-container{
-		display: flex;
+		display: grid;
+		grid-template-columns: repeat(3, 1fr);
 		gap: 1rem;
 		padding: 0 1rem;
+		position: relative;
 	}
 	.tab{
 		border-left: solid 0.3rem var(--gold-tarnished);
@@ -413,7 +393,8 @@ export const InventoryUi = ({ player }: FarmUiProps) => {
 		background:color-mix(in srgb, var(--brown-dark), black 50%);
 		padding: 0.5rem;
 		transition: all 0.5s ease;
-		position: relative
+		position: relative;
+		flex:1;
 	}
 	.tab-selected{
 		position: relative;
@@ -445,7 +426,7 @@ export const InventoryUi = ({ player }: FarmUiProps) => {
 		gap: 1rem;
 	}
 	`
-	const tabs = ['inventory', 'recipes']
+	const tabs = ['inventory', 'recipes', 'settings']
 	const selectedTab = atom('inventory')
 	const recipesOutput = createMemo(() => recipes.map(r => r.output))
 	const playerInventory = ui.sync(() => player.inventory.filter(Boolean))
@@ -479,96 +460,101 @@ export const InventoryUi = ({ player }: FarmUiProps) => {
 								</div>
 
 								<GoldContainer>
-									<Show when={selectedTab() === 'inventory'}>
-										<div class="inventory-container">
-											<ItemCategories
-												items={playerInventory}
-												setSelectedItem={setSelectedItem}
-												categories={categories}
-												menu={menu}
-												filter={(c, i) => c in itemsData[i.name]}
-											/>
-											<div class="description">
-												<Show when={selectedItem()}>
-													{(item) => {
-														const data = createMemo(() => itemsData[item().name])
-														return (
-															<>
-																<OutlineText><div class="item-name">{data().name}</div></OutlineText>
-																<Show when={meal()}>
-																	{(mods) => {
-																		const disabled = ui.sync(() => (getAmountEaten() + mods().amount) > 5)
-																		const consumeMeal = (item: Item, mods: Modifier<'maxHealth' | 'strength'>[]) => {
-																			if (item && !disabled()) {
-																				removeItemFromPlayer({ name: item.name, quantity: 1 })
-																				updateSave(s => s.modifiers.push(item.name))
-																				for (const mod of mods) {
-																					addModifier(mod, player, true)
+									<div class="container">
+										<Show when={selectedTab() === 'inventory'}>
+											<div class="inventory-container">
+												<ItemCategories
+													items={playerInventory}
+													setSelectedItem={setSelectedItem}
+													categories={categories}
+													menu={menu}
+													filter={(c, i) => c in itemsData[i.name]}
+												/>
+												<div class="description">
+													<Show when={selectedItem()}>
+														{(item) => {
+															const data = createMemo(() => itemsData[item().name])
+															return (
+																<>
+																	<OutlineText><div class="item-name">{data().name}</div></OutlineText>
+																	<Show when={meal()}>
+																		{(mods) => {
+																			const disabled = ui.sync(() => (getAmountEaten() + mods().amount) > 5)
+																			const consumeMeal = (item: Item, mods: Modifier<'maxHealth' | 'strength'>[]) => {
+																				if (item && !disabled()) {
+																					removeItemFromPlayer({ name: item.name, quantity: 1 })
+																					updateSave(s => s.modifiers.push(item.name))
+																					for (const mod of mods) {
+																						addModifier(mod, player, true)
+																					}
 																				}
 																			}
-																		}
-																		ui.updateSync(() => {
-																			if (
-																				player.playerControls.get('secondary').justPressed
-																			) {
-																				consumeMeal(item(), mods().modifiers)
-																			}
-																		})
-																		createEffect(() => extra(mods().amount))
-																		onCleanup(() => extra(0))
-																		const modifiers = createMemo(() => mods().modifiers)
-																		const amount = createMemo(() => mods().amount)
-																		return (
-																			<>
-																				<div class="eating-button-container">
-																					<MealAmount size="small" amount={amount} />
-																					<button
-																						onPointerDown={() => consumeMeal(item(), mods().modifiers)}
-																						class="styled"
-																						classList={{ disabled: disabled() }}
-																					>
-																						<InputIcon input={player.playerControls.get('secondary')}></InputIcon>
-																						Eat
-																					</button>
-																					<MealBuffs meals={modifiers} />
-																				</div>
-																			</>
-																		)
-																	}}
-																</Show>
-															</>
-														)
-													}}
-												</Show>
+																			ui.updateSync(() => {
+																				if (
+																					player.playerControls.get('secondary').justPressed
+																				) {
+																					consumeMeal(item(), mods().modifiers)
+																				}
+																			})
+																			createEffect(() => extra(mods().amount))
+																			onCleanup(() => extra(0))
+																			const modifiers = createMemo(() => mods().modifiers)
+																			const amount = createMemo(() => mods().amount)
+																			return (
+																				<>
+																					<div class="eating-button-container">
+																						<MealAmount size="small" amount={amount} />
+																						<button
+																							onPointerDown={() => consumeMeal(item(), mods().modifiers)}
+																							class="styled"
+																							classList={{ disabled: disabled() }}
+																						>
+																							<InputIcon input={player.playerControls.get('secondary')}></InputIcon>
+																							Eat
+																						</button>
+																						<MealBuffs meals={modifiers} />
+																					</div>
+																				</>
+																			)
+																		}}
+																	</Show>
+																</>
+															)
+														}}
+													</Show>
+												</div>
 											</div>
-										</div>
-									</Show>
-									<Show when={selectedTab() === 'recipes'}>
-										<div class="inventory-container">
-											<ItemCategories
-												items={recipesOutput}
-												setSelectedItem={i => selectedRecipe(recipes.find(r => r.output === i) ?? null)}
-												categories={() => [MenuType.Oven, MenuType.Cauldron]}
-												menu={menu}
-												filter={(c, i) => recipes.find(r => r.output === i)?.processor === c}
-												categoryName={(c) => {
-													switch (c) {
-														case MenuType.Oven:return 'Oven'
-														case MenuType.Cauldron:return 'Cauldron'
-														default: return ''
-													}
-												}}
-												hidden={isRecipeHidden}
-											/>
-											<div class="description">
-												<Show when={!isRecipeHidden(selectedRecipe()?.output ?? null) && selectedRecipe()}>
-													{(recipe) => {
-														return <RecipeDescription recipe={recipe} player={player} />
+										</Show>
+										<Show when={selectedTab() === 'recipes'}>
+											<div class="inventory-container">
+												<ItemCategories
+													items={recipesOutput}
+													setSelectedItem={i => selectedRecipe(recipes.find(r => r.output === i) ?? null)}
+													categories={() => [MenuType.Oven, MenuType.Cauldron]}
+													menu={menu}
+													filter={(c, i) => recipes.find(r => r.output === i)?.processor === c}
+													categoryName={(c) => {
+														switch (c) {
+															case MenuType.Oven:return 'Oven'
+															case MenuType.Cauldron:return 'Cauldron'
+															default: return ''
+														}
 													}}
-												</Show>
+													hidden={isRecipeHidden}
+												/>
+												<div class="description">
+													<Show when={!isRecipeHidden(selectedRecipe()?.output ?? null) && selectedRecipe()}>
+														{(recipe) => {
+															return <RecipeDescription recipe={recipe} player={player} />
+														}}
+													</Show>
+												</div>
 											</div>
-										</div>
-									</Show>
+										</Show>
+										<Show when={selectedTab() === 'settings'}>
+											<Settings menu={menu} />
+										</Show>
+									</div>
 								</GoldContainer>
 
 							</>

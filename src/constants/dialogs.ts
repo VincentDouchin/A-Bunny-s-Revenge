@@ -34,12 +34,12 @@ export const dialogs = {
 						yield 'Are you having trouble roasting the carrots?'
 					}
 				}
+			} else if (!hasEaten() && !hasItem('cookie')) {
+				yield 'Are you hungry? Here, have a cookie'
+				addItemToPlayer({ name: 'cookie', quantity: 1 })
 			} else if (!hasCompletedQuest('grandma_1')) {
 				yield 'Could you bring me some roasted carrots?'
 				addQuest('grandma_1')
-			} else if (!hasEaten()) {
-				yield 'Are you hungry? Here, have a cookie'
-				addItemToPlayer({ name: 'cookie', quantity: 1 })
 			} else {
 				soundDialog('Thanks again for these delicious roasted carrots')
 				yield 'Thanks again for these delicious roasted carrots'
