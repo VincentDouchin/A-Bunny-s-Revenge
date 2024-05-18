@@ -6,7 +6,11 @@ const requestFullScreen = () => {
 	document.documentElement.requestFullscreen()
 }
 
-export const isStandalone = () => window.matchMedia('(display-mode: standalone)').matches
+export const isStandalone = () => {
+	return ['fullscreen', 'standalone', 'minimal-ui'].some(
+		displayMode => window.matchMedia(`(display-mode: ${displayMode})`).matches,
+	)
+}
 
 export const FullscreenUi = () => {
 	const [show, setShow] = createSignal(!isStandalone() && (save.settings.fullscreen === null || save.settings.fullscreen === undefined))
