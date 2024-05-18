@@ -17,7 +17,7 @@ export const TouchControls = () => {
 	return (
 		<Show when={context?.showTouch() && context?.player()}>
 			{(player) => {
-				const playerInputs = () => player().playerControls.touchController
+				const playerInputs = player().playerControls.touchController
 				const pixelOffset = atom(new Vector2(0, 0))
 				const centerPostion = createMemo(() => `translate(calc(-50% + ${pixelOffset().x}px),calc(-50% + ${pixelOffset().y}px) )`)
 				const container = atom<null | HTMLDivElement>(null)
@@ -41,7 +41,7 @@ export const TouchControls = () => {
 							}
 							pixelOffset(newPos)
 							const input = newPos.clone().normalize().multiplyScalar(newPos.length() / max)
-							const touchController = playerInputs()
+							const touchController = playerInputs
 							if (touchController) {
 								touchController.set('left', input.x < 0 ? -input.x : 0)
 								touchController.set('right', input.x > 0 ? input.x : 0)
@@ -56,17 +56,17 @@ export const TouchControls = () => {
 					isJoystickPressed(false)
 					initialPos(null)
 					pixelOffset(new Vector2(0, 0))
-					playerInputs()?.set('backward', 0)
-					playerInputs()?.set('forward', 0)
-					playerInputs()?.set('right', 0)
-					playerInputs()?.set('left', 0)
+					playerInputs?.set('backward', 0)
+					playerInputs?.set('forward', 0)
+					playerInputs?.set('right', 0)
+					playerInputs?.set('left', 0)
 				}
 				onCleanup(() => {
-					playerInputs()?.set('backward', 0)
-					playerInputs()?.set('forward', 0)
-					playerInputs()?.set('left', 0)
-					playerInputs()?.set('right', 0)
-					playerInputs()?.set('primary', 0)
+					playerInputs?.set('backward', 0)
+					playerInputs?.set('forward', 0)
+					playerInputs?.set('left', 0)
+					playerInputs?.set('right', 0)
+					playerInputs?.set('primary', 0)
 				})
 				const openInventory = () => {
 					ecs.addComponent(player(), 'menuType', MenuType.Player)
@@ -75,9 +75,9 @@ export const TouchControls = () => {
 				const interactableEntity = ui.sync(() => interactableQuery.first)
 				const interactables = createMemo(() => getInteractables(player(), interactableEntity()))
 				const interact = (value: number, input: 'primary' | 'secondary') => () => {
-					playerInputs()?.set(input, value)
+					playerInputs?.set(input, value)
 				}
-				const isPressed = (input: 'primary' | 'secondary') => playerInputs()?.get(input)
+				const isPressed = (input: 'primary' | 'secondary') => playerInputs?.get(input)
 				const setInitialPos = (e: TouchEvent) => {
 					const joystick = container()
 					if (joystick) {

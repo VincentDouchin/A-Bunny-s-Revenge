@@ -1,17 +1,16 @@
 import type { JSX } from 'solid-js'
-import { Show, onCleanup } from 'solid-js'
+import { Show, createMemo, onCleanup } from 'solid-js'
 
 import { css } from 'solid-styled'
 import { Transition } from 'solid-transition-group'
 import type { Atom } from 'solid-use/atom'
 import atom from 'solid-use/atom'
 import { useGame } from '../store'
-import { assets, ecs, ui } from '@/global/init'
+import { assets } from '@/global/init'
 
-const playercontrolsQuery = ecs.with('player', 'menuInputs')
 const CloseButton = () => {
 	const context = useGame()
-	const menuTouchController = ui.sync(() => playercontrolsQuery.first?.menuInputs.touchController)
+	const menuTouchController = createMemo(() => context?.player().menuInputs.touchController)
 	const closeInventory = () => {
 		menuTouchController()?.set('cancel', 1)
 	}
@@ -25,7 +24,7 @@ const CloseButton = () => {
 		height: 4rem;
 		background: hsla(0, 0%, 0%, 0.2);
 		position: absolute;
-		top: 0;
+		bottom: 100%;
 		right: 0;
 		margin: 1rem;
 		border-radius: 1rem;
