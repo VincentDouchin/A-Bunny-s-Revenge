@@ -7,11 +7,12 @@ import { KeyboardControls } from './KeyboardControl'
 import { TouchControls } from './TouchControls'
 import { InteractionUi } from './Interactions'
 import { DebugUi } from '@/debug/debugUi'
-import { dungeonState } from '@/global/states'
+import { campState, dungeonState } from '@/global/states'
 import { EnemyHealthBarUi } from '@/states/dungeon/EnemyHealthBarUi'
 import { LoseUi } from '@/states/dungeon/LoseUi'
 import { FullscreenUi } from '@/states/game/FullscreenUi'
 import { OverlayUi } from '@/states/game/overlayUi'
+import { RecipesUi } from '@/states/farm/RecipesUi'
 
 export const UI = () => (
 	<GameProvider>
@@ -22,6 +23,9 @@ export const UI = () => (
 		<PlayerUi />
 		<StateUi state={dungeonState}>
 			<EnemyHealthBarUi />
+		</StateUi>
+		<StateUi state={campState}>
+			<RecipesUi />
 		</StateUi>
 		<KeyboardControls />
 		<TouchControls />

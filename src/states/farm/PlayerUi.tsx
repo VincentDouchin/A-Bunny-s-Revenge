@@ -7,7 +7,6 @@ import { CauldronMinigameUi } from './CauldronMinigameUi'
 import { CuttingBoardMinigameUi } from './CuttingBoardMiniGameUi'
 import { OvenMinigameUi } from './OvenMinigameUi'
 import { QuestUi } from './QuestUi'
-import { RecipesUi } from './RecipesUi'
 import { playerInventoryQuery } from '@/utils/dialogHelpers'
 import { useQuery } from '@/ui/store'
 import { DialogUi } from '@/ui/DialogUi'
@@ -24,7 +23,7 @@ export const PlayerUi = () => {
 					<>
 						<DialogUi player={player} />
 						<StateUi state={campState}>
-							<RecipesUi player={player} />
+
 							<OvenMinigameUi player={player} />
 							<CauldronMinigameUi player={player} />
 							<CuttingBoardMinigameUi player={player} />

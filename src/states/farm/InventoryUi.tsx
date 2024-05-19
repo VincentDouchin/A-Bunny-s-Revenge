@@ -330,7 +330,7 @@ const ItemCategories = <T,>({ items, setSelectedItem, menu, categories, filter, 
 		</div>
 	)
 }
-
+export const isRecipeHidden = (i: Item | null) => i?.name ? !save.unlockedRecipes.includes(i.name) : false
 export const InventoryUi = ({ player }: FarmUiProps) => {
 	ui.updateSync(() => {
 		if (player?.menuInputs?.get('cancel').justReleased) {
@@ -433,7 +433,7 @@ export const InventoryUi = ({ player }: FarmUiProps) => {
 		return playerInventory().some(item => category in itemsData[item.name])
 	}))
 	const selectedRecipe = atom<null | Recipe>(null)
-	const isRecipeHidden = (i: Item | null) => i?.name ? !save.unlockedRecipes.includes(i.name) : false
+
 	return (
 
 		<Modal open={open()}>
@@ -544,7 +544,7 @@ export const InventoryUi = ({ player }: FarmUiProps) => {
 												<div class="description">
 													<Show when={!isRecipeHidden(selectedRecipe()?.output ?? null) && selectedRecipe()}>
 														{(recipe) => {
-															return <RecipeDescription recipe={recipe} player={player} />
+															return <RecipeDescription recipe={recipe} />
 														}}
 													</Show>
 												</div>

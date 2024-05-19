@@ -1,14 +1,12 @@
-import type { With } from 'miniplex'
 import type { Accessor } from 'solid-js'
 import { For, Show, createEffect, createMemo, createSignal } from 'solid-js'
 import { css } from 'solid-styled'
 import atom from 'solid-use/atom'
 import { MealAmount } from '../dungeon/HealthUi'
-import { ItemDisplay } from './InventoryUi'
+import { ItemDisplay, isRecipeHidden } from './InventoryUi'
 import { itemsData } from '@/constants/items'
 import type { Recipe } from '@/constants/recipes'
 import { recipes } from '@/constants/recipes'
-import type { Entity } from '@/global/entity'
 import { MenuType } from '@/global/entity'
 import { assets, ecs, ui } from '@/global/init'
 import { save } from '@/global/save'
@@ -17,13 +15,13 @@ import { InputIcon } from '@/ui/InputIcon'
 import { Menu, menuItem } from '@/ui/components/Menu'
 import { Modal } from '@/ui/components/Modal'
 import { GoldContainer, InventoryTitle } from '@/ui/components/styledComponents'
-import type { FarmUiProps } from '@/ui/types'
+import { useGame, useQuery } from '@/ui/store'
 import { removeItemFromPlayer } from '@/utils/dialogHelpers'
 import { range } from '@/utils/mapFunctions'
 
 // eslint-disable-next-line no-unused-expressions
 menuItem
-const recipeQuery = ecs.with('menuType', 'menuInputs', 'recipesQueued').where(({ menuType }) => [MenuType.Oven, MenuType.Cauldron, MenuType.Bench].includes(menuType))
+const recipeQuery = useQuery(ecs.with('menuType', 'recipesQueued').where(({ menuType }) => [MenuType.Oven, MenuType.Cauldron, MenuType.Bench].includes(menuType)))
 const getMenuName = (menuType: MenuType) => {
 	switch (menuType) {
 		case MenuType.Oven :return 'Oven'
@@ -49,11 +47,12 @@ export const MealBuffs = ({ meals }: { meals: Accessor<Modifier<any>[]> }) => {
 		</For>
 	)
 }
-export const RecipeDescription = ({ recipe, player, onClick }: {
+
+export const RecipeDescription = ({ recipe, onClick }: {
 	recipe: Accessor<Recipe>
-	player: With<Entity, 'inventory' | 'playerControls'>
 	onClick?: () => void
 }) => {
+	const context = useGame()
 	const output = createMemo(() => itemsData[recipe().output.name])
 	const meal = createMemo(() => output().meal)
 	css/* css */`
@@ -111,7 +110,7 @@ export const RecipeDescription = ({ recipe, player, onClick }: {
 							<div class="ingredients-container">
 								<For each={recipe().input}>
 									{(input) => {
-										const amount = ui.sync(() => player.inventory.reduce((acc, v) => v?.name === input.name ? acc + v.quantity : acc, 0))
+										const amount = ui.sync(() => context?.player().inventory.reduce((acc, v) => v?.name === input.name ? acc + v.quantity : acc, 0) ?? 0)
 										const color = createMemo(() => amount() < input.quantity ? { color: 'red' } : {})
 										return (
 											<div class="ingredient">
@@ -131,7 +130,7 @@ export const RecipeDescription = ({ recipe, player, onClick }: {
 
 			<Show when={onClick}>
 				<button onClick={onClick} style={{ 'font-size': '1.2rem', 'display': 'flex', 'gap': '0.5rem', 'justify-self': 'center' }} class="button">
-					<InputIcon input={player.playerControls.get('secondary')} />
+					<InputIcon input={context!.player().playerControls.get('secondary')} />
 					Cook
 				</button>
 			</Show>
@@ -139,8 +138,9 @@ export const RecipeDescription = ({ recipe, player, onClick }: {
 		</div>
 	)
 }
-export const RecipesUi = ({ player }: FarmUiProps) => {
-	const recipeEntity = ui.sync(() => recipeQuery.first)
+export const RecipesUi = () => {
+	const recipeEntity = createMemo(() => recipeQuery()?.[0])
+	const context = useGame()
 	css/* css */`
 	.recipes-container{
 		display: flex;
@@ -163,12 +163,13 @@ export const RecipesUi = ({ player }: FarmUiProps) => {
 		width: 20rem
 	}
 	`
+
 	return (
 		<Modal open={recipeEntity()}>
 			<Show when={recipeEntity()}>
 				{(entity) => {
 					ui.updateSync(() => {
-						if (player.menuInputs.get('cancel').justReleased) {
+						if (context?.player().menuInputs.get('cancel').justReleased) {
 							ecs.removeComponent(entity(), 'menuType')
 						}
 					})
@@ -178,7 +179,7 @@ export const RecipesUi = ({ player }: FarmUiProps) => {
 					const cook = () => {
 						const recipe = selectedRecipe()
 						if (recipe) {
-							if (recipe.input.every(input => player.inventory.some((item) => {
+							if (recipe.input.every(input => context?.player().inventory.some((item) => {
 								return item?.name === input.name && item.quantity >= input.quantity
 							}))) {
 								if (recipeQueued().length < 4) {
@@ -191,8 +192,14 @@ export const RecipesUi = ({ player }: FarmUiProps) => {
 						}
 					}
 					ui.updateSync(() => {
-						if (player.playerControls.get('secondary').justReleased) {
+						if (context?.player().playerControls.get('secondary').justReleased) {
 							cook()
+						}
+					})
+					const showRecipe = createMemo(() => {
+						const recipe = selectedRecipe()
+						if (recipe && !isRecipeHidden(recipe.output)) {
+							return recipe
 						}
 					})
 					return (
@@ -201,7 +208,7 @@ export const RecipesUi = ({ player }: FarmUiProps) => {
 							<div class="recipes-container">
 
 								<div>
-									<Menu inputs={entity().menuInputs}>
+									<Menu inputs={context?.player().menuInputs}>
 										{({ menu }) => {
 											return (
 												<div style={{ display: 'grid', gap: '1rem' }}>
@@ -233,7 +240,7 @@ export const RecipesUi = ({ player }: FarmUiProps) => {
 																})
 																const canCraft = createMemo(() => {
 																	if (recipe.input.some((item) => {
-																		return !player.inventory.find((playerItem) => {
+																		return !context?.player().inventory.find((playerItem) => {
 																			return playerItem?.name === item.name && playerItem.quantity >= item.quantity
 																		})
 																	})) {
@@ -263,12 +270,11 @@ export const RecipesUi = ({ player }: FarmUiProps) => {
 									</Menu>
 								</div>
 								<div class="description">
-									<Show when={selectedRecipe()}>
+									<Show when={showRecipe()}>
 										{(recipe) => {
 											return (
 												<RecipeDescription
 													recipe={recipe}
-													player={player}
 													onClick={cook}
 												/>
 											)
