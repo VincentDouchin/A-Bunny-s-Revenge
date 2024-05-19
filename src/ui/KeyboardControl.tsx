@@ -8,6 +8,7 @@ import { OutlineText } from './components/styledComponents'
 import { useGame } from './store'
 import { campState } from '@/global/states'
 import { ui } from '@/global/init'
+import { save } from '@/global/save'
 
 export const KeyboardControls = () => {
 	const context = useGame()
@@ -42,9 +43,10 @@ export const KeyboardControls = () => {
 				const farm = ui.sync(() => campState.enabled)
 				const visible = atom(false)
 				onMount(() => setTimeout(() => visible(true), 100))
+				const showControls = ui.sync(() => save.settings.showControls)
 				return (
 					<Transition name="traverse-up">
-						<Show when={visible()}>
+						<Show when={showControls() && visible()}>
 							<div class="controls-container">
 								<div class="keyboard-controls">
 									<div class="controls-icons">

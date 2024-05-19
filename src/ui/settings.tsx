@@ -42,6 +42,13 @@ export const Settings = (props: { menu: MenuDir }) => {
 		updateSave(s => s.settings.controls = selectedControls)
 		controls(selectedControls)
 	}
+	// ! SHOW CONTROLS
+	const showControlsSelected = atom(false)
+	const showControls = atom(save.settings.showControls)
+	const setShowControl = (show: boolean) => {
+		updateSave(s => s.settings.showControls = show)
+		showControls(show)
+	}
 	css/* css */`
 		.settings-container{
 			display: grid;
@@ -122,6 +129,14 @@ export const Settings = (props: { menu: MenuDir }) => {
 				value={controls}
 				setValue={setControls}
 			/>
+			<div
+				use:menuItem={[props.menu, false, showControlsSelected, ['left', 'right']]}
+				class={showControlsSelected() ? 'selected' : 'unselected'}
+				onClick={() => setShowControl(!showControls())}
+			>
+				<OutlineText>Display controls</OutlineText>
+			</div>
+			<input type="checkbox" checked={showControls()} onClick={() => setShowControl(!showControls())}></input>
 		</div>
 	)
 }

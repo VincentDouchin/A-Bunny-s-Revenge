@@ -15,7 +15,7 @@ export interface SaveData {
 	selectedSeed: null | crops
 	inventories: Record<string, Item[]>
 	modifiers: items[]
-	settings: { volume: number, mute: boolean, fullscreen: boolean | null, controls: 'mouse' | 'keyboard' }
+	settings: { volume: number, mute: boolean, fullscreen: boolean | null, controls: 'mouse' | 'keyboard', showControls: boolean }
 	unlockedRecipes: items[]
 	unlockedPaths: number
 	acorns: number
@@ -30,7 +30,7 @@ const blankSave = (): SaveData => ({
 	selectedSeed: null,
 	inventories: {},
 	modifiers: [],
-	settings: { volume: 100, mute: false, fullscreen: null, controls: 'mouse' },
+	settings: { volume: 100, mute: false, fullscreen: null, controls: 'mouse', showControls: true },
 	unlockedRecipes: [],
 	unlockedPaths: 1,
 	acorns: 0,
