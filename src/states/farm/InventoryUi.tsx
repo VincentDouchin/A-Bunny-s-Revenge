@@ -32,7 +32,7 @@ import { Settings } from '@/ui/settings'
 menuItem
 
 const thumbnail = thumbnailRenderer()
-export const ItemBox = (props: { children: JSX.Element, selected?: boolean, completed?: boolean, hidden?: boolean }) => {
+export const ItemBox = (props: { children: JSX.Element, selected?: boolean, completed?: boolean }) => {
 	css/* css */`
 	.item-display{
 		border-radius: 1rem;
@@ -50,15 +50,12 @@ export const ItemBox = (props: { children: JSX.Element, selected?: boolean, comp
 		top: 0.5rem;
 		left: 0.5rem;
 	}
-	.hidden{
-		filter: contrast(0%) brightness(0%);
-	}
+
 	`
 	return (
 		<div
 			class="item-display"
 			style={{ border: props.selected ? 'solid 0.2rem white' : '' }}
-			classList={{ hidden: props.hidden ?? false }}
 		>
 			{props.children}
 			<Show when={props.completed !== undefined}>
@@ -148,11 +145,13 @@ export const ItemDisplay = (props: {
 		animation-duration: 0.4s;
 		animation-timing-function: ease-in;
 	}
+	.hidden{
+		filter: contrast(0%) brightness(0%);
+	}
 	`
 
 	return (
 		<ItemBox
-			hidden={props.hidden ?? false}
 			selected={isSelected()}
 			completed={props.completed}
 		>
@@ -177,7 +176,7 @@ export const ItemDisplay = (props: {
 									})
 									return (
 										<>
-											<div ref={setReference} class="item">{element}</div>
+											<div ref={setReference} class="item" classList={{ hidden: props.hidden }}>{element}</div>
 											<Show when={!props.hidden && showName()}>
 												<div
 													ref={setFloating}
@@ -201,7 +200,7 @@ export const ItemDisplay = (props: {
 									src={assets.items[props.item!.name].img}
 									style={disabledStyles()}
 									class="item"
-									classList={{ 'item-selected': isSelected() }}
+									classList={{ 'item-selected': isSelected(), 'hidden': props.hidden }}
 								>
 								</img>
 							</Show>
@@ -318,7 +317,7 @@ const ItemCategories = <T,>({ items, setSelectedItem, menu, categories, filter, 
 								<InventorySlots
 									menu={menu}
 									hidden={hidden}
-									first={(item: Item | null) => category === categories()[0] && item === items()[0]}
+									first={(item: Item | null) => category === categories()[0] && item === categoryItems()[0]}
 									inventory={categoryItems}
 									onSelected={select}
 									setSelectedItem={setSelectedItem}

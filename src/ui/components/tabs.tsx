@@ -1,9 +1,9 @@
 import type { JSXElement } from 'solid-js'
 import { For, Show, createEffect, createMemo } from 'solid-js'
+import { createArray } from 'solid-proxies'
 import { css } from 'solid-styled'
 import type { Atom } from 'solid-use/atom'
 import atom from 'solid-use/atom'
-import { createArray } from 'solid-proxies'
 import { InputIcon } from '../InputIcon'
 import { useGame } from '../store'
 import { type MenuDir, menuItem } from './Menu'
@@ -29,6 +29,7 @@ export const Tabs = <T extends string,>(props: TabsProps<T>) => {
 			props.menu.setSelectedRef(tabsRefs.at(nextTab)!)
 		}
 	})
+
 	css/* css */`
 	.tab{
 		position: absolute;

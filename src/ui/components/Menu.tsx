@@ -79,10 +79,6 @@ export const menuItem: MenuItem = (el, init) => {
 	if (disabledDirections) {
 		menu.disabledDirections.set(id, disabledDirections)
 	}
-	onCleanup(() => {
-		menu.refs.delete(id)
-		menu.inverseRefs.delete(el)
-	})
 	menu.refs.set(id, el)
 	menu.inverseRefs.set(el, id)
 
@@ -92,6 +88,8 @@ export const menuItem: MenuItem = (el, init) => {
 	el.addEventListener('pointerdown', clickListener)
 	onCleanup(() => {
 		el.removeEventListener('click', clickListener)
+		menu.refs.delete(id)
+		menu.inverseRefs.delete(el)
 	})
 	createEffect(() => {
 		isSelected(id === menu.selected())

@@ -92,7 +92,7 @@ export const Settings = (props: { menu: MenuDir }) => {
 	return (
 		<div class="settings-container">
 			<div
-				use:menuItem={[props.menu, false, volumeSelected, ['left', 'right']]}
+				use:menuItem={[props.menu, true, volumeSelected, ['left', 'right']]}
 				class={volumeSelected() ? 'selected' : 'unselected'}
 				onClick={muteSound}
 			>
