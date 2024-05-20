@@ -5,7 +5,7 @@ import atom from 'solid-use/atom'
 import { LevelEditor } from './LevelEditor'
 import { debugOptions } from './debugState'
 import { SaveEditor } from './saveEditor'
-import { ToonEditor } from './toonEditor'
+import { ColorCorrection, ToonEditor } from './toonEditor'
 import { SoundUi } from './SoundUi'
 import { params } from '@/global/context'
 import { RenderGroup } from '@/global/entity'
@@ -183,6 +183,7 @@ export const DebugUi = () => {
 	}
 	const showToonEditor = atom(false)
 	const showGroundEditor = atom(false)
+	const showColorCorrection = atom(false)
 	return (
 		<div style={{ 'position': 'absolute', 'color': 'white', 'z-index': 1000 }}>
 			<Show when={showUi()}>
@@ -287,7 +288,7 @@ export const DebugUi = () => {
 				</div>
 
 				<div style={{ position: 'fixed', right: 0, top: 0 }}>
-					<div style={{ 'background': 'darkgray', 'margin': '1rem', 'padding': '1rem', 'color': 'black', 'font-size': '2rem' }}>
+					<div style={{ 'background': 'darkgray', 'margin': '1rem', 'padding': '1rem', 'color': 'black', 'font-size': '20px' }}>
 						<button onClick={() => showGroundEditor(!showGroundEditor())}>Edit ground colors</button>
 						<Show when={showGroundEditor()}>
 							<For each={entries(groundColors)}>
@@ -311,13 +312,19 @@ export const DebugUi = () => {
 							</div>
 						</Show>
 					</div>
-					<div style={{ 'background': 'darkgray', 'margin': '1rem', 'padding': '1rem', 'color': 'black', 'font-size': '2rem' }}>
+					<div style={{ 'background': 'darkgray', 'margin': '1rem', 'padding': '1rem', 'color': 'black', 'font-size': '20px' }}>
 						<button onClick={() => showToonEditor(!showToonEditor())}>Edit toon shader</button>
 						<Show when={showToonEditor()}>
 							<ToonEditor />
 						</Show>
 					</div>
-					<div style={{ 'background': 'darkgray', 'margin': '1rem', 'padding': '1rem', 'color': 'black', 'font-size': '2rem' }}>
+					<div style={{ 'background': 'darkgray', 'margin': '1rem', 'padding': '1rem', 'color': 'black', 'font-size': '20px' }}>
+						<button onClick={() => showColorCorrection(!showColorCorrection())}>Edit color correction</button>
+						<Show when={showColorCorrection()}>
+							<ColorCorrection />
+						</Show>
+					</div>
+					<div style={{ 'background': 'darkgray', 'margin': '1rem', 'padding': '1rem', 'color': 'black', 'font-size': '20px' }}>
 						<div>Debug NPC encounters</div>
 						<For each={objectKeys(encounters)}>
 							{encounter => (
@@ -328,7 +335,7 @@ export const DebugUi = () => {
 							)}
 						</For>
 					</div>
-					<div style={{ 'background': 'darkgray', 'margin': '1rem', 'padding': '1rem', 'color': 'black', 'font-size': '2rem', 'height': '20rem', 'overflow-y': 'scroll' }}>
+					<div style={{ 'background': 'darkgray', 'margin': '1rem', 'padding': '1rem', 'color': 'black', 'font-size': '20px', 'height': '20rem', 'overflow-y': 'scroll' }}>
 						<div>Unlock recipes</div>
 						<For each={recipes.map(r => r.output.name)}>
 							{recipe => (
