@@ -1,5 +1,5 @@
 import type { icons } from '@assets/assets'
-import { type Accessor, For, type JSX, type JSXElement } from 'solid-js'
+import { type Accessor, For, type JSX, type JSXElement, Match, Switch } from 'solid-js'
 import { css } from 'solid-styled'
 import { assets } from '@/global/init'
 
@@ -108,5 +108,26 @@ export const SwitchButtons = <T extends string,>(props: { options: T[], value: A
 				}}
 			</For>
 		</div>
+	)
+}
+
+export const CheckBox = (props: { value: Accessor<boolean>, onClick: (value: boolean) => void }) => {
+	css/* css */`
+	.checkbox{
+		width: 1em;
+		aspect-ratio: 1;
+		display: grid;
+		place-items: center;
+	}
+	`
+	return (
+		<Switch>
+			<Match when={props.value()}>
+				<div class="checkbox" innerHTML={assets.icons['square-check-solid']}></div>
+			</Match>
+			<Match when={!props.value()}>
+				<div class="checkbox" innerHTML={assets.icons['square-regular']}></div>
+			</Match>
+		</Switch>
 	)
 }

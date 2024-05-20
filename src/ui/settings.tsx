@@ -2,7 +2,7 @@ import { Show, createMemo, createSignal } from 'solid-js'
 import { css } from 'solid-styled'
 import atom from 'solid-use/atom'
 import { type MenuDir, menuItem } from './components/Menu'
-import { OutlineText, SwitchButtons } from './components/styledComponents'
+import { CheckBox, OutlineText, SwitchButtons } from './components/styledComponents'
 import { useGame } from './store'
 import { isStandalone } from '@/states/game/FullscreenUi'
 import { save, updateSave } from '@/global/save'
@@ -114,7 +114,7 @@ export const Settings = (props: { menu: MenuDir }) => {
 						Auto fullscreen
 					</OutlineText>
 				</div>
-				<input type="checkbox" checked={fullscreen()} onClick={toggleFullscreen}></input>
+				<CheckBox value={fullscreen} onClick={toggleFullscreen}></CheckBox>
 			</Show>
 			<div
 				use:menuItem={[props.menu, false, controlsSelected, ['left', 'right']]}
@@ -136,7 +136,7 @@ export const Settings = (props: { menu: MenuDir }) => {
 			>
 				<OutlineText>Display controls</OutlineText>
 			</div>
-			<input type="checkbox" checked={showControls()} onClick={() => setShowControl(!showControls())}></input>
+			<CheckBox value={showControls} onClick={() => setShowControl(!showControls())}></CheckBox>
 		</div>
 	)
 }
