@@ -18,6 +18,7 @@ export enum RoomType {
 	Item,
 	NPC,
 	Seller,
+	Clear,
 }
 export interface Room {
 	plan: Level
@@ -26,6 +27,7 @@ export interface Room {
 	type: RoomType
 	encounter: keyof typeof encounters | null
 	items?: (Item | null)[]
+	chest?: true
 }
 interface Position {
 	x: number

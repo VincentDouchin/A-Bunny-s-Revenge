@@ -1,7 +1,7 @@
 import { ColliderDesc, RigidBodyDesc, RigidBodyType } from '@dimforge/rapier3d-compat'
 import FastNoiseLite from 'fastnoise-lite'
 import type { Vec2, Vector4Like } from 'three'
-import { CanvasTexture, Euler, Group, Mesh, PlaneGeometry, Quaternion, Vector2, Vector3 } from 'three'
+import { CanvasTexture, Color, Euler, Group, Mesh, PlaneGeometry, Quaternion, Vector2, Vector3 } from 'three'
 import { encounters } from '../dungeon/encounters'
 import { RoomType } from '../dungeon/generateDungeon'
 import { spawnLight } from './spawnLights'
@@ -35,9 +35,27 @@ const spawnFromCanvas = (level: Level, image: HTMLCanvasElement, scale: number, 
 		}
 	}
 }
-
-export const spawnTrees = (level: Level, parent: Entity) => {
-	const trees = Object.values(assets.trees).map(x => instanceMesh(x.scene, true))
+const getTrees = (level?: number) => {
+	if (level === 1) {
+		return [
+			assets.trees.CommonTree_Dead_1,
+			assets.trees.CommonTree_Dead_2,
+			assets.trees.CommonTree_Dead_3,
+			assets.trees.CommonTree_Dead_4,
+			assets.trees.CommonTree_Dead_5,
+			assets.trees.Willow_1,
+			assets.trees.Willow_2,
+		]
+	}
+	return [
+		assets.trees.Low_Poly_Forest_treeTall01,
+		assets.trees.Low_Poly_Forest_treeTall02,
+		assets.trees.Low_Poly_Forest_treeTall03,
+		assets.trees.Low_Poly_Forest_treeTall04,
+	]
+}
+export const spawnTrees = (level: Level, parent: Entity, dungeonLevel?: number) => {
+	const trees = getTrees(dungeonLevel).map(x => instanceMesh(x.scene, true))
 	const treesInstances: InstanceHandle[] = []
 	const noise = new FastNoiseLite(0)
 	noise.SetNoiseType(FastNoiseLite.NoiseType.OpenSimplex2)
@@ -81,8 +99,9 @@ export const spawnTrees = (level: Level, parent: Entity) => {
 		tree.setUniform('pos', pos)
 	}
 }
-export const spawnGrass = (level: Level, parent: Entity) => {
+export const spawnGrass = (level: Level, parent: Entity, dungeonLevel?: number) => {
 	const grass = Object.entries(assets.vegetation).filter(([name]) => name.includes('Grass')).map(x => instanceMesh(x[1].scene, true))
+
 	const flowers = Object.entries(assets.vegetation).filter(([name]) => name.includes('Flower_')).map(x => instanceMesh(x[1].scene, true))
 	const createNoise = (seed: number) => {
 		const noise = new FastNoiseLite(seed)
@@ -115,7 +134,7 @@ export const spawnGrass = (level: Level, parent: Entity) => {
 			(level.grass.height / 2 - y) / SCALE + nY,
 		).multiplyScalar(SCALE)
 		if (n * n2 < 0.2) return
-		const isFlower = nF > 0.9
+		const isFlower = nF > 0.9 && dungeonLevel !== 1
 		const size = 1
 		const grassGenerator = isFlower
 			? flowers[Math.floor(flowers.length * Math.abs(nF2))]
@@ -201,7 +220,7 @@ export const setDisplacement = (geo: PlaneGeometry, canvas: HTMLCanvasElement) =
 	positionAttribute.needsUpdate = true
 }
 
-export const spawnGroundAndTrees = (level: Level) => {
+export const spawnGroundAndTrees = (level: Level, dungeonLevel?: number) => {
 	const canvasScale = 0.5
 	const displacementMap = scaleCanvas(getdisplacementMap(level), canvasScale)
 	const displacementTexture = new CanvasTexture(displacementMap)
@@ -217,6 +236,10 @@ export const spawnGroundAndTrees = (level: Level) => {
 			ground: assets.textures.Dirt4_Dark,
 		}),
 	)
+	if (dungeonLevel === 1) {
+		groundMesh.material.uniforms.grassColor.value = new Color(0x645176)
+		groundMesh.material.uniforms.topColor.value = new Color(0x795E97)
+	}
 	setDisplacement(groundMesh.geometry, displacementMap)
 	groundMesh.geometry.computeVertexNormals()
 	groundMesh.geometry.computeTangents()
@@ -249,8 +272,8 @@ export const spawnGroundAndTrees = (level: Level) => {
 		...waterBundle(level),
 	})
 	spawnLight(level.size, ground)
-	spawnTrees(level, ground)
-	spawnGrass(level, ground)
+	spawnTrees(level, ground, dungeonLevel)
+	spawnGrass(level, ground, dungeonLevel)
 }
 
 export const spawnFarm: System<FarmRessources> = () => {
@@ -265,9 +288,9 @@ export const spawnCrossRoad = () => {
 	ecs.add({ map: level.id })
 	spawnGroundAndTrees(level)
 }
-export const spawnDungeon: System<DungeonRessources> = ({ dungeon }) => {
+export const spawnDungeon: System<DungeonRessources> = ({ dungeon, dungeonLevel }) => {
 	ecs.add({ map: dungeon.plan.id, dungeon })
-	spawnGroundAndTrees(dungeon.plan)
+	spawnGroundAndTrees(dungeon.plan, dungeonLevel)
 
 	if (dungeon.type === RoomType.NPC && dungeon.encounter) {
 		encounters[dungeon.encounter]()

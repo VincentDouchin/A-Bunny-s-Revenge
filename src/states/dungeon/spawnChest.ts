@@ -57,8 +57,9 @@ const enemiesQuery = ecs.with('faction').where(({ faction }) => faction === Fact
 
 const chestQuery = ecs.with('chestAnimator')
 export const endBattleSpawnChest: System<DungeonRessources> = (ressources) => {
-	if (enemiesQuery.size === 0 && chestQuery.size === 0 && [RoomType.Battle, RoomType.Boss].includes(ressources.dungeon.type)) {
+	if (enemiesQuery.size === 0 && chestQuery.size === 0 && [RoomType.Battle, RoomType.Boss].includes(ressources.dungeon.type) && !ressources.dungeon.chest) {
 		spawnChest(ressources.dungeonLevel, ressources.dungeon.type === RoomType.Boss)
+		ressources.dungeon.chest = true
 		enableBasketUi()
 	}
 }

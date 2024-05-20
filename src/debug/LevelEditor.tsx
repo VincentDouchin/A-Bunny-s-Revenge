@@ -14,7 +14,7 @@ import { debugState } from './debugState'
 import { getGameRenderGroup } from './debugUi'
 import type { PlacableProp, customModel } from './props'
 import { getModel, props } from './props'
-import { getFileName } from '@/global/assetLoaders'
+import { draco, getFileName } from '@/global/assetLoaders'
 import { params } from '@/global/context'
 import type { Entity } from '@/global/entity'
 import { assets, ecs, levelsData, ui } from '@/global/init'
@@ -212,7 +212,7 @@ export const LevelEditor = () => {
 						input.accept = '.glb'
 						input.addEventListener('change', async (e) => {
 							const file = (e.target as HTMLInputElement)?.files?.[0]
-							const loader = new GLTFLoader()
+							const loader = new GLTFLoader().setDRACOLoader(draco)
 							if (file) {
 								const arrayBuffer = await file?.arrayBuffer()
 								const name = getFileName(file.name) as models

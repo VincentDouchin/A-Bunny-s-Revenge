@@ -35,7 +35,7 @@ const [groundColors] = useLocalStorage('groundColor', {
 const groundExtension = new MaterialExtension({
 	level: null,
 	size: null,
-	grassColor2: new Color(groundColors.topColor),
+	topColor: new Color(groundColors.topColor),
 	pathColor: new Color(groundColors.pathColor),
 	pathColor2: new Color(groundColors.pathColor2),
 	grassColor: new Color(groundColors.grassColor),
@@ -49,7 +49,7 @@ const groundExtension = new MaterialExtension({
 		addUniform('level', 'sampler2D'),
 		addUniform(`pathColor2`, 'vec3'),
 		addUniform(`pathColor`, 'vec3'),
-		addUniform(`grassColor2`, 'vec3'),
+		addUniform(`topColor`, 'vec3'),
 		addUniform(`grassColor`, 'vec3'),
 		addUniform(`ground`, 'sampler2D'),
 		remove('color.rgb *= diffuse;'),
@@ -63,9 +63,9 @@ const groundExtension = new MaterialExtension({
 					? pathColor
 					: mix(pathColor,pathColor2,0.1) ;
 			vec3 grass = step(0.4,noise2) == 1.
-				? mix(grassColor,grassColor2,0.3)
+				? mix(grassColor,topColor,0.3)
 				: step(0.3,noise) == 1.
-					? mix(grassColor,grassColor2,0.2)
+					? mix(grassColor,topColor,0.2)
 					: grassColor;
 			vec3 normal2 = normalize( cross( dFdx( vViewPosition ), dFdy( vViewPosition ) ) );
 			float slope = dot(normal2, vec3(0.,1.,0.));

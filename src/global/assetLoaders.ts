@@ -65,7 +65,7 @@ const getDracoLoader = () => {
 	})
 	return new DRACOLoader(loadingManager).setDecoderPath('').preload()
 }
-const draco = getDracoLoader()
+export const draco = getDracoLoader()
 
 export const loadGLB = await cachedLoader('glb', (arrayBuffer: ArrayBuffer) => new GLTFLoader().setDRACOLoader(draco).parseAsync(arrayBuffer, ''))
 

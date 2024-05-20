@@ -10,6 +10,9 @@
 				},
 				"quantity": {
 					"type": "number"
+				},
+				"recipe": {
+					"$ref": "#/definitions/items"
 				}
 			},
 			"required": [
@@ -143,6 +146,13 @@
 				"settings": {
 					"additionalProperties": false,
 					"properties": {
+						"controls": {
+							"enum": [
+								"mouse",
+								"keyboard"
+							],
+							"type": "string"
+						},
 						"fullscreen": {
 							"type": [
 								"boolean",
@@ -152,6 +162,9 @@
 						"mute": {
 							"type": "boolean"
 						},
+						"showControls": {
+							"type": "boolean"
+						},
 						"volume": {
 							"type": "number"
 						}
@@ -159,7 +172,9 @@
 					"required": [
 						"volume",
 						"mute",
-						"fullscreen"
+						"fullscreen",
+						"controls",
+						"showControls"
 					],
 					"type": "object"
 				},

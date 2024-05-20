@@ -1,9 +1,15 @@
-import { Show, createMemo } from 'solid-js'
+import { Show, createMemo, onMount } from 'solid-js'
 import { css } from 'solid-styled'
-import { ecs } from '@/global/init'
+import type { With } from 'miniplex'
+import atom from 'solid-use/atom'
+import { ecs, ui } from '@/global/init'
 import { campState, openMenuState } from '@/global/states'
 import { StateUi } from '@/ui/components/StateUi'
 import { useQuery } from '@/ui/store'
+import type { Entity } from '@/global/entity'
+import { menuInputMap } from '@/global/inputMaps'
+import { InputIcon } from '@/ui/InputIcon'
+import { inMap } from '@/lib/hierarchy'
 
 const playerUi = useQuery(ecs.with('player'))
 export const LoseUi = () => {
@@ -12,6 +18,7 @@ export const LoseUi = () => {
 		openMenuState.disable()
 		campState.enable({})
 	}
+
 	css/* css */`
 	.losing{
 		height: fit-content;
@@ -22,28 +29,51 @@ export const LoseUi = () => {
 		font-size: 9rem;
 		color: red;
 		position: relative;
+
 	}
 	.losing-button{
 		margin: auto;
 		position: absolute;
 		left: 50%;
 		transform: translateX(-50%);
+		display: flex;
+		align-items: center;
+		gap: 1rem;
 }
 	`
 	return (
 		<StateUi state={openMenuState}>
 			<Show when={noPlayer()}>
-				<div
-					class="fade-in losing"
-				>
-					YOU DIED
-					<button
-						class="button losing-button"
-						onClick={retry}
-					>
-						Retry
-					</button>
-				</div>
+				{(_) =>	{
+					const controls = atom<null | With<Entity, 'menuInputs'>>(null)
+					onMount(() => {
+						controls(ecs.add({
+							...menuInputMap(),
+							...inMap(),
+						}))
+					})
+					ui.updateSync(() => {
+						if (controls()?.menuInputs.get('validate').justPressed) {
+							retry()
+						}
+					})
+					return (
+						<div
+							class="fade-in losing"
+						>
+							YOU DIED
+							<button
+								class="button losing-button"
+								onClick={retry}
+							>
+								<Show when={controls()}>
+									{controls => <InputIcon input={controls().menuInputs.get('validate')} />}
+								</Show>
+								{' '}
+								Retry
+							</button>
+						</div>
+					) }}
 			</Show>
 		</StateUi>
 	)
