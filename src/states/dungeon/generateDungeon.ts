@@ -18,7 +18,6 @@ export enum RoomType {
 	Item,
 	NPC,
 	Seller,
-	Clear,
 }
 export interface Room {
 	plan: Level
