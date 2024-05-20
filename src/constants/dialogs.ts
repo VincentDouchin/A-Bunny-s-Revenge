@@ -1,7 +1,6 @@
 import { itemsData } from './items'
 import type { Dialog } from '@/global/entity'
 import { cutSceneState } from '@/global/states'
-import { soundDialog } from '@/lib/dialogSound'
 import { dialog, t } from '@/translations'
 import { addItemToPlayer, addQuest, aliceJumpDown, canCompleteQuest, completeQuest, enterHouse, hasCompletedQuest, hasEaten, hasItem, hasQuest, leaveHouse, lockPlayer, unlockPlayer } from '@/utils/dialogHelpers'
 
@@ -16,9 +15,7 @@ export const dialogs = {
 	},
 	*GrandmasHouse() {
 		while (true) {
-			soundDialog('Hello dear')
 			yield t(dialog.grandma.hello)
-			soundDialog('How are you doing')
 			yield t(dialog.grandma.howareyoudoing)
 			if (hasQuest('grandma_1') && !hasCompletedQuest('grandma_1')) {
 				if (canCompleteQuest('grandma_1')) {
@@ -41,7 +38,6 @@ export const dialogs = {
 				yield 'Could you bring me some roasted carrots?'
 				addQuest('grandma_1')
 			} else {
-				soundDialog('Thanks again for these delicious roasted carrots')
 				yield 'Thanks again for these delicious roasted carrots'
 			}
 			leaveHouse()

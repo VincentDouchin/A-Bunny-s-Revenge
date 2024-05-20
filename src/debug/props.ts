@@ -341,6 +341,7 @@ export const props: PlacableProp<propNames>[] = [
 				dialogHeight: 4,
 				npcName: 'Grandma',
 				houseAnimator: new Animator(entity.model, assets.models.House.animations),
+				voice: 'f1',
 				dialog: dialogs.GrandmasHouse(),
 			}
 		},

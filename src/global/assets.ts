@@ -143,14 +143,18 @@ const buttonsLoader = (loader: (key: string) => void) => async (glob: Record<str
 	}
 }
 
-const loadVoices = (loader: (key: string) => void) => async (glob: GlobEager) => {
-	const sounds = await asyncMapValues(glob, async (src, key) => {
-		const audio = await loadAudio(src, key)
-		const player = new Howl({ src: audio, pool: 4, format: 'webm' })
+const loadVoices = (loader: (key: string) => void) => async (globAudio: GlobEager, globText: GlobEager) => {
+	const [audio, spriteMap] = [globAudio, globText].map(x => mapKeys(x, getFileName))
+	return asyncMapValues(audio, async (src, key) => {
+		const sprite = spriteMap[key]
+			.split('\r\n')
+			.filter(Boolean)
+			.map(l => l.split('\t'))
+			.reduce((acc, [start, end, name]) => ({ ...acc, [name]: [Number(start) * 1000, Number(end) * 1000 - Number(start) * 1000] }), {})
 		loader(src)
-		return player
+		const audio = await loadAudio(src, key)
+		return new Howl({ src: audio, pool: 10, format: 'webm', sprite })
 	})
-	return mapKeys(sounds, k => getFileName(k).split('_')[1])
 }
 const loadSounds = (loader: (key: string) => void, pool: number) => async (glob: GlobEager) => {
 	const sounds = await asyncMapValues(glob, async (src, key) => {
@@ -220,7 +224,10 @@ export const loadAssets = async () => {
 		buttons: buttonsLoader(loader)(import.meta.glob('@assets/buttons/*.*', { eager: true, import: 'default' })),
 
 		// ! audio
-		voices: loadVoices(loader)(import.meta.glob('@assets/voices/*.webm', { eager: true, import: 'default' })),
+		voices: loadVoices(loader)(
+			import.meta.glob('@assets/voices/*.webm', { eager: true, import: 'default' }),
+			import.meta.glob('@assets/voices/*.txt', { eager: true, import: 'default', as: 'raw' }),
+		),
 
 		steps: loadSounds(loader, 3)(import.meta.glob('@assets/steps/*.webm', { eager: true, import: 'default' })),
 

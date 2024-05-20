@@ -14,7 +14,7 @@ const [localSoundData] = useLocalStorage<sounds>('soundsData', soundsData)
 
 export type soundAssets = { [k in keyof typeof assets]: (typeof assets)[k] extends Record<string, Howl> ? k : never }[keyof typeof assets]
 
-export const playSFX = <K extends string = string>(soundAsset: soundAssets) => (sound: K | K[] | 'random', options?: { playbackRate?: number, offset?: number }) => {
+export const playSFX = <K extends string = string>(soundAsset: soundAssets) => (sound: K | K[] | 'random', options?: { playbackRate?: number, offset?: number, sprite?: string }) => {
 	const selectedSound = sound === 'random'
 		? getRandom(Object.keys(assets[soundAsset]))
 		: Array.isArray(sound)
@@ -26,11 +26,12 @@ export const playSFX = <K extends string = string>(soundAsset: soundAssets) => (
 	if (options?.playbackRate) {
 		soundPlayer.rate(options.playbackRate)
 	}
-	soundPlayer.play()
+	const id = soundPlayer.play(options?.sprite)
+	const duration = soundPlayer.duration(options?.sprite ? id : undefined)
 	return new Promise<void>((resolve) => {
 		setTimeout(() => {
 			resolve()
-		}, Math.max(soundPlayer.duration() * 1000 / (options?.playbackRate ?? 1) + (options?.offset ?? 0), 1))
+		}, Math.max(duration * 1000 / (options?.playbackRate ?? 1) + (options?.offset ?? 0), 1))
 	})
 }
 export const playSound = playSFX<soundEffects>('soundEffects')

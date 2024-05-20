@@ -1,3 +1,4 @@
+export type animalese = 'f3'
 export type buttons = 'texture'
 export type characters = 'ALICE_animated' | 'Armabee' | 'Armabee_Evolved' | 'Basket' | 'Big_Boar_A' | 'Big_Boar_B' | 'Big_Boar_C' | 'Bunny' | 'BunnyNewRig' | 'Forest_Butterfly_A' | 'Forest_Butterfly_B' | 'Forest_Butterfly_C' | 'Forest_Butterfly_D' | 'Frog Man' | 'JACK_animated' | 'OWL_animated' | 'Platopo_A' | 'Platopo_B' | 'Platopo_C' | 'Porin_A' | 'Porin_B' | 'Porin_C' | 'Porin_D' | 'Porin_E' | 'Racco_A' | 'Racco_B' | 'Racco_C' | 'Shaga_A' | 'Shaga_B' | 'Shaga_C' | 'Snailo_A' | 'Snailo_B' | 'Snailo_C' | 'Snailo_D'
 export type clouds = 'SM_Generic_Cloud_01' | 'SM_Generic_Cloud_02' | 'SM_Generic_Cloud_03' | 'SM_Generic_Cloud_04' | 'SM_Generic_Cloud_05'
@@ -17,5 +18,5 @@ export type steps = 'Bare Step Grass Soft A' | 'Bare Step Grass Soft B' | 'Bare 
 export type textures = 'borders' | 'circle_01' | 'Dirt4_Dark' | 'parchment'
 export type trees = 'Low_Poly_Forest_treeTall01' | 'Low_Poly_Forest_treeTall02' | 'Low_Poly_Forest_treeTall03' | 'Low_Poly_Forest_treeTall04'
 export type vegetation = 'Bush_1' | 'Bush_2' | 'SM_Env_Bush_01' | 'SM_Env_Bush_02' | 'SM_Env_Bush_03' | 'SM_Env_Bush_04' | 'SM_Env_Flower_01' | 'SM_Env_Flower_02' | 'SM_Env_Flower_03' | 'SM_Env_Flower_05' | 'SM_Env_Flower_06' | 'SM_Env_Flower_07' | 'SM_Env_Flower_08' | 'SM_Env_Flowers_01' | 'SM_Env_Flowers_02' | 'SM_Env_Grass_01' | 'SM_Env_Grass_02' | 'SM_Env_Plant_01' | 'SM_Env_Plant_02' | 'SM_Env_Plant_03'
-export type voices = 'babe_a' | 'babe_b' | 'babe_c' | 'babe_d' | 'babe_e' | 'babe_f' | 'babe_g' | 'babe_h' | 'babe_i' | 'babe_j' | 'babe_k' | 'babe_l' | 'babe_m' | 'babe_n' | 'babe_o' | 'babe_p' | 'babe_q' | 'babe_r' | 'babe_s' | 'babe_t' | 'babe_u' | 'babe_v' | 'babe_w' | 'babe_x' | 'babe_y' | 'babe_z'
+export type voices = 'f1'
 export type weapons = 'Hoe' | 'Ladle' | 'ScissorWeapon' | 'SwordWeapon'

@@ -11,6 +11,7 @@ import { useQuery } from './store'
 import { ecs, ui } from '@/global/init'
 import type { Entity } from '@/global/entity'
 import { params } from '@/global/context'
+import { soundDialog } from '@/lib/dialogSound'
 
 export const DialogText = (props: { text: string, finished: Atom<boolean> }) => {
 	css/* css */`
@@ -113,6 +114,11 @@ export const DialogUi = ({ player }: { player: With<Entity, 'playerControls' | '
 						const rot = player.position.clone().sub(entity.position)
 						const angle = Math.atan2(rot.x, rot.z)
 						entity.targetRotation.copy(new Quaternion().setFromAxisAngle(new Vector3(0, 1, 0), angle))
+					}
+				})
+				createEffect(() => {
+					if (entity.voice) {
+						soundDialog(entity.voice, currentDialog()?.value)
 					}
 				})
 				ui.updateSync(async () => {

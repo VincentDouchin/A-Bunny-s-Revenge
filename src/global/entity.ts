@@ -1,4 +1,4 @@
-import type { items, weapons } from '@assets/assets'
+import type { items, voices, weapons } from '@assets/assets'
 import type { Collider, ColliderDesc, KinematicCharacterController, RigidBody, RigidBodyDesc } from '@dimforge/rapier3d-compat'
 import type { With } from 'miniplex'
 import type { BufferGeometry, Camera, Group, Light, Mesh, MeshPhongMaterial, Object3D, Object3DEventMap, Quaternion, Scene, ShaderMaterial, Sprite, Vector3, WebGLRenderer } from 'three'
@@ -191,6 +191,7 @@ export interface Entity {
 	}
 	// ! NPC
 	npc?: true
+	voice?: voices
 	npcName?: (typeof NPC)[number]
 	questMarker?: QuestName
 	questMarkerContainer?: Group
