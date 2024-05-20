@@ -19,6 +19,7 @@ import { playSound } from '@/global/sounds'
 import { getWorldPosition } from '@/lib/transforms'
 import { addToHand } from '@/states/game/weapon'
 import { addToast } from '@/ui/Toaster'
+import { recipes } from '@/constants/recipes'
 
 const playerQuery = ecs.with('player', 'position', 'collider')
 const movingPlayerQuery = playerQuery.with('movementForce')
@@ -117,7 +118,7 @@ export const addQuest = async (name: QuestName) => {
 		const toUnlock: items[] = []
 		for (const step of quests[name].steps) {
 			for (const item of step.items) {
-				if (!save.unlockedRecipes.includes(item.name)) {
+				if (!save.unlockedRecipes.includes(item.name) && recipes.some(r => r.output.name === item.name)) {
 					toUnlock.push(item.name)
 				}
 			}

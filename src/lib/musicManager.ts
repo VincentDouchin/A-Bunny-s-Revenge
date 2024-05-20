@@ -30,8 +30,8 @@ export class MusicManager {
 		this.ambience?.fade(0.05, 0, 10)
 		const player = assets.ambiance[ambience]
 		player.play()
-		player.volume(localSoundData.music[ambience].volume * save.settings.ambianceVolume)
-		player.fade(0, localSoundData.music[ambience].volume, 10)
+		player.volume((localSoundData.music[ambience]?.volume ?? 1) * save.settings.ambianceVolume)
+		player.fade(0, (localSoundData.music[ambience]?.volume ?? 1), 10)
 		player.loop(true)
 		this.ambience = player
 	}
