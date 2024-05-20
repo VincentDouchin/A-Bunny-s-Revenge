@@ -20,7 +20,7 @@ import { params } from '@/global/context'
 import { fireParticles } from '@/particles/fireParticles'
 import { useQuery } from '@/ui/store'
 
-const cauldronQuery = useQuery(ecs.with('menuType', 'interactionContainer', 'group', 'rotation', 'recipesQueued', 'spoon').where(({ menuType }) => menuType === MenuType.CauldronGame))
+export const cauldronQuery = useQuery(ecs.with('menuType', 'interactionContainer', 'group', 'rotation', 'recipesQueued', 'spoon').where(({ menuType }) => menuType === MenuType.CauldronGame))
 export const CauldronMinigameUi = ({ player }: FarmUiProps) => {
 	const cauldron = createMemo(() => cauldronQuery()?.[0])
 	return (

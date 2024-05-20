@@ -33,9 +33,9 @@ export const getInteractables = (
 			case Interactable.Talk: return [
 				entity.activeDialog ? undefined : 'talk',
 			]
-			case Interactable.Cauldron: return ['Prepare', 'Cook']
-			case Interactable.Oven: return ['Prepare', 'Cook']
-			case Interactable.Chop: return ['Prepare', 'Cook']
+			case Interactable.Cauldron:
+			case Interactable.Oven:
+			case Interactable.Chop: return ['Prepare', entity.recipesQueued?.length ? 'Cook' : undefined]
 			case Interactable.WeaponStand: return ['Equip']
 			case Interactable.Buy: return [`Buy (${entity.price})`]
 			case Interactable.MagicBean:return getMagicBeanInteractable()

@@ -4,13 +4,15 @@ import { For, Show, createEffect, createMemo, onCleanup, onMount } from 'solid-j
 import { css } from 'solid-styled'
 import { Transition } from 'solid-transition-group'
 import atom from 'solid-use/atom'
-import { itemsData } from '@/constants/items'
-import type { Entity } from '@/global/entity'
-import { assets, coroutines, ui } from '@/global/init'
-import { save } from '@/global/save'
-import { thumbnailRenderer } from '@/lib/thumbnailRenderer'
-import { OutlineText } from '@/ui/components/styledComponents'
+import { cauldronQuery } from '../farm/CauldronMinigameUi'
+import { ovenQuery } from '../farm/OvenMinigameUi'
 import { range } from '@/utils/mapFunctions'
+import { OutlineText } from '@/ui/components/styledComponents'
+import { thumbnailRenderer } from '@/lib/thumbnailRenderer'
+import { save } from '@/global/save'
+import { assets, coroutines, ui } from '@/global/init'
+import type { Entity } from '@/global/entity'
+import { itemsData } from '@/constants/items'
 
 export const MealAmount = (props: { amount: Accessor<number>, size?: 'small' | 'big', extra?: Accessor<number> }) => {
 	const small = (props.size ?? 'big') === 'small'
@@ -218,10 +220,11 @@ export const HealthUi = (props: { player: With<Entity, 'maxHealth' | 'currentHea
 	`
 	const visible = atom(false)
 	onMount(() => setTimeout(() => visible(true), 100))
+	const isVisible = createMemo(() => ovenQuery().length === 0 && cauldronQuery().length === 0 && visible())
 	const amount = ui.sync(getAmountEaten)
 	return (
 		<Transition name="traverse-down">
-			<Show when={visible()}>
+			<Show when={isVisible()}>
 				<div class="health-ui">
 					<div class="wrapper">
 						<div class="health-amount front"></div>

@@ -21,7 +21,7 @@ import { range } from '@/utils/mapFunctions'
 
 // eslint-disable-next-line no-unused-expressions
 menuItem
-const recipeQuery = useQuery(ecs.with('menuType', 'recipesQueued').where(({ menuType }) => [MenuType.Oven, MenuType.Cauldron, MenuType.Bench].includes(menuType)))
+export const recipeQuery = useQuery(ecs.with('menuType', 'recipesQueued').where(({ menuType }) => [MenuType.Oven, MenuType.Cauldron, MenuType.Bench].includes(menuType)))
 const getMenuName = (menuType: MenuType) => {
 	switch (menuType) {
 		case MenuType.Oven :return 'Oven'

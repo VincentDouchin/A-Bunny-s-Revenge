@@ -115,21 +115,18 @@ canvas.main {
 .traverse-down-exit-active {
 	transition: all 0.3s ease;
 }
+.traverse-down-exit-to,
 .traverse-down-enter {
 	transform: translateY(-100vh);
 }
-.traverse-down-exit-to {
-	transform: translateY(100vh);
-}
+
 /* ! TRAVERSE UP */
 .traverse-up-enter-active,
 .traverse-up-exit-active {
 	transition: all 0.3s ease;
 }
+.traverse-up-exit-to,
 .traverse-up-enter {
-	transform: translateY(100vh);
-}
-.traverse-up-exit-to {
 	transform: translateY(100vh);
 }
 

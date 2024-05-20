@@ -140,16 +140,15 @@ export const props: PlacableProp<propNames>[] = [
 		name: 'oven',
 		models: ['BunnyOvenPacked'],
 		bundle: (entity) => {
-			const minigameContainer = new CSS2DObject(document.createElement('div'))
-			minigameContainer.position.setX(-30)
 			return {
 				...entity,
 				recipesQueued: [],
 				ovenAnimator: new Animator(entity.model, assets.models.BunnyOvenPacked.animations),
-				minigameContainer,
 				interactable: Interactable.Oven,
 				onPrimary: openMenu(MenuType.Oven),
-				onSecondary: openMenu(MenuType.OvenMinigame),
+				onSecondary: (e) => {
+					e.recipesQueued?.length && openMenu(MenuType.OvenMinigame)(e)
+				},
 				withChildren(parent) {
 					const model = assets.models['ume-wood'].scene.clone()
 					model.scale.setScalar(5)
@@ -167,8 +166,10 @@ export const props: PlacableProp<propNames>[] = [
 		bundle: entity => ({
 			...entity,
 			interactable: Interactable.Cauldron,
-			onPrimary: e => ecs.addComponent(e, 'menuType', MenuType.Cauldron),
-			onSecondary: e => ecs.addComponent(e, 'menuType', MenuType.CauldronGame),
+			onPrimary: openMenu(MenuType.Cauldron),
+			onSecondary: (e) => {
+				e.recipesQueued?.length && openMenu(MenuType.CauldronGame)(e)
+			},
 			withChildren(parent) {
 				const spoonmodel = assets.models.spoon.scene.clone()
 				const spoon = ecs.add({

@@ -1,8 +1,7 @@
 import { Tween } from '@tweenjs/tween.js'
 import type { With } from 'miniplex'
 import { between } from 'randomish'
-import { For, Show, createSignal, onCleanup, onMount } from 'solid-js'
-import { Portal } from 'solid-js/web'
+import { For, Show, createMemo, createSignal, onCleanup, onMount } from 'solid-js'
 import { css } from 'solid-styled'
 import { Color, PointLight, Vector3 } from 'three'
 import { ConstantValue } from 'three.quarks'
@@ -19,11 +18,12 @@ import { addTag } from '@/lib/hierarchy'
 import { getWorldPosition } from '@/lib/transforms'
 import { fireParticles } from '@/particles/fireParticles'
 import { smoke } from '@/particles/smoke'
+import { OutlineText } from '@/ui/components/styledComponents'
 import { useGame, useQuery } from '@/ui/store'
 import type { FarmUiProps } from '@/ui/types'
 import { sleep } from '@/utils/sleep'
 
-const ovenQuery = useQuery(ecs.with('menuType', 'recipesQueued', 'ovenAnimator', 'position').where(({ menuType }) => menuType === MenuType.OvenMinigame))
+export const ovenQuery = useQuery(ecs.with('menuType', 'recipesQueued', 'ovenAnimator', 'position').where(({ menuType }) => menuType === MenuType.OvenMinigame))
 
 export const OvenMinigameUi = ({ player }: FarmUiProps) => {
 	const context = useGame()
@@ -85,9 +85,9 @@ export const OvenMinigameUi = ({ player }: FarmUiProps) => {
 					}))
 				})
 				const [bar, setBar] = createSignal(50)
-				const height = 30
 				const [target, setTarget] = createSignal(50)
 				const [heat, setHeat] = createSignal(100)
+				const heatHeight = createMemo(() => 10 + 20 * heat() / 100)
 				const [progress, setProgress] = createSignal(0)
 				const [direction, setDirection] = createSignal(Math.random() > 0.5 ? 1 : -1)
 				const [timer, setTimer] = createSignal(between(3, 5))
@@ -100,8 +100,8 @@ export const OvenMinigameUi = ({ player }: FarmUiProps) => {
 							setBar(x => Math.min(100, x - 10))
 						}
 						setBar(x => x + 25 * time.delta / 1000)
-						if (bar() < target() + height / 2 && bar() > target() - height / 2) {
-							setProgress(x => Math.min(100, x + 20 * time.delta / 1000))
+						if (bar() < target() + heatHeight() / 2 && bar() > target() - heatHeight() / 2) {
+							setProgress(x => Math.min(100, x + 20 * time.delta / 1000 * heat() / 100))
 							setHeat(x => Math.min(100, x + 5 * time.delta / 1000))
 						} else {
 							setHeat(x => Math.max(0, x - 15 * time.delta / 1000))
@@ -182,8 +182,9 @@ export const OvenMinigameUi = ({ player }: FarmUiProps) => {
 					display: grid;
 					grid-template-columns: auto auto auto;
 					gap: 1rem 3rem;
-					transform: translate(0%, -80%);
-					position: absolute;
+					width: fit-content;
+					align-items: center;
+					margin-left: 15rem;
 				}
 				.progress-text{
 					position: absolute;
@@ -219,7 +220,7 @@ export const OvenMinigameUi = ({ player }: FarmUiProps) => {
 					position: relative;
 				}
 				.target{
-					height: ${`${height}%`};
+					height: ${`${heatHeight()}%`};
 					width: 100%;
 					position: absolute;
 					background: linear-gradient(0deg, transparent, #f3a833, #e98537, #f3a833, transparent);
@@ -274,41 +275,39 @@ export const OvenMinigameUi = ({ player }: FarmUiProps) => {
 								<div innerHTML={assets.icons['fire-solid']} class="fire-icon"></div>
 							</div>
 						</Show>
-						<Portal mount={oven.minigameContainer?.element}>
-							<div class="minigame-container">
-								{/*  progress */}
-								<div class="relative">
-									<div class="progress-text">Progress</div>
-									<div class="progress-container">
-										<div class="progress-bar"></div>
-									</div>
+						<div class="minigame-container">
+							{/*  progress */}
+							<div class="relative">
+								<div class="progress-text"><OutlineText>Progress</OutlineText></div>
+								<div class="progress-container">
+									<div class="progress-bar"></div>
 								</div>
-								{/* middle */}
-								<div class="relative">
-									<Show when={output()}>
-										{output => (
-											<div style={{ position: 'absolute', bottom: 'calc(100% + 2rem)' }}>
-												<ItemDisplay item={output()}></ItemDisplay>
-											</div>
-										)}
-									</Show>
-									<div class="target-container">
-										{/* target */}
-										<div class="target"></div>
-										{/* bar */}
-										<div class="target-bar"></div>
-									</div>
-								</div>
-								{/* heat */}
-								<div class="relative">
-									<div class="heat-text">Heat</div>
-									<div class="heat-container">
-										<div class="heat-bar"></div>
-									</div>
-								</div>
-
 							</div>
-						</Portal>
+							{/* middle */}
+							<div class="relative">
+								<Show when={output()}>
+									{output => (
+										<div style={{ position: 'absolute', bottom: 'calc(100% + 2rem)' }}>
+											<ItemDisplay item={output()}></ItemDisplay>
+										</div>
+									)}
+								</Show>
+								<div class="target-container">
+									{/* target */}
+									<div class="target"></div>
+									{/* bar */}
+									<div class="target-bar"></div>
+								</div>
+							</div>
+							{/* heat */}
+							<div class="relative">
+								<div class="heat-text"><OutlineText>Heat</OutlineText></div>
+								<div class="heat-container">
+									<div class="heat-bar"></div>
+								</div>
+							</div>
+
+						</div>
 					</>
 				)
 			}}
