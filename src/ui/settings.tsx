@@ -1,34 +1,23 @@
-import { Show, createMemo, createSignal } from 'solid-js'
+import { For, Show, createMemo, createSignal } from 'solid-js'
 import { css } from 'solid-styled'
 import atom from 'solid-use/atom'
 import { type MenuDir, menuItem } from './components/Menu'
 import { CheckBox, OutlineText, SwitchButtons } from './components/styledComponents'
 import { useGame } from './store'
 import { isStandalone } from '@/states/game/FullscreenUi'
+import { setAllMuted } from '@/global/sounds'
 import { save, updateSave } from '@/global/save'
+import type { SaveData } from '@/global/save'
 import { assets, ui } from '@/global/init'
 
 // eslint-disable-next-line no-unused-expressions
 menuItem
 
 export const Settings = (props: { menu: MenuDir }) => {
-	const [mute, setMute] = createSignal(save.settings.mute)
 	const context = useGame()
 	const inputs = createMemo(() => context?.player().menuInputs)
 	// ! VOLUME
-	const volumeSelected = atom(false)
-	const muteSound = () => {
-		setMute(x => !x)
-		Howler.mute(mute())
-		updateSave(s => s.settings.mute = mute())
-	}
-	const volume = atom(save.settings.volume)
 
-	const setVolume = (volumeAmount: number) => {
-		volume(volumeAmount)
-		updateSave(s => s.settings.volume = volumeAmount)
-		Howler.volume(volumeAmount / 100)
-	}
 	// ! FULLSCREEN
 	const fullscreenSelected = atom(false)
 	const toggleFullscreen = () => {
@@ -57,7 +46,7 @@ export const Settings = (props: { menu: MenuDir }) => {
 			font-size: 2rem;
 			height: fit-content;
 			align-items: center;
-			gap: 1rem 2rem;
+			gap: 0.5rem 2rem;
 		}
 		.volume{
 			display: grid;
@@ -78,31 +67,61 @@ export const Settings = (props: { menu: MenuDir }) => {
 		}
 
 	`
+	const specificVolumes = [
+		['Global Volume', 'volume', 'mute'],
+		['Music', 'musicVolume', 'musicMute'],
+		['Ambiance', 'ambianceVolume', 'ambianceMute'],
+		['Sound Effects', 'soundEffectsVolume', 'soundEffectsMute'],
+	] as const satisfies ReadonlyArray<readonly [string, keyof SaveData['settings'], keyof SaveData['settings'] ]>
 
-	ui.updateSync(() => {
-		if (volumeSelected()) {
-			if (inputs()?.get('left').justPressed) {
-				setVolume(Math.max(volume() - 5, 0))
-			}
-			if (inputs()?.get('right').justPressed) {
-				setVolume(Math.min(volume() + 5, 100))
-			}
-		}
-	})
 	return (
 		<div class="settings-container">
-			<div
-				use:menuItem={[props.menu, true, volumeSelected, ['left', 'right']]}
-				class={volumeSelected() ? 'selected' : 'unselected'}
-				onClick={muteSound}
-			>
-				<OutlineText>Volume</OutlineText>
-			</div>
-			<div class="volume">
-				<div class="volume-icon" innerHTML={mute() ? assets.icons['volume-xmark-solid'] : assets.icons['volume-high-solid']} onClick={muteSound}></div>
-				<input type="range" class="input-range" value={volume()} onChange={e => setVolume(e.target.valueAsNumber)}></input>
-				<OutlineText>{String(volume())}</OutlineText>
-			</div>
+
+			<For each={specificVolumes}>
+				{([title, volumeName, muteName]) => {
+					const selected = atom(false)
+					const volume = atom(save.settings[volumeName])
+					const [mute, setMute] = createSignal(save.settings[muteName])
+					const muteSound = async () => {
+						setMute(x => !x)
+						Howler.mute(mute())
+						await updateSave(s => s.settings[muteName] = mute())
+						setAllMuted()
+					}
+
+					const setVolume = (volumeAmount: number) => {
+						volume(volumeAmount)
+						updateSave(s => s.settings[volumeName] = volumeAmount)
+						Howler.volume(volumeAmount / 100)
+					}
+					ui.updateSync(() => {
+						if (selected()) {
+							if (inputs()?.get('left').justPressed) {
+								setVolume(Math.max(volume() - 5, 0))
+							}
+							if (inputs()?.get('right').justPressed) {
+								setVolume(Math.min(volume() + 5, 100))
+							}
+						}
+					})
+					return (
+						<>
+							<div
+								use:menuItem={[props.menu, true, selected, ['left', 'right']]}
+								class={selected() ? 'selected' : 'unselected'}
+								onClick={muteSound}
+							>
+								<OutlineText>{title}</OutlineText>
+							</div>
+							<div class="volume">
+								<div class="volume-icon" innerHTML={mute() ? assets.icons['volume-xmark-solid'] : assets.icons['volume-high-solid']} onClick={muteSound}></div>
+								<input type="range" class="input-range" value={volume()} onChange={e => setVolume(e.target.valueAsNumber)}></input>
+								<OutlineText>{String(volume())}</OutlineText>
+							</div>
+						</>
+					)
+				}}
+			</For>
 			<Show when={!isStandalone()}>
 
 				<div

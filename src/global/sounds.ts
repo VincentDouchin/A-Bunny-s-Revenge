@@ -5,9 +5,25 @@ import { save } from './save'
 import { getRandom } from '@/utils/mapFunctions'
 import { useLocalStorage } from '@/utils/useLocalStorage'
 
+const setMuted = (sounds: soundAssets | 'global', muted: boolean) => {
+	if (sounds === 'global') {
+		Howler.mute(muted)
+	} else {
+		for (const sound in assets[sounds]) {
+			assets[sounds][sound].mute(muted)
+		}
+	}
+}
+export const setAllMuted = () => {
+	setMuted('global', save.settings.mute)
+	setMuted('ambiance', save.settings.ambianceMute)
+	setMuted('music', save.settings.musicMute)
+	setMuted('soundEffects', save.settings.soundEffectsMute)
+}
+
 export const initHowler = () => {
 	Howler.volume(save.settings.volume / 100)
-	Howler.mute(save.settings.mute)
+	setAllMuted()
 }
 type sounds = Record<soundAssets, Record<string, { volume: number }>>
 const [localSoundData] = useLocalStorage<sounds>('soundsData', soundsData)
@@ -22,7 +38,7 @@ export const playSFX = <K extends string = string>(soundAsset: soundAssets) => (
 			: sound
 	const soundPlayer = assets[soundAsset][selectedSound]
 	const volume = localSoundData[soundAsset][selectedSound]?.volume ?? 1
-	soundPlayer.volume(volume)
+	soundPlayer.volume(volume * save.settings.soundEffectsVolume / 100)
 	if (options?.playbackRate) {
 		soundPlayer.rate(options.playbackRate)
 	}

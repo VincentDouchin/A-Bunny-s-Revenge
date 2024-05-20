@@ -234,6 +234,7 @@ export const loadAssets = async () => {
 		soundEffects: loadSounds(loader, 5)(import.meta.glob('@assets/soundEffects/*.webm', { eager: true, import: 'default' })),
 
 		music: loadSounds(loader, 1)(import.meta.glob('@assets/music/*.webm', { eager: true, import: 'default' })),
+		ambiance: loadSounds(loader, 1)(import.meta.glob('@assets/ambiance/*.webm', { eager: true, import: 'default' })),
 
 		// ! others
 		fonts: fontLoader(loader)(import.meta.glob('@assets/fonts/*.*', { eager: true, import: 'default' })),

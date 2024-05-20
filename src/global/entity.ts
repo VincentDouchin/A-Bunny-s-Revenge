@@ -289,7 +289,7 @@ export interface Entity {
 }
 export type Bundle<C extends keyof Entity> = () => With<Entity, C>
 
-type KeysOfType<T, U> = {
+export type KeysOfType<T, U> = {
 	[K in keyof T]: T[K] extends U ? K : never;
 }[keyof T]
 export type ComponentsOfType<T> = KeysOfType<Required<Entity>, T>
