@@ -130,10 +130,12 @@ export const spawnPlayerDungeon: System<DungeonRessources> = (ressources) => {
 export const spawnPlayerClearing = () => {
 	for (const door of doorQuery) {
 		if (door.door === 'south') {
+			const rotation = door.rotation.clone().multiply(new Quaternion().setFromAxisAngle(new Vector3(0, 1, 0), Math.PI))
 			ecs.add({
 				...playerBundle(PLAYER_DEFAULT_HEALTH, true, null),
 				position: new Vector3(...door.position.toArray()).add(new Vector3(0, 0, -20).applyQuaternion(door.rotation)),
-				rotation: door.rotation.clone().multiply(new Quaternion().setFromAxisAngle(new Vector3(0, 1, 0), Math.PI)),
+				rotation,
+				targetRotation: rotation.clone(),
 			})
 		}
 	}
