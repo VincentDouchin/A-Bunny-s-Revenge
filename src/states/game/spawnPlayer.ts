@@ -81,7 +81,6 @@ export const playerBundle = (health: number, addHealth: boolean, weapon: weapons
 		dash: new Dash(1000),
 		sneeze: new Timer(2000, false),
 		poisoned: new Timer(500, false),
-		targetRotation: new Quaternion(),
 		combo: {
 			lastAttack: 0,
 			heavyAttack: 0,
@@ -111,6 +110,7 @@ export const spawnCharacter: System<FarmRessources> = (ressources) => {
 		...playerBundle(PLAYER_DEFAULT_HEALTH, true, null),
 		position,
 		rotation,
+		targetRotation: rotation.clone(),
 	})
 }
 

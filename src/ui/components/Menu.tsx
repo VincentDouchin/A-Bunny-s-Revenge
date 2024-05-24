@@ -52,7 +52,7 @@ export interface MenuItemProps extends JSX.HTMLAttributes<HTMLDivElement> {
 	menu: MenuDir
 }
 
-export type MenuItem = (el: HTMLElement, selected: () => [MenuDir, boolean, Atom<boolean>, ('up' | 'down' | 'left' | 'right')[]] | [MenuDir, boolean, Atom<boolean>]) => void
+export type MenuItem = (el: HTMLElement, selected: () => [MenuDir, boolean, Atom<boolean>, ('up' | 'down' | 'left' | 'right')[], boolean ] | [MenuDir, boolean, Atom<boolean>]) => void
 declare module 'solid-js' {
 	// eslint-disable-next-line ts/no-namespace
 	namespace JSX {
@@ -72,7 +72,7 @@ export interface MenuDir {
 }
 export const menuItem: MenuItem = (el, init) => {
 	const id = generateUUID()
-	const [menu, first, isSelected, disabledDirections] = init()
+	const [menu, first, isSelected, disabledDirections, autofocus] = init()
 	if (first) {
 		menu.setSelected(id)
 	}
@@ -94,6 +94,13 @@ export const menuItem: MenuItem = (el, init) => {
 	createEffect(() => {
 		isSelected(id === menu.selected())
 	})
+	if (autofocus) {
+		createEffect(() => {
+			if (isSelected()) {
+				el.scrollIntoView({ behavior: 'smooth' })
+			}
+		})
+	}
 }
 
 export function Menu(props: { children: Component<MenuItemProps>, inputs?: MenuInputMap }) {

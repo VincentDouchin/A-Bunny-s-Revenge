@@ -51,7 +51,6 @@ import { losingBattle, spawnCharacter, spawnPlayerClearing, spawnPlayerDungeon }
 import { touchItem } from './states/game/touchItem'
 import { updateWeaponArc } from './states/game/weapon'
 import { clickOnMenuButton, initMainMenuCamPos, intiMainMenuRendering, renderMainMenu, selectMainMenu, setMainCameraPosition, spawnPlayerContinueGame } from './states/mainMenu/mainMenuRendering'
-import { playCloseSound, playOpenSound } from './states/pause/pause'
 import { disablePortrait, enableFullscreen, resize, setupGame, stopOnLosingFocus } from './states/setup/setupGame'
 import { UI } from './ui/UI'
 
@@ -94,9 +93,9 @@ campState
 	.onUpdate(runIf(canPlayerMove, plantSeed, harvestCrop, openPlayerInventory, savePlayerPosition))
 	.onExit(despawnOfType('map'))
 openMenuState
-	.onEnter(playOpenSound, stopPlayer)
+	.onEnter(stopPlayer)
 	.addSubscriber(disableInventoryState)
-	.onExit(playCloseSound)
+	.onExit()
 	.onUpdate(closePlayerInventory)
 genDungeonState
 	.addSubscriber(unlockDoorClearing)

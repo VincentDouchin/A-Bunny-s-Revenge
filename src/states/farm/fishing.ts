@@ -7,6 +7,7 @@ import { fishBehaviorPlugin } from '@/behaviors/fishBehavior'
 import { MenuType } from '@/global/entity'
 import { assets, ecs, gameTweens } from '@/global/init'
 import { scene } from '@/global/rendering'
+import { playSound } from '@/global/sounds'
 import { MeshLine, MeshLineMaterial } from '@/lib/MeshLine'
 import { behaviorBundle } from '@/lib/behaviors'
 import { inMap } from '@/lib/hierarchy'
@@ -31,7 +32,7 @@ const playerFishingQuery = ecs.with('fishingPole', 'model', 'position', 'rotatio
 const fishingQuery = ecs.with('menuType', 'group').where(e => e.menuType === MenuType.Fishing)
 export const stopFishing = (force: boolean = false) => () => {
 	for (const player of playerFishingQuery) {
-		if (player.menuInputs.get('cancel').justReleased || force) {
+		if ((player.menuInputs.get('cancel').justReleased || force) && player.fishingPole.bobber) {
 			player.playerAnimator.playClamped('lightAttack', { timeScale: 0.5 })
 			const { bobber } = player.fishingPole
 			if (bobber) {
@@ -44,6 +45,7 @@ export const stopFishing = (force: boolean = false) => () => {
 					fish.rotateX(-Math.PI / 2)
 					bobber.model?.add(fish)
 				}
+				playSound('zapsplat_leisure_fishing_road_swipe_cast_air_whoosh_24610')
 				bobber.body?.setLinvel(new Vector3(0, 100, -50).applyQuaternion(player.rotation), true)
 				setTimeout(() => {
 					ecs.remove(bobber)
@@ -68,6 +70,7 @@ const updateFishingLine = () => {
 			bobber.body.setBodyType(RigidBodyType.Fixed, true)
 			ecs.reindex(bobber)
 			bobber.position.y = -3
+			playSound(['zapsplat_sport_fishing_sinker_tackle_hit_water_plop_001_13669', 'zapsplat_sport_fishing_sinker_tackle_hit_water_plop_002_13670'])
 		}
 
 		if (tip && bobber) {
@@ -111,6 +114,7 @@ const useFishingPole = () => {
 						colliderDesc: ColliderDesc.ball(1).setSensor(true),
 					})
 					ecs.update(fishingPole, { bobber })
+					playSound('zapsplat_leisure_fishing_road_swipe_cast_air_whoosh_24610')
 				}, 500)
 				player.playerAnimator.playClamped('lightAttack', { timeScale: 0.5 }).then(() => {
 					player.playerAnimator.playAnimation('idle', { timeScale: 0.2 })

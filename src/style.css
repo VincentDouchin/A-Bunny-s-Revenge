@@ -18,6 +18,11 @@
 		hsla(0, 0%, 0%, 0.4),
 		hsla(0, 0%, 0%, 0.2)
 	);
+	--gold-transparent: linear-gradient(
+		to bottom,
+		color-mix(in srgb, var(--gold), transparent 60%),
+		color-mix(in srgb, var(--gold), transparent 80%)
+	);
 	--meal-color: #f3a833;
 }
 html,

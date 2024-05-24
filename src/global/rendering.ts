@@ -6,6 +6,7 @@ import { params } from './context'
 import { RenderGroup } from './entity'
 import { ecs } from './init'
 import { mainMenuState } from './states'
+import { save } from './save'
 import { getDepthShader, getSobelShader } from '@/shaders/EdgePass'
 
 export const scene = new Scene()
@@ -47,7 +48,7 @@ export const updateRenderSize = (newSize?: Vector2) => {
 }
 export const initThree = () => {
 	renderer.clear()
-	renderer.shadowMap.enabled = true
+	renderer.shadowMap.enabled = !save.settings.disableShadows
 	renderer.shadowMap.type = BasicShadowMap
 	renderer.domElement.classList.add('main')
 	document.body.appendChild(renderer.domElement)

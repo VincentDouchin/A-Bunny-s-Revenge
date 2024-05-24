@@ -1,5 +1,5 @@
 import soundsData from '@assets/soundsData.json'
-import { For, Show, createEffect, createSignal, onCleanup, onMount } from 'solid-js'
+import { For, Show, createEffect, createMemo, createSignal, onCleanup, onMount } from 'solid-js'
 import { css } from 'solid-styled'
 import { assets } from '@/global/init'
 import type { soundAssets } from '@/global/sounds'
@@ -53,7 +53,7 @@ export const SoundUi = () => {
 		gap:30px;
 	}
 	.part-container{
-		background:hsl(0,0%,0%,0.8);
+		background:hsl(0,0%,0%);
 		margin:1rem 10rem;
 		border-radius:1rem;
 		padding:1rem;
@@ -105,14 +105,15 @@ export const SoundUi = () => {
 							{(soundAsset) => {
 								const [showPart, setShowPart] = createSignal(false)
 								const [filter, setFilter] = createSignal('')
+								const sounds = createMemo(() => entries(assets[soundAsset]).filter(([k]) => !filter() || k.toLowerCase().includes(filter().toLowerCase())))
 								return (
 									<div class="part-container">
 										<div class="part-title" onClick={() => setShowPart(x => !x)}>{soundAsset}</div>
 										<input class="sound-search" placeholder="search sound" value={filter()} onChange={e => setFilter(e.target.value)}></input>
 
 										<div class="part-list">
-											<Show when={showPart() || filter()}>
-												<For each={entries(assets[soundAsset]).filter(([k]) => !filter() || k.toLowerCase().includes(filter().toLowerCase()))}>
+											<Show when={showPart()}>
+												<For each={sounds()}>
 													{([key, howl]) => {
 														const updateVolume = (volume: number) => setReactiveSoundData((x) => {
 															return { ...x, [soundAsset]: { ...x[soundAsset], [key]: { ...x[soundAsset][key], volume } } }
