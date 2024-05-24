@@ -15,6 +15,7 @@
 		},
 		"resolveJsonModule": true,
 		"types": [
+			"vite-plugin-solid-svg/types-component-solid",
 			"vite/client",
 			"vite-plugin-pwa/client",
 			"new-javascript",

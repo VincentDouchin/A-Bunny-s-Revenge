@@ -1,4 +1,4 @@
-import type { characters, fruit_trees, icons, items, mainMenuAssets, models, particles, textures, trees, vegetation, weapons } from '@assets/assets'
+import type { characters, fruit_trees, items, mainMenuAssets, models, particles, textures, trees, vegetation, weapons } from '@assets/assets'
 import type { ColorRepresentation, Material, Side, TextureFilter } from 'three'
 import { DoubleSide, FrontSide, Mesh, MeshBasicMaterial, MeshPhysicalMaterial, MeshStandardMaterial, NearestFilter, RepeatWrapping, SRGBColorSpace, Texture } from 'three'
 
@@ -19,9 +19,7 @@ type GlobEager<T = string> = Record<string, T>
 const typeGlob = <K extends string>(glob: Record<string, any>) => async <F extends (glob: Record<string, any>) => Promise<Record<string, any>>>(fn: F) => {
 	return await fn(glob) as Record<K, Awaited<ReturnType<F>>[string]>
 }
-const typeGlobEager = <K extends string>(glob: GlobEager) => <F extends (glob: GlobEager) => Record<string, any>>(fn: F) => {
-	return fn(glob) as Record<K, ReturnType<F>[string]>
-}
+
 type getToonOptions = (key: string, materialName: string, name: string, node: Mesh)=>({
 	color?: ColorRepresentation
 	material?: Constructor<Material>
@@ -112,11 +110,6 @@ const texturesLoader = (loader: (key: string) => void) => async (glob: GlobEager
 		texture.wrapT = RepeatWrapping
 		return texture
 	}), getFileName)
-}
-const iconsLoader = (loader: (key: string) => void) => (glob: GlobEager<string>) => {
-	Object.keys(glob).forEach(loader)
-	const icons = mapValues(glob, svg => svg.replace('<path', '<path fill="currentColor"'))
-	return mapKeys(icons, getFileName)
 }
 
 interface PackedJSON {
@@ -228,8 +221,6 @@ export const loadAssets = async () => {
 		particles: typeGlob<particles>(import.meta.glob('@assets/particles/*.webp', { eager: true, import: 'default' }))(texturesLoader(loader)),
 
 		textures: typeGlob<textures>(import.meta.glob('@assets/textures/*.webp', { eager: true, import: 'default' }))(texturesLoader(loader)),
-
-		icons: typeGlobEager<icons>(import.meta.glob('@assets/icons/*.svg', { eager: true, import: 'default', as: 'raw' }))(iconsLoader(loader)),
 
 		buttons: buttonsLoader(loader)(import.meta.glob('@assets/buttons/*.*', { eager: true, import: 'default' })),
 

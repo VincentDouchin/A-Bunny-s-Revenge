@@ -1,7 +1,7 @@
 import { For, Show, createEffect, createSignal, onMount } from 'solid-js'
 import { css } from 'solid-styled'
 import atom from 'solid-use/atom'
-import { IconDisplay, ItemDisplay } from './InventoryUi'
+import { ItemDisplay } from './InventoryUi'
 import { quests } from '@/constants/quests'
 import type { Quest, QuestName } from '@/constants/quests'
 
@@ -10,10 +10,10 @@ import { ecs, ui } from '@/global/init'
 import { save } from '@/global/save'
 import { Menu, menuItem } from '@/ui/components/Menu'
 import { Modal } from '@/ui/components/Modal'
-import type { FarmUiProps } from '@/ui/types'
-import { entries } from '@/utils/mapFunctions'
 import { GoldContainer, InventoryTitle } from '@/ui/components/styledComponents'
 import { useQuery } from '@/ui/store'
+import type { FarmUiProps } from '@/ui/types'
+import { entries } from '@/utils/mapFunctions'
 // eslint-disable-next-line no-unused-expressions
 menuItem
 const openBulletinBoardQuery = useQuery(ecs.with('menuType').where(e => e.menuType === MenuType.Quest))
@@ -99,9 +99,6 @@ export const QuestUi = ({ player }: FarmUiProps) => {
 																							/>
 																						)}
 																					</For>
-																					<Show when={step.icon}>
-																						{icon => <IconDisplay completed={isCompleted} icon={icon()} />}
-																					</Show>
 																					<Show when={step.description}>
 																						{description => <div class="quest-description">{description()}</div>}
 																					</Show>

@@ -1,12 +1,12 @@
 import type { JSX } from 'solid-js'
 import { Show, createMemo, onCleanup } from 'solid-js'
 
+import Cross from '@assets/icons/xmark-solid.svg'
 import { css } from 'solid-styled'
 import { Transition } from 'solid-transition-group'
 import type { Atom } from 'solid-use/atom'
 import atom from 'solid-use/atom'
 import { useGame } from '../store'
-import { assets } from '@/global/init'
 
 const CloseButton = () => {
 	const context = useGame()
@@ -39,14 +39,14 @@ const CloseButton = () => {
 		<Show when={context?.usingTouch()}>
 			<div
 				class="close-button icon-container"
-				innerHTML={assets.icons['xmark-solid']}
 				onTouchStart={closeInventory}
 				onTouchEnd={reset}
-			/>
+			>
+				<Cross />
+			</div>
 		</Show>
 	)
 }
-
 export function Modal<T>(props: { children: JSX.Element, open: T, showClose?: boolean, finished?: Atom<boolean> }) {
 	css/* css */`
 	.modal{

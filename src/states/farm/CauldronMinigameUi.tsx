@@ -1,24 +1,26 @@
+import Exit from '@assets/icons/arrow-left-solid.svg'
+import Spoon from '@assets/icons/spoon-solid.svg'
+import { Tween } from '@tweenjs/tween.js'
 import { between } from 'randomish'
 import { Show, createMemo, createSignal, onCleanup, onMount } from 'solid-js'
 import { Portal } from 'solid-js/web'
-import { Color, PointLight, Vector3 } from 'three'
-import { Tween } from '@tweenjs/tween.js'
 import { css } from 'solid-styled'
+import { Color, PointLight, Vector3 } from 'three'
 import { itemBundle } from '../game/items'
 import { ItemDisplay } from './InventoryUi'
+import { updateCameraZoom } from '@/global/camera'
+import { params } from '@/global/context'
 import type { Entity } from '@/global/entity'
 import { MenuType } from '@/global/entity'
-import { assets, ecs, gameTweens, inputManager, time, ui } from '@/global/init'
+import { ecs, gameTweens, inputManager, time, ui } from '@/global/init'
 import { cameraQuery } from '@/global/rendering'
 import { playSound } from '@/global/sounds'
 import { addTag } from '@/lib/hierarchy'
 import { getWorldPosition } from '@/lib/transforms'
 import { cauldronSparkles } from '@/particles/cauldronSparkles'
-import type { FarmUiProps } from '@/ui/types'
-import { updateCameraZoom } from '@/global/camera'
-import { params } from '@/global/context'
 import { fireParticles } from '@/particles/fireParticles'
 import { useQuery } from '@/ui/store'
+import type { FarmUiProps } from '@/ui/types'
 
 export const cauldronQuery = useQuery(ecs.with('menuType', 'interactionContainer', 'group', 'rotation', 'recipesQueued', 'spoon').where(({ menuType }) => menuType === MenuType.CauldronGame))
 export const CauldronMinigameUi = ({ player }: FarmUiProps) => {
@@ -155,9 +157,9 @@ export const CauldronMinigameUi = ({ player }: FarmUiProps) => {
 					border:${`solid ${isPrimaryPressed() ? '0.3rem' : '0.1rem'} hsl(0, 0%,100%, 30% )`}
 				}
 				.spoon-icon{
-					color: white;
-					width: 50%;
-					height: 50%;
+					fill: white;
+					font-size:4rem;
+					display: grid;
 				}
 				.progress-container{
 					display: grid;
@@ -220,11 +222,11 @@ export const CauldronMinigameUi = ({ player }: FarmUiProps) => {
 					<>
 						<Show when={isTouch()}>
 							<button class="button exit-button" onClick={close}>
-								<div class="exit-icon" innerHTML={assets.icons['arrow-left-solid']}></div>
+								<div class="exit-icon"><Exit /></div>
 								<div>Exit</div>
 							</button>
 							<div class="spoon" onTouchStart={interact(1, 'primary')} onTouchEnd={interact(0, 'primary')}>
-								<div class="spoon-icon" innerHTML={assets.icons['spoon-solid']}></div>
+								<div class="spoon-icon"><Spoon /></div>
 							</div>
 						</Show>
 						<Portal mount={cauldron().interactionContainer.element}>

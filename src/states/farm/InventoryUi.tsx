@@ -1,7 +1,8 @@
-import type { icons } from '@assets/assets'
+import Check from '@assets/icons/circle-check-solid.svg'
+import Cross from '@assets/icons/circle-xmark-solid.svg'
 import { autoUpdate } from '@floating-ui/dom'
 import { useFloating } from 'solid-floating-ui'
-import type { Accessor, JSX, Setter } from 'solid-js'
+import type { Accessor, JSX, JSXElement, Setter } from 'solid-js'
 import { For, Show, createEffect, createMemo, createSignal, onCleanup, onMount } from 'solid-js'
 import { css } from 'solid-styled'
 import atom from 'solid-use/atom'
@@ -24,10 +25,10 @@ import { Menu, menuItem } from '@/ui/components/Menu'
 import { Modal } from '@/ui/components/Modal'
 import { GoldContainer, InventoryTitle, OutlineText } from '@/ui/components/styledComponents'
 import { Tabs } from '@/ui/components/tabs'
+import { Settings } from '@/ui/settings'
 import type { FarmUiProps } from '@/ui/types'
 import { removeItemFromPlayer } from '@/utils/dialogHelpers'
 import { range } from '@/utils/mapFunctions'
-import { Settings } from '@/ui/settings'
 // eslint-disable-next-line no-unused-expressions
 menuItem
 
@@ -62,20 +63,24 @@ export const ItemBox = (props: { children: JSX.Element, selected?: boolean, comp
 				<div
 
 					class="completed"
-					innerHTML={assets.icons[props.completed ? 'circle-check-solid' : 'circle-xmark-solid']}
-					style={{ color: props.completed ? '#33cc33' : 'red' }}
-				/>
+
+					style={{ fill: props.completed ? '#33cc33' : 'red' }}
+				>
+					{props.completed && <Check />}
+					{!props.completed && <Cross />}
+				</div>
 			</Show>
 		</div>
 	)
 }
 
-export const IconDisplay = (props: { icon: icons, completed?: boolean }) => (
+export const IconDisplay = (props: { children: () => JSXElement, completed?: boolean }) => (
 	<ItemBox completed={props.completed}>
 		<div
 			style={{ width: '80%', display: 'grid' }}
-			innerHTML={assets.icons[props.icon]}
+
 		>
+			<props.children />
 		</div>
 	</ItemBox>
 )

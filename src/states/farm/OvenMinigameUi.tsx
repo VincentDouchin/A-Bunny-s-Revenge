@@ -1,3 +1,5 @@
+import Exit from '@assets/icons/arrow-left-solid.svg'
+import Fire from '@assets/icons/fire-solid.svg'
 import { Tween } from '@tweenjs/tween.js'
 import type { With } from 'miniplex'
 import { between } from 'randomish'
@@ -11,7 +13,7 @@ import { updateCameraZoom } from '@/global/camera'
 import { params } from '@/global/context'
 import type { Entity } from '@/global/entity'
 import { MenuType } from '@/global/entity'
-import { assets, ecs, gameTweens, time, ui } from '@/global/init'
+import { ecs, gameTweens, time, ui } from '@/global/init'
 import { cameraQuery } from '@/global/rendering'
 import { playSound } from '@/global/sounds'
 import { addTag } from '@/lib/hierarchy'
@@ -174,9 +176,9 @@ export const OvenMinigameUi = ({ player }: FarmUiProps) => {
 					margin: 7rem;
 				}
 				.fire-icon{
-					color: white;
-					width: 50%;
-					height: 50%;
+					fill: white;
+					font-size: 4rem;
+					display: grid;
 				}
 				.minigame-container{
 					display: grid;
@@ -266,13 +268,13 @@ export const OvenMinigameUi = ({ player }: FarmUiProps) => {
 					<>
 						<Show when={context?.usingTouch()}>
 							<button class="button exit" onClick={close}>
-								<div style={{ width: '2rem' }} innerHTML={assets.icons['arrow-left-solid']}></div>
+								<div style={{ width: '2rem' }}><Exit /></div>
 								<div>Exit</div>
 							</button>
 						</Show>
 						<Show when={context?.usingTouch()}>
 							<div class="fire" onTouchStart={interact(1, 'primary')} onTouchEnd={interact(0, 'primary')}>
-								<div innerHTML={assets.icons['fire-solid']} class="fire-icon"></div>
+								<div class="fire-icon"><Fire /></div>
 							</div>
 						</Show>
 						<div class="minigame-container">

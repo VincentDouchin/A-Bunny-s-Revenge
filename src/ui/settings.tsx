@@ -1,3 +1,5 @@
+import VolumeOn from '@assets/icons/volume-high-solid.svg'
+import VolumeOff from '@assets/icons/volume-xmark-solid.svg'
 import { For, Show, createMemo, createSignal } from 'solid-js'
 import { css } from 'solid-styled'
 import atom from 'solid-use/atom'
@@ -8,8 +10,7 @@ import { isStandalone } from '@/states/game/FullscreenUi'
 import { setAllMuted } from '@/global/sounds'
 import { save, updateSave } from '@/global/save'
 import type { SaveData } from '@/global/save'
-import { assets, ui } from '@/global/init'
-
+import { ui } from '@/global/init'
 // eslint-disable-next-line no-unused-expressions
 menuItem
 
@@ -53,6 +54,7 @@ export const Settings = (props: { menu: MenuDir }) => {
 			grid-template-columns: auto 1fr 0.2fr;
 			gap: 1rem;
 			align-items:center;
+			fill:white;
 		}
 		.volume-icon{
 			width: 2rem;
@@ -104,6 +106,7 @@ export const Settings = (props: { menu: MenuDir }) => {
 							}
 						}
 					})
+
 					return (
 						<>
 							<div
@@ -114,7 +117,9 @@ export const Settings = (props: { menu: MenuDir }) => {
 								<OutlineText>{title}</OutlineText>
 							</div>
 							<div class="volume">
-								<div class="volume-icon" innerHTML={mute() ? assets.icons['volume-xmark-solid'] : assets.icons['volume-high-solid']} onClick={muteSound}></div>
+								{mute() && <VolumeOff />}
+								{!mute() && <VolumeOn />}
+								{/* <div class="volume-icon" onClick={muteSound}><Dynamic component={mute() ? assets.icons['volume-xmark-solid']() : assets.icons['volume-high-solid']()}></Dynamic></div> */}
 								<input type="range" class="input-range" value={volume()} onChange={e => setVolume(e.target.valueAsNumber)}></input>
 								<OutlineText>{String(volume())}</OutlineText>
 							</div>

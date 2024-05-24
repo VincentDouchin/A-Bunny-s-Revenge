@@ -4,6 +4,7 @@ import { For, Show, createEffect, createMemo, onCleanup, onMount } from 'solid-j
 import { css } from 'solid-styled'
 import { Transition } from 'solid-transition-group'
 import atom from 'solid-use/atom'
+import Drop from '@assets/icons/droplet-solid.svg'
 import { cauldronQuery } from '../farm/CauldronMinigameUi'
 import { ovenQuery } from '../farm/OvenMinigameUi'
 import { range } from '@/utils/mapFunctions'
@@ -243,7 +244,7 @@ export const HealthUi = (props: { player: With<Entity, 'maxHealth' | 'currentHea
 							const waterAmount = ui.sync(() => props.player.wateringCan?.waterAmount)
 							return (
 								<div class="watering-container">
-									<div class="watering" innerHTML={assets.icons['droplet-solid']} />
+									<div class="watering"><Drop /></div>
 									<div class="water-overlay" style={{ '--water': `${(waterAmount() ?? 0) * 100}%` }}></div>
 								</div>
 							)

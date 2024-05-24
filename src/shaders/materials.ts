@@ -182,7 +182,7 @@ export const gardenPlotExtention = new MaterialExtension({
 	`),
 	)
 export const ToonMaterial = extendMaterial(MeshPhongMaterial, [toonExtension])
-export const VineGateMaterial = extendMaterial(MeshPhongMaterial, [toonExtension, vineGateMaterial], { debug: 'vertex' })
+export const VineGateMaterial = extendMaterial(MeshPhongMaterial, [toonExtension, vineGateMaterial])
 export const CharacterMaterial = extendMaterial(MeshPhongMaterial, [toonExtension, characterExtension])
 export const GroundMaterial = extendMaterial(MeshPhongMaterial, [toonExtension, groundExtension])
 export const WaterMaterial = extendMaterial(MeshPhongMaterial, [toonExtension, waterExtension])

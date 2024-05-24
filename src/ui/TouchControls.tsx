@@ -3,9 +3,10 @@ import { css } from 'solid-styled'
 import { Transition } from 'solid-transition-group'
 import type { Vec2 } from 'three'
 import { Vector2 } from 'three'
+import Pause from '@assets/icons/pause-solid.svg'
+import Inventory from '@assets/icons/basket-shopping-solid.svg'
 import { getInteractables } from './Interactions'
 import { StateUi } from './components/StateUi'
-import { Icon } from './components/styledComponents'
 import { useGame } from './store'
 import { atom } from '@/lib/uiManager'
 import { campState, pausedState } from '@/global/states'
@@ -175,8 +176,9 @@ export const TouchControls = () => {
 		font-size: 2rem
 	}
 	.inventory-button{
+		font-size: 4rem;
 		opacity: 20%;
-		color:white;
+		fill:white;
 		display: grid;
 		place-items:center;
 		position: fixed;
@@ -187,7 +189,7 @@ export const TouchControls = () => {
 				return (
 					<div>
 						<button class="pause-button button" onTouchStart={() => pausedState.enable()}>
-							<Icon icon="pause-solid" />
+							<Pause />
 							Pause
 						</button>
 
@@ -214,7 +216,7 @@ export const TouchControls = () => {
 						</div>
 						<StateUi state={campState}>
 							<div onTouchStart={openInventory} class="inventory-button touch-input">
-								<Icon icon="basket-shopping-solid" />
+								<Inventory />
 							</div>
 						</StateUi>
 						<div class="inputs-container">

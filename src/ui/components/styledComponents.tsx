@@ -1,7 +1,7 @@
-import type { icons } from '@assets/assets'
+import CheckSquare from '@assets/icons/square-check-solid.svg'
+import Square from '@assets/icons/square-regular.svg'
 import { type Accessor, For, type JSX, type JSXElement, Match, Switch } from 'solid-js'
 import { css } from 'solid-styled'
-import { assets } from '@/global/init'
 
 interface OutlineTextProps {
 	children: JSX.Element
@@ -43,13 +43,6 @@ export const GoldContainer = (props: { children: JSXElement | JSXElement [], pad
 	return <div class="styled-container">{props.children}</div>
 }
 
-export const Icon = (props: { icon: icons }) => {
-	css/* css */`
-	.icon{
-	}
-	`
-	return <div class="icon" innerHTML={assets.icons[props.icon]}></div>
-}
 export const InventoryTitle = (props: { children: JSXElement, color?: string }) => {
 	css/* css */`
 	.inventory-title{
@@ -118,16 +111,20 @@ export const CheckBox = (props: { value: Accessor<boolean>, onClick: (value: boo
 		aspect-ratio: 1;
 		display: grid;
 		place-items: center;
+		fill:white;
 	}
 	`
 	return (
-		<Switch>
-			<Match when={props.value()}>
-				<div class="checkbox" innerHTML={assets.icons['square-check-solid']}></div>
-			</Match>
-			<Match when={!props.value()}>
-				<div class="checkbox" innerHTML={assets.icons['square-regular']}></div>
-			</Match>
-		</Switch>
+		<div class="checkbox">
+
+			<Switch>
+				<Match when={props.value()}>
+					<CheckSquare />
+				</Match>
+				<Match when={!props.value()}>
+					<Square />
+				</Match>
+			</Switch>
+		</div>
 	)
 }

@@ -5,6 +5,7 @@ import solidPlugin from 'vite-plugin-solid'
 import solidStyledPlugin from 'vite-plugin-solid-styled'
 
 import { VitePWA } from 'vite-plugin-pwa'
+import solidSvg from 'vite-plugin-solid-svg'
 import { assetPipeline } from './scripts/assetPipeline'
 import { ConverAudioFiles } from './scripts/convertAudioFiles'
 import { ExtractAnimations } from './scripts/extractAnimations'
@@ -25,6 +26,7 @@ export default defineConfig(async () => {
 				new ConverFBXToGLB(),
 			]),
 			solidPlugin(),
+			solidSvg({ defaultAsComponent: true }),
 			solidStyledPlugin({
 				filter: {
 					include: 'src/**/*.{tsx,jsx}',

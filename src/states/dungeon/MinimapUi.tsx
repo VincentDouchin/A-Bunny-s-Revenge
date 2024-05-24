@@ -1,4 +1,10 @@
-import { For, Show, onMount } from 'solid-js'
+import Door from '@assets/icons/door-closed-solid.svg'
+import Pawn from '@assets/icons/pawn.svg'
+import Pouch from '@assets/icons/pouch.svg'
+import Skull from '@assets/icons/skull.svg'
+import Store from '@assets/icons/store-solid.svg'
+import Sword from '@assets/icons/sword.svg'
+import { For, Match, Show, Switch, onMount } from 'solid-js'
 import { css } from 'solid-styled'
 import { Transition } from 'solid-transition-group'
 import atom from 'solid-use/atom'
@@ -7,7 +13,7 @@ import { RoomType } from './generateDungeon'
 import { entries } from '@/utils/mapFunctions'
 import { useQuery } from '@/ui/store'
 import type { direction } from '@/lib/directions'
-import { assets, ecs } from '@/global/init'
+import { ecs } from '@/global/init'
 
 const RoomUi = ({ room, direction, previous, current }: { room: Room, direction?: direction, previous?: Room, current: boolean }) => {
 	const dir: Record<direction, string> = {
@@ -18,14 +24,7 @@ const RoomUi = ({ room, direction, previous, current }: { room: Room, direction?
 	}
 
 	const offset = direction ? dir[direction] : '0% 0%'
-	const icons: Record<RoomType, string> = {
-		[RoomType.Battle]: assets.icons.sword,
-		[RoomType.Boss]: assets.icons.skull,
-		[RoomType.Entrance]: assets.icons['door-closed-solid'],
-		[RoomType.Item]: assets.icons.pouch,
-		[RoomType.NPC]: assets.icons.pawn,
-		[RoomType.Seller]: assets.icons['store-solid'],
-	}
+
 	const connectorSize: Record<direction, any> = {
 		north: { width: '0.5rem', height: '1rem', bottom: '100%' },
 		south: { width: '0.5rem', height: '1rem', top: '100%' },
@@ -51,9 +50,9 @@ const RoomUi = ({ room, direction, previous, current }: { room: Room, direction?
 		height: 100%;
 	}
 	.minimap-icon{
-	 	width: 1.5rem;
-		height: 1.5rem;
-		color: black;
+	 	font-size: 1.5rem;
+		fill: black;
+		display: grid;
 	}
 	.connector{
 		position: absolute;
@@ -71,7 +70,29 @@ const RoomUi = ({ room, direction, previous, current }: { room: Room, direction?
 	return (
 		<div class="minimap-wrapper">
 			<div class="minimap-container">
-				<div innerHTML={icons[room.type]} class="minimap-icon"></div>
+				<div class="minimap-icon">
+					<Switch>
+						<Match when={room.type === RoomType.Battle}>
+							<Sword />
+						</Match>
+						<Match when={room.type === RoomType.Boss}>
+							<Skull />
+						</Match>
+						<Match when={room.type === RoomType.Entrance}>
+							<Door />
+						</Match>
+						<Match when={room.type === RoomType.Item}>
+							<Pouch />
+						</Match>
+						<Match when={room.type === RoomType.NPC}>
+							<Pawn />
+						</Match>
+						<Match when={room.type === RoomType.Seller}>
+							<Store />
+						</Match>
+
+					</Switch>
+				</div>
 				<For each={entries(room.doors).filter(x => x[1] && x[1] !== previous)}>
 					{([direction, nextRoom]) => {
 						return (
