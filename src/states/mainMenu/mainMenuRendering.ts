@@ -326,6 +326,7 @@ export const spawnPlayerContinueGame = async () => {
 			...playerBundle(PLAYER_DEFAULT_HEALTH, true, null),
 			position: house.worldPosition.clone(),
 			rotation: house.rotation.clone(),
+			targetRotation: house.rotation.clone(),
 		})
 		spawnBasket()
 
