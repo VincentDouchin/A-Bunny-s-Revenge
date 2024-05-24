@@ -37,12 +37,14 @@ export const stopFishing = (force: boolean = false) => () => {
 			if (bobber) {
 				bobber.body?.setBodyType(RigidBodyType.Dynamic, true)
 				ecs.reindex(bobber)
-				const fish = assets.items.trout.model
-				fish.scale.setScalar(0.1)
-				fish.position.y -= 3
-				fish.rotateX(-Math.PI / 2)
-				bobber.model?.add(fish)
-				bobber.body?.setLinvel(new Vector3(0, 50, -50).applyQuaternion(player.rotation), true)
+				if (force) {
+					const fish = assets.items.trout.model.clone()
+					fish.scale.setScalar(0.1)
+					fish.position.y -= 3
+					fish.rotateX(-Math.PI / 2)
+					bobber.model?.add(fish)
+				}
+				bobber.body?.setLinvel(new Vector3(0, 100, -50).applyQuaternion(player.rotation), true)
 				setTimeout(() => {
 					ecs.remove(bobber)
 					ecs.removeComponent(player.fishingPole, 'bobber')
