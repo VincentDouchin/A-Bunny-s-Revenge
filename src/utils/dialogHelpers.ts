@@ -14,12 +14,12 @@ import type { QuestName, QuestStepKey } from '@/constants/quests'
 
 import { dialogs } from '@/constants/dialogs'
 import type { Item } from '@/constants/items'
+import { recipes } from '@/constants/recipes'
 import { addItem, removeItem, save, updateSave } from '@/global/save'
 import { playSound } from '@/global/sounds'
 import { getWorldPosition } from '@/lib/transforms'
-import { addToHand } from '@/states/game/weapon'
 import { addToast } from '@/ui/Toaster'
-import { recipes } from '@/constants/recipes'
+import { addToHand } from '@/states/game/equip'
 
 const playerQuery = ecs.with('player', 'position', 'collider')
 const movingPlayerQuery = playerQuery.with('movementForce')

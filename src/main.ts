@@ -33,11 +33,13 @@ import { endBattleSpawnChest } from './states/dungeon/spawnChest'
 import { rotateStun } from './states/dungeon/stun'
 import { addBeanStalkHole, growMagicBean, harvestMagicBean } from './states/farm/beanStalk'
 import { growCrops, harvestCrop, initPlantableSpotsInteractions, interactablePlantableSpot, plantSeed } from './states/farm/farming'
+import { fishingPlugin } from './states/farm/fishing'
 import { closePlayerInventory, disableInventoryState, enableInventoryState, interact, openPlayerInventory } from './states/farm/openInventory'
-import { addWateringCan, waterCrops } from './states/farm/wateringCan'
+import { waterCrops } from './states/farm/wateringCan'
 import { addDashDisplay, updateDashDisplay } from './states/game/dash'
 import { dayNight, playNightMusic } from './states/game/dayNight'
 import { addQuestMarkers, talkToNPC, turnNPCHead } from './states/game/dialog'
+import { equip } from './states/game/equip'
 import { bobItems, collectItems, popItems, stopItems } from './states/game/items'
 import { canPlayerMove, movePlayer, playerSteps, savePlayerFromTheEmbraceOfTheVoid, savePlayerPosition, stopPlayer } from './states/game/movePlayer'
 import { pauseGame } from './states/game/pauseGame'
@@ -47,7 +49,7 @@ import { allowDoorCollision, collideWithDoor, collideWithDoorCamp, collideWithDo
 import { generatenavGrid, spawnCrossRoad, spawnDungeon, spawnFarm, spawnLevelData, updateTimeUniforms } from './states/game/spawnLevel'
 import { losingBattle, spawnCharacter, spawnPlayerClearing, spawnPlayerDungeon } from './states/game/spawnPlayer'
 import { touchItem } from './states/game/touchItem'
-import { addOrRemoveWeaponModel, updateWeaponArc } from './states/game/weapon'
+import { updateWeaponArc } from './states/game/weapon'
 import { clickOnMenuButton, initMainMenuCamPos, intiMainMenuRendering, renderMainMenu, selectMainMenu, setMainCameraPosition, spawnPlayerContinueGame } from './states/mainMenu/mainMenuRendering'
 import { playCloseSound, playOpenSound } from './states/pause/pause'
 import { disablePortrait, enableFullscreen, resize, setupGame, stopOnLosingFocus } from './states/setup/setupGame'
@@ -67,9 +69,9 @@ setupState
 	.enable()
 
 gameState
-	.addPlugins(debugPlugin)
+	.addPlugins(debugPlugin, fishingPlugin)
 
-	.addSubscriber(initializeCameraPosition, bobItems, enableInventoryState, killAnimation, popItems, addHealthBarContainer, ...addOrRemoveWeaponModel, ...doorLocking, addDashDisplay, addQuestMarkers)
+	.addSubscriber(initializeCameraPosition, bobItems, enableInventoryState, killAnimation, popItems, addHealthBarContainer, ...equip('wateringCan', 'weapon', 'fishingPole'), ...doorLocking, addDashDisplay, addQuestMarkers)
 	.onUpdate(
 		runIf(canPlayerMove, movePlayer, updateDashDisplay),
 		runIf(() => !pausedState.enabled, playerSteps, dayNight, updateTimeUniforms, applyDeathTimer, () => gameTweens.update(time.elapsed)),
@@ -85,7 +87,7 @@ mainMenuState
 	.addSubscriber(clickOnMenuButton, initMainMenuCamPos)
 	.onExit(removeStateEntity(mainMenuState), spawnPlayerContinueGame)
 campState
-	.addSubscriber(...interactablePlantableSpot, addWateringCan)
+	.addSubscriber(...interactablePlantableSpot)
 	.onEnter(spawnFarm, spawnLevelData, initPlantableSpotsInteractions, spawnGodRay, addBeanStalkHole)
 	.onEnter(runIf(() => !mainMenuState.enabled, spawnCharacter, spawnBasket, enableBasketUi), moveCamera(true))
 	.onUpdate(collideWithDoorCamp, playNightMusic, waterCrops, growCrops, growMagicBean, harvestMagicBean)

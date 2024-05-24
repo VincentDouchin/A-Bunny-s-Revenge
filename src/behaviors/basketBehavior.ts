@@ -1,15 +1,15 @@
+import type { With } from 'miniplex'
 import { Vector3 } from 'three'
 import { applyMove, applyRotate, getMovementForce } from './behaviorHelpers'
 import type { Entity } from '@/global/entity'
 import { ecs } from '@/global/init'
-import type { StateParameters } from '@/lib/behaviors'
-import { behaviorPlugin } from '@/lib/behaviors'
 import { cutSceneState, mainMenuState } from '@/global/states'
+import { behaviorPlugin } from '@/lib/behaviors'
 
 const basketComponents = ['basket', 'basketAnimator', 'position', 'body', 'movementForce', 'targetRotation', 'rotation', 'speed'] as const satisfies readonly (keyof Entity)[]
 const basketQuery = ecs.with(...basketComponents)
 const playerQuery = ecs.with('player', 'position')
-const basketParameters: StateParameters<(typeof basketComponents)[number]> = (e) => {
+const basketParameters = (e: With<Entity, (typeof basketComponents)[number]>) => {
 	const player = playerQuery.first
 	let dist = 0
 	const direction = new Vector3()

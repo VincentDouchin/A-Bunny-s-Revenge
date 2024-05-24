@@ -41,6 +41,10 @@ export const itemsData: Record<items, ItemData> = {
 		name: 'Acorn',
 	},
 	// ! Ingredients
+	trout: {
+		name: 'Trout',
+		ingredient: true,
+	},
 	haricot: {
 		name: 'Haricot',
 		ingredient: true,

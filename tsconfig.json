@@ -18,7 +18,8 @@
 			"vite/client",
 			"vite-plugin-pwa/client",
 			"new-javascript",
-			"@total-typescript/ts-reset"
+			"@total-typescript/ts-reset",
+			"./src/types/three.meshline.d.ts"
 
 		],
 		"allowImportingTsExtensions": true,

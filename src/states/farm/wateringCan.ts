@@ -46,13 +46,7 @@ export const wateringCanBundle = () => {
 }
 
 const wateringCanQuery = ecs.with('wateringCan', 'model', 'sensorCollider', 'playerControls')
-export const addWateringCan = () => wateringCanQuery.onEntityAdded.subscribe((e) => {
-	e.model.traverse((node) => {
-		if (node.name === 'DEF_FingerL') {
-			node.add(e.wateringCan.model)
-		}
-	})
-})
+
 export const updateSpotWatered = (plot: With<Entity, 'model' | 'planted'>, watered: boolean, instant: boolean) => {
 	const [start, end] = watered ? [0, 1] : [1, 0]
 	const updateUniform = (val: number) => {

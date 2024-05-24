@@ -9,7 +9,7 @@ import type { Constructor } from 'type-fest'
 import { getExtension, getFileName, loadAudio, loadGLB, loadImage, loaderProgress, textureLoader } from './assetLoaders'
 import type { crops } from '@/constants/items'
 import { thumbnailRenderer } from '@/lib/thumbnailRenderer'
-import { CharacterMaterial, GardenPlotMaterial, GrassMaterial, ToonMaterial, TreeMaterial } from '@/shaders/materials'
+import { CharacterMaterial, GardenPlotMaterial, GrassMaterial, ToonMaterial, TreeMaterial, VineGateMaterial } from '@/shaders/materials'
 import { getScreenBuffer } from '@/utils/buffer'
 import { asyncMapValues, entries, groupByObject, mapKeys, mapValues } from '@/utils/mapFunctions'
 
@@ -22,18 +22,19 @@ const typeGlob = <K extends string>(glob: Record<string, any>) => async <F exten
 const typeGlobEager = <K extends string>(glob: GlobEager) => <F extends (glob: GlobEager) => Record<string, any>>(fn: F) => {
 	return fn(glob) as Record<K, ReturnType<F>[string]>
 }
-
+type getToonOptions = (key: string, materialName: string, name: string, node: Mesh)=>({
+	color?: ColorRepresentation
+	material?: Constructor<Material>
+	side?: Side
+	transparent?: boolean
+	shadow?: boolean
+	filter?: TextureFilter
+	depthWrite?: boolean
+	isolate?: boolean
+})
 const loadGLBAsToon = (
 	loader: (key: string) => void,
-	getOptions?: (key: string, name: string)=>({
-		color?: ColorRepresentation
-		material?: Constructor<Material>
-		side?: Side
-		transparent?: true
-		shadow?: true
-		filter?: TextureFilter
-		depthWrite?: boolean
-	}),
+	getOptions?: getToonOptions,
 ) => async (glob: GlobEager) => {
 	const loaded = await asyncMapValues(glob, async (path, key) => {
 		const glb = await loadGLB(path, key)
@@ -45,10 +46,9 @@ const loadGLBAsToon = (
 		glb.scene.traverse((node) => {
 			if (node instanceof Mesh) {
 				if (node.material instanceof MeshStandardMaterial || node.material instanceof MeshPhysicalMaterial) {
-					if (!materials.has(node.material.uuid)) {
-						const options = getOptions ? getOptions(key, node.material.name) : {}
+					const options = getOptions ? getOptions(key, node.material.name, node.name, node) : {}
+					if (!materials.has(node.material.uuid) || options.isolate) {
 						const Mat = options?.material ?? ToonMaterial
-
 						const newMaterial = new Mat({
 							color: (options && 'color' in options) ? options.color : node.material.color,
 							map: node.material.map,
@@ -58,6 +58,7 @@ const loadGLBAsToon = (
 							opacity: node.material.opacity,
 							depthWrite: options?.depthWrite ?? true,
 						})
+						newMaterial.name = node.material.name
 						if ('map' in newMaterial && newMaterial.map instanceof Texture) {
 							newMaterial.map.colorSpace = SRGBColorSpace
 							const minFilter = options?.filter ?? node.material.map?.minFilter
@@ -188,7 +189,16 @@ const loadMainMenuAssets = async (glob: GlobEager) => {
 		return glb
 	}), k => getFileName(k.replace('-optimized', '')))
 }
-
+const modelOptions: getToonOptions = (_key: string, materialName: string, _name: string, node: Mesh) => {
+	const isGate = node.parent?.name === 'Vines_Gate'
+	return {
+		shadow: true,
+		depthWrite: !materialName.includes('Leaves'),
+		material: isGate ? VineGateMaterial : ToonMaterial,
+		isolate: isGate,
+		transparent: isGate || undefined,
+	}
+}
 type AssetsLoaded<T extends Record<string, Promise<any> | any>> = { [K in keyof T]: Awaited<T[K]> }
 export const loadAssets = async () => {
 	const { loader, clear } = loaderProgress(assetManifest)
@@ -196,7 +206,7 @@ export const loadAssets = async () => {
 		// ! models
 		characters: typeGlob<characters>(import.meta.glob('@assets/characters/*.glb', { as: 'url', eager: true }))(loadGLBAsToon(loader, () => ({ material: CharacterMaterial, shadow: true, filter: NearestFilter }))),
 
-		models: typeGlob<models>(import.meta.glob('@assets/models/*.glb', { as: 'url', eager: true }))(loadGLBAsToon(loader, (_key, name) => ({ shadow: true, depthWrite: name !== 'Leaves' }))),
+		models: typeGlob<models>(import.meta.glob('@assets/models/*.glb', { as: 'url', eager: true }))(loadGLBAsToon(loader, modelOptions)),
 
 		trees: typeGlob<trees>(import.meta.glob('@assets/trees/*.glb', { as: 'url', eager: true }))(loadGLBAsToon(loader, () => ({ material: TreeMaterial, shadow: true, transparent: true }))),
 

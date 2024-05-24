@@ -2,7 +2,7 @@ import { Color, MeshPhongMaterial, Vector2, Vector3 } from 'three'
 
 import noise from '@/shaders/glsl/lib/cnoise.glsl?raw'
 
-import { MaterialExtension, addUniform, extendMaterial, importLib, override, remove, replace, replaceInclude, unpack } from '@/lib/materialExtension'
+import { MaterialExtension, addUniform, addVarying, extendMaterial, importLib, insertAfer, insertBefore, override, remove, replace, replaceInclude, unpack } from '@/lib/materialExtension'
 import { gradient } from '@/shaders/glsl/lib/generateGradient'
 import water from '@/shaders/glsl/water.glsl?raw'
 import { useLocalStorage } from '@/utils/useLocalStorage'
@@ -32,6 +32,21 @@ const [groundColors] = useLocalStorage('groundColor', {
 	pathColor2: '#A26D3F',
 	grassColor: '#26854C',
 })
+const vineGateMaterial = new MaterialExtension({ time: 0 })
+	.frag(
+		addVarying('worldPos', 'vec4'),
+		addUniform('time', 'float'),
+		insertBefore('gl_FragColor = vec4(outgoingLight2,color.a);',
+			/* glsl */`
+	float op = (worldPos.y+ 40. * time )/30.;
+	color.a = min(color.a, (1. - op) );
+`),
+	).vert(
+		addVarying('worldPos', 'vec4'),
+		insertAfer('#include <worldpos_vertex>', /* glsl */`
+	worldPos = vec4( transformed, 1.0 );
+	`),
+	)
 const groundExtension = new MaterialExtension({
 	level: null,
 	size: null,
@@ -102,7 +117,6 @@ export const treeExtension = new MaterialExtension({ playerZ: 0, pos: new Vector
 		addUniform('pos', 'vec2'),
 		unpack('project_vertex'),
 		replace('mvPosition = instanceMatrix * mvPosition;', /* glsl */`
-		vec4 position2 = vec4( transformed, 1.0 ) * instanceMatrix;
 		float noise = cnoise(vec3(pos.xy,time/4.));
 		float height_factor = mvPosition.y/10.;
 		mvPosition = instanceMatrix * (mvPosition + vec4(sin(noise)*height_factor,0.,cos(noise)*height_factor,0.));
@@ -168,6 +182,7 @@ export const gardenPlotExtention = new MaterialExtension({
 	`),
 	)
 export const ToonMaterial = extendMaterial(MeshPhongMaterial, [toonExtension])
+export const VineGateMaterial = extendMaterial(MeshPhongMaterial, [toonExtension, vineGateMaterial], { debug: 'vertex' })
 export const CharacterMaterial = extendMaterial(MeshPhongMaterial, [toonExtension, characterExtension])
 export const GroundMaterial = extendMaterial(MeshPhongMaterial, [toonExtension, groundExtension])
 export const WaterMaterial = extendMaterial(MeshPhongMaterial, [toonExtension, waterExtension])

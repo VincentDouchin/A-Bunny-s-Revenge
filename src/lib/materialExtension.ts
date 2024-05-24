@@ -11,10 +11,10 @@ export const importLib = (part: string) => (shader: string) => {
 	return shader.replace('void main() {', `${part}\nvoid main() {`)
 }
 export const insertBefore = (before: string, part: string) => (shader: string) => {
-	return shader.replace(before, `${before}\n${part}`)
+	return shader.replace(before, `${part}\n${before}`)
 }
 export const insertAfer = (after: string, part: string) => (shader: string) => {
-	return shader.replace(after, `${part}\n${after}`)
+	return shader.replace(after, `${after}\n${part}`)
 }
 export const replaceInclude = (include: string, part: string) => (shader: string) => {
 	return shader.replace(`#include <${include}>`, part)
@@ -30,6 +30,7 @@ export const replace = (toReplace: string, part: string) => (shader: string) => 
 export const addUniform = (name: string, type: 'vec2' | 'vec3' | 'vec4' | 'float' | 'int' | 'bool' | 'sampler2D') => (shader: string) => {
 	return importLib(`uniform ${type} ${name};`)(shader)
 }
+export const addVarying = (name: string, type: 'vec2' | 'vec3' | 'vec4' | 'float' | 'int' | 'bool' | 'sampler2D') => (shader: string) => importLib(`varying ${type} ${name};`)(shader)
 export const remove = (toRemove: string) => (shader: string) => shader.replace(toRemove, '')
 export class MaterialExtension {
 	_defines: Record<string, any> = {}

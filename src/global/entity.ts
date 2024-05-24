@@ -6,6 +6,7 @@ import type { BatchedRenderer, ParticleEmitter } from 'three.quarks'
 import type { CSS2DObject } from 'three/examples/jsm/renderers/CSS2DRenderer'
 import type { Animator } from './animator'
 import type { InstanceHandle } from './assetLoaders'
+import type { MeshLine, MeshLineMaterial } from '@/lib/MeshLine'
 import type { NPC } from '@/constants/NPC'
 import type { enemy } from '@/constants/enemies'
 import type { Item, crops } from '@/constants/items'
@@ -45,6 +46,7 @@ export enum Interactable {
 	Water = 'water',
 	Buy = 'buy',
 	MagicBean = 'Plant magic bean',
+	Fishing = 'Use fishing pole',
 }
 export enum MenuType {
 	Oven,
@@ -58,6 +60,7 @@ export enum MenuType {
 	CauldronGame,
 	SelectSeed,
 	Basket,
+	Fishing,
 }
 export enum RenderGroup {
 	MainMenu,
@@ -75,6 +78,7 @@ export interface States {
 	player: 'idle' | 'running' | 'attack' | 'dying' | 'dead' | 'picking' | 'dash' | 'hit' | 'stun' | 'poisoned'
 	enemy: 'idle' | 'running' | 'attack' | 'hit' | 'dying' | 'dead' | 'waitingAttack' | 'attackCooldown' | 'stun' | 'wander'
 	boss: 'idle' | 'running' | 'rangeAttack' | 'attack' | 'dying' | 'dead' | 'waitingAttack' | 'attackCooldown' | 'hit'
+	fish: 'going' | 'hooked' | 'wander' | 'bounce' | 'runaway'
 }
 export interface Crop {
 	stage: number
@@ -285,6 +289,15 @@ export interface Entity {
 	// ! Alice
 	beanstalk?: true
 	magicHaricot?: Entity
+	// ! Fishing
+	fishingPole?: With<Entity, 'model' >
+	fishingLine?: Mesh<MeshLine, MeshLineMaterial>
+	fishingSpot?: true
+	bobber?: With<Entity, 'position'>
+	fish?: Timer<false>
+	fishingProgress?: { attempts: number, sucess: number, done: boolean }
+	bobbing?: true
+	fishSpawner?: true
 
 }
 export type Bundle<C extends keyof Entity> = () => With<Entity, C>

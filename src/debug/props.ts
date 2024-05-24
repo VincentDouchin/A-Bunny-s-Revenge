@@ -1,8 +1,8 @@
 import type { fruit_trees, gardenPlots, models, vegetation } from '@assets/assets'
 import { ActiveCollisionTypes, ColliderDesc, RigidBodyDesc } from '@dimforge/rapier3d-compat'
 import type { With } from 'miniplex'
-import type { BufferGeometry, Object3D, Object3DEventMap } from 'three'
-import { Color, DoubleSide, Euler, Group, Mesh, MeshPhongMaterial, PointLight, Quaternion, Vector3 } from 'three'
+import type { BufferGeometry, Object3DEventMap } from 'three'
+import { Color, DoubleSide, Euler, Group, Mesh, MeshPhongMaterial, Object3D, PointLight, Quaternion, Vector3 } from 'three'
 
 import FastNoiseLite from 'fastnoise-lite'
 import { CSS2DObject } from 'three/examples/jsm/renderers/CSS2DRenderer'
@@ -59,7 +59,7 @@ export interface ExtraData {
 
 }
 
-type BundleFn<E extends EntityData<any>> = (entity: With<Entity, 'entityId' | 'model' | 'position' | 'rotation'>, data: NonNullable<E>, ressources: FarmRessources | DungeonRessources | void) => Entity
+type BundleFn<E extends EntityData<any>> = (entity: With<Entity, 'entityId' | 'model' | 'position' | 'rotation' >, data: NonNullable<E>, ressources: FarmRessources | DungeonRessources | void) => Entity
 
 export interface PlacableProp<N extends string> {
 	name: N
@@ -67,7 +67,7 @@ export interface PlacableProp<N extends string> {
 	data?: N extends keyof ExtraData ? ExtraData[N] : undefined
 	bundle?: BundleFn<EntityData<N extends keyof ExtraData ? NonNullable<ExtraData[N]> : never>>
 }
-type propNames = 'log' | 'door' | 'rock' | 'board' | 'oven' | 'CookingPot' | 'stove' | 'Flower/plants' | 'sign' | 'plots' | 'bush' | 'fence' | 'house' | 'mushrooms' | 'lamp' | 'Kitchen' | 'berry bushes' | 'bench' | 'well' | 'fruit trees' | 'stall' | 'Vine gate'
+type propNames = 'log' | 'door' | 'rock' | 'board' | 'oven' | 'CookingPot' | 'stove' | 'Flower/plants' | 'sign' | 'plots' | 'bush' | 'fence' | 'house' | 'mushrooms' | 'lamp' | 'Kitchen' | 'berry bushes' | 'bench' | 'well' | 'fruit trees' | 'stall' | 'Vine gate' | 'fishing deck'
 export const props: PlacableProp<propNames>[] = [
 	{
 		name: 'log',
@@ -304,7 +304,7 @@ export const props: PlacableProp<propNames>[] = [
 			return {
 				...entity,
 				vineGate: true,
-				door: data.direction,
+				door: data?.direction ?? 'north',
 			}
 		},
 	},
@@ -407,6 +407,53 @@ export const props: PlacableProp<propNames>[] = [
 	{
 		name: 'fruit trees',
 		models: ['Apple_Tree'],
+	},
+	{
+		name: 'fishing deck',
+		models: ['fishing_deck'],
+		bundle: (e) => {
+			// const fishingSpotPosition = new Vector3(0, 3, -10)
+			return {
+				...e,
+				withChildren(parent) {
+					if (!e.size) return
+					const spotBundle = (): Entity => ({
+						fishingSpot: true,
+						interactable: Interactable.Fishing,
+						parent,
+						rotation: e.rotation.clone(),
+						bodyDesc: RigidBodyDesc.fixed(),
+						model: new Object3D(),
+					})
+					const spotSizeY = 3
+					// front
+					ecs.add({
+						...spotBundle(),
+						position: new Vector3(0, e.size.y / 2, -(e.size.z / 2 + 2)),
+						colliderDesc: ColliderDesc.cuboid(e.size.x / 2, spotSizeY, 2),
+					})
+					// left
+					ecs.add({
+						...spotBundle(),
+						position: new Vector3(e.size.x / 2 + 2, e.size.y / 2, 0),
+						colliderDesc: ColliderDesc.cuboid(2, spotSizeY, e.size.z / 2),
+					})
+					// right
+					ecs.add({
+						...spotBundle(),
+						position: new Vector3(-(e.size.x / 2 + 2), e.size.y / 2, 0),
+						colliderDesc: ColliderDesc.cuboid(2, spotSizeY, e.size.z / 2),
+					})
+					// spawner
+					ecs.add({
+						parent,
+						position: new Vector3(0, 0, -e.size.z),
+						model: new Object3D(),
+						fishSpawner: true,
+					})
+				},
+			}
+		},
 	},
 	{
 		name: 'stall',

@@ -1,0 +1,170 @@
+import { ColliderDesc, RigidBodyDesc, RigidBodyType } from '@dimforge/rapier3d-compat'
+import { Tween } from '@tweenjs/tween.js'
+import { between } from 'randomish'
+import { BufferGeometry, CatmullRomCurve3, Mesh, MeshBasicMaterial, PlaneGeometry, Quaternion, SphereGeometry, Vector3 } from 'three'
+import { openMenu } from './openInventory'
+import { fishBehaviorPlugin } from '@/behaviors/fishBehavior'
+import { MenuType } from '@/global/entity'
+import { assets, ecs, gameTweens } from '@/global/init'
+import { scene } from '@/global/rendering'
+import { MeshLine, MeshLineMaterial } from '@/lib/MeshLine'
+import { behaviorBundle } from '@/lib/behaviors'
+import { inMap } from '@/lib/hierarchy'
+import type { State } from '@/lib/state'
+import { Timer } from '@/lib/timer'
+import { getWorldPosition } from '@/lib/transforms'
+import { range } from '@/utils/mapFunctions'
+
+const fishingPoleBundle = () => {
+	const poleModel = assets.models.fishing_pole.scene.clone()
+	poleModel.scale.setScalar(10)
+	const line = new MeshLine()
+	line.setGeometry(new BufferGeometry().setFromPoints([new Vector3(), new Vector3()]))
+	const mat = new MeshLineMaterial({ color: 0xFFFFFF, lineWidth: 0.3 })
+	const fishingLine = new Mesh(line, mat)
+	scene.add(fishingLine)
+	const fishingPole = ecs.add({ model: poleModel, fishingLine })
+	return fishingPole
+}
+
+const playerFishingQuery = ecs.with('fishingPole', 'model', 'position', 'rotation', 'menuInputs', 'playerAnimator')
+const fishingQuery = ecs.with('menuType', 'group').where(e => e.menuType === MenuType.Fishing)
+export const stopFishing = (force: boolean = false) => () => {
+	for (const player of playerFishingQuery) {
+		if (player.menuInputs.get('cancel').justReleased || force) {
+			player.playerAnimator.playClamped('lightAttack', { timeScale: 0.5 })
+			const { bobber } = player.fishingPole
+			if (bobber) {
+				bobber.body?.setBodyType(RigidBodyType.Dynamic, true)
+				ecs.reindex(bobber)
+				const fish = assets.items.trout.model
+				fish.scale.setScalar(0.1)
+				fish.position.y -= 3
+				fish.rotateX(-Math.PI / 2)
+				bobber.model?.add(fish)
+				bobber.body?.setLinvel(new Vector3(0, 50, -50).applyQuaternion(player.rotation), true)
+				setTimeout(() => {
+					ecs.remove(bobber)
+					ecs.removeComponent(player.fishingPole, 'bobber')
+					player.fishingPole.fishingLine?.removeFromParent()
+					ecs.removeComponent(player.fishingPole, 'fishingLine')
+					for (const fishing of fishingQuery) {
+						ecs.removeComponent(fishing, 'menuType')
+					}
+				}, 300)
+			}
+		}
+	}
+}
+const updateFishingLine = () => {
+	for (const fisherman of playerFishingQuery) {
+		const fishingPole = fisherman.fishingPole
+		const tip = fishingPole.model.getObjectByName('tip')
+		const { bobber } = fishingPole
+		if (bobber && bobber.position.y <= -3 && bobber.body && !bobber.bobbing) {
+			ecs.update(bobber, { bobbing: true })
+			bobber.body.setBodyType(RigidBodyType.Fixed, true)
+			ecs.reindex(bobber)
+			bobber.position.y = -3
+		}
+
+		if (tip && bobber) {
+			const pos1 = getWorldPosition(tip)
+			const pos2 = new Vector3()
+			const pos3 = bobber.position
+			pos2.lerpVectors(pos1, pos3, 0.5)
+			const y = pos1.y - pos3.y
+			pos2.y = pos3.y + y / 3
+			const points = new CatmullRomCurve3([
+				pos1,
+				pos2,
+				pos3,
+			]).getPoints(50)
+			if (fishingPole.fishingLine) {
+				fishingPole.fishingLine.geometry.setGeometry(new BufferGeometry().setFromPoints(points))
+			}
+		}
+	}
+}
+
+const fishingSpotQuery = ecs.with('collider', 'fishingSpot', 'interactionContainer', 'rotation')
+const playerQuery = ecs.with('player', 'playerControls', 'playerAnimator', 'rotation')
+const useFishingPole = () => {
+	for (const spot of fishingSpotQuery) {
+		for (const player of playerQuery) {
+			if (player.playerControls.get('primary').justReleased && fishingQuery.size === 0) {
+				ecs.removeComponent(player, 'fishingPole')
+				const fishingPole = fishingPoleBundle()
+				ecs.update(player, { fishingPole })
+				openMenu(MenuType.Fishing)(spot)
+
+				const rot = spot.rotation.clone().multiply(new Quaternion().setFromAxisAngle(new Vector3(0, 1, 0), Math.PI))
+				setTimeout(() => {
+					const bobber = ecs.add({
+						parent: fishingPole,
+						position: getWorldPosition(fishingPole.model.getObjectByName('tip')!),
+						model: new Mesh(new SphereGeometry(1), new MeshBasicMaterial({ color: 0xFF0000 })),
+						bodyDesc: RigidBodyDesc.dynamic().setLinvel(...new Vector3(0, 100, 30).applyQuaternion(player.rotation).toArray()).setAngularDamping(2),
+						rotation: rot,
+						colliderDesc: ColliderDesc.ball(1).setSensor(true),
+					})
+					ecs.update(fishingPole, { bobber })
+				}, 500)
+				player.playerAnimator.playClamped('lightAttack', { timeScale: 0.5 }).then(() => {
+					player.playerAnimator.playAnimation('idle', { timeScale: 0.2 })
+				})
+			}
+		}
+	}
+}
+const fishBundle = (parentPos: Vector3) => {
+	const model = new Mesh(
+		new PlaneGeometry(8, 3),
+		new MeshBasicMaterial({ map: assets.textures.fish, depthWrite: false, opacity: 0, transparent: true }),
+	)
+	model.rotateX(-Math.PI / 2)
+	model.rotateZ(Math.PI / 2)
+	gameTweens.add(new Tween(model.material).to({ opacity: 0.5 }, 2000))
+	const rot = new Quaternion().setFromAxisAngle(new Vector3(0, 1, 0), Math.PI * 2 * Math.random())
+	const dist = 20
+	return {
+		...inMap(),
+		targetRotation: rot.clone(),
+		rotation: rot,
+		position: parentPos.add(new Vector3(between(-dist, dist), 0, between(-dist, dist))).setY(-2),
+		model,
+		fish: new Timer(between(3000, 5000), true),
+		...behaviorBundle('fish', 'wander'),
+
+	}
+}
+const fishSpawnerQuery = ecs.with('fishSpawner', 'group')
+const addFish = () => fishSpawnerQuery.onEntityAdded.subscribe((e) => {
+	setTimeout(() => {
+		range(0, 5, () => {
+			ecs.add(fishBundle(getWorldPosition(e.group)))
+		})
+	}, 100)
+})
+const fishQuery = ecs.with('fish', 'position', 'model')
+const despawnFish = () => {
+	for (const spawner of fishSpawnerQuery) {
+		for (const fish of fishQuery) {
+			if (getWorldPosition(spawner.group).distanceTo(fish.position) > 50) {
+				if (fish.model instanceof Mesh && fish.model.material) {
+					ecs.removeComponent(fish, 'fish')
+					gameTweens.add(new Tween(fish.model.material).to({ opacity: 0 }, 2000).onComplete(() => {
+						ecs.remove(fish)
+						ecs.add(fishBundle(getWorldPosition(spawner.group)))
+					}))
+				}
+			}
+		}
+	}
+}
+
+export const fishingPlugin = (s: State) => {
+	s.addSubscriber(addFish)
+	s.onUpdate(useFishingPole, updateFishingLine, stopFishing(), despawnFish)
+	s.addPlugins(fishBehaviorPlugin)
+}

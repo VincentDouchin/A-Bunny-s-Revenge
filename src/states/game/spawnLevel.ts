@@ -180,9 +180,10 @@ export const getdisplacementMap = (level: Level, invert = true) => {
 	// ! water
 	ctx.save()
 	if (invert) {
-		ctx.filter = 'invert(1)'
+		ctx.filter = `invert(1)`
 	}
 	ctx.drawImage(level.water, 0, 0)
+
 	ctx.restore()
 	return ctx.canvas
 }
@@ -247,7 +248,7 @@ export const spawnGroundAndTrees = (level: Level, dungeonLevel?: number) => {
 	groundMesh.position.y = -HEIGHT / 4
 	groundMesh.receiveShadow = true
 	const heightfieldMap = scaleCanvas(getdisplacementMap(level, false), 0.2)
-	const heights = canvasToArray(heightfieldMap).map(pixel => pixel.x / 255)
+	const heights = canvasToArray(heightfieldMap).map(pixel => pixel.y / 255)
 	const heightfield = new Float32Array(heights.length)
 	heightfield.set(heights)
 	const ground = ecs.add({

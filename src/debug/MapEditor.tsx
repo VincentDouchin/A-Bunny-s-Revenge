@@ -11,7 +11,7 @@ import { throttle } from '@/lib/state'
 import { getdisplacementMap, setDisplacement, spawnGrass, spawnGroundAndTrees, spawnTrees } from '@/states/game/spawnLevel'
 import { getScreenBuffer } from '@/utils/buffer'
 
-type drawingColors = 'path' | 'trees' | 'trees_transparent' | 'grass' | 'heightMap' | 'water'
+type drawingColors = 'path' | 'trees' | 'trees_transparent' | 'grass' | 'heightMap' | 'water' | 'bridge'
 const colors: Record<drawingColors, string> = {
 	path: 'rgb(255,0,0)',
 	trees: 'rgb(0,255,0)',
@@ -19,6 +19,7 @@ const colors: Record<drawingColors, string> = {
 	grass: 'rgb(255,0,0)',
 	heightMap: 'rgba(255,255,255,1)',
 	water: 'rgba(255,255,255,1)',
+	bridge: 'rgba(255,0,0,1)',
 }
 const canvases: Record<drawingColors, LevelImage> = {
 	path: 'path',
@@ -27,6 +28,7 @@ const canvases: Record<drawingColors, LevelImage> = {
 	grass: 'grass',
 	heightMap: 'heightMap',
 	water: 'water',
+	bridge: 'water',
 }
 const grassQuery = ecs.with('grass')
 const groundQuery = ecs.with('ground', 'model')
@@ -172,7 +174,7 @@ export const MapEditor = ({
 		}
 	})
 	const respawnEnvListener = () => {
-		if (selectedColor() === 'heightMap' || selectedColor() === 'water') {
+		if (selectedColor() === 'heightMap' || canvases[selectedColor()] === 'water') {
 			ecs.remove(ground())
 			spawnGroundAndTrees(activeLevel())
 			// selectedColor() === 'heightMap' && displayHeights()
@@ -265,7 +267,7 @@ export const MapEditor = ({
 						<button onClick={download}>download</button>
 						<button onClick={upload}>upload</button>
 					</div>
-					<For each={['path', 'trees', 'trees_transparent', 'grass', 'heightMap', 'water'] as drawingColors[]}>
+					<For each={['path', 'trees', 'trees_transparent', 'grass', 'heightMap', 'water', 'bridge'] as drawingColors[]}>
 						{color => <div><button style={{ width: '100%' }} onClick={() => setSelectedColor(color)} classList={{ selected: selectedColor() === color }}>{color}</button></div>}
 					</For>
 				</div>

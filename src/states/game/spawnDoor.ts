@@ -1,5 +1,5 @@
-import { DoubleSide, Group, Mesh, MeshBasicMaterial, PlaneGeometry, ShaderMaterial, Vector3 } from 'three'
 import { Tween } from '@tweenjs/tween.js'
+import { DoubleSide, Group, Mesh, MeshBasicMaterial, PlaneGeometry, ShaderMaterial } from 'three'
 import { RoomType, genDungeon } from '../dungeon/generateDungeon'
 import { Faction } from '@/global/entity'
 import { ecs, gameTweens, world } from '@/global/init'
@@ -11,6 +11,7 @@ import { otherDirection } from '@/lib/directions'
 import type { System } from '@/lib/state'
 import { doorClosed } from '@/particles/doorClosed'
 import vertexShader from '@/shaders/glsl/main.vert?raw'
+import { VineGateMaterial } from '@/shaders/materials'
 
 export const doorSide = () => {
 	const mesh = new Mesh(
@@ -129,11 +130,19 @@ const unlockDoors = () => doorToUnlockQuery.onEntityAdded.subscribe((e) => {
 	e.collider.setSensor(true)
 
 	if (e.vineGate) {
-		const vinesBottom = e.model?.getObjectByName('Vines_Gate_Bottom')
+		const vinesBottom = e.model?.getObjectByName('Vines_Gate')
 		if (vinesBottom) {
+			const initialPosition = vinesBottom.position.y
 			gameTweens.add(
-				new Tween(vinesBottom.position)
-					.to(vinesBottom.position.clone().add(new Vector3(0, -30, 0)), 2000),
+				new Tween([0]).to([1], 5000).onUpdate(([f]) => {
+					vinesBottom.position.y = initialPosition - 30 * f
+					vinesBottom.traverse((node) => {
+						if (node instanceof Mesh && node.material instanceof VineGateMaterial) {
+							node.material.uniforms.time.value = f * 2
+							node.material.depthWrite = false
+						}
+					})
+				}),
 			)
 		}
 	}
