@@ -119,10 +119,12 @@ export const spawnPlayerDungeon: System<DungeonRessources> = (ressources) => {
 	const isStart = ressources.dungeon.type === RoomType.Entrance && ressources.firstEntry
 	for (const door of doorQuery) {
 		if (isStart ? ressources.dungeon.doors[door.door] === null : door.door === ressources.direction) {
+			const rotation = door.rotation.clone().multiply(new Quaternion().setFromAxisAngle(new Vector3(0, 1, 0), Math.PI))
 			ecs.add({
 				...playerBundle(ressources.playerHealth, ressources.firstEntry, ressources.weapon),
 				position: new Vector3(...door.position.toArray()).add(new Vector3(0, 0, -20).applyQuaternion(door.rotation)),
-				rotation: door.rotation.clone().multiply(new Quaternion().setFromAxisAngle(new Vector3(0, 1, 0), Math.PI)),
+				rotation,
+				targetRotation: rotation.clone(),
 			})
 		}
 	}
