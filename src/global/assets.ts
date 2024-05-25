@@ -183,7 +183,7 @@ const loadMainMenuAssets = async (glob: GlobEager) => {
 	}), k => getFileName(k.replace('-optimized', '')))
 }
 const modelOptions: getToonOptions = (_key: string, materialName: string, _name: string, node: Mesh) => {
-	const isGate = node.parent?.name === 'Vines_Gate'
+	const isGate = node.parent?.name === 'GATE'
 	return {
 		shadow: true,
 		depthWrite: !materialName.includes('Leaves'),

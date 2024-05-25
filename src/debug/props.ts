@@ -283,8 +283,14 @@ export const props: PlacableProp<propNames>[] = [
 				entity.doorLevel = data.data.doorLevel
 				entity.doorLocked = true
 			}
-
-			return { door: data.data.direction, ...entity }
+			if (ressources && 'dungeon' in ressources && data.data.direction && (ressources.dungeon.doors[data.data.direction]?.type === RoomType.Boss || (ressources.dungeon.type === RoomType.Boss && ressources.dungeon.doors[data.data.direction] !== null))) {
+				entity.model = assets.models.Gate_Thorns.scene.clone()
+				entity.vineGate = true
+			}
+			return {
+				door: data.data.direction,
+				...entity,
+			}
 		},
 	},
 	{

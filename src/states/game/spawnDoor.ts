@@ -130,7 +130,7 @@ const unlockDoors = () => doorToUnlockQuery.onEntityAdded.subscribe((e) => {
 	e.collider.setSensor(true)
 
 	if (e.vineGate) {
-		const vinesBottom = e.model?.getObjectByName('Vines_Gate')
+		const vinesBottom = e.model?.getObjectByName('GATE')
 		if (vinesBottom) {
 			const initialPosition = vinesBottom.position.y
 			gameTweens.add(
