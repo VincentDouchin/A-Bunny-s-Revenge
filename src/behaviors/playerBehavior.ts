@@ -16,7 +16,7 @@ import { poisonBubbles } from '@/states/dungeon/poisonTrail'
 import { stunBundle } from '@/states/dungeon/stun'
 import { sleep } from '@/utils/sleep'
 
-const ANIMATION_SPEED = 1
+const ANIMATION_SPEED = 1.3
 const playerComponents = ['playerAnimator', 'movementForce', 'speed', 'body', 'rotation', 'playerControls', 'combo', 'attackSpeed', 'dash', 'collider', 'currentHealth', 'model', 'hitTimer', 'size', 'sneeze', 'targetRotation', 'poisoned', 'size', 'position', 'targetMovementForce'] as const satisfies readonly (keyof Entity)[]
 type PlayerComponents = (typeof playerComponents)[number]
 const playerQuery = ecs.with(...playerComponents)
