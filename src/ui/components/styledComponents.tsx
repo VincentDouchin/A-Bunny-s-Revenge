@@ -115,8 +115,7 @@ export const CheckBox = (props: { value: Accessor<boolean>, onClick: (value: boo
 	}
 	`
 	return (
-		<div class="checkbox">
-
+		<div class="checkbox" onClick={() => props.onClick(!props.value())}>
 			<Switch>
 				<Match when={props.value()}>
 					<CheckSquare />

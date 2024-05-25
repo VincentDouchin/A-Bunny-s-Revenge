@@ -48,6 +48,13 @@ export const Settings = (props: { menu: MenuDir }) => {
 		updateSave(s => s.settings.disableShadows = !shadowsEnabled)
 		renderer.shadowMap.enabled = shadowsEnabled
 	}
+	// ! LOCK CAMERA
+	const lockCameraSelected = atom(false)
+	const lockCamera = atom(save.settings.lockCamera)
+	const setLockCamera = (locked: boolean) => {
+		lockCamera(locked)
+		updateSave(s => s.settings.lockCamera = locked)
+	}
 	css/* css */`
 		.settings-container{
 			display: grid;
@@ -172,7 +179,7 @@ export const Settings = (props: { menu: MenuDir }) => {
 			>
 				<OutlineText>Display controls</OutlineText>
 			</div>
-			<CheckBox value={showControls} onClick={() => setShowControl(!showControls())}></CheckBox>
+			<CheckBox value={showControls} onClick={setShowControl}></CheckBox>
 			<div
 				use:menuItem={[props.menu, false, shadowsSelected, ['left', 'right'], true]}
 				class={shadowsSelected() ? 'selected' : 'unselected'}
@@ -180,7 +187,15 @@ export const Settings = (props: { menu: MenuDir }) => {
 			>
 				<OutlineText>Shadows</OutlineText>
 			</div>
-			<CheckBox value={shadows} onClick={() => setShadows(!shadows())}></CheckBox>
+			<CheckBox value={shadows} onClick={setShadows}></CheckBox>
+			<div
+				use:menuItem={[props.menu, false, lockCameraSelected, ['left', 'right'], true]}
+				class={lockCameraSelected() ? 'selected' : 'unselected'}
+				onClick={() => setLockCamera(!lockCamera())}
+			>
+				<OutlineText>Lock Camera to player</OutlineText>
+			</div>
+			<CheckBox value={lockCamera} onClick={setLockCamera}></CheckBox>
 
 		</div>
 	)

@@ -7,6 +7,7 @@ import { Transition } from 'solid-transition-group'
 import type { Atom } from 'solid-use/atom'
 import atom from 'solid-use/atom'
 import { useGame } from '../store'
+import { save } from '@/global/save'
 
 const CloseButton = () => {
 	const context = useGame()
@@ -30,17 +31,19 @@ const CloseButton = () => {
 		border-radius: 1rem;
 		border: solid 0.1rem hsla(0, 0%, 100%, 0.3);
 		font-size: 3rem;
-		color: white;
+		fill: white;
 		display: grid;
 		place-items: center;
 	}
 	`
 	return (
-		<Show when={context?.usingTouch()}>
+		<Show when={context?.usingTouch() || save.settings.controls === 'mouse'}>
 			<div
 				class="close-button icon-container"
 				onTouchStart={closeInventory}
 				onTouchEnd={reset}
+				onPointerDown={closeInventory}
+				onPointerUp={reset}
 			>
 				<Cross />
 			</div>

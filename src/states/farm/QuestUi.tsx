@@ -1,4 +1,4 @@
-import { For, Show, createEffect, createSignal, onMount } from 'solid-js'
+import { For, Show, createEffect, createMemo, createSignal, onMount } from 'solid-js'
 import { css } from 'solid-styled'
 import atom from 'solid-use/atom'
 import { ItemDisplay } from './InventoryUi'

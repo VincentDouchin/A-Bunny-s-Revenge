@@ -37,14 +37,14 @@ const secondaryQuery = interactableQuery.with('onSecondary')
 export const interact = () => {
 	for (const entity of primaryQuery) {
 		for (const player of playerInventoryClosedQuery) {
-			if (player.playerControls.get('primary').justReleased) {
+			if (player.playerControls.get('primary').justPressed) {
 				entity.onPrimary(entity, player)
 			}
 		}
 	}
 	for (const entity of secondaryQuery) {
 		for (const player of playerInventoryClosedQuery) {
-			if (player.playerControls.get('secondary').justReleased) {
+			if (player.playerControls.get('secondary').justPressed) {
 				entity.onSecondary(entity, player)
 			}
 		}

@@ -43,8 +43,10 @@ export class InputManager {
 	#maps = new Set<InputMap<any>>()
 	mouse: Record<number, boolean> = {}
 	layoutMap: KeyboardLayoutMap | null = null
+	mouseMoving = atom(false)
 	constructor() {
 		window.addEventListener('keydown', (e) => {
+			this.controls('keyboard')
 			if (e.code in this.keys) {
 				e.preventDefault()
 				this.keys[e.code] = 1
@@ -55,9 +57,6 @@ export class InputManager {
 				e.preventDefault()
 				this.keys[e.code] = 0
 			}
-		})
-		window.addEventListener('keydown', () => {
-			this.controls('keyboard')
 		})
 		window.addEventListener('touchstart', () => {
 			this.controls('touch')
