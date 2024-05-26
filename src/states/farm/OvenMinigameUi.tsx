@@ -24,6 +24,7 @@ import { OutlineText } from '@/ui/components/styledComponents'
 import { useGame, useQuery } from '@/ui/store'
 import type { FarmUiProps } from '@/ui/types'
 import { sleep } from '@/utils/sleep'
+import { TouchButton } from '@/ui/TouchControls'
 
 export const ovenQuery = useQuery(ecs.with('menuType', 'recipesQueued', 'ovenAnimator', 'position').where(({ menuType }) => menuType === MenuType.OvenMinigame))
 
@@ -96,6 +97,7 @@ export const OvenMinigameUi = ({ player }: FarmUiProps) => {
 				ui.updateSync(() => {
 					if (player.menuInputs.get('cancel').justReleased) {
 						ecs.removeComponent(oven, 'menuType')
+						return
 					}
 					if (output()) {
 						if (player.playerControls.get('primary').justReleased) {
@@ -145,41 +147,7 @@ export const OvenMinigameUi = ({ player }: FarmUiProps) => {
 						}
 					}
 				})
-				const playerInputs = () => player.playerControls.touchController
-				const isPrimaryPressed = ui.sync(() => playerInputs()?.get('primary'))
-				const interact = (value: number, input: 'primary' | 'secondary') => () => {
-					playerInputs()?.set(input, value)
-				}
-				const close = () => ecs.removeComponent(oven, 'menuType')
 				css/* css */`
-				.exit{
-					position: fixed;
-					height: 80%;
-					left: 0;
-					width: 5rem;
-					margin: 3rem 2rem;
-					display: flex;
-					justify-content: center;
-					flex-direction: column;
-				}
-				.fire{
-					position: fixed;
-					width: 8rem;
-					height: 8rem;
-					background: hsla(0, 0%, 0%, 20%);
-					border-radius: 8rem;
-					border: ${isPrimaryPressed() ? 'solid 0.3rem hsla(0, 0%, 100%, 30%)' : 'solid 0.1rem hsla(0, 0%, 100%, 30%)'};
-					bottom: 0%;
-					right: 0%;
-					display: grid;
-					place-items: center;
-					margin: 7rem;
-				}
-				.fire-icon{
-					fill: white;
-					font-size: 4rem;
-					display: grid;
-				}
 				.minigame-container{
 					display: grid;
 					grid-template-columns: auto auto auto;
@@ -263,20 +231,29 @@ export const OvenMinigameUi = ({ player }: FarmUiProps) => {
 					position: absolute;
 					bottom: 0;
 				}
+				.inputs-container{
+					position: fixed;
+					bottom: 0;
+					right: 0;
+					margin: 7em;
+					display: flex;
+					gap: 7rem;
+					flex-direction: row-reverse;
+				}
 				`
 				return (
 					<>
 						<Show when={context?.usingTouch()}>
-							<button class="button exit" onClick={close}>
-								<div style={{ width: '2rem' }}><Exit /></div>
-								<div>Exit</div>
-							</button>
-						</Show>
-						<Show when={context?.usingTouch()}>
-							<div class="fire" onTouchStart={interact(1, 'primary')} onTouchEnd={interact(0, 'primary')}>
-								<div class="fire-icon"><Fire /></div>
+							<div class="inputs-container">
+								<TouchButton input="primary" controller={player.playerControls.touchController!}>
+									<Fire />
+								</TouchButton>
+								<TouchButton input="cancel" controller={player.menuInputs.touchController!}>
+									<Exit />
+								</TouchButton>
 							</div>
 						</Show>
+
 						<div class="minigame-container">
 							{/*  progress */}
 							<div class="relative">

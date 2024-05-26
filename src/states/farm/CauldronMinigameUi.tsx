@@ -21,6 +21,7 @@ import { cauldronSparkles } from '@/particles/cauldronSparkles'
 import { fireParticles } from '@/particles/fireParticles'
 import { useQuery } from '@/ui/store'
 import type { FarmUiProps } from '@/ui/types'
+import { TouchButton } from '@/ui/TouchControls'
 
 export const cauldronQuery = useQuery(ecs.with('menuType', 'interactionContainer', 'group', 'rotation', 'recipesQueued', 'spoon').where(({ menuType }) => menuType === MenuType.CauldronGame))
 export const CauldronMinigameUi = ({ player }: FarmUiProps) => {
@@ -84,6 +85,7 @@ export const CauldronMinigameUi = ({ player }: FarmUiProps) => {
 				ui.updateSync(() => {
 					if (player.menuInputs.get('cancel').justReleased) {
 						ecs.removeComponent(cauldron(), 'menuType')
+						return
 					}
 					if (output()) {
 						setSpoon(x => x + time.delta / 500 * (1 + progress() / 50))
@@ -122,12 +124,6 @@ export const CauldronMinigameUi = ({ player }: FarmUiProps) => {
 					return `calc(0.5rem + ${percentSynced()}rem)`
 				})
 				const isTouch = createMemo(() => inputManager.controls() === 'touch')
-				const close = () => ecs.removeComponent(cauldron(), 'menuType')
-				const playerInputs = () => player.playerControls.touchController
-				const isPrimaryPressed = ui.sync(() => playerInputs()?.get('primary'))
-				const interact = (value: number, input: 'primary' | 'secondary') => () => {
-					playerInputs()?.set(input, value)
-				}
 				css/* css */`
 				.button {
 					position: fixed;
@@ -138,28 +134,6 @@ export const CauldronMinigameUi = ({ player }: FarmUiProps) => {
 					display: flex;
 					justify-content: center;
 					flex-direction: column;
-				}
-				.exit-icon{
-					width: 2rem;
-				}
-				.spoon{
-					position: fixed;
-					width: 8rem;
-					height: 8rem;
-					background: hsl(0, 0%, 0%, 20%);
-					border-radius: 8rem;
-					border: solid hsl(0, 0%, 100%, 30%);
-					bottom: 0%;
-					right: 0%;
-					display: grid;
-					place-items: center;
-					margin: 7rem;
-					border:${`solid ${isPrimaryPressed() ? '0.3rem' : '0.1rem'} hsl(0, 0%,100%, 30% )`}
-				}
-				.spoon-icon{
-					fill: white;
-					font-size:4rem;
-					display: grid;
 				}
 				.progress-container{
 					display: grid;
@@ -217,16 +191,26 @@ export const CauldronMinigameUi = ({ player }: FarmUiProps) => {
 					border:  ${`solid ${spotColor()} ${spotSize()}`};
 					translate: ${`calc(10rem * ${spotCoordinates().x}) calc(10rem * ${spotCoordinates().y})`};
 				}
+				.inputs-container{
+					position: fixed;
+					bottom: 0;
+					right: 0;
+					margin: 7em;
+					display: flex;
+					gap: 7rem;
+					flex-direction: row-reverse;
+				}
 				`
 				return (
 					<>
 						<Show when={isTouch()}>
-							<button class="button exit-button" onClick={close}>
-								<div class="exit-icon"><Exit /></div>
-								<div>Exit</div>
-							</button>
-							<div class="spoon" onTouchStart={interact(1, 'primary')} onTouchEnd={interact(0, 'primary')}>
-								<div class="spoon-icon"><Spoon /></div>
+							<div class="inputs-container">
+								<TouchButton input="primary" controller={player.playerControls.touchController!}>
+									<Spoon />
+								</TouchButton>
+								<TouchButton input="cancel" controller={player.menuInputs.touchController!}>
+									<Exit />
+								</TouchButton>
 							</div>
 						</Show>
 						<Portal mount={cauldron().interactionContainer.element}>

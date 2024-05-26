@@ -13,6 +13,7 @@ import { LoseUi } from '@/states/dungeon/LoseUi'
 import { FullscreenUi } from '@/states/game/FullscreenUi'
 import { OverlayUi } from '@/states/game/overlayUi'
 import { RecipesUi } from '@/states/farm/RecipesUi'
+import { FishingMinigameUi } from '@/states/farm/FishingMinigameUi'
 
 export const UI = () => (
 	<GameProvider>
@@ -21,6 +22,7 @@ export const UI = () => (
 		<FullscreenUi />
 		<LoseUi />
 		<PlayerUi />
+		<FishingMinigameUi />
 		<StateUi state={dungeonState}>
 			<EnemyHealthBarUi />
 		</StateUi>

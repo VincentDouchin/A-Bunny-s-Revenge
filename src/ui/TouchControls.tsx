@@ -1,3 +1,4 @@
+import type { Accessor, JSXElement } from 'solid-js'
 import { For, Show, createMemo, onCleanup } from 'solid-js'
 import { css } from 'solid-styled'
 import { Transition } from 'solid-transition-group'
@@ -12,6 +13,64 @@ import { atom } from '@/lib/uiManager'
 import { campState, pausedState } from '@/global/states'
 import { ecs, ui } from '@/global/init'
 import { MenuType } from '@/global/entity'
+import type { TouchController } from '@/lib/inputs'
+
+export const TouchButton = <T extends string,>({ input, controller, children, text }: {
+	input: T
+	controller: TouchController<T>
+	children?: JSXElement
+	text?: Accessor<string | undefined>
+}) => {
+	const isPressed = createMemo(() => controller?.get(input))
+	const interact = (value: number) => () => {
+		controller.set(input, value)
+	}
+	css/* css */`
+	.touch-input{
+		transition: all 0.2s ease;
+		position: relative;
+		width: 8rem;
+		height: 8rem;
+		background: hsl(0, 0%, 0%, 50%);
+		border-radius: 100rem;
+		box-shadow:${isPressed() ? 'inset 0 0 2rem 0 black' : ''};
+		opacity:${text && text() ? '80%' : '30%'};
+		border:${`solid ${isPressed() ? '0.3rem' : '0.1rem'} hsl(0, 0%,100%)`};
+		font-size: 4rem;
+		fill:white;
+		display: grid;
+		place-items:center;
+	}
+	.interactable-text{
+		color: white;
+		position: absolute;
+		top: 100%;
+		left: 50%;
+		transform: translate(-50%, 0);
+		padding-top: 0.5rem;
+		white-space: nowrap;
+		font-size: 3rem;
+	}
+	`
+	onCleanup(interact(0))
+	return (
+		<div
+			class="touch-input"
+			onTouchStart={interact(1)}
+			onTouchEnd={interact(0)}
+			onTouchCancel={interact(0)}
+		>
+			{children}
+			<Transition name="popup">
+				<Show when={text && text()}>
+					{(text) => {
+						return <div class="interactable-text">{text()}</div>
+					}}
+				</Show>
+			</Transition>
+		</div>
+	)
+}
 
 export const TouchControls = () => {
 	const context = useGame()
@@ -67,7 +126,6 @@ export const TouchControls = () => {
 					playerInputs?.set('forward', 0)
 					playerInputs?.set('left', 0)
 					playerInputs?.set('right', 0)
-					playerInputs?.set('primary', 0)
 				})
 				const openInventory = () => {
 					ecs.addComponent(player(), 'menuType', MenuType.Player)
@@ -75,10 +133,7 @@ export const TouchControls = () => {
 				const interactableQuery = ecs.with('interactable', 'interactionContainer')
 				const interactableEntity = ui.sync(() => interactableQuery.first)
 				const interactables = createMemo(() => getInteractables(player(), interactableEntity()))
-				const interact = (value: number, input: 'primary' | 'secondary') => () => {
-					playerInputs?.set(input, value)
-				}
-				const isPressed = (input: 'primary' | 'secondary') => playerInputs?.get(input)
+
 				const setInitialPos = (e: TouchEvent) => {
 					const joystick = container()
 					if (joystick) {
@@ -101,91 +156,67 @@ export const TouchControls = () => {
 					}
 				})
 				css/* css */`
-	.top-button{
-		width: 4rem;
-		height: 4rem;
-		background: hsla(0, 0%, 0%, 0.2);
-		border-radius: 1rem;
-		border: solid 0.1rem hsla(0, 0%, 100%, 0.3);
-		font-size: 2rem;
-		color: white;
-		display: grid;
-		place-items: center;
-	}
-	.joystick-container{
-		position: fixed;
-		left: 0;
-		bottom: 0;
-		top:0;
-		right: 50%;
-		z-index: 2;
-	}
-	.joystick{
-		position: relative;
-		background: hsl(0, 0%, 0%);
-		border-radius: 1000px;
-		width: 12rem;
-		height: 12rem;
-		opacity: 20%;
-	}
-	.joystick-center{
-		border-radius: 1000px;
-		width: 5rem;
-		height: 5rem;
-		background: hsl(0, 0%, 100%);
-		position: absolute;
-		top: 50%;
-		left: 50%;
-	}
-	.inputs-container{
-		position: absolute;
-		bottom: 0;
-		right: 0;
-		margin: 7em;
-		display: flex;
-		gap: 7rem;
-		flex-direction: row-reverse;
-	}
-	.touch-input{
-		transition: all 0.2s ease;
-		position: relative;
-		width: 8rem;
-		height: 8rem;
-		background: hsl(0, 0%, 0%);
-		border-radius: 100rem;
-	}
-	.interactable-text{
-		color: white;
-		position: absolute;
-		top: 100%;
-		left: 50%;
-		transform: translate(-50%, 0);
-		padding-top: 0.5rem;
-		white-space: nowrap;
-		font-size: 3rem;
-	}
-	.pause-button {
-		position: fixed;
-		top: 1rem;
-		left: 50%;
-		transform: translateX(-50%);
-		color: white;
-		display: flex;
-		align-items:center;
-		gap:1rem;
-		font-size: 2rem
-	}
-	.inventory-button{
-		font-size: 4rem;
-		opacity: 20%;
-		fill:white;
-		display: grid;
-		place-items:center;
-		position: fixed;
-		bottom: 15rem;
-		right: 14.5rem;
-		border: solid 0.1rem hsl(0, 0%,100%);
-	}`
+				.top-button{
+					width: 4rem;
+					height: 4rem;
+					background: hsla(0, 0%, 0%, 0.2);
+					border-radius: 1rem;
+					border: solid 0.1rem hsla(0, 0%, 100%, 0.3);
+					font-size: 2rem;
+					color: white;
+					display: grid;
+					place-items: center;
+				}
+				.joystick-container{
+					position: fixed;
+					left: 0;
+					bottom: 0;
+					top:0;
+					right: 50%;
+					z-index: 2;
+				}
+				.joystick{
+					position: relative;
+					background: hsl(0, 0%, 0%);
+					border-radius: 1000px;
+					width: 12rem;
+					height: 12rem;
+					opacity: 20%;
+				}
+				.joystick-center{
+					border-radius: 1000px;
+					width: 5rem;
+					height: 5rem;
+					background: hsl(0, 0%, 100%);
+					position: absolute;
+					top: 50%;
+					left: 50%;
+				}
+				.inputs-container{
+					position: fixed;
+					bottom: 0;
+					right: 0;
+					margin: 7em;
+					display: flex;
+					gap: 7rem;
+					flex-direction: row-reverse;
+				}
+				.pause-button {
+					position: fixed;
+					top: 1rem;
+					left: 50%;
+					transform: translateX(-50%);
+					fill: white;
+					display: flex;
+					align-items:center;
+					gap:1rem;
+					font-size: 2rem
+				}
+				.inventory-button{
+					position: fixed;
+					bottom: 15rem;
+					right: 14.5rem;
+				}`
 				return (
 					<div>
 						<button class="pause-button button" onTouchStart={() => pausedState.enable()}>
@@ -215,33 +246,17 @@ export const TouchControls = () => {
 							</div>
 						</div>
 						<StateUi state={campState}>
-							<div onTouchStart={openInventory} class="inventory-button touch-input">
-								<Inventory />
+							<div onTouchStart={openInventory} class="inventory-button">
+								<TouchButton input="inventory" controller={playerInputs!}>
+									<Inventory />
+								</TouchButton>
 							</div>
 						</StateUi>
 						<div class="inputs-container">
 							<For each={['primary', 'secondary'] as const}>
 								{(input, index) => {
-									return (
-										<div
-											style={{
-												border: `solid ${isPressed(input) ? '0.3rem' : '0.1rem'} hsl(0, 0%,100%)`,
-												opacity: interactables()[index()] ? '50%' : '20%',
-											}}
-											class="touch-input"
-											onTouchStart={interact(1, input)}
-											onTouchEnd={interact(0, input)}
-										>
-											<Transition name="popup">
-												<Show when={interactables()[index()]}>
-													{(interactable) => {
-														return <div class="interactable-text">{interactable()}</div>
-													}}
-												</Show>
-											</Transition>
-										</div>
-									)
-								}}
+									const interactableText = createMemo(() => interactables()[index()])
+									return <TouchButton input={input} controller={playerInputs!} text={interactableText} /> }}
 							</For>
 						</div>
 					</div>

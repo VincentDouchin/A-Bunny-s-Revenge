@@ -1,4 +1,5 @@
 import atom from 'solid-use/atom'
+import { createMap } from 'solid-proxies'
 import { keys, metaKeys, mouse } from '@/constants/keys'
 
 export const GAMEPAD_AXIS = {
@@ -184,7 +185,7 @@ export class Input {
 }
 
 export class TouchController< Buttons extends string> {
-	#buttons = new Map<Buttons, number>()
+	#buttons = createMap<Buttons, number>()
 	constructor(...buttons: Buttons[]) {
 		for (const button of buttons) {
 			this.#buttons.set(button, 0)
