@@ -29,6 +29,7 @@ export interface SaveData {
 		soundEffectsMute: boolean
 		disableShadows: boolean
 		lockCamera: boolean
+		uiScale: number
 	}
 	unlockedRecipes: items[]
 	unlockedPaths: number
@@ -58,6 +59,7 @@ const blankSave = (): SaveData => ({
 		soundEffectsMute: false,
 		disableShadows: true,
 		lockCamera: false,
+		uiScale: 10,
 	},
 	unlockedRecipes: [],
 	unlockedPaths: 1,

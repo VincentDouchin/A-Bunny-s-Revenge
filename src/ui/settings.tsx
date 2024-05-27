@@ -55,6 +55,24 @@ export const Settings = (props: { menu: MenuDir }) => {
 		lockCamera(locked)
 		updateSave(s => s.settings.lockCamera = locked)
 	}
+	// ! UI SCALE
+	const uiScaleSelected = atom(false)
+	const uiScale = atom(save.settings.uiScale ?? 10)
+	const setUiScale = async (scale: number) => {
+		uiScale(scale)
+		await updateSave(s => s.settings.uiScale = scale)
+		ui.setFontSize()
+	}
+	ui.updateSync(() => {
+		if (uiScaleSelected()) {
+			if (inputs()?.get('left').justPressed) {
+				setUiScale(Math.max(uiScale() - 1, 2))
+			}
+			if (inputs()?.get('right').justPressed) {
+				setUiScale(Math.min(uiScale() + 1, 15))
+			}
+		}
+	})
 	css/* css */`
 		.settings-container{
 			display: grid;
@@ -87,6 +105,13 @@ export const Settings = (props: { menu: MenuDir }) => {
 		.unselected{
 			border-bottom: solid 0.2rem transparent;
 		}
+		.ui-scale{
+			display: grid;
+			grid-template-columns: 1fr 5rem;
+			gap: 2rem;
+			width: 100%;
+		}
+
 
 	`
 	const specificVolumes = [
@@ -95,7 +120,6 @@ export const Settings = (props: { menu: MenuDir }) => {
 		['Ambiance', 'ambianceVolume', 'ambianceMute'],
 		['Sound Effects', 'soundEffectsVolume', 'soundEffectsMute'],
 	] as const satisfies ReadonlyArray<readonly [string, keyof SaveData['settings'], keyof SaveData['settings'] ]>
-
 	return (
 		<div class="settings-container">
 
@@ -196,6 +220,24 @@ export const Settings = (props: { menu: MenuDir }) => {
 				<OutlineText>Lock Camera to player</OutlineText>
 			</div>
 			<CheckBox value={lockCamera} onClick={setLockCamera}></CheckBox>
+			<div
+				use:menuItem={[props.menu, false, uiScaleSelected, ['left', 'right'], true]}
+				class={uiScaleSelected() ? 'selected' : 'unselected'}
+			>
+				<OutlineText>UI scale</OutlineText>
+			</div>
+			<div class="ui-scale">
+				<input
+					type="range"
+					class="input-range"
+					value={uiScale()}
+					min="2"
+					max="15"
+					onChange={e => setUiScale(e.target.valueAsNumber)}
+				>
+				</input>
+				<OutlineText>{String(Math.min(uiScale() / 10))}</OutlineText>
+			</div>
 
 		</div>
 	)

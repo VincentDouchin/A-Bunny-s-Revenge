@@ -10,7 +10,7 @@ import { ecs, ui } from '@/global/init'
 import { save } from '@/global/save'
 import { Menu, menuItem } from '@/ui/components/Menu'
 import { Modal } from '@/ui/components/Modal'
-import { GoldContainer, InventoryTitle } from '@/ui/components/styledComponents'
+import { GoldContainer, InventoryTitle, OutlineText } from '@/ui/components/styledComponents'
 import { useQuery } from '@/ui/store'
 import type { FarmUiProps } from '@/ui/types'
 import { entries } from '@/utils/mapFunctions'
@@ -44,7 +44,7 @@ export const QuestUi = ({ player }: FarmUiProps) => {
 					border-radius:1rem;
 					margin: 0.2rem;
 					box-sizing: border-box;
-				}	
+				}
 				.step{
 					display: flex;
 					gap: 1rem;
@@ -56,6 +56,12 @@ export const QuestUi = ({ player }: FarmUiProps) => {
 					display: grid;
 					gap: 0.5rem;
 				}
+				.no-quests{
+					text-align: center;
+					font-size:2rem;
+					color:white;
+					min-width: 20rem;
+				}
 				`
 				return (
 					<Modal open={visible()}>
@@ -63,6 +69,11 @@ export const QuestUi = ({ player }: FarmUiProps) => {
 							<GoldContainer>
 								<InventoryTitle>Quests</InventoryTitle>
 								<div class="quest-container scroll-container">
+									<Show when={questsToComplete.length === 0}>
+										<div class="no-quests">
+											<OutlineText>No quests</OutlineText>
+										</div>
+									</Show>
 									<Menu inputs={player.menuInputs}>
 										{({ menu }) => {
 											return (

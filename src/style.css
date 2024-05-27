@@ -8,8 +8,6 @@
 	-webkit-font-smoothing: antialiased;
 	-moz-osx-font-smoothing: grayscale;
 	-webkit-text-size-adjust: 100%;
-	font-size: 14px;
-	font-size: 2vh;
 	--brown-dark: #29201e;
 	--gold: #f3a833;
 	--gold-tarnished: #a26d3f;
@@ -24,6 +22,7 @@
 		color-mix(in srgb, var(--gold), transparent 80%)
 	);
 	--meal-color: #f3a833;
+	font-size: 2vh;
 }
 html,
 body,
