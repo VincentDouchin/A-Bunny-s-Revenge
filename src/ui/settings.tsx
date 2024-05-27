@@ -154,7 +154,7 @@ export const Settings = (props: { menu: MenuDir }) => {
 					return (
 						<>
 							<div
-								use:menuItem={[props.menu, title === 'Global Volume', selected, ['left', 'right'], true]}
+								use:menuItem={[props.menu, title === 'Global Volume', selected, () => ['left', 'right'], true]}
 								class={selected() ? 'selected' : 'unselected'}
 								onClick={muteSound}
 							>
@@ -173,7 +173,7 @@ export const Settings = (props: { menu: MenuDir }) => {
 			<Show when={!isStandalone()}>
 
 				<div
-					use:menuItem={[props.menu, false, fullscreenSelected, ['left', 'right'], true]}
+					use:menuItem={[props.menu, false, fullscreenSelected, () => ['left', 'right'], true]}
 					class={fullscreenSelected() ? 'selected' : 'unselected'}
 					onClick={toggleFullscreen}
 				>
@@ -184,7 +184,7 @@ export const Settings = (props: { menu: MenuDir }) => {
 				<CheckBox value={fullscreen} onClick={toggleFullscreen}></CheckBox>
 			</Show>
 			<div
-				use:menuItem={[props.menu, false, controlsSelected, ['left', 'right'], true]}
+				use:menuItem={[props.menu, false, controlsSelected, () => ['left', 'right'], true]}
 				class={controlsSelected() ? 'selected' : 'unselected'}
 				onClick={() => setControls(controls() === 'keyboard' ? 'mouse' : 'keyboard')}
 			>
@@ -197,7 +197,7 @@ export const Settings = (props: { menu: MenuDir }) => {
 				setValue={setControls}
 			/>
 			<div
-				use:menuItem={[props.menu, false, showControlsSelected, ['left', 'right'], true]}
+				use:menuItem={[props.menu, false, showControlsSelected, () => ['left', 'right'], true]}
 				class={showControlsSelected() ? 'selected' : 'unselected'}
 				onClick={() => setShowControl(!showControls())}
 			>
@@ -205,7 +205,7 @@ export const Settings = (props: { menu: MenuDir }) => {
 			</div>
 			<CheckBox value={showControls} onClick={setShowControl}></CheckBox>
 			<div
-				use:menuItem={[props.menu, false, shadowsSelected, ['left', 'right'], true]}
+				use:menuItem={[props.menu, false, shadowsSelected, () => ['left', 'right'], true]}
 				class={shadowsSelected() ? 'selected' : 'unselected'}
 				onClick={() => setShadows(!shadows())}
 			>
@@ -213,7 +213,7 @@ export const Settings = (props: { menu: MenuDir }) => {
 			</div>
 			<CheckBox value={shadows} onClick={setShadows}></CheckBox>
 			<div
-				use:menuItem={[props.menu, false, lockCameraSelected, ['left', 'right'], true]}
+				use:menuItem={[props.menu, false, lockCameraSelected, () => ['left', 'right'], true]}
 				class={lockCameraSelected() ? 'selected' : 'unselected'}
 				onClick={() => setLockCamera(!lockCamera())}
 			>
@@ -221,7 +221,7 @@ export const Settings = (props: { menu: MenuDir }) => {
 			</div>
 			<CheckBox value={lockCamera} onClick={setLockCamera}></CheckBox>
 			<div
-				use:menuItem={[props.menu, false, uiScaleSelected, ['left', 'right'], true]}
+				use:menuItem={[props.menu, false, uiScaleSelected, () => ['left', 'right'], true]}
 				class={uiScaleSelected() ? 'selected' : 'unselected'}
 			>
 				<OutlineText>UI scale</OutlineText>

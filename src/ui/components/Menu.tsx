@@ -52,7 +52,7 @@ export interface MenuItemProps extends JSX.HTMLAttributes<HTMLDivElement> {
 	menu: MenuDir
 }
 
-export type MenuItem = (el: HTMLElement, selected: () => [MenuDir, boolean, Atom<boolean>, ('up' | 'down' | 'left' | 'right')[], boolean ] | [MenuDir, boolean, Atom<boolean>]) => void
+export type MenuItem = (el: HTMLElement, selected: () => [MenuDir, boolean, Atom<boolean>, Accessor<('up' | 'down' | 'left' | 'right')[]>, boolean ] | [MenuDir, boolean, Atom<boolean>]) => void
 declare module 'solid-js' {
 	// eslint-disable-next-line ts/no-namespace
 	namespace JSX {
@@ -68,7 +68,7 @@ export interface MenuDir {
 	setSelected: (id: string) => void
 	setSelectedRef: (el: HTMLElement) => void
 	selected: Accessor<string>
-	disabledDirections: Map<string, ('up' | 'down' | 'left' | 'right')[]>
+	disabledDirections: Map<string, Accessor<('up' | 'down' | 'left' | 'right')[]>>
 }
 export const menuItem: MenuItem = (el, init) => {
 	const id = generateUUID()
@@ -108,13 +108,13 @@ export function Menu(props: { children: Component<MenuItemProps>, inputs?: MenuI
 
 	const refs = new Map<string, HTMLElement>()
 	const inverseRefs = new Map<HTMLElement, string>()
-	const disabledDirections = new Map<string, ('up' | 'down' | 'left' | 'right')[]>()
+	const disabledDirections = new Map<string, Accessor<('up' | 'down' | 'left' | 'right')[]>>()
 	const update = () => {
 		for (const direction of ['up', 'down', 'left', 'right'] as const) {
 			if (props.inputs?.get(direction).justPressed) {
 				const selectedId = createRoot(selected)
 				const forbiddenDir = disabledDirections.get(selectedId)
-				if (forbiddenDir && forbiddenDir.includes(direction)) continue
+				if (forbiddenDir && forbiddenDir().includes(direction)) continue
 				const selectedElement = refs.get(selectedId)
 				if (selectedElement) {
 					const finder = findClosest(selectedElement, refs.values())

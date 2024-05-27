@@ -5,11 +5,13 @@ import { AdditiveBlending, Mesh, MeshBasicMaterial, SphereGeometry, Vector3 } fr
 import type { Entity } from '@/global/entity'
 import { assets, ecs, gameTweens } from '@/global/init'
 import { playSound } from '@/global/sounds'
-import { inMap } from '@/lib/hierarchy'
+import { addTag, inMap } from '@/lib/hierarchy'
 import { modelColliderBundle } from '@/lib/models'
 import { addItemToPlayer } from '@/utils/dialogHelpers'
+import { updateSave } from '@/global/save'
+import { sleep } from '@/utils/sleep'
 
-export const itemsQuery = ecs.with('item', 'position', 'model', 'itemLabel')
+export const itemsQuery = ecs.with('item', 'position', 'model').without('collecting')
 
 export const itemBundle = (item: items) => {
 	const model = assets.items[item].model.clone()
@@ -70,22 +72,30 @@ export const stopItems = () => {
 }
 
 const playerQuery = ecs.with('player', 'position', 'inventory', 'inventoryId', 'inventorySize')
-export const collectItems = () => {
+export const collectItems = (force = false) => async () => {
 	for (const player of playerQuery) {
 		for (const item of itemsQuery) {
-			if (item.position.clone().setY(0).distanceTo(player.position.clone().setY(0)) < 10) {
+			const dist = item.position.clone().setY(0).distanceTo(player.position.clone().setY(0))
+			if (dist < 10 || force) {
 				ecs.removeComponent(item, 'body')
+				if (force) await sleep(100)
 				itemsQuery.remove(item)
-				addItemToPlayer({ name: item.itemLabel, quantity: 1, recipe: item.recipe })
+				if (item.itemLabel) {
+					addItemToPlayer({ name: item.itemLabel, quantity: 1, recipe: item.recipe })
+				}
+				if (item.acorn) {
+					updateSave(s => s.acorns++)
+				}
+				addTag(item, 'collecting')
 				gameTweens.add(new Tween([0])
-					.easing(Easing.Bounce.Out)
-					.to([1], 1000).onUpdate(([i]) => {
+					.easing(Easing.Elastic.Out)
+					.to([1], dist * 100).onUpdate(([i]) => {
 						item.position.lerp({ ...player.position, y: 4 }, i)
 					}).onComplete(() => {
 						ecs.remove(item)
 					}))
-				setTimeout(() => playSound('zapsplat_multimedia_alert_action_collect_pick_up_point_or_item_79293'), 500)
-				gameTweens.add(new Tween(item.model.scale).to(new Vector3(), 1000).easing(Easing.Bounce.Out))
+				setTimeout(() => playSound('zapsplat_multimedia_alert_action_collect_pick_up_point_or_item_79293'), dist * 100 - 500)
+				gameTweens.add(new Tween(item.model.scale).to(new Vector3(), dist * 100).easing(Easing.Bounce.Out))
 			}
 		}
 	}

@@ -176,6 +176,7 @@ export interface Entity {
 	// ! Items
 	item?: true
 	itemLabel?: items
+	collecting?: true
 	recipe?: items
 	popDirection?: Vector3
 	groundLevel?: number

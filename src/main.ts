@@ -18,7 +18,6 @@ import { runIf } from './lib/state'
 import { tickModifiers } from './lib/stats'
 import { transformsPlugin } from './lib/transforms'
 import { spawnGodRay } from './shaders/godrays'
-import { pickupAcorn } from './states/dungeon/acorn'
 import { applyArchingForce, detroyProjectiles, honeySplat, stepInHoney, tickPoison, tickSneeze } from './states/dungeon/attacks'
 import { applyDeathTimer, tickHitCooldown } from './states/dungeon/battle'
 import { dropBerriesOnHit } from './states/dungeon/bushes'
@@ -77,7 +76,7 @@ gameState
 		runIf(() => !openMenuState.enabled, pauseGame, interact),
 	)
 	.addPlugins(playerBehaviorPlugin, rangeEnemyBehaviorPlugin, chargingEnemyBehaviorPlugin, meleeEnemyBehaviorPlugin, beeBossBehaviorPlugin, jumpingEnemyBehaviorPlugin, basketBehaviorPlugin)
-	.onUpdate(collectItems, touchItem, talkToNPC, turnNPCHead, stopItems, pickupAcorn, dropBerriesOnHit, updateWeaponArc)
+	.onUpdate(collectItems(), touchItem, talkToNPC, turnNPCHead, stopItems, dropBerriesOnHit, updateWeaponArc)
 	.onPostUpdate(renderGame, rotateStun)
 	.enable()
 mainMenuState

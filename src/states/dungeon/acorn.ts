@@ -2,13 +2,12 @@ import { RigidBodyDesc } from '@dimforge/rapier3d-compat'
 import { between } from 'randomish'
 import type { Object3D, Object3DEventMap } from 'three'
 import { Vector3 } from 'three'
+import type { Entity } from '@/global/entity'
 import { assets, ecs } from '@/global/init'
 import { playSound } from '@/global/sounds'
+import { inMap } from '@/lib/hierarchy'
 import { getSize } from '@/lib/models'
 import { sleep } from '@/utils/sleep'
-import type { Entity } from '@/global/entity'
-import { inMap } from '@/lib/hierarchy'
-import { updateSave } from '@/global/save'
 
 export const spawnBouncyItems = (entity: Entity, itemModel: Object3D<Object3DEventMap>) => async (amount: number, position: Vector3) => {
 	const size = getSize(itemModel)
@@ -33,16 +32,3 @@ export const spawnBouncyItems = (entity: Entity, itemModel: Object3D<Object3DEve
 }
 
 export const spawnAcorns = spawnBouncyItems({ acorn: true }, assets.items.acorn.model)
-const acornQuery = ecs.with('position', 'acorn')
-const playerQuery = ecs.with('player', 'position')
-export const pickupAcorn = () => {
-	for (const player of playerQuery) {
-		for (const acorn of acornQuery) {
-			if (player.position.distanceTo(acorn.position) < 5) {
-				ecs.remove(acorn)
-				playSound('zapsplat_multimedia_alert_action_collect_pick_up_point_or_item_79293')
-				updateSave(s => s.acorns++)
-			}
-		}
-	}
-}

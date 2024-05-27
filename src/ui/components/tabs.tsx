@@ -66,10 +66,9 @@ export const Tabs = <T extends string,>(props: TabsProps<T>) => {
 										props.selectedTab(tab)
 									}
 								})
-
 								return (
 									<div
-										use:menuItem={[props.menu, isSelected(), selected]}
+										use:menuItem={[props.menu, isSelected(), selected, () => isSelected() ? [] : ['down', 'up'], false]}
 										ref={el => tabsRefs[i()] = el}
 									>
 										{props.children(tab, selected())}
