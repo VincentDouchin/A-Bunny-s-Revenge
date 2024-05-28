@@ -50,8 +50,8 @@ const changePixelation = (pixelation: boolean) => {
 }
 export const DebugUi = () => {
 	const [showUi, setShowUi] = createSignal(false)
-	const growCrops = () => {
-		campState.enable({ previousState: 'dungeon' })
+	const growCrops = async () => {
+		await updateSave(s => s.playerPosition = [0, 0, 0])
 	}
 	const destroyCrops = () => {
 		updateSave((s) => {
@@ -278,7 +278,7 @@ export const DebugUi = () => {
 					<button classList={{ selected: !dayToNight() }} onClick={() => dayTime.dayToNight = false}>Night to day</button>
 				</div>
 				<div style={{ display: 'flex', gap: '1rem', margin: '1rem', width: '20rem' }}>
-					<button onClick={growCrops}>Grow crops</button>
+					<button onClick={growCrops}>Reset player position</button>
 					<button onClick={destroyCrops}>Destroy crops</button>
 					<button onClick={reset}>Reset Save</button>
 					<button classList={{ selected: debugOptions.attackInFarm() }} onClick={enableAttackAnimations}>
