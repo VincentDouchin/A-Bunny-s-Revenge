@@ -204,7 +204,7 @@ export const leaveHouse = async () => {
 		await house.houseAnimator.playClamped('DoorOpen')
 		await movePlayerTo(new Vector3(0, 0, 50).applyQuaternion(house.rotation).add(house.position))
 		cutSceneState.disable()
-		await sleep(500)
+		await sleep(1000)
 		await house.houseAnimator.playClamped('DoorClose')
 		setSensor(houseQuery, false)
 		setSensor(doorQuery, false)

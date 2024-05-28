@@ -280,6 +280,16 @@ export const selectMainMenu = () => {
 				selectOption(offset => mainMenu.menuTexture(undefined, offset)).then(() => continueGame([mainMenu]))
 			}
 		}
+		if (mainMenu.menuInputs.get('validate').justPressed) {
+			if (mainMenu.menuTexture() === 'New Game') {
+				selectOption(offset => mainMenu.menuTexture(undefined, offset))
+					.then(() => {
+						resetSave().then(() => {
+							continueGame([mainMenu])
+						})
+					})
+			}
+		}
 	}
 }
 const mainMenuButtonsQuery = ecs.with('model', 'menuButton')
