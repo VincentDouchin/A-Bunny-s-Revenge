@@ -1,6 +1,6 @@
 import { For, Show, createSignal, onCleanup, onMount } from 'solid-js'
 import type { ShaderMaterial } from 'three'
-import { Color, Mesh, OrthographicCamera, PerspectiveCamera } from 'three'
+import { Color, Mesh, OrthographicCamera, PerspectiveCamera, Quaternion, Vector3 } from 'three'
 import atom from 'solid-use/atom'
 import { LevelEditor } from './LevelEditor'
 import { debugOptions } from './debugState'
@@ -20,6 +20,7 @@ import { useLocalStorage } from '@/utils/useLocalStorage'
 import { RapierDebugRenderer } from '@/lib/debugRenderer'
 import { encounters } from '@/states/dungeon/encounters'
 import { recipes } from '@/constants/recipes'
+import { playerBundle } from '@/states/game/spawnPlayer'
 
 const rendererQuery = ecs.with('renderer', 'scene', 'renderGroup').where(e => e.renderGroup === RenderGroup.Game)
 
@@ -50,8 +51,16 @@ const changePixelation = (pixelation: boolean) => {
 }
 export const DebugUi = () => {
 	const [showUi, setShowUi] = createSignal(false)
-	const growCrops = async () => {
-		await updateSave(s => s.playerPosition = [0, 0, 0])
+	const centerPlayer = async () => {
+		for (const player of ecs.with('player')) {
+			ecs.remove(player)
+		}
+		ecs.add({
+			...playerBundle(10, true, null),
+			position: new Vector3(),
+			rotation: new Quaternion(),
+			targetRotation: new Quaternion(),
+		})
 	}
 	const destroyCrops = () => {
 		updateSave((s) => {
@@ -278,7 +287,7 @@ export const DebugUi = () => {
 					<button classList={{ selected: !dayToNight() }} onClick={() => dayTime.dayToNight = false}>Night to day</button>
 				</div>
 				<div style={{ display: 'flex', gap: '1rem', margin: '1rem', width: '20rem' }}>
-					<button onClick={growCrops}>Reset player position</button>
+					<button onClick={centerPlayer}>center player</button>
 					<button onClick={destroyCrops}>Destroy crops</button>
 					<button onClick={reset}>Reset Save</button>
 					<button classList={{ selected: debugOptions.attackInFarm() }} onClick={enableAttackAnimations}>
