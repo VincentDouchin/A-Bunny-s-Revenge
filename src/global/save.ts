@@ -30,6 +30,7 @@ export interface SaveData {
 		disableShadows: boolean
 		lockCamera: boolean
 		uiScale: number
+		difficulty: 'normal' | 'easy'
 	}
 	unlockedRecipes: items[]
 	unlockedPaths: number
@@ -60,6 +61,7 @@ const blankSave = (): SaveData => ({
 		disableShadows: true,
 		lockCamera: false,
 		uiScale: 10,
+		difficulty: 'normal',
 	},
 	unlockedRecipes: [],
 	unlockedPaths: 1,

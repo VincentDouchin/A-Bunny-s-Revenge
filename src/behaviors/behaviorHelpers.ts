@@ -5,6 +5,7 @@ import { params } from '@/global/context'
 import type { Entity } from '@/global/entity'
 import { time } from '@/global/init'
 import { pausedState } from '@/global/states'
+import { save } from '@/global/save'
 
 export const getMovementForce = ({ movementForce, speed, targetMovementForce }: With<Entity, 'movementForce' | 'speed' >) => {
 	const targetForce = movementForce.clone().multiplyScalar(speed.value * params.speedUp * time.delta / 1000)
@@ -33,5 +34,12 @@ export const applyRotate = (entity: With<Entity, 'rotation' | 'targetRotation'>,
 	entity.targetRotation.setFromAxisAngle(new Vector3(0, 1, 0), Math.atan2(force.x, force.z))
 }
 export const takeDamage = (entity: With<Entity, 'currentHealth'>, damage: number) => {
+	if (save.settings.difficulty === 'easy') {
+		if (entity.player) {
+			damage *= 0.5
+		} else {
+			damage *= 2
+		}
+	}
 	entity.currentHealth = Math.max(0, entity.currentHealth - damage)
 }

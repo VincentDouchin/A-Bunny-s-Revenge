@@ -8,7 +8,7 @@ import { behaviorPlugin } from '../lib/behaviors'
 import { projectileAttack } from '../states/dungeon/attacks'
 import { calculateDamage, flash } from '../states/dungeon/battle'
 import { stunBundle } from '../states/dungeon/stun'
-import { applyMove, applyRotate, getMovementForce } from './behaviorHelpers'
+import { applyMove, applyRotate, getMovementForce, takeDamage } from './behaviorHelpers'
 import { sleep } from '@/utils/sleep'
 import { impact } from '@/particles/impact'
 import { dash } from '@/particles/dashParticles'
@@ -155,7 +155,7 @@ const hit: EnemyState = {
 			playSound(['Hit_Metal_on_flesh', 'Hit_Metal_on_leather', 'Hit_Wood_on_flesh', 'Hit_Wood_on_leather'])
 			// ! damage
 			const [damage, crit] = calculateDamage(player)
-			e.currentHealth -= damage
+			takeDamage(e, damage)
 			ecs.update(e, { emitter: impact() })
 			spawnDamageNumber(damage, e, crit)
 			// ! knockback

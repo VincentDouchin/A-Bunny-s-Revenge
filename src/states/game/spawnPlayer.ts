@@ -63,7 +63,7 @@ export const playerBundle = (health: number, addHealth: boolean, weapon: weapons
 		...inMap(),
 		cameratarget: true,
 		faction: Faction.Player,
-		sensorDesc: ColliderDesc.cuboid(2, 2, 2).setTranslation(0, 1, 5).setSensor(true).setMass(0).setActiveCollisionTypes(ActiveCollisionTypes.ALL),
+		sensorDesc: ColliderDesc.cuboid(3, 3, 3).setTranslation(0, 1.5, 5).setSensor(true).setMass(0).setActiveCollisionTypes(ActiveCollisionTypes.ALL),
 		player: true,
 		movementForce: new Vector3(),
 		targetMovementForce: new Vector3(),

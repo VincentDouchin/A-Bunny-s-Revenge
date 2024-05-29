@@ -1,6 +1,6 @@
 import VolumeOn from '@assets/icons/volume-high-solid.svg'
 import VolumeOff from '@assets/icons/volume-xmark-solid.svg'
-import { For, Show, createMemo, createSignal } from 'solid-js'
+import { For, Show, createEffect, createMemo, createSignal } from 'solid-js'
 import { css } from 'solid-styled'
 import atom from 'solid-use/atom'
 import { type MenuDir, menuItem } from './components/Menu'
@@ -72,6 +72,12 @@ export const Settings = (props: { menu: MenuDir }) => {
 				setUiScale(Math.min(uiScale() + 1, 15))
 			}
 		}
+	})
+	// ! DIFFICULTY
+	const difficultySelected = atom(false)
+	const difficulty = atom<'normal' | 'easy'>(save.settings.difficulty ?? 'normal')
+	createEffect(() => {
+		updateSave(s => s.settings.difficulty = difficulty())
 	})
 	css/* css */`
 		.settings-container{
@@ -177,9 +183,7 @@ export const Settings = (props: { menu: MenuDir }) => {
 					class={fullscreenSelected() ? 'selected' : 'unselected'}
 					onClick={toggleFullscreen}
 				>
-					<OutlineText>
-						Auto fullscreen
-					</OutlineText>
+					<OutlineText>Auto fullscreen</OutlineText>
 				</div>
 				<CheckBox value={fullscreen} onClick={toggleFullscreen}></CheckBox>
 			</Show>
@@ -238,7 +242,19 @@ export const Settings = (props: { menu: MenuDir }) => {
 				</input>
 				<OutlineText>{String(Math.min(uiScale() / 10))}</OutlineText>
 			</div>
+			<div
+				use:menuItem={[props.menu, false, difficultySelected, () => ['left', 'right'], true]}
+				class={difficultySelected() ? 'selected' : 'unselected'}
+				onClick={() => difficulty(difficulty() === 'easy' ? 'normal' : 'easy')}
+			>
+				<OutlineText>Difficulty</OutlineText>
 
+			</div>
+			<SwitchButtons
+				options={['easy', 'normal']}
+				value={difficulty}
+				setValue={difficulty}
+			/>
 		</div>
 	)
 }
