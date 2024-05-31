@@ -43,8 +43,24 @@ export const stopOnLosingFocus = () => {
 			app.start()
 		}
 	}
+	const blurListener = () => {
+		app.stop()
+		time.stop()
+		Howler.mute(true)
+	}
+	const focusListener = () => {
+		time.start()
+		app.start()
+		Howler.mute(false)
+	}
 	document.addEventListener('visibilitychange', listener)
-	return () => document.removeEventListener('visibilitychange', listener)
+	window.addEventListener('blur', blurListener)
+	window.addEventListener('focus', focusListener)
+	return () => {
+		document.removeEventListener('visibilitychange', listener)
+		window.removeEventListener('blur', blurListener)
+		window.removeEventListener('focus', focusListener)
+	}
 }
 
 export const disablePortrait = () => {
