@@ -105,7 +105,7 @@ export const OvenMinigameUi = ({ player }: FarmUiProps) => {
 						}
 						setBar(x => x + 25 * time.delta / 1000)
 						if (bar() < target() + heatHeight() / 2 && bar() > target() - heatHeight() / 2) {
-							setProgress(x => Math.min(100, x + 20 * time.delta / 1000 * heat() / 100))
+							setProgress(x => Math.min(100, x + 20 * time.delta / 1000))
 							setHeat(x => Math.min(100, x + 5 * time.delta / 1000))
 						} else {
 							setHeat(x => Math.max(0, x - 15 * time.delta / 1000))
@@ -266,7 +266,7 @@ export const OvenMinigameUi = ({ player }: FarmUiProps) => {
 							<div class="relative">
 								<Show when={output()}>
 									{output => (
-										<div style={{ position: 'absolute', bottom: 'calc(100% + 2rem)' }}>
+										<div class="output" style={{ position: 'absolute', bottom: 'calc(100% + 2rem)', transform: 'translate(-50%)', left: '50%' }}>
 											<ItemDisplay item={output()}></ItemDisplay>
 										</div>
 									)}

@@ -204,10 +204,9 @@ export const HealthUi = (props: { player: With<Entity, 'maxHealth' | 'currentHea
 		background:var(--black-transparent);
 	}
 	.watering{
-		width: 90%;
-		height: 90%;
-		z-index:1;
-		color:white;
+		font-size: 3rem;
+		z-index: 1;
+		fill: white;
 	}
 	.water-overlay{
 		background: #36c5f4;

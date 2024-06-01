@@ -146,6 +146,12 @@
 				"settings": {
 					"additionalProperties": false,
 					"properties": {
+						"ambianceMute": {
+							"type": "boolean"
+						},
+						"ambianceVolume": {
+							"type": "number"
+						},
 						"controls": {
 							"enum": [
 								"mouse",
@@ -153,17 +159,45 @@
 							],
 							"type": "string"
 						},
+						"difficulty": {
+							"enum": [
+								"normal",
+								"easy"
+							],
+							"type": "string"
+						},
+						"disableShadows": {
+							"type": "boolean"
+						},
 						"fullscreen": {
 							"type": [
 								"boolean",
 								"null"
 							]
 						},
+						"lockCamera": {
+							"type": "boolean"
+						},
+						"musicMute": {
+							"type": "boolean"
+						},
+						"musicVolume": {
+							"type": "number"
+						},
 						"mute": {
 							"type": "boolean"
 						},
 						"showControls": {
 							"type": "boolean"
+						},
+						"soundEffectsMute": {
+							"type": "boolean"
+						},
+						"soundEffectsVolume": {
+							"type": "number"
+						},
+						"uiScale": {
+							"type": "number"
 						},
 						"volume": {
 							"type": "number"
@@ -174,7 +208,17 @@
 						"mute",
 						"fullscreen",
 						"controls",
-						"showControls"
+						"showControls",
+						"musicVolume",
+						"musicMute",
+						"ambianceVolume",
+						"ambianceMute",
+						"soundEffectsVolume",
+						"soundEffectsMute",
+						"disableShadows",
+						"lockCamera",
+						"uiScale",
+						"difficulty"
 					],
 					"type": "object"
 				},
@@ -260,6 +304,7 @@
 				"tomato",
 				"tomato_seeds",
 				"tomato_soup",
+				"trout",
 				"wheat",
 				"wheat_seeds"
 			],
