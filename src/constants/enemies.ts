@@ -57,7 +57,7 @@ export const enemyData: { [k in enemy]: Enemy<k> } = {
 		scale: 10,
 		speed: 1,
 		boss: true,
-		drops: [],
+		drops: [{ name: 'recipe', quantity: 1, recipe: 'hummus', rarity: Rarity.Always }],
 		behavior: 'boss',
 		attackStyle: EnemyAttackStyle.BeeBoss,
 		animationMap: {

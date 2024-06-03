@@ -15,6 +15,7 @@ import type { State } from '@/lib/state'
 import { Timer } from '@/lib/timer'
 import { getWorldPosition } from '@/lib/transforms'
 import { range } from '@/utils/mapFunctions'
+import { addItemToPlayer } from '@/utils/dialogHelpers'
 
 const fishingPoleBundle = () => {
 	const poleModel = assets.models.fishing_pole.scene.clone()
@@ -39,8 +40,8 @@ export const stopFishing = (force: boolean = false) => () => {
 				bobber.body?.setBodyType(RigidBodyType.Dynamic, true)
 				ecs.reindex(bobber)
 				if (force) {
-					const fish = assets.items.trout.model.clone()
-					fish.scale.setScalar(0.1)
+					const fish = assets.items.redSnapper.model.clone()
+					fish.scale.setScalar(4)
 					fish.position.y -= 3
 					fish.rotateX(-Math.PI / 2)
 					bobber.model?.add(fish)
@@ -52,6 +53,7 @@ export const stopFishing = (force: boolean = false) => () => {
 					ecs.removeComponent(player.fishingPole, 'bobber')
 					player.fishingPole.fishingLine?.removeFromParent()
 					ecs.removeComponent(player.fishingPole, 'fishingLine')
+					addItemToPlayer({ name: 'redSnapper', quantity: 1 })
 					for (const fishing of fishingQuery) {
 						ecs.removeComponent(fishing, 'menuType')
 					}

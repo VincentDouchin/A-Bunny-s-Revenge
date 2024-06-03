@@ -2,10 +2,11 @@ import { ColliderDesc, RigidBodyDesc } from '@dimforge/rapier3d-compat'
 import { Easing, Tween } from '@tweenjs/tween.js'
 import { Vector3 } from 'three'
 import { clone } from 'three/examples/jsm/utils/SkeletonUtils'
-import { enableBasketUi } from '../game/spawnBasket'
 import { collectItems } from '../game/items'
+import { enableBasketUi } from '../game/spawnBasket'
 import { RoomType } from './generateDungeon'
-import { chestLootPool, dropBundle } from './lootPool'
+import { dropBundle, lootPool } from './lootPool'
+import { chestLoot } from '@/constants/chestLoot'
 import { Animator } from '@/global/animator'
 import { Faction } from '@/global/entity'
 import { assets, ecs, gameTweens } from '@/global/init'
@@ -18,9 +19,11 @@ import { sleep } from '@/utils/sleep'
 
 export const lootPlayerQuery = ecs.with('player', 'lootQuantity', 'lootChance')
 
-export const spawnChest = (dungeonLevel: number, boss: boolean) => {
+export const spawnChest = (dungeonLevel: number) => {
 	for (const player of lootPlayerQuery) {
-		const items = chestLootPool(dungeonLevel, boss, player)
+		const pool = chestLoot.find(lootPool => lootPool.level === dungeonLevel)
+		if (!pool) throw new Error(`lootpool not found for level ${dungeonLevel}`)
+		const items = lootPool(pool.items, player, pool.quantity)
 		if (items.length === 0) return
 		const chest = clone(assets.models.Chest.scene)
 		chest.scale.setScalar(0)
@@ -59,7 +62,7 @@ const enemiesQuery = ecs.with('faction').where(({ faction }) => faction === Fact
 const chestQuery = ecs.with('chestAnimator')
 export const endBattleSpawnChest: System<DungeonRessources> = (ressources) => {
 	if (enemiesQuery.size === 0 && chestQuery.size === 0 && [RoomType.Battle, RoomType.Boss, RoomType.Entrance].includes(ressources.dungeon.type) && !ressources.dungeon.chest) {
-		spawnChest(ressources.dungeonLevel, ressources.dungeon.type === RoomType.Boss)
+		spawnChest(ressources.dungeonLevel)
 		ressources.dungeon.chest = true
 		enableBasketUi()
 		setTimeout(() =>	collectItems(true)(), 2000)

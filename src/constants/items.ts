@@ -26,12 +26,6 @@ export interface ItemData {
 		modifiers: Modifier<any>[]
 	}
 	'ingredient'?: true
-	'drop'?: {
-		rarity: Rarity
-		level: 0 | 1 | 2 | 3
-		recipe?: true
-		boss?: true
-	}
 	'key item'?: true
 	'price'?: number
 }
@@ -41,8 +35,8 @@ export const itemsData: Record<items, ItemData> = {
 		name: 'Acorn',
 	},
 	// ! Ingredients
-	trout: {
-		name: 'Trout',
+	redSnapper: {
+		name: 'Red snapper',
 		ingredient: true,
 	},
 	haricot: {
@@ -121,34 +115,18 @@ export const itemsData: Record<items, ItemData> = {
 	carrot_seeds: {
 		name: 'Carrot seed',
 		seed: 'carrot',
-		drop: {
-			rarity: Rarity.Common,
-			level: 0,
-		},
 	},
 	beet_seeds: {
 		name: 'Beet seed',
 		seed: 'beet',
-		drop: {
-			rarity: Rarity.Common,
-			level: 0,
-		},
 	},
 	tomato_seeds: {
 		name: 'Tomato seeds',
 		seed: 'tomato',
-		drop: {
-			rarity: Rarity.Common,
-			level: 0,
-		},
 	},
 	lettuce_seeds: {
 		name: 'Lettuce seeds',
 		seed: 'lettuce',
-		drop: {
-			rarity: Rarity.Common,
-			level: 0,
-		},
 	},
 	pumpkin_seeds: {
 		name: 'Pumpkin seeds',
@@ -158,27 +136,16 @@ export const itemsData: Record<items, ItemData> = {
 	wheat_seeds: {
 		name: 'Wheat seeds',
 		seed: 'wheat',
-		drop: {
-			rarity: Rarity.Common,
-			level: 1,
-		},
 	},
 	// ! Chest Loot
 	egg: {
 		name: 'Egg',
 		ingredient: true,
-		drop: {
-			level: 0,
-			rarity: Rarity.Common,
-		},
+
 	},
 	cinnamon: {
 		name: 'Cinnamon',
 		ingredient: true,
-		drop: {
-			level: 0,
-			rarity: Rarity.Rare,
-		},
 		price: 10,
 	},
 	// ! Meals
@@ -219,11 +186,6 @@ export const itemsData: Record<items, ItemData> = {
 				createModifier('carrot_soup', 'lootQuantity', 1, ModStage.Base, ModType.Add, true),
 			],
 		},
-		drop: {
-			rarity: Rarity.Common,
-			level: 0,
-			recipe: true,
-		},
 
 	},
 	honey_glazed_carrot: {
@@ -235,11 +197,7 @@ export const itemsData: Record<items, ItemData> = {
 				createModifier('honey_glazed_carrot', 'maxHealth', 1, ModStage.Total, ModType.Add, true),
 			],
 		},
-		drop: {
-			rarity: Rarity.Common,
-			level: 0,
-			recipe: true,
-		},
+
 	},
 	beetroot_salad: {
 		name: 'Beetroot Salad',
@@ -259,11 +217,7 @@ export const itemsData: Record<items, ItemData> = {
 				createModifier('ham_honey', 'maxHealth', 3, ModStage.Base, ModType.Add, true),
 			],
 		},
-		drop: {
-			rarity: Rarity.Rare,
-			level: 0,
-			recipe: true,
-		},
+
 	},
 	slime_bread: {
 		name: 'Slime Bread',
@@ -272,11 +226,6 @@ export const itemsData: Record<items, ItemData> = {
 			modifiers: [
 				createModifier('slime_dumpling', 'maxHealth', 1, ModStage.Base, ModType.Add, true),
 			],
-		},
-		drop: {
-			rarity: Rarity.Common,
-			level: 0,
-			recipe: true,
 		},
 	},
 	slime_dumpling: {
@@ -287,11 +236,6 @@ export const itemsData: Record<items, ItemData> = {
 				createModifier('slime_dumpling', 'strength', 0.5, ModStage.Base, ModType.Add, true),
 				createModifier('slime_dumpling', 'maxHealth', -2, ModStage.Base, ModType.Add, true),
 			],
-		},
-		drop: {
-			rarity: Rarity.Common,
-			level: 0,
-			recipe: true,
 		},
 	},
 	carrot_cake: {
@@ -349,12 +293,6 @@ export const itemsData: Record<items, ItemData> = {
 				createModifier('pumpkin_bowl', 'lootQuantity', 1, ModStage.Base, ModType.Add, true),
 				createModifier('pumpkin_bowl', 'lootChance', 0.5, ModStage.Base, ModType.Percent, true),
 			],
-		},
-		drop: {
-			rarity: Rarity.Rare,
-			level: 0,
-			boss: true,
-			recipe: true,
 		},
 	},
 	magic_bean: {
