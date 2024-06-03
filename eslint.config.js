@@ -17,5 +17,5 @@ export default antfu({
 		html: true,
 	},
 }, {
-	ignores: ['dev-dist', 'assets', 'node-modules', 'dist', 'public'],
+	ignores: ['dev-dist', 'assets', 'node-modules', 'dist', 'public', 'src-tauri'],
 })

@@ -19,16 +19,7 @@ const seedQuery = useQuery(ecs.with('menuType', 'interactionContainer', 'plantab
 const playerMenuInputs = ecs.with('player', 'menuInputs')
 export const SeedUi = () => {
 	const context = useGame()
-	const player = context!.player()
-	const seeds = ui.sync(() => player.inventory.filter(item => item && itemsData[item.name].seed).filter(Boolean))
-	const inputs = ui.sync(() => playerMenuInputs.first?.menuInputs)
-	const chooseSeed = (seed: Item, entity: Entity) => {
-		const crop = itemsData[seed.name].seed
-		if (crop) {
-			updateSave(s => s.selectedSeed = crop)
-			ecs.removeComponent(entity, 'menuType')
-		}
-	}
+
 	css/* css */`
 	.seeds{
 		display: flex;
@@ -50,54 +41,68 @@ export const SeedUi = () => {
 	}
 	`
 	return (
-		<Show when={inputs()}>
-			{inputs => (
-				<Menu inputs={inputs()}>
-					{({ menu }) => {
-						return (
-							<For each={seedQuery()}>
-								{(entity) => {
-									const [visible, setVisible] = createSignal(false)
-									onMount(() => setTimeout(() => setVisible(true), 100))
-									ui.updateSync(() => {
-										if (inputs().get('cancel').justReleased) {
-											ecs.removeComponent(entity, 'menuType')
-										}
-									})
+		<Show when={context?.player()}>
+			{(player) => {
+				const seeds = ui.sync(() => player().inventory.filter(item => item && itemsData[item.name].seed).filter(Boolean))
+				const inputs = ui.sync(() => playerMenuInputs.first?.menuInputs)
+				const chooseSeed = (seed: Item, entity: Entity) => {
+					const crop = itemsData[seed.name].seed
+					if (crop) {
+						updateSave(s => s.selectedSeed = crop)
+						ecs.removeComponent(entity, 'menuType')
+					}
+				}
+				return (
+					<Show when={inputs()}>
+						{inputs => (
+							<Menu inputs={inputs()}>
+								{({ menu }) => {
 									return (
-										<Portal mount={entity.interactionContainer.element}>
-											<Transition name="popup">
-												<Show when={visible()}>
-													<GoldContainer padding="0.5rem 1rem">
-														<div class="seeds">
-															<Show when={!context?.usingTouch()}>
-																<div class="input-icon">
-																	<InputIcon input={player.playerControls.get('primary')} />
-																	<OutlineText>Select</OutlineText>
-																</div>
+										<For each={seedQuery()}>
+											{(entity) => {
+												const [visible, setVisible] = createSignal(false)
+												onMount(() => setTimeout(() => setVisible(true), 100))
+												ui.updateSync(() => {
+													if (inputs().get('cancel').justReleased) {
+														ecs.removeComponent(entity, 'menuType')
+													}
+												})
+												return (
+													<Portal mount={entity.interactionContainer.element}>
+														<Transition name="popup">
+															<Show when={visible()}>
+																<GoldContainer padding="0.5rem 1rem">
+																	<div class="seeds">
+																		<Show when={!context?.usingTouch()}>
+																			<div class="input-icon">
+																				<InputIcon input={player().playerControls.get('primary')} />
+																				<OutlineText>Select</OutlineText>
+																			</div>
+																		</Show>
+																		<For each={seeds()}>
+																			{(seed, i) => {
+																				const selected = atom(false)
+																				return (
+																					<div use:menuItem={[menu, i() === 0, selected]} onClick={() => chooseSeed(seed, entity)} class="seed">
+																						<ItemDisplay item={seed} selected={selected}></ItemDisplay>
+																					</div>
+																				)
+																			}}
+																		</For>
+																	</div>
+																</GoldContainer>
 															</Show>
-															<For each={seeds()}>
-																{(seed, i) => {
-																	const selected = atom(false)
-																	return (
-																		<div use:menuItem={[menu, i() === 0, selected]} onClick={() => chooseSeed(seed, entity)} class="seed">
-																			<ItemDisplay item={seed} selected={selected}></ItemDisplay>
-																		</div>
-																	)
-																}}
-															</For>
-														</div>
-													</GoldContainer>
-												</Show>
-											</Transition>
-										</Portal>
+														</Transition>
+													</Portal>
+												)
+											}}
+										</For>
 									)
 								}}
-							</For>
-						)
-					}}
-				</Menu>
-			)}
+							</Menu>
+						)}
+					</Show>
+				) }}
 		</Show>
 	)
 }
