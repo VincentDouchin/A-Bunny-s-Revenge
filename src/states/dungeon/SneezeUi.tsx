@@ -1,11 +1,13 @@
-import type { With } from 'miniplex'
 import { For, Portal, Show } from 'solid-js/web'
 import { css } from 'solid-styled'
-import type { ComponentsOfType, Entity } from '@/global/entity'
+import type { ComponentsOfType } from '@/global/entity'
 import { ui } from '@/global/init'
 import type { Timer } from '@/lib/timer'
+import { useGame } from '@/ui/store'
 
-export const SneezeUi = ({ player }: { player: With<Entity, 'sneeze' | 'poisoned' | 'debuffsContainer'> }) => {
+export const SneezeUi = () => {
+	const context = useGame()!
+	const player = context.player()
 	const affect = [
 		['sneeze', '#e8d282'],
 		['poisoned', '#9DE64E'],

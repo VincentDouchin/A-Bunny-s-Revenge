@@ -12,12 +12,13 @@ import { ecs, gameTweens, time, ui } from '@/global/init'
 import { cameraQuery } from '@/global/rendering'
 import { addTag } from '@/lib/hierarchy'
 import { getWorldPosition } from '@/lib/transforms'
-import { useQuery } from '@/ui/store'
-import type { FarmUiProps } from '@/ui/types'
+import { useGame, useQuery } from '@/ui/store'
 
 const boardQuery = useQuery(ecs.with('menuType', 'recipesQueued', 'position', 'rotation', 'group', 'minigameContainer').where(({ menuType }) => menuType === MenuType.BenchGame))
 
-export const CuttingBoardMinigameUi = ({ player }: FarmUiProps) => {
+export const CuttingBoardMinigameUi = () => {
+	const context = useGame()
+	const player = context!.player()
 	return (
 		<For each={boardQuery()}>
 			{(board) => {

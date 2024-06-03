@@ -20,16 +20,16 @@ import { addTag } from '@/lib/hierarchy'
 import { getWorldPosition } from '@/lib/transforms'
 import { fireParticles } from '@/particles/fireParticles'
 import { smoke } from '@/particles/smoke'
+import { TouchButton } from '@/ui/TouchControls'
 import { OutlineText } from '@/ui/components/styledComponents'
 import { useGame, useQuery } from '@/ui/store'
-import type { FarmUiProps } from '@/ui/types'
 import { sleep } from '@/utils/sleep'
-import { TouchButton } from '@/ui/TouchControls'
 
 export const ovenQuery = useQuery(ecs.with('menuType', 'recipesQueued', 'ovenAnimator', 'position').where(({ menuType }) => menuType === MenuType.OvenMinigame))
 
-export const OvenMinigameUi = ({ player }: FarmUiProps) => {
+export const OvenMinigameUi = () => {
 	const context = useGame()
+	const player = context!.player()
 	return (
 		<For each={ovenQuery()}>
 			{(oven) => {

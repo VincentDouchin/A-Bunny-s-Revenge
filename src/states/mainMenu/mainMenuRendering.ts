@@ -2,7 +2,7 @@ import { Easing, Tween } from '@tweenjs/tween.js'
 import type { MeshStandardMaterial } from 'three'
 import { CanvasTexture, Group, Mesh, MeshBasicMaterial, PerspectiveCamera, PlaneGeometry, Raycaster, Scene, Vector2, Vector3 } from 'three'
 
-import { enableBasketUi, spawnBasket } from '../game/spawnBasket'
+import { enableBasketUi } from '../game/spawnBasket'
 import { PLAYER_DEFAULT_HEALTH, playerBundle } from '../game/spawnPlayer'
 import { updateCameraZoom } from '@/global/camera'
 import { params } from '@/global/context'
@@ -338,7 +338,6 @@ export const spawnPlayerContinueGame = async () => {
 			rotation: house.rotation.clone(),
 			targetRotation: house.rotation.clone(),
 		})
-		spawnBasket()
 
 		enableBasketUi()
 		await leaveHouse()

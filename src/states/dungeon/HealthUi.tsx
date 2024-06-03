@@ -1,18 +1,17 @@
-import type { With } from 'miniplex'
+import Drop from '@assets/icons/droplet-solid.svg'
 import type { Accessor } from 'solid-js'
 import { For, Show, createEffect, createMemo, onCleanup, onMount } from 'solid-js'
 import { css } from 'solid-styled'
 import { Transition } from 'solid-transition-group'
 import atom from 'solid-use/atom'
-import Drop from '@assets/icons/droplet-solid.svg'
 import { cauldronQuery } from '../farm/CauldronMinigameUi'
 import { ovenQuery } from '../farm/OvenMinigameUi'
 import { range } from '@/utils/mapFunctions'
+import { useGame } from '@/ui/store'
 import { OutlineText } from '@/ui/components/styledComponents'
 import { thumbnailRenderer } from '@/lib/thumbnailRenderer'
 import { save } from '@/global/save'
 import { assets, coroutines, ui } from '@/global/init'
-import type { Entity } from '@/global/entity'
 import { itemsData } from '@/constants/items'
 
 export const MealAmount = (props: { amount: Accessor<number>, size?: 'small' | 'big', extra?: Accessor<number> }) => {
@@ -110,11 +109,13 @@ export const MealAmount = (props: { amount: Accessor<number>, size?: 'small' | '
 export const extra = atom(0)
 export const getAmountEaten = () => save.modifiers.reduce((acc, v) => acc + (itemsData[v]?.meal?.amount ?? 0), 0)
 const acornRenderer = thumbnailRenderer(64)
-export const HealthUi = (props: { player: With<Entity, 'maxHealth' | 'currentHealth'> }) => {
-	const health = ui.sync(() => `${props.player.currentHealth / props.player.maxHealth.value * 100}%`)
-	const max = ui.sync(() => Math.floor(props.player.maxHealth.value))
+export const HealthUi = () => {
+	const context = useGame()!
+	const player = context.player()
+	const health = ui.sync(() => `${player.currentHealth / player.maxHealth.value * 100}%`)
+	const max = ui.sync(() => Math.floor(player.maxHealth.value))
 	const maxWidth = createMemo(() => `${max()}rem`)
-	const current = ui.sync(() => Math.floor(props.player.currentHealth))
+	const current = ui.sync(() => Math.floor(player.currentHealth))
 	const healthDisplay = createMemo(() => `${current()} / ${max()}`)
 	const model = assets.items.acorn.model.clone()
 	model.rotateY(Math.PI / 2)
@@ -130,7 +131,7 @@ export const HealthUi = (props: { player: With<Entity, 'maxHealth' | 'currentHea
 			oldAmount = save.acorns
 		}
 	})
-	const wateringCan = ui.sync(() => props.player.wateringCan)
+	const wateringCan = ui.sync(() => player.wateringCan)
 	onCleanup(clear)
 	css/* css */`
 	.health-ui{
@@ -240,7 +241,7 @@ export const HealthUi = (props: { player: With<Entity, 'maxHealth' | 'currentHea
 					</div>
 					<Show when={wateringCan()}>
 						{(_) => {
-							const waterAmount = ui.sync(() => props.player.wateringCan?.waterAmount)
+							const waterAmount = ui.sync(() => player.wateringCan?.waterAmount)
 							return (
 								<div class="watering-container">
 									<div class="watering"><Drop /></div>

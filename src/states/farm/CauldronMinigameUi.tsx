@@ -19,12 +19,13 @@ import { addTag } from '@/lib/hierarchy'
 import { getWorldPosition } from '@/lib/transforms'
 import { cauldronSparkles } from '@/particles/cauldronSparkles'
 import { fireParticles } from '@/particles/fireParticles'
-import { useQuery } from '@/ui/store'
-import type { FarmUiProps } from '@/ui/types'
+import { useGame, useQuery } from '@/ui/store'
 import { TouchButton } from '@/ui/TouchControls'
 
 export const cauldronQuery = useQuery(ecs.with('menuType', 'interactionContainer', 'group', 'rotation', 'recipesQueued', 'spoon').where(({ menuType }) => menuType === MenuType.CauldronGame))
-export const CauldronMinigameUi = ({ player }: FarmUiProps) => {
+export const CauldronMinigameUi = () => {
+	const context = useGame()
+	const player = context!.player()
 	const cauldron = createMemo(() => cauldronQuery()?.[0])
 	return (
 		<Show when={cauldron()}>

@@ -13,12 +13,13 @@ import { InputIcon } from '@/ui/InputIcon'
 import { Menu, menuItem } from '@/ui/components/Menu'
 import { GoldContainer, OutlineText } from '@/ui/components/styledComponents'
 import { useGame, useQuery } from '@/ui/store'
-import type { FarmUiProps } from '@/ui/types'
 // eslint-disable-next-line no-unused-expressions
 menuItem
 const seedQuery = useQuery(ecs.with('menuType', 'interactionContainer', 'plantableSpot'))
 const playerMenuInputs = ecs.with('player', 'menuInputs')
-export const SeedUi = ({ player }: FarmUiProps) => {
+export const SeedUi = () => {
+	const context = useGame()
+	const player = context!.player()
 	const seeds = ui.sync(() => player.inventory.filter(item => item && itemsData[item.name].seed).filter(Boolean))
 	const inputs = ui.sync(() => playerMenuInputs.first?.menuInputs)
 	const chooseSeed = (seed: Item, entity: Entity) => {
@@ -28,7 +29,6 @@ export const SeedUi = ({ player }: FarmUiProps) => {
 			ecs.removeComponent(entity, 'menuType')
 		}
 	}
-	const context = useGame()
 	css/* css */`
 	.seeds{
 		display: flex;

@@ -85,7 +85,7 @@ export const assetPipeline = async (globPattern: string, transforms: (AssetTrans
 		configureServer(server) {
 			server.watcher.on('add', async (path, stats) => {
 				const pathParsed = transformPath(path, false)
-				if (pathParsed.folder === 'assets') return
+				if (pathParsed.folder === 'assets' || !pathParsed.full.includes('assets')) return
 				for (const transform of transforms) {
 					if (transform.canRun(pathParsed)) {
 						await transform.add(pathParsed, getStats(path, stats))
@@ -95,6 +95,7 @@ export const assetPipeline = async (globPattern: string, transforms: (AssetTrans
 			})
 			server.watcher.on('unlink', async (path) => {
 				const pathParsed = transformPath(path, false)
+				if (pathParsed.folder === 'assets' || !pathParsed.full.includes('assets')) return
 				for (const transform of transforms) {
 					if (transform.canRun(pathParsed)) {
 						await transform.remove(pathParsed)

@@ -1,17 +1,15 @@
-import type { With } from 'miniplex'
 import { For, Show, createEffect, createMemo, onCleanup, onMount } from 'solid-js'
 import { Portal } from 'solid-js/web'
 import { css } from 'solid-styled'
 import type { Atom } from 'solid-use/atom'
 import atom from 'solid-use/atom'
-import { CSS2DObject } from 'three/examples/jsm/renderers/CSS2DRenderer'
 import { Quaternion, Vector3 } from 'three'
+import { CSS2DObject } from 'three/examples/jsm/renderers/CSS2DRenderer'
 import { OutlineText } from './components/styledComponents'
-import { useQuery } from './store'
-import { ecs, ui } from '@/global/init'
-import type { Entity } from '@/global/entity'
-import { params } from '@/global/context'
+import { useGame, useQuery } from './store'
 import { soundDialog } from '@/lib/dialogSound'
+import { ecs, ui } from '@/global/init'
+import { params } from '@/global/context'
 
 export const DialogText = (props: { text: string, finished: Atom<boolean> }) => {
 	css/* css */`
@@ -81,7 +79,9 @@ export const DialogText = (props: { text: string, finished: Atom<boolean> }) => 
 }
 
 const dialogQuery = useQuery(ecs.with('dialog', 'activeDialog'))
-export const DialogUi = ({ player }: { player: With<Entity, 'playerControls' | 'position'> }) => {
+export const DialogUi = () => {
+	const context = useGame()!
+	const player = context.player()
 	css/* css */`
 	.dialog-container {
 		color: white;

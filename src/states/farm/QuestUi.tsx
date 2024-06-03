@@ -11,14 +11,15 @@ import { save } from '@/global/save'
 import { Menu, menuItem } from '@/ui/components/Menu'
 import { Modal } from '@/ui/components/Modal'
 import { GoldContainer, InventoryTitle, OutlineText } from '@/ui/components/styledComponents'
-import { useQuery } from '@/ui/store'
-import type { FarmUiProps } from '@/ui/types'
+import { useGame, useQuery } from '@/ui/store'
 import { entries } from '@/utils/mapFunctions'
 // eslint-disable-next-line no-unused-expressions
 menuItem
 const openBulletinBoardQuery = useQuery(ecs.with('menuType').where(e => e.menuType === MenuType.Quest))
 
-export const QuestUi = ({ player }: FarmUiProps) => {
+export const QuestUi = () => {
+	const context = useGame()
+	const player = context!.player()
 	return (
 		<For each={openBulletinBoardQuery()}>
 			{(board) => {

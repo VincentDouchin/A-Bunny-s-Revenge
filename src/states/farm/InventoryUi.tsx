@@ -26,9 +26,9 @@ import { Modal } from '@/ui/components/Modal'
 import { GoldContainer, InventoryTitle, OutlineText } from '@/ui/components/styledComponents'
 import { Tabs } from '@/ui/components/tabs'
 import { Settings } from '@/ui/settings'
-import type { FarmUiProps } from '@/ui/types'
 import { removeItemFromPlayer } from '@/utils/dialogHelpers'
 import { range } from '@/utils/mapFunctions'
+import { useGame } from '@/ui/store'
 // eslint-disable-next-line no-unused-expressions
 menuItem
 
@@ -336,7 +336,9 @@ const ItemCategories = <T,>({ items, setSelectedItem, menu, categories, filter, 
 	)
 }
 export const isRecipeHidden = (i: Item | null) => i?.name ? !save.unlockedRecipes.includes(i.name) : false
-export const InventoryUi = ({ player }: FarmUiProps) => {
+export const InventoryUi = () => {
+	const context = useGame()
+	const player = context!.player()
 	ui.updateSync(() => {
 		if (player?.menuInputs?.get('cancel').justReleased) {
 			ecs.removeComponent(player, 'menuType')
