@@ -1,0 +1,107 @@
+name: Build and Release Tauri Apps
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  desktop-build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v2
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v2
+        with:
+          node-version: '16'
+
+      - name: Install dependencies
+        run: npm install
+
+      - name: Build Tauri desktop app
+        run: npm run tauri build
+
+      - name: Archive desktop production artifacts
+        uses: actions/upload-artifact@v2
+        with:
+          name: tauri-desktop-build
+          path: src-tauri/target/release/bundle/
+
+      - name: Create Desktop Release
+        id: create_desktop_release
+        uses: actions/create-release@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          tag_name: ${{ github.sha }}
+          release_name: Desktop Release ${{ github.sha }}
+          draft: false
+          prerelease: false
+
+      - name: Upload Desktop Release Asset
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ steps.create_desktop_release.outputs.upload_url }}
+          asset_path: src-tauri/target/release/bundle/
+          asset_name: my-tauri-desktop-app.zip
+          asset_content_type: application/zip
+
+  android-build:
+    runs-on: ubuntu-latest
+    needs: desktop-build
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v2
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v2
+        with:
+          node-version: '16'
+
+      - name: Set up JDK
+        uses: actions/setup-java@v2
+        with:
+          distribution: zulu
+          java-version: '11'
+
+      - name: Install dependencies
+        run: npm install
+
+      - name: Build Tauri Android app
+        run: npm run tauri build
+
+      - name: Archive Android production artifacts
+        uses: actions/upload-artifact@v2
+        with:
+          name: tauri-android-build
+          path: src-tauri/target/release/bundle/android/
+
+      - name: Create Android Release
+        id: create_android_release
+        uses: actions/create-release@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          tag_name: ${{ github.sha }}
+          release_name: Android Release ${{ github.sha }}
+          draft: false
+          prerelease: false
+
+      - name: Upload Android Release Asset
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ steps.create_android_release.outputs.upload_url }}
+          asset_path: src-tauri/target/release/bundle/android/
+          asset_name: my-tauri-android-app.apk
+          asset_content_type: application/vnd.android.package-archive
