@@ -131,6 +131,7 @@ export interface Entity {
 	body?: RigidBody
 	colliderDesc?: ColliderDesc
 	collider?: Collider
+	secondaryColliders?: ColliderDesc[]
 	size?: Vector3
 	controller?: KinematicCharacterController
 	// ! Behaviors

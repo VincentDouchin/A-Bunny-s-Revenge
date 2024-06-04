@@ -33,7 +33,7 @@ export const customModels = {
 	door: doorSide,
 } as const satisfies Record<string, () => Object3D<Object3DEventMap>>
 export type customModel = keyof typeof customModels
-export const getModel = (key: ModelName) => {
+export const getModel = (key: ModelName): Object3D => {
 	if (key in customModels) {
 		// @ts-expect-error okok
 		return customModels[key]()

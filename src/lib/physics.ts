@@ -25,9 +25,14 @@ const removeColliders = () => ecs.with('collider').onEntityRemoved.subscribe((en
 const removeBodies = () => ecs.with('body').onEntityRemoved.subscribe((entity) => {
 	world.removeRigidBody(entity.body)
 })
+const addSecondaryColliders = () => ecs.with('body', 'secondaryColliders').onEntityAdded.subscribe((e) => {
+	for (const collider of e.secondaryColliders) {
+		world.createCollider(collider, e.body)
+	}
+})
 const stepWorld = () => world.step()
 export const physicsPlugin = (state: State) => {
 	state
 		.onPreUpdate(runIf(() => !pausedState.enabled, stepWorld))
-		.addSubscriber(addBodies, addColliders, removeColliders, removeBodies)
+		.addSubscriber(addBodies, addColliders, removeColliders, removeBodies, addSecondaryColliders)
 }
