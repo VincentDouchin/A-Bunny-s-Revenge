@@ -21,6 +21,15 @@ jobs:
         with:
           node-version: '16'
 
+      - name: Install Rust
+        uses: actions-rs/toolchain@v1
+        with:
+          toolchain: stable
+          target: x86_64-pc-windows-msvc
+          profile: minimal
+          override: true
+          components: rustfmt, clippy
+
       - name: Install dependencies
         run: npm install
 
