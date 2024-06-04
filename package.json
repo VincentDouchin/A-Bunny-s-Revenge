@@ -11,7 +11,8 @@
 		"generate-pwa-assets": "pwa-assets-generator --preset minimal public/logo-03.jpg",
 		"save_data_schema": "npx ts-json-schema-generator --path './src/global/save.ts' --type SaveData --tsconfig ./tsconfig.json --no-type-check --out ./src/debug/saveDataSchema.json",
 		"tauri": "tauri",
-		"android dev": "npm run tauri android dev --open"
+		"android dev": "npm run tauri android dev --open",
+		"android build": "npm run tauri android build"
 	},
 	"dependencies": {
 		"@dimforge/rapier3d-compat": "^0.12.0",

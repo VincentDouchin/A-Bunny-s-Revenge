@@ -1,0 +1,2 @@
+#!/usr/bin/env bash
+java -jar ~/Documents/software/uber-apk-signer/uber-apk-signer.jar -a ../src-tauri/gen/android/app/build/outputs/apk/universal/release --ks ~/Documents/software/uber-apk-signer/keystore.keystore --ksAlias keystore
