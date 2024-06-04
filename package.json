@@ -10,11 +10,13 @@
 		"test": "vitest",
 		"generate-pwa-assets": "pwa-assets-generator --preset minimal public/logo-03.jpg",
 		"save_data_schema": "npx ts-json-schema-generator --path './src/global/save.ts' --type SaveData --tsconfig ./tsconfig.json --no-type-check --out ./src/debug/saveDataSchema.json",
-		"tauri": "tauri"
+		"tauri": "tauri",
+		"android dev": "npm run tauri android dev --open"
 	},
 	"dependencies": {
 		"@dimforge/rapier3d-compat": "^0.12.0",
 		"@floating-ui/dom": "^1.6.5",
+		"@tauri-apps/api": "^2.0.0-beta.13",
 		"@tweenjs/tween.js": "^21.0.0",
 		"astar-typescript": "^1.2.7",
 		"fastnoise-lite": "^1.1.1",
@@ -40,7 +42,7 @@
 		"@gltf-transform/core": "^3.10.0",
 		"@gltf-transform/extensions": "^3.10.0",
 		"@gltf-transform/functions": "^3.10.0",
-		"@tauri-apps/cli": "^1.5.14",
+		"@tauri-apps/cli": "^2.0.0-beta.20",
 		"@total-typescript/ts-reset": "^0.5.1",
 		"@types/howler": "^2.2.11",
 		"@types/jsoneditor": "^9.9.5",
