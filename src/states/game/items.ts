@@ -75,27 +75,28 @@ const playerQuery = ecs.with('player', 'position', 'inventory', 'inventoryId', '
 export const collectItems = (force = false) => async () => {
 	for (const player of playerQuery) {
 		for (const item of itemsQuery) {
-			const dist = item.position.clone().setY(0).distanceTo(player.position.clone().setY(0))
-			if (dist < 10 || force) {
-				ecs.removeComponent(item, 'body')
-				if (force) await sleep(100)
-				itemsQuery.remove(item)
-				if (item.itemLabel) {
-					addItemToPlayer({ name: item.itemLabel, quantity: 1, recipe: item.recipe, health: item.health })
-				}
-				if (item.acorn) {
-					updateSave(s => s.acorns++)
-				}
-				addTag(item, 'collecting')
-				gameTweens.add(new Tween([0])
-					.easing(Easing.Elastic.Out)
-					.to([1], dist * 100).onUpdate(([i]) => {
-						item.position.lerp({ ...player.position, y: 4 }, i)
-					}).onComplete(() => {
-						ecs.remove(item)
-					}))
-				setTimeout(() => playSound('zapsplat_multimedia_alert_action_collect_pick_up_point_or_item_79293'), dist * 100 - 500)
-				gameTweens.add(new Tween(item.model.scale).to(new Vector3(), dist * 100).easing(Easing.Bounce.Out))
+			if (item) {
+				const dist = item.position.clone().setY(0).distanceTo(player.position.clone().setY(0))
+				if (dist < 10 || force) {
+					ecs.removeComponent(item, 'body')
+					if (force) await sleep(100)
+					itemsQuery.remove(item)
+					if (item.itemLabel) {
+						addItemToPlayer({ name: item.itemLabel, quantity: 1, recipe: item.recipe, health: item.health })
+					}
+					if (item.acorn) {
+						updateSave(s => s.acorns++)
+					}
+					addTag(item, 'collecting')
+					gameTweens.add(new Tween([0])
+						.easing(Easing.Elastic.Out)
+						.to([1], dist * 100).onUpdate(([i]) => {
+							item.position.lerp({ ...player.position, y: 4 }, i)
+						}).onComplete(() => {
+							ecs.remove(item)
+						}))
+					setTimeout(() => playSound('zapsplat_multimedia_alert_action_collect_pick_up_point_or_item_79293'), dist * 100 - 500)
+					gameTweens.add(new Tween(item.model.scale).to(new Vector3(), dist * 100).easing(Easing.Bounce.Out)) }
 			}
 		}
 	}
