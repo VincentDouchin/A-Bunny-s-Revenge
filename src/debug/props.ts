@@ -44,8 +44,12 @@ export const getModel = (key: ModelName): Object3D => {
 			return clone(assets[model][key].scene)
 		}
 	}
-	// @ts-expect-error okok
-	return clone(assets.models[key].scene)
+	if (key in assets.models) {
+		// @ts-expect-error okok
+		return clone(assets.models[key].scene)
+	} else {
+		throw new Error(`Coudln\'t find model ${key}`)
+	}
 }
 export interface ExtraData {
 	'door': {
