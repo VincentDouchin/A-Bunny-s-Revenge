@@ -62,7 +62,7 @@ export const spawnWeaponsChoice = () => {
 		const weaponName = weaponNames[i]
 		const stump = ecs.add({
 			model: stumpModel,
-			position: new Vector3(offsetX, 0, -20),
+			position: new Vector3(offsetX, 0, 10),
 			bodyDesc: RigidBodyDesc.fixed().lockRotations(),
 			colliderDesc: ColliderDesc.cylinder(4, 3).setActiveCollisionTypes(ActiveCollisionTypes.ALL),
 			rotation: new Quaternion().setFromAxisAngle(new Vector3(0, 1, 0), Math.random() * Math.PI * 2),

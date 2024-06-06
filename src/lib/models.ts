@@ -1,6 +1,6 @@
 import { ActiveCollisionTypes, ColliderDesc, RigidBodyDesc, RigidBodyType } from '@dimforge/rapier3d-compat'
 import type { Object3D, Object3DEventMap } from 'three'
-import { Box3, Mesh, Quaternion, Vector3 } from 'three'
+import { Box3, BufferGeometry, Mesh, Quaternion, Vector3 } from 'three'
 
 import { clone } from 'three/examples/jsm/utils/SkeletonUtils.js'
 import type { Constructor } from 'type-fest'
@@ -21,8 +21,31 @@ export const getSize = (model: Object3D<Object3DEventMap>) => {
 	boxSize.getSize(size)
 	return size
 }
+
+export const getTrimeshCollider = (node: Mesh) => {
+	const vertices = new Float32Array(node.geometry.getAttribute('position').array)
+	const indices = new Uint32Array(node.geometry.index!.array)
+	return ColliderDesc.trimesh(vertices, indices).setTranslation(...node.position.toArray())
+}
+export const getSecondaryColliders = (model: Object3D) => {
+	const secondaryColliders: ColliderDesc[] = []
+	const nodesToRemove: Object3D[] = []
+	model.traverse((node) => {
+		if (node.name.includes('collider') && node instanceof Mesh && node.geometry instanceof BufferGeometry) {
+			nodesToRemove.push(node)
+			secondaryColliders.push(getTrimeshCollider(node))
+		}
+	})
+	nodesToRemove.forEach(node => node.removeFromParent())
+	if (secondaryColliders.length > 0) {
+		return { secondaryColliders } as const satisfies Entity
+	}
+	return {}
+}
 export const getBoundingBox = (modelName: ModelName, model: Object3D<Object3DEventMap>, colliderData: CollidersData, scale: number) => {
 	const collider = colliderData[modelName]
+	const mainCollider = model.getObjectByName('mainCollider')
+
 	if (collider) {
 		const size = new Vector3()
 		if (collider.size) {
@@ -40,6 +63,16 @@ export const getBoundingBox = (modelName: ModelName, model: Object3D<Object3DEve
 				size,
 			} as const satisfies Entity
 		}
+	} else if (mainCollider instanceof Mesh && mainCollider.geometry instanceof BufferGeometry) {
+		mainCollider.removeFromParent()
+		const size = new Vector3()
+		mainCollider.geometry.computeBoundingBox()
+		mainCollider.geometry.boundingBox!.getSize(size)
+		return {
+			bodyDesc: RigidBodyDesc.fixed().lockRotations(),
+			colliderDesc: getTrimeshCollider(mainCollider),
+			size,
+		} as const satisfies Entity
 	}
 }
 export const modelColliderBundle = (model: Object3D<Object3DEventMap>, type = RigidBodyType.Dynamic, sensor = false, size?: Vector3, shape: 'ball' | 'cuboid' = 'cuboid') => {

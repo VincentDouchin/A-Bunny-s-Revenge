@@ -101,6 +101,7 @@ export const MapEditor = ({
 	}
 
 	const longClickListener = throttle(10, (event: MouseEvent) => {
+		event.preventDefault()
 		const camera = cameraQuery.first?.camera
 		if (!camera || !fakeGround) return
 

@@ -81,7 +81,7 @@ export const DialogText = (props: { text: string, finished: Atom<boolean> }) => 
 const dialogQuery = useQuery(ecs.with('dialog', 'activeDialog'))
 export const DialogUi = () => {
 	const context = useGame()!
-	const player = context.player()
+
 	css/* css */`
 	.dialog-container {
 		color: white;
@@ -111,7 +111,7 @@ export const DialogUi = () => {
 				const finished = atom(false)
 				onMount(() => {
 					if (entity.targetRotation && entity.position && entity.kayAnimator?.current === 'Idle') {
-						const rot = player.position.clone().sub(entity.position)
+						const rot = context.player().position.clone().sub(entity.position)
 						const angle = Math.atan2(rot.x, rot.z)
 						entity.targetRotation.copy(new Quaternion().setFromAxisAngle(new Vector3(0, 1, 0), angle))
 					}
@@ -122,7 +122,7 @@ export const DialogUi = () => {
 					}
 				})
 				ui.updateSync(async () => {
-					if (player.playerControls.get('primary').justReleased) {
+					if (context.player().playerControls.get('primary').justReleased) {
 						if (!entity.dialogContainer) {
 							const dialogContainer = new CSS2DObject(document.createElement('div'))
 							dialogContainer.position.y = entity.dialogHeight ?? entity.size?.y ?? 4

@@ -81,7 +81,7 @@ export const collectItems = (force = false) => async () => {
 				if (force) await sleep(100)
 				itemsQuery.remove(item)
 				if (item.itemLabel) {
-					addItemToPlayer({ name: item.itemLabel, quantity: 1, recipe: item.recipe })
+					addItemToPlayer({ name: item.itemLabel, quantity: 1, recipe: item.recipe, health: item.health })
 				}
 				if (item.acorn) {
 					updateSave(s => s.acorns++)

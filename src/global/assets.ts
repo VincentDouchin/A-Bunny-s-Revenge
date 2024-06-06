@@ -30,6 +30,7 @@ type getToonOptions = (key: string, materialName: string, name: string, node: Me
 	depthWrite?: boolean
 	isolate?: boolean
 })
+export const materials = new Map<string, Material>()
 const loadGLBAsToon = (
 	loader: (key: string) => void,
 	getOptions?: getToonOptions,
@@ -39,7 +40,7 @@ const loadGLBAsToon = (
 		loader(key)
 		return glb
 	})
-	const materials = new Map<string, Material>()
+
 	const toons = mapValues(loaded, (glb, key) => {
 		glb.scene.traverse((node) => {
 			if (node instanceof Mesh) {

@@ -2,7 +2,7 @@ import type { fruit_trees, gardenPlots, models, vegetation } from '@assets/asset
 import { ActiveCollisionTypes, ColliderDesc, RigidBodyDesc } from '@dimforge/rapier3d-compat'
 import type { With } from 'miniplex'
 import type { BufferGeometry, Object3DEventMap } from 'three'
-import { Color, DoubleSide, Euler, Group, Mesh, MeshPhongMaterial, Object3D, PointLight, Quaternion, Vector3 } from 'three'
+import { Color, DoubleSide, Euler, Group, Material, Mesh, MeshPhongMaterial, Object3D, PointLight, Quaternion, Vector3 } from 'three'
 
 import FastNoiseLite from 'fastnoise-lite'
 import { CSS2DObject } from 'three/examples/jsm/renderers/CSS2DRenderer'
@@ -67,7 +67,7 @@ export interface PlacableProp<N extends string> {
 	data?: N extends keyof ExtraData ? ExtraData[N] : undefined
 	bundle?: BundleFn<EntityData<N extends keyof ExtraData ? NonNullable<ExtraData[N]> : never>>
 }
-type propNames = 'log' | 'door' | 'rock' | 'board' | 'oven' | 'CookingPot' | 'stove' | 'Flower/plants' | 'sign' | 'plots' | 'bush' | 'fence' | 'house' | 'mushrooms' | 'lamp' | 'Kitchen' | 'berry bushes' | 'bench' | 'well' | 'fruit trees' | 'stall' | 'Vine gate' | 'fishing deck'
+type propNames = 'log' | 'door' | 'rock' | 'board' | 'oven' | 'CookingPot' | 'stove' | 'Flower/plants' | 'sign' | 'plots' | 'bush' | 'fence' | 'house' | 'mushrooms' | 'lamp' | 'Kitchen' | 'berry bushes' | 'bench' | 'well' | 'fruit trees' | 'stall' | 'Vine gate' | 'fishing deck' | 'pillar'
 export const props: PlacableProp<propNames>[] = [
 	{
 		name: 'log',
@@ -267,7 +267,7 @@ export const props: PlacableProp<propNames>[] = [
 	},
 	{
 		name: 'Flower/plants',
-		models: ['SM_Env_Flower_01', 'SM_Env_Flower_02', 'SM_Env_Flower_03', 'SM_Env_Flower_05', 'SM_Env_Flower_06', 'SM_Env_Flower_07', 'SM_Env_Flower_08', 'SM_Env_Grass_01', 'SM_Env_Grass_02', 'grass&vines', 'SM_Env_Flowers_01', 'SM_Env_Flowers_02', 'SM_Env_Plant_01', 'SM_Env_Plant_02', 'SM_Env_Plant_03', 'Creepy_Flower', 'Creepy_Grass'],
+		models: ['SM_Env_Flower_01', 'SM_Env_Flower_02', 'SM_Env_Flower_03', 'SM_Env_Flower_05', 'SM_Env_Flower_06', 'SM_Env_Flower_07', 'SM_Env_Flower_08', 'SM_Env_Grass_01', 'SM_Env_Grass_02', 'grass&vines', 'SM_Env_Flowers_01', 'SM_Env_Flowers_02', 'SM_Env_Plant_01', 'SM_Env_Plant_02', 'SM_Env_Plant_03', 'Creepy_Flower', 'Creepy_Grass', 'SM_Env_Lillypad_Large_01', 'SM_Env_Lillypad_Large_02', 'SM_Env_Lillypad_Large_03', 'SM_Env_Lillypad_Small_01', 'SM_Env_Reeds_01', 'SM_Env_Reeds_02', 'SM_Env_RicePlant_01', 'SM_Env_RicePlant_02'],
 	},
 	{
 		name: 'door',
@@ -295,8 +295,14 @@ export const props: PlacableProp<propNames>[] = [
 	},
 	{
 		name: 'Vine gate',
+		data: { direction: 'north', doorLevel: 0 },
 		models: ['Gate_Vines'],
 		bundle(entity, { data }, ressources) {
+			entity.model.traverse((node) => {
+				if (node.parent?.name === 'GATE' && node instanceof Mesh && node.material instanceof Material) {
+					node.material = node.material.clone()
+				}
+			})
 			if (dungeonState.enabled && ressources && 'dungeon' in ressources) {
 				if (![RoomType.NPC, RoomType.Item].includes(ressources.dungeon.type)) {
 					entity.doorLocked = true
@@ -520,5 +526,9 @@ export const props: PlacableProp<propNames>[] = [
 				return {}
 			}
 		},
+	},
+	{
+		name: 'pillar',
+		models: ['pillarDown', 'pillarUp'],
 	},
 ]

@@ -55,7 +55,7 @@ export const movePlayerTo = (dest: Vector3) => {
 		}
 	})
 }
-export const playerInventoryQuery = ecs.with('inventoryId', 'inventory', 'inventorySize', 'player')
+export const playerInventoryQuery = ecs.with('inventoryId', 'inventory', 'inventorySize', 'player', 'currentHealth', 'maxHealth')
 export const unlockRecipe = (item: items) => {
 	updateSave(s => s.unlockedRecipes.push(item))
 	addToast({ type: 'recipe', recipe: item })
@@ -63,7 +63,9 @@ export const unlockRecipe = (item: items) => {
 export const addItemToPlayer = (item: Item) => {
 	const player = playerInventoryQuery.first
 	if (player) {
-		if (item.recipe) {
+		if (item.health) {
+			player.currentHealth = Math.min(player.maxHealth.value, player.currentHealth + item.health)
+		} else if (item.recipe) {
 			unlockRecipe(item.recipe)
 		} else {
 			addItem(player, item)

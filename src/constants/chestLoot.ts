@@ -19,6 +19,7 @@ export const chestLoot: ChestLoot[] = [{
 		{ name: 'recipe', recipe: 'ham_honey', quantity: 1, rarity: Rarity.Rare },
 		{ name: 'recipe', recipe: 'slime_bread', quantity: 1, rarity: Rarity.Rare },
 		{ name: 'recipe', recipe: 'slime_dumpling', quantity: 1, rarity: Rarity.Rare },
+		{ name: 'Heart', health: 1, quantity: 1, rarity: Rarity.Rare },
 	],
 
 }]

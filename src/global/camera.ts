@@ -1,10 +1,13 @@
 import { Tween } from '@tweenjs/tween.js'
-import { OrthographicCamera, PerspectiveCamera, Vector3 } from 'three'
+import { Mesh, OrthographicCamera, PerspectiveCamera, SphereGeometry, Vector3 } from 'three'
 import { params } from './context'
 import { RenderGroup } from './entity'
 import { ecs, gameTweens, levelsData, time } from './init'
 import { save } from './save'
+import { materials } from './assets'
+import { renderGame } from './rendering'
 import { debugState } from '@/debug/debugState'
+import { getGameRenderGroup } from '@/debug/debugUi'
 
 export const initCamera = () => {
 	const h = 600

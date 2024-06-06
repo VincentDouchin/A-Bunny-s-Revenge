@@ -11,6 +11,7 @@ export interface Item {
 	name: items
 	quantity: number
 	recipe?: items
+	health?: number
 }
 
 export enum Rarity {
@@ -28,11 +29,16 @@ export interface ItemData {
 	'ingredient'?: true
 	'key item'?: true
 	'price'?: number
+	'health'?: number
 }
 
 export const itemsData: Record<items, ItemData> = {
 	acorn: {
 		name: 'Acorn',
+	},
+	Heart: {
+		name: 'Heart',
+		health: 1,
 	},
 	// ! Ingredients
 	redSnapper: {

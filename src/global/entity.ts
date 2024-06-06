@@ -179,6 +179,7 @@ export interface Entity {
 	itemLabel?: items
 	collecting?: true
 	recipe?: items
+	health?: number
 	popDirection?: Vector3
 	groundLevel?: number
 	bounce?: { amount: number, force: Vector3, touchedGround: boolean }

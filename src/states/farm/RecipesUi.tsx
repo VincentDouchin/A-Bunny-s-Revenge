@@ -178,10 +178,13 @@ export const RecipesUi = () => {
 					const [selectedRecipe, setSelectedRecipe] = createSignal<null | Recipe>(null)
 					const cook = () => {
 						const recipe = selectedRecipe()
+
 						if (recipe) {
-							if (recipe.input.every(input => context?.player().inventory.some((item) => {
+							const hasIngredients = recipe.input.every(input => context?.player().inventory.some((item) => {
 								return item?.name === input.name && item.quantity >= input.quantity
-							}))) {
+							}))
+							const isUnlocked = save.unlockedRecipes.includes(recipe.output.name)
+							if (hasIngredients && isUnlocked) {
 								if (recipeQueued().length < 4) {
 									for (const input of recipe.input) {
 										removeItemFromPlayer(input)
@@ -238,17 +241,19 @@ export const RecipesUi = () => {
 																		setSelectedRecipe(recipe)
 																	}
 																})
+																const hidden = !save.unlockedRecipes.includes(recipe.output.name)
 																const canCraft = createMemo(() => {
 																	if (recipe.input.some((item) => {
 																		return !context?.player().inventory.find((playerItem) => {
 																			return playerItem?.name === item.name && playerItem.quantity >= item.quantity
 																		})
+																		&& !hidden
 																	})) {
 																		return { completed: false }
 																	}
 																	return {}
 																})
-																const hidden = !save.unlockedRecipes.includes(recipe.output.name)
+
 																return (
 																	<div style={{ color: 'white' }}>
 																		<div use:menuItem={[menu, i() === 0, selected]} style={{ 'display': 'grid', 'align-items': 'center' }}>

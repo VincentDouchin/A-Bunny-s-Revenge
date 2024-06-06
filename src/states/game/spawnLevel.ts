@@ -1,7 +1,7 @@
 import { ColliderDesc, RigidBodyDesc, RigidBodyType } from '@dimforge/rapier3d-compat'
 import FastNoiseLite from 'fastnoise-lite'
-import type { Object3D, Vec2, Vector4Like } from 'three'
-import { BufferGeometry, CanvasTexture, Color, Euler, Group, Mesh, PlaneGeometry, Quaternion, Vector2, Vector3 } from 'three'
+import type { Vec2, Vector4Like } from 'three'
+import { CanvasTexture, Color, Euler, Group, Mesh, PlaneGeometry, Quaternion, Vector2, Vector3 } from 'three'
 import { encounters } from '../dungeon/encounters'
 import { RoomType } from '../dungeon/generateDungeon'
 import { spawnLight } from './spawnLights'
@@ -13,7 +13,7 @@ import type { Entity } from '@/global/entity'
 import { assets, ecs, levelsData, time } from '@/global/init'
 import type { DungeonRessources, FarmRessources } from '@/global/states'
 import { inMap } from '@/lib/hierarchy'
-import { getBoundingBox, getSize } from '@/lib/models'
+import { getBoundingBox, getSecondaryColliders, getSize } from '@/lib/models'
 import { NavGrid } from '@/lib/navGrid'
 import type { System } from '@/lib/state'
 import { GroundMaterial, WaterMaterial } from '@/shaders/materials'
@@ -307,30 +307,18 @@ export const spawnLevelData: System<FarmRessources | DungeonRessources | void> =
 				const model = getModel(entityData.model)
 				model.scale.setScalar(entityData.scale)
 				const position = new Vector3().fromArray(entityData.position)
-				const rotation = new Quaternion().set(...entityData.rotation)
+				const rotation = new Quaternion().fromArray(entityData.rotation)
 				const bundleFn = props.find(p => p.models.includes(entityData.model))?.bundle
+
 				const entity = {
 					rotation,
 					position,
 					...getBoundingBox(entityData.model, model, colliderData, entityData.scale ?? 1),
+					...getSecondaryColliders(model),
 					entityId,
 					model,
 					...inMap(),
 				} as const satisfies Entity
-				const secondaryColliders: ColliderDesc[] = []
-				const nodesToRemove: Object3D[] = []
-				model.traverse((node) => {
-					if (node.name.includes('collider') && 'geometry' in node && node.geometry instanceof BufferGeometry && node.geometry.index) {
-						nodesToRemove.push(node)
-						const vertices = new Float32Array(node.geometry.getAttribute('position').array)
-						const indices = new Uint32Array(node.geometry.index.array)
-						secondaryColliders.push(ColliderDesc.trimesh(vertices, indices).setTranslation(...node.position.toArray()))
-					}
-				})
-				nodesToRemove.forEach(node => node.removeFromParent())
-				if (secondaryColliders.length > 0) {
-					Object.assign(entity, { secondaryColliders })
-				}
 
 				if (bundleFn) {
 					ecs.add(bundleFn(entity, entityData, ressources))

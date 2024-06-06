@@ -16,19 +16,17 @@ export const lootPool = (drops: Drop[], player: With<Entity, 'lootChance' | 'loo
 	const possibleRecipes = drops.filter(drop => drop.recipe && !save.unlockedRecipes.includes(drop.recipe))
 	const possibleItems = drops.filter(drop => !drop.recipe)
 	const extraLoot = Math.floor(lootQuantity) + Math.random() < lootQuantity % 1 ? 1 : 0
-	const pool: Drop[] = possibleItems.flatMap(drop => range(0, drop.quantity, () => ({ name: drop.name, rarity: drop.rarity, quantity: 1 })))
+	const pool: Drop[] = possibleItems.flatMap(drop => range(0, drop.quantity, () => ({ name: drop.name, rarity: drop.rarity, quantity: 1, health: drop.health })))
 	pool.push(...range(0, extraLoot).map(() => getRandom(drops)))
 	const limitedPool = quantity ? shuffle(pool).slice(0, quantity) : pool
 	const loot: Item[] = []
 	if (possibleRecipes.length > 0) {
 		limitedPool.push(getRandom(possibleRecipes))
 	}
-	for (const possibleLoot of limitedPool) {
+	for (const item of limitedPool) {
 		const roll = Math.random() * 100
-		const chance = possibleLoot.rarity + (lootChance * 100)
+		const chance = item.rarity + (lootChance * 100)
 		if (roll < chance) {
-			const item: Item = { name: possibleLoot.name, quantity: 1 }
-			if (possibleLoot.recipe) item.recipe = possibleLoot.recipe
 			loot.push(item)
 		}
 	}
@@ -37,9 +35,8 @@ export const lootPool = (drops: Drop[], player: With<Entity, 'lootChance' | 'loo
 
 export const dropBundle = (drop: Item) => {
 	const bundle: Entity = itemBundle(drop.name)
-	if (drop.recipe) {
-		bundle.recipe = drop.recipe
-	}
+	if (drop.recipe) bundle.recipe = drop.recipe
+	if (drop.health) bundle.health = drop.health
 	return bundle
 }
 const enemyDropsQuery = ecs.with('enemyName', 'position')
