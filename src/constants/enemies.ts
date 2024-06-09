@@ -21,7 +21,7 @@ export interface Enemy<Name extends keyof Animations> {
 	animationMap: Record<EnemyAnimations, Animations[Name]>
 	components?: () => Entity
 }
-const enemyNames = ['Armabee', 'Armabee_Evolved', 'Shaga_A', 'Big_Boar_A', 'Snailo_A', 'Snailo_B', 'Porin_A', 'Forest_Butterfly_A', 'Racco_A', 'Platopo_A'] as const satisfies readonly characters[]
+const enemyNames = ['Armabee', 'Armabee_Evolved', 'Shaga_A', 'Big_Boar_A', 'Snailo_A', 'Snailo_B', 'Porin_A', 'Forest_Butterfly_A', 'Racco_A', 'Platopo_A', 'Batty_A', 'Big_Boar_C', 'Magicbook_A', 'Devilu_A'] as const satisfies readonly characters[]
 
 export type enemy = (typeof enemyNames)[number]
 
@@ -160,27 +160,48 @@ export const enemyData: { [k in enemy]: Enemy<k> } = {
 		attackStyle: EnemyAttackStyle.Range,
 		animationMap: genericEnemyAnimationMap,
 	},
+	Batty_A: {
+		name: 'Batty',
+		health: 5,
+		scale: 25,
+		speed: 1,
+		boss: false,
+		drops: [],
+		behavior: 'enemy',
+		attackStyle: EnemyAttackStyle.Melee,
+		animationMap: genericEnemyAnimationMap,
+	},
+	Magicbook_A: {
+		name: 'Magic book',
+		health: 8,
+		scale: 25,
+		speed: 1,
+		boss: false,
+		drops: [],
+		behavior: 'enemy',
+		attackStyle: EnemyAttackStyle.Melee,
+		animationMap: genericEnemyAnimationMap,
+	},
+	Devilu_A: {
+		name: 'Batty',
+		health: 5,
+		scale: 25,
+		speed: 1,
+		boss: false,
+		drops: [],
+		behavior: 'enemy',
+		attackStyle: EnemyAttackStyle.Melee,
+		animationMap: genericEnemyAnimationMap,
+	},
+	Big_Boar_C: {
+		name: 'Biggie',
+		health: 40,
+		scale: 10,
+		speed: 1,
+		boss: true,
+		drops: [],
+		behavior: 'enemy',
+		attackStyle: EnemyAttackStyle.BeeBoss,
+		animationMap: genericEnemyAnimationMap,
+	},
 }
-
-export interface EnemyGroup {
-	enemies: enemy[]
-	boss?: enemy
-}
-export const enemyGroups: EnemyGroup[] = [
-	{
-		enemies: ['Armabee', 'Armabee', 'Armabee', 'Big_Boar_A', 'Big_Boar_A'],
-	},
-	{
-		enemies: [],
-		boss: 'Armabee_Evolved',
-	},
-	{
-		enemies: ['Shaga_A', 'Shaga_A', 'Porin_A', 'Porin_A'],
-	},
-	{
-		enemies: ['Platopo_A', 'Racco_A', 'Racco_A', 'Snailo_A'],
-	},
-	{
-		enemies: ['Forest_Butterfly_A', 'Snailo_B', 'Forest_Butterfly_A', 'Forest_Butterfly_A'],
-	},
-]

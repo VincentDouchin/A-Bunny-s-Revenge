@@ -51,7 +51,7 @@ import { touchItem } from './states/game/touchItem'
 import { updateWeaponArc } from './states/game/weapon'
 import { clickOnMenuButton, initMainMenuCamPos, intiMainMenuRendering, renderMainMenu, selectMainMenu, setMainCameraPosition, spawnPlayerContinueGame } from './states/mainMenu/mainMenuRendering'
 import { disablePortrait, enableFullscreen, resize, setupGame, stopOnLosingFocus } from './states/setup/setupGame'
-import { UI } from './ui/UI'
+import { UI, errors } from './ui/UI'
 
 coreState
 	.addPlugins(hierarchyPlugin, physicsPlugin, transformsPlugin, addToScene('camera', 'light', 'model', 'dialogContainer', 'emitter', 'interactionContainer', 'minigameContainer', 'healthBarContainer', 'dashDisplay', 'stun', 'debuffsContainer', 'weaponArc', 'questMarkerContainer'), updateModels, particlesPlugin)
@@ -117,7 +117,11 @@ pausedState
 	.onExit(() => time.start(), musicManager.play)
 
 const animate = () => {
-	app.update()
+	try {
+		app.update()
+	} catch (e) {
+		errors.push(JSON.stringify(e))
+	}
 	requestAnimationFrame(animate)
 }
 

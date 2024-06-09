@@ -83,12 +83,14 @@ export const collideWithDoorCamp = () => {
 		}
 	}
 }
+
+const doorQueryClearing = doorQuery.with('doorLevel')
 export const collideWithDoorClearing = () => {
-	for (const door of doorQuery) {
+	for (const door of doorQueryClearing) {
 		for (const player of playerQuery) {
 			if (world.intersectionPair(door.collider, player.collider)) {
 				if (door.doorLevel !== undefined && player.weapon) {
-					const dungeon = genDungeon(7 + door.doorLevel * 5, true).find(room => room.type === RoomType.Entrance)!
+					const dungeon = genDungeon(7 + door.doorLevel * 5, true, door.doorLevel).find(room => room.type === RoomType.Entrance)!
 					dungeonState.enable({ dungeon, direction: 'south', firstEntry: true, playerHealth: 10, dungeonLevel: door.doorLevel, weapon: player.weapon.weaponName })
 				}
 				if (door.doorLevel === undefined) {

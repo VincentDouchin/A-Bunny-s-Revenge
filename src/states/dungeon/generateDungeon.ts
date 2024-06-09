@@ -1,6 +1,6 @@
 import { encounters } from './encounters'
 import type { enemy } from '@/constants/enemies'
-import { enemyGroups } from '@/constants/enemies'
+import { enemyGroups } from '@/constants/enemyGroups'
 import { type Item, getSellableItems } from '@/constants/items'
 import type { Level } from '@/debug/LevelEditor'
 import { levelsData } from '@/global/init'
@@ -189,12 +189,12 @@ const createRooms = (count: number): BlankRoom[] => {
 	return rooms
 }
 
-const getEnemies = (type: RoomType): enemy[] => {
+const getEnemies = (type: RoomType, level: number): enemy[] => {
 	switch (type) {
 		case RoomType.Battle:
-		case RoomType.Entrance: return getRandom(enemyGroups.filter(group => !group.boss)).enemies
+		case RoomType.Entrance: return getRandom(enemyGroups[level].filter(group => !group.boss)).enemies
 		case RoomType.Boss: {
-			const possibleGroups = enemyGroups.filter(group => group.boss !== undefined)
+			const possibleGroups = enemyGroups[level].filter(group => group.boss !== undefined)
 			const group = getRandom(possibleGroups)
 			return [group.boss, ...group.enemies].filter(Boolean)
 		}
@@ -202,7 +202,7 @@ const getEnemies = (type: RoomType): enemy[] => {
 	}
 }
 
-export const assignPlanAndEnemies = (rooms: BlankRoom[]): Room[] => {
+export const assignPlanAndEnemies = (rooms: BlankRoom[], level: number): Room[] => {
 	const dungeons = levelsData.levels.filter(level => level.dungeon)
 	let hasSeller = false
 	const filledRooms = rooms.map((room) => {
@@ -220,7 +220,7 @@ export const assignPlanAndEnemies = (rooms: BlankRoom[]): Room[] => {
 		if (room.type === RoomType.NPC) {
 			encounter = getRandom(Object.keys(encounters) as (keyof typeof encounters)[])
 		}
-		const enemies = [...getEnemies(room.type)]
+		const enemies = [...getEnemies(room.type, level)]
 		const newRoom: Room = { ...room, plan, enemies, doors, encounter }
 		if (
 			!hasSeller
@@ -253,12 +253,12 @@ const placeNPC = (rooms: BlankRoom[]) => {
 	}
 }
 
-export const genDungeon = (roomsAmount: number, npc: boolean) => {
+export const genDungeon = (roomsAmount: number, npc: boolean, level: number) => {
 	const rooms = createRooms(roomsAmount)
 	findStartExit(rooms)
 	if (npc) {
 		placeNPC(rooms)
 	}
-	const filledRooms = assignPlanAndEnemies(rooms)
+	const filledRooms = assignPlanAndEnemies(rooms, level)
 	return filledRooms
 }

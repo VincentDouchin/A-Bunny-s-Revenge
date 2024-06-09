@@ -1,3 +1,4 @@
+import { createArray } from 'solid-proxies'
 import { DialogUi } from './DialogUi'
 import { InteractionUi } from './Interactions'
 import { KeyboardControls } from './KeyboardControl'
@@ -23,6 +24,7 @@ import { SeedUi } from '@/states/farm/SeedUi'
 import { FullscreenUi } from '@/states/game/FullscreenUi'
 import { OverlayUi } from '@/states/game/overlayUi'
 
+export const errors = createArray<string>([])
 export const UI = () => (
 	<GameProvider>
 		<DebugUi />

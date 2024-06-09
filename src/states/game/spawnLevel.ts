@@ -35,18 +35,18 @@ const spawnFromCanvas = (level: Level, image: HTMLCanvasElement, scale: number, 
 		}
 	}
 }
-const getTrees = (level?: number) => {
-	if (level === 1) {
-		return [
-			assets.trees.CommonTree_Dead_1,
-			assets.trees.CommonTree_Dead_2,
-			assets.trees.CommonTree_Dead_3,
-			assets.trees.CommonTree_Dead_4,
-			assets.trees.CommonTree_Dead_5,
-			assets.trees.Willow_1,
-			assets.trees.Willow_2,
-		]
-	}
+const getTrees = (_level?: number) => {
+	// if (level === 1) {
+	// 	return [
+	// 		assets.trees.CommonTree_Dead_1,
+	// 		assets.trees.CommonTree_Dead_2,
+	// 		assets.trees.CommonTree_Dead_3,
+	// 		assets.trees.CommonTree_Dead_4,
+	// 		assets.trees.CommonTree_Dead_5,
+	// 		assets.trees.Willow_1,
+	// 		assets.trees.Willow_2,
+	// 	]
+	// }
 	return [
 		assets.trees.Low_Poly_Forest_treeTall01,
 		assets.trees.Low_Poly_Forest_treeTall02,
@@ -237,10 +237,10 @@ export const spawnGroundAndTrees = (level: Level, dungeonLevel?: number) => {
 			ground: assets.textures.Dirt4_Dark,
 		}),
 	)
-	if (dungeonLevel === 1) {
-		groundMesh.material.uniforms.grassColor.value = new Color(0x645176)
-		groundMesh.material.uniforms.topColor.value = new Color(0x795E97)
-	}
+	// if (dungeonLevel === 1) {
+	// 	groundMesh.material.uniforms.grassColor.value = new Color(0x645176)
+	// 	groundMesh.material.uniforms.topColor.value = new Color(0x795E97)
+	// }
 	setDisplacement(groundMesh.geometry, displacementMap)
 	groundMesh.geometry.computeVertexNormals()
 	groundMesh.geometry.computeTangents()
