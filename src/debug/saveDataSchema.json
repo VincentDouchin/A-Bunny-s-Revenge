@@ -5,6 +5,9 @@
 		"Item": {
 			"additionalProperties": false,
 			"properties": {
+				"health": {
+					"type": "number"
+				},
 				"name": {
 					"$ref": "#/definitions/items"
 				},
@@ -119,6 +122,12 @@
 							"type": "array"
 						},
 						"grandma_1": {
+							"items": {
+								"type": "boolean"
+							},
+							"type": "array"
+						},
+						"grandma_start": {
 							"items": {
 								"type": "boolean"
 							},
@@ -280,9 +289,11 @@
 				"ham",
 				"ham_honey",
 				"haricot",
+				"Heart",
 				"honey",
 				"honey_glazed_carrot",
 				"hummus",
+				"lemon",
 				"lettuce",
 				"lettuce_seeds",
 				"magic_bean",
@@ -305,7 +316,6 @@
 				"tomato",
 				"tomato_seeds",
 				"tomato_soup",
-				"trout",
 				"wheat",
 				"wheat_seeds"
 			],

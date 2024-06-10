@@ -13,6 +13,15 @@ export const dialogs = {
 			yield false
 		}
 	},
+	*GrandmaStart() {
+		yield 'Good morning dear.'
+		yield 'Do you remember that we have Master Owl over for dinner tonight?'
+		yield 'I just need one trout and a few lemons to make him a delicious dinner.'
+		yield 'Can you be a dear and get them for me?'
+		yield 'You should be able to find lemon trees next to the river.'
+		addQuest('grandma_start')
+		leaveHouse()
+	},
 	*GrandmasHouse() {
 		while (true) {
 			yield t(dialog.grandma.hello)

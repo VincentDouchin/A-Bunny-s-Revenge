@@ -3,7 +3,6 @@ import { Easing, Tween } from '@tweenjs/tween.js'
 import { Vector3 } from 'three'
 import { clone } from 'three/examples/jsm/utils/SkeletonUtils'
 import { collectItems } from '../game/items'
-import { enableBasketUi } from '../game/spawnBasket'
 import { RoomType } from './generateDungeon'
 import { dropBundle, lootPool } from './lootPool'
 import { chestLoot } from '@/constants/chestLoot'
@@ -64,7 +63,6 @@ export const endBattleSpawnChest: System<DungeonRessources> = (ressources) => {
 	if (enemiesQuery.size === 0 && chestQuery.size === 0 && [RoomType.Battle, RoomType.Boss, RoomType.Entrance].includes(ressources.dungeon.type) && !ressources.dungeon.chest) {
 		spawnChest(ressources.dungeonLevel)
 		ressources.dungeon.chest = true
-		enableBasketUi()
 		setTimeout(() =>	collectItems(true)(), 2000)
 	}
 }

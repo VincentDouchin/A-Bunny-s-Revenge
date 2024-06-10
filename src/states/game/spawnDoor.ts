@@ -84,9 +84,8 @@ export const collideWithDoorCamp = () => {
 	}
 }
 
-const doorQueryClearing = doorQuery.with('doorLevel')
 export const collideWithDoorClearing = () => {
-	for (const door of doorQueryClearing) {
+	for (const door of doorQuery) {
 		for (const player of playerQuery) {
 			if (world.intersectionPair(door.collider, player.collider)) {
 				if (door.doorLevel !== undefined && player.weapon) {

@@ -14,6 +14,13 @@ export interface Quest {
 }
 
 export const quests = {
+	grandma_start: {
+		name: 'Host Matser Owl for dinner',
+		steps: [{
+			key: 'trout and lemons',
+			items: [{ name: 'redSnapper', quantity: 1 }],
+		}],
+	},
 	grandma_1: {
 		name: 'Bring grandma some roasted carrots',
 		steps: [{

@@ -53,6 +53,10 @@ export const itemsData: Record<items, ItemData> = {
 		name: 'Strawberry',
 		ingredient: true,
 	},
+	lemon: {
+		name: 'Lemon',
+		ingredient: true,
+	},
 	beet: {
 		name: 'Beet',
 		ingredient: true,
