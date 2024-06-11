@@ -1,15 +1,16 @@
+import type { ColorRepresentation } from 'three'
 import { CircleGeometry, Color, MeshPhongMaterial, Vector3 } from 'three'
 import { Bezier, ColorOverLife, ColorRange, ConstantValue, Gradient, IntervalValue, ParticleSystem, PiecewiseBezier, RenderMode, SizeOverLife, SphereEmitter } from 'three.quarks'
 import { between } from 'randomish'
 import { colorToVec4 } from './honeySplatParticles'
 import type { Entity } from '@/global/entity'
 
-export const pollenBundle = () => {
+export const pollenBundle = (colorStart: ColorRepresentation, colorEnd: ColorRepresentation) => {
 	const system = new ParticleSystem({
 		duration: between(50, 70),
 		looping: false,
 		prewarm: true,
-		startColor: new ColorRange(colorToVec4(0xE8D282, 0.7), colorToVec4(0xF7F3B7, 0.7)),
+		startColor: new ColorRange(colorToVec4(colorStart, 0.7), colorToVec4(colorEnd, 0.7)),
 		startLife: new IntervalValue(20, 30),
 		startSpeed: new IntervalValue(0.05, 0.1),
 		startSize: new IntervalValue(1.5, 2),
@@ -24,7 +25,7 @@ export const pollenBundle = () => {
 		renderMode: RenderMode.BillBoard,
 		behaviors: [
 			new ColorOverLife(new Gradient(
-				[[new Vector3(...new Color(0xF7F3B7).toArray()), 0], [new Vector3(...new Color(0xF7F3B7).toArray()), 1]],
+				[[new Vector3(...new Color(colorStart).toArray()), 0], [new Vector3(...new Color(colorEnd).toArray()), 1]],
 				[[0, 0], [1, 0.5], [0, 1]],
 			)),
 			new SizeOverLife(new PiecewiseBezier([[new Bezier(1, 1, 1, 0.5), 0]])),

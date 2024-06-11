@@ -71,6 +71,7 @@ export enum EnemyAttackStyle {
 	Range,
 	Melee,
 	Jumping,
+	Spore,
 	BeeBoss,
 }
 export interface States {
@@ -226,7 +227,9 @@ export interface Entity {
 	attackStyle?: EnemyAttackStyle
 	sneeze?: Timer<false>
 	poisoned?: Timer<false>
+	sleepy?: Timer<false>
 	pollen?: true
+	sleepingPowder?: true
 	// ! AI
 	navGrid?: NavGrid
 	// ! Particles

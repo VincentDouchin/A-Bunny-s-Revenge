@@ -8,7 +8,9 @@ import type { ComponentsOfType, Entity } from '@/global/entity'
 
 import { ecs, time, world } from '@/global/init'
 import { modelColliderBundle } from '@/lib/models'
-import { ModStage, ModType, type Stat, createModifier } from '@/lib/stats'
+import type { Modifier, Stat } from '@/lib/stats'
+import { ModStage, ModType, addModifier, createModifier } from '@/lib/stats'
+
 import { Timer } from '@/lib/timer'
 import { getWorldPosition } from '@/lib/transforms'
 import { honeyDrippingParticles, honeySplatParticlesBundle } from '@/particles/honeySplatParticles'
@@ -117,18 +119,24 @@ export const pollenAttack = async ({ group }: With<Entity, 'group'>) => {
 		ecs.add({
 			...inMap(),
 			position: new Vector3(Math.cos(angle) * distance, 0, Math.sin(angle) * distance).add(origin),
-			...pollenBundle(),
+			...pollenBundle(0xE8D282, 0xF7F3B7),
 			pollen: true,
 		})
 		await sleep(between(200, 600))
 	}
 }
 
-const tickDebuff = (timer: ComponentsOfType<Timer<false>>, affect: ComponentsOfType<true>, distance: number) => {
+const tickDebuff = (timer: ComponentsOfType<Timer<false>>, affect: ComponentsOfType<true>, distance: number, debuffs?: () => Modifier<any>[]) => {
 	const affectedQuery = ecs.with(timer, 'position')
 	const affectQuery = ecs.with(affect, 'position')
 	return () => {
 		for (const entity of affectedQuery) {
+			if (debuffs && entity[timer].finished()) {
+				for (const debuff of debuffs()) {
+					addModifier(debuff, entity, false)
+				}
+				entity[timer].reset()
+			}
 			let closeBy = false
 			for (const affectEntity of affectQuery) {
 				if (entity.position.distanceTo(affectEntity.position) < distance) {
@@ -144,6 +152,10 @@ const tickDebuff = (timer: ComponentsOfType<Timer<false>>, affect: ComponentsOfT
 }
 export const tickSneeze = tickDebuff('sneeze', 'pollen', 10)
 export const tickPoison = tickDebuff('poisoned', 'poison', 4)
+export const tickSleepy = tickDebuff('sleepy', 'sleepingPowder', 10, () => ([
+	createModifier('sleeping powder', 'attackSpeed', -50, ModStage.Total, ModType.Percent, false, 5000),
+	createModifier('sleeping powder', 'speed', -20, ModStage.Total, ModType.Percent, false, 5000),
+]))
 
 const projectilesQuery = ecs.with('projectile', 'collider')
 const obstaclesQuery = ecs.with('obstacle', 'collider')

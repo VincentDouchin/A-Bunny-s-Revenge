@@ -64,7 +64,7 @@ const blankSave = (): SaveData => ({
 		difficulty: 'normal',
 	},
 	unlockedRecipes: [],
-	unlockedPaths: 1,
+	unlockedPaths: 0,
 	acorns: 0,
 	daytime: { current: 0, dayToNight: true, timePassed: 0, dayLight: 0 },
 })

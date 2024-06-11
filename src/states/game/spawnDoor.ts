@@ -104,7 +104,7 @@ const playerWithWeaponQuery = playerQuery.with('weapon')
 
 export const unlockDoorClearing = () => playerWithWeaponQuery.onEntityAdded.subscribe(() => {
 	for (const door of doorClearingQuery) {
-		if (door.doorLevel < save.unlockedPaths) {
+		if (door.doorLevel <= save.unlockedPaths) {
 			ecs.removeComponent(door, 'doorLocked')
 		}
 	}

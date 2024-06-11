@@ -15,6 +15,7 @@ export const SneezeUi = () => {
 				const affect = [
 					['sneeze', '#e8d282'],
 					['poisoned', '#9DE64E'],
+					['sleepy', '#CFE0ED'],
 				] as const satisfies ReadonlyArray<readonly [ComponentsOfType<Timer<false>>, string]>
 				css/* css */`
 				.debuff-container{

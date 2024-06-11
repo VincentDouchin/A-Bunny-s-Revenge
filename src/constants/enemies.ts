@@ -146,7 +146,7 @@ export const enemyData: { [k in enemy]: Enemy<k> } = {
 		boss: false,
 		drops: [],
 		behavior: 'enemy',
-		attackStyle: EnemyAttackStyle.Melee,
+		attackStyle: EnemyAttackStyle.Spore,
 		animationMap: genericEnemyAnimationMap,
 	},
 	Platopo_A: {

@@ -29,125 +29,127 @@ export const ovenQuery = useQuery(ecs.with('menuType', 'recipesQueued', 'ovenAni
 
 export const OvenMinigameUi = () => {
 	const context = useGame()
-	const player = context!.player()
 	return (
-		<For each={ovenQuery()}>
-			{(oven) => {
-				const output = ui.sync(() => oven.recipesQueued?.[0]?.output)
-				const smokeTrails: With<Entity, 'emitter'>[] = []
-				let targetEntity: Entity | null = null
-				let lightEntity: With<Entity, 'light' | 'emitter'> | null = null
-				onMount(() => {
-					gameTweens.add(new Tween([params.zoom]).to([15], 1000).onUpdate(([zoom]) => {
-						updateCameraZoom(zoom)
-					}))
-					for (const camera of cameraQuery) {
-						// ecs.removeComponent(camera, 'lockX')
-						ecs.addComponent(camera, 'cameraOffset', new Vector3(0, 30, 80).applyQuaternion(oven.rotation!))
-					}
-					const position = getWorldPosition(oven.group!)
-					targetEntity = ecs.add({
-						worldPosition: position.add(new Vector3(0, 10, 0)),
-						cameratarget: true,
-					})
-					ecs.removeComponent(player, 'cameratarget')
-					oven.model?.traverse((node) => {
-						if (node.name.includes('smoke')) {
-							const smokeTrail = ecs.add({
-								parent: oven,
-								position: node.position.clone().multiply(oven.model!.scale),
-								emitter: smoke(),
-								autoDestroy: true,
-							})
-							smokeTrails.push(smokeTrail)
-						}
-					})
-					const light = new PointLight(new Color(0xFF0000), 10, 20)
-					light.position.setY(5)
-					lightEntity = ecs.add({ light, parent: oven, position: new Vector3(0, 0, 0), emitter: fireParticles() })
-				})
-				onCleanup(() => {
-					gameTweens.add(new Tween([15]).to([params.zoom], 1000).onUpdate(([zoom]) => {
-						updateCameraZoom(zoom)
-					}))
-					targetEntity && ecs.remove(targetEntity)
-					addTag(player, 'cameratarget')
-					for (const camera of cameraQuery) {
-						ecs.removeComponent(camera, 'cameraOffset')
-					}
-					ecs.removeComponent(oven, 'cameratarget')
-					for (const smokeTrail of smokeTrails) {
-						smokeTrail.emitter.system.looping = false
-					}
-					gameTweens.add(new Tween([1]).to([0], 4000).onUpdate(([f]) => {
-						if (lightEntity) {
-							lightEntity.light.intensity = f * 10
-							// @ts-expect-error wrong type
-							lightEntity.emitter.system.emissionOverTime = new ConstantValue(f * 2 / 30)
-						}
-					}))
-				})
-				const [bar, setBar] = createSignal(50)
-				const [target, setTarget] = createSignal(50)
-				const [heat, setHeat] = createSignal(100)
-				const heatHeight = createMemo(() => 10 + 20 * heat() / 100)
-				const [progress, setProgress] = createSignal(0)
-				const [direction, setDirection] = createSignal(Math.random() > 0.5 ? 1 : -1)
-				const [timer, setTimer] = createSignal(between(3, 5))
-				ui.updateSync(() => {
-					if (player.menuInputs.get('cancel').justReleased) {
-						ecs.removeComponent(oven, 'menuType')
-						return
-					}
-					if (output()) {
-						if (player.playerControls.get('primary').justReleased) {
-							setBar(x => Math.min(100, x - 10))
-						}
-						setBar(x => x + 25 * time.delta / 1000)
-						if (bar() < target() + heatHeight() / 2 && bar() > target() - heatHeight() / 2) {
-							setProgress(x => Math.min(100, x + 20 * time.delta / 1000))
-							setHeat(x => Math.min(100, x + 5 * time.delta / 1000))
-						} else {
-							setHeat(x => Math.max(0, x - 15 * time.delta / 1000))
-						}
-						for (const { emitter } of smokeTrails) {
-						// @ts-expect-error wrong type
-							emitter.system.emissionOverTime = new ConstantValue(heat() / 30)
-						}
-						setTimer(x => x - time.delta / 1000)
-						if (timer() <= 0) {
-							setDirection(x => x *= -1)
-							setTimer(between(2, 7))
-						}
-						setTarget(x => Math.max(0, Math.min(100, x + direction() * 3 * (time.delta / 1000) * (1 + progress() / 20))))
-						if (progress() >= 100) {
-							setProgress(0)
-							playSound('zapsplat_foley_heavy_flat_stone_very_sort_drag_scrape_002_87118')
-							oven.ovenAnimator.playClamped('Opening').then(async () => {
-								oven.recipesQueued.shift()
-								const position = new Vector3()
-								oven.model!.traverse((node) => {
-									if (node.name.includes('Door')) {
-										node.getWorldPosition(position)
+		<Show when={context?.player()}>
+			{(player) => {
+				return (
+					<For each={ovenQuery()}>
+						{(oven) => {
+							const output = ui.sync(() => oven.recipesQueued?.[0]?.output)
+							const smokeTrails: With<Entity, 'emitter'>[] = []
+							let targetEntity: Entity | null = null
+							let lightEntity: With<Entity, 'light' | 'emitter'> | null = null
+							onMount(() => {
+								gameTweens.add(new Tween([params.zoom]).to([15], 1000).onUpdate(([zoom]) => {
+									updateCameraZoom(zoom)
+								}))
+								for (const camera of cameraQuery) {
+									// ecs.removeComponent(camera, 'lockX')
+									ecs.addComponent(camera, 'cameraOffset', new Vector3(0, 30, 80).applyQuaternion(oven.rotation!))
+								}
+								const position = getWorldPosition(oven.group!)
+								targetEntity = ecs.add({
+									worldPosition: position.add(new Vector3(0, 10, 0)),
+									cameratarget: true,
+								})
+								ecs.removeComponent(player(), 'cameratarget')
+								oven.model?.traverse((node) => {
+									if (node.name.includes('smoke')) {
+										const smokeTrail = ecs.add({
+											parent: oven,
+											position: node.position.clone().multiply(oven.model!.scale),
+											emitter: smoke(),
+											autoDestroy: true,
+										})
+										smokeTrails.push(smokeTrail)
 									}
 								})
-								for (let i = 0; i < output().quantity; i++) {
-									playSound('cauldron2')
-									ecs.add({
-										...itemBundle(output().name),
-										position,
-										popDirection: new Vector3(between(-1, 1), 0, between(2, 2.5)).applyQuaternion(oven.rotation!),
-										groundLevel: oven.position.y,
-									})
-								}
-								await sleep(500)
-								playSound('zapsplat_foley_rubble_rock_drop_onto_pile_others_medium_sized_006_108147')
-								oven.ovenAnimator.playClamped('Closing')
+								const light = new PointLight(new Color(0xFF0000), 10, 20)
+								light.position.setY(5)
+								lightEntity = ecs.add({ light, parent: oven, position: new Vector3(0, 0, 0), emitter: fireParticles() })
 							})
-						}
-					}
-				})
-				css/* css */`
+							onCleanup(() => {
+								gameTweens.add(new Tween([15]).to([params.zoom], 1000).onUpdate(([zoom]) => {
+									updateCameraZoom(zoom)
+								}))
+								targetEntity && ecs.remove(targetEntity)
+								addTag(player(), 'cameratarget')
+								for (const camera of cameraQuery) {
+									ecs.removeComponent(camera, 'cameraOffset')
+								}
+								ecs.removeComponent(oven, 'cameratarget')
+								for (const smokeTrail of smokeTrails) {
+									smokeTrail.emitter.system.looping = false
+								}
+								gameTweens.add(new Tween([1]).to([0], 4000).onUpdate(([f]) => {
+									if (lightEntity) {
+										lightEntity.light.intensity = f * 10
+										// @ts-expect-error wrong type
+										lightEntity.emitter.system.emissionOverTime = new ConstantValue(f * 2 / 30)
+									}
+								}))
+							})
+							const [bar, setBar] = createSignal(50)
+							const [target, setTarget] = createSignal(50)
+							const [heat, setHeat] = createSignal(100)
+							const heatHeight = createMemo(() => 10 + 20 * heat() / 100)
+							const [progress, setProgress] = createSignal(0)
+							const [direction, setDirection] = createSignal(Math.random() > 0.5 ? 1 : -1)
+							const [timer, setTimer] = createSignal(between(3, 5))
+							ui.updateSync(() => {
+								if (player().menuInputs.get('cancel').justReleased) {
+									ecs.removeComponent(oven, 'menuType')
+									return
+								}
+								if (output()) {
+									if (player().playerControls.get('primary').justReleased) {
+										setBar(x => Math.min(100, x - 10))
+									}
+									setBar(x => x + 25 * time.delta / 1000)
+									if (bar() < target() + heatHeight() / 2 && bar() > target() - heatHeight() / 2) {
+										setProgress(x => Math.min(100, x + 20 * time.delta / 1000))
+										setHeat(x => Math.min(100, x + 5 * time.delta / 1000))
+									} else {
+										setHeat(x => Math.max(0, x - 15 * time.delta / 1000))
+									}
+									for (const { emitter } of smokeTrails) {
+										// @ts-expect-error wrong type
+										emitter.system.emissionOverTime = new ConstantValue(heat() / 30)
+									}
+									setTimer(x => x - time.delta / 1000)
+									if (timer() <= 0) {
+										setDirection(x => x *= -1)
+										setTimer(between(2, 7))
+									}
+									setTarget(x => Math.max(0, Math.min(100, x + direction() * 3 * (time.delta / 1000) * (1 + progress() / 20))))
+									if (progress() >= 100) {
+										setProgress(0)
+										playSound('zapsplat_foley_heavy_flat_stone_very_sort_drag_scrape_002_87118')
+										oven.ovenAnimator.playClamped('Opening').then(async () => {
+											oven.recipesQueued.shift()
+											const position = new Vector3()
+											oven.model!.traverse((node) => {
+												if (node.name.includes('Door')) {
+													node.getWorldPosition(position)
+												}
+											})
+											for (let i = 0; i < output().quantity; i++) {
+												playSound('cauldron2')
+												ecs.add({
+													...itemBundle(output().name),
+													position,
+													popDirection: new Vector3(between(-1, 1), 0, between(2, 2.5)).applyQuaternion(oven.rotation!),
+													groundLevel: oven.position.y,
+												})
+											}
+											await sleep(500)
+											playSound('zapsplat_foley_rubble_rock_drop_onto_pile_others_medium_sized_006_108147')
+											oven.ovenAnimator.playClamped('Closing')
+										})
+									}
+								}
+							})
+							css/* css */`
 				.minigame-container{
 					display: grid;
 					grid-template-columns: auto auto auto;
@@ -241,55 +243,58 @@ export const OvenMinigameUi = () => {
 					flex-direction: row-reverse;
 				}
 				`
-				return (
-					<>
-						<Show when={context?.usingTouch()}>
-							<div class="inputs-container">
-								<TouchButton input="primary" controller={player.playerControls.touchController!}>
-									<Fire />
-								</TouchButton>
-								<TouchButton input="cancel" controller={player.menuInputs.touchController!}>
-									<Exit />
-								</TouchButton>
-							</div>
-						</Show>
-
-						<div class="minigame-container">
-							{/*  progress */}
-							<div class="relative">
-								<div class="progress-text"><OutlineText>Progress</OutlineText></div>
-								<div class="progress-container">
-									<div class="progress-bar"></div>
-								</div>
-							</div>
-							{/* middle */}
-							<div class="relative">
-								<Show when={output()}>
-									{output => (
-										<div class="output" style={{ position: 'absolute', bottom: 'calc(100% + 2rem)', transform: 'translate(-50%)', left: '50%' }}>
-											<ItemDisplay item={output()}></ItemDisplay>
+							return (
+								<>
+									<Show when={context?.usingTouch()}>
+										<div class="inputs-container">
+											<TouchButton input="primary" controller={player().playerControls.touchController!}>
+												<Fire />
+											</TouchButton>
+											<TouchButton input="cancel" controller={player().menuInputs.touchController!}>
+												<Exit />
+											</TouchButton>
 										</div>
-									)}
-								</Show>
-								<div class="target-container">
-									{/* target */}
-									<div class="target"></div>
-									{/* bar */}
-									<div class="target-bar"></div>
-								</div>
-							</div>
-							{/* heat */}
-							<div class="relative">
-								<div class="heat-text"><OutlineText>Heat</OutlineText></div>
-								<div class="heat-container">
-									<div class="heat-bar"></div>
-								</div>
-							</div>
+									</Show>
 
-						</div>
-					</>
+									<div class="minigame-container">
+										{/*  progress */}
+										<div class="relative">
+											<div class="progress-text"><OutlineText>Progress</OutlineText></div>
+											<div class="progress-container">
+												<div class="progress-bar"></div>
+											</div>
+										</div>
+										{/* middle */}
+										<div class="relative">
+											<Show when={output()}>
+												{output => (
+													<div class="output" style={{ position: 'absolute', bottom: 'calc(100% + 2rem)', transform: 'translate(-50%)', left: '50%' }}>
+														<ItemDisplay item={output()}></ItemDisplay>
+													</div>
+												)}
+											</Show>
+											<div class="target-container">
+												{/* target */}
+												<div class="target"></div>
+												{/* bar */}
+												<div class="target-bar"></div>
+											</div>
+										</div>
+										{/* heat */}
+										<div class="relative">
+											<div class="heat-text"><OutlineText>Heat</OutlineText></div>
+											<div class="heat-container">
+												<div class="heat-bar"></div>
+											</div>
+										</div>
+
+									</div>
+								</>
+							)
+						}}
+					</For>
 				)
 			}}
-		</For>
+		</Show>
 	)
 }

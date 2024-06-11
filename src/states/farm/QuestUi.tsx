@@ -19,19 +19,21 @@ const openBulletinBoardQuery = useQuery(ecs.with('menuType').where(e => e.menuTy
 
 export const QuestUi = () => {
 	const context = useGame()
-	const player = context!.player()
 	return (
-		<For each={openBulletinBoardQuery()}>
-			{(board) => {
-				const visible = atom(false)
-				onMount(() => setTimeout(() => visible(true), 100))
-				const questsToComplete = entries(save.quests).toReversed() as [QuestName, boolean[]][]
-				ui.updateSync(() => {
-					if (player.menuInputs.get('cancel').justReleased) {
-						ecs.removeComponent(board, 'menuType')
-					}
-				})
-				css/* css */`
+		<Show when={context?.player()}>
+			{(player) => {
+				return (
+					<For each={openBulletinBoardQuery()}>
+						{(board) => {
+							const visible = atom(false)
+							onMount(() => setTimeout(() => visible(true), 100))
+							const questsToComplete = entries(save.quests).toReversed() as [QuestName, boolean[]][]
+							ui.updateSync(() => {
+								if (player().menuInputs.get('cancel').justReleased) {
+									ecs.removeComponent(board, 'menuType')
+								}
+							})
+							css/* css */`
 				.quest-container{
 					max-height: 30rem;
 					overflow: hidden;
@@ -64,75 +66,78 @@ export const QuestUi = () => {
 					min-width: 20rem;
 				}
 				`
-				return (
-					<Modal open={visible()}>
-						<Show when={visible()}>
-							<GoldContainer>
-								<InventoryTitle>Quests</InventoryTitle>
-								<div class="quest-container scroll-container">
-									<Show when={questsToComplete.length === 0}>
-										<div class="no-quests">
-											<OutlineText>No quests</OutlineText>
-										</div>
-									</Show>
-									<Menu inputs={player.menuInputs}>
-										{({ menu }) => {
-											return (
-												<For each={questsToComplete}>
-													{([questName, completedSteps], i) => {
-														const quest = quests[questName] as Quest
-														const selected = atom(false)
-														const [ref, setRef] = createSignal<HTMLElement>()
-														createEffect(() => {
-															if (selected()) {
-																ref()?.scrollIntoView({ behavior: 'smooth' })
-															}
-														})
+							return (
+								<Modal open={visible()}>
+									<Show when={visible()}>
+										<GoldContainer>
+											<InventoryTitle>Quests</InventoryTitle>
+											<div class="quest-container scroll-container">
+												<Show when={questsToComplete.length === 0}>
+													<div class="no-quests">
+														<OutlineText>No quests</OutlineText>
+													</div>
+												</Show>
+												<Menu inputs={player().menuInputs}>
+													{({ menu }) => {
 														return (
-															<div
-																ref={setRef}
-																class="quest"
-																use:menuItem={[menu, i() === 0, selected]}
-																style={{ border: `solid 0.2rem ${selected() ? 'white' : 'transparent'}` }}
-															>
-																<div style={{ 'font-size': '2rem' }}>{quest.name}</div>
-																<div class="step-container">
-																	<For each={quest.steps}>
-																		{(step, i) => {
-																			const isCompleted = Boolean(completedSteps[i()])
-																			return (
-																				<div class="step">
-																					<For each={step.items}>
-																						{item => (
-																							<ItemDisplay
-																								completed={isCompleted}
-																								item={item}
-																								selected={() => false}
-																							/>
-																						)}
-																					</For>
-																					<Show when={step.description}>
-																						{description => <div class="quest-description">{description()}</div>}
-																					</Show>
-																				</div>
-																			)
-																		}}
-																	</For>
-																</div>
-															</div>
+															<For each={questsToComplete}>
+																{([questName, completedSteps], i) => {
+																	const quest = quests[questName] as Quest
+																	const selected = atom(false)
+																	const [ref, setRef] = createSignal<HTMLElement>()
+																	createEffect(() => {
+																		if (selected()) {
+																			ref()?.scrollIntoView({ behavior: 'smooth' })
+																		}
+																	})
+																	return (
+																		<div
+																			ref={setRef}
+																			class="quest"
+																			use:menuItem={[menu, i() === 0, selected]}
+																			style={{ border: `solid 0.2rem ${selected() ? 'white' : 'transparent'}` }}
+																		>
+																			<div style={{ 'font-size': '2rem' }}>{quest.name}</div>
+																			<div class="step-container">
+																				<For each={quest.steps}>
+																					{(step, i) => {
+																						const isCompleted = Boolean(completedSteps[i()])
+																						return (
+																							<div class="step">
+																								<For each={step.items}>
+																									{item => (
+																										<ItemDisplay
+																											completed={isCompleted}
+																											item={item}
+																											selected={() => false}
+																										/>
+																									)}
+																								</For>
+																								<Show when={step.description}>
+																									{description => <div class="quest-description">{description()}</div>}
+																								</Show>
+																							</div>
+																						)
+																					}}
+																				</For>
+																			</div>
+																		</div>
+																	)
+																}}
+															</For>
 														)
 													}}
-												</For>
-											)
-										}}
-									</Menu>
-								</div>
-							</GoldContainer>
+												</Menu>
+											</div>
+										</GoldContainer>
 
-						</Show>
-					</Modal>
+									</Show>
+								</Modal>
+							)
+						}}
+					</For>
 				)
 			}}
-		</For>
+		</Show>
 	)
 }

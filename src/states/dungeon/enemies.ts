@@ -15,6 +15,7 @@ import type { Subscriber, System } from '@/lib/state'
 import { Stat } from '@/lib/stats'
 import { Timer } from '@/lib/timer'
 import { getRandom } from '@/utils/mapFunctions'
+import { save, updateSave } from '@/global/save'
 
 export const enemyBundle = (name: enemy, level: number) => {
 	const enemy = enemyData[name]
@@ -76,3 +77,8 @@ export const tickInactiveTimer = () => {
 		}
 	}
 }
+
+const bossQuery = ecs.with('boss')
+export const unlockDungeon: Subscriber<DungeonRessources> = ressources => bossQuery.onEntityRemoved.subscribe(() => {
+	updateSave(s => s.unlockedPaths = Math.max(s.unlockedPaths, ressources.dungeonLevel + 1))
+})

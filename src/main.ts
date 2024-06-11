@@ -1,6 +1,6 @@
 import { basketBehaviorPlugin } from './behaviors/basketBehavior'
 import { beeBossBehaviorPlugin } from './behaviors/beeBossBehavior'
-import { chargingEnemyBehaviorPlugin, jumpingEnemyBehaviorPlugin, meleeEnemyBehaviorPlugin, rangeEnemyBehaviorPlugin } from './behaviors/enemyBehavior'
+import { chargingEnemyBehaviorPlugin, jumpingEnemyBehaviorPlugin, meleeEnemyBehaviorPlugin, rangeEnemyBehaviorPlugin, sporeBehaviorPlugin } from './behaviors/enemyBehavior'
 import { playerBehaviorPlugin } from './behaviors/playerBehavior'
 import { debugPlugin } from './debug/debugPlugin'
 import { updateAnimations } from './global/animations'
@@ -18,12 +18,12 @@ import { runIf } from './lib/state'
 import { tickModifiers } from './lib/stats'
 import { transformsPlugin } from './lib/transforms'
 import { spawnGodRay } from './shaders/godrays'
-import { applyArchingForce, detroyProjectiles, honeySplat, stepInHoney, tickPoison, tickSneeze } from './states/dungeon/attacks'
+import { applyArchingForce, detroyProjectiles, honeySplat, stepInHoney, tickPoison, tickSleepy, tickSneeze } from './states/dungeon/attacks'
 import { applyDeathTimer, tickHitCooldown } from './states/dungeon/battle'
 import { dropBerriesOnHit } from './states/dungeon/bushes'
 import { buyItems } from './states/dungeon/buyItems'
 import { spawnWeaponsChoice } from './states/dungeon/chooseWeapon'
-import { removeEnemyFromSpawn, spawnEnemies, tickInactiveTimer } from './states/dungeon/enemies'
+import { removeEnemyFromSpawn, spawnEnemies, tickInactiveTimer, unlockDungeon } from './states/dungeon/enemies'
 import { killAnimation, killEntities } from './states/dungeon/health'
 import { addHealthBarContainer } from './states/dungeon/healthBar'
 import { spawnDrops } from './states/dungeon/lootPool'
@@ -74,7 +74,7 @@ gameState
 		runIf(() => !pausedState.enabled, playerSteps, dayNight, updateTimeUniforms, applyDeathTimer, () => gameTweens.update(time.elapsed)),
 		runIf(() => !openMenuState.enabled, pauseGame, interact),
 	)
-	.addPlugins(playerBehaviorPlugin, rangeEnemyBehaviorPlugin, chargingEnemyBehaviorPlugin, meleeEnemyBehaviorPlugin, beeBossBehaviorPlugin, jumpingEnemyBehaviorPlugin, basketBehaviorPlugin)
+	.addPlugins(playerBehaviorPlugin, rangeEnemyBehaviorPlugin, chargingEnemyBehaviorPlugin, meleeEnemyBehaviorPlugin, beeBossBehaviorPlugin, jumpingEnemyBehaviorPlugin, basketBehaviorPlugin, sporeBehaviorPlugin)
 	.onUpdate(collectItems(), touchItem, talkToNPC, turnNPCHead, stopItems, dropBerriesOnHit, updateWeaponArc)
 	.onPostUpdate(renderGame, rotateStun)
 	.enable()
@@ -102,11 +102,11 @@ genDungeonState
 	.onExit(despawnOfType('map'))
 
 dungeonState
-	.addSubscriber(spawnDrops, losingBattle, removeEnemyFromSpawn, applyArchingForce)
+	.addSubscriber(spawnDrops, losingBattle, removeEnemyFromSpawn, applyArchingForce, unlockDungeon)
 	.onEnter(spawnDungeon, spawnLevelData, generatenavGrid, spawnEnemies, spawnPlayerDungeon, moveCamera(true))
 	.onUpdate(
 		runIf(canPlayerMove, allowDoorCollision, collideWithDoor, harvestCrop, killEntities),
-		runIf(() => !pausedState.enabled, tickHitCooldown, tickModifiers('speed'), tickSneeze, tickPoison, tickInactiveTimer),
+		runIf(() => !pausedState.enabled, tickHitCooldown, tickModifiers('speed', 'attackSpeed'), tickSneeze, tickPoison, tickInactiveTimer, tickSleepy),
 	)
 	.onUpdate(detroyProjectiles, honeySplat, stepInHoney, endBattleSpawnChest, spawnPoisonTrail)
 	.onPostUpdate(buyItems)

@@ -17,7 +17,7 @@ import { stunBundle } from '@/states/dungeon/stun'
 import { sleep } from '@/utils/sleep'
 
 const ANIMATION_SPEED = 1.3
-const playerComponents = ['playerAnimator', 'movementForce', 'speed', 'body', 'rotation', 'playerControls', 'combo', 'attackSpeed', 'dash', 'collider', 'currentHealth', 'model', 'hitTimer', 'size', 'sneeze', 'targetRotation', 'poisoned', 'size', 'position', 'targetMovementForce'] as const satisfies readonly (keyof Entity)[]
+const playerComponents = ['playerAnimator', 'movementForce', 'speed', 'body', 'rotation', 'playerControls', 'combo', 'attackSpeed', 'dash', 'collider', 'currentHealth', 'model', 'hitTimer', 'size', 'sneeze', 'targetRotation', 'poisoned', 'size', 'position', 'targetMovementForce', 'sleepy'] as const satisfies readonly (keyof Entity)[]
 type PlayerComponents = (typeof playerComponents)[number]
 const playerQuery = ecs.with(...playerComponents)
 const enemyQuery = ecs.with('faction', 'state', 'strength', 'collider').where(e => e.faction === Faction.Enemy && e.state === 'attack')
@@ -33,6 +33,11 @@ const getAttackingEnemy = (player: With<Entity, PlayerComponents>) => {
 	}
 	return null
 }
+
+const getAttackSpeed = (e: With<Entity, 'attackSpeed' | 'sleepy'>) => {
+	return e.attackSpeed.value * ANIMATION_SPEED
+}
+
 export const playerBehaviorPlugin = behaviorPlugin(
 	playerQuery,
 	'player',
@@ -90,15 +95,15 @@ export const playerBehaviorPlugin = behaviorPlugin(
 		enter: async (e, setupState) => {
 			if (e.combo.lastAttack === 0) {
 				playSound(['Slash_Attack_Heavy_1', 'Slash_Attack_Heavy_2', 'Slash_Attack_Heavy_3'])
-				await e.playerAnimator.playOnce('lightAttack', { timeScale: e.attackSpeed.value * ANIMATION_SPEED }, 0.5)
+				await e.playerAnimator.playOnce('lightAttack', { timeScale: getAttackSpeed(e) }, 0.5)
 			}
 			if (e.combo.lastAttack === 1) {
 				playSound(['Slash_Attack_Light_1', 'Slash_Attack_Light_2'])
-				await e.playerAnimator.playOnce('slashAttack', { timeScale: e.attackSpeed.value * 0.8 * ANIMATION_SPEED }, 0.2)
+				await e.playerAnimator.playOnce('slashAttack', { timeScale: getAttackSpeed(e) * 0.8 }, 0.2)
 			}
 			if (e.combo.lastAttack === 2) {
 				playSound(['Slash_Attack_Heavy_1', 'Slash_Attack_Heavy_2', 'Slash_Attack_Heavy_3'])
-				await e.playerAnimator.playClamped('heavyAttack', { timeScale: 0.8 * e.attackSpeed.value * ANIMATION_SPEED })
+				await e.playerAnimator.playClamped('heavyAttack', { timeScale: getAttackSpeed(e) * 0.8 })
 			}
 			e.combo.lastAttack = 0
 			setupState('idle')

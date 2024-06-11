@@ -19,6 +19,7 @@ import { playSound } from '@/global/sounds'
 import { assets, coroutines, ecs, gameTweens, time, world } from '@/global/init'
 import { EnemyAttackStyle, Faction } from '@/global/entity'
 import type { Entity } from '@/global/entity'
+import { pollenBundle } from '@/particles/pollenParticles'
 
 export const playerQuery = ecs.with('position', 'sensorCollider', 'strength', 'body', 'critChance', 'critDamage', 'combo', 'playerAnimator', 'weapon', 'player', 'collider').where(({ faction }) => faction === Faction.Player)
 
@@ -194,12 +195,59 @@ const stun: EnemyState = {
 		ecs.removeComponent(e, 'stun')
 	},
 }
-// ! RANGE
+
+const attackCooldown = (delay: number): EnemyState => ({
+	enter: async (e, setState) => {
+		e.enemyAnimator.playAnimation('running')
+		await sleep(delay)
+		return setState('idle')
+	},
+	update: (e, setState, { touchedByPlayer, force, direction }) => {
+		if (touchedByPlayer) return setState('hit')
+		if (direction) {
+			e.movementForce.x = direction.x
+			e.movementForce.z = direction.z
+			applyRotate(e, force)
+			applyMove(e, force.multiplyScalar(0.5))
+		}
+	},
+})
 const enemyBehavior = (attackStyle: EnemyAttackStyle) => behaviorPlugin(
 	enemyQuery.where(e => e.attackStyle === attackStyle),
 	'enemy',
 	enemyDecisions,
 )
+// ! SPORE
+
+export const sporeBehaviorPlugin = enemyBehavior(EnemyAttackStyle.Spore)({
+	idle,
+	wander,
+	running: running(50),
+	waitingAttack: waitingAttack(800),
+	attack: {
+		enter: async (e, setState) => {
+			e.enemyAnimator.playAnimation('attacking')
+			ecs.add({
+				position: e.position.clone().add(new Vector3(0, 0, 15).applyQuaternion(e.rotation)),
+				...pollenBundle(0xCFE0ED, 0xCFD1ED),
+				sleepingPowder: true,
+			})
+			await sleep(800)
+			return setState('attackCooldown')
+		},
+		update: (e, setState, { force, touchedByPlayer }) => {
+			applyRotate(e, force)
+			applyMove(e, force.multiplyScalar(0.5))
+			if (touchedByPlayer) return setState('hit')
+		},
+	},
+	hit,
+	dying,
+	stun,
+	dead: {},
+	attackCooldown: attackCooldown(4000),
+})
+// ! RANGE
 export const rangeEnemyBehaviorPlugin = enemyBehavior(EnemyAttackStyle.Range)({
 	idle,
 	wander,
@@ -276,22 +324,7 @@ export const chargingEnemyBehaviorPlugin = enemyBehavior(EnemyAttackStyle.Chargi
 			})
 		},
 	},
-	attackCooldown: {
-		enter: async (e, setState) => {
-			e.enemyAnimator.playAnimation('running')
-			await sleep(2000)
-			return setState('idle')
-		},
-		update: (e, setState, { touchedByPlayer, force, direction }) => {
-			if (touchedByPlayer) return setState('hit')
-			if (direction) {
-				e.movementForce.x = direction.x
-				e.movementForce.z = direction.z
-				applyRotate(e, force)
-				applyMove(e, force.multiplyScalar(0.5))
-			}
-		},
-	},
+	attackCooldown: attackCooldown(2000),
 })
 
 // ! MELEE
@@ -316,22 +349,7 @@ export const meleeEnemyBehaviorPlugin = enemyBehavior(EnemyAttackStyle.Melee)({
 			if (touchedByPlayer) return setState('hit')
 		},
 	},
-	attackCooldown: {
-		enter: async (e, setState) => {
-			e.enemyAnimator.playAnimation('running')
-			await sleep(2000)
-			return setState('idle')
-		},
-		update: (e, setState, { touchedByPlayer, force, direction }) => {
-			if (touchedByPlayer) return setState('hit')
-			if (direction) {
-				e.movementForce.x = direction.x
-				e.movementForce.z = direction.z
-				applyRotate(e, force)
-				applyMove(e, force.multiplyScalar(0.5))
-			}
-		},
-	},
+	attackCooldown: attackCooldown(2000),
 })
 
 // ! JUMPING
@@ -390,20 +408,5 @@ export const jumpingEnemyBehaviorPlugin = enemyBehavior(EnemyAttackStyle.Jumping
 			if (touchedByPlayer) return setState('hit')
 		},
 	},
-	attackCooldown: {
-		enter: async (e, setState) => {
-			e.enemyAnimator.playAnimation('running')
-			await sleep(4000)
-			return setState('idle')
-		},
-		update: (e, setState, { touchedByPlayer, force, direction }) => {
-			if (touchedByPlayer) return setState('hit')
-			if (direction) {
-				e.movementForce.x = direction.x
-				e.movementForce.z = direction.z
-				applyRotate(e, force)
-				applyMove(e, force.multiplyScalar(0.5))
-			}
-		},
-	},
+	attackCooldown: attackCooldown(4000),
 })

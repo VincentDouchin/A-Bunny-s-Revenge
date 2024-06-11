@@ -18,7 +18,10 @@ export const quests = {
 		name: 'Host Matser Owl for dinner',
 		steps: [{
 			key: 'trout and lemons',
-			items: [{ name: 'redSnapper', quantity: 1 }],
+			items: [
+				{ name: 'redSnapper', quantity: 1 },
+				{ name: 'lemon', quantity: 3 },
+			],
 		}],
 	},
 	grandma_1: {

@@ -18,53 +18,55 @@ const boardQuery = useQuery(ecs.with('menuType', 'recipesQueued', 'position', 'r
 
 export const CuttingBoardMinigameUi = () => {
 	const context = useGame()
-	const player = context!.player()
 	return (
-		<For each={boardQuery()}>
-			{(board) => {
-				// const output = ui.sync(() => board.recipesQueued?.[0]?.output)
-				let targetEntity: Entity | null = null
-				onMount(() => {
-					gameTweens.add(new Tween([params.zoom]).to([20], 1000).onUpdate(([zoom]) => {
-						updateCameraZoom(zoom)
-					}))
-					for (const camera of cameraQuery) {
-						ecs.removeComponent(camera, 'lockX')
-						ecs.addComponent(camera, 'cameraOffset', new Vector3(0, 50, -10).applyQuaternion(board.rotation))
-					}
-					const position = getWorldPosition(board.group)
-					targetEntity = ecs.add({
-						worldPosition: position.add(new Vector3(0, 0, 0)),
-						cameratarget: true,
-					})
-					ecs.removeComponent(player, 'cameratarget')
-				})
-				onCleanup(() => {
-					gameTweens.add(new Tween([15]).to([params.zoom], 1000).onUpdate(([zoom]) => {
-						updateCameraZoom(zoom)
-					}))
-					targetEntity && ecs.remove(targetEntity)
-					addTag(player, 'cameratarget')
-					for (const camera of cameraQuery) {
-						ecs.removeComponent(camera, 'cameraOffset')
-						ecs.addComponent(camera, 'lockX', true)
-					}
-				})
-				ui.updateSync(() => {
-					if (player.menuInputs.get('cancel').justReleased) {
-						ecs.removeComponent(board, 'menuType')
-					}
-				})
-				const arrowPos = atom(0)
-				const forward = atom(true)
-				ui.updateSync(() => {
-					if (arrowPos() >= 1 || arrowPos() <= 0) {
-						forward(!forward())
-					}
-					arrowPos(arrowPos() + (time.delta / 2000 * (forward() ? 1 : -1)))
-				})
-				const arrowLeft = createMemo(() => `${arrowPos() * 100}%`)
-				css/* css */`
+		<Show when={context?.player()}>
+			{(player) => {
+				return (
+					<For each={boardQuery()}>
+						{(board) => {
+							// const output = ui.sync(() => board.recipesQueued?.[0]?.output)
+							let targetEntity: Entity | null = null
+							onMount(() => {
+								gameTweens.add(new Tween([params.zoom]).to([20], 1000).onUpdate(([zoom]) => {
+									updateCameraZoom(zoom)
+								}))
+								for (const camera of cameraQuery) {
+									ecs.removeComponent(camera, 'lockX')
+									ecs.addComponent(camera, 'cameraOffset', new Vector3(0, 50, -10).applyQuaternion(board.rotation))
+								}
+								const position = getWorldPosition(board.group)
+								targetEntity = ecs.add({
+									worldPosition: position.add(new Vector3(0, 0, 0)),
+									cameratarget: true,
+								})
+								ecs.removeComponent(player(), 'cameratarget')
+							})
+							onCleanup(() => {
+								gameTweens.add(new Tween([15]).to([params.zoom], 1000).onUpdate(([zoom]) => {
+									updateCameraZoom(zoom)
+								}))
+								targetEntity && ecs.remove(targetEntity)
+								addTag(player(), 'cameratarget')
+								for (const camera of cameraQuery) {
+									ecs.removeComponent(camera, 'cameraOffset')
+									ecs.addComponent(camera, 'lockX', true)
+								}
+							})
+							ui.updateSync(() => {
+								if (player().menuInputs.get('cancel').justReleased) {
+									ecs.removeComponent(board, 'menuType')
+								}
+							})
+							const arrowPos = atom(0)
+							const forward = atom(true)
+							ui.updateSync(() => {
+								if (arrowPos() >= 1 || arrowPos() <= 0) {
+									forward(!forward())
+								}
+								arrowPos(arrowPos() + (time.delta / 2000 * (forward() ? 1 : -1)))
+							})
+							const arrowLeft = createMemo(() => `${arrowPos() * 100}%`)
+							css/* css */`
 				.container{
 					display: grid;
 					gap: 2rem;
@@ -103,33 +105,36 @@ export const CuttingBoardMinigameUi = () => {
 					transform: translateY(-100%);
 				}
 				`
-				const dots = atom([true, false, true, false, true])
-				return (
-					<Portal mount={board.minigameContainer.element}>
-						<div class="container">
-							<div class="dot-container">
-								<For each={dots()}>
-									{(dot) => {
-										return (
-											<>
-												<Show when={dot}>
-													<div class="dot-filled"></div>
-												</Show>
-												<Show when={!dot}>
-													<div class="dot-empty"></div>
-												</Show>
-											</>
-										)
-									}}
-								</For>
-							</div>
-							<div class="timer">
-								<div class="timer-arrow"></div>
-							</div>
-						</div>
-					</Portal>
+							const dots = atom([true, false, true, false, true])
+							return (
+								<Portal mount={board.minigameContainer.element}>
+									<div class="container">
+										<div class="dot-container">
+											<For each={dots()}>
+												{(dot) => {
+													return (
+														<>
+															<Show when={dot}>
+																<div class="dot-filled"></div>
+															</Show>
+															<Show when={!dot}>
+																<div class="dot-empty"></div>
+															</Show>
+														</>
+													)
+												}}
+											</For>
+										</div>
+										<div class="timer">
+											<div class="timer-arrow"></div>
+										</div>
+									</div>
+								</Portal>
+							)
+						}}
+					</For>
 				)
 			}}
-		</For>
+		</Show>
 	)
 }

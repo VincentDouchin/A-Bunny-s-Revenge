@@ -51,8 +51,8 @@ export class Stat {
 	addModifier(modifier: Modifier<any>) {
 		if (modifier.stackable || !this.#modifiers.some(m => m.key === modifier.key)) {
 			this.#modifiers.push(modifier)
+			this.calculate()
 		}
-		this.calculate()
 		return this
 	}
 

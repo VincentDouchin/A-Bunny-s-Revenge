@@ -81,6 +81,7 @@ export const playerBundle = (health: number, addHealth: boolean, weapon: weapons
 		dash: new Dash(1000),
 		sneeze: new Timer(2000, false),
 		poisoned: new Timer(500, false),
+		sleepy: new Timer(2000, false),
 		combo: {
 			lastAttack: 0,
 			heavyAttack: 0,
