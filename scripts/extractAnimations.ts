@@ -23,15 +23,19 @@ export class ExtractAnimations extends AssetTransformer {
 
 	async add(path: PathInfo) {
 		const io = await this.registerIO()
-		const glb = await io.read(path.full)
-		const root = glb.getRoot()
-		const animationNames = root
-			.listAnimations()
-			.map(animation => animation.getName())
-			.filter(x => !x.toLowerCase().includes('meta'))
-			.sort((a, b) => a.localeCompare(b))
-		if (path.name) {
-			this.animations.set(path.name.replace('-optimized', ''), animationNames)
+		try {
+			const glb = await io.read(path.full)
+			const root = glb.getRoot()
+			const animationNames = root
+				.listAnimations()
+				.map(animation => animation.getName())
+				.filter(x => !x.toLowerCase().includes('meta'))
+				.sort((a, b) => a.localeCompare(b))
+			if (path.name) {
+				this.animations.set(path.name.replace('-optimized', ''), animationNames)
+			}
+		} catch (e) {
+			console.error(e)
 		}
 	}
 

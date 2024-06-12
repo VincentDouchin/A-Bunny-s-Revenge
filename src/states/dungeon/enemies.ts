@@ -8,6 +8,7 @@ import { EnemySizes, Sizes } from '@/constants/sizes'
 import { Animator } from '@/global/animator'
 import { type Entity, Faction } from '@/global/entity'
 import { assets, ecs, time } from '@/global/init'
+import { updateSave } from '@/global/save'
 import type { DungeonRessources } from '@/global/states'
 import { inMap } from '@/lib/hierarchy'
 import { modelColliderBundle } from '@/lib/models'
@@ -15,7 +16,6 @@ import type { Subscriber, System } from '@/lib/state'
 import { Stat } from '@/lib/stats'
 import { Timer } from '@/lib/timer'
 import { getRandom } from '@/utils/mapFunctions'
-import { save, updateSave } from '@/global/save'
 
 export const enemyBundle = (name: enemy, level: number) => {
 	const enemy = enemyData[name]

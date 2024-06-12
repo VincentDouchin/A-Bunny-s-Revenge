@@ -127,7 +127,7 @@ const lockDoors = () => doorToLockQuery.onEntityAdded.subscribe((e) => {
 		ecs.update(e, { emitter: doorClosed() })
 	}
 })
-const unlockDoors = () => doorToUnlockQuery.onEntityAdded.subscribe((e) => {
+export const unlockDoors = () => doorToUnlockQuery.onEntityAdded.subscribe((e) => {
 	e.collider.setSensor(true)
 
 	if (e.vineGate) {

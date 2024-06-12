@@ -20,6 +20,7 @@ import { assets, coroutines, ecs, gameTweens, time, world } from '@/global/init'
 import { EnemyAttackStyle, Faction } from '@/global/entity'
 import type { Entity } from '@/global/entity'
 import { pollenBundle } from '@/particles/pollenParticles'
+import { inMap } from '@/lib/hierarchy'
 
 export const playerQuery = ecs.with('position', 'sensorCollider', 'strength', 'body', 'critChance', 'critDamage', 'combo', 'playerAnimator', 'weapon', 'player', 'collider').where(({ faction }) => faction === Faction.Player)
 
@@ -228,6 +229,7 @@ export const sporeBehaviorPlugin = enemyBehavior(EnemyAttackStyle.Spore)({
 		enter: async (e, setState) => {
 			e.enemyAnimator.playAnimation('attacking')
 			ecs.add({
+				...inMap(),
 				position: e.position.clone().add(new Vector3(0, 0, 15).applyQuaternion(e.rotation)),
 				...pollenBundle(0xCFE0ED, 0xCFD1ED),
 				sleepingPowder: true,

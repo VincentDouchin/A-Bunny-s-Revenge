@@ -184,7 +184,7 @@ const loadMainMenuAssets = async (glob: GlobEager) => {
 		return glb
 	}), k => getFileName(k.replace('-optimized', '')))
 }
-const modelOptions: getToonOptions = (_key: string, materialName: string, _name: string, node: Mesh) => {
+const modelOptions: getToonOptions = (key: string, materialName: string, _name: string, node: Mesh) => {
 	const isGate = node.parent?.name === 'GATE'
 	return {
 		shadow: true,
@@ -192,6 +192,7 @@ const modelOptions: getToonOptions = (_key: string, materialName: string, _name:
 		material: isGate ? VineGateMaterial : ToonMaterial,
 		isolate: isGate,
 		transparent: isGate || undefined,
+		side: key.includes('Creepy') ? DoubleSide : undefined,
 	}
 }
 type AssetsLoaded<T extends Record<string, Promise<any> | any>> = { [K in keyof T]: Awaited<T[K]> }

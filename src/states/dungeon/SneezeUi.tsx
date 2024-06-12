@@ -18,6 +18,10 @@ export const SneezeUi = () => {
 					['sleepy', '#CFE0ED'],
 				] as const satisfies ReadonlyArray<readonly [ComponentsOfType<Timer<false>>, string]>
 				css/* css */`
+				.debuff-wrapper{
+					display:grid;
+					gap: 0.5rem;
+				}
 				.debuff-container{
 					width:5rem;
 					height: 0.5rem;
@@ -32,19 +36,21 @@ export const SneezeUi = () => {
 				`
 				return (
 					<Portal mount={player().debuffsContainer.element}>
-						<For each={affect}>
-							{([component, color]) => {
-								const affected = ui.sync(() => player()[component].running())
-								const sneezePercent = ui.sync(() => player()[component].percent())
-								return (
-									<Show when={affected()}>
-										<div class="debuff-container">
-											<div class="debuff" style={{ width: `${sneezePercent() * 100}%`, background: color }}></div>
-										</div>
-									</Show>
-								)
-							}}
-						</For>
+						<div class="debuff-wrapper">
+							<For each={affect}>
+								{([component, color]) => {
+									const affected = ui.sync(() => player()[component].running())
+									const sneezePercent = ui.sync(() => player()[component].percent())
+									return (
+										<Show when={affected()}>
+											<div class="debuff-container">
+												<div class="debuff" style={{ width: `${sneezePercent() * 100}%`, background: color }}></div>
+											</div>
+										</Show>
+									)
+								}}
+							</For>
+						</div>
 					</Portal>
 				)
 			}}

@@ -18,7 +18,7 @@ export const setupGame = async () => {
 		updateCameraZoom()
 	} else if (params.debugEnemies) {
 		const enemiesRoom = assignPlanAndEnemies([{ position: { x: 0, y: 0 }, connections: { north: 1, south: null, east: null }, type: RoomType.Battle }], 0)
-		enemiesRoom[0].enemies = ['Forest_Butterfly_A', 'Forest_Butterfly_A', 'Forest_Butterfly_A']
+		enemiesRoom[0].enemies = ['Forest_Butterfly_A', 'Forest_Butterfly_A', 'Forest_Butterfly_A', 'Snailo_B']
 		enemiesRoom[0].type = RoomType.Battle
 		dungeonState.enable({ dungeon: enemiesRoom[0], direction: 'south', firstEntry: true, playerHealth: 5, dungeonLevel: 0, weapon: 'SwordWeapon' })
 		updateRenderSize()

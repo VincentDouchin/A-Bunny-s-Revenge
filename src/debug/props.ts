@@ -28,6 +28,7 @@ import { dialogBundle } from '@/states/game/dialog'
 import { doorSide } from '@/states/game/spawnDoor'
 import { lockPlayer, unlockPlayer } from '@/utils/dialogHelpers'
 import { sleep } from '@/utils/sleep'
+import { getSecondaryColliders } from '@/lib/models'
 
 export const customModels = {
 	door: doorSide,
@@ -287,9 +288,26 @@ export const props: PlacableProp<propNames>[] = [
 				entity.doorLevel = data.data.doorLevel
 				entity.doorLocked = true
 			}
-			if (ressources && 'dungeon' in ressources && data.data.direction && (ressources.dungeon.doors[data.data.direction]?.type === RoomType.Boss || (ressources.dungeon.type === RoomType.Boss && ressources.dungeon.doors[data.data.direction] !== null))) {
-				entity.model = assets.models.Gate_Thorns.scene.clone()
-				entity.vineGate = true
+			if (ressources && 'dungeon' in ressources && data.data.direction) {
+				const isBossEntrance = ressources.dungeon.doors[data.data.direction]?.type === RoomType.Boss
+				const isBossRoom = ressources.dungeon.type === RoomType.Boss && ressources.dungeon.doors[data.data.direction] !== null
+				const isEntrance = ressources.dungeon.type === RoomType.Entrance && ressources.dungeon.doors[data.data.direction] === null
+				let model: Object3D | null = null
+				if (isBossEntrance || isBossRoom) {
+					model = assets.models.Gate_Thorns.scene.clone()
+					entity.vineGate = true
+					if (isBossRoom) {
+						model.rotateY(Math.PI)
+					}
+				} else if (isEntrance) {
+					model = assets.models.Gate_Vines.scene.clone()
+					entity.vineGate = true
+					model.rotateY(Math.PI)
+				}
+				if (model) {
+					Object.assign(entity, getSecondaryColliders(model))
+					entity.model = model
+				}
 			}
 			return {
 				door: data.data.direction,
@@ -401,6 +419,7 @@ export const props: PlacableProp<propNames>[] = [
 			entity.model.traverse((node) => {
 				if (node.name.includes('Berry') && node instanceof Mesh) {
 					berriesModel.push(node)
+					node.material = node.material.clone()
 				}
 			})
 			for (let i = 0; i < 15; i++) {
