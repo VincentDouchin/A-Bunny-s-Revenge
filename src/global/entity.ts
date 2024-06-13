@@ -68,12 +68,15 @@ export enum RenderGroup {
 }
 export enum EnemyAttackStyle {
 	Charging,
+	ChargingTwice,
 	Range,
+	RangeThrice,
 	Melee,
 	Jumping,
 	Spore,
 	BeeBoss,
 }
+
 export interface States {
 	basket: 'idle' | 'running'
 	player: 'idle' | 'running' | 'attack' | 'dying' | 'dead' | 'picking' | 'dash' | 'hit' | 'stun' | 'poisoned'
@@ -225,6 +228,8 @@ export interface Entity {
 	deathTimer?: Timer<false>
 	attackPattern?: 'melee' | 'distance'
 	attackStyle?: EnemyAttackStyle
+	charges?: number
+	// ! Debuff
 	sneeze?: Timer<false>
 	poisoned?: Timer<false>
 	sleepy?: Timer<false>

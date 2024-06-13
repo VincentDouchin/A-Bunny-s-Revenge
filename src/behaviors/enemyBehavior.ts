@@ -139,11 +139,14 @@ const wander: EnemyState = {
 	},
 }
 const waitingAttack = (cooldown: number): EnemyState => ({
-	enter: async (e, setState) => {
+	enter: async (e, setState, { direction }) => {
 		e.enemyAnimator.playAnimation('idle')
 		flash(e, cooldown, 'preparing')
+		if (direction) {
+			e.movementForce.x = direction.x
+			e.movementForce.z = direction.z
+		}
 		await sleep(cooldown)
-
 		return setState('attack')
 	},
 	update: (e, setState, { touchedByPlayer, force }) => {
@@ -197,29 +200,38 @@ const stun: EnemyState = {
 	},
 }
 
-const attackCooldown = (delay: number): EnemyState => ({
-	enter: async (e, setState) => {
+const attackCooldown = (delay: number, escape: boolean): EnemyState => ({
+	enter: async (e, setState, { direction, player }) => {
 		e.enemyAnimator.playAnimation('running')
+		if (direction && player && escape) {
+			if (e.position.distanceTo(player.position) < 40) {
+				e.movementForce.x = -direction.x
+				e.movementForce.z = -direction.z
+			}
+		}
 		await sleep(delay)
 		return setState('idle')
 	},
 	update: (e, setState, { touchedByPlayer, force, direction }) => {
 		if (touchedByPlayer) return setState('hit')
 		if (direction) {
-			e.movementForce.x = direction.x
-			e.movementForce.z = direction.z
+			if (!escape) {
+				e.movementForce.x = direction.x
+				e.movementForce.z = direction.z
+			}
 			applyRotate(e, force)
 			applyMove(e, force.multiplyScalar(0.5))
 		}
 	},
 })
+
 const enemyBehavior = (attackStyle: EnemyAttackStyle) => behaviorPlugin(
 	enemyQuery.where(e => e.attackStyle === attackStyle),
 	'enemy',
 	enemyDecisions,
 )
-// ! SPORE
 
+// ! SPORE
 export const sporeBehaviorPlugin = enemyBehavior(EnemyAttackStyle.Spore)({
 	idle,
 	wander,
@@ -247,8 +259,9 @@ export const sporeBehaviorPlugin = enemyBehavior(EnemyAttackStyle.Spore)({
 	dying,
 	stun,
 	dead: {},
-	attackCooldown: attackCooldown(4000),
+	attackCooldown: attackCooldown(4000, false),
 })
+
 // ! RANGE
 export const rangeEnemyBehaviorPlugin = enemyBehavior(EnemyAttackStyle.Range)({
 	idle,
@@ -258,8 +271,8 @@ export const rangeEnemyBehaviorPlugin = enemyBehavior(EnemyAttackStyle.Range)({
 	attack: {
 		enter: async (e, setState, { force }) => {
 			applyRotate(e, force)
+			e.enemyAnimator.playClamped('attacking')
 			projectileAttack(e.rotation.clone())(e)
-			await e.enemyAnimator.playClamped('attacking')
 			return setState('attackCooldown')
 		},
 		update: (_e, setState, { touchedByPlayer }) => {
@@ -270,24 +283,38 @@ export const rangeEnemyBehaviorPlugin = enemyBehavior(EnemyAttackStyle.Range)({
 	dying,
 	stun,
 	dead: {},
-	attackCooldown: {
-		enter: async (e, setState, { direction, player }) => {
-			e.enemyAnimator.playClamped('running')
-			if (direction && player) {
-				if (e.position.distanceTo(player.position) < 40) {
-					e.movementForce.x = -direction.x
-					e.movementForce.z = -direction.z
-				}
-			}
-			await sleep(1000)
-			return setState('idle')
-		},
-		update: (e, setState, { force, touchedByPlayer }) => {
-			if (touchedByPlayer) return setState('hit')
-			applyMove(e, force.multiplyScalar(0.5))
+	attackCooldown: attackCooldown(1000, true),
+
+})
+
+// ! RANGE THRICE
+export const rangeThriceEnemyBehaviorPlugin = enemyBehavior(EnemyAttackStyle.RangeThrice)({
+	idle,
+	wander,
+	running: running(50),
+	waitingAttack: waitingAttack(200),
+	attack: {
+		enter: async (e, setState, { force }) => {
 			applyRotate(e, force)
+			projectileAttack(e.rotation.clone())(e)
+			await e.enemyAnimator.playClamped('attacking', { timeScale: 2 })
+			if (e.charges !== undefined && e.charges < 2) {
+				e.charges++
+				return setState('waitingAttack')
+			} else {
+				e.charges = 0
+				return setState('attackCooldown')
+			}
+		},
+		update: (_e, setState, { touchedByPlayer }) => {
+			if (touchedByPlayer) return setState('hit')
 		},
 	},
+	hit,
+	dying,
+	stun,
+	dead: {},
+	attackCooldown: attackCooldown(1000, true),
 
 })
 
@@ -326,7 +353,52 @@ export const chargingEnemyBehaviorPlugin = enemyBehavior(EnemyAttackStyle.Chargi
 			})
 		},
 	},
-	attackCooldown: attackCooldown(2000),
+	attackCooldown: attackCooldown(2000, false),
+})
+
+// ! CHARGING TWICE
+export const chargingTwiceEnemyBehaviorPlugin = enemyBehavior(EnemyAttackStyle.ChargingTwice)({
+	idle,
+	dying,
+	waitingAttack: waitingAttack(500),
+	hit,
+	stun,
+	wander,
+	running: running(30),
+	dead: {},
+	attack: {
+		enter: async (e, setState) => {
+			ecs.add({ parent: e, ...dash(4) })
+			e.enemyAnimator.playAnimation('running')
+			await sleep(800)
+			if (e.charges === 0) {
+				e.charges = 1
+				return setState('waitingAttack')
+			} else {
+				e.charges = 0
+				return setState('attackCooldown')
+			}
+		},
+		update: (e, setState, { force, touchedByPlayer, player }) => {
+			applyRotate(e, force)
+			applyMove(e, force.multiplyScalar(2))
+			if (touchedByPlayer) return setState('hit')
+			world.contactPairsWith(e.collider, (c) => {
+				for (const obstacle of obstableQuery) {
+					if (obstacle.collider === c && world.intersectionPair(e.sensorCollider, c)) {
+						playSound('zapsplat_impacts_wood_rotten_tree_trunk_hit_break_crumple_011_102694')
+						e.charges = 0
+						return setState('stun')
+					}
+				}
+				if (player && c === player.collider) {
+					e.charges = 0
+					return setState('attackCooldown')
+				}
+			})
+		},
+	},
+	attackCooldown: attackCooldown(2000, false),
 })
 
 // ! MELEE
@@ -351,7 +423,7 @@ export const meleeEnemyBehaviorPlugin = enemyBehavior(EnemyAttackStyle.Melee)({
 			if (touchedByPlayer) return setState('hit')
 		},
 	},
-	attackCooldown: attackCooldown(2000),
+	attackCooldown: attackCooldown(2000, false),
 })
 
 // ! JUMPING
@@ -410,5 +482,5 @@ export const jumpingEnemyBehaviorPlugin = enemyBehavior(EnemyAttackStyle.Jumping
 			if (touchedByPlayer) return setState('hit')
 		},
 	},
-	attackCooldown: attackCooldown(4000),
+	attackCooldown: attackCooldown(4000, false),
 })

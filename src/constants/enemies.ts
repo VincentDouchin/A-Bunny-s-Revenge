@@ -21,7 +21,7 @@ export interface Enemy<Name extends keyof Animations> {
 	animationMap: Record<EnemyAnimations, Animations[Name]>
 	components?: () => Entity
 }
-const enemyNames = ['Armabee', 'Armabee_Evolved', 'Shaga_A', 'Big_Boar_A', 'Snailo_A', 'Snailo_B', 'Porin_A', 'Forest_Butterfly_A', 'Racco_A', 'Platopo_A', 'Batty_A', 'Big_Boar_C', 'Magicbook_A', 'Devilu_A'] as const satisfies readonly characters[]
+const enemyNames = ['Armabee', 'Armabee_Evolved', 'Shaga_A', 'Big_Boar_A', 'Snailo_A', 'Snailo_B', 'Porin_A', 'Forest_Butterfly_A', 'Racco_A', 'Platopo_A', 'Batty_A', 'Big_Boar_C', 'Magicbook_A', 'Devilu_A', 'Big_Boar_B'] as const satisfies readonly characters[]
 
 export type enemy = (typeof enemyNames)[number]
 
@@ -190,7 +190,7 @@ export const enemyData: { [k in enemy]: Enemy<k> } = {
 		boss: false,
 		drops: [],
 		behavior: 'enemy',
-		attackStyle: EnemyAttackStyle.Melee,
+		attackStyle: EnemyAttackStyle.RangeThrice,
 		animationMap: genericEnemyAnimationMap,
 	},
 	Big_Boar_C: {
@@ -202,6 +202,17 @@ export const enemyData: { [k in enemy]: Enemy<k> } = {
 		drops: [],
 		behavior: 'enemy',
 		attackStyle: EnemyAttackStyle.BeeBoss,
+		animationMap: genericEnemyAnimationMap,
+	},
+	Big_Boar_B: {
+		name: 'Moss boar',
+		health: 5,
+		scale: 2.5,
+		speed: 1.5,
+		boss: false,
+		drops: [{ name: 'ham', quantity: 2, rarity: Rarity.Common }],
+		behavior: 'enemy',
+		attackStyle: EnemyAttackStyle.ChargingTwice,
 		animationMap: genericEnemyAnimationMap,
 	},
 }

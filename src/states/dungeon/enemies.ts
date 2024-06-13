@@ -6,7 +6,7 @@ import type { enemy } from '@/constants/enemies'
 import { enemyData } from '@/constants/enemies'
 import { EnemySizes, Sizes } from '@/constants/sizes'
 import { Animator } from '@/global/animator'
-import { type Entity, Faction } from '@/global/entity'
+import { EnemyAttackStyle, type Entity, Faction } from '@/global/entity'
 import { assets, ecs, time } from '@/global/init'
 import { updateSave } from '@/global/save'
 import type { DungeonRessources } from '@/global/states'
@@ -43,7 +43,9 @@ export const enemyBundle = (name: enemy, level: number) => {
 		healthBar: true,
 		attackStyle: enemy.attackStyle,
 		...(enemy.components ? enemy.components() : {}),
+		...([EnemyAttackStyle.ChargingTwice, EnemyAttackStyle.RangeThrice].includes(enemy.attackStyle) ? { charges: 0 } : {}),
 	} as const satisfies Entity
+
 	if (enemy.boss) {
 		Object.assign(entity, {
 			boss: true,
