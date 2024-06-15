@@ -20,6 +20,7 @@ import { playSound } from '@/global/sounds'
 import { getWorldPosition } from '@/lib/transforms'
 import { addToast } from '@/ui/Toaster'
 import { addToHand } from '@/states/game/equip'
+import { heartEmitter } from '@/particles/heartParticles'
 
 const playerQuery = ecs.with('player', 'position', 'collider')
 const movingPlayerQuery = playerQuery.with('movementForce')
@@ -64,6 +65,12 @@ export const addItemToPlayer = (item: Item) => {
 	const player = playerInventoryQuery.first
 	if (player) {
 		if (item.health) {
+			ecs.add({
+				parent: player,
+				emitter: heartEmitter(),
+				position: new Vector3(),
+				autoDestroy: true,
+			})
 			player.currentHealth = Math.min(player.maxHealth.value, player.currentHealth + item.health)
 		} else if (item.recipe) {
 			unlockRecipe(item.recipe)

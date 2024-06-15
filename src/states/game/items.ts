@@ -81,12 +81,7 @@ export const collectItems = (force = false) => async () => {
 					ecs.removeComponent(item, 'body')
 					if (force) await sleep(100)
 					itemsQuery.remove(item)
-					if (item.itemLabel) {
-						addItemToPlayer({ name: item.itemLabel, quantity: 1, recipe: item.recipe, health: item.health })
-					}
-					if (item.acorn) {
-						updateSave(s => s.acorns++)
-					}
+
 					addTag(item, 'collecting')
 					const initialPosition = item.position.clone()
 					const initialScale = item.model.scale.clone()
@@ -98,9 +93,14 @@ export const collectItems = (force = false) => async () => {
 						}).onComplete(() => {
 							playSound('zapsplat_multimedia_alert_action_collect_pick_up_point_or_item_79293')
 							ecs.remove(item)
+							if (item.itemLabel) {
+								addItemToPlayer({ name: item.itemLabel, quantity: 1, recipe: item.recipe, health: item.health })
+							}
+							if (item.acorn) {
+								updateSave(s => s.acorns++)
+							}
 						}),
 					)
-					// gameTweens.add(new Tween(item.model.scale).to(item.model.scale.clone().multiplyScalar(0.5), dist * 100).easing(Easing.Elastic.InOut))
 				}
 			}
 		}

@@ -19,7 +19,6 @@ import { pollenBundle } from '@/particles/pollenParticles'
 import { projectileTrail } from '@/particles/projectileTrail'
 import { sleepyEmitter } from '@/particles/sleepyParticles'
 import { sleep } from '@/utils/sleep'
-import { heartEmitter } from '@/particles/heartParticles'
 
 const projectileBundle = (rotation: Quaternion, origin: Vector3, strength: Stat) => {
 	const model = new Mesh(new ConeGeometry(1, 4, 7), new MeshToonMaterial({ color: 0x2C1E31 }))
