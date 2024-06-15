@@ -2,7 +2,7 @@ import type { Object3D, Object3DEventMap } from 'three'
 import { Quaternion, Vector3 } from 'three'
 import type { Collider } from '@dimforge/rapier3d-compat'
 import type { State } from './state'
-import type { direction } from './directions'
+import { Direction } from './directions'
 import { ecs, time, world } from '@/global/init'
 
 export const getWorldPosition = (obj: Object3D<Object3DEventMap>) => {
@@ -17,12 +17,12 @@ export const getWorldRotation = (obj: Object3D<Object3DEventMap>) => {
 }
 
 const positionQuery = ecs.with('position', 'group')
-export const getRotationFromDirection = (direction: direction) => {
-	const rotations = {
-		west: 1,
-		east: -1,
-		north: 0,
-		south: 2,
+export const getRotationFromDirection = (direction: Direction) => {
+	const rotations: Record<Direction, number> = {
+		[Direction.W]: 1,
+		[Direction.E]: -1,
+		[Direction.N]: 0,
+		[Direction.S]: 2,
 	}
 	const rotation = new Quaternion()
 	rotation.setFromAxisAngle(new Vector3(0, 1, 0), Math.PI / 2 * rotations[direction])

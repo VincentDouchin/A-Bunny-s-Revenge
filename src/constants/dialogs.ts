@@ -32,7 +32,7 @@ export const dialogs = {
 					yield 'You\'re such a lovely granddaughter'
 					completeQuest('grandma_1')
 				} else {
-					if (!hasItem(i => Boolean(itemsData[i.name].seed))) {
+					if (!hasItem(i => 'seed' in itemsData[i.name])) {
 						yield 'Oh you don\'t have any seeds!'
 						yield 'Here, let me give you a few'
 						addItemToPlayer({ name: 'carrot_seeds', quantity: 10 })

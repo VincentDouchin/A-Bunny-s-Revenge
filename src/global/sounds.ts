@@ -22,8 +22,19 @@ export const setAllMuted = () => {
 }
 
 export const initHowler = () => {
-	Howler.volume(save.settings.volume / 100)
-	setAllMuted()
+	const init = () => {
+		Howler.volume(save.settings.volume / 100)
+		setAllMuted()
+	}
+	if (Howler.ctx.state === 'suspended') {
+		Howler.ctx.onstatechange = () => {
+			if (Howler.ctx.state === 'running') {
+				init()
+			}
+		}
+	} else {
+		init()
+	}
 }
 type sounds = Record<soundAssets, Record<string, { volume: number }>>
 const [localSoundData] = useLocalStorage<sounds>('soundsData', soundsData)

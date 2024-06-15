@@ -4,12 +4,11 @@ import { enemyGroups } from '@/constants/enemyGroups'
 import { type Item, getSellableItems } from '@/constants/items'
 import type { Level } from '@/debug/LevelEditor'
 import { levelsData } from '@/global/init'
-import type { direction } from '@/lib/directions'
-import { otherDirection } from '@/lib/directions'
+import { Direction, cardinalDirections, otherDirection } from '@/lib/directions'
 import { getRandom, mapValues } from '@/utils/mapFunctions'
 
 // ! ROOMS
-type Connections = Partial<Record<direction, number | null>>
+type Connections = Partial<Record<Direction, number | null>>
 
 export enum RoomType {
 	Battle,
@@ -22,7 +21,7 @@ export enum RoomType {
 export interface Room {
 	plan: Level
 	enemies: enemy[]
-	doors: Partial<Record<direction, Room | null>>
+	doors: Partial<Record<Direction, Room | null>>
 	type: RoomType
 	encounter: keyof typeof encounters | null
 	items?: (Item | null)[]
@@ -39,13 +38,13 @@ interface BlankRoom {
 	type: RoomType
 }
 
-const getRoomSidePosition = ({ position }: BlankRoom, side: direction): Position => {
+const getRoomSidePosition = ({ position }: BlankRoom, side: Direction): Position => {
 	const positionOffset: Position = { x: 0, y: 0 }
 
-	if (side === 'north') positionOffset.y = 1
-	if (side === 'east') positionOffset.x = 1
-	if (side === 'south') positionOffset.y = -1
-	if (side === 'west') positionOffset.x = -1
+	if (side === Direction.N) positionOffset.y = 1
+	if (side === Direction.E) positionOffset.x = 1
+	if (side === Direction.S) positionOffset.y = -1
+	if (side === Direction.W) positionOffset.x = -1
 
 	return {
 		x: position.x + positionOffset.x,
@@ -62,7 +61,7 @@ const findRoomByPosition = (rooms: BlankRoom[], pos: Position) => {
 
 	return -1
 }
-const createSideRoom = (rooms: BlankRoom[], roomId: number, direction: direction, position: Position): BlankRoom => {
+const createSideRoom = (rooms: BlankRoom[], roomId: number, direction: Direction, position: Position): BlankRoom => {
 	rooms[roomId].connections[direction] = rooms.length
 
 	return {
@@ -93,7 +92,7 @@ const floodFill = (roomId: number, rooms: RoomDistance[], distance: number) => {
 
 	currRoom.distance = distance
 
-	for (const connectionSide of Object.keys(currRoom.connections) as direction[]) {
+	for (const connectionSide of Object.keys(currRoom.connections) as Direction[]) {
 		const connection = currRoom.connections[connectionSide]
 		if (connection) {
 			floodFill(connection, rooms, distance + 1)
@@ -104,12 +103,12 @@ const resetFloodFill = (rooms: RoomDistance[]) => {
 	rooms.forEach(room => delete room.distance)
 }
 const assignStartOrEnd = (room: BlankRoom, rooms: BlankRoom[]) => {
-	const possibleStart = (['north', 'east', 'west', 'south'] as const).filter((dir) => {
+	const possibleStart = [...cardinalDirections].filter((dir) => {
 		const position = getRoomSidePosition(room, dir)
 		return !rooms.find(r => r.position.x === position.x && r.position.y === position.y)
 	})
 	if (possibleStart.length === 0) {
-		const newPossibleDirections = (['north', 'south', 'east', 'west'] as const).filter(dir => !(dir in room.connections))
+		const newPossibleDirections = [...cardinalDirections].filter(dir => !(dir in room.connections))
 		possibleStart.push(...newPossibleDirections)
 	}
 	room.connections[getRandom(possibleStart)] = null
@@ -156,7 +155,7 @@ const findCriticalPath = (rooms: RoomDistance[]) => {
 
 		const currRoom = rooms[currRoomId]
 		for (const connectionSide in currRoom.connections) {
-			const roomId = currRoom.connections[connectionSide as direction]
+			const roomId = currRoom.connections[connectionSide as Direction]
 			if (roomId && rooms[roomId].distance! === currRoom.distance! - 1) {
 				currRoomId = roomId
 				break
@@ -175,7 +174,7 @@ const createRooms = (count: number): BlankRoom[] => {
 
 	while (count > 1) {
 		const rndRoomId = Math.floor(Math.random() * rooms.length)
-		const rndSide: direction = getRandom(['north', 'south', 'east', 'west'])
+		const rndSide: Direction = getRandom([...cardinalDirections])
 		const rndRoom = rooms[rndRoomId]
 		const position = getRoomSidePosition(rndRoom, rndSide)
 
@@ -206,7 +205,7 @@ export const assignPlanAndEnemies = (rooms: BlankRoom[], level: number): Room[] 
 	const dungeons = levelsData.levels.filter(level => level.dungeon)
 	let hasSeller = false
 	const filledRooms = rooms.map((room) => {
-		const directions = Object.keys(room.connections) as direction[]
+		const directions = Object.keys(room.connections) as Direction[]
 		const possibleRooms = dungeons.filter((dungeon) => {
 			const props = Object.values(levelsData.levelData).filter(p => p?.map === dungeon.id && p?.data?.direction)
 			return directions.length === props.length && directions.every(dir => props.some((p) => {

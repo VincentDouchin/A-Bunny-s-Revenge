@@ -32,7 +32,7 @@ import { getScreenBuffer } from '@/utils/buffer'
 import { entries, getRandom } from '@/utils/mapFunctions'
 
 export type ModelName = models | customModel | vegetation | gardenPlots | fruit_trees
-export interface EntityData<T extends Record<string, any>> {
+export interface EntityData<T extends Record<string, any> | undefined> {
 	model: ModelName
 	scale: number
 	position: [number, number, number]
@@ -202,7 +202,7 @@ export const LevelEditor = () => {
 						ecs.add({ map: level.id })
 						spawnGroundAndTrees(level)
 						spawnLevelData({})
-						ecs.add({ ...playerBundle(PLAYER_DEFAULT_HEALTH, true, null), position: new Vector3(0, 10, 0) })
+						ecs.add({ ...playerBundle(PLAYER_DEFAULT_HEALTH, null), position: new Vector3(0, 10, 0) })
 					}
 					const draw = createMemo(() => selectedTab() === 'draw map')
 					const uploadModel = () => {

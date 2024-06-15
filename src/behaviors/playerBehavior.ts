@@ -9,7 +9,7 @@ import type { Entity } from '@/global/entity'
 import { EnemyAttackStyle, Faction } from '@/global/entity'
 import { ecs, world } from '@/global/init'
 import { playSound } from '@/global/sounds'
-import { campState } from '@/global/states'
+import { campState, pausedState } from '@/global/states'
 import { spawnDamageNumber } from '@/particles/damageNumber'
 import { dash } from '@/particles/dashParticles'
 import { poisonBubbles } from '@/states/dungeon/poisonTrail'
@@ -17,7 +17,7 @@ import { stunBundle } from '@/states/dungeon/stun'
 import { sleep } from '@/utils/sleep'
 
 const ANIMATION_SPEED = 1.3
-const playerComponents = ['playerAnimator', 'movementForce', 'speed', 'body', 'rotation', 'playerControls', 'combo', 'attackSpeed', 'dash', 'collider', 'currentHealth', 'model', 'hitTimer', 'size', 'sneeze', 'targetRotation', 'poisoned', 'size', 'position', 'targetMovementForce', 'sleepy'] as const satisfies readonly (keyof Entity)[]
+const playerComponents = ['playerAnimator', 'movementForce', 'speed', 'body', 'rotation', 'playerControls', 'combo', 'attackSpeed', 'dash', 'collider', 'currentHealth', 'model', 'hitTimer', 'size', 'sneeze', 'targetRotation', 'poisoned', 'size', 'position', 'targetMovementForce', 'sleepy', 'modifiers'] as const satisfies readonly (keyof Entity)[]
 type PlayerComponents = (typeof playerComponents)[number]
 const playerQuery = ecs.with(...playerComponents)
 const enemyQuery = ecs.with('faction', 'state', 'strength', 'collider').where(e => e.faction === Faction.Enemy && e.state === 'attack')
@@ -45,7 +45,7 @@ export const playerBehaviorPlugin = behaviorPlugin(
 		const attackingEnemy = getAttackingEnemy(e)
 		const sneezing = e.sneeze.finished()
 		const poisoned = e.poisoned.finished()
-		const canDash = e.dash.finished() && !e.speed.hasModifier('beeBoss')
+		const canDash = e.dash.finished() && !e.modifiers.hasModifier('honeySpot')
 		return { ...getMovementForce(e), touchedByEnemy: attackingEnemy, sneezing, poisoned, canDash }
 	},
 )({
@@ -94,15 +94,15 @@ export const playerBehaviorPlugin = behaviorPlugin(
 	attack: {
 		enter: async (e, setupState) => {
 			if (e.combo.lastAttack === 0) {
-				playSound(['Slash_Attack_Heavy_1', 'Slash_Attack_Heavy_2', 'Slash_Attack_Heavy_3'])
+				!pausedState.enabled && playSound(['Slash_Attack_Heavy_1', 'Slash_Attack_Heavy_2', 'Slash_Attack_Heavy_3'])
 				await e.playerAnimator.playOnce('lightAttack', { timeScale: getAttackSpeed(e) }, 0.5)
 			}
 			if (e.combo.lastAttack === 1) {
-				playSound(['Slash_Attack_Light_1', 'Slash_Attack_Light_2'])
+				!pausedState.enabled && playSound(['Slash_Attack_Light_1', 'Slash_Attack_Light_2'])
 				await e.playerAnimator.playOnce('slashAttack', { timeScale: getAttackSpeed(e) * 0.8 }, 0.2)
 			}
 			if (e.combo.lastAttack === 2) {
-				playSound(['Slash_Attack_Heavy_1', 'Slash_Attack_Heavy_2', 'Slash_Attack_Heavy_3'])
+				!pausedState.enabled && playSound(['Slash_Attack_Heavy_1', 'Slash_Attack_Heavy_2', 'Slash_Attack_Heavy_3'])
 				await e.playerAnimator.playClamped('heavyAttack', { timeScale: getAttackSpeed(e) * 0.8 })
 			}
 			e.combo.lastAttack = 0

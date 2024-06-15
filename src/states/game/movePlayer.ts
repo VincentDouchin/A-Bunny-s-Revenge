@@ -6,7 +6,7 @@ import { throttle } from '@/lib/state'
 import { footstepsBundle } from '@/particles/footsteps'
 
 const movementQuery = ecs.with('body', 'rotation', 'movementForce', 'speed')
-const playerQuery = movementQuery.with('playerControls', 'position', 'state', 'lastStep', 'playerAnimator')
+const playerQuery = movementQuery.with('playerControls', 'position', 'state', 'lastStep', 'playerAnimator', 'modifiers')
 
 export const playerSteps = () => {
 	for (const player of playerQuery) {
@@ -16,7 +16,7 @@ export const playerSteps = () => {
 					if (player.lastStep[foot] === false) {
 						playStep('random')
 						player.lastStep[foot] = true
-						const honey = player.speed.hasModifier('beeBoss')
+						const honey = player.modifiers.hasModifier('honeySpot')
 						ecs.add({
 							parent: player,
 							...footstepsBundle(foot, honey),

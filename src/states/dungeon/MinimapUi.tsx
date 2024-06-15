@@ -12,24 +12,24 @@ import type { Room } from './generateDungeon'
 import { RoomType } from './generateDungeon'
 import { entries } from '@/utils/mapFunctions'
 import { useQuery } from '@/ui/store'
-import type { direction } from '@/lib/directions'
+import { Direction } from '@/lib/directions'
 import { ecs } from '@/global/init'
 
-const RoomUi = ({ room, direction, previous, current }: { room: Room, direction?: direction, previous?: Room, current: boolean }) => {
-	const dir: Record<direction, string> = {
-		north: '0% calc(-100% - 0.5rem)',
-		south: '0% calc(100% + 0.5rem)',
-		east: 'calc(100% + 0.5rem) 0%',
-		west: 'calc(-100% - 0.5rem) 0%',
+const RoomUi = ({ room, direction, previous, current }: { room: Room, direction?: Direction, previous?: Room, current: boolean }) => {
+	const dir: Record<Direction, string> = {
+		[Direction.N]: '0% calc(-100% - 0.5rem)',
+		[Direction.S]: '0% calc(100% + 0.5rem)',
+		[Direction.E]: 'calc(100% + 0.5rem) 0%',
+		[Direction.W]: 'calc(-100% - 0.5rem) 0%',
 	}
 
 	const offset = direction ? dir[direction] : '0% 0%'
 
-	const connectorSize: Record<direction, any> = {
-		north: { width: '0.5rem', height: '1rem', bottom: '100%' },
-		south: { width: '0.5rem', height: '1rem', top: '100%' },
-		east: { width: '1.1rem', height: '0.5rem', left: '100%' },
-		west: { width: '1.1rem', height: '0.5rem', right: '100%' },
+	const connectorSize: Record<Direction, any> = {
+		[Direction.N]: { width: '0.5rem', height: '1rem', bottom: '100%' },
+		[Direction.S]: { width: '0.5rem', height: '1rem', top: '100%' },
+		[Direction.E]: { width: '1.1rem', height: '0.5rem', left: '100%' },
+		[Direction.W]: { width: '1.1rem', height: '0.5rem', right: '100%' },
 	}
 	css/* css */`
 	.minimap-wrapper{

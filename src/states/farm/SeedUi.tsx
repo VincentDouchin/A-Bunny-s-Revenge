@@ -5,7 +5,7 @@ import { Transition } from 'solid-transition-group'
 import atom from 'solid-use/atom'
 import { ItemDisplay } from './InventoryUi'
 import type { Item } from '@/constants/items'
-import { itemsData } from '@/constants/items'
+import { getSeed } from '@/constants/items'
 import type { Entity } from '@/global/entity'
 import { ecs, ui } from '@/global/init'
 import { updateSave } from '@/global/save'
@@ -43,10 +43,10 @@ export const SeedUi = () => {
 	return (
 		<Show when={context?.player()}>
 			{(player) => {
-				const seeds = ui.sync(() => player().inventory.filter(item => item && itemsData[item.name].seed).filter(Boolean))
+				const seeds = ui.sync(() => player().inventory.filter(item => item && getSeed(item.name)).filter(Boolean))
 				const inputs = ui.sync(() => playerMenuInputs.first?.menuInputs)
 				const chooseSeed = (seed: Item, entity: Entity) => {
-					const crop = itemsData[seed.name].seed
+					const crop = getSeed(seed.name)
 					if (crop) {
 						updateSave(s => s.selectedSeed = crop)
 						ecs.removeComponent(entity, 'menuType')

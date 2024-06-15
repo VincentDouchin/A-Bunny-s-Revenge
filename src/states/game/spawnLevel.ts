@@ -1,11 +1,11 @@
 import { ColliderDesc, RigidBodyDesc, RigidBodyType } from '@dimforge/rapier3d-compat'
 import FastNoiseLite from 'fastnoise-lite'
 import type { Vec2, Vector4Like } from 'three'
-import { CanvasTexture, Color, Euler, Group, Mesh, PlaneGeometry, Quaternion, Vector2, Vector3 } from 'three'
+import { CanvasTexture, Euler, Group, Mesh, PlaneGeometry, Quaternion, Vector2, Vector3 } from 'three'
 import { encounters } from '../dungeon/encounters'
 import { RoomType } from '../dungeon/generateDungeon'
 import { spawnLight } from './spawnLights'
-import type { Level } from '@/debug/LevelEditor'
+import type { EntityData, Level } from '@/debug/LevelEditor'
 import { getModel, props } from '@/debug/props'
 import type { InstanceHandle } from '@/global/assetLoaders'
 import { canvasToArray, canvasToGrid, instanceMesh } from '@/global/assetLoaders'
@@ -321,7 +321,7 @@ export const spawnLevelData: System<FarmRessources | DungeonRessources | void> =
 				} as const satisfies Entity
 
 				if (bundleFn) {
-					ecs.add(bundleFn(entity, entityData, ressources))
+					ecs.add(bundleFn(entity, entityData as EntityData<never>, ressources))
 				} else {
 					ecs.add(entity)
 				}

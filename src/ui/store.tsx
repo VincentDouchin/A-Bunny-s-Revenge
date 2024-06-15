@@ -16,7 +16,7 @@ const GameContext = createContext<{
 	isPauseState: Accessor<boolean>
 	player: Accessor<typeof playerQuery['entities'][number]>
 }>()
-const playerQuery = playerInventoryQuery.with('playerControls', 'maxHealth', 'currentHealth', 'maxHealth', 'currentHealth', 'strength', 'menuInputs', 'sneeze', 'debuffsContainer', 'poisoned', 'position', 'sleepy')
+const playerQuery = playerInventoryQuery.with('playerControls', 'maxHealth', 'currentHealth', 'maxHealth', 'currentHealth', 'strength', 'menuInputs', 'sneeze', 'debuffsContainer', 'poisoned', 'position', 'sleepy', 'modifiers')
 export const useQuery = <T,>(query: Query<T>) => {
 	const [entities, setEntities] = createSignal(query.entities, { equals: false })
 	query.onEntityAdded.subscribe(() => {

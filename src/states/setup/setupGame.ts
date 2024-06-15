@@ -9,18 +9,19 @@ import { app, campState, dungeonState, mainMenuState } from '@/global/states'
 import { windowEvent } from '@/lib/uiManager'
 import { throttle } from '@/lib/state'
 import { time } from '@/global/init'
+import { Direction } from '@/lib/directions'
 
 export const setupGame = async () => {
 	if (params.debugBoss) {
 		const bossRoom = assignPlanAndEnemies([{ position: { x: 0, y: 0 }, connections: { north: 1, south: null }, type: RoomType.Boss }], 0)
-		dungeonState.enable({ dungeon: bossRoom[0], direction: 'south', firstEntry: true, playerHealth: 5, dungeonLevel: 0, weapon: 'Hoe' })
+		dungeonState.enable({ dungeon: bossRoom[0], direction: Direction.S, firstEntry: true, playerHealth: 5, dungeonLevel: 0, weapon: 'Hoe' })
 		updateRenderSize()
 		updateCameraZoom()
 	} else if (params.debugEnemies) {
 		const enemiesRoom = assignPlanAndEnemies([{ position: { x: 0, y: 0 }, connections: { north: 1, south: null, east: null }, type: RoomType.Battle }], 0)
-		enemiesRoom[0].enemies = ['Devilu_A']
+		enemiesRoom[0].enemies = ['Forest_Butterfly_A']
 		enemiesRoom[0].type = RoomType.Battle
-		dungeonState.enable({ dungeon: enemiesRoom[0], direction: 'south', firstEntry: true, playerHealth: 5, dungeonLevel: 0, weapon: 'SwordWeapon' })
+		dungeonState.enable({ dungeon: enemiesRoom[0], direction: Direction.S, firstEntry: true, playerHealth: 5, dungeonLevel: 0, weapon: 'SwordWeapon' })
 		updateRenderSize()
 		updateCameraZoom()
 	} else if (!params.skipMainMenu) {

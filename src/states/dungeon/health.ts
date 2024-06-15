@@ -19,6 +19,12 @@ export const killEntities = () => {
 		}
 	}
 }
+export const setInitialHealth = () => {
+	for (const entity of healthQuery) {
+		entity.currentHealth = entity.maxHealth.value
+	}
+}
+
 const deadEntities = ecs.with('state', 'body', 'movementForce', 'model', 'faction').where(e => e.state === 'dead')
 export const killAnimation = () => deadEntities.onEntityAdded.subscribe((e) => {
 	ecs.removeComponent(e, 'body')

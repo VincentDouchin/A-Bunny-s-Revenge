@@ -12,7 +12,7 @@ import { getTargetSize, renderer, updateRenderSize } from '@/global/rendering'
 import { resetSave } from '@/global/save'
 import { playSound } from '@/global/sounds'
 import { cutSceneState, mainMenuState } from '@/global/states'
-import type { direction } from '@/lib/directions'
+import { Direction } from '@/lib/directions'
 import { windowEvent } from '@/lib/uiManager'
 import { drawnHouseShader } from '@/shaders/drawnHouseShader'
 import { mainMenuBackgound } from '@/shaders/mainMenuBackground'
@@ -51,7 +51,7 @@ const drawUnderline = (ctx: CanvasRenderingContext2D, x: number, y: number, w: n
 	)
 	ctx.globalAlpha = 0.8
 }
-export type RenderMainMenuFn = (direction?: direction, offset?: number) => MenuOptions
+export type RenderMainMenuFn = (direction?: Direction, offset?: number) => MenuOptions
 const menu = ['Continue', 'New Game'] as const
 const mainMenuTexture = (mat: MeshStandardMaterial) => {
 	let selected = 0
@@ -77,7 +77,7 @@ const mainMenuTexture = (mat: MeshStandardMaterial) => {
 
 	let lastClone: HTMLCanvasElement | null = null
 	let map: CanvasTexture | null = null
-	return (direction?: direction | null, offset = 0) => {
+	return (direction?: Direction | null, offset = 0) => {
 		const oldSelected = selected
 		if (direction === 'south') {
 			selected = Math.min(selected + 1, menu.length - 1)
@@ -270,10 +270,10 @@ const selectOption = (fn: (offset: number) => void) => new Promise<void>((resolv
 export const selectMainMenu = () => {
 	for (const mainMenu of menuTextureQuery) {
 		if (mainMenu.menuInputs.get('down').justPressed) {
-			mainMenu.menuTexture('south')
+			mainMenu.menuTexture(Direction.S)
 		}
 		if (mainMenu.menuInputs.get('up').justPressed) {
-			mainMenu.menuTexture('north')
+			mainMenu.menuTexture(Direction.N)
 		}
 		if (mainMenu.menuInputs.get('validate').justPressed) {
 			if (mainMenu.menuTexture() === 'Continue') {

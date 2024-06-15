@@ -7,7 +7,7 @@ import { save } from '@/global/save'
 import { playSound } from '@/global/sounds'
 import type { DungeonRessources } from '@/global/states'
 import { campState, dungeonState, genDungeonState } from '@/global/states'
-import { otherDirection } from '@/lib/directions'
+import { Direction, otherDirection } from '@/lib/directions'
 import type { System } from '@/lib/state'
 import { doorClosed } from '@/particles/doorClosed'
 import vertexShader from '@/shaders/glsl/main.vert?raw'
@@ -90,7 +90,7 @@ export const collideWithDoorClearing = () => {
 			if (world.intersectionPair(door.collider, player.collider)) {
 				if (door.doorLevel !== undefined && player.weapon) {
 					const dungeon = genDungeon(7 + door.doorLevel * 5, true, door.doorLevel).find(room => room.type === RoomType.Entrance)!
-					dungeonState.enable({ dungeon, direction: 'south', firstEntry: true, playerHealth: 10, dungeonLevel: door.doorLevel, weapon: player.weapon.weaponName })
+					dungeonState.enable({ dungeon, direction: Direction.S, firstEntry: true, playerHealth: player.currentHealth, dungeonLevel: door.doorLevel, weapon: player.weapon.weaponName })
 				}
 				if (door.doorLevel === undefined) {
 					campState.enable({})

@@ -13,7 +13,7 @@ import { getModel } from './props'
 import { entries } from '@/utils/mapFunctions'
 import { ToonMaterial } from '@/shaders/materials'
 import { getSize } from '@/lib/models'
-import type { direction } from '@/lib/directions'
+import type { Direction } from '@/lib/directions'
 import { cameraQuery } from '@/global/rendering'
 import { ecs } from '@/global/init'
 import type { Entity } from '@/global/entity'
@@ -194,7 +194,7 @@ export const EntityEditor = ({ entity, levelData, setLevelData, setSelectedEntit
 													{key === 'direction' && (
 														<select
 															value={val}
-															onChange={e => updateData({ ...data(), direction: e.target.value as direction })}
+															onChange={e => updateData({ ...data(), direction: e.target.value as Direction })}
 														>
 															<option value="north">north</option>
 															<option value="south">south</option>
@@ -203,6 +203,18 @@ export const EntityEditor = ({ entity, levelData, setLevelData, setSelectedEntit
 														</select>
 													)}
 													{key === 'doorLevel' && (<input type="number" value={val} onChange={e => updateData({ ...data(), doorLevel: e.target.valueAsNumber })}></input>) }
+													{key === 'text' && (
+														<input
+															type="text"
+															value={val}
+															placeholder="Sign text"
+															onChange={(e) => {
+																e.stopImmediatePropagation()
+																updateData({ ...data(), text: e.target.value })
+															}}
+														>
+														</input>
+													)}
 												</div>
 											)
 										}}

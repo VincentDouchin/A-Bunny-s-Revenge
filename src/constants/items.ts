@@ -1,9 +1,10 @@
 import type { items } from '@assets/assets'
-import { ModStage, ModType, type Modifier, createModifier } from '@/lib/stats'
-import { entries, shuffle } from '@/utils/mapFunctions'
-import { save } from '@/global/save'
 
-export const cropNames = ['carrot', 'beet', 'tomato', 'lettuce', 'pumpkin', 'wheat', 'haricot', 'magic_bean'] as const satisfies readonly items[]
+import { save } from '@/global/save'
+import { entries, shuffle } from '@/utils/mapFunctions'
+import { modifiers } from '@/global/modifiers'
+
+export const cropNames = ['carrot', 'beet', 'tomato', 'lettuce', 'pumpkin', 'wheat', 'haricot', 'magic_bean', 'potato'] as const satisfies readonly items[]
 export const fruitNames = ['apple'] as const
 export type crops = (typeof cropNames)[number]
 export type fruits = (typeof fruitNames)[number]
@@ -19,20 +20,18 @@ export enum Rarity {
 	Rare = 25,
 	Always = 100,
 }
+
 export interface ItemData {
 	'name': string
 	'seed'?: crops
-	'meal'?: {
-		amount: number
-		modifiers: Modifier<any>[]
-	}
+	'meal'?: number
 	'ingredient'?: true
 	'key item'?: true
 	'price'?: number
 	'health'?: number
 }
 
-export const itemsData: Record<items, ItemData> = {
+export const itemsData = {
 	acorn: {
 		name: 'Acorn',
 	},
@@ -71,6 +70,10 @@ export const itemsData: Record<items, ItemData> = {
 	},
 	lettuce: {
 		name: 'Lettuce',
+		ingredient: true,
+	},
+	potato: {
+		name: 'Potato',
 		ingredient: true,
 	},
 	honey: {
@@ -147,6 +150,10 @@ export const itemsData: Record<items, ItemData> = {
 		name: 'Wheat seeds',
 		seed: 'wheat',
 	},
+	potato_seeds: {
+		name: 'Potato seeds',
+		seed: 'potato',
+	},
 	// ! Chest Loot
 	egg: {
 		name: 'Egg',
@@ -161,149 +168,66 @@ export const itemsData: Record<items, ItemData> = {
 	// ! Meals
 	cookie: {
 		name: 'Cookie',
-		meal: {
-			amount: 0.5,
-			modifiers: [
-				createModifier('cookie', 'maxHealth', 1, ModStage.Total, ModType.Add, false),
-			],
-		},
+		meal: 0.5,
 	},
 	// ? GRANDMA QUEST
 	roasted_carrot: {
 		name: 'Roasted carrot',
-		meal: {
-			amount: 1,
-			modifiers: [
-				createModifier('roasted_carrot', 'strength', 0.2, ModStage.Base, ModType.Add, true),
-			],
-		},
+		meal: 1,
 	},
-	// ? JACk QUEST
+	// ? JACK QUEST
 	carrot_soup: {
 		name: 'Carrot soup',
-		meal: {
-			amount: 2,
-			modifiers: [
-				createModifier('carrot_soup', 'lootChance', 0.5, ModStage.Base, ModType.Percent, true),
-			],
-		},
+		meal: 2,
 	},
 	tomato_soup: {
 		name: 'Tomato soup',
-		meal: {
-			amount: 2,
-			modifiers: [
-				createModifier('carrot_soup', 'lootQuantity', 1, ModStage.Base, ModType.Add, true),
-			],
-		},
+		meal: 2,
 
 	},
 	honey_glazed_carrot: {
 		name: 'Honey glazed carrot',
-		meal: {
-			amount: 1,
-			modifiers: [
-				createModifier('honey_glazed_carrot', 'strength', -0.5, ModStage.Base, ModType.Add, true),
-				createModifier('honey_glazed_carrot', 'maxHealth', 1, ModStage.Total, ModType.Add, true),
-			],
-		},
+		meal: 1,
 
 	},
 	beetroot_salad: {
 		name: 'Beetroot Salad',
-		meal: {
-			amount: 1,
-			modifiers: [
-				createModifier('beetroot_salad', 'strength', 2, ModStage.Base, ModType.Add, false),
-				createModifier('beetroot_salad', 'critDamage', -0.05, ModStage.Base, ModType.Add, false),
-			],
-		},
+		meal: 1,
 	},
 	ham_honey: {
 		name: 'Honey Ham',
-		meal: {
-			amount: 2,
-			modifiers: [
-				createModifier('ham_honey', 'maxHealth', 3, ModStage.Base, ModType.Add, true),
-			],
-		},
+		meal: 2,
 
 	},
 	slime_bread: {
 		name: 'Slime Bread',
-		meal: {
-			amount: 1.5,
-			modifiers: [
-				createModifier('slime_dumpling', 'maxHealth', 1, ModStage.Base, ModType.Add, true),
-			],
-		},
+		meal: 1.5,
 	},
 	slime_dumpling: {
 		name: 'Slime Dumpling',
-		meal: {
-			amount: 2,
-			modifiers: [
-				createModifier('slime_dumpling', 'strength', 0.5, ModStage.Base, ModType.Add, true),
-				createModifier('slime_dumpling', 'maxHealth', -2, ModStage.Base, ModType.Add, true),
-			],
-		},
+		meal: 1.5,
 	},
 	carrot_cake: {
 		name: 'Carrot cake',
-		meal: {
-			amount: 2,
-			modifiers: [],
-		},
+		meal: 2,
 	},
 	pumpkin_bread: {
 		name: 'Pumpkin bread',
-		meal: {
-			amount: 1.5,
-			modifiers: [
-				createModifier('pumpkin_bowl', 'strength', 2, ModStage.Base, ModType.Add, true),
-				createModifier('pumpkin_bowl', 'maxHealth', -1, ModStage.Base, ModType.Add, true),
-				createModifier('pumpkin_bowl', 'lootChance', -1, ModStage.Base, ModType.Add, true),
-			],
-		},
+		meal: 1.5,
 		price: 30,
 	},
 	flan: {
 		name: 'Pudding',
-		meal: {
-			amount: 1.5,
-			modifiers: [
-				// createModifier('pudding', 'attackSpeed', 0.1, ModStage.Total, ModType.Add, false),
-			],
-		},
+		meal: 1.5,
 	},
 	pumpkin_bowl: {
 		name: 'Stuffed pumpkin',
-		meal: {
-			amount: 3,
-			modifiers: [
-				createModifier('pumpkin_bowl', 'strength', 1, ModStage.Base, ModType.Add, true),
-				createModifier('pumpkin_bowl', 'maxHealth', 2, ModStage.Base, ModType.Add, true),
-				createModifier('pumpkin_bowl', 'critChance', -0.5, ModStage.Base, ModType.Percent, true),
-			],
-		},
+		meal: 3,
 		price: 50,
 	},
 	strawberry_pie: {
 		name: 'Strawberry pie',
-		meal: {
-			amount: 2,
-			modifiers: [],
-		},
-	},
-	hummus: {
-		name: 'Hummus',
-		meal: {
-			amount: 3,
-			modifiers: [
-				createModifier('pumpkin_bowl', 'lootQuantity', 1, ModStage.Base, ModType.Add, true),
-				createModifier('pumpkin_bowl', 'lootChance', 0.5, ModStage.Base, ModType.Percent, true),
-			],
-		},
+		meal: 2,
 	},
 	magic_bean: {
 		'name': '"Magic" bean',
@@ -313,13 +237,26 @@ export const itemsData: Record<items, ItemData> = {
 		'name': 'Recipe',
 		'key item': true,
 	},
-}
+	hummus: {
+		name: 'Hummus',
+		meal: 3,
+	},
+} as const satisfies Record<items, ItemData>
 
+export type Meals = { [k in keyof typeof itemsData]: (typeof itemsData)[k] extends { meal: any } ? k : never }[keyof typeof itemsData]
+
+export const isMeal = (item: items): item is Meals => item in modifiers
+export const getSeed = (item: items) => {
+	const itemData = itemsData[item]
+	if ('seed' in itemData) {
+		return itemData.seed
+	}
+}
 export const getSellableItems = (amount: number) => {
 	const items: Item[] = []
-	for (const [name, { price, meal }] of entries(itemsData)) {
-		if (!price) continue
-		if (meal) {
+	for (const [name, item] of entries(itemsData)) {
+		if (!('price' in item)) continue
+		if ('meal' in item) {
 			if (!save.unlockedRecipes.includes(name)) {
 				items.push({ name: 'recipe', quantity: 1, recipe: name })
 			}

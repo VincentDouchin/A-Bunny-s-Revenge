@@ -167,8 +167,10 @@ export const Settings = (props: { menu: MenuDir }) => {
 								<OutlineText>{title}</OutlineText>
 							</div>
 							<div class="volume">
-								{mute() && <VolumeOff />}
-								{!mute() && <VolumeOn />}
+								<div onClick={muteSound}>
+									{mute() && <VolumeOff />}
+									{!mute() && <VolumeOn />}
+								</div>
 								<input type="range" class="input-range" value={volume()} onChange={e => setVolume(e.target.valueAsNumber)}></input>
 								<OutlineText>{String(volume())}</OutlineText>
 							</div>

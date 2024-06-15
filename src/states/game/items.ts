@@ -88,15 +88,20 @@ export const collectItems = (force = false) => async () => {
 						updateSave(s => s.acorns++)
 					}
 					addTag(item, 'collecting')
+					const initialPosition = item.position.clone()
+					const initialScale = item.model.scale.clone()
 					gameTweens.add(new Tween([0])
-						.easing(Easing.Elastic.Out)
-						.to([1], dist * 100).onUpdate(([i]) => {
-							item.position.lerp({ ...player.position, y: 4 }, i)
+						.easing(Easing.Back.In)
+						.to([1], dist * 30).onUpdate(([i]) => {
+							item.position.lerpVectors(initialPosition, { ...player.position, y: 4 }, i)
+							item.model.scale.lerpVectors(initialScale, initialScale.clone().multiplyScalar(0.5), i)
 						}).onComplete(() => {
+							playSound('zapsplat_multimedia_alert_action_collect_pick_up_point_or_item_79293')
 							ecs.remove(item)
-						}))
-					setTimeout(() => playSound('zapsplat_multimedia_alert_action_collect_pick_up_point_or_item_79293'), dist * 100 - 500)
-					gameTweens.add(new Tween(item.model.scale).to(new Vector3(), dist * 100).easing(Easing.Bounce.Out)) }
+						}),
+					)
+					// gameTweens.add(new Tween(item.model.scale).to(item.model.scale.clone().multiplyScalar(0.5), dist * 100).easing(Easing.Elastic.InOut))
+				}
 			}
 		}
 	}

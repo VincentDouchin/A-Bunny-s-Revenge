@@ -1,23 +1,25 @@
 import { ActiveCollisionTypes, ColliderDesc, RigidBodyDesc, RigidBodyType } from '@dimforge/rapier3d-compat'
 import type { With } from 'miniplex'
-import { ConeGeometry, Mesh, MeshBasicMaterial, MeshToonMaterial, Quaternion, SphereGeometry, Vector3 } from 'three'
+import { ConeGeometry, Mesh, MeshBasicMaterial, MeshPhongMaterial, MeshToonMaterial, Quaternion, SphereGeometry, Vector3 } from 'three'
 
 import { between } from 'randomish'
-import { Faction } from '@/global/entity'
 import type { ComponentsOfType, Entity } from '@/global/entity'
+import { Faction } from '@/global/entity'
 
-import { ecs, time, world } from '@/global/init'
+import { assets, ecs, time, world } from '@/global/init'
 import { modelColliderBundle } from '@/lib/models'
-import type { Modifier, Stat } from '@/lib/stats'
-import { ModStage, ModType, addModifier, createModifier } from '@/lib/stats'
+import type { Stat } from '@/lib/stats'
 
+import type { Modifiers } from '@/global/modifiers'
+import { inMap } from '@/lib/hierarchy'
 import { Timer } from '@/lib/timer'
 import { getWorldPosition } from '@/lib/transforms'
 import { honeyDrippingParticles, honeySplatParticlesBundle } from '@/particles/honeySplatParticles'
 import { pollenBundle } from '@/particles/pollenParticles'
 import { projectileTrail } from '@/particles/projectileTrail'
+import { sleepyEmitter } from '@/particles/sleepyParticles'
 import { sleep } from '@/utils/sleep'
-import { inMap } from '@/lib/hierarchy'
+import { heartEmitter } from '@/particles/heartParticles'
 
 const projectileBundle = (rotation: Quaternion, origin: Vector3, strength: Stat) => {
 	const model = new Mesh(new ConeGeometry(1, 4, 7), new MeshToonMaterial({ color: 0x2C1E31 }))
@@ -92,19 +94,19 @@ export const honeySplat = () => {
 				...inMap(),
 				...honeySplatParticlesBundle(),
 				position: honey.position.clone().setY(1),
-				honeySpot: createModifier('beeBoss', 'speed', -50, ModStage.Total, ModType.Percent, false, 5000),
+				honeySpot: true,
 			})
 		}
 	}
 }
 
-const speedQuery = ecs.with('speed', 'position').without('boss')
+const speedQuery = ecs.with('modifiers', 'position').without('boss')
 const honeySpotQuery = ecs.with('honeySpot', 'position')
 export const stepInHoney = () => {
 	for (const honeySpot of honeySpotQuery) {
 		for (const entity of speedQuery) {
 			if (honeySpot.position.distanceTo(entity.position) < 15) {
-				entity.speed.addModifier(honeySpot.honeySpot)
+				entity.modifiers.addModifier('honeySpot')
 			}
 		}
 	}
@@ -126,16 +128,16 @@ export const pollenAttack = async ({ group }: With<Entity, 'group'>) => {
 	}
 }
 
-const tickDebuff = (timer: ComponentsOfType<Timer<false>>, affect: ComponentsOfType<true>, distance: number, debuffs?: () => Modifier<any>[]) => {
-	const affectedQuery = ecs.with(timer, 'position')
+const tickDebuff = (timer: ComponentsOfType<Timer<false>>, affect: ComponentsOfType<true>, distance: number, debuffs?: Modifiers[]) => {
+	const affectedQuery = ecs.with(timer, 'position', 'modifiers')
 	const affectQuery = ecs.with(affect, 'position')
 	return () => {
 		for (const entity of affectedQuery) {
 			if (debuffs && entity[timer].finished()) {
-				for (const debuff of debuffs()) {
-					addModifier(debuff, entity, false)
-				}
 				entity[timer].reset()
+				for (const debuff of debuffs) {
+					entity.modifiers.addModifier(debuff)
+				}
 			}
 			let closeBy = false
 			for (const affectEntity of affectQuery) {
@@ -152,10 +154,7 @@ const tickDebuff = (timer: ComponentsOfType<Timer<false>>, affect: ComponentsOfT
 }
 export const tickSneeze = tickDebuff('sneeze', 'pollen', 10)
 export const tickPoison = tickDebuff('poisoned', 'poison', 4)
-export const tickSleepy = tickDebuff('sleepy', 'sleepingPowder', 10, () => ([
-	createModifier('sleeping powder', 'attackSpeed', -50, ModStage.Total, ModType.Percent, false, 5000),
-	createModifier('sleeping powder', 'speed', -20, ModStage.Total, ModType.Percent, false, 5000),
-]))
+export const tickSleepy = tickDebuff('sleepy', 'sleepingPowder', 10, ['sleepingPowder'])
 
 const projectilesQuery = ecs.with('projectile', 'collider')
 const obstaclesQuery = ecs.with('obstacle', 'collider')
@@ -165,6 +164,28 @@ export const detroyProjectiles = () => {
 			if (world.intersectionPair(projectile.collider, obstacle.collider)) {
 				ecs.remove(projectile)
 			}
+		}
+	}
+}
+
+const sleepyQuery = ecs.with('player', 'modifiers', 'model')
+export const sleepyEffects = () => {
+	for (const entity of sleepyQuery) {
+		if (entity.modifiers.added.has('sleepingPowder')) {
+			ecs.update(entity, { emitter: sleepyEmitter() })
+			entity.model.traverse((node) => {
+				if (node instanceof Mesh && node.material instanceof MeshPhongMaterial) {
+					node.material.map = assets.textures['bunny-sleepy'].clone()
+				}
+			})
+		}
+		if (entity.modifiers.removed.has('sleepingPowder')) {
+			ecs.removeComponent(entity, 'emitter')
+			entity.model.traverse((node) => {
+				if (node instanceof Mesh && node.material instanceof MeshPhongMaterial) {
+					node.material.map = assets.textures.bunny.clone()
+				}
+			})
 		}
 	}
 }

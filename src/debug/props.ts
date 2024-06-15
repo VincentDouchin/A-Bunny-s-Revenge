@@ -10,15 +10,18 @@ import { clone } from 'three/examples/jsm/utils/SkeletonUtils'
 import type { EntityData, ModelName } from './LevelEditor'
 import { dialogs } from '@/constants/dialogs'
 import { Animator } from '@/global/animator'
-import { type Entity, Interactable, MenuType } from '@/global/entity'
+import type { Entity } from '@/global/entity'
+import { Interactable, MenuType } from '@/global/entity'
+
 import { assets, ecs } from '@/global/init'
 import { save } from '@/global/save'
 import type { DungeonRessources, FarmRessources } from '@/global/states'
 import { dungeonState, genDungeonState } from '@/global/states'
 
 import { itemsData } from '@/constants/items'
-import type { direction } from '@/lib/directions'
+import { Direction } from '@/lib/directions'
 import { inMap } from '@/lib/hierarchy'
+import { getSecondaryColliders } from '@/lib/models'
 import { GardenPlotMaterial } from '@/shaders/materials'
 import { RoomType } from '@/states/dungeon/generateDungeon'
 import { cropBundle } from '@/states/farm/farming'
@@ -28,7 +31,6 @@ import { dialogBundle } from '@/states/game/dialog'
 import { doorSide } from '@/states/game/spawnDoor'
 import { lockPlayer, unlockPlayer } from '@/utils/dialogHelpers'
 import { sleep } from '@/utils/sleep'
-import { getSecondaryColliders } from '@/lib/models'
 
 export const customModels = {
 	door: doorSide,
@@ -39,27 +41,25 @@ export const getModel = (key: ModelName): Object3D => {
 		// @ts-expect-error okok
 		return customModels[key]()
 	}
-	for (const model of ['vegetation', 'gardenPlots', 'fruitTrees'] as const) {
+	for (const model of ['vegetation', 'gardenPlots', 'fruitTrees', 'models'] as const) {
 		if (key in assets[model]) {
 		// @ts-expect-error okok
 			return clone(assets[model][key].scene)
 		}
 	}
-	if (key in assets.models) {
-		// @ts-expect-error okok
-		return clone(assets.models[key].scene)
-	} else {
-		throw new Error(`Coudln\'t find model ${key}`)
-	}
+	throw new Error(`Coudln\'t find model ${key}`)
 }
 export interface ExtraData {
 	'door': {
-		direction: direction
+		direction: Direction
 		doorLevel: number
 	}
-	'Vine Gate': {
-		direction: direction
+	'Vine gate': {
+		direction: Direction
 		doorLevel: number
+	}
+	'sign': {
+		text: string
 	}
 
 }
@@ -73,22 +73,59 @@ export interface PlacableProp<N extends string> {
 	bundle?: BundleFn<EntityData<N extends keyof ExtraData ? NonNullable<ExtraData[N]> : never>>
 }
 type propNames = 'log' | 'door' | 'rock' | 'board' | 'oven' | 'CookingPot' | 'stove' | 'Flower/plants' | 'sign' | 'plots' | 'bush' | 'fence' | 'house' | 'mushrooms' | 'lamp' | 'Kitchen' | 'berry bushes' | 'bench' | 'well' | 'fruit trees' | 'stall' | 'Vine gate' | 'fishing deck' | 'pillar'
-export const props: PlacableProp<propNames>[] = [
+
+type Props = ({ [k in propNames]: PlacableProp<k> }[propNames])[]
+export const props: Props = [
 	{
 		name: 'log',
 		models: ['WoodLog', 'WoodLog_Moss', 'TreeStump', 'TreeStump_Moss'],
-		bundle: entity => ({
-			...entity,
-			obstacle: true,
-		}),
+		bundle: entity => ({ ...entity, obstacle: true }),
+	},
+	{
+		name: 'door',
+		data: { direction: Direction.N, doorLevel: 0 },
+		models: ['door'],
+		bundle: (entity, data, ressources) => {
+			if (dungeonState.enabled && ressources && 'dungeon' in ressources) {
+				if ([RoomType.Battle, RoomType.Boss, RoomType.Entrance].includes(ressources.dungeon.type)) {
+					entity.doorLocked = true
+				}
+			}
+			if (genDungeonState.enabled && data.data.direction === 'north') {
+				entity.doorLevel = data.data.doorLevel
+				entity.doorLocked = true
+			}
+			if (ressources && 'dungeon' in ressources && data.data.direction) {
+				const isBossEntrance = ressources.dungeon.doors[data.data.direction]?.type === RoomType.Boss
+				const isBossRoom = ressources.dungeon.type === RoomType.Boss && ressources.dungeon.doors[data.data.direction] !== null
+				const isEntrance = ressources.dungeon.type === RoomType.Entrance && ressources.dungeon.doors[data.data.direction] === null
+				let model: Object3D | null = null
+				if (isBossEntrance || isBossRoom) {
+					model = assets.models.Gate_Thorns.scene.clone()
+					entity.vineGate = true
+					if (isBossRoom) {
+						model.rotateY(Math.PI)
+					}
+				} else if (isEntrance) {
+					model = assets.models.Gate_Vines.scene.clone()
+					entity.vineGate = true
+					model.rotateY(Math.PI)
+				}
+				if (model) {
+					Object.assign(entity, getSecondaryColliders(model))
+					entity.model = model
+				}
+			}
+			return {
+				door: data.data.direction,
+				...entity,
+			}
+		},
 	},
 	{
 		name: 'rock',
 		models: ['Rock_1', 'Rock_2', 'Rock_3', 'Rock_4', 'Rock_5', 'Rock_6', 'Rock_7'],
-		bundle: entity => ({
-			...entity,
-			obstacle: true,
-		}),
+		bundle: entity => ({ ...entity, obstacle: true }),
 	},
 	{
 		name: 'bush',
@@ -223,7 +260,21 @@ export const props: PlacableProp<propNames>[] = [
 	},
 	{
 		name: 'sign',
+		data: { text: '' },
 		models: ['WoodenSign', 'WoodenSign2'],
+		bundle: (entity, data) => {
+			const dialog = function*() {
+				while (true) {
+					yield data.data.text
+					yield false
+				}
+			}
+			return {
+				...entity,
+				interactable: Interactable.Read,
+				dialog: dialog(),
+			}
+		},
 	},
 	{
 		name: 'fence',
@@ -274,50 +325,10 @@ export const props: PlacableProp<propNames>[] = [
 		name: 'Flower/plants',
 		models: ['SM_Env_Flower_01', 'SM_Env_Flower_02', 'SM_Env_Flower_03', 'SM_Env_Flower_05', 'SM_Env_Flower_06', 'SM_Env_Flower_07', 'SM_Env_Flower_08', 'SM_Env_Grass_01', 'SM_Env_Grass_02', 'grass&vines', 'SM_Env_Flowers_01', 'SM_Env_Flowers_02', 'SM_Env_Plant_01', 'SM_Env_Plant_02', 'SM_Env_Plant_03', 'Creepy_Flower', 'Creepy_Grass', 'SM_Env_Lillypad_Large_01', 'SM_Env_Lillypad_Large_02', 'SM_Env_Lillypad_Large_03', 'SM_Env_Lillypad_Small_01', 'SM_Env_Reeds_01', 'SM_Env_Reeds_02', 'SM_Env_RicePlant_01', 'SM_Env_RicePlant_02'],
 	},
-	{
-		name: 'door',
-		data: { direction: 'north', doorLevel: 0 },
-		models: ['door'],
-		bundle: (entity, data, ressources) => {
-			if (dungeonState.enabled && ressources && 'dungeon' in ressources) {
-				if ([RoomType.Battle, RoomType.Boss, RoomType.Entrance].includes(ressources.dungeon.type)) {
-					entity.doorLocked = true
-				}
-			}
-			if (genDungeonState.enabled && data.data.direction === 'north') {
-				entity.doorLevel = data.data.doorLevel
-				entity.doorLocked = true
-			}
-			if (ressources && 'dungeon' in ressources && data.data.direction) {
-				const isBossEntrance = ressources.dungeon.doors[data.data.direction]?.type === RoomType.Boss
-				const isBossRoom = ressources.dungeon.type === RoomType.Boss && ressources.dungeon.doors[data.data.direction] !== null
-				const isEntrance = ressources.dungeon.type === RoomType.Entrance && ressources.dungeon.doors[data.data.direction] === null
-				let model: Object3D | null = null
-				if (isBossEntrance || isBossRoom) {
-					model = assets.models.Gate_Thorns.scene.clone()
-					entity.vineGate = true
-					if (isBossRoom) {
-						model.rotateY(Math.PI)
-					}
-				} else if (isEntrance) {
-					model = assets.models.Gate_Vines.scene.clone()
-					entity.vineGate = true
-					model.rotateY(Math.PI)
-				}
-				if (model) {
-					Object.assign(entity, getSecondaryColliders(model))
-					entity.model = model
-				}
-			}
-			return {
-				door: data.data.direction,
-				...entity,
-			}
-		},
-	},
+
 	{
 		name: 'Vine gate',
-		data: { direction: 'north', doorLevel: 0 },
+		data: { direction: Direction.N, doorLevel: 0 },
 		models: ['Gate_Vines'],
 		bundle(entity, { data }, ressources) {
 			entity.model.traverse((node) => {
@@ -330,7 +341,7 @@ export const props: PlacableProp<propNames>[] = [
 					entity.doorLocked = true
 				}
 			}
-			if (genDungeonState.enabled && data.direction === 'north') {
+			if (genDungeonState.enabled && data.direction === Direction.N) {
 				entity.doorLevel = data.doorLevel
 				entity.doorLocked = true
 			}
@@ -338,7 +349,7 @@ export const props: PlacableProp<propNames>[] = [
 			return {
 				...entity,
 				vineGate: true,
-				door: data?.direction ?? 'north',
+				door: data?.direction ?? Direction.N,
 			}
 		},
 	},
@@ -516,12 +527,15 @@ export const props: PlacableProp<propNames>[] = [
 								stallPosition: i,
 								itemLabel: item.name,
 							}
+							let itemForPrice = itemData
 							if (item.recipe) {
 								itemEntity.recipe = item.recipe
-								itemEntity.price = itemsData[item.recipe].price
-							} else {
-								itemEntity.price = itemData.price
+								itemForPrice = itemsData[item.recipe]
 							}
+							if ('price' in itemForPrice) {
+								itemEntity.price = itemForPrice.price
+							}
+
 							ecs.add(itemEntity)
 						}
 						const owlModel = clone(assets.characters.OWL_animated.scene)

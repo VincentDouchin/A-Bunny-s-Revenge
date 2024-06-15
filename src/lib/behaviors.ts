@@ -4,6 +4,7 @@ import { ecs } from '@/global/init'
 import type { State } from '@/lib/state'
 import { entries } from '@/utils/mapFunctions'
 import { sleep } from '@/utils/sleep'
+import { pausedState } from '@/global/states'
 
 export type StateParameters<C extends keyof Entity> = (e: StateEntity<C>) => any
 export type StateFn<C extends keyof Entity, B extends keyof States, F extends StateParameters<C>> = (
@@ -35,19 +36,19 @@ export const behaviorPlugin = <C extends keyof Entity, B extends keyof States, F
 			}
 			const stateQuery = query.where(e => e.state === entityState)
 			const { enter, update, exit } = stateManager
-			if (enter) {
+			if (enter && !pausedState.enabled) {
 				state.addSubscriber(() => stateQuery.onEntityAdded.subscribe((e) => {
 					enter(e, setState(e, entityState), fn(e))
 				}))
 			}
-			if (update) {
+			if (update && !pausedState.enabled) {
 				state.onPostUpdate(() => {
 					for (const entity of stateQuery) {
 						update(entity, setState(entity, entityState), fn(entity))
 					}
 				})
 			}
-			if (exit) {
+			if (exit && !pausedState.enabled) {
 				state.addSubscriber(() => stateQuery.onEntityRemoved.subscribe(async (e) => {
 					await sleep(1)
 					exit(e, setState(e, entityState), fn(e))

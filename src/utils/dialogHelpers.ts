@@ -164,6 +164,7 @@ export const hasQuest = (name: QuestName) => {
 }
 
 export const questsUnlocks: Record<QuestName, () => boolean> = {
+	grandma_start: () => true,
 	grandma_1: () => true,
 	jack_1: () => true,
 	alice_1: () => hasCompletedQuest('jack_1'),

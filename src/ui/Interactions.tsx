@@ -6,7 +6,7 @@ import { Transition } from 'solid-transition-group'
 import { InputIcon } from './InputIcon'
 import { OutlineText } from './components/styledComponents'
 import { useGame, useQuery } from './store'
-import { itemsData } from '@/constants/items'
+import { getSeed } from '@/constants/items'
 import type { Entity } from '@/global/entity'
 import { Interactable } from '@/global/entity'
 import { ecs, ui } from '@/global/init'
@@ -19,9 +19,9 @@ export const getInteractables = (
 	player: With<Entity, 'inventory'>,
 	entity?: With<Entity, 'interactable'>,
 ): (string | undefined)[] => {
-	const hasSeedInInventory = player.inventory?.filter(Boolean)?.some(item => itemsData[item.name].seed)
+	const hasSeedInInventory = player.inventory?.filter(Boolean)?.some(item => getSeed(item.name))
 	const hasSelectedSeed = player.inventory?.filter(Boolean).some((item) => {
-		return itemsData[item.name].seed === save.selectedSeed && item.quantity > 0
+		return getSeed(item.name) === save.selectedSeed && item.quantity > 0
 	})
 	if (entity) {
 		switch (entity?.interactable) {
@@ -30,8 +30,9 @@ export const getInteractables = (
 				hasSeedInInventory ? 'select seed' : undefined,
 			]
 			case Interactable.Water:return (player.wateringCan?.waterAmount ?? 0) > 0 ? [Interactable.Water] : []
+			case Interactable.Read:
 			case Interactable.Talk: return [
-				entity.activeDialog ? undefined : 'talk',
+				entity.activeDialog ? undefined : entity.interactable,
 			]
 			case Interactable.Cauldron:
 			case Interactable.Oven:

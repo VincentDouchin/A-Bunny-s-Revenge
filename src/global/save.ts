@@ -5,7 +5,7 @@ import type { items } from '@assets/assets'
 import { context } from './context'
 import type { Crop, Entity } from './entity'
 import type { QuestName } from '@/constants/quests'
-import type { Item, crops } from '@/constants/items'
+import type { Item, Meals, crops } from '@/constants/items'
 
 export interface SaveData {
 	crops: Record<string, NonNullable<Crop>>
@@ -14,7 +14,7 @@ export interface SaveData {
 	quests: Partial<Record<QuestName, Array<boolean>>>
 	selectedSeed: null | crops
 	inventories: Record<string, Item[]>
-	modifiers: items[]
+	modifiers: Meals[]
 	settings: {
 		volume: number
 		mute: boolean

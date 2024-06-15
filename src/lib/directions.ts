@@ -1,10 +1,14 @@
-export const cardinalDirections = ['north', 'south', 'west', 'east'] as const
+export enum Direction {
+	N = 'north',
+	S = 'south',
+	E = 'east',
+	W = 'west',
+}
+export const cardinalDirections: Direction[] = [Direction.N, Direction.S, Direction.W, Direction.E]
 
-export type direction = typeof cardinalDirections[number]
-
-export const otherDirection: Record<direction, direction> = {
-	north: 'south',
-	south: 'north',
-	west: 'east',
-	east: 'west',
+export const otherDirection: Record<Direction, Direction> = {
+	[Direction.N]: Direction.S,
+	[Direction.S]: Direction.N,
+	[Direction.W]: Direction.E,
+	[Direction.E]: Direction.W,
 }

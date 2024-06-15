@@ -76,7 +76,10 @@ export const plantSeed = () => {
 		const { playerControls, inventory } = player
 		if (playerControls.get('primary').justPressed) {
 			for (const spot of plantableSpotsQuery) {
-				const seed = inventory.filter(Boolean).find(item => itemsData[item.name].seed === save.selectedSeed && item.quantity > 0)
+				const seed = inventory.filter(Boolean).find((item) => {
+					const itemData = itemsData[item.name]
+					return 'seed' in itemData && itemData.seed === save.selectedSeed && item.quantity > 0
+				})
 				if (spot.interactionContainer && save.selectedSeed && seed) {
 					if (save.crops[spot.plantableSpot] === undefined) {
 						const planted = ecs.add({
@@ -116,7 +119,10 @@ export const harvestCrop = async () => {
 		const { playerControls } = player
 		if (playerControls.get('secondary').justPressed) {
 			for (const spot of touchedPlantablespotQuery) {
-				if (save.inventories.player.some(item => itemsData[item.name].seed)) {
+				if (save.inventories.player.some((item) => {
+					const itemData = itemsData[item.name]
+					return 'seed' in itemData
+				})) {
 					ecs.addComponent(spot, 'menuType', MenuType.SelectSeed)
 				}
 			}

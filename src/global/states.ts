@@ -1,7 +1,7 @@
 import type { weapons } from '@assets/assets'
 import { StateMananger } from './../lib/state'
 import type { Room } from '@/states/dungeon/generateDungeon'
-import type { direction } from '@/lib/directions'
+import type { Direction } from '@/lib/directions'
 
 export const app = new StateMananger()
 export const coreState = app.create()
@@ -18,7 +18,7 @@ export const pausedState = app.create()
 export const mainMenuState = app.create()
 export interface DungeonRessources {
 	dungeon: Room
-	direction: direction
+	direction: Direction
 	playerHealth: number
 	firstEntry: boolean
 	dungeonLevel: number

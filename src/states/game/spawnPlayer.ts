@@ -21,11 +21,11 @@ import { save, updateSave } from '@/global/save'
 import type { DungeonRessources, FarmRessources } from '@/global/states'
 import { openMenuState } from '@/global/states'
 
-import { itemsData } from '@/constants/items'
+import { ModifierContainer } from '@/global/modifiers'
 import { inMap } from '@/lib/hierarchy'
 import { capsuleColliderBundle, characterControllerBundle } from '@/lib/models'
 import type { System } from '@/lib/state'
-import { Stat, addModifier } from '@/lib/stats'
+import { Stat } from '@/lib/stats'
 import { Timer } from '@/lib/timer'
 
 const playerAnimationMap: Record<PlayerAnimations, Animations['Bunny']> = {
@@ -40,12 +40,11 @@ const playerAnimationMap: Record<PlayerAnimations, Animations['Bunny']> = {
 
 export const PLAYER_DEFAULT_HEALTH = 10
 
-export const playerBundle = (health: number, addHealth: boolean, weapon: weapons | null) => {
+export const playerBundle = (health: number, weapon: weapons | null) => {
 	const model = clone(assets.characters.Bunny.scene)
 	model.traverse((node) => {
 		if (node instanceof Mesh && node.material.map) {
 			node.material.map.colorSpace = LinearSRGBColorSpace
-			node.material.opacity = 1
 		}
 	})
 	const bundle = capsuleColliderBundle(model, Sizes.character)
@@ -82,20 +81,16 @@ export const playerBundle = (health: number, addHealth: boolean, weapon: weapons
 		sneeze: new Timer(2000, false),
 		poisoned: new Timer(500, false),
 		sleepy: new Timer(2000, false),
+		modifiers: new ModifierContainer(),
 		combo: {
 			lastAttack: 0,
 			heavyAttack: 0,
 		},
+		...(weapon !== null ? { weapon: weaponBundle(weapon) } : {}),
 	} as const satisfies Entity
-	if (weapon !== null) {
-		ecs.update(player, { weapon: weaponBundle(weapon) })
-	}
 
 	for (const item of save.modifiers) {
-		const mods = itemsData[item]?.meal?.modifiers ?? []
-		for (const mod of mods) {
-			addModifier(mod, player, addHealth)
-		}
+		player.modifiers.addModifier(item)
 	}
 	return player
 }
@@ -107,8 +102,9 @@ export const spawnCharacter: System<FarmRessources> = (ressources) => {
 	if (ressources?.previousState === 'dungeon') {
 		updateSave(s => s.modifiers = [])
 	}
+
 	ecs.add({
-		...playerBundle(PLAYER_DEFAULT_HEALTH, true, null),
+		...playerBundle(PLAYER_DEFAULT_HEALTH, null),
 		position,
 		rotation,
 		targetRotation: rotation.clone(),
@@ -122,7 +118,7 @@ export const spawnPlayerDungeon: System<DungeonRessources> = (ressources) => {
 		if (isStart ? ressources.dungeon.doors[door.door] === null : door.door === ressources.direction) {
 			const rotation = door.rotation.clone().multiply(new Quaternion().setFromAxisAngle(new Vector3(0, 1, 0), Math.PI))
 			ecs.add({
-				...playerBundle(ressources.playerHealth, ressources.firstEntry, ressources.weapon),
+				...playerBundle(ressources.playerHealth, ressources.weapon),
 				position: new Vector3(...door.position.toArray()).add(new Vector3(0, 0, -20).applyQuaternion(door.rotation)),
 				rotation,
 				targetRotation: rotation.clone(),
@@ -135,7 +131,7 @@ export const spawnPlayerClearing = () => {
 		if (door.door === 'south') {
 			const rotation = door.rotation.clone().multiply(new Quaternion().setFromAxisAngle(new Vector3(0, 1, 0), Math.PI))
 			ecs.add({
-				...playerBundle(PLAYER_DEFAULT_HEALTH, true, null),
+				...playerBundle(PLAYER_DEFAULT_HEALTH, null),
 				position: new Vector3(...door.position.toArray()).add(new Vector3(0, 0, -20).applyQuaternion(door.rotation)),
 				rotation,
 				targetRotation: rotation.clone(),

@@ -5,6 +5,7 @@ import { RenderGroup } from './entity'
 import { ecs, gameTweens, levelsData, time } from './init'
 import { save } from './save'
 import { debugState } from '@/debug/debugState'
+import { Direction } from '@/lib/directions'
 
 export const initCamera = () => {
 	const h = 600
@@ -74,16 +75,16 @@ export const moveCamera = (init = false) => () => {
 		for (const { worldPosition } of cameraTargetQuery) {
 			target.copy(worldPosition)
 			for (const door of doorsQuery) {
-				if (door.door === 'north') {
+				if (door.door === Direction.N) {
 					target.z = Math.min(target.z, door.position.z - OFFSETZ)
 				}
-				if (door.door === 'south') {
+				if (door.door === Direction.S) {
 					target.z = Math.max(target.z, door.position.z + OFFSETZ)
 				}
-				if (door.door === 'west') {
+				if (door.door === Direction.W) {
 					target.x = Math.min(target.x, door.position.x - OFFSETX)
 				}
-				if (door.door === 'east') {
+				if (door.door === Direction.E) {
 					target.x = Math.max(target.x, door.position.x + OFFSETX)
 				}
 			}

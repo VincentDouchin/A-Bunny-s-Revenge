@@ -6,17 +6,18 @@ import type { BatchedRenderer, ParticleEmitter } from 'three.quarks'
 import type { CSS2DObject } from 'three/examples/jsm/renderers/CSS2DRenderer'
 import type { Animator } from './animator'
 import type { InstanceHandle } from './assetLoaders'
-import type { MeshLine, MeshLineMaterial } from '@/lib/MeshLine'
+import type { ModifierContainer } from './modifiers'
 import type { NPC } from '@/constants/NPC'
 import type { enemy } from '@/constants/enemies'
 import type { Item, crops } from '@/constants/items'
 import type { QuestName } from '@/constants/quests'
 import type { Recipe } from '@/constants/recipes'
 import type { MenuInputMap, PlayerInputMap } from '@/global/inputMaps'
-import type { direction } from '@/lib/directions'
+import type { MeshLine, MeshLineMaterial } from '@/lib/MeshLine'
+import type { Direction } from '@/lib/directions'
 import type { NavGrid } from '@/lib/navGrid'
 import type { State } from '@/lib/state'
-import type { Modifier, Stat } from '@/lib/stats'
+import type { Stat } from '@/lib/stats'
 import type { Timer } from '@/lib/timer'
 import type { WeaponArc } from '@/shaders/weaponArc'
 import type { Room } from '@/states/dungeon/generateDungeon'
@@ -47,6 +48,7 @@ export enum Interactable {
 	Buy = 'buy',
 	MagicBean = 'Plant magic bean',
 	Fishing = 'Use fishing pole',
+	Read = 'read',
 }
 export enum MenuType {
 	Oven,
@@ -166,7 +168,7 @@ export interface Entity {
 	onSecondary?: (entity: Entity, player: Entity) => void
 	outline?: With<Entity, 'model'>
 	// ! Camp
-	door?: direction
+	door?: Direction
 	vineGate?: true
 	doorLevel?: number
 	doorLocked?: true
@@ -177,7 +179,7 @@ export interface Entity {
 	// ! Dungeon
 	dungeon?: Room
 	faction?: Faction
-	ignoreDoor?: direction
+	ignoreDoor?: Direction
 	// ! Items
 	item?: true
 	itemLabel?: items
@@ -224,7 +226,7 @@ export interface Entity {
 	projectile?: true
 	archingProjectile?: Vector3
 	honeyProjectile?: true
-	honeySpot?: Modifier<'speed'>
+	honeySpot?: true
 	deathTimer?: Timer<false>
 	attackPattern?: 'melee' | 'distance'
 	attackStyle?: EnemyAttackStyle
@@ -235,6 +237,7 @@ export interface Entity {
 	sleepy?: Timer<false>
 	pollen?: true
 	sleepingPowder?: true
+	modifiers?: ModifierContainer
 	// ! AI
 	navGrid?: NavGrid
 	// ! Particles
@@ -316,4 +319,13 @@ export type Bundle<C extends keyof Entity> = () => With<Entity, C>
 export type KeysOfType<T, U> = {
 	[K in keyof T]: T[K] extends U ? K : never;
 }[keyof T]
+type UnionToIntersection<U> =
+    (U extends any ? (k: U) => void : never) extends ((k: infer I) => void) ? I : never
+
+type LastOf<T> =
+    UnionToIntersection<T extends any ? () => T : never> extends () => infer R ? R : never
+
+type UnionToTuple<T, L = LastOf<T>> =
+    [T] extends [never] ? [] : [...UnionToTuple<Exclude<T, L>>, L]
 export type ComponentsOfType<T> = KeysOfType<Required<Entity>, T>
+export type AllComponentsOfType<T> = UnionToTuple<ComponentsOfType<T>>

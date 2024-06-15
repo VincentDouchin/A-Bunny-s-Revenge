@@ -15,7 +15,6 @@ import { cameraQuery, depthQuad, getTargetSize, height, scene, updateRenderSize,
 import { resetSave, updateSave } from '@/global/save'
 import { campState } from '@/global/states'
 import { RapierDebugRenderer } from '@/lib/debugRenderer'
-import { ModStage, ModType, createModifier } from '@/lib/stats'
 import { encounters } from '@/states/dungeon/encounters'
 import { playerBundle } from '@/states/game/spawnPlayer'
 import { weaponBundle } from '@/states/game/weapon'
@@ -56,7 +55,7 @@ export const DebugUi = () => {
 			ecs.remove(player)
 		}
 		ecs.add({
-			...playerBundle(10, true, null),
+			...playerBundle(10, null),
 			position: new Vector3(),
 			rotation: new Quaternion(),
 			targetRotation: new Quaternion(),
@@ -151,16 +150,13 @@ export const DebugUi = () => {
 			}
 		}
 	}
-	const modifier = createModifier('debug', 'strength', 999, ModStage.Base, ModType.Add, false)
 	const toggleGodMode = () => {
 		debugOptions.godMode(!debugOptions.godMode())
-		if (debugOptions.godMode()) {
-			for (const player of ecs.with('player', 'strength')) {
-				player.strength.addModifier(modifier)
-			}
-		} else {
-			for (const player of ecs.with('player', 'strength')) {
-				player.strength.removeModifier(modifier)
+		for (const player of ecs.with('player', 'modifiers')) {
+			if (debugOptions.godMode()) {
+				player.modifiers.addModifier('godMode')
+			} else {
+				player.modifiers.removeModifiers('godMode')
 			}
 		}
 	}

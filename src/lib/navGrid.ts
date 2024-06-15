@@ -3,6 +3,7 @@ import { AStarFinder } from 'astar-typescript'
 import type { Vec2 } from 'three'
 import { Color, InstancedMesh, Matrix4, MeshBasicMaterial, Quaternion, SphereGeometry, Vector2, Vector3 } from 'three'
 
+import { Direction } from './directions'
 import type { Level } from '@/debug/LevelEditor'
 import { getGameRenderGroup } from '@/debug/debugUi'
 import { ecs, world } from '@/global/init'
@@ -123,10 +124,10 @@ export class NavGrid {
 			}
 			for (const door of doorsQuery) {
 				const isCloseToDoor = validPoint.distanceTo(door.position) < 60
-				const isNorth = door.door === 'north' && validPoint.z > door.position.z
-				const isSouth = door.door === 'south' && validPoint.z < door.position.z
-				const isEast = door.door === 'east' && validPoint.x < door.position.x
-				const isWest = door.door === 'west' && validPoint.x > door.position.x
+				const isNorth = door.door === Direction.N && validPoint.z > door.position.z
+				const isSouth = door.door === Direction.S && validPoint.z < door.position.z
+				const isEast = door.door === Direction.E && validPoint.x < door.position.x
+				const isWest = door.door === Direction.W && validPoint.x > door.position.x
 				if (isCloseToDoor || isNorth || isSouth || isEast || isWest) {
 					valid.delete(validPoint)
 				}

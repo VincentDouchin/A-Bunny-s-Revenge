@@ -107,7 +107,7 @@ export const MealAmount = (props: { amount: Accessor<number>, size?: 'small' | '
 	)
 }
 export const extra = atom(0)
-export const getAmountEaten = () => save.modifiers.reduce((acc, v) => acc + (itemsData[v]?.meal?.amount ?? 0), 0)
+export const getAmountEaten = () => save.modifiers.reduce((acc, v) => acc + (itemsData[v]?.meal ?? 0), 0)
 const acornRenderer = thumbnailRenderer(64)
 export const HealthUi = () => {
 	const context = useGame()

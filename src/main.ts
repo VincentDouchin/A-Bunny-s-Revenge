@@ -6,6 +6,7 @@ import { debugPlugin } from './debug/debugPlugin'
 import { updateAnimations } from './global/animations'
 import { initCamera, initializeCameraPosition, moveCamera } from './global/camera'
 import { coroutines, gameTweens, inputManager, musicManager, time, ui } from './global/init'
+import { tickModifiersPlugin } from './global/modifiers'
 import { initThree, renderGame } from './global/rendering'
 import { initHowler } from './global/sounds'
 import { app, campState, coreState, dungeonState, gameState, genDungeonState, mainMenuState, openMenuState, pausedState, setupState } from './global/states'
@@ -15,16 +16,15 @@ import { particlesPlugin } from './lib/particles'
 import { physicsPlugin } from './lib/physics'
 import { addToScene } from './lib/registerComponents'
 import { runIf } from './lib/state'
-import { tickModifiers } from './lib/stats'
 import { transformsPlugin } from './lib/transforms'
 import { spawnGodRay } from './shaders/godrays'
-import { applyArchingForce, detroyProjectiles, honeySplat, stepInHoney, tickPoison, tickSleepy, tickSneeze } from './states/dungeon/attacks'
+import { applyArchingForce, detroyProjectiles, honeySplat, sleepyEffects, stepInHoney, tickPoison, tickSleepy, tickSneeze } from './states/dungeon/attacks'
 import { applyDeathTimer, tickHitCooldown } from './states/dungeon/battle'
 import { dropBerriesOnHit } from './states/dungeon/bushes'
 import { buyItems } from './states/dungeon/buyItems'
 import { spawnWeaponsChoice } from './states/dungeon/chooseWeapon'
 import { removeEnemyFromSpawn, spawnEnemies, tickInactiveTimer, unlockDungeon } from './states/dungeon/enemies'
-import { killAnimation, killEntities } from './states/dungeon/health'
+import { killAnimation, killEntities, setInitialHealth } from './states/dungeon/health'
 import { addHealthBarContainer } from './states/dungeon/healthBar'
 import { spawnDrops } from './states/dungeon/lootPool'
 import { spawnPoisonTrail } from './states/dungeon/poisonTrail'
@@ -58,7 +58,7 @@ coreState
 	.onEnter(() => ui.render(UI), initHowler)
 	.addSubscriber(...target, resize, disablePortrait, enableFullscreen, stopOnLosingFocus)
 	.onPreUpdate(coroutines.tick, savePlayerFromTheEmbraceOfTheVoid)
-	.onUpdate(runIf(() => !pausedState.enabled, updateAnimations('enemyAnimator', 'playerAnimator', 'chestAnimator', 'houseAnimator', 'ovenAnimator', 'basketAnimator', 'kayAnimator'), () => time.tick()))
+	.onUpdate(runIf(() => !pausedState.enabled, updateAnimations('playerAnimator', 'basketAnimator', 'enemyAnimator', 'ovenAnimator', 'houseAnimator', 'chestAnimator', 'kayAnimator'), () => time.tick()))
 	.onUpdate(inputManager.update, ui.update, moveCamera())
 	.enable()
 setupState
@@ -66,7 +66,7 @@ setupState
 	.enable()
 
 gameState
-	.addPlugins(debugPlugin, fishingPlugin)
+	.addPlugins(debugPlugin, fishingPlugin, tickModifiersPlugin('speed', 'maxHealth', 'strength', 'critChance', 'critDamage', 'attackSpeed', 'lootQuantity', 'lootChance'))
 
 	.addSubscriber(initializeCameraPosition, bobItems, enableInventoryState, killAnimation, popItems, addHealthBarContainer, ...equip('wateringCan', 'weapon', 'fishingPole'), ...doorLocking, addDashDisplay, addQuestMarkers)
 	.onUpdate(
@@ -75,7 +75,7 @@ gameState
 		runIf(() => !openMenuState.enabled, pauseGame, interact),
 	)
 	.addPlugins(playerBehaviorPlugin, rangeEnemyBehaviorPlugin, chargingEnemyBehaviorPlugin, meleeEnemyBehaviorPlugin, beeBossBehaviorPlugin, jumpingEnemyBehaviorPlugin, basketBehaviorPlugin, sporeBehaviorPlugin, chargingTwiceEnemyBehaviorPlugin, rangeThriceEnemyBehaviorPlugin)
-	.onUpdate(collectItems(), touchItem, talkToNPC, turnNPCHead, stopItems, dropBerriesOnHit, updateWeaponArc)
+	.onUpdate(collectItems(), touchItem, talkToNPC, turnNPCHead, stopItems, dropBerriesOnHit, updateWeaponArc, sleepyEffects)
 	.onPostUpdate(renderGame, rotateStun)
 	.enable()
 mainMenuState
@@ -86,7 +86,7 @@ mainMenuState
 campState
 	.addSubscriber(...interactablePlantableSpot)
 	.onEnter(spawnFarm, spawnLevelData, initPlantableSpotsInteractions, spawnGodRay, addBeanStalkHole)
-	.onEnter(runIf(() => !mainMenuState.enabled, spawnCharacter), moveCamera(true))
+	.onEnter(runIf(() => !mainMenuState.enabled, spawnCharacter, setInitialHealth), moveCamera(true))
 	.onUpdate(collideWithDoorCamp, playNightMusic, waterCrops, growCrops, growMagicBean, harvestMagicBean)
 	.onUpdate(runIf(canPlayerMove, plantSeed, harvestCrop, openPlayerInventory, savePlayerPosition))
 	.onExit(despawnOfType('map'))
@@ -97,7 +97,7 @@ openMenuState
 	.onUpdate(closePlayerInventory)
 genDungeonState
 	.addSubscriber(unlockDoorClearing)
-	.onEnter(spawnCrossRoad, spawnLevelData, spawnPlayerClearing, spawnWeaponsChoice, moveCamera(true))
+	.onEnter(spawnCrossRoad, spawnLevelData, spawnPlayerClearing, setInitialHealth, spawnWeaponsChoice, moveCamera(true))
 	.onUpdate(collideWithDoorClearing)
 	.onExit(despawnOfType('map'))
 
@@ -106,7 +106,7 @@ dungeonState
 	.onEnter(spawnDungeon, spawnLevelData, generatenavGrid, spawnEnemies, spawnPlayerDungeon, moveCamera(true))
 	.onUpdate(
 		runIf(canPlayerMove, allowDoorCollision, collideWithDoor, harvestCrop, killEntities),
-		runIf(() => !pausedState.enabled, tickHitCooldown, tickModifiers('speed', 'attackSpeed'), tickSneeze, tickPoison, tickInactiveTimer, tickSleepy),
+		runIf(() => !pausedState.enabled, tickHitCooldown, tickSneeze, tickPoison, tickInactiveTimer, tickSleepy),
 	)
 	.onUpdate(detroyProjectiles, honeySplat, stepInHoney, endBattleSpawnChest, spawnPoisonTrail)
 	.onPostUpdate(buyItems)

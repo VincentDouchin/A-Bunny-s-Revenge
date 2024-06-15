@@ -4,13 +4,15 @@ import { css } from 'solid-styled'
 import atom from 'solid-use/atom'
 import { MealAmount } from '../dungeon/HealthUi'
 import { ItemDisplay, isRecipeHidden } from './InventoryUi'
-import { itemsData } from '@/constants/items'
+import { isMeal, itemsData } from '@/constants/items'
 import type { Recipe } from '@/constants/recipes'
 import { recipes } from '@/constants/recipes'
 import { MenuType } from '@/global/entity'
 import { assets, ecs, ui } from '@/global/init'
+import type { Modifier } from '@/global/modifiers'
+import { modifiers } from '@/global/modifiers'
 import { save } from '@/global/save'
-import { ModType, type Modifier } from '@/lib/stats'
+import { ModType } from '@/lib/stats'
 import { InputIcon } from '@/ui/InputIcon'
 import { Menu, menuItem } from '@/ui/components/Menu'
 import { Modal } from '@/ui/components/Modal'
@@ -30,7 +32,7 @@ const getMenuName = (menuType: MenuType) => {
 	}
 	return ''
 }
-export const MealBuffs = ({ meals }: { meals: Accessor<Modifier<any>[]> }) => {
+export const MealBuffs = ({ meals }: { meals: Accessor<Modifier[]> }) => {
 	return (
 		<For each={meals()}>
 			{mod => (
@@ -40,7 +42,7 @@ export const MealBuffs = ({ meals }: { meals: Accessor<Modifier<any>[]> }) => {
 					{mod.type === ModType.Percent && <span>%</span>}
 					<span>
 						{' '}
-						{mod.name}
+						{mod.stat}
 					</span>
 				</div>
 			)}
@@ -53,8 +55,17 @@ export const RecipeDescription = ({ recipe, onClick }: {
 	onClick?: () => void
 }) => {
 	const context = useGame()
-	const output = createMemo(() => itemsData[recipe().output.name])
-	const meal = createMemo(() => output().meal)
+	const name = createMemo(() => itemsData[recipe().output.name].name)
+	const output = createMemo(() => {
+		const itemName = recipe().output.name
+		if (isMeal(itemName)) {
+			return {
+				modifiers: modifiers[itemName].mods,
+				amount: itemsData[itemName].meal,
+
+			}
+		}
+	})
 	css/* css */`
 	.meal-description-container{
 		font-size: 1.5rem;
@@ -96,11 +107,11 @@ export const RecipeDescription = ({ recipe, onClick }: {
 	`
 	return (
 		<div class="meal-description-container">
-			<div class="name">{output().name}</div>
-			<Show when={meal()}>
-				{(meal) => {
-					const modifiers = createMemo(() => meal().modifiers)
-					const amount = createMemo(() => meal().amount)
+			<div class="name">{name()}</div>
+			<Show when={output()}>
+				{(output) => {
+					const amount = createMemo(() => output().amount)
+					const modifiers = createMemo(() => output().modifiers)
 					return (
 
 						<div class="description-items">

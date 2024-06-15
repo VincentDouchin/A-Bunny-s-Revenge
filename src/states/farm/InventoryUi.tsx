@@ -1,3 +1,4 @@
+import type { items } from '@assets/assets'
 import Check from '@assets/icons/circle-check-solid.svg'
 import Cross from '@assets/icons/circle-xmark-solid.svg'
 import { autoUpdate } from '@floating-ui/dom'
@@ -7,17 +8,17 @@ import { For, Show, createEffect, createMemo, createSignal, onCleanup, onMount }
 import { css } from 'solid-styled'
 import atom from 'solid-use/atom'
 import { MealAmount, extra, getAmountEaten } from '../dungeon/HealthUi'
+import { setInitialHealth } from '../dungeon/health'
 import { MealBuffs, RecipeDescription } from './RecipesUi'
-import { itemsData } from '@/constants/items'
+import { isMeal, itemsData } from '@/constants/items'
 import type { Item } from '@/constants/items'
 
 import type { Recipe } from '@/constants/recipes'
 import { recipes } from '@/constants/recipes'
 import { MenuType } from '@/global/entity'
 import { assets, ecs, ui } from '@/global/init'
+import { modifiers } from '@/global/modifiers'
 import { save, updateSave } from '@/global/save'
-import type { Modifier } from '@/lib/stats'
-import { addModifier } from '@/lib/stats'
 import { thumbnailRenderer } from '@/lib/thumbnailRenderer'
 import { InputIcon } from '@/ui/InputIcon'
 import type { MenuDir } from '@/ui/components/Menu'
@@ -26,9 +27,9 @@ import { Modal } from '@/ui/components/Modal'
 import { GoldContainer, InventoryTitle, OutlineText } from '@/ui/components/styledComponents'
 import { Tabs } from '@/ui/components/tabs'
 import { Settings } from '@/ui/settings'
+import { useGame } from '@/ui/store'
 import { removeItemFromPlayer } from '@/utils/dialogHelpers'
 import { range } from '@/utils/mapFunctions'
-import { useGame } from '@/ui/store'
 // eslint-disable-next-line no-unused-expressions
 menuItem
 
@@ -431,11 +432,16 @@ export const InventoryUi = () => {
 				})
 				const open = ui.sync(() => player().menuType === MenuType.Player)
 				const [selectedItem, setSelectedItem] = createSignal<Item | null>(null)
-				const item = createMemo(() => {
+
+				const meal = createMemo(() => {
 					const name = selectedItem()?.name
-					return name ? itemsData[name] : null
+					if (name && isMeal(name)) {
+						return {
+							amount: itemsData[name].meal,
+							mods: modifiers[name].mods,
+						}
+					}
 				})
-				const meal = createMemo(() => item()?.meal)
 				const tabs = ['inventory', 'recipes', 'settings']
 				const selectedTab = atom('inventory')
 				const recipesOutput = createMemo(() => recipes.map(r => r.output))
@@ -485,34 +491,31 @@ export const InventoryUi = () => {
 																			<>
 																				<OutlineText><div class="item-name">{data().name}</div></OutlineText>
 																				<Show when={meal()}>
-																					{(mods) => {
-																						const disabled = ui.sync(() => (getAmountEaten() + mods().amount) > 5)
-																						const consumeMeal = (item: Item, mods: Modifier<'maxHealth' | 'strength'>[]) => {
-																							if (item && !disabled()) {
-																								removeItemFromPlayer({ name: item.name, quantity: 1 })
-																								updateSave(s => s.modifiers.push(item.name))
-																								for (const mod of mods) {
-																									addModifier(mod, player(), true)
-																								}
+																					{(meal) => {
+																						const disabled = ui.sync(() => (getAmountEaten() + meal().amount) > 5)
+																						const consumeMeal = (itemName: items) => {
+																							if (!disabled() && isMeal(itemName)) {
+																								removeItemFromPlayer({ name: itemName, quantity: 1 })
+																								updateSave(s => s.modifiers.push(itemName))
+																								player().modifiers.addModifier(itemName)
+																								setInitialHealth()
 																							}
 																						}
 																						ui.updateSync(() => {
-																							if (
-																								player().playerControls.get('secondary').justPressed
-																							) {
-																								consumeMeal(item(), mods().modifiers)
+																							if (player().playerControls.get('secondary').justPressed) {
+																								consumeMeal(item().name)
 																							}
 																						})
-																						createEffect(() => extra(mods().amount))
+																						createEffect(() => extra(meal().amount))
 																						onCleanup(() => extra(0))
-																						const modifiers = createMemo(() => mods().modifiers)
-																						const amount = createMemo(() => mods().amount)
+																						const modifiers = createMemo(() => meal().mods)
+																						const amount = createMemo(() => meal().amount)
 																						return (
 																							<>
 																								<div class="eating-button-container">
 																									<MealAmount size="small" amount={amount} />
 																									<button
-																										onPointerDown={() => consumeMeal(item(), mods().modifiers)}
+																										onPointerDown={() => consumeMeal(item().name)}
 																										class="styled"
 																										classList={{ disabled: disabled() }}
 																									>
