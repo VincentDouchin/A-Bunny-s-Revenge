@@ -124,7 +124,8 @@ export interface Entity {
 	camera?: Camera
 	light?: Light
 	group?: Group
-	model?: Object3D<Object3DEventMap>
+	model?: Object3D
+	outline?: true
 	// ! Hierarchy
 	parent?: Entity
 	children?: Set<Entity>
@@ -166,7 +167,6 @@ export interface Entity {
 	interactionContainer?: CSS2DObject
 	onPrimary?: (entity: Entity, player: Entity) => void
 	onSecondary?: (entity: Entity, player: Entity) => void
-	outline?: With<Entity, 'model'>
 	// ! Camp
 	door?: Direction
 	vineGate?: true

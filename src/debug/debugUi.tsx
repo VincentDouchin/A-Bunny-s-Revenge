@@ -1,6 +1,5 @@
 import { For, Show, createSignal, onCleanup, onMount } from 'solid-js'
 import atom from 'solid-use/atom'
-import type { ShaderMaterial } from 'three'
 import { Color, Mesh, OrthographicCamera, PerspectiveCamera, Quaternion, Vector3 } from 'three'
 import { LevelEditor } from './LevelEditor'
 import { SoundUi } from './SoundUi'
@@ -11,7 +10,7 @@ import { recipes } from '@/constants/recipes'
 import { params } from '@/global/context'
 import { RenderGroup } from '@/global/entity'
 import { dayTime, ecs, ui, world } from '@/global/init'
-import { cameraQuery, depthQuad, getTargetSize, height, scene, updateRenderSize, width } from '@/global/rendering'
+import { cameraQuery, getTargetSize, height, scene, updateRenderSize, width } from '@/global/rendering'
 import { resetSave, updateSave } from '@/global/save'
 import { campState } from '@/global/states'
 import { RapierDebugRenderer } from '@/lib/debugRenderer'
@@ -108,13 +107,13 @@ export const DebugUi = () => {
 	const changeCameraNormal = () => {
 		const camera = removeCamera()
 		if (!camera) return
-		(depthQuad.material as ShaderMaterial).uniforms.orthographic.value = false
+		// (depthQuad.material as ShaderMaterial).uniforms.orthographic.value = false
 		ecs.addComponent(camera, 'camera', new PerspectiveCamera(params.fov, window.innerWidth / window.innerHeight, 0.1, 1000))
 	}
 	const changeCameraOrtho = () => {
 		const camera = removeCamera()
 		if (!camera) return
-		(depthQuad.material as ShaderMaterial).uniforms.orthographic.value = true
+		// (depthQuad.material as ShaderMaterial).uniforms.orthographic.value = true
 		ecs.addComponent(camera, 'camera', new OrthographicCamera(
 			-width / 2 / params.zoom,
 			width / 2 / params.zoom,

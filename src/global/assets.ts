@@ -42,7 +42,6 @@ const loadGLBAsToon = (
 	})
 
 	const toons = mapValues(loaded, (glb, key) => {
-		glb.scene.frustumCulled = false
 		glb.scene.traverse((node) => {
 			if (node instanceof Mesh) {
 				if (node.material instanceof MeshStandardMaterial || node.material instanceof MeshPhysicalMaterial) {

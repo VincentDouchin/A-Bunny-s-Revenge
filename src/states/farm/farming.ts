@@ -5,10 +5,10 @@ import { Vector3 } from 'three'
 import { randFloat } from 'three/src/math/MathUtils'
 import { itemBundle } from '../game/items'
 import { updateSpotWatered } from './wateringCan'
-import type { crops } from '@/constants/items'
-import { itemsData } from '@/constants/items'
-import { Sizes } from '@/constants/sizes'
 import { type Crop, type Entity, Interactable, MenuType } from '@/global/entity'
+import { Sizes } from '@/constants/sizes'
+import { itemsData } from '@/constants/items'
+import type { crops } from '@/constants/items'
 
 import { assets, dayTime, ecs, gameTweens } from '@/global/init'
 import { removeItem, save, updateSave } from '@/global/save'
@@ -36,7 +36,7 @@ export const cropBundle = (grow: boolean, crop: NonNullable<Entity['crop']>) => 
 	model.scale.setScalar(10)
 	const hole = assets.models.plantedHole.scene.clone()
 	const modelBundle = modelColliderBundle(model, RigidBodyType.Fixed, true, Sizes.small)
-	const bundle: With<Entity, 'crop'> = {
+	const bundle: With<Entity, 'crop' | 'model'> = {
 		crop: {
 			name: crop.name,
 			stage,
@@ -54,6 +54,7 @@ export const cropBundle = (grow: boolean, crop: NonNullable<Entity['crop']>) => 
 			})
 		},
 	}
+
 	if (stage === 0) {
 		modelBundle.model.scale.setScalar(0)
 		const tween = new Tween({ scale: 0 }).to({ scale: 10 }, 1000).easing(Easing.Elastic.Out).onUpdate(({ scale }) => {

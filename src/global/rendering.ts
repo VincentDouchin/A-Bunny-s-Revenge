@@ -1,13 +1,16 @@
-import { BasicShadowMap, DepthTexture, LinearSRGBColorSpace, NearestFilter, RGBAFormat, Scene, ShaderMaterial, Vector2, WebGLRenderTarget, WebGLRenderer } from 'three'
+import type { Object3D } from 'three'
+import { BasicShadowMap, DepthTexture, LinearSRGBColorSpace, MeshBasicMaterial, NearestFilter, RGBAFormat, Scene, ShaderMaterial, Vector2, WebGLRenderTarget, WebGLRenderer } from 'three'
 
 import { FullScreenQuad } from 'three/examples/jsm/postprocessing/Pass'
 import { CSS2DRenderer } from 'three/examples/jsm/renderers/CSS2DRenderer'
 import { params } from './context'
 import { RenderGroup } from './entity'
 import { ecs } from './init'
-import { mainMenuState } from './states'
 import { save } from './save'
-import { getDepthShader, getSobelShader } from '@/shaders/EdgePass'
+import { mainMenuState } from './states'
+import { gameCameraQuery } from '@/states/mainMenu/mainMenuRendering'
+import { getSobelShader, outlineShader } from '@/shaders/EdgePass'
+import { getGameRenderGroup } from '@/debug/debugUi'
 
 export const scene = new Scene()
 export const renderer = new WebGLRenderer({ alpha: false, powerPreference: 'high-performance' })
@@ -16,24 +19,20 @@ const cssRenderer = new CSS2DRenderer()
 
 export const width = window.innerWidth
 export const height = window.innerHeight
-export const target = new WebGLRenderTarget(width, height)
-export const depthTarget = new WebGLRenderTarget(width, height)
+export const target = new WebGLRenderTarget(width, height, { depthBuffer: true })
+const outlineTarget = new WebGLRenderTarget(width, height, { depthBuffer: true })
+const outlineTarget2 = new WebGLRenderTarget(width, height)
 export const finalTarget = new WebGLRenderTarget(width, height)
-depthTarget.texture.format = RGBAFormat
-depthTarget.texture.magFilter = NearestFilter
-depthTarget.texture.minFilter = NearestFilter
-depthTarget.texture.generateMipmaps = false
+
 target.texture.format = RGBAFormat
 target.texture.minFilter = NearestFilter
 target.texture.magFilter = NearestFilter
 target.texture.generateMipmaps = false
-target.stencilBuffer = false
-target.depthBuffer = true
-const depthTexture = new DepthTexture(width, height)
-target.depthTexture = depthTexture
-const depthMat = new ShaderMaterial(getDepthShader(target))
-export const depthQuad = new FullScreenQuad(depthMat)
-export const sobelMat = new ShaderMaterial(getSobelShader(width, height, target, depthTarget))
+target.depthTexture = new DepthTexture(width, height)
+outlineTarget.depthTexture = new DepthTexture(width, height)
+const outlineMat = new ShaderMaterial(outlineShader(target, outlineTarget))
+const outlineQuad = new FullScreenQuad(outlineMat)
+export const sobelMat = new ShaderMaterial(getSobelShader(width, height, target, outlineTarget2))
 const sobelQuad = new FullScreenQuad(sobelMat)
 export const getTargetSize = (height = params.renderHeight) => {
 	const ratio = window.innerWidth / window.innerHeight
@@ -67,10 +66,20 @@ export const cameraQuery = ecs.with('camera', 'renderGroup').where(e => e.render
 export const renderGame = () => {
 	const camera = cameraQuery.first?.camera
 	if (!camera) return
+	// Base scene
 	renderer.setRenderTarget(target)
 	renderer.render(scene, camera)
-	renderer.setRenderTarget(depthTarget)
-	depthQuad.render(renderer)
+	// outline entities
+	camera.layers.set(1)
+	scene.overrideMaterial = new MeshBasicMaterial()
+	renderer.setRenderTarget(outlineTarget)
+	renderer.render(scene, camera)
+	scene.overrideMaterial = null
+	camera.layers.set(0)
+	// outline entities with depth
+	renderer.setRenderTarget(outlineTarget2)
+	outlineQuad.render(renderer)
+
 	if (mainMenuState.enabled) {
 		renderer.setRenderTarget(finalTarget)
 	} else {
@@ -79,4 +88,21 @@ export const renderGame = () => {
 	sobelQuad.render(renderer)
 
 	cssRenderer.render(scene, camera)
+}
+
+export const compileShaders = () => {
+	const { scene, renderer } = getGameRenderGroup()
+	const invisible: Object3D[] = []
+	scene.traverse((node) => {
+		if (!node.visible) {
+			node.visible = true
+			invisible.push(node)
+		}
+	})
+	for (const { camera } of gameCameraQuery) {
+		renderer.compile(scene, camera)
+	}
+	for (const node of invisible) {
+		node.visible = false
+	}
 }

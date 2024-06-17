@@ -1,7 +1,7 @@
-import { CSS2DObject } from 'three/examples/jsm/renderers/CSS2DRenderer'
 import { Vector3 } from 'three'
-import { ecs, world } from '@/global/init'
+import { CSS2DObject } from 'three/examples/jsm/renderers/CSS2DRenderer'
 import type { Entity } from '@/global/entity'
+import { ecs, world } from '@/global/init'
 
 const playerQuery = ecs.with('playerControls', 'sensorCollider', 'position', 'rotation')
 const interactingQuery = ecs.with('collider', 'interactable', 'position')
@@ -25,12 +25,23 @@ export const touchItem = () => {
 		if (lastEntity !== null && !lastEntity?.interactionContainer) {
 			const interactionContainer = new CSS2DObject(document.createElement('div'))
 			ecs.update(lastEntity, { interactionContainer })
+			if (lastEntity.group) {
+				lastEntity.group.traverse(node => node.layers.enable(1))
+				ecs.update(lastEntity, { outline: true })
+			}
 			ecs.reindex(lastEntity)
 		}
 		for (const item of losingInteractionQuery) {
 			if (lastEntity !== item) {
 				ecs.removeComponent(item, 'interactionContainer')
+				if (item.outline && item.group) {
+					item.group.traverse(node => node.layers.disable(1))
+				}
 			}
 		}
 	}
 }
+const outlineQuery = ecs.with('group', 'model', 'outline', 'interactable')
+export const removeOutlines = () => outlineQuery.onEntityRemoved.subscribe((e) => {
+	e.group.traverse(node => node.layers.disable(1))
+})

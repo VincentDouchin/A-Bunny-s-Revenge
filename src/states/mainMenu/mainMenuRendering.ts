@@ -333,7 +333,7 @@ export const spawnPlayerContinueGame = async () => {
 		setSensor(houseQuery, true)
 		setSensor(doorQuery, true)
 		ecs.add({
-			...playerBundle(PLAYER_DEFAULT_HEALTH, true, null),
+			...playerBundle(PLAYER_DEFAULT_HEALTH, null),
 			position: house.worldPosition.clone(),
 			rotation: house.rotation.clone(),
 			targetRotation: house.rotation.clone(),
