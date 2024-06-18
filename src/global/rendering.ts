@@ -1,5 +1,5 @@
 import type { Object3D } from 'three'
-import { BasicShadowMap, DepthTexture, LinearSRGBColorSpace, MeshBasicMaterial, NearestFilter, RGBAFormat, Scene, ShaderMaterial, Vector2, WebGLRenderTarget, WebGLRenderer } from 'three'
+import { BasicShadowMap, DepthTexture, LinearSRGBColorSpace, MeshBasicMaterial, Scene, ShaderMaterial, Vector2, WebGLRenderTarget, WebGLRenderer } from 'three'
 
 import { FullScreenQuad } from 'three/examples/jsm/postprocessing/Pass'
 import { CSS2DRenderer } from 'three/examples/jsm/renderers/CSS2DRenderer'
@@ -24,10 +24,6 @@ const outlineTarget = new WebGLRenderTarget(width, height, { depthBuffer: true }
 const outlineTarget2 = new WebGLRenderTarget(width, height)
 export const finalTarget = new WebGLRenderTarget(width, height)
 
-target.texture.format = RGBAFormat
-target.texture.minFilter = NearestFilter
-target.texture.magFilter = NearestFilter
-target.texture.generateMipmaps = false
 target.depthTexture = new DepthTexture(width, height)
 outlineTarget.depthTexture = new DepthTexture(width, height)
 const outlineMat = new ShaderMaterial(outlineShader(target, outlineTarget))
