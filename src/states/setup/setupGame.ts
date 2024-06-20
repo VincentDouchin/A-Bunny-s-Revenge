@@ -1,15 +1,15 @@
 import { Vector2 } from 'three'
-import { setMainCameraPosition } from '../mainMenu/mainMenuRendering'
 import { RoomType, assignPlanAndEnemies } from '../dungeon/generateDungeon'
+import { setMainCameraPosition } from '../mainMenu/mainMenuRendering'
 import { updateCameraZoom } from '@/global/camera'
 import { params } from '@/global/context'
+import { time } from '@/global/init'
 import { updateRenderSize } from '@/global/rendering'
 import { save } from '@/global/save'
 import { app, campState, dungeonState, mainMenuState } from '@/global/states'
-import { windowEvent } from '@/lib/uiManager'
-import { throttle } from '@/lib/state'
-import { time } from '@/global/init'
 import { Direction } from '@/lib/directions'
+import { throttle } from '@/lib/state'
+import { windowEvent } from '@/lib/uiManager'
 
 export const setupGame = async () => {
 	if (params.debugBoss) {
@@ -53,7 +53,7 @@ export const stopOnLosingFocus = () => {
 	const focusListener = () => {
 		time.start()
 		app.start()
-		Howler.mute(false)
+		Howler.mute(save.settings.mute)
 	}
 	document.addEventListener('visibilitychange', listener)
 	window.addEventListener('blur', blurListener)

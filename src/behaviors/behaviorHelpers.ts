@@ -3,7 +3,7 @@ import type { With } from 'miniplex'
 import { Vector3 } from 'three'
 import { params } from '@/global/context'
 import type { Entity } from '@/global/entity'
-import { time } from '@/global/init'
+import { inputManager, time } from '@/global/init'
 import { pausedState } from '@/global/states'
 import { save } from '@/global/save'
 
@@ -31,7 +31,12 @@ export const applyMove = (entity: With<Entity, 'body' >, force: Vector3) => {
 }
 export const applyRotate = (entity: With<Entity, 'rotation' | 'targetRotation'>, force: Vector3) => {
 	if (pausedState.enabled) return
-	entity.targetRotation.setFromAxisAngle(new Vector3(0, 1, 0), Math.atan2(force.x, force.z))
+	if (entity.player && entity.position && inputManager.controls() === 'keyboard' && save.settings.controls === 'mouse') {
+		const dir = inputManager.mouseWorldPosition.clone().sub(entity.position)
+		entity.targetRotation.setFromAxisAngle(new Vector3(0, 1, 0), Math.atan2(dir.x, dir.z))
+	} else {
+		entity.targetRotation.setFromAxisAngle(new Vector3(0, 1, 0), Math.atan2(force.x, force.z))
+	}
 }
 export const takeDamage = (entity: With<Entity, 'currentHealth'>, damage: number) => {
 	if (save.settings.difficulty === 'easy') {

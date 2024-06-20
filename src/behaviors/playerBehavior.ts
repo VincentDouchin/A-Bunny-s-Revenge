@@ -55,8 +55,8 @@ export const playerBehaviorPlugin = behaviorPlugin(
 			if (touchedByEnemy) return setState('hit')
 			if (sneezing) return setState('stun')
 			if (poisoned) return setState('poisoned')
+			applyRotate(e, force)
 			if (isMoving) {
-				applyRotate(e, force)
 				setState('running')
 			}
 			if (!campState.enabled || debugOptions.attackInFarm()) {

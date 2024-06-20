@@ -7,6 +7,7 @@ import { updateAnimations } from './global/animations'
 import { initCamera, initializeCameraPosition, moveCamera } from './global/camera'
 import { coroutines, gameTweens, inputManager, musicManager, time, ui } from './global/init'
 import { tickModifiersPlugin } from './global/modifiers'
+import { updateMousePosition } from './global/mousePosition'
 import { compileShaders, initThree, renderGame } from './global/rendering'
 import { initHowler } from './global/sounds'
 import { app, campState, coreState, dungeonState, gameState, genDungeonState, mainMenuState, openMenuState, pausedState, setupState } from './global/states'
@@ -57,7 +58,7 @@ coreState
 	.onEnter(initThree, initCamera, moveCamera(true))
 	.onEnter(() => ui.render(UI), initHowler)
 	.addSubscriber(...target, resize, disablePortrait, enableFullscreen, stopOnLosingFocus)
-	.onPreUpdate(coroutines.tick, savePlayerFromTheEmbraceOfTheVoid)
+	.onPreUpdate(coroutines.tick, savePlayerFromTheEmbraceOfTheVoid, updateMousePosition())
 	.onUpdate(runIf(() => !pausedState.enabled, updateAnimations('playerAnimator', 'basketAnimator', 'enemyAnimator', 'ovenAnimator', 'houseAnimator', 'chestAnimator', 'kayAnimator'), () => time.tick()))
 	.onUpdate(inputManager.update, ui.update, moveCamera())
 	.enable()

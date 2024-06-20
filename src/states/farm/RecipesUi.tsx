@@ -16,7 +16,7 @@ import { ModType } from '@/lib/stats'
 import { InputIcon } from '@/ui/InputIcon'
 import { Menu, menuItem } from '@/ui/components/Menu'
 import { Modal } from '@/ui/components/Modal'
-import { GoldContainer, InventoryTitle } from '@/ui/components/styledComponents'
+import { GoldContainer, InventoryTitle, OutlineText } from '@/ui/components/styledComponents'
 import { useGame, useQuery } from '@/ui/store'
 import { removeItemFromPlayer } from '@/utils/dialogHelpers'
 import { range } from '@/utils/mapFunctions'
@@ -173,6 +173,15 @@ export const RecipesUi = () => {
 	.description{
 		width: 20rem
 	}
+	.input-icon{
+		font-size: 1.5rem;
+		color: white;
+		position: absolute;
+		margin-top: 1rem;
+		top: 100%;
+		right: 0.5rem;
+		display:flex;
+	}
 	`
 
 	return (
@@ -299,6 +308,16 @@ export const RecipesUi = () => {
 
 								</div>
 							</div>
+							<Show when={!context?.usingTouch() && context?.player()}>
+								{(player) => {
+									return (
+										<div class="input-icon">
+											<InputIcon input={player().menuInputs.get('cancel')} />
+											<OutlineText>Close</OutlineText>
+										</div>
+									)
+								}}
+							</Show>
 						</GoldContainer>
 					)
 				}}

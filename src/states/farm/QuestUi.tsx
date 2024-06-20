@@ -13,6 +13,7 @@ import { Modal } from '@/ui/components/Modal'
 import { GoldContainer, InventoryTitle, OutlineText } from '@/ui/components/styledComponents'
 import { useGame, useQuery } from '@/ui/store'
 import { entries } from '@/utils/mapFunctions'
+import { InputIcon } from '@/ui/InputIcon'
 // eslint-disable-next-line no-unused-expressions
 menuItem
 const openBulletinBoardQuery = useQuery(ecs.with('menuType').where(e => e.menuType === MenuType.Quest))
@@ -65,6 +66,16 @@ export const QuestUi = () => {
 					color:white;
 					min-width: 20rem;
 				}
+				.input-icon{
+					position:absolute;
+					right:0.5rem;
+					top:100%;
+					display: flex;
+					align-items: center;
+					color: white;
+					font-size: 1.5rem;
+				}
+	
 				`
 							return (
 								<Modal open={visible()}>
@@ -129,6 +140,12 @@ export const QuestUi = () => {
 													}}
 												</Menu>
 											</div>
+											<Show when={!context?.usingTouch()}>
+												<div class="input-icon">
+													<InputIcon input={player().menuInputs.get('cancel')} />
+													<OutlineText>Close</OutlineText>
+												</div>
+											</Show>
 										</GoldContainer>
 
 									</Show>

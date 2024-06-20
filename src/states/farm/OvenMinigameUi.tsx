@@ -24,6 +24,7 @@ import { TouchButton } from '@/ui/TouchControls'
 import { OutlineText } from '@/ui/components/styledComponents'
 import { useGame, useQuery } from '@/ui/store'
 import { sleep } from '@/utils/sleep'
+import { InputIcon } from '@/ui/InputIcon'
 
 export const ovenQuery = useQuery(ecs.with('menuType', 'recipesQueued', 'ovenAnimator', 'position').where(({ menuType }) => menuType === MenuType.OvenMinigame))
 
@@ -157,6 +158,7 @@ export const OvenMinigameUi = () => {
 					width: fit-content;
 					align-items: center;
 					margin-left: 15rem;
+					position: relative;
 				}
 				.progress-text{
 					position: absolute;
@@ -233,15 +235,21 @@ export const OvenMinigameUi = () => {
 					position: absolute;
 					bottom: 0;
 				}
-				.inputs-container{
-					position: fixed;
-					bottom: 0;
-					right: 0;
-					margin: 7em;
-					display: flex;
-					gap: 7rem;
-					flex-direction: row-reverse;
+				.input-container{
+					position: absolute;
+					top: 100%;
+					font-size: 1.5rem;
+					color: white;
+					width: max-content;
+					transform: translateX(-50%);
+					margin-top: 1rem;
+					left: 50%;
 				}
+				.input-icon{
+					display: flex;
+					flex-wrap: nowrap;
+				}
+				
 				`
 							return (
 								<>
@@ -257,6 +265,7 @@ export const OvenMinigameUi = () => {
 									</Show>
 
 									<div class="minigame-container">
+
 										{/*  progress */}
 										<div class="relative">
 											<div class="progress-text"><OutlineText>Progress</OutlineText></div>
@@ -279,6 +288,18 @@ export const OvenMinigameUi = () => {
 												{/* bar */}
 												<div class="target-bar"></div>
 											</div>
+											<Show when={!context?.usingTouch()}>
+												<div class="input-container">
+													<div class="input-icon">
+														<InputIcon input={player().playerControls.get('primary')} />
+														<OutlineText>Stoke fire</OutlineText>
+													</div>
+													<div class="input-icon">
+														<InputIcon input={player().menuInputs.get('cancel')} />
+														<OutlineText>Close</OutlineText>
+													</div>
+												</div>
+											</Show>
 										</div>
 										{/* heat */}
 										<div class="relative">
