@@ -23,6 +23,7 @@ import { RecipesUi } from '@/states/farm/RecipesUi'
 import { SeedUi } from '@/states/farm/SeedUi'
 import { FullscreenUi } from '@/states/game/FullscreenUi'
 import { OverlayUi } from '@/states/game/overlayUi'
+import { LockIndicator } from '@/states/dungeon/lockIndicator'
 
 export const errors = createArray<string>([])
 export const UI = () => (
@@ -45,6 +46,7 @@ export const UI = () => (
 		<StateUi state={dungeonState}>
 			<SneezeUi />
 			<HealthUi />
+			<LockIndicator />
 		</StateUi>
 		<StateUi state={genDungeonState}>
 			<HealthUi />

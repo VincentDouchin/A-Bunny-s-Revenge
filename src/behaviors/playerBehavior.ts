@@ -2,7 +2,7 @@ import type { With } from 'miniplex'
 import { Vector3 } from 'three'
 import { behaviorPlugin } from '../lib/behaviors'
 import { flash } from '../states/dungeon/battle'
-import { applyMove, applyRotate, getMovementForce, takeDamage } from './behaviorHelpers'
+import { applyMove, applyRotate, getMovementForce, getPlayerRotation, takeDamage } from './behaviorHelpers'
 import { debugOptions } from '@/debug/debugState'
 import { addCameraShake } from '@/global/camera'
 import type { Entity } from '@/global/entity'
@@ -16,7 +16,7 @@ import { poisonBubbles } from '@/states/dungeon/poisonTrail'
 import { stunBundle } from '@/states/dungeon/stun'
 import { sleep } from '@/utils/sleep'
 
-const ANIMATION_SPEED = 1.3
+const ANIMATION_SPEED = 1.15
 const playerComponents = ['playerAnimator', 'movementForce', 'speed', 'body', 'rotation', 'playerControls', 'combo', 'attackSpeed', 'dash', 'collider', 'currentHealth', 'model', 'hitTimer', 'size', 'sneeze', 'targetRotation', 'poisoned', 'size', 'position', 'targetMovementForce', 'sleepy', 'modifiers'] as const satisfies readonly (keyof Entity)[]
 type PlayerComponents = (typeof playerComponents)[number]
 const playerQuery = ecs.with(...playerComponents)
@@ -46,16 +46,18 @@ export const playerBehaviorPlugin = behaviorPlugin(
 		const sneezing = e.sneeze.finished()
 		const poisoned = e.poisoned.finished()
 		const canDash = e.dash.finished() && !e.modifiers.hasModifier('honeySpot')
-		return { ...getMovementForce(e), touchedByEnemy: attackingEnemy, sneezing, poisoned, canDash }
+		const { force, isMoving } = getMovementForce(e)
+		const direction = getPlayerRotation(e, force)
+		return { force, isMoving, direction, touchedByEnemy: attackingEnemy, sneezing, poisoned, canDash }
 	},
 )({
 	idle: {
 		enter: e => e.playerAnimator.playAnimation('idle'),
-		update: (e, setState, { isMoving, force, touchedByEnemy, sneezing, canDash, poisoned }) => {
+		update: (e, setState, { isMoving, touchedByEnemy, sneezing, canDash, poisoned, direction }) => {
 			if (touchedByEnemy) return setState('hit')
 			if (sneezing) return setState('stun')
 			if (poisoned) return setState('poisoned')
-			applyRotate(e, force)
+			applyRotate(e, direction)
 			if (isMoving) {
 				setState('running')
 			}
@@ -71,12 +73,12 @@ export const playerBehaviorPlugin = behaviorPlugin(
 	},
 	running: {
 		enter: e => e.playerAnimator.playAnimation('running'),
-		update: (e, setState, { isMoving, force, touchedByEnemy, sneezing, canDash, poisoned }) => {
+		update: (e, setState, { isMoving, force, touchedByEnemy, sneezing, canDash, poisoned, direction }) => {
 			if (touchedByEnemy) return setState('hit')
 			if (sneezing) return setState('stun')
 			if (poisoned) return setState('poisoned')
 			if (isMoving) {
-				applyRotate(e, force)
+				applyRotate(e, direction)
 				applyMove(e, force)
 			} else {
 				setState('idle')
@@ -108,12 +110,12 @@ export const playerBehaviorPlugin = behaviorPlugin(
 			e.combo.lastAttack = 0
 			setupState('idle')
 		},
-		update: (e, setState, { isMoving, force, touchedByEnemy, sneezing, poisoned }) => {
+		update: (e, setState, { isMoving, force, touchedByEnemy, sneezing, poisoned, direction }) => {
 			if (touchedByEnemy) return setState('hit')
 			if (sneezing) return setState('stun')
 			if (poisoned) return setState('poisoned')
 			if (isMoving) {
-				applyRotate(e, force)
+				applyRotate(e, direction)
 				applyMove(e, force.multiplyScalar(0.8))
 			}
 			if (e.playerControls.get('primary').justPressed) {

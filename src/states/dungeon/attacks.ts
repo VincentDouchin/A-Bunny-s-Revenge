@@ -172,7 +172,7 @@ export const sleepyEffects = () => {
 	for (const entity of sleepyQuery) {
 		if (entity.modifiers.added.has('sleepingPowder')) {
 			ecs.update(entity, { emitter: sleepyEmitter() })
-			entity.model.traverse((node) => {
+			assets.characters.Bunny.scene.traverse((node) => {
 				if (node instanceof Mesh && node.material instanceof MeshPhongMaterial) {
 					node.material.map = assets.textures['bunny-sleepy'].clone()
 				}
@@ -180,7 +180,7 @@ export const sleepyEffects = () => {
 		}
 		if (entity.modifiers.removed.has('sleepingPowder')) {
 			ecs.removeComponent(entity, 'emitter')
-			entity.model.traverse((node) => {
+			assets.characters.Bunny.scene.traverse((node) => {
 				if (node instanceof Mesh && node.material instanceof MeshPhongMaterial) {
 					node.material.map = assets.textures.bunny.clone()
 				}

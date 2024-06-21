@@ -312,6 +312,8 @@ export interface Entity {
 	fishingProgress?: { attempts: number, sucess: number, done: boolean }
 	bobbing?: true
 	fishSpawner?: true
+	// ! Lock on
+	lockedOn?: CSS2DObject
 
 }
 export type Bundle<C extends keyof Entity> = () => With<Entity, C>

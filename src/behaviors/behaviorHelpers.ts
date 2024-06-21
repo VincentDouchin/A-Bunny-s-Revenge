@@ -3,9 +3,9 @@ import type { With } from 'miniplex'
 import { Vector3 } from 'three'
 import { params } from '@/global/context'
 import type { Entity } from '@/global/entity'
-import { inputManager, time } from '@/global/init'
-import { pausedState } from '@/global/states'
+import { ecs, inputManager, time } from '@/global/init'
 import { save } from '@/global/save'
+import { pausedState } from '@/global/states'
 
 export const getMovementForce = ({ movementForce, speed, targetMovementForce }: With<Entity, 'movementForce' | 'speed' >) => {
 	const targetForce = movementForce.clone().multiplyScalar(speed.value * params.speedUp * time.delta / 1000)
@@ -15,6 +15,24 @@ export const getMovementForce = ({ movementForce, speed, targetMovementForce }: 
 		force,
 		isMoving: (Math.abs(force.x) + Math.abs(force.z)) > 0.05,
 	}
+}
+const lockedOnQuery = ecs.with('lockedOn', 'position')
+export const getPlayerRotation = (e: With<Entity, 'position' | 'playerControls'>, force: Vector3) => {
+	const lockOn = lockedOnQuery.first
+	if (lockOn) {
+		return lockOn.position.clone().sub(e.position).normalize()
+	}
+	if (inputManager.controls() === 'gamepad' && save.settings.controls === 'mouse') {
+		return new Vector3(
+			e.playerControls.get('lookLeft').pressed - e.playerControls.get('lookRight').pressed,
+			0,
+			e.playerControls.get('lookForward').pressed - e.playerControls.get('lookBackward').pressed,
+		).normalize()
+	}
+	if (inputManager.controls() === 'keyboard' && save.settings.controls === 'mouse') {
+		return inputManager.mouseWorldPosition.clone().sub(e.position).normalize()
+	}
+	return force
 }
 export const applyMove = (entity: With<Entity, 'body' >, force: Vector3) => {
 	if (pausedState.enabled) return
@@ -31,10 +49,7 @@ export const applyMove = (entity: With<Entity, 'body' >, force: Vector3) => {
 }
 export const applyRotate = (entity: With<Entity, 'rotation' | 'targetRotation'>, force: Vector3) => {
 	if (pausedState.enabled) return
-	if (entity.player && entity.position && inputManager.controls() === 'keyboard' && save.settings.controls === 'mouse') {
-		const dir = inputManager.mouseWorldPosition.clone().sub(entity.position)
-		entity.targetRotation.setFromAxisAngle(new Vector3(0, 1, 0), Math.atan2(dir.x, dir.z))
-	} else {
+	if (force.length() > 0) {
 		entity.targetRotation.setFromAxisAngle(new Vector3(0, 1, 0), Math.atan2(force.x, force.z))
 	}
 }

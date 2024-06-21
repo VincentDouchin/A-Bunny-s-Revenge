@@ -36,7 +36,13 @@ export const GAMEPAD_BUTTON = {
 } as const
 export enum MOUSE_BUTTONS {
 	LEFT = 0,
+	MIDDLE = 1,
 	RIGHT = 2,
+}
+export enum MOUSE_WHEEL {
+	X = 'x',
+	Y = 'y',
+	Z = 'z',
 }
 export type ControlType = 'gamepad' | 'touch' | 'keyboard'
 export class InputManager {
@@ -48,7 +54,13 @@ export class InputManager {
 	layoutMap: KeyboardLayoutMap | null = null
 	mouseMoving = atom(false)
 	mouseWorldPosition = new Vector3()
+	mouseWheel = new Vector3()
 	constructor() {
+		window.addEventListener('wheel', (e) => {
+			this.mouseWheel.x = e.deltaX
+			this.mouseWheel.y = e.deltaY
+			this.mouseWheel.z = e.deltaZ
+		})
 		window.addEventListener('keydown', (e) => {
 			this.controls('keyboard')
 			if (e.code in this.keys) {
@@ -99,6 +111,9 @@ export class InputManager {
 		for (const map of this.#maps) {
 			map.update(gamepads)
 		}
+		for (const wheelDirection of [MOUSE_WHEEL.X, MOUSE_WHEEL.Y, MOUSE_WHEEL.Z]) {
+			this.mouseWheel[wheelDirection] = 0
+		}
 	}
 
 	createMap<K extends string>(inputs: readonly K[], touch = false) {
@@ -115,6 +130,7 @@ export class Input {
 	buttons: number[] = []
 	axes: [number, 1 | -1][] = []
 	mouse: number[] = []
+	mouseWheel: [MOUSE_WHEEL, 1 | -1][] = []
 	#manager: InputManager
 
 	constructor(manager: InputManager) {
@@ -131,6 +147,12 @@ export class Input {
 
 	setMouse(...buttons: MOUSE_BUTTONS[]) {
 		this.mouse.push(...buttons)
+		return this
+	}
+
+	setMouseWheel(axis: MOUSE_WHEEL, direction: 1 | -1) {
+		this.mouseWheel.push([axis, direction])
+		return this
 	}
 
 	setButtons(...buttons: number[]) {
@@ -155,6 +177,12 @@ export class Input {
 		}
 		for (const bubtton of this.mouse) {
 			if (this.#manager.mouse[bubtton]) {
+				this.pressed = 1
+			}
+		}
+		for (const [axis, direction] of this.mouseWheel) {
+			const amount = this.#manager.mouseWheel[axis]
+			if (amount !== 0 && Math.sign(amount) === direction) {
 				this.pressed = 1
 			}
 		}

@@ -21,6 +21,7 @@ import { EnemyAttackStyle, Faction } from '@/global/entity'
 import type { Entity } from '@/global/entity'
 import { pollenBundle } from '@/particles/pollenParticles'
 import { inMap } from '@/lib/hierarchy'
+import { selectNewLockedEnemey } from '@/states/dungeon/locking'
 
 export const playerQuery = ecs.with('position', 'sensorCollider', 'strength', 'body', 'critChance', 'critDamage', 'combo', 'playerAnimator', 'weapon', 'player', 'collider').where(({ faction }) => faction === Faction.Player)
 
@@ -180,6 +181,11 @@ const hit: EnemyState = {
 }
 const dying: EnemyState = {
 	enter: async (e, setState) => {
+		if (e.lockedOn) {
+			selectNewLockedEnemey()
+			ecs.removeComponent(e, 'lockedOn')
+			ecs.removeComponent(e, 'outline')
+		}
 		await e.enemyAnimator.playClamped('dead')
 		return setState('dead')
 	},
