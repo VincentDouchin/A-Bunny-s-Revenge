@@ -40,12 +40,12 @@ const addWorldPosition = () => bodiesWithoutWorldPositionQuery.onEntityAdded.sub
 	entity.group.getWorldPosition(worldPosition)
 	ecs.addComponent(entity, 'worldPosition', worldPosition)
 })
-const worldPositionQuery = ecs.with('group', 'worldPosition', 'body')
+const worldPositionQuery = ecs.with('group', 'worldPosition', 'body').without('bodyDesc')
 const updateWorldPosition = () => {
 	for (const entity of worldPositionQuery) {
 		const { group, worldPosition, body } = entity
 		group.getWorldPosition(worldPosition)
-		if (body && body.isFixed()) {
+		if (body.isFixed()) {
 			body.setTranslation(worldPosition, true)
 			worldPositionQuery.remove(entity)
 		}
