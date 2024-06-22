@@ -1,11 +1,10 @@
-import { For, Show } from 'solid-js'
-import Fish from '@assets/icons/fish-solid.svg'
 import Exit from '@assets/icons/arrow-left-solid.svg'
-import { css } from 'solid-styled'
+import Fish from '@assets/icons/fish-solid.svg'
+import { For, Show } from 'solid-js'
 import { MenuType } from '@/global/entity'
 import { ecs } from '@/global/init'
-import { useGame, useQuery } from '@/ui/store'
 import { TouchButton } from '@/ui/TouchControls'
+import { useGame, useQuery } from '@/ui/store'
 
 const fishingQuery = useQuery(ecs.with('menuType').where(e => e.menuType === MenuType.Fishing))
 export const FishingMinigameUi = () => {
@@ -13,29 +12,18 @@ export const FishingMinigameUi = () => {
 	return (
 		<Show when={context?.usingTouch() && context.player()}>
 			{(player) => {
-				css/* css */`
-			.inputs-container{
-				position: fixed;
-				bottom: 0;
-				right: 0;
-				margin: 7em;
-				display: flex;
-				gap: 7rem;
-				flex-direction: row-reverse;
-			}
-			`
 				return (
 					<For each={fishingQuery()}>
 						{() => {
 							return (
-								<div class="inputs-container">
-									<TouchButton input="primary" controller={player().playerControls.touchController!}>
+								<>
+									<TouchButton size="10rem" input="primary" controller={player().playerControls.touchController!}>
 										<Fish />
 									</TouchButton>
-									<TouchButton input="cancel" controller={player().menuInputs.touchController!}>
+									<TouchButton size="7rem" distance="15rem" angle="100deg" input="cancel" controller={player().menuInputs.touchController!}>
 										<Exit />
 									</TouchButton>
-								</div>
+								</>
 							)
 						}}
 					</For>

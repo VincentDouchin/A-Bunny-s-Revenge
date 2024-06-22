@@ -254,14 +254,12 @@ export const OvenMinigameUi = () => {
 							return (
 								<>
 									<Show when={context?.usingTouch()}>
-										<div class="inputs-container">
-											<TouchButton input="primary" controller={player().playerControls.touchController!}>
-												<Fire />
-											</TouchButton>
-											<TouchButton input="cancel" controller={player().menuInputs.touchController!}>
-												<Exit />
-											</TouchButton>
-										</div>
+										<TouchButton size="10rem" input="primary" controller={player().playerControls.touchController!}>
+											<Fire />
+										</TouchButton>
+										<TouchButton size="7rem" distance="15rem" angle="100deg" input="cancel" controller={player().menuInputs.touchController!}>
+											<Exit />
+										</TouchButton>
 									</Show>
 
 									<div class="minigame-container">

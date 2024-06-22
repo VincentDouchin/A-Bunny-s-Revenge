@@ -78,7 +78,7 @@ export const KeyboardControls = () => {
 										return (
 											<div class="keyboard-controls">
 												<InputIcon input={player().playerControls.get('primary')}></InputIcon>
-												<OutlineText>{interactable()}</OutlineText>
+												<OutlineText>{interactable().text}</OutlineText>
 
 											</div>
 										)
@@ -89,7 +89,7 @@ export const KeyboardControls = () => {
 										return (
 											<div class="keyboard-controls">
 												<InputIcon input={player().playerControls.get('secondary')}></InputIcon>
-												<OutlineText>{interactable()}</OutlineText>
+												<OutlineText>{interactable().text}</OutlineText>
 
 											</div>
 										)

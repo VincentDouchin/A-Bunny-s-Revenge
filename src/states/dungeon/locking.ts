@@ -1,7 +1,6 @@
 import { CSS2DObject } from 'three/examples/jsm/renderers/CSS2DRenderer'
-import type { With } from 'miniplex'
-import { ecs } from '@/global/init'
 import type { Entity } from '@/global/entity'
+import { ecs } from '@/global/init'
 
 const playerQuery = ecs.with('player', 'position', 'playerControls')
 const enemiesQuery = ecs.with('enemyName', 'position', 'state').where(e => e.state !== 'dying')
@@ -14,8 +13,8 @@ const lockOn = (e: Entity) => {
 	lockedOn.position.y = e.size?.y ? e.size?.y + 3 : 10
 	ecs.update(e, { lockedOn, outline: true })
 }
-export const selectNewLockedEnemey = (player?: With<Entity, 'position'>) => {
-	player ??= playerQuery.first
+export const selectNewLockedEnemey = () => {
+	const player = playerQuery.first
 	if (!player) return
 	const sortedEnemies = enemiesQuery.entities.toSorted((a, b) => {
 		return a.position.distanceTo(player.position) - b.position.distanceTo(player.position)
@@ -46,7 +45,7 @@ export const lockOnEnemy = () => {
 			if (alreadyLocked) {
 				unlock(alreadyLocked)
 			} else {
-				selectNewLockedEnemey(player)
+				selectNewLockedEnemey()
 			}
 		}
 		if (player.playerControls.get('lookLeft').justPressed) {

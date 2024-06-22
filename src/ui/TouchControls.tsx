@@ -67,33 +67,45 @@ export const TouchButton = <T extends string,>({ input, controller, children, in
 		font-size: calc(var(--input-size) * 0.25);
 		white-space: nowrap;
 	}
+	.inputs-container{
+		position: fixed;
+		bottom: 10rem;
+		right: 15rem;
+	}
+	.inputs-center{
+		position:relative
+	}
 	`
 	const icon = createMemo(() => children ?? (interactable && interactable()?.icon))
 	onCleanup(interact(0))
 	return (
-		<div
-			class="input"
-			onTouchStart={interact(1)}
-			onTouchEnd={interact(0)}
-			onTouchCancel={interact(0)}
-		>
-			<Transition name="popup" mode="outin">
-				<Show when={icon()}>
-					{icon => icon()}
-				</Show>
-			</Transition>
-			<Transition name="popup" mode="outin">
-				<Show when={textToDisplay()}>
-					{(text) => {
-						return (
-							<div class="input-text">
-								<OutlineText>{text()}</OutlineText>
-							</div>
-						)
-					}}
-				</Show>
-			</Transition>
+		<div class="inputs-container">
+			<div class="inputs-center">
+				<div
+					class="input"
+					onTouchStart={interact(1)}
+					onTouchEnd={interact(0)}
+					onTouchCancel={interact(0)}
+				>
+					<Transition name="popup" mode="outin">
+						<Show when={icon()}>
+							{icon => icon()}
+						</Show>
+					</Transition>
+					<Transition name="popup" mode="outin">
+						<Show when={textToDisplay()}>
+							{(text) => {
+								return (
+									<div class="input-text">
+										<OutlineText>{text()}</OutlineText>
+									</div>
+								)
+							}}
+						</Show>
+					</Transition>
 
+				</div>
+			</div>
 		</div>
 	)
 }
@@ -153,9 +165,6 @@ export const TouchControls = () => {
 					playerInputs?.set('left', 0)
 					playerInputs?.set('right', 0)
 				})
-				// const openInventory = () => {
-				// 	ecs.addComponent(player(), 'menuType', MenuType.Player)
-				// }
 				const interactableQuery = ecs.with('interactable', 'interactionContainer')
 				const interactableEntity = ui.sync(() => interactableQuery.first)
 				const interactables = createMemo(() => getInteractables(player(), interactableEntity()))
@@ -240,14 +249,7 @@ export const TouchControls = () => {
 					bottom: 15rem;
 					right: 14.5rem;
 				}
-				.inputs-container{
-					position: fixed;
-					bottom: 10rem;
-					right: 15rem;
-				}
-				.inputs-center{
-					position:relative
-				}
+				
 
 				
 			
@@ -282,23 +284,18 @@ export const TouchControls = () => {
 								</div>
 							</div>
 						</div>
-						<div class="inputs-container">
-							<div class="inputs-center">
-								<StateUi state={campState}>
-									<TouchButton input="inventory" controller={playerInputs!} size="7rem" angle="45deg" distance="15rem" text="Open inventory">
-										<Inventory />
-									</TouchButton>
-								</StateUi>
-								<StateUi state={dungeonState}>
-									<TouchButton input="lock" controller={playerInputs!} size="7rem" angle="45deg" distance="15rem" text="Lock">
-										<Lock />
-									</TouchButton>
-								</StateUi>
-								<TouchButton input="primary" controller={playerInputs!} interactable={primaryInteractable} size="10rem" />
-								<TouchButton input="secondary" controller={playerInputs!} interactable={secondaryInteractable} size="7rem" angle="100deg" distance="15rem" />
-							</div>
-
-						</div>
+						<StateUi state={campState}>
+							<TouchButton input="inventory" controller={playerInputs!} size="7rem" angle="45deg" distance="15rem" text="Open inventory">
+								<Inventory />
+							</TouchButton>
+						</StateUi>
+						<StateUi state={dungeonState}>
+							<TouchButton input="lock" controller={playerInputs!} size="7rem" angle="45deg" distance="15rem" text="Lock">
+								<Lock />
+							</TouchButton>
+						</StateUi>
+						<TouchButton input="primary" controller={playerInputs!} interactable={primaryInteractable} size="10rem" />
+						<TouchButton input="secondary" controller={playerInputs!} interactable={secondaryInteractable} size="7rem" angle="100deg" distance="15rem" />
 					</div>
 				)
 			}}

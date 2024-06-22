@@ -194,27 +194,16 @@ export const CauldronMinigameUi = () => {
 					border:  ${`solid ${spotColor()} ${spotSize()}`};
 					translate: ${`calc(10rem * ${spotCoordinates().x}) calc(10rem * ${spotCoordinates().y})`};
 				}
-				.inputs-container{
-					position: fixed;
-					bottom: 0;
-					right: 0;
-					margin: 7em;
-					display: flex;
-					gap: 7rem;
-					flex-direction: row-reverse;
-				}
 				`
 							return (
 								<>
 									<Show when={isTouch()}>
-										<div class="inputs-container">
-											<TouchButton input="primary" controller={player().playerControls.touchController!}>
-												<Spoon />
-											</TouchButton>
-											<TouchButton input="cancel" controller={player().menuInputs.touchController!}>
-												<Exit />
-											</TouchButton>
-										</div>
+										<TouchButton size="10rem" input="primary" controller={player().playerControls.touchController!}>
+											<Spoon />
+										</TouchButton>
+										<TouchButton size="7rem" distance="15rem" angle="90deg" input="cancel" controller={player().menuInputs.touchController!}>
+											<Exit />
+										</TouchButton>
 									</Show>
 									<Portal mount={cauldron().interactionContainer.element}>
 										<div class="progress-container">
