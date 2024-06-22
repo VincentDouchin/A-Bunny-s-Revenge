@@ -9,8 +9,8 @@ import { Interactable } from '@/global/entity'
 import { assets, dayTime, ecs, gameTweens, world } from '@/global/init'
 import { save } from '@/global/save'
 import { inMap } from '@/lib/hierarchy'
-import { completeQuestStep, hasCompletedStep, hasQuest, removeItemFromPlayer } from '@/utils/dialogHelpers'
 import { getWorldPosition } from '@/lib/transforms'
+import { completeQuestStep, hasCompletedStep, hasQuest, removeItemFromPlayer } from '@/utils/dialogHelpers'
 
 const magicParticles = () => {
 	const system = new ParticleSystem({
@@ -35,10 +35,6 @@ const magicParticles = () => {
 	system.emitter.position.setY(5)
 
 	return system.emitter
-}
-
-export const getMagicBeanInteractable = (): [undefined | string, undefined | string] => {
-	return ['Plant magic bean', undefined]
 }
 
 const MAGIC_BEAN_CROP_ID = 'magic_bean'

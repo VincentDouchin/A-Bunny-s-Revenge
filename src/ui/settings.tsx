@@ -73,6 +73,24 @@ export const Settings = (props: { menu: MenuDir }) => {
 			}
 		}
 	})
+	// ! UI OPACITY
+	const uiOpacitySelected = atom(false)
+	const uiOpacity = atom(save.settings.uiOpacity ?? 10)
+	const setUiOpacity = async (scale: number) => {
+		uiOpacity(scale)
+		await updateSave(s => s.settings.uiOpacity = scale)
+		ui.setUiOpacity()
+	}
+	ui.updateSync(() => {
+		if (uiOpacitySelected()) {
+			if (inputs()?.get('left').justPressed) {
+				setUiOpacity(Math.max(uiOpacity() - 10, 0))
+			}
+			if (inputs()?.get('right').justPressed) {
+				setUiOpacity(Math.min(uiOpacity() + 10, 100))
+			}
+		}
+	})
 	// ! DIFFICULTY
 	const difficultySelected = atom(false)
 	const difficulty = atom<'normal' | 'easy'>(save.settings.difficulty ?? 'normal')
@@ -111,7 +129,7 @@ export const Settings = (props: { menu: MenuDir }) => {
 		.unselected{
 			border-bottom: solid 0.2rem transparent;
 		}
-		.ui-scale{
+		.range-input-container{
 			display: grid;
 			grid-template-columns: 1fr 5rem;
 			gap: 2rem;
@@ -232,7 +250,7 @@ export const Settings = (props: { menu: MenuDir }) => {
 			>
 				<OutlineText>UI scale</OutlineText>
 			</div>
-			<div class="ui-scale">
+			<div class="range-input-container">
 				<input
 					type="range"
 					class="input-range"
@@ -245,12 +263,30 @@ export const Settings = (props: { menu: MenuDir }) => {
 				<OutlineText>{String(Math.min(uiScale() / 10))}</OutlineText>
 			</div>
 			<div
+				use:menuItem={[props.menu, false, uiOpacitySelected, () => ['left', 'right'], true]}
+				class={uiOpacitySelected() ? 'selected' : 'unselected'}
+			>
+				<OutlineText>UI Opacity</OutlineText>
+			</div>
+			<div class="range-input-container">
+				<input
+					type="range"
+					class="input-range"
+					value={uiOpacity()}
+					min="0"
+					step={10}
+					max="100"
+					onChange={e => setUiOpacity(e.target.valueAsNumber)}
+				>
+				</input>
+				<OutlineText>{String(uiOpacity())}</OutlineText>
+			</div>
+			<div
 				use:menuItem={[props.menu, false, difficultySelected, () => ['left', 'right'], true]}
 				class={difficultySelected() ? 'selected' : 'unselected'}
 				onClick={() => difficulty(difficulty() === 'easy' ? 'normal' : 'easy')}
 			>
 				<OutlineText>Difficulty</OutlineText>
-
 			</div>
 			<SwitchButtons
 				options={['easy', 'normal']}

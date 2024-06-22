@@ -1,73 +1,99 @@
-import type { Accessor, JSXElement } from 'solid-js'
-import { For, Show, createMemo, onCleanup } from 'solid-js'
+import Inventory from '@assets/icons/basket-shopping-solid.svg'
+import Pause from '@assets/icons/pause-solid.svg'
+import type { Accessor, JSX, JSXElement } from 'solid-js'
+import { Show, createMemo, onCleanup } from 'solid-js'
 import { css } from 'solid-styled'
 import { Transition } from 'solid-transition-group'
 import type { Vec2 } from 'three'
 import { Vector2 } from 'three'
-import Pause from '@assets/icons/pause-solid.svg'
-import Inventory from '@assets/icons/basket-shopping-solid.svg'
+import Lock from '@assets/icons/lockIndicator.svg'
 import { getInteractables } from './Interactions'
 import { StateUi } from './components/StateUi'
+import { OutlineText } from './components/styledComponents'
 import { useGame } from './store'
 import { atom } from '@/lib/uiManager'
-import { campState, pausedState } from '@/global/states'
-import { ecs, ui } from '@/global/init'
-import { MenuType } from '@/global/entity'
 import type { TouchController } from '@/lib/inputs'
+import { campState, dungeonState, pausedState } from '@/global/states'
+import { ecs, ui } from '@/global/init'
 
-export const TouchButton = <T extends string,>({ input, controller, children, text }: {
+export const TouchButton = <T extends string,>({ input, controller, children, interactable, size, distance, angle, text }: {
 	input: T
 	controller: TouchController<T>
 	children?: JSXElement
-	text?: Accessor<string | undefined>
+	interactable?: Accessor<{ text: string, icon?: JSX.Element } | undefined>
+	text?: string
+	size: string
+	distance?: string
+	angle?: string
 }) => {
 	const isPressed = createMemo(() => controller?.get(input))
 	const interact = (value: number) => () => {
 		controller.set(input, value)
 	}
+	const textToDisplay = createMemo(() => text ?? (interactable && interactable()?.text))
 	css/* css */`
-	.touch-input{
+	.input{
+		top:calc((cos(var(--angle)) * -1 * var(--distance)) + 50%);
+		left:calc((sin(var(--angle)) * -1 * var(--distance)) + 50%);
+		--angle: ${angle ?? '0deg'};
+		--distance: ${distance ?? '0'};
+		--input-size:${size};
+		--pressed:${isPressed() ? '0rem' : '1rem'};
 		transition: all 0.2s ease;
-		position: relative;
-		width: 8rem;
-		height: 8rem;
-		background: hsl(0, 0%, 0%, 50%);
-		border-radius: 100rem;
-		box-shadow:${isPressed() ? 'inset 0 0 2rem 0 black' : ''};
-		opacity:${text && text() ? '80%' : '30%'};
-		border:${`solid ${isPressed() ? '0.3rem' : '0.1rem'} hsl(0, 0%,100%)`};
-		font-size: 4rem;
-		fill:white;
-		display: grid;
-		place-items:center;
-	}
-	.interactable-text{
-		color: white;
+		transform:translate(-50%, calc(-50% + 1rem - var(--pressed)));
+		width: var(--input-size);
+		height: var(--input-size);
+		border-radius: var(--input-size);
 		position: absolute;
-		top: 100%;
-		left: 50%;
-		transform: translate(-50%, 0);
-		padding-top: 0.5rem;
+		display: grid;
+		place-items: center;
+		font-size: calc(0.6 * var(--input-size));
+		fill: white;
+		background: var(--gold);
+		box-shadow: inset 0.5rem 0.5rem 0 0 var(--gold-shiny), 0 var(--pressed) 0 0 black;
+		opacity: var(--ui-opacity);
+	}
+	:global(.input svg) {
+		filter:
+			drop-shadow(-1px -1px 0px black)
+			drop-shadow(2px -1px 0px black)
+			drop-shadow(2px 2px 0px black)
+			drop-shadow(-1px 2px 0px black);
+	}
+	.input-text{
+		position: absolute;
+		color: white;
+		bottom: 0%;
+		font-size: calc(var(--input-size) * 0.25);
 		white-space: nowrap;
-		font-size: 3rem;
 	}
 	`
+	const icon = createMemo(() => children ?? (interactable && interactable()?.icon))
 	onCleanup(interact(0))
 	return (
 		<div
-			class="touch-input"
+			class="input"
 			onTouchStart={interact(1)}
 			onTouchEnd={interact(0)}
 			onTouchCancel={interact(0)}
 		>
-			{children}
-			<Transition name="popup">
-				<Show when={text && text()}>
+			<Transition name="popup" mode="outin">
+				<Show when={icon()}>
+					{icon => icon()}
+				</Show>
+			</Transition>
+			<Transition name="popup" mode="outin">
+				<Show when={textToDisplay()}>
 					{(text) => {
-						return <div class="interactable-text">{text()}</div>
+						return (
+							<div class="input-text">
+								<OutlineText>{text()}</OutlineText>
+							</div>
+						)
 					}}
 				</Show>
 			</Transition>
+
 		</div>
 	)
 }
@@ -127,9 +153,9 @@ export const TouchControls = () => {
 					playerInputs?.set('left', 0)
 					playerInputs?.set('right', 0)
 				})
-				const openInventory = () => {
-					ecs.addComponent(player(), 'menuType', MenuType.Player)
-				}
+				// const openInventory = () => {
+				// 	ecs.addComponent(player(), 'menuType', MenuType.Player)
+				// }
 				const interactableQuery = ecs.with('interactable', 'interactionContainer')
 				const interactableEntity = ui.sync(() => interactableQuery.first)
 				const interactables = createMemo(() => getInteractables(player(), interactableEntity()))
@@ -177,37 +203,34 @@ export const TouchControls = () => {
 				}
 				.joystick{
 					position: relative;
-					background: hsl(0, 0%, 0%);
+					background: var(--brown-dark);
+					border: solid var(--gold) 0.5rem;
 					border-radius: 1000px;
 					width: 12rem;
 					height: 12rem;
-					opacity: 20%;
+					opacity:var(--ui-opacity);
+					box-shadow:inset 0 0 2rem 0rem black;
 				}
 				.joystick-center{
 					border-radius: 1000px;
 					width: 5rem;
 					height: 5rem;
-					background: hsl(0, 0%, 100%);
+					background: var(--gold);
+					box-shadow: inset 0.5rem 0.5rem 0 0 var(--gold-shiny);
 					position: absolute;
 					top: 50%;
 					left: 50%;
 				}
-				.inputs-container{
-					position: fixed;
-					bottom: 0;
-					right: 0;
-					margin: 7em;
-					display: flex;
-					gap: 7rem;
-					flex-direction: row-reverse;
-				}
+
 				.pause-button {
 					position: fixed;
 					top: 1rem;
 					left: 50%;
 					transform: translateX(-50%);
-					fill: white;
+					fill: hsla(0,0%,100%);
 					display: flex;
+					z-index:100;
+					opacity:0.3;
 					align-items:center;
 					gap:1rem;
 					font-size: 2rem
@@ -216,7 +239,21 @@ export const TouchControls = () => {
 					position: fixed;
 					bottom: 15rem;
 					right: 14.5rem;
-				}`
+				}
+				.inputs-container{
+					position: fixed;
+					bottom: 10rem;
+					right: 15rem;
+				}
+				.inputs-center{
+					position:relative
+				}
+
+				
+			
+				`
+				const primaryInteractable = createMemo(() => interactables()[0])
+				const secondaryInteractable = createMemo(() => interactables()[1])
 				return (
 					<div>
 						<button class="pause-button button" onTouchStart={() => pausedState.enable()}>
@@ -234,7 +271,7 @@ export const TouchControls = () => {
 								class="joystick"
 								ref={container}
 								style={{
-									border: `solid ${isJoystickPressed() ? '0.3rem' : '0.1rem'} hsl(0, 0%,100%)`,
+
 									...defaultPos(),
 								}}
 							>
@@ -245,19 +282,22 @@ export const TouchControls = () => {
 								</div>
 							</div>
 						</div>
-						<StateUi state={campState}>
-							<div onTouchStart={openInventory} class="inventory-button">
-								<TouchButton input="inventory" controller={playerInputs!}>
-									<Inventory />
-								</TouchButton>
-							</div>
-						</StateUi>
 						<div class="inputs-container">
-							<For each={['primary', 'secondary'] as const}>
-								{(input, index) => {
-									const interactableText = createMemo(() => interactables()[index()])
-									return <TouchButton input={input} controller={playerInputs!} text={interactableText} /> }}
-							</For>
+							<div class="inputs-center">
+								<StateUi state={campState}>
+									<TouchButton input="inventory" controller={playerInputs!} size="7rem" angle="45deg" distance="15rem" text="Open inventory">
+										<Inventory />
+									</TouchButton>
+								</StateUi>
+								<StateUi state={dungeonState}>
+									<TouchButton input="lock" controller={playerInputs!} size="7rem" angle="45deg" distance="15rem" text="Lock">
+										<Lock />
+									</TouchButton>
+								</StateUi>
+								<TouchButton input="primary" controller={playerInputs!} interactable={primaryInteractable} size="10rem" />
+								<TouchButton input="secondary" controller={playerInputs!} interactable={secondaryInteractable} size="7rem" angle="100deg" distance="15rem" />
+							</div>
+
 						</div>
 					</div>
 				)

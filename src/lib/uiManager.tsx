@@ -15,6 +15,7 @@ export class UIManager {
 		document.body.appendChild(el)
 		this.root = el
 		this.setFontSize()
+		this.setUiOpacity()
 	}
 
 	listeners = new Set<() => void>()
@@ -26,6 +27,10 @@ export class UIManager {
 
 	setFontSize() {
 		document.documentElement.style.setProperty('font-size', `${save.settings.uiScale / 10 * 2}vh`)
+	}
+
+	setUiOpacity() {
+		document.documentElement.style.setProperty('--ui-opacity', `${save.settings.uiOpacity}%`)
 	}
 
 	sync<T>(data: () => T) {

@@ -1,24 +1,32 @@
 import type { With } from 'miniplex'
+import type { JSX } from 'solid-js'
 import { For, createSignal, onMount } from 'solid-js'
 import { Portal, Show } from 'solid-js/web'
 import { css } from 'solid-styled'
 import { Transition } from 'solid-transition-group'
+import Seed from '@assets/icons/seedling-solid.svg'
+import Carrot from '@assets/icons/carrot-solid.svg'
+import Sword from '@assets/icons/sword.svg'
+import Clipboard from '@assets/icons/clipboard-check-solid.svg'
+import Water from '@assets/icons/droplet-solid.svg'
+import Utensils from '@assets/icons/utensils-solid.svg'
+import Spoon from '@assets/icons/spoon-solid.svg'
+import Wind from '@assets/icons/wind-solid (1).svg'
 import { InputIcon } from './InputIcon'
 import { OutlineText } from './components/styledComponents'
 import { useGame, useQuery } from './store'
-import { getSeed } from '@/constants/items'
-import type { Entity } from '@/global/entity'
-import { Interactable } from '@/global/entity'
-import { ecs, ui } from '@/global/init'
-import { save } from '@/global/save'
-import { dungeonState } from '@/global/states'
 import { WeaponStatsUi } from '@/states/dungeon/WeaponStatsUi'
-import { getMagicBeanInteractable } from '@/states/farm/beanStalk'
+import { dungeonState } from '@/global/states'
+import { save } from '@/global/save'
+import { ecs, ui } from '@/global/init'
+import { Interactable } from '@/global/entity'
+import type { Entity } from '@/global/entity'
+import { getSeed } from '@/constants/items'
 
 export const getInteractables = (
 	player: With<Entity, 'inventory'>,
 	entity?: With<Entity, 'interactable'>,
-): (string | undefined)[] => {
+): ({ text: string, icon?: JSX.Element } | undefined)[] => {
 	const hasSeedInInventory = player.inventory?.filter(Boolean)?.some(item => getSeed(item.name))
 	const hasSelectedSeed = player.inventory?.filter(Boolean).some((item) => {
 		return getSeed(item.name) === save.selectedSeed && item.quantity > 0
@@ -26,25 +34,33 @@ export const getInteractables = (
 	if (entity) {
 		switch (entity?.interactable) {
 			case Interactable.Plant: return [
-				hasSelectedSeed ? `plant ${save.selectedSeed}` : undefined,
-				hasSeedInInventory ? 'select seed' : undefined,
+				hasSelectedSeed ? { text: `plant ${save.selectedSeed}`, icon: Carrot } : undefined,
+				hasSeedInInventory ? { text: 'select seed', icon: Seed } : undefined,
 			]
-			case Interactable.Water:return (player.wateringCan?.waterAmount ?? 0) > 0 ? [Interactable.Water] : []
+			case Interactable.Water: return (player.wateringCan?.waterAmount ?? 0) > 0 ? [{ text: Interactable.Water, icon: Water }] : []
+			case Interactable.FillWateringCan: return [{ text: Interactable.FillWateringCan, icon: Water }]
 			case Interactable.Read:
 			case Interactable.Talk: return [
-				entity.activeDialog ? undefined : entity.interactable,
+				entity.activeDialog ? undefined : { text: entity.interactable },
 			]
 			case Interactable.Cauldron:
 			case Interactable.Oven:
-			case Interactable.Chop: return ['Prepare', entity.recipesQueued?.length ? 'Cook' : undefined]
-			case Interactable.WeaponStand: return ['Equip']
-			case Interactable.Buy: return [`Buy (${entity.price})`]
-			case Interactable.MagicBean:return getMagicBeanInteractable()
-			default: return [entity?.interactable]
+			case Interactable.Chop: return [
+				{ text: 'Prepare', icon: Utensils },
+				entity.recipesQueued?.length ? { text: 'Cook', icon: Spoon } : undefined,
+			]
+			case Interactable.WeaponStand: return [{ text: 'Equip' }]
+			case Interactable.Buy: return [{ text: `Buy (${entity.price})` }]
+			case Interactable.MagicBean: return [{ text: 'Plant magic bean' }, undefined]
+			case Interactable.BulletinBoard :return [{ text: Interactable.BulletinBoard, icon: Clipboard }]
+			default: return [{ text: entity?.interactable }]
 		}
 	}
 	if (dungeonState.enabled) {
-		return ['Attack', 'Dash']
+		return [
+			{ text: 'Attack', icon: Sword },
+			{ text: 'Dash', icon: Wind },
+		]
 	}
 	return []
 }
@@ -96,13 +112,13 @@ export const InteractionUi = () => {
 													<Show when={interactables()[1]}>
 														<div class="interaction-text">
 															<InputIcon input={player().playerControls.get('secondary')} />
-															<OutlineText>{interactables()[1]}</OutlineText>
+															<OutlineText>{interactables()[1]?.text}</OutlineText>
 														</div>
 													</Show>
 													<Show when={interactables()[0]}>
 														<div class="interaction-text">
 															<InputIcon input={player().playerControls.get('primary')}></InputIcon>
-															<OutlineText>{interactables()[0]}</OutlineText>
+															<OutlineText>{interactables()[0]?.text}</OutlineText>
 														</div>
 													</Show>
 												</Show>

@@ -47,3 +47,6 @@ export const removeOutlines = () => outlineQuery.onEntityRemoved.subscribe((e) =
 export const addOutline = () => outlineQuery.onEntityAdded.subscribe((e) => {
 	e.model.traverse(node => node.layers.enable(1))
 })
+export const removeInteractableOutline = () => interactingQuery.onEntityRemoved.subscribe((e) => {
+	ecs.removeComponent(e, 'outline')
+})

@@ -5,7 +5,7 @@ import { params } from '@/global/context'
 import type { Entity } from '@/global/entity'
 import { ecs, inputManager, time } from '@/global/init'
 import { save } from '@/global/save'
-import { pausedState } from '@/global/states'
+import { openMenuState, pausedState } from '@/global/states'
 
 export const getMovementForce = ({ movementForce, speed, targetMovementForce }: With<Entity, 'movementForce' | 'speed' >) => {
 	const targetForce = movementForce.clone().multiplyScalar(speed.value * params.speedUp * time.delta / 1000)
@@ -22,15 +22,17 @@ export const getPlayerRotation = (e: With<Entity, 'position' | 'playerControls'>
 	if (lockOn) {
 		return lockOn.position.clone().sub(e.position).normalize()
 	}
-	if (inputManager.controls() === 'gamepad' && save.settings.controls === 'mouse') {
-		return new Vector3(
-			e.playerControls.get('lookLeft').pressed - e.playerControls.get('lookRight').pressed,
-			0,
-			e.playerControls.get('lookForward').pressed - e.playerControls.get('lookBackward').pressed,
-		).normalize()
-	}
-	if (inputManager.controls() === 'keyboard' && save.settings.controls === 'mouse') {
-		return inputManager.mouseWorldPosition.clone().sub(e.position).normalize()
+	if (!openMenuState.enabled) {
+		if (inputManager.controls() === 'gamepad' && save.settings.controls === 'mouse') {
+			return new Vector3(
+				e.playerControls.get('lookLeft').pressed - e.playerControls.get('lookRight').pressed,
+				0,
+				e.playerControls.get('lookForward').pressed - e.playerControls.get('lookBackward').pressed,
+			).normalize()
+		}
+		if (inputManager.controls() === 'keyboard' && save.settings.controls === 'mouse') {
+			return inputManager.mouseWorldPosition.clone().sub(e.position).normalize()
+		}
 	}
 	return force
 }
