@@ -22,15 +22,15 @@ export const getPlayerRotation = (e: With<Entity, 'position' | 'playerControls'>
 	if (lockOn) {
 		return lockOn.position.clone().sub(e.position).normalize()
 	}
-	if (!openMenuState.enabled) {
-		if (inputManager.controls() === 'gamepad' && save.settings.controls === 'mouse') {
+	if (!openMenuState.enabled && save.settings.controls === 'mouse') {
+		if (inputManager.controls() === 'gamepad') {
 			return new Vector3(
 				e.playerControls.get('lookLeft').pressed - e.playerControls.get('lookRight').pressed,
 				0,
 				e.playerControls.get('lookForward').pressed - e.playerControls.get('lookBackward').pressed,
 			).normalize()
 		}
-		if (inputManager.controls() === 'keyboard' && save.settings.controls === 'mouse') {
+		if (inputManager.controls() === 'keyboard') {
 			return inputManager.mouseWorldPosition.clone().sub(e.position).normalize()
 		}
 	}

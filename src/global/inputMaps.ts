@@ -19,7 +19,7 @@ export const playerInputMap = () => {
 	map.get('primary').setKeys('Space').setButtons(GAMEPAD_BUTTON.A, GAMEPAD_BUTTON.R).setMouse(MOUSE_BUTTONS.LEFT)
 	map.get('secondary').setKeys('ShiftLeft').setButtons(GAMEPAD_BUTTON.X).setMouse(MOUSE_BUTTONS.RIGHT)
 	map.get('pause').setKeys('Tab', 'Escape').setButtons(GAMEPAD_BUTTON.START)
-	map.get('lock').setMouse(MOUSE_BUTTONS.MIDDLE).setButtons(GAMEPAD_BUTTON.R3)
+	map.get('lock').setKeys('ControlLeft').setMouse(MOUSE_BUTTONS.MIDDLE).setButtons(GAMEPAD_BUTTON.R3)
 	return { playerControls: map } as const satisfies Entity
 }
 
