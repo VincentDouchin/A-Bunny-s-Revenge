@@ -1,4 +1,4 @@
-import { type Collider, RigidBodyType } from '@dimforge/rapier3d-compat'
+import type { Collider } from '@dimforge/rapier3d-compat'
 import type { Object3D, Object3DEventMap } from 'three'
 import { Quaternion, Vector3 } from 'three'
 import { Direction } from './directions'
