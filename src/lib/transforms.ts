@@ -1,8 +1,8 @@
+import { type Collider, RigidBodyType } from '@dimforge/rapier3d-compat'
 import type { Object3D, Object3DEventMap } from 'three'
 import { Quaternion, Vector3 } from 'three'
-import type { Collider } from '@dimforge/rapier3d-compat'
-import type { State } from './state'
 import { Direction } from './directions'
+import type { State } from './state'
 import { ecs, time, world } from '@/global/init'
 
 export const getWorldPosition = (obj: Object3D<Object3DEventMap>) => {
@@ -45,9 +45,13 @@ const updateWorldPosition = () => {
 	for (const entity of worldPositionQuery) {
 		const { group, worldPosition, body } = entity
 		group.getWorldPosition(worldPosition)
-		if (body.isFixed()) {
-			body.setTranslation(worldPosition, true)
-			worldPositionQuery.remove(entity)
+		try {
+			if (body.bodyType() === RigidBodyType.Fixed) {
+				body.setTranslation(worldPosition, true)
+				worldPositionQuery.remove(entity)
+			}
+		} catch (e) {
+			console.error(e, entity)
 		}
 	}
 }
@@ -64,7 +68,11 @@ const rotationQuery = ecs.with('rotation').without('bodyDesc')
 const updateRotation = () => {
 	for (const entity of rotationQuery) {
 		if (entity.body) {
-			entity.body.setRotation(entity.rotation, true)
+			try {
+				entity.body.setRotation(entity.rotation, true)
+			} catch (e) {
+				console.error(e)
+			}
 		}
 		if (entity.group) {
 			entity.group.setRotationFromQuaternion(entity.rotation)

@@ -2,17 +2,6 @@ import { type State, runIf } from './state'
 import { pausedState } from '@/global/states'
 import { ecs, world } from '@/global/init'
 
-const addBodies = () => ecs.with('bodyDesc', 'position').onEntityAdded.subscribe((entity) => {
-	const body = world.createRigidBody(entity.bodyDesc)
-	body.setTranslation(entity.position, true)
-	if (entity.rotation) {
-		body.setRotation(entity.rotation, true)
-	}
-	body.userData = entity
-	ecs.addComponent(entity, 'body', body)
-	ecs.removeComponent(entity, 'bodyDesc')
-})
-
 const addColliders = () => ecs.with('body', 'colliderDesc').onEntityAdded.subscribe((entity) => {
 	const collider = world.createCollider(entity.colliderDesc, entity.body)
 
@@ -25,14 +14,28 @@ const removeColliders = () => ecs.with('collider').onEntityRemoved.subscribe((en
 const removeBodies = () => ecs.with('body').onEntityRemoved.subscribe((entity) => {
 	world.removeRigidBody(entity.body)
 })
-const addSecondaryColliders = () => ecs.with('body', 'secondaryColliders').onEntityAdded.subscribe((e) => {
+const addSecondaryColliders = () => ecs.with('body', 'secondaryColliders').without('bodyDesc').onEntityAdded.subscribe((e) => {
 	for (const collider of e.secondaryColliders) {
 		world.createCollider(collider, e.body)
 	}
 })
-const stepWorld = () => world.step()
+const bodiesQuery = ecs.with('bodyDesc', 'position').without('body')
+const stepWorld = () => {
+	for (const entity of bodiesQuery) {
+		const body = world.createRigidBody(entity.bodyDesc)
+
+		ecs.removeComponent(entity, 'bodyDesc')
+		body.setTranslation(entity.position, true)
+		if (entity.rotation) {
+			body.setRotation(entity.rotation, true)
+		}
+		body.userData = entity
+		ecs.addComponent(entity, 'body', body)
+	}
+	world.step()
+}
 export const physicsPlugin = (state: State) => {
 	state
 		.onPreUpdate(runIf(() => !pausedState.enabled, stepWorld))
-		.addSubscriber(addBodies, addColliders, removeColliders, removeBodies, addSecondaryColliders)
+		.addSubscriber(addColliders, removeColliders, removeBodies, addSecondaryColliders)
 }

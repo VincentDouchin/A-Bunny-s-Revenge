@@ -53,14 +53,17 @@ export const despawnOfType = (...components: (keyof Entity)[]) => {
 		}
 	}))
 }
+const withChildrenQuery = ecs.with('withChildren').without('bodyDesc')
 
-const addChildrenCallBack = () => ecs.with('withChildren').without('bodyDesc').onEntityAdded.subscribe((entity) => {
-	entity.withChildren(entity)
-	ecs.removeComponent(entity, 'withChildren')
-})
+const addChildrenCallBack = () => {
+	for (const entity of withChildrenQuery) {
+		entity.withChildren(entity)
+		ecs.removeComponent(entity, 'withChildren')
+	}
+}
 
 export const hierarchyPlugin = (state: State) => {
-	state.addSubscriber(addChildren, removeChildren, despanwChildren, addChildrenCallBack)
+	state.addSubscriber(addChildren, removeChildren, despanwChildren).onPostUpdate(addChildrenCallBack)
 }
 export const addTag = (entity: Entity, tag: ComponentsOfType<true>) => {
 	ecs.addComponent(entity, tag, true)
