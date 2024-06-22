@@ -10,12 +10,12 @@ export const OverlayUi = () => {
 	.overlay {
 		position: fixed;
 		inset: 0;
-		/* background: linear-gradient(
+		background: linear-gradient(
 			45deg in lab,
 			lch(39 53.53 282.75 / var(--opacity)),
 			lch(65 67.77 57.86 / var(--opacity))
-		); */
-		/* mix-blend-mode: soft-light; */
+		);
+		mix-blend-mode: soft-light;
 		filter: saturate(0%);
 	}
 	`
