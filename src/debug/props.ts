@@ -376,7 +376,6 @@ export const props: Props = [
 								interactable: Interactable.Enter,
 								bodyDesc: RigidBodyDesc.fixed().lockRotations(),
 								colliderDesc: ColliderDesc.cuboid(5, 7, 1).setSensor(true).setActiveCollisionTypes(ActiveCollisionTypes.ALL),
-
 							})
 						} else if (node instanceof Mesh) {
 							ecs.add({ parent, emissiveMat: node.material })

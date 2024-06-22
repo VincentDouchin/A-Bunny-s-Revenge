@@ -8,11 +8,13 @@ const addColliders = () => ecs.with('body', 'colliderDesc').onEntityAdded.subscr
 	ecs.addComponent(entity, 'collider', collider)
 	ecs.removeComponent(entity, 'colliderDesc')
 })
-const removeColliders = () => ecs.with('collider').onEntityRemoved.subscribe((entity) => {
-	world.removeCollider(entity.collider, true)
-})
+
 const removeBodies = () => ecs.with('body').onEntityRemoved.subscribe((entity) => {
 	world.removeRigidBody(entity.body)
+	if (entity.collider) {
+		world.removeCollider(entity.collider, true)
+		ecs.removeComponent(entity, 'collider')
+	}
 })
 const addSecondaryColliders = () => ecs.with('body', 'secondaryColliders').without('bodyDesc').onEntityAdded.subscribe((e) => {
 	for (const collider of e.secondaryColliders) {
@@ -37,5 +39,5 @@ const stepWorld = () => {
 export const physicsPlugin = (state: State) => {
 	state
 		.onPreUpdate(runIf(() => !pausedState.enabled, stepWorld))
-		.addSubscriber(addColliders, removeColliders, removeBodies, addSecondaryColliders)
+		.addSubscriber(addColliders, removeBodies, addSecondaryColliders)
 }
