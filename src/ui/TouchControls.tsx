@@ -39,7 +39,7 @@ export const TouchButton = <T extends string,>({ input, controller, children, in
 		--distance: ${distance ?? '0'};
 		--input-size:${size};
 		--pressed:${isPressed() ? '0rem' : '1rem'};
-		transition: all 0.2s ease;
+		transition: all 0.1s ease-in-out;
 		transform:translate(-50%, calc(-50% + 1rem - var(--pressed)));
 		width: var(--input-size);
 		height: var(--input-size);
