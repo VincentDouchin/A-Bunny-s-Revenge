@@ -249,10 +249,6 @@ export const TouchControls = () => {
 					bottom: 15rem;
 					right: 14.5rem;
 				}
-				
-
-				
-			
 				`
 				const primaryInteractable = createMemo(() => interactables()[0])
 				const secondaryInteractable = createMemo(() => interactables()[1])

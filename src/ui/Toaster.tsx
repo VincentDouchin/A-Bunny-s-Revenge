@@ -73,6 +73,7 @@ export const Toaster = () => {
 	.toast-icon{
 		height: 1.5rem;
 		aspect-ratio: 1;
+		color:white;
 	}
 	.toast{
 		color: white;
