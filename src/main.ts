@@ -124,6 +124,7 @@ const animate = () => {
 	try {
 		app.update()
 	} catch (e) {
+		console.error(e)
 		errors.push(JSON.stringify(e))
 	}
 	requestAnimationFrame(animate)

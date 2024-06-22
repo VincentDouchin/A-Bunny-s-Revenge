@@ -7,6 +7,7 @@ import { TopRight } from './TopRight'
 import { TouchControls } from './TouchControls'
 import { StateUi } from './components/StateUi'
 import { GameProvider } from './store'
+import { Errors } from './Errors'
 import { DebugUi } from '@/debug/debugUi'
 import { campState, dungeonState, genDungeonState } from '@/global/states'
 import { EnemyHealthBarUi } from '@/states/dungeon/EnemyHealthBarUi'
@@ -28,6 +29,7 @@ import { LockIndicator } from '@/states/dungeon/lockIndicator'
 export const errors = createArray<string>([])
 export const UI = () => (
 	<GameProvider>
+		<Errors />
 		<DebugUi />
 		<PauseUi />
 		<FullscreenUi />
