@@ -74,6 +74,7 @@ export const Toaster = () => {
 		height: 1.5rem;
 		aspect-ratio: 1;
 		color:white;
+		fill:white;
 	}
 	.toast{
 		color: white;
