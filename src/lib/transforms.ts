@@ -45,13 +45,9 @@ const updateWorldPosition = () => {
 	for (const entity of worldPositionQuery) {
 		const { group, worldPosition, body } = entity
 		group.getWorldPosition(worldPosition)
-		try {
-			if (body.bodyType() === RigidBodyType.Fixed) {
-				body.setTranslation(worldPosition, true)
-				worldPositionQuery.remove(entity)
-			}
-		} catch (e) {
-			console.error(e, entity)
+		if (body.isValid() && body.isFixed()) {
+			body.setTranslation(worldPosition, true)
+			worldPositionQuery.remove(entity)
 		}
 	}
 }
