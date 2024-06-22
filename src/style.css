@@ -72,8 +72,8 @@ img {
 	image-rendering: pixelated;
 }
 canvas.main {
-	width: 100% !important;
-	height: 100% !important;
+	width: 100dvw !important;
+	height: 100dvh !important;
 }
 .input-icon > canvas {
 	width: 100%;
