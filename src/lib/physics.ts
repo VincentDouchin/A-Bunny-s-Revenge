@@ -25,22 +25,22 @@ const addSecondaryColliders = () => secondaryCollidersQuery.onEntityAdded.subscr
 })
 
 const bodiesQuery = ecs.with('bodyDesc', 'position').without('body')
-const stepWorld = () => {
-	for (const entity of bodiesQuery) {
-		const body = world.createRigidBody(entity.bodyDesc)
+const addBodies = () => bodiesQuery.onEntityAdded.subscribe((entity) => {
+	const body = world.createRigidBody(entity.bodyDesc)
 
-		body.setTranslation(entity.position, true)
-		if (entity.rotation) {
-			body.setRotation(entity.rotation, true)
-		}
-		body.userData = entity
-		ecs.addComponent(entity, 'body', body)
-		ecs.removeComponent(entity, 'bodyDesc')
+	body.setTranslation(entity.position, true)
+	if (entity.rotation) {
+		body.setRotation(entity.rotation, true)
 	}
+	body.userData = entity
+	ecs.addComponent(entity, 'body', body)
+	ecs.removeComponent(entity, 'bodyDesc')
+})
+const stepWorld = () => {
 	world.step()
 }
 export const physicsPlugin = (state: State) => {
 	state
 		.onPreUpdate(runIf(() => !pausedState.enabled, stepWorld))
-		.addSubscriber(addColliders, addSecondaryColliders, removeBodies)
+		.addSubscriber(addBodies, addColliders, addSecondaryColliders, removeBodies)
 }
