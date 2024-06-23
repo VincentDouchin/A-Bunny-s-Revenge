@@ -1,4 +1,5 @@
 import { createArray } from 'solid-proxies'
+import { Show } from 'solid-js'
 import { DialogUi } from './DialogUi'
 import { InteractionUi } from './Interactions'
 import { KeyboardControls } from './KeyboardControl'
@@ -25,42 +26,50 @@ import { SeedUi } from '@/states/farm/SeedUi'
 import { FullscreenUi } from '@/states/game/FullscreenUi'
 import { OverlayUi } from '@/states/game/overlayUi'
 import { LockIndicator } from '@/states/dungeon/lockIndicator'
+import { ui } from '@/global/init'
+import { debugState } from '@/debug/debugState'
 
 export const errors = createArray<string>([])
-export const UI = () => (
-	<GameProvider>
-		<Errors />
-		<DebugUi />
-		<PauseUi />
-		<FullscreenUi />
-		<LoseUi />
-		<DialogUi />
-		<StateUi state={campState}>
-			<RecipesUi />
-			<OvenMinigameUi />
-			<CauldronMinigameUi />
-			<CuttingBoardMinigameUi />
-			<InventoryUi />
-			<SeedUi />
-			<QuestUi />
-			<HealthUi />
-		</StateUi>
-		<StateUi state={dungeonState}>
-			<SneezeUi />
-			<HealthUi />
-			<LockIndicator />
-		</StateUi>
-		<StateUi state={genDungeonState}>
-			<HealthUi />
-		</StateUi>
-		<StateUi state={dungeonState}>
-			<EnemyHealthBarUi />
-		</StateUi>
-		<FishingMinigameUi />
-		<KeyboardControls />
-		<TouchControls />
-		<InteractionUi />
-		<TopRight />
-		<OverlayUi />
-	</GameProvider>
-)
+export const UI = () => {
+	const debug = ui.sync(() => debugState.enabled)
+	return (
+		<GameProvider>
+			<DebugUi />
+			<Show when={!debug()}>
+				<Errors />
+				<PauseUi />
+				<FullscreenUi />
+				<LoseUi />
+				<DialogUi />
+				<StateUi state={campState}>
+					<RecipesUi />
+					<OvenMinigameUi />
+					<CauldronMinigameUi />
+					<CuttingBoardMinigameUi />
+					<InventoryUi />
+					<SeedUi />
+					<QuestUi />
+					<HealthUi />
+				</StateUi>
+				<StateUi state={dungeonState}>
+					<SneezeUi />
+					<HealthUi />
+					<LockIndicator />
+				</StateUi>
+				<StateUi state={genDungeonState}>
+					<HealthUi />
+				</StateUi>
+				<StateUi state={dungeonState}>
+					<EnemyHealthBarUi />
+				</StateUi>
+				<FishingMinigameUi />
+				<KeyboardControls />
+				<TouchControls />
+				<InteractionUi />
+				<TopRight />
+				<OverlayUi />
+			</Show>
+
+		</GameProvider>
+	)
+}

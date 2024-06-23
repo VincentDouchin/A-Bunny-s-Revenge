@@ -5,7 +5,7 @@ import type { With } from 'miniplex'
 import { For, Show, createEffect, createMemo, createSignal, onCleanup, onMount } from 'solid-js'
 import { css } from 'solid-styled'
 import { Mesh, MeshBasicMaterial, MeshStandardMaterial, PlaneGeometry, Quaternion, Raycaster, Vector2, Vector3 } from 'three'
-import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls'
+import { MapControls } from 'three/examples/jsm/controls/MapControls'
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader'
 import { generateUUID } from 'three/src/math/MathUtils'
 import { EntityEditor } from './EntityEditor'
@@ -17,7 +17,7 @@ import { getModel, props } from './props'
 import { draco, getFileName } from '@/global/assetLoaders'
 import { params } from '@/global/context'
 import type { Entity } from '@/global/entity'
-import { assets, ecs, levelsData, ui } from '@/global/init'
+import { assets, ecs, levelsData, time, ui } from '@/global/init'
 import { loadLevelData } from '@/global/levelData'
 import { updateRenderSize } from '@/global/rendering'
 import { campState, dungeonState } from '@/global/states'
@@ -250,13 +250,15 @@ export const LevelEditor = () => {
 						const group = camera.parent!
 						camera.removeFromParent()
 						camera.position.set(...group.position.toArray())
-						const controls = new OrbitControls(camera, renderer.domElement)
+						const controls = new MapControls(camera, renderer.domElement)
 						createEffect(() => {
 							controls.enabled = !draw()
 						})
-						controls.update()
+						controls.update(0)
 						setFakeGround(activeLevel())
-						ui.updateSync(() => controls.update())
+						ui.updateSync(() => {
+							controls.update(time.delta / 100)
+						})
 						createEffect(() => {
 							if (selectedEntity()) {
 								controls.enabled = false
