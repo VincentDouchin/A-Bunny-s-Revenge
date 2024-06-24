@@ -16,7 +16,7 @@ import { poisonBubbles } from '@/states/dungeon/poisonTrail'
 import { stunBundle } from '@/states/dungeon/stun'
 import { sleep } from '@/utils/sleep'
 
-const ANIMATION_SPEED = 1.15
+const ANIMATION_SPEED = 1
 const playerComponents = ['playerAnimator', 'movementForce', 'speed', 'body', 'rotation', 'playerControls', 'combo', 'attackSpeed', 'dash', 'collider', 'currentHealth', 'model', 'hitTimer', 'size', 'sneeze', 'targetRotation', 'poisoned', 'size', 'position', 'targetMovementForce', 'sleepy', 'modifiers'] as const satisfies readonly (keyof Entity)[]
 type PlayerComponents = (typeof playerComponents)[number]
 const playerQuery = ecs.with(...playerComponents)
@@ -101,11 +101,11 @@ export const playerBehaviorPlugin = behaviorPlugin(
 			}
 			if (e.combo.lastAttack === 1) {
 				!pausedState.enabled && playSound(['Slash_Attack_Light_1', 'Slash_Attack_Light_2'])
-				await e.playerAnimator.playOnce('slashAttack', { timeScale: getAttackSpeed(e) * 0.8 }, 0.2)
+				await e.playerAnimator.playOnce('slashAttack', { timeScale: getAttackSpeed(e) }, 0.2)
 			}
 			if (e.combo.lastAttack === 2) {
 				!pausedState.enabled && playSound(['Slash_Attack_Heavy_1', 'Slash_Attack_Heavy_2', 'Slash_Attack_Heavy_3'])
-				await e.playerAnimator.playClamped('heavyAttack', { timeScale: getAttackSpeed(e) * 0.8 })
+				await e.playerAnimator.playClamped('heavyAttack', { timeScale: getAttackSpeed(e) })
 			}
 			e.combo.lastAttack = 0
 			setupState('idle')

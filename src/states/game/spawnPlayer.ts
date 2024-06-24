@@ -31,9 +31,9 @@ import { Timer } from '@/lib/timer'
 const playerAnimationMap: Record<PlayerAnimations, Animations['Bunny']> = {
 	idle: 'IDLE_NEW',
 	running: 'RUN_ALT',
-	lightAttack: 'FIGHT_ACTION1',
-	slashAttack: 'SLASH',
-	heavyAttack: 'HEAVYATTACK',
+	lightAttack: 'ATTACK_NEW_1',
+	slashAttack: 'ATTACK_NEW_2',
+	heavyAttack: 'NEW_ATTACK_3',
 	hit: 'HURT',
 	dying: 'DEATH',
 }

@@ -51,6 +51,6 @@ const stepWorld = () => {
 }
 export const physicsPlugin = (state: State) => {
 	state
-		.onPreUpdate(runIf(() => !pausedState.enabled, stepWorld))
+		.onUpdate(runIf(() => !pausedState.enabled, stepWorld))
 		.addSubscriber(addColliders, addSecondaryColliders, removeBodies)
 }

@@ -82,7 +82,7 @@ const updateRotation = () => {
 export const transformsPlugin = (state: State) => {
 	state
 		.addSubscriber(addWorldPosition, swapPosition)
-		.onUpdate(updateGroupPosition, updateRotation)
+		.onPreUpdate(updateGroupPosition, updateRotation)
 		.onPostUpdate(updateWorldPosition)
 }
 
