@@ -290,7 +290,7 @@ export const spawnCrossRoad = () => {
 	spawnGroundAndTrees(level)
 }
 export const spawnDungeon: System<DungeonRessources> = ({ dungeon, dungeonLevel }) => {
-	ecs.add({ map: dungeon.plan.id, dungeon })
+	ecs.add({ map: dungeon.plan.id, dungeon, navGrid: NavGrid.deserialize(dungeon.plan.navgrid!) })
 	spawnGroundAndTrees(dungeon.plan, dungeonLevel)
 
 	if (dungeon.type === RoomType.NPC && dungeon.encounter) {
@@ -345,9 +345,9 @@ export const updateTimeUniforms = () => {
 }
 
 export const generatenavGrid = () => {
-	const mapId = mapQuery.first?.map
-	const map = levelsData.levels.find(level => level.id === mapId)
-	if (!map) throw new Error('map not found')
-	const navGrid = new NavGrid(map)
-	ecs.add({ navGrid, ...inMap() })
+	// const map = mapQuery.first
+	// const mapData = levelsData.levels.find(level => level.id === map?.map)
+	// if (!mapData?.navgrid) throw new Error('map not found')
+	// const navGrid = NavGrid.deserialize(mapData.navgrid)
+	// ecs.add({ navGrid, ...inMap() })
 }

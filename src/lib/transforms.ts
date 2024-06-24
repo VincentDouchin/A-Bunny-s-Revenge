@@ -60,14 +60,14 @@ const updateGroupPosition = () => {
 		position.copy(bodyPos)
 	}
 }
-const rotationQuery = ecs.with('rotation').without('bodyDesc')
+const rotationQuery = ecs.with('rotation')
 const updateRotation = () => {
 	for (const entity of rotationQuery) {
 		if (entity.body) {
 			try {
 				entity.body.setRotation(entity.rotation, true)
 			} catch (e) {
-				console.error(e)
+				console.error(e, entity)
 			}
 		}
 		if (entity.group) {

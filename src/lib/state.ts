@@ -6,6 +6,7 @@ export class StateMananger {
 	callbacks = new Map<State<any>, System<any>[]>()
 	queue = new Set<() => void>()
 	running = true
+	toDisable: null | State = null
 	create<R = void>() {
 		return new State<R>(this)
 	}

@@ -8,6 +8,7 @@ import { Mesh, MeshBasicMaterial, MeshStandardMaterial, PlaneGeometry, Quaternio
 import { MapControls } from 'three/examples/jsm/controls/MapControls'
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader'
 import { generateUUID } from 'three/src/math/MathUtils'
+import atom from 'solid-use/atom'
 import { EntityEditor } from './EntityEditor'
 import { MapEditor } from './MapEditor'
 import { debugState } from './debugState'
@@ -30,6 +31,7 @@ import { PLAYER_DEFAULT_HEALTH, playerBundle } from '@/states/game/spawnPlayer'
 import { useQuery } from '@/ui/store'
 import { getScreenBuffer } from '@/utils/buffer'
 import { entries, getRandom } from '@/utils/mapFunctions'
+import { NavGrid } from '@/lib/navGrid'
 
 export type ModelName = models | customModel | vegetation | gardenPlots | fruit_trees
 export interface EntityData<T extends Record<string, any> | undefined> {
@@ -48,8 +50,9 @@ export type CollidersData = Partial<Record<ModelName, {
 	sensor: boolean
 	offset: [number, number, number]
 	scale: number | null
+
 } >>
-export type LevelImage = { [k in keyof Level]: Level[k] extends HTMLCanvasElement ? k : never }[keyof Level]
+export type LevelImage = NonNullable<{ [k in keyof Level]: Level[k] extends HTMLCanvasElement ? k : never }[keyof Level]>
 
 export type RawLevel = { [k in keyof Level]: Level[k] extends HTMLCanvasElement ? string : Level[k] }
 
@@ -64,6 +67,7 @@ export interface Level {
 	crossRoad: boolean
 	id: string
 	name: string
+	navgrid?: Array<Array<null | [number, number, number, number, boolean]>>
 	size: { x: number, y: number }
 }
 const addedEntitiesQuery = ecs.with('entityId', 'model', 'group', 'position', 'rotation')
@@ -127,6 +131,7 @@ export const LevelEditor = () => {
 					const [colliderData, setColliderData] = createSignal<CollidersData>(levelsData.colliderData)
 					// ! LEVELS
 					const [activeLevelIndex, setActiveLevelIndex] = createSignal<number>(levelsData.levels.findIndex(x => x.id === map())!)
+
 					let fakeGround: null | Mesh<PlaneGeometry> = null
 					const [levels, setLevels] = createSignal<Level[]>(levelsData.levels)
 					const newLevel = () => {
@@ -167,12 +172,7 @@ export const LevelEditor = () => {
 						Object.assign(levelsData.levels, levels())
 						saveChanges({})
 					})
-					const deleteLevel = (level: Level) => {
-						// eslint-disable-next-line no-alert
-						if (confirm('delete level?')) {
-							setLevels(x => x.filter(y => y !== level))
-						}
-					}
+
 					const updateLevel = (level: Level) => (newLevel: Partial<Level>) => {
 						setLevels(x => x.map((l) => {
 							if (l === level) {
@@ -181,6 +181,30 @@ export const LevelEditor = () => {
 							return l
 						}))
 					}
+					let navgrid: null | NavGrid = null
+					const navgridDisplayed = atom(false)
+					const displayNavgrid = (level: Level) => {
+						if (navgrid) {
+							navgrid.render(false)
+							navgrid = null
+							navgridDisplayed(false)
+						} else if (level.navgrid) {
+							navgrid = NavGrid.deserialize(level.navgrid)
+							navgrid.render(true)
+							navgridDisplayed(true)
+						}
+					}
+					const generateNavGrid = (level: Level) => {
+						const navgridSerialized = NavGrid.fromLevel(level.size).serialize()
+						updateLevel(level)({ navgrid: navgridSerialized })
+						if (navgrid) {
+							navgrid.render(false)
+							navgrid = null
+							navgridDisplayed(false)
+						}
+						displayNavgrid(level)
+					}
+
 					const setFakeGround = (level: Level) => {
 						if (fakeGround) {
 							fakeGround.removeFromParent()
@@ -192,6 +216,11 @@ export const LevelEditor = () => {
 						scene.add(fakeGround)
 					}
 					const switchLevel = (level: Level) => {
+						navgridDisplayed(false)
+						if (navgrid) {
+							navgrid.render(false)
+							navgrid = null
+						}
 						setActiveLevelIndex(levels().indexOf(level))
 						for (const ground of groundQuery) {
 							ecs.remove(ground)
@@ -240,6 +269,15 @@ export const LevelEditor = () => {
 						}
 					})
 					const activeLevel = createMemo(() => levels()[activeLevelIndex()])
+					const deleteLevel = (levelIndex: number) => {
+						// eslint-disable-next-line no-alert
+						if (confirm('delete level?')) {
+							setLevels(x => x.filter((_, i) => i !== levelIndex))
+							Object.assign(levelsData.levels, levels())
+							saveChanges({})
+							window.location.reload()
+						}
+					}
 					onMount(async () => {
 						const camera = cameraQuery.first?.camera
 						if (!camera) return
@@ -377,58 +415,74 @@ export const LevelEditor = () => {
 					}
 					const updateLevelSize = (change: (l: Level) => void) => {
 						update(change)
-						for (const canvas of ['path', 'trees', 'grass', 'heightMap', 'water'] as LevelImage[]) {
+						for (const canvasName of ['path', 'trees', 'grass', 'heightMap', 'water'] as LevelImage[]) {
 							const buffer = getScreenBuffer(activeLevel().size.x, activeLevel().size.y, true)
-							buffer.drawImage(activeLevel()[canvas], 0, 0, activeLevel().size.x, activeLevel().size.y)
-							update(x => x[canvas] = buffer.canvas)
+							const canvas = activeLevel()[canvasName]
+							buffer.drawImage(canvas, 0, 0, activeLevel().size.x, activeLevel().size.y)
+							update(x => x[canvasName] = buffer.canvas)
 						}
 						switchLevel(activeLevel())
 					}
+					const changeLevel = (e: Event) => {
+						const val = Number((e.target as HTMLInputElement).value)
+						switchLevel(levels()[val])
+					}
+
 					return (
 						<div style={{ 'z-index': 2, 'position': 'fixed' }}>
-							<div style={{ display: 'grid' }}>
+							<select onChange={changeLevel} value={activeLevelIndex()}>
 								<For each={levels()}>
-									{(level) => {
-										return (
-											<div>
-												<button
-													onClick={() => switchLevel(level)}
-												>
-													{level.name}
-												</button>
-												<button onClick={() => deleteLevel(level)}>X</button>
-											</div>
-										)
+									{(level, index) => {
+										return <option value={index()}>{level.name}</option>
 									}}
 								</For>
-							</div>
+							</select>
+							<div><button onClick={() => deleteLevel(activeLevelIndex())}>Delete level</button></div>
 							<div><button onClick={newLevel}>New level</button></div>
 							<div><button onClick={download}>Download</button></div>
 							<div>
 								<button onClick={resetLocalChanges}>Reset local changes</button>
 							</div>
 							<div>
-								<input type="text" value={activeLevel().name} onChange={e => update(l => l.name = e.target.value)} />
-								<div>
-									farm
-									<input type="checkbox" checked={activeLevel().farm} onChange={e => update(l => l.farm = e.target.checked)}></input>
-								</div>
-								<div>
-									dungeon
-									<input type="checkbox" checked={activeLevel().dungeon} onChange={e => update(l => l.dungeon = e.target.checked)}></input>
-								</div>
-								<div>
-									crossRoad
-									<input type="checkbox" checked={activeLevel().crossRoad} onChange={e => update(l => l.crossRoad = e.target.checked)}></input>
-								</div>
-								<div>
-									width
-									<input type="number" value={activeLevel().size.x} onChange={e => updateLevelSize(x => x.size.x = e.target.valueAsNumber)}></input>
-								</div>
-								<div>
-									height
-									<input type="number" value={activeLevel().size.y} onChange={e => updateLevelSize(x => x.size.y = e.target.valueAsNumber)}></input>
-								</div>
+								<Show when={activeLevel()}>
+									{(level) => {
+										return (
+											<>
+												<input type="text" value={level().name} onChange={e => update(l => l.name = e.target.value)} />
+												<div>
+													farm
+													<input type="checkbox" checked={level().farm} onChange={e => update(l => l.farm = e.target.checked)}></input>
+												</div>
+												<div>
+													dungeon
+													<input type="checkbox" checked={level().dungeon} onChange={e => update(l => l.dungeon = e.target.checked)}></input>
+												</div>
+												<div>
+													crossRoad
+													<input type="checkbox" checked={level().crossRoad} onChange={e => update(l => l.crossRoad = e.target.checked)}></input>
+												</div>
+												<div>
+													width
+													<input type="number" value={level().size.x} onChange={e => updateLevelSize(x => x.size.x = e.target.valueAsNumber)}></input>
+												</div>
+												<div>
+													height
+													<input type="number" value={level().size.y} onChange={e => updateLevelSize(x => x.size.y = e.target.valueAsNumber)}></input>
+												</div>
+												<div>
+													<button onClick={() => generateNavGrid(level())}>
+														Generate Navgrid
+													</button>
+												</div>
+												<div>
+													<button onClick={() => displayNavgrid(level())} disabled={!level().navgrid} classList={{ selected: navgridDisplayed() }}>
+														Display nav grid
+													</button>
+												</div>
+											</>
+										)
+									}}
+								</Show>
 							</div>
 							<div style={{ 'position': 'fixed', 'top': 0, 'right': 0, 'display': 'grid', 'grid-template-columns': 'auto auto' }}>
 								<div>
