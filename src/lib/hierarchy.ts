@@ -61,9 +61,15 @@ const addChildrenCallBack = () => {
 		ecs.removeComponent(entity, 'withChildren')
 	}
 }
+const onDestroyQuery = ecs.with('onDestroy')
+const onDestroyCallBack = () => onDestroyQuery.onEntityRemoved.subscribe((e) => {
+	e.onDestroy()
+})
 
 export const hierarchyPlugin = (state: State) => {
-	state.addSubscriber(addChildren, removeChildren, despanwChildren).onPostUpdate(addChildrenCallBack)
+	state
+		.addSubscriber(onDestroyCallBack, addChildren, removeChildren, despanwChildren)
+		.onPostUpdate(addChildrenCallBack)
 }
 export const addTag = (entity: Entity, tag: ComponentsOfType<true>) => {
 	ecs.addComponent(entity, tag, true)

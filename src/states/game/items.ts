@@ -34,13 +34,19 @@ export const itemBundle = (item: items) => {
 	} as const satisfies Entity
 }
 export const bobItems = () => itemsQuery.onEntityAdded.subscribe((entity) => {
-	gameTweens.add(new Tween({ rotation: 0 })
+	const rotationTween = new Tween({ rotation: 0 })
 		.to({ rotation: Math.PI * 2 }, 2000)
 		.repeat(Number.POSITIVE_INFINITY)
-		.onUpdate(({ rotation }) => entity.rotation?.setFromAxisAngle(new Vector3(0, 1, 0), rotation)))
-	gameTweens.add(new Tween(entity.model.position)
+		.onUpdate(({ rotation }) => entity.rotation?.setFromAxisAngle(new Vector3(0, 1, 0), rotation))
+	const positionTween = new Tween(entity.model.position)
 		.to({ y: 5 }, 2000)
-		.repeat(Number.POSITIVE_INFINITY).yoyo(true).easing(Easing.Quadratic.InOut))
+		.repeat(Number.POSITIVE_INFINITY).yoyo(true).easing(Easing.Quadratic.InOut)
+	gameTweens.add(rotationTween, positionTween)
+
+	ecs.addComponent(entity, 'onDestroy', () => {
+		gameTweens.remove(rotationTween)
+		gameTweens.remove(positionTween)
+	})
 })
 
 export const popItems = () => ecs.with('body', 'item', 'collider').onEntityAdded.subscribe((e) => {
@@ -63,7 +69,7 @@ export const stopItems = () => {
 				if (force.y < 1)item.bounce.amount = 0
 			} else {
 				item.position.y = item.groundLevel ?? 1
-				item.body.setBodyType(RigidBodyType.Fixed, true)
+				item.body.setBodyType(RigidBodyType.Fixed, false)
 			}
 		} else if (item.bounce && item.bounce.touchedGround) {
 			item.bounce.touchedGround = false

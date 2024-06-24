@@ -130,6 +130,7 @@ export interface Entity {
 	parent?: Entity
 	children?: Set<Entity>
 	withChildren?: (parent: Entity) => void
+	onDestroy?: () => void
 	// ! InputMaps
 	playerControls?: PlayerInputMap
 	menuInputs?: MenuInputMap

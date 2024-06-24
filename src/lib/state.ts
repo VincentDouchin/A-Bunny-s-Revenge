@@ -7,6 +7,10 @@ export class StateMananger {
 	queue = new Set<() => void>()
 	running = true
 	toDisable: null | State = null
+	onNextTick(callback: () => void) {
+		this.queue.add(callback)
+	}
+
 	create<R = void>() {
 		return new State<R>(this)
 	}

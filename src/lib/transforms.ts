@@ -40,12 +40,12 @@ const addWorldPosition = () => bodiesWithoutWorldPositionQuery.onEntityAdded.sub
 	entity.group.getWorldPosition(worldPosition)
 	ecs.addComponent(entity, 'worldPosition', worldPosition)
 })
-const worldPositionQuery = ecs.with('group', 'worldPosition', 'body').without('bodyDesc')
+const worldPositionQuery = ecs.with('group', 'worldPosition', 'body')
 const updateWorldPosition = () => {
 	for (const entity of worldPositionQuery) {
 		const { group, worldPosition, body } = entity
 		group.getWorldPosition(worldPosition)
-		if (body.isValid() && body.isFixed()) {
+		if (body.isFixed()) {
 			body.setTranslation(worldPosition, true)
 			worldPositionQuery.remove(entity)
 		}
@@ -61,21 +61,18 @@ const updateGroupPosition = () => {
 	}
 }
 const rotationQuery = ecs.with('rotation')
+const rotationWithBodyQuery = rotationQuery.with('body')
 const updateRotation = () => {
 	for (const entity of rotationQuery) {
-		if (entity.body) {
-			try {
-				entity.body.setRotation(entity.rotation, true)
-			} catch (e) {
-				console.error(e, entity)
-			}
-		}
 		if (entity.group) {
 			entity.group.setRotationFromQuaternion(entity.rotation)
 		}
 		if (entity.targetRotation) {
 			entity.rotation.slerp(entity.targetRotation, time.delta / 70)
 		}
+	}
+	for (const entity of rotationWithBodyQuery) {
+		entity.body.setRotation(entity.rotation, true)
 	}
 }
 

@@ -37,7 +37,7 @@ export const stopFishing = (force: boolean = false) => () => {
 			player.playerAnimator.playClamped('lightAttack', { timeScale: 0.5 })
 			const { bobber } = player.fishingPole
 			if (bobber) {
-				bobber.body?.setBodyType(RigidBodyType.Dynamic, true)
+				bobber.body?.setBodyType(RigidBodyType.Dynamic, false)
 				ecs.reindex(bobber)
 				if (force) {
 					const fish = assets.items.redSnapper.model.clone()
@@ -69,7 +69,7 @@ const updateFishingLine = () => {
 		const { bobber } = fishingPole
 		if (bobber && bobber.position.y <= -3 && bobber.body && !bobber.bobbing) {
 			ecs.update(bobber, { bobbing: true })
-			bobber.body.setBodyType(RigidBodyType.Fixed, true)
+			bobber.body.setBodyType(RigidBodyType.Fixed, false)
 			ecs.reindex(bobber)
 			bobber.position.y = -3
 			playSound(['zapsplat_sport_fishing_sinker_tackle_hit_water_plop_001_13669', 'zapsplat_sport_fishing_sinker_tackle_hit_water_plop_002_13670'])

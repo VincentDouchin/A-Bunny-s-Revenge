@@ -3,27 +3,16 @@ import { type State, runIf } from './state'
 import { pausedState } from '@/global/states'
 import { ecs, world } from '@/global/init'
 
-const addColliders = () => ecs.with('body', 'colliderDesc').onEntityAdded.subscribe((entity) => {
-	const collider = world.createCollider(entity.colliderDesc, entity.body)
-
-	ecs.removeComponent(entity, 'colliderDesc')
-	ecs.addComponent(entity, 'collider', collider)
-})
 const bodiesToRemove = new Set<RigidBody>()
 const removeBodies = () => ecs.with('body').onEntityRemoved.subscribe((entity) => {
 	bodiesToRemove.add(entity.body)
 })
 
-const secondaryCollidersQuery = ecs.with('body', 'secondaryColliders').without('bodyDesc')
-const addSecondaryColliders = () => secondaryCollidersQuery.onEntityAdded.subscribe((e) => {
-	for (const collider of e.secondaryColliders) {
-		world.createCollider(collider, e.body)
-	}
-})
+const secondaryCollidersQuery = ecs.with('body', 'secondaryColliders')
 
 const bodiesQuery = ecs.with('bodyDesc', 'position').without('body')
-
-const stepWorld = () => {
+const colliderQueries = ecs.with('colliderDesc', 'body').without('collider')
+export const stepWorld = () => {
 	const callBacks: Array<() => void> = []
 	for (const entity of bodiesQuery) {
 		const body = world.createRigidBody(entity.bodyDesc)
@@ -36,8 +25,20 @@ const stepWorld = () => {
 		callBacks.push(() => {
 			ecs.addComponent(entity, 'body', body)
 			ecs.removeComponent(entity, 'bodyDesc')
-			ecs.reindex(entity)
 		})
+	}
+	for (const entity of colliderQueries) {
+		const collider = world.createCollider(entity.colliderDesc, entity.body)
+		callBacks.push(() => {
+			ecs.addComponent(entity, 'collider', collider)
+			ecs.removeComponent(entity, 'colliderDesc')
+		})
+	}
+	for (const entity of secondaryCollidersQuery) {
+		for (const collider of entity.secondaryColliders) {
+			world.createCollider(collider, entity.body)
+		}
+		ecs.removeComponent(entity, 'secondaryColliders')
 	}
 	for (const body of bodiesToRemove) {
 		for (let i = 0; i < body.numColliders(); i++) {
@@ -53,5 +54,5 @@ const stepWorld = () => {
 export const physicsPlugin = (state: State) => {
 	state
 		.onUpdate(runIf(() => !pausedState.enabled, stepWorld))
-		.addSubscriber(addColliders, addSecondaryColliders, removeBodies)
+		.addSubscriber(removeBodies)
 }
