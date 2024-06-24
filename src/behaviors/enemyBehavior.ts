@@ -36,7 +36,7 @@ const getPlayerDirection = (e: With<Entity, EnemyComponents>, player: With<Entit
 	if (!player) return null
 
 	const direction = player.position.clone().sub(e.position).normalize()
-	const hit = world.castShape(e.position, e.rotation, direction, e.collider.shape, 20, true, undefined, undefined, e.collider, undefined, c => !c.isSensor() && c.shape.type !== ShapeType.HeightField)
+	const hit = world.castShape(e.position, e.rotation, direction, e.collider.shape, 20, 100, true, undefined, undefined, e.collider, undefined, c => !c.isSensor() && c.shape.type !== ShapeType.HeightField)
 	const obstacle = hit && hit?.collider !== player.collider
 	const navGrid = navGridQuery.first?.navGrid
 	const canSeePlayer = player.position.distanceTo(e.position) < 70
