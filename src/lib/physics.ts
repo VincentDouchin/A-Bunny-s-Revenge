@@ -36,6 +36,7 @@ const stepWorld = () => {
 		callBacks.push(() => {
 			ecs.addComponent(entity, 'body', body)
 			ecs.removeComponent(entity, 'bodyDesc')
+			ecs.reindex(entity)
 		})
 	}
 	for (const body of bodiesToRemove) {

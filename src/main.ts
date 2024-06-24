@@ -55,7 +55,7 @@ import { disablePortrait, enableFullscreen, resize, setupGame, stopOnLosingFocus
 import { UI, errors } from './ui/UI'
 
 coreState
-	.addPlugins(hierarchyPlugin, physicsPlugin, transformsPlugin, addToScene('camera', 'light', 'model', 'dialogContainer', 'emitter', 'interactionContainer', 'minigameContainer', 'healthBarContainer', 'dashDisplay', 'stun', 'debuffsContainer', 'weaponArc', 'questMarkerContainer', 'lockedOn'), updateModels, particlesPlugin)
+	.addPlugins(hierarchyPlugin, transformsPlugin, physicsPlugin, addToScene('camera', 'light', 'model', 'dialogContainer', 'emitter', 'interactionContainer', 'minigameContainer', 'healthBarContainer', 'dashDisplay', 'stun', 'debuffsContainer', 'weaponArc', 'questMarkerContainer', 'lockedOn'), updateModels, particlesPlugin)
 	.onEnter(initThree, initCamera, moveCamera(true))
 	.onEnter(() => ui.render(UI), initHowler)
 	.addSubscriber(...target, resize, disablePortrait, enableFullscreen, stopOnLosingFocus)
