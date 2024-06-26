@@ -1,7 +1,8 @@
 import type { BufferGeometry, Mesh, MeshPhongMaterial } from 'three'
 import { Vector3 } from 'three'
 import { itemBundle } from '../game/items'
-import { ecs, world } from '@/global/init'
+import { getIntersections } from '../game/sensor'
+import { ecs } from '@/global/init'
 
 const dropBerries = (amount: number, bushPosition: Vector3, berries: Set<Mesh<BufferGeometry, MeshPhongMaterial>>) => {
 	for (let i = 0; i < amount; i++) {
@@ -23,13 +24,13 @@ const dropBerries = (amount: number, bushPosition: Vector3, berries: Set<Mesh<Bu
 	})
 }
 
-const playerQuery = ecs.with('player', 'playerControls', 'sensorCollider')
+const playerQuery = ecs.with('player', 'playerControls', 'sensor', 'position', 'rotation')
 const bushesQuery = ecs.with('berries', 'collider', 'model', 'position')
 export const dropBerriesOnHit = () => {
 	for (const player of playerQuery) {
 		if (player.playerControls.get('primary').justReleased) {
 			for (const bush of bushesQuery) {
-				if (world.intersectionPair(player.sensorCollider, bush.collider)) {
+				if (getIntersections(player) === bush.collider) {
 					dropBerries(5, bush.position, bush.berries)
 					if (bush.berries.size === 0) {
 						ecs.removeComponent(bush, 'berries')

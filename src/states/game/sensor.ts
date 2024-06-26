@@ -1,13 +1,19 @@
-import { ecs, world } from '@/global/init'
+import type { With } from 'miniplex'
+import { Vector3 } from 'three'
+import type { Collider } from '@dimforge/rapier3d-compat'
+import type { Entity } from '@/global/entity'
+import { world } from '@/global/init'
 
-const withSensorDescQuery = ecs.with('sensorDesc', 'group', 'body')
-const addTarget = () => withSensorDescQuery.onEntityAdded.subscribe((entity) => {
-	const sensorCollider = world.createCollider(entity.sensorDesc, entity.body)
-	ecs.addComponent(entity, 'sensorCollider', sensorCollider)
-})
-const addedSensorQuery = withSensorDescQuery.with('sensorCollider')
-const removeTarget = () => addedSensorQuery.onEntityRemoved.subscribe((entity) => {
-	world.removeCollider(entity.sensorCollider, true)
-})
-
-export const target = [addTarget, removeTarget]
+export const getIntersections = (e: With<Entity, 'position' | 'rotation' | 'sensor'>, group?: number, callback?: (collider: Collider) => boolean) => {
+	const position = new Vector3(0, 0, e.sensor.distance).applyQuaternion(e.rotation).add(e.position)
+	if (callback) {
+		const colliders = new Array<Collider>()
+		world.intersectionsWithShape(position, e.rotation, e.sensor.shape, (c) => {
+			colliders.push(c)
+			return true
+		})
+		return colliders.some(callback)
+	} else {
+		return world.intersectionWithShape(position, e.rotation, e.sensor.shape, undefined, group, e.collider)
+	}
+}

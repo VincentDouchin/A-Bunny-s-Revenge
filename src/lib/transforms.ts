@@ -45,9 +45,13 @@ const updateWorldPosition = () => {
 	for (const entity of worldPositionQuery) {
 		const { group, worldPosition, body } = entity
 		group.getWorldPosition(worldPosition)
-		if (body.isFixed()) {
-			body.setTranslation(worldPosition, true)
-			worldPositionQuery.remove(entity)
+		try {
+			if (body.isFixed()) {
+				body.setTranslation(worldPosition, true)
+				worldPositionQuery.remove(entity)
+			}
+		} catch (e) {
+			console.error(e, entity)
 		}
 	}
 }
@@ -61,7 +65,7 @@ const updateGroupPosition = () => {
 	}
 }
 const rotationQuery = ecs.with('rotation')
-const rotationWithBodyQuery = rotationQuery.with('body')
+
 const updateRotation = () => {
 	for (const entity of rotationQuery) {
 		if (entity.group) {
@@ -70,9 +74,6 @@ const updateRotation = () => {
 		if (entity.targetRotation) {
 			entity.rotation.slerp(entity.targetRotation, time.delta / 70)
 		}
-	}
-	for (const entity of rotationWithBodyQuery) {
-		entity.body.setRotation(entity.rotation, true)
 	}
 }
 

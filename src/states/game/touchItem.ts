@@ -1,9 +1,10 @@
 import { Vector3 } from 'three'
 import { CSS2DObject } from 'three/examples/jsm/renderers/CSS2DRenderer'
+import { getIntersections } from './sensor'
+import { ecs } from '@/global/init'
 import type { Entity } from '@/global/entity'
-import { ecs, world } from '@/global/init'
 
-const playerQuery = ecs.with('playerControls', 'sensorCollider', 'position', 'rotation')
+const playerQuery = ecs.with('playerControls', 'sensor', 'position', 'rotation')
 const interactingQuery = ecs.with('collider', 'interactable', 'position')
 const losingInteractionQuery = interactingQuery.with('interactionContainer')
 
@@ -11,9 +12,9 @@ export const touchItem = () => {
 	for (const player of playerQuery) {
 		let lastDist = Number.POSITIVE_INFINITY
 		let lastEntity: Entity | null = null
+		const intersection = getIntersections(player)
 		for (const item of interactingQuery) {
-			const intersection = world.intersectionPair(player.sensorCollider, item.collider)
-			if (intersection) {
+			if (intersection === item.collider) {
 				const sensorPos = new Vector3(0, 0, 5).applyQuaternion(player.rotation).add(player.position)
 				const dist = item.position.distanceTo(sensorPos)
 				if (dist < lastDist) {

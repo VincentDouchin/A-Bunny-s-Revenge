@@ -1,5 +1,5 @@
 import type { items, voices, weapons } from '@assets/assets'
-import type { Collider, ColliderDesc, KinematicCharacterController, RigidBody, RigidBodyDesc } from '@dimforge/rapier3d-compat'
+import type { Collider, ColliderDesc, KinematicCharacterController, RigidBody, RigidBodyDesc, Shape } from '@dimforge/rapier3d-compat'
 import type { With } from 'miniplex'
 import type { BufferGeometry, Camera, Group, Light, Mesh, MeshPhongMaterial, Object3D, Object3DEventMap, Quaternion, Scene, ShaderMaterial, Sprite, Vector3, WebGLRenderer } from 'three'
 import type { BatchedRenderer, ParticleEmitter } from 'three.quarks'
@@ -153,8 +153,7 @@ export interface Entity {
 	chestAnimator?: Animator<Animations['Chest']>
 	kayAnimator?: Animator<Animations['ALICE_animated']>
 	// ! Farming
-	sensorDesc?: ColliderDesc
-	sensorCollider?: Collider
+	sensor?: { shape: Shape, distance: number }
 	crop?: Crop
 	plantableSpot?: string
 	planted?: With<Entity, 'crop'>

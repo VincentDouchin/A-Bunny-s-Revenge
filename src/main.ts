@@ -44,7 +44,6 @@ import { equip } from './states/game/equip'
 import { bobItems, collectItems, popItems, stopItems } from './states/game/items'
 import { canPlayerMove, movePlayer, playerSteps, savePlayerFromTheEmbraceOfTheVoid, savePlayerPosition, stopPlayer } from './states/game/movePlayer'
 import { pauseGame } from './states/game/pauseGame'
-import { target } from './states/game/sensor'
 import { allowDoorCollision, collideWithDoor, collideWithDoorCamp, collideWithDoorClearing, doorLocking, unlockDoorClearing } from './states/game/spawnDoor'
 import { generatenavGrid, spawnCrossRoad, spawnDungeon, spawnFarm, spawnLevelData, updateTimeUniforms } from './states/game/spawnLevel'
 import { losingBattle, spawnCharacter, spawnPlayerClearing, spawnPlayerDungeon } from './states/game/spawnPlayer'
@@ -58,7 +57,7 @@ coreState
 	.addPlugins(hierarchyPlugin, transformsPlugin, physicsPlugin, addToScene('camera', 'light', 'model', 'dialogContainer', 'emitter', 'interactionContainer', 'minigameContainer', 'healthBarContainer', 'dashDisplay', 'stun', 'debuffsContainer', 'weaponArc', 'questMarkerContainer', 'lockedOn'), updateModels, particlesPlugin)
 	.onEnter(initThree, initCamera, moveCamera(true))
 	.onEnter(() => ui.render(UI), initHowler)
-	.addSubscriber(...target, resize, disablePortrait, enableFullscreen, stopOnLosingFocus)
+	.addSubscriber(resize, disablePortrait, enableFullscreen, stopOnLosingFocus)
 	.onPreUpdate(coroutines.tick, savePlayerFromTheEmbraceOfTheVoid, updateMousePosition())
 	.onUpdate(runIf(() => !pausedState.enabled, updateAnimations('playerAnimator', 'basketAnimator', 'enemyAnimator', 'ovenAnimator', 'houseAnimator', 'chestAnimator', 'kayAnimator'), () => time.tick()))
 	.onUpdate(inputManager.update, ui.update, moveCamera())
@@ -110,7 +109,7 @@ genDungeonState
 dungeonState
 	.addSubscriber(spawnDrops, losingBattle, removeEnemyFromSpawn, applyArchingForce, unlockDungeon)
 	.onEnter(spawnDungeon, spawnLevelData, generatenavGrid, spawnEnemies, spawnPlayerDungeon, moveCamera(true))
-	.onEnter(compileShaders)
+	.onEnter(compileShaders, generatenavGrid)
 	.onUpdate(
 		runIf(canPlayerMove, allowDoorCollision, collideWithDoor, harvestCrop, killEntities),
 		runIf(() => !pausedState.enabled, tickHitCooldown, tickSneeze, tickPoison, tickInactiveTimer, tickSleepy),

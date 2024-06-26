@@ -1,174 +1,149 @@
 import { Cuboid } from '@dimforge/rapier3d-compat'
 import { AStarFinder } from 'astar-typescript'
-import type { Vec2 } from 'three'
-import { Color, InstancedMesh, Matrix4, MeshBasicMaterial, Quaternion, SphereGeometry, Vector3 } from 'three'
-
+import { Color, InstancedMesh, Matrix4, MeshBasicMaterial, Quaternion, SphereGeometry, type Vec2, Vector2, Vector3 } from 'three'
 import { Direction } from './directions'
-import { getGameRenderGroup } from '@/debug/debugUi'
+import { scene } from '@/global/rendering'
 import { ecs, world } from '@/global/init'
-import { memo } from '@/utils/mapFunctions'
 
-class NavPoint extends Vector3 {
-	spawnPoint: boolean
-	valid = true
-	constructor(coords: { x: number, y: number, z: number }, public gridCoord: { x: number, y: number }, spawnPoint: boolean = true) {
-		super(coords.x, coords.y, coords.z)
-		this.spawnPoint = spawnPoint
-	}
-}
 const RESOLUTION = 5
-
+export enum NavCell {
+	Wall,
+	Walkable,
+	Spawnpoint,
+}
 const doorsQuery = ecs.with('door', 'position')
 
-const getValidSpawnPoints = (points: NavPoint[]) => {
-	const [valid, invalid] = [true, false].map(valid => new Set(points.filter(p => p.valid === valid)))
-	for (const validPoint of valid) {
-		for (const invalidPoint of invalid) {
-			if (validPoint.distanceTo(invalidPoint) < 15) {
-				validPoint.spawnPoint = false
-			}
-		}
-		for (const door of doorsQuery) {
-			const isCloseToDoor = validPoint.distanceTo(door.position) < 60
-			const isNorth = door.door === Direction.N && validPoint.z > door.position.z
-			const isSouth = door.door === Direction.S && validPoint.z < door.position.z
-			const isEast = door.door === Direction.E && validPoint.x < door.position.x
-			const isWest = door.door === Direction.W && validPoint.x > door.position.x
-			if (isCloseToDoor || isNorth || isSouth || isEast || isWest) {
-				validPoint.spawnPoint = false
-			}
-		}
-	}
-}
+// this.matrix.forEach((l, y) => {
+// 	l.forEach((c, x) => {
+// 		const isInPath = path?.some(p => p[0] === x && p[1] === y)
+// 		const isStartOrEnd = [start, end].some(p => p.x === x && p.y === y)
+// 		b.fillStyle = isInPath ? 'blue' : isStartOrEnd ? 'white' : c === Cell.Walkable ? 'green' : c === Cell.Wall ? 'yellow' : 'red'
+// 		b.fillRect(x * RESOLUTION, y * RESOLUTION, RESOLUTION, RESOLUTION)
+// 	})
+// })
+
+// const b = getScreenBuffer(500, 500)
+// document.body.appendChild(b.canvas)
+// b.canvas.style.position = 'fixed'
 export class NavGrid {
-	matrixMap: Array<Array<NavPoint | null>> = []
-	// inverseMatrix = new Map<NavPoint, { x: number, y: number }>()
-	aStar: AStarFinder
-	mesh?: InstancedMesh
-	constructor(matrix: Array<Array<NavPoint | null>>) {
-		this.matrixMap = matrix
-		this.aStar = new AStarFinder({
+	astar: AStarFinder
+	closestNodes: Vec2[][] = []
+	constructor(public matrix: NavCell[][], public size: Vec2) {
+		this.astar = new AStarFinder({
 			grid: {
-				matrix: matrix.map(l => l.map(p => p ? 0 : 1)),
+				matrix: matrix.map(l => l.map(c => c === NavCell.Wall ? 1 : 0)),
 			},
 			includeStartNode: false,
+			includeEndNode: false,
 		})
-	}
-
-	static fromLevel(levelSize: { x: number, y: number }) {
-		const matrixMap: Array<Array<NavPoint>> = []
-		world.step()
-		const rot = new Quaternion()
-		const shape = new Cuboid(4, 1, 4)
-		for (let x = 0; x < levelSize.x / RESOLUTION; x++) {
-			for (let y = 0; y < levelSize.y / RESOLUTION; y++) {
-				const adjustedX = x * RESOLUTION
-				const adjustedY = y * RESOLUTION
-
-				const navPoint = new NavPoint({
-					x: adjustedX - levelSize.x / 2,
-					y: 2,
-					z: levelSize.y / 2 - adjustedY,
-				}, {
-					x,
-					y,
-				})
-
-				matrixMap[y] ??= []
-				const c = world.intersectionWithShape(navPoint, rot, shape, undefined, undefined, undefined, undefined)
-				matrixMap[y][x] = navPoint
-				if (c) {
-					navPoint.valid = false
+		matrix.forEach((l, y) => {
+			l.forEach((c, x) => {
+				if (c === NavCell.Wall) {
+					let closest: Vec2 | null = null
+					let dist = Infinity
+					matrix.forEach((l2, y2) => {
+						l2.forEach((c2, x2) => {
+							const nDist = new Vector2(x, y).distanceTo({ x: x2, y: y2 })
+							if (c2 !== NavCell.Wall && nDist < dist) {
+								dist = nDist
+								closest = { x: x2, y: y2 }
+							}
+						})
+					})
+					if (closest) {
+						this.closestNodes[y] ??= []
+						this.closestNodes[y][x] = closest
+					}
 				}
-			}
-		}
-
-		getValidSpawnPoints(matrixMap.flat(2))
-		const matrix = matrixMap.map(l => l.map(p => p.valid ? p : null))
-		return new NavGrid(matrix)
-	}
-
-	static deserialize(data: Array<Array<null | [number, number, number, number, boolean]>>) {
-		const matrix = data.map(l => l.map((p) => {
-			if (p) {
-				return new NavPoint({ x: p[0], y: 2, z: p[1] }, { x: p[2], y: p[3] }, p[4])
-			}
-			return null
-		}))
-		return new NavGrid(matrix)
-	}
-
-	serialize(): Array<Array<null | [number, number, number, number, boolean]>> {
-		return this.matrixMap.map((line) => {
-			return line.map((point) => {
-				if (point) {
-					return [point.x, point.z, point.gridCoord.x, point.gridCoord.y, point.spawnPoint]
-				}
-				return null
 			})
 		})
 	}
 
-	render(render: boolean) {
-		if (!this.mesh) {
-			this.mesh = new InstancedMesh(new SphereGeometry(1), new MeshBasicMaterial(), this.points.length)
-			for (let i = 0; i < this.points.length; i++) {
+	static fromLevel(size: Vec2) {
+		const shape = new Cuboid(5, 1, 5)
+		const rot = new Quaternion()
+		const matrix: NavCell[][] = []
+
+		for (let y = 0; y < size.y / RESOLUTION; y++) {
+			matrix[y] = []
+			for (let x = 0; x < size.x / RESOLUTION; x++) {
+				const p = new Vector3(size.x / 2 - x * RESOLUTION, 2, size.y / 2 - y * RESOLUTION)
+				const c = world.intersectionWithShape(p, rot, shape, undefined, undefined, undefined, undefined)
+				if (c) {
+					matrix[y][x] = NavCell.Wall
+				} else {
+					matrix[y][x] = NavCell.Walkable
+				}
+			}
+		}
+		return new NavGrid(matrix, size).setSpawnPoints()
+	}
+
+	getSpawnPoints() {
+		return this.matrix.flatMap((l, y) => l.map((c, x) => c === NavCell.Spawnpoint ? this.gridToWorld({ x, y }) : null).filter(Boolean))
+	}
+
+	setSpawnPoints() {
+		const [valid, notValid] = [NavCell.Walkable, NavCell.Wall].map((type) => {
+			return this.matrix.flatMap((l, y) => {
+				return l.map((c, x) => c === type ? new Vector2(x, y) : null).filter(Boolean)
+			})
+		})
+		const spawnPoints = new Set(valid)
+		for (const validPoint of valid) {
+			const worldPos = this.gridToWorld(validPoint)
+			for (const invalidPoint of notValid) {
+				if (worldPos.distanceTo(this.gridToWorld(invalidPoint)) < 15) {
+					spawnPoints.delete(validPoint)
+				}
+			}
+			for (const door of doorsQuery) {
+				const isCloseToDoor = worldPos.distanceTo(door.position) < 60
+				const isNorth = door.door === Direction.N && worldPos.z > door.position.z
+				const isSouth = door.door === Direction.S && worldPos.z < door.position.z
+				const isEast = door.door === Direction.E && worldPos.x < door.position.x
+				const isWest = door.door === Direction.W && worldPos.x > door.position.x
+				if (isCloseToDoor || isNorth || isSouth || isEast || isWest) {
+					spawnPoints.delete(validPoint)
+				}
+			}
+		}
+		for (const { x, y } of spawnPoints) {
+			this.matrix[y][x] = NavCell.Spawnpoint
+		}
+		return this
+	}
+
+	gridToWorld({ x, y }: Vec2) {
+		return new Vector3(this.size.x / 2 - x * RESOLUTION, 2, this.size.y / 2 - y * RESOLUTION)
+	}
+
+	worldToGrid(pos: Vector3) {
+		return new Vector2(this.size.x, this.size.y).divideScalar(2).sub(new Vector2(pos.x, pos.z)).divideScalar(RESOLUTION).floor()
+	}
+
+	mesh?: InstancedMesh
+	render() {
+		const mesh = new InstancedMesh(new SphereGeometry(1), new MeshBasicMaterial(), this.matrix.flat().length)
+		scene.add(mesh)
+		this.matrix.forEach((l, y) => {
+			l.forEach((c, x) => {
+				const index = y * l.length + x
 				const matrix = new Matrix4()
-				const navPoint = this.points[i]
-				if (navPoint) {
-					matrix.setPosition(navPoint)
-					this.mesh.setMatrixAt(i, matrix)
-					this.mesh.setColorAt(i, new Color(navPoint.valid ? (navPoint.spawnPoint ? 0x00FF00 : 0xFFFF00) : 0xFF0000))
-				}
-			}
-		}
-		if (render && this.mesh) {
-			const { scene } = getGameRenderGroup()
-			scene.add(this.mesh)
-		}
-		if (!render && this.mesh) {
-			this.mesh.removeFromParent()
-		}
+				matrix.setPosition(this.gridToWorld({ x, y }))
+				mesh.setColorAt(index, new Color(c === NavCell.Wall ? 0xFF0000 : c === NavCell.Walkable ? 0x00FF00 : 0xFFFF00))
+				mesh.setMatrixAt(index, matrix)
+			})
+		})
+		this.mesh = mesh
 	}
 
-	get points() {
-		return this.matrixMap.flat(2)
-	}
-
-	get spawnPoints() {
-		return this.points.filter(p => p?.spawnPoint).filter(Boolean)
-	}
-
-	findClosest = memo((x: number, y: number) => {
-		let closest: NavPoint | null = null
-		let dist = Number.POSITIVE_INFINITY
-		for (const point of this.points.filter(p => p)) {
-			if (point) {
-				const distanceToPoint = new Vector3(x, 2, y).distanceTo(point)
-				if (distanceToPoint < dist) {
-					dist = distanceToPoint
-					closest = point
-				}
-			}
+	findPath(from: Vector3, to: Vector3) {
+		const [start, end] = [from, to].map(p => this.worldToGrid(p)).map(({ x, y }) => this.closestNodes?.[y]?.[x] ?? { x, y })
+		const path = this.astar.findPath(start, end)
+		const next = path?.[0]
+		if (next) {
+			return this.gridToWorld({ x: next[0], y: next[1] })
 		}
-		if (closest) {
-			return closest.gridCoord
-		}
-	})
-
-	findClosestPoint(position: Vector3) {
-		return this.findClosest(position.x, position.z)
-	}
-
-	findPathMemo = memo((from: Vec2, to: Vec2) => {
-		return this.aStar.findPath(from, to)
-	})
-
-	findPath(fromPosition: Vector3, toPosition: Vector3) {
-		const [from, to] = [fromPosition, toPosition].map(p => this.findClosestPoint(p))
-		if (!from || !to) return
-		const path = this.findPathMemo(from, to)
-		const next = path[0]
-		if (next) return this.matrixMap[next[1]][next[0]]
 	}
 }

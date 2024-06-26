@@ -3,13 +3,14 @@ import type { With } from 'miniplex'
 import type { Quaternion } from 'three'
 import { CircleGeometry, Mesh, MeshBasicMaterial, Vector3 } from 'three'
 import { ApplyForce, ColorRange, ConeEmitter, ConstantValue, IntervalValue, ParticleSystem, RandomQuatGenerator, RenderMode } from 'three.quarks'
+import { getIntersections } from '../game/sensor'
 import { updateCropsSave } from './farming'
-import type { Entity } from '@/global/entity'
-import { Interactable } from '@/global/entity'
-import { assets, ecs, gameTweens, world } from '@/global/init'
-import { batchRendererQuery } from '@/lib/particles'
-import { getWorldRotation } from '@/lib/transforms'
 import { colorToVec4 } from '@/particles/honeySplatParticles'
+import { getWorldRotation } from '@/lib/transforms'
+import { batchRendererQuery } from '@/lib/particles'
+import { assets, ecs, gameTweens } from '@/global/init'
+import { Interactable } from '@/global/entity'
+import type { Entity } from '@/global/entity'
 
 const waterParticles = (rotation: Quaternion) => {
 	const system = new ParticleSystem({
@@ -45,7 +46,7 @@ export const wateringCanBundle = () => {
 	})
 }
 
-const wateringCanQuery = ecs.with('wateringCan', 'model', 'sensorCollider', 'playerControls')
+const wateringCanQuery = ecs.with('wateringCan', 'model', 'sensor', 'playerControls', 'position', 'rotation')
 
 export const updateSpotWatered = (plot: With<Entity, 'model' | 'planted'>, watered: boolean, instant: boolean) => {
 	const [start, end] = watered ? [0, 1] : [1, 0]
@@ -76,7 +77,7 @@ export const waterCrops = () => {
 				player.playerControls.get('primary').justPressed
 				&& player.wateringCan.waterAmount > 0
 				&& !plant.crop?.watered
-				&& world.intersectionPair(player.sensorCollider, plant.collider)
+				&& getIntersections(player) === plant.collider
 			) {
 				player.wateringCan.waterAmount -= 0.1
 				for (const plot of plantedQuery) {

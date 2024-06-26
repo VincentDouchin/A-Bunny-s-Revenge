@@ -39,7 +39,7 @@
 		"three.quarks": "^0.11.2"
 	},
 	"devDependencies": {
-		"@antfu/eslint-config": "^2.16.1",
+		"@antfu/eslint-config": "^2.21.1",
 		"@ffmpeg-installer/ffmpeg": "^1.1.0",
 		"@gltf-transform/core": "^3.10.0",
 		"@gltf-transform/extensions": "^3.10.0",
@@ -52,7 +52,7 @@
 		"@types/three": "^0.161.2",
 		"@vite-pwa/assets-generator": "^0.2.4",
 		"draco3dgltf": "^1.5.6",
-		"eslint": "^9.2.0",
+		"eslint": "^9.5.0",
 		"eslint-plugin-format": "^0.1.1",
 		"fluent-ffmpeg": "^2.1.2",
 		"glob": "^10.3.10",
@@ -62,7 +62,7 @@
 		"simple-git-hooks": "^2.11.1",
 		"ts-json-schema-generator": "^1.5.0",
 		"type-fest": "^4.12.0",
-		"typescript": "^5.4.5",
+		"typescript": "^5.5.2",
 		"vite": "^4.5.0",
 		"vite-plugin-pwa": "^0.17.4",
 		"vite-plugin-solid": "^2.7.2",

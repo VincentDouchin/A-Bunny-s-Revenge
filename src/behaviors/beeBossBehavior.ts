@@ -2,15 +2,16 @@ import { Tween } from '@tweenjs/tween.js'
 import { Vector3 } from 'three'
 import { applyMove, applyRotate, getMovementForce, takeDamage } from './behaviorHelpers'
 import { playerQuery } from './enemyBehavior'
-import { playSound } from '@/global/sounds'
 import { EnemyAttackStyle } from '@/global/entity'
-import { ecs, gameTweens, world } from '@/global/init'
+import { ecs, gameTweens } from '@/global/init'
+import { playSound } from '@/global/sounds'
 import { behaviorPlugin } from '@/lib/behaviors'
+import { spawnDamageNumber } from '@/particles/damageNumber'
 import { honeyProjectile, pollenAttack, projectilesCircleAttack } from '@/states/dungeon/attacks'
 import { calculateDamage, flash } from '@/states/dungeon/battle'
+import { getIntersections } from '@/states/game/sensor'
 import { getRandom } from '@/utils/mapFunctions'
 import { sleep } from '@/utils/sleep'
-import { spawnDamageNumber } from '@/particles/damageNumber'
 
 const pollenQuery = ecs.with('pollen')
 const rangedAttacks = () => pollenQuery.size > 5
@@ -25,7 +26,7 @@ export const beeBossBehaviorPlugin = behaviorPlugin(
 	(e) => {
 		const player = playerQuery.first
 		const direction = player ? player.position.clone().sub(e.position).normalize() : null
-		const touchedByPlayer = !e.hitTimer.running() && player && player.state === 'attack' && world.intersectionPair(player.sensorCollider, e.collider)
+		const touchedByPlayer = !e.hitTimer.running() && player && player.state === 'attack' && getIntersections(player) === e.collider
 		return { ...getMovementForce(e), player, direction, touchedByPlayer }
 	},
 )({

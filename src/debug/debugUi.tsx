@@ -179,10 +179,10 @@ export const DebugUi = () => {
 	})
 	const navgridQuery = ecs.with('navGrid')
 	const isNavGridRenderered = ui.sync(() => !!navgridQuery.first?.navGrid?.mesh?.parent)
-	const toggleNavGrid = (render: boolean) => {
+	const toggleNavGrid = () => {
 		const navgrid = navgridQuery.first?.navGrid
 		if (navgrid) {
-			navgrid.render(render)
+			navgrid.render()
 		}
 	}
 	const showToonEditor = atom(false)
@@ -264,7 +264,7 @@ export const DebugUi = () => {
 					Debug Renderer
 					<input type="checkbox" onChange={e => toggleDebugRenderer(e.target.checked)}></input>
 					nav grid
-					<input type="checkbox" checked={isNavGridRenderered()} onChange={e => toggleNavGrid(e.target.checked)}></input>
+					<input type="checkbox" checked={isNavGridRenderered()} onChange={() => toggleNavGrid()}></input>
 					Time of day
 					<input
 						type="range"

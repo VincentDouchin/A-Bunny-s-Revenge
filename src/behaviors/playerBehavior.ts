@@ -14,21 +14,30 @@ import { spawnDamageNumber } from '@/particles/damageNumber'
 import { dash } from '@/particles/dashParticles'
 import { poisonBubbles } from '@/states/dungeon/poisonTrail'
 import { stunBundle } from '@/states/dungeon/stun'
+import { getIntersections } from '@/states/game/sensor'
 import { sleep } from '@/utils/sleep'
 
 const ANIMATION_SPEED = 1
 const playerComponents = ['playerAnimator', 'movementForce', 'speed', 'body', 'rotation', 'playerControls', 'combo', 'attackSpeed', 'dash', 'collider', 'currentHealth', 'model', 'hitTimer', 'size', 'sneeze', 'targetRotation', 'poisoned', 'size', 'position', 'targetMovementForce', 'sleepy', 'modifiers'] as const satisfies readonly (keyof Entity)[]
 type PlayerComponents = (typeof playerComponents)[number]
 const playerQuery = ecs.with(...playerComponents)
-const enemyQuery = ecs.with('faction', 'state', 'strength', 'collider').where(e => e.faction === Faction.Enemy && e.state === 'attack')
+const enemyQuery = ecs.with('faction', 'state', 'strength', 'collider', 'position', 'rotation').where(e => e.faction === Faction.Enemy && e.state === 'attack')
+const enemyWithSensor = enemyQuery.with('sensor')
+const enemyWithoutSensor = enemyQuery.without('sensor')
 const interactionQuery = ecs.with('interactionContainer')
 const getAttackingEnemy = (player: With<Entity, PlayerComponents>) => {
 	if (player.hitTimer.running()) return null
-	for (const enemy of enemyQuery) {
-		if (enemy.attackStyle !== EnemyAttackStyle.Melee || (enemy.enemyAnimator?.getTimeRatio() ?? 1) > 0.3) {
-			if (world.intersectionPair(enemy.sensorCollider ?? enemy.collider, player.collider)) {
+	for (const enemy of enemyWithoutSensor) {
+		if (enemy.attackStyle !== EnemyAttackStyle.Melee) {
+			if (world.intersectionPair(enemy.collider, player.collider)) {
 				return enemy
 			}
+		}
+	}
+	for (const enemy of enemyWithSensor) {
+		const intersections = getIntersections(enemy) === player.collider
+		if (intersections && (enemy.enemyAnimator?.getTimeRatio() ?? 1) > 0.3) {
+			return enemy
 		}
 	}
 	return null

@@ -1,4 +1,4 @@
-import { ColliderDesc, RigidBodyDesc, ShapeType } from '@dimforge/rapier3d-compat'
+import { ColliderDesc, RigidBodyDesc } from '@dimforge/rapier3d-compat'
 import { Tween } from '@tweenjs/tween.js'
 import type { With } from 'miniplex'
 import { between } from 'randomish'
@@ -9,24 +9,25 @@ import { projectileAttack } from '../states/dungeon/attacks'
 import { calculateDamage, flash } from '../states/dungeon/battle'
 import { stunBundle } from '../states/dungeon/stun'
 import { applyMove, applyRotate, getMovementForce, takeDamage } from './behaviorHelpers'
-import { sleep } from '@/utils/sleep'
-import { impact } from '@/particles/impact'
-import { dash } from '@/particles/dashParticles'
-import { spawnDamageNumber } from '@/particles/damageNumber'
-import { getWorldPosition } from '@/lib/transforms'
-import { Timer } from '@/lib/timer'
-import { playSound } from '@/global/sounds'
-import { assets, coroutines, ecs, gameTweens, time, world } from '@/global/init'
-import { EnemyAttackStyle, Faction } from '@/global/entity'
 import type { Entity } from '@/global/entity'
-import { pollenBundle } from '@/particles/pollenParticles'
+import { EnemyAttackStyle, Faction } from '@/global/entity'
+import { assets, coroutines, ecs, gameTweens, time, world } from '@/global/init'
+import { playSound } from '@/global/sounds'
+import { collisionGroups } from '@/lib/collisionGroups'
 import { inMap } from '@/lib/hierarchy'
+import { Timer } from '@/lib/timer'
+import { getWorldPosition } from '@/lib/transforms'
+import { spawnDamageNumber } from '@/particles/damageNumber'
+import { dash } from '@/particles/dashParticles'
+import { impact } from '@/particles/impact'
+import { pollenBundle } from '@/particles/pollenParticles'
 import { selectNewLockedEnemey } from '@/states/dungeon/locking'
+import { sleep } from '@/utils/sleep'
+import { getIntersections } from '@/states/game/sensor'
 
-export const playerQuery = ecs.with('position', 'sensorCollider', 'strength', 'body', 'critChance', 'critDamage', 'combo', 'playerAnimator', 'weapon', 'player', 'collider').where(({ faction }) => faction === Faction.Player)
+export const playerQuery = ecs.with('position', 'strength', 'body', 'critChance', 'critDamage', 'combo', 'playerAnimator', 'weapon', 'player', 'collider', 'sensor', 'rotation').where(({ faction }) => faction === Faction.Player)
 
-const enemyComponents = ['movementForce', 'body', 'speed', 'enemyAnimator', 'rotation', 'position', 'group', 'strength', 'collider', 'model', 'currentHealth', 'size', 'sensorCollider', 'hitTimer', 'targetRotation'] as const satisfies readonly (keyof Entity)[]
-
+const enemyComponents = ['movementForce', 'body', 'speed', 'enemyAnimator', 'rotation', 'position', 'group', 'strength', 'collider', 'model', 'currentHealth', 'size', 'hitTimer', 'targetRotation', 'sensor'] as const satisfies readonly (keyof Entity)[]
 const enemyQuery = ecs.with(...enemyComponents)
 
 type EnemyComponents = (typeof enemyComponents)[number]
@@ -36,14 +37,14 @@ const getPlayerDirection = (e: With<Entity, EnemyComponents>, player: With<Entit
 	if (!player) return null
 
 	const direction = player.position.clone().sub(e.position).normalize()
-	const hit = world.castShape(e.position, e.rotation, direction, e.collider.shape, 20, 100, true, undefined, undefined, e.collider, undefined, c => !c.isSensor() && c.shape.type !== ShapeType.HeightField)
+	const hit = world.castShape(e.position, e.rotation, direction, e.collider.shape, 1, 20, false, undefined, collisionGroups('any', ['obstacle', 'player']), undefined, undefined)
 	const obstacle = hit && hit?.collider !== player.collider
 	const navGrid = navGridQuery.first?.navGrid
 	const canSeePlayer = player.position.distanceTo(e.position) < 70
 	if (obstacle && navGrid) {
-		const navPoint = navGrid.findPath(e.position, player.position)?.clone()?.sub(e.position).normalize()
+		const navPoint = navGrid.findPath(e.position, player.position)?.sub(e.position).normalize()
 		return {
-			direction: navPoint ? new Vector3().copy(navPoint) : null,
+			direction: navPoint ?? null,
 			canSeePlayer,
 			canShootPlayer: !obstacle,
 		}
@@ -53,7 +54,7 @@ const getPlayerDirection = (e: With<Entity, EnemyComponents>, player: With<Entit
 const enemyDecisions = (e: With<Entity, EnemyComponents>) => {
 	const player = playerQuery.first
 	const playerData = getPlayerDirection(e, player)
-	const touchedByPlayer = !e.hitTimer.running() && player && player.state === 'attack' && world.intersectionPair(player.sensorCollider, e.collider)
+	const touchedByPlayer = !e.hitTimer.running() && player && player.state === 'attack' && getIntersections(player) === e.collider
 	return { ...getMovementForce(e), player, touchedByPlayer, ...playerData }
 }
 
@@ -348,7 +349,7 @@ export const chargingEnemyBehaviorPlugin = enemyBehavior(EnemyAttackStyle.Chargi
 			if (touchedByPlayer) return setState('hit')
 			world.contactPairsWith(e.collider, (c) => {
 				for (const obstacle of obstableQuery) {
-					if (obstacle.collider === c && world.intersectionPair(e.sensorCollider, c)) {
+					if (obstacle.collider === c && getIntersections(e) === c) {
 						playSound('zapsplat_impacts_wood_rotten_tree_trunk_hit_break_crumple_011_102694')
 						return setState('stun')
 					}
@@ -391,7 +392,7 @@ export const chargingTwiceEnemyBehaviorPlugin = enemyBehavior(EnemyAttackStyle.C
 			if (touchedByPlayer) return setState('hit')
 			world.contactPairsWith(e.collider, (c) => {
 				for (const obstacle of obstableQuery) {
-					if (obstacle.collider === c && world.intersectionPair(e.sensorCollider, c)) {
+					if (obstacle.collider === c && getIntersections(e) === c) {
 						playSound('zapsplat_impacts_wood_rotten_tree_trunk_hit_break_crumple_011_102694')
 						e.charges = 0
 						return setState('stun')

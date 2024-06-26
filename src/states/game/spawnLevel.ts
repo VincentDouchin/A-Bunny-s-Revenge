@@ -1,4 +1,4 @@
-import { ColliderDesc, RigidBodyDesc, RigidBodyType } from '@dimforge/rapier3d-compat'
+import { ActiveEvents, ColliderDesc, RigidBodyDesc, RigidBodyType } from '@dimforge/rapier3d-compat'
 import FastNoiseLite from 'fastnoise-lite'
 import type { Vec2, Vector4Like } from 'three'
 import { CanvasTexture, Euler, Group, Mesh, PlaneGeometry, Quaternion, Vector2, Vector3 } from 'three'
@@ -12,9 +12,9 @@ import { canvasToArray, canvasToGrid, instanceMesh } from '@/global/assetLoaders
 import type { Entity } from '@/global/entity'
 import { assets, ecs, levelsData, time } from '@/global/init'
 import type { DungeonRessources, FarmRessources } from '@/global/states'
+import { collisionGroups } from '@/lib/collisionGroups'
 import { inMap } from '@/lib/hierarchy'
 import { getBoundingBox, getSecondaryColliders, getSize } from '@/lib/models'
-import { NavGrid } from '@/lib/navGrid'
 import type { System } from '@/lib/state'
 import { GroundMaterial, WaterMaterial } from '@/shaders/materials'
 import { getScreenBuffer, scaleCanvas } from '@/utils/buffer'
@@ -80,7 +80,7 @@ export const spawnTrees = (level: Level, parent: Entity, dungeonLevel?: number) 
 				group: new Group(),
 				size: treeSize,
 				bodyDesc: RigidBodyDesc.fixed().lockRotations().setSleeping(true),
-				colliderDesc: ColliderDesc.cylinder(treeSize.y / 2, treeSize.x / 2).setTranslation(0, treeSize.y / 2, 0),
+				colliderDesc: ColliderDesc.cylinder(treeSize.y / 2, treeSize.x / 2).setTranslation(0, treeSize.y / 2, 0).setCollisionGroups(collisionGroups('obstacle', ['obstacle', 'enemy', 'player'])).setActiveEvents(ActiveEvents.COLLISION_EVENTS),
 				tree: true,
 				obstable: true,
 				withTimeUniform: true,
@@ -265,7 +265,9 @@ export const spawnGroundAndTrees = (level: Level, dungeonLevel?: number) => {
 				{ x: level.size.y, y: HEIGHT, z: level.size.x },
 			)
 			.setTranslation(0, -HEIGHT / 4, 0)
-			.setRotation(new Quaternion().setFromAxisAngle(new Vector3(0, 1, 0), Math.PI / 2)),
+			.setRotation(new Quaternion().setFromAxisAngle(new Vector3(0, 1, 0), Math.PI / 2))
+			.setCollisionGroups(collisionGroups('floor', ['enemy', 'player']))
+			.setActiveEvents(ActiveEvents.COLLISION_EVENTS),
 		ground: true,
 	})
 	ecs.add({
@@ -290,7 +292,7 @@ export const spawnCrossRoad = () => {
 	spawnGroundAndTrees(level)
 }
 export const spawnDungeon: System<DungeonRessources> = ({ dungeon, dungeonLevel }) => {
-	ecs.add({ map: dungeon.plan.id, dungeon, navGrid: NavGrid.deserialize(dungeon.plan.navgrid!) })
+	ecs.add({ map: dungeon.plan.id, dungeon })
 	spawnGroundAndTrees(dungeon.plan, dungeonLevel)
 
 	if (dungeon.type === RoomType.NPC && dungeon.encounter) {
@@ -345,9 +347,5 @@ export const updateTimeUniforms = () => {
 }
 
 export const generatenavGrid = () => {
-	// const map = mapQuery.first
-	// const mapData = levelsData.levels.find(level => level.id === map?.map)
-	// if (!mapData?.navgrid) throw new Error('map not found')
-	// const navGrid = NavGrid.deserialize(mapData.navgrid)
-	// ecs.add({ navGrid, ...inMap() })
+
 }

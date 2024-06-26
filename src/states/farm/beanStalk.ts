@@ -4,9 +4,10 @@ import { Color, MeshBasicMaterial, PlaneGeometry, Vector3, Vector4 } from 'three
 import { Easing, Tween } from '@tweenjs/tween.js'
 import { Bezier, ConstantColor, ConstantValue, IntervalValue, ParticleSystem, PiecewiseBezier, RenderMode, SizeOverLife, SphereEmitter } from 'three.quarks'
 import { itemBundle } from '../game/items'
+import { getIntersections } from '../game/sensor'
 import { getGrowthStages, updateCropsSave } from './farming'
 import { Interactable } from '@/global/entity'
-import { assets, dayTime, ecs, gameTweens, world } from '@/global/init'
+import { assets, dayTime, ecs, gameTweens } from '@/global/init'
 import { save } from '@/global/save'
 import { inMap } from '@/lib/hierarchy'
 import { getWorldPosition } from '@/lib/transforms'
@@ -119,12 +120,12 @@ export const growMagicBean = () => {
 	}
 }
 const magicHaricotQuery = ecs.with('interactable', 'parent', 'collider', 'group').where(e => Boolean(e.parent.beanstalk) && e.interactable === Interactable.Harvest)
-const playerQuery = ecs.with('player', 'sensorCollider', 'playerControls')
+const playerQuery = ecs.with('player', 'sensor', 'playerControls', 'position', 'rotation')
 export const harvestMagicBean = () => {
 	for (const player of playerQuery) {
 		if (player.playerControls.get('primary').justPressed) {
 			for (const magicHaricot of magicHaricotQuery) {
-				if (world.intersectionPair(magicHaricot.collider, player.sensorCollider)) {
+				if (getIntersections(player) === magicHaricot.collider) {
 					ecs.remove(magicHaricot)
 					ecs.add({
 						...itemBundle('magic_bean'),

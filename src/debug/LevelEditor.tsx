@@ -31,6 +31,7 @@ import { PLAYER_DEFAULT_HEALTH, playerBundle } from '@/states/game/spawnPlayer'
 import { useQuery } from '@/ui/store'
 import { getScreenBuffer } from '@/utils/buffer'
 import { entries, getRandom } from '@/utils/mapFunctions'
+import type { NavCell } from '@/lib/navGrid'
 import { NavGrid } from '@/lib/navGrid'
 
 export type ModelName = models | customModel | vegetation | gardenPlots | fruit_trees
@@ -67,7 +68,7 @@ export interface Level {
 	crossRoad: boolean
 	id: string
 	name: string
-	navgrid?: Array<Array<null | [number, number, number, number, boolean]>>
+	navgrid?: NavCell[][]
 	size: { x: number, y: number }
 }
 const addedEntitiesQuery = ecs.with('entityId', 'model', 'group', 'position', 'rotation')
@@ -184,25 +185,16 @@ export const LevelEditor = () => {
 					let navgrid: null | NavGrid = null
 					const navgridDisplayed = atom(false)
 					const displayNavgrid = (level: Level) => {
-						if (navgrid) {
-							navgrid.render(false)
-							navgrid = null
-							navgridDisplayed(false)
-						} else if (level.navgrid) {
-							navgrid = NavGrid.deserialize(level.navgrid)
-							navgrid.render(true)
-							navgridDisplayed(true)
+						navgrid?.mesh?.removeFromParent()
+						if (level.navgrid) {
+							navgrid ??= new NavGrid(level.navgrid, level.size)
+							navgrid?.render()
 						}
 					}
 					const generateNavGrid = (level: Level) => {
-						const navgridSerialized = NavGrid.fromLevel(level.size).serialize()
-						updateLevel(level)({ navgrid: navgridSerialized })
-						if (navgrid) {
-							navgrid.render(false)
-							navgrid = null
-							navgridDisplayed(false)
-						}
-						displayNavgrid(level)
+						navgrid = NavGrid.fromLevel(level.size)
+						navgrid.render()
+						updateLevel(level)({ navgrid: navgrid.matrix })
 					}
 
 					const setFakeGround = (level: Level) => {
@@ -218,9 +210,10 @@ export const LevelEditor = () => {
 					const switchLevel = (level: Level) => {
 						navgridDisplayed(false)
 						if (navgrid) {
-							navgrid.render(false)
+							navgrid.mesh?.removeFromParent()
 							navgrid = null
 						}
+
 						setActiveLevelIndex(levels().indexOf(level))
 						for (const ground of groundQuery) {
 							ecs.remove(ground)

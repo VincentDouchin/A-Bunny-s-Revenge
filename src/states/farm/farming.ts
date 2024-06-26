@@ -18,7 +18,7 @@ import { modelColliderBundle } from '@/lib/models'
 import { getWorldPosition } from '@/lib/transforms'
 import { sleep } from '@/utils/sleep'
 
-const playerQuery = ecs.with('playerControls', 'sensorCollider', 'movementForce', 'inventory', 'inventoryId', 'inventorySize')
+const playerQuery = ecs.with('playerControls', 'movementForce', 'inventory', 'inventoryId', 'inventorySize')
 const plantedSpotQuery = ecs.with('plantableSpot', 'planted', 'group', 'model')
 
 export const updateCropsSave = () => {
