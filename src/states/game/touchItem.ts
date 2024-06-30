@@ -15,7 +15,7 @@ export const touchItem = () => {
 		const intersection = getIntersections(player)
 		for (const item of interactingQuery) {
 			if (intersection === item.collider) {
-				const sensorPos = new Vector3(0, 0, 5).applyQuaternion(player.rotation).add(player.position)
+				const sensorPos = new Vector3(0, 0, 3).applyQuaternion(player.rotation).add(player.position)
 				const dist = item.position.distanceTo(sensorPos)
 				if (dist < lastDist) {
 					lastDist = dist
