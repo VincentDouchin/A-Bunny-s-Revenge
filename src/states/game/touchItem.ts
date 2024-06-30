@@ -12,10 +12,10 @@ export const touchItem = () => {
 	for (const player of playerQuery) {
 		let lastDist = Number.POSITIVE_INFINITY
 		let lastEntity: Entity | null = null
-		const intersection = getIntersections(player)
+
 		for (const item of interactingQuery) {
-			if (intersection === item.collider) {
-				const sensorPos = new Vector3(0, 0, 3).applyQuaternion(player.rotation).add(player.position)
+			if (getIntersections(player, undefined, c => c === item.collider)) {
+				const sensorPos = new Vector3(0, 0, player.sensor.distance).applyQuaternion(player.rotation).add(player.position)
 				const dist = item.position.distanceTo(sensorPos)
 				if (dist < lastDist) {
 					lastDist = dist

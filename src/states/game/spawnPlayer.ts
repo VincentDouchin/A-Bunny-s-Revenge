@@ -65,7 +65,6 @@ export const playerBundle = (health: number, weapon: weapons | null) => {
 		cameratarget: true,
 		faction: Faction.Player,
 		sensor: { shape: new Cuboid(3, 3, 3), distance: 1.5 + Sizes.character.x / 2 },
-		// sensorDesc: ColliderDesc.cuboid(3, 3, 3).setTranslation(0, 1.5, 5).setSensor(true).setMass(0).setCollisionGroups(collisionGroups('player', ['obstacle', 'enemy', 'floor'])).setActiveEvents(ActiveEvents.COLLISION_EVENTS),
 		player: true,
 		movementForce: new Vector3(),
 		targetMovementForce: new Vector3(),

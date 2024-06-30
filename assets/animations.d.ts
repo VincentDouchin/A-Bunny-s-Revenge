@@ -23,6 +23,8 @@ interface Animations {
 
 'Big_Boar_C' : 'Attack' | 'Damage' | 'Die' | 'Idle' | 'Move'
 
+'Bunny' : 'ATTACK_NEW_1' | 'ATTACK_NEW_2' | 'CHEER' | 'DEATH' | 'FIGHT_ACTION1' | 'HEAVYATTACK' | 'HURT' | 'IDLE_NEW' | 'NEW_ATTACK_3' | 'RUN_ALT' | 'SLASH' | 'SLASH.001' | 'STAB'
+
 'BunnyNewRig' : 'CHEER' | 'FIGHT_ACTION1' | 'HEAVYATTACK' | 'HURT' | 'IDLE_NEW' | 'RUN_ALT' | 'SLASH'
 
 'BunnyOvenPacked' : 'Closing' | 'Closing_OvenArmature' | 'Opening' | 'Opening_OvenArmature'
