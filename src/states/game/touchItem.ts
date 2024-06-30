@@ -25,17 +25,12 @@ export const touchItem = () => {
 		}
 		if (lastEntity !== null && !lastEntity?.interactionContainer) {
 			const interactionContainer = new CSS2DObject(document.createElement('div'))
-			ecs.update(lastEntity, { interactionContainer })
-
-			ecs.update(lastEntity, { outline: true })
-			ecs.reindex(lastEntity)
+			ecs.update(lastEntity, { interactionContainer, outline: true })
 		}
 		for (const item of losingInteractionQuery) {
 			if (lastEntity !== item) {
 				ecs.removeComponent(item, 'interactionContainer')
-				if (item.outline && item.group) {
-					item.group.traverse(node => node.layers.disable(1))
-				}
+				ecs.removeComponent(item, 'outline')
 			}
 		}
 	}
