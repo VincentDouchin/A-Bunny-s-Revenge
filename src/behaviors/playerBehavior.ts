@@ -35,7 +35,7 @@ const getAttackingEnemy = (player: With<Entity, PlayerComponents>) => {
 		}
 	}
 	for (const enemy of enemyWithSensor) {
-		const intersections = getIntersections(enemy) === player.collider
+		const intersections = getIntersections(enemy, undefined, c => c === player.collider)
 		if (intersections && (enemy.enemyAnimator?.getTimeRatio() ?? 1) > 0.3) {
 			return enemy
 		}

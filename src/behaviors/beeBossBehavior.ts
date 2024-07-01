@@ -26,7 +26,7 @@ export const beeBossBehaviorPlugin = behaviorPlugin(
 	(e) => {
 		const player = playerQuery.first
 		const direction = player ? player.position.clone().sub(e.position).normalize() : null
-		const touchedByPlayer = !e.hitTimer.running() && player && player.state === 'attack' && getIntersections(player) === e.collider
+		const touchedByPlayer = !e.hitTimer.running() && player && player.state === 'attack' && getIntersections(player, undefined, c => c === e.collider)
 		return { ...getMovementForce(e), player, direction, touchedByPlayer }
 	},
 )({

@@ -9,9 +9,12 @@ import Carrot from '@assets/icons/carrot-solid.svg'
 import Sword from '@assets/icons/sword.svg'
 import Clipboard from '@assets/icons/clipboard-check-solid.svg'
 import Water from '@assets/icons/droplet-solid.svg'
+import WateringCan from '@assets/icons/tool_watering_can.svg'
 import Utensils from '@assets/icons/utensils-solid.svg'
 import Spoon from '@assets/icons/spoon-solid.svg'
 import Wind from '@assets/icons/wind-solid.svg'
+import Talk from '@assets/icons/comment-dots-solid.svg'
+import HandOpen from '@assets/icons/hand_open.svg'
 import { InputIcon } from './InputIcon'
 import { OutlineText } from './components/styledComponents'
 import { useGame, useQuery } from './store'
@@ -37,11 +40,11 @@ export const getInteractables = (
 				hasSelectedSeed ? { text: `plant ${save.selectedSeed}`, icon: Carrot } : undefined,
 				hasSeedInInventory ? { text: 'select seed', icon: Seed } : undefined,
 			]
-			case Interactable.Water: return (player.wateringCan?.waterAmount ?? 0) > 0 ? [{ text: Interactable.Water, icon: Water }] : []
+			case Interactable.Water: return (player.wateringCan?.waterAmount ?? 0) > 0 ? [{ text: Interactable.Water, icon: WateringCan }] : []
 			case Interactable.FillWateringCan: return [{ text: Interactable.FillWateringCan, icon: Water }]
 			case Interactable.Read:
 			case Interactable.Talk: return [
-				entity.activeDialog ? undefined : { text: entity.interactable },
+				entity.activeDialog ? undefined : { text: entity.interactable, icon: Talk },
 			]
 			case Interactable.Cauldron:
 			case Interactable.Oven:
@@ -49,7 +52,7 @@ export const getInteractables = (
 				{ text: 'Prepare', icon: Utensils },
 				entity.recipesQueued?.length ? { text: 'Cook', icon: Spoon } : undefined,
 			]
-			case Interactable.WeaponStand: return [{ text: 'Equip' }]
+			case Interactable.WeaponStand: return [{ text: 'Equip', icon: HandOpen }]
 			case Interactable.Buy: return [{ text: `Buy (${entity.price})` }]
 			case Interactable.MagicBean: return [{ text: 'Plant magic bean' }, undefined]
 			case Interactable.BulletinBoard :return [{ text: Interactable.BulletinBoard, icon: Clipboard }]

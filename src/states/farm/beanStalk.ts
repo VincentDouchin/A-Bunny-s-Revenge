@@ -125,7 +125,7 @@ export const harvestMagicBean = () => {
 	for (const player of playerQuery) {
 		if (player.playerControls.get('primary').justPressed) {
 			for (const magicHaricot of magicHaricotQuery) {
-				if (getIntersections(player) === magicHaricot.collider) {
+				if (getIntersections(player, undefined, c => c === magicHaricot.collider)) {
 					ecs.remove(magicHaricot)
 					ecs.add({
 						...itemBundle('magic_bean'),

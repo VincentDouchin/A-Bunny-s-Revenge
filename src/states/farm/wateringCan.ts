@@ -77,7 +77,7 @@ export const waterCrops = () => {
 				player.playerControls.get('primary').justPressed
 				&& player.wateringCan.waterAmount > 0
 				&& !plant.crop?.watered
-				&& getIntersections(player) === plant.collider
+				&& getIntersections(player, undefined, c => c === plant.collider)
 			) {
 				player.wateringCan.waterAmount -= 0.1
 				for (const plot of plantedQuery) {

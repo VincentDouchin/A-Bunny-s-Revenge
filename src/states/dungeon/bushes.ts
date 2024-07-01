@@ -30,7 +30,7 @@ export const dropBerriesOnHit = () => {
 	for (const player of playerQuery) {
 		if (player.playerControls.get('primary').justReleased) {
 			for (const bush of bushesQuery) {
-				if (getIntersections(player) === bush.collider) {
+				if (getIntersections(player, undefined, c => c === bush.collider)) {
 					dropBerries(5, bush.position, bush.berries)
 					if (bush.berries.size === 0) {
 						ecs.removeComponent(bush, 'berries')
