@@ -16,7 +16,6 @@ export const OverlayUi = () => {
 			lch(65 67.77 57.86 / var(--opacity))
 		);
 		mix-blend-mode: soft-light;
-		filter: saturate(0%);
 	}
 	`
 	return (
