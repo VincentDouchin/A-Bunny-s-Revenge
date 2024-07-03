@@ -87,7 +87,9 @@ export const props: Props = [
 		models: ['door'],
 		bundle: (entity, data, ressources) => {
 			if (dungeonState.enabled && ressources && 'dungeon' in ressources) {
-				if ([RoomType.Battle, RoomType.Boss, RoomType.Entrance].includes(ressources.dungeon.type)) {
+				const isBattle = [RoomType.Battle, RoomType.Boss, RoomType.Entrance].includes(ressources.dungeon.type)
+				const enemiesPresent = ressources.dungeon.enemies.length > 0
+				if (isBattle && enemiesPresent) {
 					entity.doorLocked = true
 				}
 			}

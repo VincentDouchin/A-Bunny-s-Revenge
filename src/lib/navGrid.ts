@@ -140,10 +140,14 @@ export class NavGrid {
 
 	findPath(from: Vector3, to: Vector3) {
 		const [start, end] = [from, to].map(p => this.worldToGrid(p)).map(({ x, y }) => this.closestNodes?.[y]?.[x] ?? { x, y })
-		const path = this.astar.findPath(start, end)
-		const next = path?.[0]
-		if (next) {
-			return this.gridToWorld({ x: next[0], y: next[1] })
+		try {
+			const path = this.astar.findPath(start, end)
+			const next = path?.[0]
+			if (next) {
+				return this.gridToWorld({ x: next[0], y: next[1] })
+			}
+		} catch (e) {
+
 		}
 	}
 }

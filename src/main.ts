@@ -58,8 +58,8 @@ coreState
 	.onEnter(initThree, initCamera, moveCamera(true))
 	.onEnter(() => ui.render(UI), initHowler)
 	.addSubscriber(resize, disablePortrait, enableFullscreen, stopOnLosingFocus)
-	.onPreUpdate(coroutines.tick, savePlayerFromTheEmbraceOfTheVoid, updateMousePosition())
-	.onUpdate(runIf(() => !pausedState.enabled, updateAnimations('playerAnimator', 'basketAnimator', 'enemyAnimator', 'ovenAnimator', 'houseAnimator', 'chestAnimator', 'kayAnimator'), () => time.tick()))
+	.onPreUpdate(() => time.tick(), coroutines.tick, savePlayerFromTheEmbraceOfTheVoid, updateMousePosition())
+	.onUpdate(runIf(() => !pausedState.enabled, updateAnimations('playerAnimator', 'basketAnimator', 'enemyAnimator', 'ovenAnimator', 'houseAnimator', 'chestAnimator', 'kayAnimator')))
 	.onUpdate(inputManager.update, ui.update, moveCamera())
 	.enable()
 setupState

@@ -152,8 +152,10 @@ export const playerBehaviorPlugin = behaviorPlugin(
 			await sleep(200)
 			setState('idle')
 		},
-		update: (e, _setState) => {
-			applyMove(e, new Vector3(0, 0, 3).applyQuaternion(e.rotation))
+		update: (e, _setState, { force }) => {
+			if (force) {
+				applyMove(e, force.clone().normalize().multiplyScalar(3))
+			}
 		},
 		exit: (e) => {
 			e.dash.reset()

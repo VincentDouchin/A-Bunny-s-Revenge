@@ -135,11 +135,10 @@ export const spawnGrass = (level: Level, parent: Entity, dungeonLevel?: number) 
 		).multiplyScalar(SCALE)
 		if (n * n2 < 0.2) return
 		const isFlower = nF > 0.9 && dungeonLevel !== 1
-		const size = 1
 		const grassGenerator = isFlower
 			? flowers[Math.floor(flowers.length * Math.abs(nF2))]
 			: grass[Math.floor(grass.length * Math.abs(nF2))]
-		const instanceHandle = grassGenerator.addAt(position, size, new Euler(0, noise(x, y), 0))
+		const instanceHandle = grassGenerator.addAt(position, 1, new Euler(0, noise(x, y), 0))
 		instances.set(instanceHandle, position)
 		ecs.add({
 			...inMap(),

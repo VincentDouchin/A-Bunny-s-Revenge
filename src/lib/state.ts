@@ -2,6 +2,7 @@ export type System<R> = (ressources: R) => void
 export type Subscriber<R> = (ressources: R) => () => void
 
 export class StateMananger {
+	elapsedTime = 0
 	states = new Map<State<any>, any>()
 	callbacks = new Map<State<any>, System<any>[]>()
 	queue = new Set<() => void>()
@@ -59,7 +60,9 @@ export class StateMananger {
 			for (const callback of this.queue) {
 				callback()
 			}
-			this.queue.clear() }
+			this.queue.clear()
+			this.elapsedTime = 0
+		}
 	}
 
 	exclusive(...states: State<any>[]) {
@@ -84,6 +87,7 @@ export class State<R = void> {
 	_update = new Array<System<R>>()
 	_subscribers = new Array<Subscriber<R>>()
 	_callBacks = new Array<System<R>>()
+	_render = new Array<System<R>>()
 	#app: StateMananger
 	constructor(app: StateMananger) {
 		this.#app = app
@@ -120,6 +124,11 @@ export class State<R = void> {
 
 	onUpdate(...systems: System<R>[]) {
 		this._update.push(...systems)
+		return this
+	}
+
+	onRender(...systems: System<R>[]) {
+		this._render.push(...systems)
 		return this
 	}
 

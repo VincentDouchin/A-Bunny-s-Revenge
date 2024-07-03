@@ -6,7 +6,8 @@ import { InputIcon } from './InputIcon'
 import { getInteractables } from './Interactions'
 import { OutlineText } from './components/styledComponents'
 import { useGame } from './store'
-import { campState } from '@/global/states'
+import { StateUi } from './components/StateUi'
+import { campState, dungeonState } from '@/global/states'
 import { ui } from '@/global/init'
 import { save } from '@/global/save'
 
@@ -73,6 +74,14 @@ export const KeyboardControls = () => {
 										<OutlineText>Inventory</OutlineText>
 									</div>
 								</Show>
+								<StateUi state={dungeonState}>
+									<div class="keyboard-controls">
+										<div class="controls-icons">
+											<InputIcon input={player().playerControls.get('lock')}></InputIcon>
+										</div>
+										<OutlineText>Lock on</OutlineText>
+									</div>
+								</StateUi>
 								<Show when={interactables[0]}>
 									{(interactable) => {
 										return (
