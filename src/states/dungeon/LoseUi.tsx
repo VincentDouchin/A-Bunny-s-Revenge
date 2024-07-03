@@ -5,11 +5,12 @@ import atom from 'solid-use/atom'
 import { ecs, ui } from '@/global/init'
 import { campState, openMenuState } from '@/global/states'
 import { StateUi } from '@/ui/components/StateUi'
-import { useQuery } from '@/ui/store'
+import { useGame, useQuery } from '@/ui/store'
 import type { Entity } from '@/global/entity'
 import { menuInputMap } from '@/global/inputMaps'
 import { InputIcon } from '@/ui/InputIcon'
 import { inMap } from '@/lib/hierarchy'
+import { playSound } from '@/global/sounds'
 
 const playerUi = useQuery(ecs.with('player'))
 export const LoseUi = () => {
@@ -45,8 +46,10 @@ export const LoseUi = () => {
 		<StateUi state={openMenuState}>
 			<Show when={noPlayer()}>
 				{(_) =>	{
+					const context = useGame()
 					const controls = atom<null | With<Entity, 'menuInputs'>>(null)
 					onMount(() => {
+						playSound('losing_musical')
 						controls(ecs.add({
 							...menuInputMap(),
 							...inMap(),
@@ -66,7 +69,7 @@ export const LoseUi = () => {
 								class="button losing-button"
 								onClick={retry}
 							>
-								<Show when={controls()}>
+								<Show when={!context?.usingTouch() && controls()}>
 									{controls => <InputIcon input={controls().menuInputs.get('validate')} />}
 								</Show>
 								{' '}

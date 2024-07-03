@@ -133,6 +133,7 @@ export const unlockDoors = () => doorToUnlockQuery.onEntityAdded.subscribe((e) =
 	if (e.vineGate) {
 		const vinesBottom = e.model?.getObjectByName('GATE')
 		if (vinesBottom) {
+			playSound('zapsplat_foley_tree_palm_front_dead_large_dry_movement_ground_001_99605', { playbackRate: 1.5 })
 			const initialPosition = vinesBottom.position.y
 			gameTweens.add(
 				new Tween([0]).to([1], 5000).onUpdate(([f]) => {

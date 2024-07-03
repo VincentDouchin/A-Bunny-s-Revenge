@@ -37,6 +37,7 @@ const playerAnimationMap: Record<PlayerAnimations, Animations['Bunny']> = {
 	heavyAttack: 'NEW_ATTACK_3',
 	hit: 'HURT',
 	dying: 'DEATH',
+
 }
 
 export const PLAYER_DEFAULT_HEALTH = 10
