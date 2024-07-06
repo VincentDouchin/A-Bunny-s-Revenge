@@ -202,7 +202,7 @@ const getEnemies = (type: RoomType, level: number): enemy[] => {
 }
 
 export const assignPlanAndEnemies = (rooms: BlankRoom[], level: number): Room[] => {
-	const dungeons = levelsData.levels.filter(level => level.dungeon)
+	const dungeons = levelsData.levels.filter(level => level.type === 'dungeon')
 	let hasSeller = false
 	const filledRooms = rooms.map((room) => {
 		const directions = Object.keys(room.connections) as Direction[]
