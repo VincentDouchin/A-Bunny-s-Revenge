@@ -10,7 +10,7 @@ import { tickModifiersPlugin } from './global/modifiers'
 import { updateMousePosition } from './global/mousePosition'
 import { compileShaders, initThree, renderGame } from './global/rendering'
 import { initHowler } from './global/sounds'
-import { app, campState, coreState, dungeonState, gameState, genDungeonState, mainMenuState, openMenuState, pausedState, setupState } from './global/states'
+import { app, campState, coreState, dungeonState, gameState, genDungeonState, mainMenuState, openMenuState, pausedState, ruinsIntro, setupState } from './global/states'
 import { despawnOfType, hierarchyPlugin, removeStateEntity } from './lib/hierarchy'
 import { updateModels } from './lib/modelsProperties'
 import { particlesPlugin } from './lib/particles'
@@ -45,7 +45,7 @@ import { bobItems, collectItems, popItems, stopItems } from './states/game/items
 import { canPlayerMove, movePlayer, playerSteps, savePlayerFromTheEmbraceOfTheVoid, savePlayerPosition, stopPlayer } from './states/game/movePlayer'
 import { pauseGame } from './states/game/pauseGame'
 import { allowDoorCollision, collideWithDoor, collideWithDoorCamp, collideWithDoorClearing, doorLocking, unlockDoorClearing } from './states/game/spawnDoor'
-import { generatenavGrid, spawnCrossRoad, spawnDungeon, spawnFarm, spawnLevelData, updateTimeUniforms } from './states/game/spawnLevel'
+import { generatenavGrid, spawnCrossRoad, spawnDungeon, spawnFarm, spawnLevelData, spawnRuins, updateTimeUniforms } from './states/game/spawnLevel'
 import { losingBattle, spawnCharacter, spawnPlayerClearing, spawnPlayerDungeon } from './states/game/spawnPlayer'
 import { addOutline, removeInteractableOutline, removeOutlines, touchItem } from './states/game/touchItem'
 import { updateWeaponArc } from './states/game/weapon'
@@ -86,6 +86,11 @@ mainMenuState
 	.onUpdate(renderMainMenu, selectMainMenu)
 	.addSubscriber(clickOnMenuButton, initMainMenuCamPos)
 	.onExit(removeStateEntity(mainMenuState), spawnPlayerContinueGame)
+openMenuState
+	.onEnter(stopPlayer)
+	.addSubscriber(disableInventoryState)
+	.onExit()
+	.onUpdate(closePlayerInventory)
 campState
 	.addSubscriber(...interactablePlantableSpot)
 	.onEnter(spawnFarm, spawnLevelData, initPlantableSpotsInteractions, spawnGodRay, addBeanStalkHole)
@@ -94,11 +99,9 @@ campState
 	.onUpdate(collideWithDoorCamp, playNightMusic, waterCrops, growCrops, growMagicBean, harvestMagicBean)
 	.onUpdate(runIf(canPlayerMove, plantSeed, harvestCrop, openPlayerInventory, savePlayerPosition))
 	.onExit(despawnOfType('map'))
-openMenuState
-	.onEnter(stopPlayer)
-	.addSubscriber(disableInventoryState)
-	.onExit()
-	.onUpdate(closePlayerInventory)
+ruinsIntro
+	.onEnter(spawnRuins, spawnLevelData, compileShaders, moveCamera(true))
+	.onExit(despawnOfType('map'))
 genDungeonState
 	.addSubscriber(unlockDoorClearing)
 	.onEnter(spawnCrossRoad, spawnLevelData, spawnPlayerClearing, setInitialHealth, spawnWeaponsChoice, moveCamera(true))

@@ -99,7 +99,7 @@ export const MapEditor = ({
 		)
 		buffer().fill()
 	}
-
+	const respawnTrees = throttle(100, () => spawnTrees(activeLevel(), ground(), undefined, false))
 	const longClickListener = throttle(10, (event: MouseEvent) => {
 		event.preventDefault()
 		const camera = cameraQuery.first?.camera
@@ -143,7 +143,7 @@ export const MapEditor = ({
 			for (const tree of treeQuery) {
 				ecs.remove(tree)
 			}
-			spawnTrees(activeLevel(), ground())
+			respawnTrees({})
 		}
 		if (canvases[selectedColor()] === 'grass') {
 			for (const grass of grassQuery) {

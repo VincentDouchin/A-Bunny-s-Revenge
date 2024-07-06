@@ -153,7 +153,7 @@ export const getSobelShader = (x: number, y: number, diffuseTarget: WebGLRenderT
 			color.rgb = mix(vec3(grey), color.rgb, saturation);
 			color.rgb = mulRGB * pow( ( color.rgb + addRGB ), powRGB );
 			color = (sobel(outline,uv,resolution*1.5)>0.) 
-				? mix(vec4(1.), color, 0.3) 
+				? mix(vec4(1.), color, 0.) 
 				: color;
 			gl_FragColor = color;
 		}`,

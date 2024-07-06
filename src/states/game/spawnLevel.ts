@@ -5,7 +5,8 @@ import { CanvasTexture, Euler, Group, Mesh, PlaneGeometry, Quaternion, Vector2, 
 import { encounters } from '../dungeon/encounters'
 import { RoomType } from '../dungeon/generateDungeon'
 import { spawnLight } from './spawnLights'
-import type { EntityData, Level } from '@/debug/LevelEditor'
+import type { EntityData, Level, LevelType } from '@/debug/LevelEditor'
+
 import { getModel, props } from '@/debug/props'
 import type { InstanceHandle } from '@/global/assetLoaders'
 import { canvasToArray, canvasToGrid, instanceMesh } from '@/global/assetLoaders'
@@ -54,7 +55,7 @@ const getTrees = (_level?: number) => {
 		assets.trees.Low_Poly_Forest_treeTall04,
 	]
 }
-export const spawnTrees = (level: Level, parent: Entity, dungeonLevel?: number) => {
+export const spawnTrees = (level: Level, parent: Entity, dungeonLevel?: number, withCollider = true) => {
 	const trees = getTrees(dungeonLevel).map(x => instanceMesh(x.scene, true))
 	const treesInstances: InstanceHandle[] = []
 	const noise = new FastNoiseLite(0)
@@ -79,8 +80,9 @@ export const spawnTrees = (level: Level, parent: Entity, dungeonLevel?: number) 
 				instanceHandle,
 				group: new Group(),
 				size: treeSize,
-				bodyDesc: RigidBodyDesc.fixed().lockRotations().setSleeping(true),
-				colliderDesc: ColliderDesc.cylinder(treeSize.y / 2, treeSize.x / 2).setTranslation(0, treeSize.y / 2, 0).setCollisionGroups(collisionGroups('obstacle', ['obstacle', 'enemy', 'player'])).setActiveEvents(ActiveEvents.COLLISION_EVENTS),
+				...(withCollider
+					? { bodyDesc: RigidBodyDesc.fixed().lockRotations().setSleeping(true), colliderDesc: ColliderDesc.cylinder(treeSize.y / 2, treeSize.x / 2).setTranslation(0, treeSize.y / 2, 0).setCollisionGroups(collisionGroups('obstacle', ['obstacle', 'enemy', 'player'])).setActiveEvents(ActiveEvents.COLLISION_EVENTS) }
+					: {}),
 				tree: true,
 				obstable: true,
 				withTimeUniform: true,
@@ -278,18 +280,16 @@ export const spawnGroundAndTrees = (level: Level, dungeonLevel?: number) => {
 	spawnGrass(level, ground, dungeonLevel)
 }
 
-export const spawnFarm: System<FarmRessources> = () => {
-	const level = levelsData.levels.find(level => level.farm)
-	if (!level) throw new Error('can\'t find farm')
+const spawnLevel = (type: LevelType) => () => {
+	const level = levelsData.levels.find(level => level.type === type)
+	if (!level) throw new Error('can\'t find level')
 	ecs.add({ map: level.id })
 	spawnGroundAndTrees(level)
 }
-export const spawnCrossRoad = () => {
-	const level = levelsData.levels.find(level => level.crossRoad)
-	if (!level) throw new Error('can\'t find crossroad')
-	ecs.add({ map: level.id })
-	spawnGroundAndTrees(level)
-}
+
+export const spawnFarm = spawnLevel('farm')
+export const spawnCrossRoad = spawnLevel('crossroad')
+export const spawnRuins = spawnLevel('ruins')
 export const spawnDungeon: System<DungeonRessources> = ({ dungeon, dungeonLevel }) => {
 	ecs.add({ map: dungeon.plan.id, dungeon })
 	spawnGroundAndTrees(dungeon.plan, dungeonLevel)

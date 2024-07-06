@@ -6,7 +6,7 @@ import { params } from '@/global/context'
 import { time } from '@/global/init'
 import { updateRenderSize } from '@/global/rendering'
 import { save } from '@/global/save'
-import { app, campState, dungeonState, mainMenuState } from '@/global/states'
+import { app, campState, dungeonState, mainMenuState, ruinsIntro } from '@/global/states'
 import { Direction } from '@/lib/directions'
 import { throttle } from '@/lib/state'
 import { windowEvent } from '@/lib/uiManager'
@@ -24,6 +24,8 @@ export const setupGame = async () => {
 		dungeonState.enable({ dungeon: enemiesRoom[0], direction: Direction.S, firstEntry: true, playerHealth: 5, dungeonLevel: 0, weapon: 'SwordWeapon' })
 		updateRenderSize()
 		updateCameraZoom()
+	} else if (params.debugIntro) {
+		ruinsIntro.enable()
 	} else if (!params.skipMainMenu) {
 		mainMenuState.enable()
 		setMainCameraPosition()

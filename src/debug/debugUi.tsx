@@ -261,6 +261,8 @@ export const DebugUi = () => {
 					<input type="checkbox" checked={params.debugBoss} onChange={e => setParams(d => ({ ...d, debugBoss: e.target.checked }))}></input>
 					Debug Enemies
 					<input type="checkbox" checked={params.debugEnemies} onChange={e => setParams(d => ({ ...d, debugEnemies: e.target.checked }))}></input>
+					Debug Intro
+					<input type="checkbox" checked={params.debugIntro} onChange={e => setParams(d => ({ ...d, debugIntro: e.target.checked }))}></input>
 					Debug Renderer
 					<input type="checkbox" onChange={e => toggleDebugRenderer(e.target.checked)}></input>
 					nav grid

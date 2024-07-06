@@ -15,6 +15,7 @@ interface Params extends Record<string, any> {
 	skipMainMenu: boolean
 	debugBoss: boolean
 	debugEnemies: boolean
+	debugIntro: boolean
 	language: 'en' | 'fr'
 }
 
@@ -30,6 +31,7 @@ export const params: Params = {
 	dialogSpeed: 1,
 	skipMainMenu: false,
 	debugBoss: false,
+	debugIntro: false,
 	debugEnemies: false,
 	language: 'en',
 }

@@ -4,7 +4,7 @@ import { delMany, get, set } from 'idb-keyval'
 import type { With } from 'miniplex'
 import { For, Show, createEffect, createMemo, createSignal, onCleanup, onMount } from 'solid-js'
 import { css } from 'solid-styled'
-import { Mesh, MeshBasicMaterial, MeshStandardMaterial, PlaneGeometry, Quaternion, Raycaster, Vector2, Vector3 } from 'three'
+import { Mesh, MeshBasicMaterial, MeshStandardMaterial, OrthographicCamera, PlaneGeometry, Quaternion, Raycaster, Vector2, Vector3 } from 'three'
 import { MapControls } from 'three/examples/jsm/controls/MapControls'
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader'
 import { generateUUID } from 'three/src/math/MathUtils'
@@ -57,17 +57,17 @@ export type LevelImage = NonNullable<{ [k in keyof Level]: Level[k] extends HTML
 
 export type RawLevel = { [k in keyof Level]: Level[k] extends HTMLCanvasElement ? string : Level[k] }
 
+export type LevelType = 'farm' | 'crossroad' | 'dungeon' | 'ruins'
+
 export interface Level {
 	path: HTMLCanvasElement
 	trees: HTMLCanvasElement
 	grass: HTMLCanvasElement
 	heightMap: HTMLCanvasElement
 	water: HTMLCanvasElement
-	farm: boolean
-	dungeon: boolean
-	crossRoad: boolean
 	id: string
 	name: string
+	type?: LevelType
 	navgrid?: NavCell[][]
 	size: { x: number, y: number }
 }
@@ -101,10 +101,16 @@ export const LevelEditor = () => {
 
 	const showUiListener = (e: KeyboardEvent) => {
 		if (e.code === 'F2') {
+			debugState.enable()
 			e.preventDefault()
 			setOpen(!open())
 		}
 	}
+	createEffect(() => {
+		if (!open()) {
+			debugState.disable()
+		}
+	})
 	onMount(() => {
 		document.addEventListener('keydown', showUiListener)
 	})
@@ -144,11 +150,8 @@ export const LevelEditor = () => {
 							heightMap: getScreenBuffer(100, 100).canvas,
 							water: getScreenBuffer(100, 100).canvas,
 							size: { x: 100, y: 100 },
-							farm: false,
-							dungeon: false,
 							name: `level n°${x.length + 1}`,
 							id,
-							crossRoad: false,
 						}])
 						setActiveLevelIndex(levels().length - 1)
 					}
@@ -274,12 +277,15 @@ export const LevelEditor = () => {
 					onMount(async () => {
 						const camera = cameraQuery.first?.camera
 						if (!camera) return
-						debugState.enable()
 						const val = window.innerWidth
 						const ratio = window.innerHeight / window.innerWidth
 						renderer.setSize(val, val * ratio)
 						const group = camera.parent!
 						camera.removeFromParent()
+						if (camera instanceof OrthographicCamera) {
+							camera.far = 1000000
+							camera.near = 0.0000001
+						}
 						camera.position.set(...group.position.toArray())
 						const controls = new MapControls(camera, renderer.domElement)
 						createEffect(() => {
@@ -298,7 +304,6 @@ export const LevelEditor = () => {
 							}
 						})
 						onCleanup(() => {
-							debugState.disable()
 							group?.add(camera)
 							camera.position.set(0, 0, 0)
 							updateRenderSize()
@@ -441,18 +446,26 @@ export const LevelEditor = () => {
 									{(level) => {
 										return (
 											<>
-												<input type="text" value={level().name} onChange={e => update(l => l.name = e.target.value)} />
 												<div>
-													farm
-													<input type="checkbox" checked={level().farm} onChange={e => update(l => l.farm = e.target.checked)}></input>
+													name
+													<input
+														type="text"
+														value={level().name}
+														onChange={(e) => {
+															update(l => l.name = e.target.value) }}
+													/>
 												</div>
 												<div>
-													dungeon
-													<input type="checkbox" checked={level().dungeon} onChange={e => update(l => l.dungeon = e.target.checked)}></input>
-												</div>
-												<div>
-													crossRoad
-													<input type="checkbox" checked={level().crossRoad} onChange={e => update(l => l.crossRoad = e.target.checked)}></input>
+													level type
+													<select
+														value={level().type}
+														onChange={e => update(l => Object.assign(l, { type: e.target.value }))}
+													>
+														<option value="farm">Farm</option>
+														<option value="crossroad">Crossroad</option>
+														<option value="dungeon">Dungeon</option>
+														<option value="ruins">Ruins</option>
+													</select>
 												</div>
 												<div>
 													width

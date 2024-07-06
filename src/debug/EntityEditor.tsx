@@ -215,6 +215,17 @@ export const EntityEditor = ({ entity, levelData, setLevelData, setSelectedEntit
 														>
 														</input>
 													)}
+													{key === 'name' && (
+														<input
+															type="text"
+															placeholder="marker name"
+															value={val}
+															onChange={(e) => {
+																e.stopImmediatePropagation()
+																updateData({ ...data(), name: e.target.value })
+															}}
+														/>
+													)}
 												</div>
 											)
 										}}

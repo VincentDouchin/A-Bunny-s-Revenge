@@ -64,13 +64,13 @@ export class InputManager {
 		window.addEventListener('keydown', (e) => {
 			this.controls('keyboard')
 			if (e.code in this.keys) {
-				e.preventDefault()
+				// e.preventDefault()
 				this.keys[e.code] = 1
 			}
 		})
 		window.addEventListener('keyup', (e) => {
 			if (e.code in this.keys) {
-				e.preventDefault()
+				// e.preventDefault()
 				this.keys[e.code] = 0
 			}
 		})

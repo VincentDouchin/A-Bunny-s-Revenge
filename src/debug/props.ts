@@ -2,12 +2,13 @@ import type { fruit_trees, gardenPlots, models, vegetation } from '@assets/asset
 import { ActiveCollisionTypes, ColliderDesc, RigidBodyDesc } from '@dimforge/rapier3d-compat'
 import type { With } from 'miniplex'
 import type { BufferGeometry, Object3DEventMap } from 'three'
-import { Color, DoubleSide, Euler, Group, Material, Mesh, MeshPhongMaterial, Object3D, PointLight, Quaternion, Vector3 } from 'three'
+import { Color, ConeGeometry, DoubleSide, Euler, Group, Material, Mesh, MeshBasicMaterial, MeshPhongMaterial, Object3D, PointLight, Quaternion, SphereGeometry, Vector3 } from 'three'
 
 import FastNoiseLite from 'fastnoise-lite'
 import { CSS2DObject } from 'three/examples/jsm/renderers/CSS2DRenderer'
 import { clone } from 'three/examples/jsm/utils/SkeletonUtils'
 import type { EntityData, ModelName } from './LevelEditor'
+import { debugState } from './debugState'
 import { dialogs } from '@/constants/dialogs'
 import { Animator } from '@/global/animator'
 import type { Entity } from '@/global/entity'
@@ -31,9 +32,18 @@ import { dialogBundle } from '@/states/game/dialog'
 import { doorSide } from '@/states/game/spawnDoor'
 import { lockPlayer, unlockPlayer } from '@/utils/dialogHelpers'
 import { sleep } from '@/utils/sleep'
+import { spawnMarker } from '@/states/game/spawnMarker'
 
 export const customModels = {
 	door: doorSide,
+	marker: () => {
+		const mesh = new Mesh(new SphereGeometry(3), new MeshBasicMaterial())
+		const arrow = new Mesh(new ConeGeometry(2, 5), new MeshBasicMaterial({ color: 0xFF0000 }))
+		arrow.position.set(0, 0, 3)
+		arrow.rotateX(Math.PI / 2)
+		mesh.add(arrow)
+		return mesh
+	},
 } as const satisfies Record<string, () => Object3D<Object3DEventMap>>
 export type customModel = keyof typeof customModels
 export const getModel = (key: ModelName): Object3D => {
@@ -61,6 +71,9 @@ export interface ExtraData {
 	'sign': {
 		text: string
 	}
+	'marker': {
+		name: string
+	}
 
 }
 
@@ -72,7 +85,7 @@ export interface PlacableProp<N extends string> {
 	data?: N extends keyof ExtraData ? ExtraData[N] : undefined
 	bundle?: BundleFn<EntityData<N extends keyof ExtraData ? NonNullable<ExtraData[N]> : never>>
 }
-type propNames = 'log' | 'door' | 'rock' | 'board' | 'oven' | 'CookingPot' | 'stove' | 'Flower/plants' | 'sign' | 'plots' | 'bush' | 'fence' | 'house' | 'mushrooms' | 'lamp' | 'Kitchen' | 'berry bushes' | 'bench' | 'well' | 'fruit trees' | 'stall' | 'Vine gate' | 'fishing deck' | 'pillar'
+type propNames = 'log' | 'door' | 'rock' | 'board' | 'oven' | 'CookingPot' | 'stove' | 'Flower/plants' | 'sign' | 'plots' | 'bush' | 'fence' | 'house' | 'mushrooms' | 'lamp' | 'Kitchen' | 'berry bushes' | 'bench' | 'well' | 'fruit trees' | 'stall' | 'Vine gate' | 'fishing deck' | 'pillar' | 'marker'
 
 type Props = ({ [k in propNames]: PlacableProp<k> }[propNames])[]
 export const props: Props = [
@@ -80,6 +93,22 @@ export const props: Props = [
 		name: 'log',
 		models: ['WoodLog', 'WoodLog_Moss', 'TreeStump', 'TreeStump_Moss'],
 		bundle: entity => ({ ...entity, obstacle: true }),
+	},
+	{
+		name: 'marker',
+		models: ['marker'],
+		data: { name: '' },
+		bundle(e, data) {
+			if (debugState.enabled) return e
+
+			return {
+				position: e.position,
+				rotation: e.rotation,
+				targetRotation: e.rotation.clone(),
+				...spawnMarker(data.data.name),
+				...inMap(),
+			}
+		},
 	},
 	{
 		name: 'door',

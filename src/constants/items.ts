@@ -35,6 +35,10 @@ export const itemsData = {
 	acorn: {
 		name: 'Acorn',
 	},
+	recipe_book: {
+		'name': 'Recipe book',
+		'key item': true,
+	},
 	Heart: {
 		name: 'Heart',
 		health: 1,

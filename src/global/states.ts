@@ -16,6 +16,7 @@ export const cutSceneState = app.create()
 export const genDungeonState = app.create()
 export const pausedState = app.create()
 export const mainMenuState = app.create()
+export const ruinsIntro = app.create()
 export interface DungeonRessources {
 	dungeon: Room
 	direction: Direction

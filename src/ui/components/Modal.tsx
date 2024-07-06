@@ -7,6 +7,7 @@ import { Transition } from 'solid-transition-group'
 import type { Atom } from 'solid-use/atom'
 import atom from 'solid-use/atom'
 import { useGame } from '../store'
+import { GoldContainer } from './styledComponents'
 import { save } from '@/global/save'
 
 const CloseButton = () => {
@@ -21,23 +22,18 @@ const CloseButton = () => {
 	onCleanup(reset)
 	css/* CSS */`
 	.close-button{
-		width: 4rem;
-		height: 4rem;
-		background: hsla(0, 0%, 0%, 0.2);
 		position: absolute;
 		bottom: 100%;
 		right: 0;
 		margin: 1rem;
-		border-radius: 1rem;
-		border: solid 0.1rem hsla(0, 0%, 100%, 0.3);
 		font-size: 3rem;
 		fill: white;
-		display: grid;
-		place-items: center;
+		line-height: 1;
 	}
 	`
 	return (
 		<Show when={context?.usingTouch() || save.settings.controls === 'mouse'}>
+
 			<div
 				class="close-button icon-container"
 				onTouchStart={closeInventory}
@@ -45,7 +41,9 @@ const CloseButton = () => {
 				onPointerDown={closeInventory}
 				onPointerUp={reset}
 			>
-				<Cross />
+				<GoldContainer padding="0.5rem">
+					<Cross />
+				</GoldContainer>
 			</div>
 		</Show>
 	)
