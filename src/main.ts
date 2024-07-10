@@ -49,6 +49,7 @@ import { generatenavGrid, spawnCrossRoad, spawnDungeon, spawnFarm, spawnLevelDat
 import { losingBattle, spawnCharacter, spawnPlayerClearing, spawnPlayerDungeon } from './states/game/spawnPlayer'
 import { addOutline, removeInteractableOutline, removeOutlines, touchItem } from './states/game/touchItem'
 import { updateWeaponArc } from './states/game/weapon'
+import { startIntro } from './states/intro/startIntro'
 import { clickOnMenuButton, initMainMenuCamPos, intiMainMenuRendering, renderMainMenu, selectMainMenu, setMainCameraPosition, spawnPlayerContinueGame } from './states/mainMenu/mainMenuRendering'
 import { disablePortrait, enableFullscreen, resize, setupGame, stopOnLosingFocus } from './states/setup/setupGame'
 import { UI, errors } from './ui/UI'
@@ -69,7 +70,7 @@ setupState
 gameState
 	.addPlugins(debugPlugin, fishingPlugin, tickModifiersPlugin('speed', 'maxHealth', 'strength', 'critChance', 'critDamage', 'attackSpeed', 'lootQuantity', 'lootChance'))
 
-	.addSubscriber(initializeCameraPosition, bobItems, enableInventoryState, killAnimation, popItems, addHealthBarContainer, ...equip('wateringCan', 'weapon', 'fishingPole'), ...doorLocking, addDashDisplay, addQuestMarkers, removeOutlines, addOutline, removeInteractableOutline)
+	.addSubscriber(initializeCameraPosition, bobItems, enableInventoryState, killAnimation, popItems, addHealthBarContainer, ...equip('wateringCan', 'weapon', 'fishingPole'), ...doorLocking, addDashDisplay, addQuestMarkers, removeInteractableOutline, removeOutlines, addOutline)
 	.onPreUpdate(stopItems)
 	.onPreUpdate(runIf(() => !pausedState.enabled, () => gameTweens.update(time.elapsed)))
 	.onUpdate(
@@ -100,7 +101,8 @@ campState
 	.onUpdate(runIf(canPlayerMove, plantSeed, harvestCrop, openPlayerInventory, savePlayerPosition))
 	.onExit(despawnOfType('map'))
 ruinsIntro
-	.onEnter(spawnRuins, spawnLevelData, compileShaders, moveCamera(true))
+	.onEnter(spawnRuins, spawnLevelData, moveCamera(true), startIntro)
+	.onEnter(compileShaders)
 	.onExit(despawnOfType('map'))
 genDungeonState
 	.addSubscriber(unlockDoorClearing)

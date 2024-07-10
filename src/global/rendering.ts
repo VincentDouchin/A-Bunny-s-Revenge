@@ -58,23 +58,31 @@ export const initThree = () => {
 }
 export const gameRenderGroupQuery = ecs.with('renderer', 'renderGroup', 'scene').where(e => e.renderGroup === RenderGroup.Game)
 export const cameraQuery = ecs.with('camera', 'renderGroup').where(e => e.renderGroup === RenderGroup.Game)
-
+const outlineQuery = ecs.with('outline')
+let withOutline = false
 export const renderGame = () => {
 	const camera = cameraQuery.first?.camera
 	if (!camera) return
 	// Base scene
 	renderer.setRenderTarget(target)
 	renderer.render(scene, camera)
-	// outline entities
-	camera.layers.set(1)
-	scene.overrideMaterial = new MeshBasicMaterial()
-	renderer.setRenderTarget(outlineTarget)
-	renderer.render(scene, camera)
-	scene.overrideMaterial = null
-	camera.layers.set(0)
-	// outline entities with depth
-	renderer.setRenderTarget(outlineTarget2)
-	outlineQuad.render(renderer)
+	if (outlineQuery.size) {
+		// outline entities
+		camera.layers.set(1)
+		scene.overrideMaterial = new MeshBasicMaterial()
+		renderer.setRenderTarget(outlineTarget)
+		renderer.render(scene, camera)
+		scene.overrideMaterial = null
+		camera.layers.set(0)
+		// outline entities with depth
+		renderer.setRenderTarget(outlineTarget2)
+		outlineQuad.render(renderer)
+	}
+	if (withOutline && outlineQuery.size === 0) {
+		renderer.setRenderTarget(outlineTarget2)
+		renderer.clear()
+	}
+	withOutline = outlineQuery.size > 0
 
 	if (mainMenuState.enabled) {
 		renderer.setRenderTarget(finalTarget)

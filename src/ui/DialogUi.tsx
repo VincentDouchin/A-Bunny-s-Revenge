@@ -109,37 +109,48 @@ export const DialogUi = () => {
 				const currentDialog = atom<IteratorResult<string | string[] | void | false> | null>(null)
 				const element = atom<HTMLElement | null>(null)
 				const finished = atom(false)
+				let cancelCurrentDialog: (() => void) | null = null
+				const stepDialog = async () => {
+					if (!entity.dialogContainer) {
+						const dialogContainer = new CSS2DObject(document.createElement('div'))
+						dialogContainer.position.y = entity.dialogHeight ?? entity.size?.y ?? 4
+						element(dialogContainer.element)
+						ecs.update(entity, { dialogContainer })
+						currentDialog(await entity.dialog.next())
+					} else {
+						if (finished()) {
+							currentDialog(await entity.dialog.next())
+							if (!currentDialog()?.value || currentDialog()?.done) {
+								ecs.removeComponent(entity, 'dialogContainer')
+								ecs.removeComponent(entity, 'activeDialog')
+							}
+						} else {
+							finished(true)
+						}
+					}
+				}
 				onMount(() => {
 					if (entity.targetRotation && entity.position && entity.kayAnimator?.current === 'Idle') {
 						const rot = context.player().position.clone().sub(entity.position)
 						const angle = Math.atan2(rot.x, rot.z)
 						entity.targetRotation.copy(new Quaternion().setFromAxisAngle(new Vector3(0, 1, 0), angle))
 					}
+					if (entity.activeDialog === 'instant') {
+						stepDialog()
+					}
 				})
 				createEffect(() => {
 					if (entity.voice) {
-						soundDialog(entity.voice, currentDialog()?.value)
+						const { cancel, play } = soundDialog(entity.voice, currentDialog()?.value)
+						play()
+						cancelCurrentDialog = cancel
 					}
 				})
+
 				ui.updateSync(async () => {
 					if (context.player().playerControls.get('primary').justReleased) {
-						if (!entity.dialogContainer) {
-							const dialogContainer = new CSS2DObject(document.createElement('div'))
-							dialogContainer.position.y = entity.dialogHeight ?? entity.size?.y ?? 4
-							element(dialogContainer.element)
-							ecs.update(entity, { dialogContainer })
-							currentDialog(await entity.dialog.next())
-						} else {
-							if (finished()) {
-								currentDialog(await entity.dialog.next())
-								if (!currentDialog()?.value || currentDialog()?.done) {
-									ecs.removeComponent(entity, 'dialogContainer')
-									ecs.removeComponent(entity, 'activeDialog')
-								}
-							} else {
-								finished(true)
-							}
-						}
+						cancelCurrentDialog && cancelCurrentDialog()
+						stepDialog()
 					}
 				})
 

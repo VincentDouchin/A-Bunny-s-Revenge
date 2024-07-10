@@ -22,6 +22,9 @@ export const spawnMarker = (name: string): Entity => {
 					addItemToPlayer({ name: 'recipe_book', quantity: 1 })
 					chestAnimator.playClamped('chest_open')
 					ecs.removeComponent(entity, 'onPrimary')
+					ecs.removeComponent(entity, 'interactionContainer')
+					ecs.removeComponent(entity, 'interactable')
+					ecs.removeComponent(entity, 'outline')
 				},
 				interactable: Interactable.Open,
 			}

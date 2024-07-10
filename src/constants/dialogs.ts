@@ -5,6 +5,11 @@ import { dialog, t } from '@/translations'
 import { addItemToPlayer, addQuest, aliceJumpDown, canCompleteQuest, completeQuest, enterHouse, hasCompletedQuest, hasEaten, hasItem, hasQuest, leaveHouse, lockPlayer, unlockPlayer } from '@/utils/dialogHelpers'
 
 export const dialogs = {
+	*PlayerIntro1() {
+		yield 'Oh no I got lost again!'
+		yield 'I need to find the way back home before grandma gets too worried'
+		cutSceneState.disable()
+	},
 
 	async *GrandmasDoor() {
 		while (true) {
