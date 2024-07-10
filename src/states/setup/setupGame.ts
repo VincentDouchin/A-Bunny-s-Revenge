@@ -26,6 +26,7 @@ export const setupGame = async () => {
 		updateCameraZoom()
 	} else if (params.debugIntro) {
 		ruinsIntro.enable()
+		updateRenderSize()
 	} else if (!params.skipMainMenu) {
 		mainMenuState.enable()
 		setMainCameraPosition()
