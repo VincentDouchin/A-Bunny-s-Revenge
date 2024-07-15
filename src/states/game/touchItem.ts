@@ -3,12 +3,14 @@ import { CSS2DObject } from 'three/examples/jsm/renderers/CSS2DRenderer'
 import { getIntersections } from './sensor'
 import { ecs } from '@/global/init'
 import type { Entity } from '@/global/entity'
+import type { State } from '@/lib/state'
 
+const interactableQuery = ecs.with('interactable')
 const playerQuery = ecs.with('playerControls', 'sensor', 'position', 'rotation')
-const interactingQuery = ecs.with('collider', 'interactable', 'position')
+const interactingQuery = interactableQuery.with('collider', 'position')
 const losingInteractionQuery = interactingQuery.with('interactionContainer')
-
-export const touchItem = () => {
+const outlineQuery = ecs.with('outline')
+const touchItem = () => {
 	for (const player of playerQuery) {
 		let lastDist = Number.POSITIVE_INFINITY
 		let lastEntity: Entity | null = null
@@ -35,14 +37,22 @@ export const touchItem = () => {
 		}
 	}
 }
-const outlineQuery = ecs.with('model', 'outline')
-export const removeOutlines = () => outlineQuery.onEntityRemoved.subscribe((e) => {
-	e.model.traverse(node => node.layers.disable(1))
+
+const removeOutlines = () => outlineQuery.onEntityRemoved.subscribe((e) => {
+	e.model?.traverse(node => node.layers.disable(1))
 })
 
-export const addOutline = () => outlineQuery.onEntityAdded.subscribe((e) => {
-	e.model.traverse(node => node.layers.enable(1))
+const addOutline = () => outlineQuery.onEntityAdded.subscribe((e) => {
+	e.model?.traverse(node => node.layers.enable(1))
 })
-export const removeInteractableOutline = () => interactingQuery.onEntityRemoved.subscribe((e) => {
+
+const removeInteractionContainer = () => interactingQuery.onEntityRemoved.subscribe((e) => {
+	ecs.removeComponent(e, 'interactionContainer')
 	ecs.removeComponent(e, 'outline')
 })
+
+export const interactionPlugin = (state: State) => {
+	state
+		.onUpdate(touchItem)
+		.addSubscriber(removeOutlines, addOutline, removeInteractionContainer)
+}

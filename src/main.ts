@@ -39,15 +39,15 @@ import { closePlayerInventory, disableInventoryState, enableInventoryState, inte
 import { waterCrops } from './states/farm/wateringCan'
 import { addDashDisplay, updateDashDisplay } from './states/game/dash'
 import { dayNight, playNightMusic } from './states/game/dayNight'
-import { addQuestMarkers, talkToNPC, turnNPCHead } from './states/game/dialog'
+import { addQuestMarkers, talkToNPC, triggerDialog, turnNPCHead } from './states/game/dialog'
 import { equip } from './states/game/equip'
 import { bobItems, collectItems, popItems, stopItems } from './states/game/items'
 import { canPlayerMove, movePlayer, playerSteps, savePlayerFromTheEmbraceOfTheVoid, savePlayerPosition, stopPlayer } from './states/game/movePlayer'
 import { pauseGame } from './states/game/pauseGame'
-import { allowDoorCollision, collideWithDoor, collideWithDoorCamp, collideWithDoorClearing, doorLocking, unlockDoorClearing } from './states/game/spawnDoor'
-import { generatenavGrid, spawnCrossRoad, spawnDungeon, spawnFarm, spawnLevelData, spawnRuins, updateTimeUniforms } from './states/game/spawnLevel'
+import { allowDoorCollision, collideWithDoorCamp, collideWithDoorClearing, collideWithDoorDungeon, collideWithDoorRuins, doorLocking, unlockDoorClearing, unlockDoorDungeon } from './states/game/spawnDoor'
+import { spawnCrossRoad, spawnDungeon, spawnFarm, spawnLevelData, spawnRuins, updateTimeUniforms } from './states/game/spawnLevel'
 import { losingBattle, spawnCharacter, spawnPlayerClearing, spawnPlayerDungeon } from './states/game/spawnPlayer'
-import { addOutline, removeInteractableOutline, removeOutlines, touchItem } from './states/game/touchItem'
+import { interactionPlugin } from './states/game/touchItem'
 import { updateWeaponArc } from './states/game/weapon'
 import { startIntro } from './states/intro/startIntro'
 import { clickOnMenuButton, initMainMenuCamPos, intiMainMenuRendering, renderMainMenu, selectMainMenu, setMainCameraPosition, spawnPlayerContinueGame } from './states/mainMenu/mainMenuRendering'
@@ -68,19 +68,19 @@ setupState
 	.enable()
 
 gameState
-	.addPlugins(debugPlugin, fishingPlugin, tickModifiersPlugin('speed', 'maxHealth', 'strength', 'critChance', 'critDamage', 'attackSpeed', 'lootQuantity', 'lootChance'))
+	.addPlugins(debugPlugin, fishingPlugin, interactionPlugin, tickModifiersPlugin('speed', 'maxHealth', 'strength', 'critChance', 'critDamage', 'attackSpeed', 'lootQuantity', 'lootChance'))
 
-	.addSubscriber(initializeCameraPosition, bobItems, enableInventoryState, killAnimation, popItems, addHealthBarContainer, ...equip('wateringCan', 'weapon', 'fishingPole'), ...doorLocking, addDashDisplay, addQuestMarkers, removeInteractableOutline, removeOutlines, addOutline)
+	.addSubscriber(initializeCameraPosition, bobItems, enableInventoryState, killAnimation, popItems, addHealthBarContainer, ...equip('wateringCan', 'weapon', 'fishingPole'), ...doorLocking, addDashDisplay, addQuestMarkers)
 	.onPreUpdate(stopItems)
 	.onPreUpdate(runIf(() => !pausedState.enabled, () => gameTweens.update(time.elapsed)))
 	.onUpdate(
 		runIf(canPlayerMove, movePlayer, updateDashDisplay),
-		runIf(() => !pausedState.enabled, playerSteps, dayNight, updateTimeUniforms, applyDeathTimer),
-		runIf(() => !openMenuState.enabled, pauseGame, interact),
+		runIf(() => !pausedState.enabled, playerSteps, dayNight, updateTimeUniforms, applyDeathTimer, triggerDialog),
+		runIf(() => !openMenuState.enabled, pauseGame),
 	)
 	.addPlugins(playerBehaviorPlugin, rangeEnemyBehaviorPlugin, chargingEnemyBehaviorPlugin, meleeEnemyBehaviorPlugin, beeBossBehaviorPlugin, jumpingEnemyBehaviorPlugin, basketBehaviorPlugin, sporeBehaviorPlugin, chargingTwiceEnemyBehaviorPlugin, rangeThriceEnemyBehaviorPlugin)
-	.onUpdate(collectItems(), touchItem, talkToNPC, turnNPCHead, dropBerriesOnHit, updateWeaponArc, sleepyEffects)
-	.onPostUpdate(renderGame, rotateStun)
+	.onUpdate(collectItems(), talkToNPC, turnNPCHead, dropBerriesOnHit, updateWeaponArc, sleepyEffects)
+	.onPostUpdate(renderGame, rotateStun, runIf(() => !openMenuState.enabled, interact))
 	.enable()
 mainMenuState
 	.onEnter(intiMainMenuRendering, setMainCameraPosition)
@@ -95,7 +95,7 @@ openMenuState
 campState
 	.addSubscriber(...interactablePlantableSpot)
 	.onEnter(spawnFarm, spawnLevelData, initPlantableSpotsInteractions, spawnGodRay, addBeanStalkHole)
-	.onEnter(runIf(() => !mainMenuState.enabled, spawnCharacter, setInitialHealth), moveCamera(true))
+	.onEnter(runIf(() => mainMenuState.disabled, spawnCharacter, setInitialHealth), moveCamera(true))
 	.onEnter(compileShaders)
 	.onUpdate(collideWithDoorCamp, playNightMusic, waterCrops, growCrops, growMagicBean, harvestMagicBean)
 	.onUpdate(runIf(canPlayerMove, plantSeed, harvestCrop, openPlayerInventory, savePlayerPosition))
@@ -103,6 +103,7 @@ campState
 ruinsIntro
 	.onEnter(spawnRuins, spawnLevelData, moveCamera(true), startIntro)
 	.onEnter(compileShaders)
+	.onUpdate(collideWithDoorRuins)
 	.onExit(despawnOfType('map'))
 genDungeonState
 	.addSubscriber(unlockDoorClearing)
@@ -113,10 +114,10 @@ genDungeonState
 
 dungeonState
 	.addSubscriber(spawnDrops, losingBattle, removeEnemyFromSpawn, applyArchingForce, unlockDungeon)
-	.onEnter(spawnDungeon, spawnLevelData, generatenavGrid, spawnEnemies, spawnPlayerDungeon, moveCamera(true))
-	.onEnter(compileShaders, generatenavGrid)
+	.onEnter(spawnDungeon, spawnLevelData, spawnEnemies, spawnPlayerDungeon, moveCamera(true))
+	.onEnter(compileShaders)
 	.onUpdate(
-		runIf(canPlayerMove, allowDoorCollision, collideWithDoor, harvestCrop, killEntities),
+		runIf(canPlayerMove, allowDoorCollision, collideWithDoorDungeon, harvestCrop, killEntities, unlockDoorDungeon),
 		runIf(() => !pausedState.enabled, tickHitCooldown, tickSneeze, tickPoison, tickInactiveTimer, tickSleepy),
 	)
 	.onUpdate(detroyProjectiles, honeySplat, stepInHoney, endBattleSpawnChest, spawnPoisonTrail, lockOnEnemy, buyItems)

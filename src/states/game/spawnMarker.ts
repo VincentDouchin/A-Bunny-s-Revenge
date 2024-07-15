@@ -1,34 +1,61 @@
-import { clone } from 'three/examples/jsm/utils/SkeletonUtils'
 import { RigidBodyType } from '@dimforge/rapier3d-compat'
+import { clone } from 'three/examples/jsm/utils/SkeletonUtils'
 import { PLAYER_DEFAULT_HEALTH, playerBundle } from './spawnPlayer'
-import { assets, ecs } from '@/global/init'
-import { type Entity, Interactable } from '@/global/entity'
-import { addItemToPlayer } from '@/utils/dialogHelpers'
-import { modelColliderBundle } from '@/lib/models'
+import { weaponBundle } from './weapon'
+import { dialogs } from '@/constants/dialogs'
 import { Animator } from '@/global/animator'
+import { type Entity, Interactable } from '@/global/entity'
+import { assets, ecs } from '@/global/init'
+import { modelColliderBundle } from '@/lib/models'
+import { addItemToPlayer, hasItem, removeItemFromPlayer } from '@/utils/dialogHelpers'
+
+const chestBundle = () => {
+	const model = clone(assets.models.Chest.scene)
+	model.scale.setScalar(5)
+	const colliderBundle = modelColliderBundle(model, RigidBodyType.Fixed, false)
+	const chestAnimator = new Animator<Animations['Chest']>(colliderBundle.model, assets.models.Chest.animations)
+	return {
+		chestAnimator,
+		...colliderBundle,
+		interactable: Interactable.Open,
+	}
+}
 
 export const spawnMarker = (name: string): Entity => {
-	switch (name) {
-		case 'ruin-player':return playerBundle(PLAYER_DEFAULT_HEALTH, null)
-		case 'ruin-chest':{
-			const model = clone(assets.models.Chest.scene)
-			model.scale.setScalar(5)
-			const chestAnimator = new Animator<Animations['Chest']>(model, assets.models.Chest.animations)
-			return {
-				...modelColliderBundle(model, RigidBodyType.Fixed, false),
-				model,
-				chestAnimator,
-				onPrimary(entity) {
-					addItemToPlayer({ name: 'recipe_book', quantity: 1 })
-					chestAnimator.playClamped('chest_open')
-					ecs.removeComponent(entity, 'onPrimary')
-					ecs.removeComponent(entity, 'interactionContainer')
-					ecs.removeComponent(entity, 'interactable')
-					ecs.removeComponent(entity, 'outline')
-				},
-				interactable: Interactable.Open,
+	if (name === 'ruin-player') {
+		removeItemFromPlayer({ name: 'recipe_book', quantity: 100 })
+		return playerBundle(PLAYER_DEFAULT_HEALTH, null)
+	}
+	if (name === 'ruin-chest') {
+		const chest = chestBundle()
+		const onPrimary: Entity['onPrimary'] = async (entity, player) => {
+			if (hasItem('recipe_book')) {
+				ecs.update(player, { weapon: weaponBundle('SwordWeapon') })
+				chest.chestAnimator.playClamped('chest_open')
+				ecs.removeComponent(entity, 'onPrimary')
+				ecs.removeComponent(entity, 'interactable')
+			} else {
+				addItemToPlayer({ name: 'recipe_book', quantity: 1 })
+				chest.chestAnimator.playClamped('chest_open')
+				ecs.removeComponent(entity, 'onPrimary')
+				ecs.removeComponent(entity, 'interactable')
+				ecs.update(player, {
+					activeDialog: 'instant',
+					dialog: dialogs.PlayerIntro3(),
+				})
 			}
 		}
-		default:return {}
+
+		return {
+			...chest,
+			onPrimary,
+
+		}
+	}
+	if (name.startsWith('dialog-trigger')) {
+		return { dialogTrigger: name.replace('dialog-trigger-', '') }
+	}
+	return {
+		markerName: name,
 	}
 }

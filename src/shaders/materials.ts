@@ -101,7 +101,7 @@ const groundExtension = new MaterialExtension({
 	`),
 	)
 
-export const treeExtension = new MaterialExtension({ playerZ: 0, pos: new Vector2(), time: 0 })
+export const treeExtension = new MaterialExtension({ playerZ: 0 })
 
 	.frag(
 		addUniform('playerZ', 'float'),
@@ -111,30 +111,28 @@ export const treeExtension = new MaterialExtension({ playerZ: 0, pos: new Vector
 	gl_FragColor = vec4(outgoingLight2, new_opacity);
 	`),
 	)
-	.vert(
-		addUniform('time', 'float'),
-		importLib(noise),
-		addUniform('pos', 'vec2'),
-		unpack('project_vertex'),
-		replace('mvPosition = instanceMatrix * mvPosition;', /* glsl */`
-		float noise = cnoise(vec3(pos.xy,time/4.));
-		float height_factor = mvPosition.y/10.;
-		mvPosition = instanceMatrix * (mvPosition + vec4(sin(noise)*height_factor,0.,cos(noise)*height_factor,0.));
-		`),
-	)
 
-export const grassExtension = new MaterialExtension({ pos: new Vector2(), time: 0 })
+export const vegetationExtension = new MaterialExtension({ pos: new Vector2(), time: 0, height: 1, shake: 0 })
 
 	.vert(
 		addUniform('time', 'float'),
+		addUniform('height', 'float'),
+		addUniform('shake', 'float'),
 		importLib(noise),
 		addUniform('pos', 'vec2'),
 		unpack('project_vertex'),
-		replace('mvPosition = instanceMatrix * mvPosition;', /* glsl */`
-		vec4 position2 = vec4( transformed, 1.0 ) * instanceMatrix;
-		float noise = cnoise(vec3(pos.xy,time));
-		float height_factor = mvPosition.y/4.;
-		mvPosition = instanceMatrix * (mvPosition + vec4(sin(noise)*height_factor,0.,cos(noise)*height_factor,0.));
+		replace('mvPosition = modelViewMatrix * mvPosition;', /* glsl */`
+		float noise = cnoise(vec3(pos.xy,time+shake));
+		float height_factor = mvPosition.y / height;
+		float shakeX = (shake > 0.) ? sin(shake) * 3. : 0.;
+		float shakeY = (shake > 0.) ? cos(shake) * 3. : 0.;
+		vec4 displacement = vec4(
+			(sin(noise)+shakeX)*height_factor,
+			0.,
+			(cos(noise)+shakeY)*height_factor,
+			0.
+		);
+		mvPosition = modelViewMatrix * (mvPosition + displacement);
 		`),
 	)
 
@@ -186,6 +184,6 @@ export const VineGateMaterial = extendMaterial(MeshPhongMaterial, [toonExtension
 export const CharacterMaterial = extendMaterial(MeshPhongMaterial, [toonExtension, characterExtension])
 export const GroundMaterial = extendMaterial(MeshPhongMaterial, [toonExtension, groundExtension])
 export const WaterMaterial = extendMaterial(MeshPhongMaterial, [toonExtension, waterExtension])
-export const TreeMaterial = extendMaterial(MeshPhongMaterial, [toonExtension, treeExtension])
-export const GrassMaterial = extendMaterial(MeshPhongMaterial, [toonExtension, grassExtension])
+export const TreeMaterial = extendMaterial(MeshPhongMaterial, [toonExtension, treeExtension, vegetationExtension])
+export const GrassMaterial = extendMaterial(MeshPhongMaterial, [toonExtension, vegetationExtension])
 export const GardenPlotMaterial = extendMaterial(MeshPhongMaterial, [toonExtension, gardenPlotExtention])

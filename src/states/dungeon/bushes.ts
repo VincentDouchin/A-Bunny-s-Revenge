@@ -1,8 +1,10 @@
 import type { BufferGeometry, Mesh, MeshPhongMaterial } from 'three'
 import { Vector3 } from 'three'
+import { Easing, Tween } from '@tweenjs/tween.js'
 import { itemBundle } from '../game/items'
 import { getIntersections } from '../game/sensor'
-import { ecs } from '@/global/init'
+import { ecs, gameTweens } from '@/global/init'
+import { shakenLeaves } from '@/particles/bushShaken'
 
 const dropBerries = (amount: number, bushPosition: Vector3, berries: Set<Mesh<BufferGeometry, MeshPhongMaterial>>) => {
 	for (let i = 0; i < amount; i++) {
@@ -25,16 +27,44 @@ const dropBerries = (amount: number, bushPosition: Vector3, berries: Set<Mesh<Bu
 }
 
 const playerQuery = ecs.with('player', 'playerControls', 'sensor', 'position', 'rotation')
-const bushesQuery = ecs.with('berries', 'collider', 'model', 'position')
+const berryBushesQuery = ecs.with('berries', 'collider', 'model', 'position')
+const bushesQuery = ecs.with('bush', 'collider')
 export const dropBerriesOnHit = () => {
 	for (const player of playerQuery) {
 		if (player.playerControls.get('primary').justReleased) {
-			for (const bush of bushesQuery) {
+			for (const bush of berryBushesQuery) {
 				if (getIntersections(player, undefined, c => c === bush.collider)) {
 					dropBerries(5, bush.position, bush.berries)
 					if (bush.berries.size === 0) {
 						ecs.removeComponent(bush, 'berries')
 						bush.collider.setSensor(true)
+					}
+				}
+			}
+			for (const bush of bushesQuery) {
+				if (player.weapon) {
+					ecs.update(bush, { shake: 5 })
+					if (getIntersections(player, undefined, c => c === bush.collider)) {
+						if (bush.shaken !== undefined) {
+							bush.shaken += 1
+						} else {
+							ecs.update(bush, { shaken: 0 })
+						}
+						ecs.add({
+							parent: bush,
+							autoDestroy: true,
+							position: new Vector3(),
+							emitter: shakenLeaves(),
+						})
+						gameTweens.add(new Tween([0]).to([10], 500).easing(Easing.Sinusoidal.InOut).onUpdate(([f]) => {
+							bush.shake = f
+						}).onComplete(() => {
+							if (bush.shaken === 2) {
+								ecs.remove(bush)
+							} else {
+								ecs.removeComponent(bush, 'shake')
+							}
+						}))
 					}
 				}
 			}

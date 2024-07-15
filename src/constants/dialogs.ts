@@ -10,7 +10,18 @@ export const dialogs = {
 		yield 'I need to find the way back home before grandma gets too worried'
 		cutSceneState.disable()
 	},
-
+	*PlayerIntro2() {
+		cutSceneState.enable()
+		yield 'I think I see some light through the trees!'
+		yield 'But I need to find something to cut down the bushes to go through'
+		cutSceneState.disable()
+	},
+	*PlayerIntro3() {
+		cutSceneState.enable()
+		yield 'Oh a recipe book!'
+		yield 'I should be able to find a recipe to make for the next festival!'
+		cutSceneState.disable()
+	},
 	async *GrandmasDoor() {
 		while (true) {
 			cutSceneState.enable()

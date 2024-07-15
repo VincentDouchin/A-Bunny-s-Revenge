@@ -1,26 +1,24 @@
 import type { Collider, RigidBody } from '@dimforge/rapier3d-compat'
 import { type State, runIf } from './state'
-import { pausedState } from '@/global/states'
 import { ecs, world } from '@/global/init'
-import type { Entity } from '@/global/entity'
+import { pausedState } from '@/global/states'
 
 const bodiesQuery = ecs.with('bodyDesc', 'position').without('body')
 const colliderQueries = ecs.with('colliderDesc', 'body').without('collider')
 const rotationWithBodyQuery = ecs.with('body', 'rotation')
-const secondaryCollidersQuery = ecs.with('body', 'secondaryColliders')
+const secondaryCollidersQuery = ecs.with('body', 'secondaryCollidersDesc')
 
 const bodiesToRemove = new Set<RigidBody>()
 const collidersToRemove = new Set<Collider>()
-const secondaryColliders = new Map<Entity, Collider[]>()
-const entitiesRemoved = new Set<Entity>()
+const secondaryCollidersToRemove = new Set<Collider[]>()
 const removeBodies = () => ecs.with('body').onEntityRemoved.subscribe((entity) => {
 	bodiesToRemove.add(entity.body)
 })
 const removeColliders = () => ecs.with('collider').onEntityRemoved.subscribe((entity) => {
 	collidersToRemove.add(entity.collider)
 })
-const removeSecondaryColliders = () => secondaryCollidersQuery.onEntityRemoved.subscribe((e) => {
-	entitiesRemoved.add(e)
+const removeSecondaryColliders = () => ecs.with('secondaryColliders').onEntityRemoved.subscribe((e) => {
+	secondaryCollidersToRemove.add(e.secondaryColliders)
 })
 
 export const stepWorld = () => {
@@ -46,12 +44,10 @@ export const stepWorld = () => {
 		})
 	}
 	for (const entity of secondaryCollidersQuery) {
-		const colliders = entity.secondaryColliders.map(desc => world.createCollider(desc, entity.body))
-		secondaryColliders.set(entity, colliders)
-
-		ecs.removeComponent(entity, 'secondaryColliders')
+		const colliders = entity.secondaryCollidersDesc.map(desc => world.createCollider(desc, entity.body))
+		ecs.addComponent(entity, 'secondaryColliders', colliders)
+		ecs.removeComponent(entity, 'secondaryCollidersDesc')
 	}
-	bodiesToRemove.clear()
 	world.step()
 	for (const body of bodiesToRemove) {
 		world.removeRigidBody(body)
@@ -61,14 +57,12 @@ export const stepWorld = () => {
 		world.removeCollider(collider, false)
 	}
 	collidersToRemove.clear()
-	for (const entity of entitiesRemoved) {
-		const colliders = secondaryColliders.get(entity)
-		if (colliders) {
-			for (const collider of colliders) {
-				world.removeCollider(collider, false)
-			}
+	for (const secondaryColliders of secondaryCollidersToRemove) {
+		for (const collider of secondaryColliders) {
+			world.removeCollider(collider, false)
 		}
 	}
+	secondaryCollidersToRemove.clear()
 	callBacks.forEach(callBack => callBack())
 	for (const entity of rotationWithBodyQuery) {
 		entity.body.setRotation(entity.rotation, true)

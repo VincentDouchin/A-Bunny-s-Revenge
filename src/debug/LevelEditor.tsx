@@ -244,7 +244,7 @@ export const LevelEditor = () => {
 								const glb = await loader.parseAsync(arrayBuffer, '')
 								glb.scene.traverse((x) => {
 									if (x instanceof Mesh && x.material instanceof MeshStandardMaterial) {
-										x.material = new ToonMaterial({ color: x.material.color, map: x.material.map })
+										x.material = new ToonMaterial({ color: x.material.color, map: x.material.map, transparent: true })
 									}
 								})
 								assets.models[name] = glb

@@ -9,7 +9,7 @@ export const addToScene = (...components: Array<Exclude<ComponentsOfType<Object3
 	for (const component of components) {
 		const query = ecs.with(component, 'position')
 		const withoutGroup = query.without('group')
-		state.onEnter(() => withoutGroup.onEntityAdded.subscribe((entity) => {
+		state.addSubscriber(() => withoutGroup.onEntityAdded.subscribe((entity) => {
 			const group = new Group()
 			group.position.x = entity.position.x
 			group.position.y = entity.position.y
@@ -18,15 +18,15 @@ export const addToScene = (...components: Array<Exclude<ComponentsOfType<Object3
 			ecs.addComponent(entity, 'group', group)
 		}))
 		const withGroup = query.with('group')
-		state.onEnter(() => withGroup.onEntityAdded.subscribe((entity) => {
-			entity.group.add(entity[component])
+		state.addSubscriber(() => withGroup.onEntityAdded.subscribe((entity) => {
+			if (entity[component]) entity.group.add(entity[component])
 		}))
-		state.onEnter(() => withGroup.onEntityRemoved.subscribe((entity) => {
-			entity[component].removeFromParent()
+		state.addSubscriber(() => withGroup.onEntityRemoved.subscribe((entity) => {
+			if (entity[component]) entity[component].removeFromParent()
 		}))
 	}
 	const withGroup = ecs.with('group')
-	state.onEnter(() => withGroup.onEntityAdded.subscribe((entity) => {
+	state.addSubscriber(() => withGroup.onEntityAdded.subscribe((entity) => {
 		if (entity.parent?.group) {
 			entity.parent.group.add(entity.group)
 		} else {
@@ -40,7 +40,7 @@ export const addToScene = (...components: Array<Exclude<ComponentsOfType<Object3
 			entity.group.position.z = entity.position.z
 		}
 	}))
-	state.onEnter(() => withGroup.onEntityRemoved.subscribe((entity) => {
+	state.addSubscriber(() => withGroup.onEntityRemoved.subscribe((entity) => {
 		entity.group.removeFromParent()
 	}))
 }

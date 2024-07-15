@@ -71,8 +71,10 @@ export const playerBehaviorPlugin = behaviorPlugin(
 				setState('running')
 			}
 			if (!campState.enabled || debugOptions.attackInFarm()) {
-				if (e.playerControls.get('primary').justReleased && e.weapon && interactionQuery.size === 0) {
-					setState('attack')
+				if (e.playerControls.get('primary').justReleased && e.weapon) {
+					if (interactionQuery.size === 0) {
+						setState('attack')
+					}
 				}
 				if (e.playerControls.get('secondary').justReleased && canDash) {
 					setState('dash')

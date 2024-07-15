@@ -2,17 +2,17 @@ import type { fruit_trees, gardenPlots, models, vegetation } from '@assets/asset
 import { ActiveCollisionTypes, ColliderDesc, RigidBodyDesc } from '@dimforge/rapier3d-compat'
 import type { With } from 'miniplex'
 import type { BufferGeometry, Object3DEventMap } from 'three'
-import { Color, ConeGeometry, DoubleSide, Euler, Group, Material, Mesh, MeshBasicMaterial, MeshPhongMaterial, Object3D, PointLight, Quaternion, SphereGeometry, Vector3 } from 'three'
+import { Color, ConeGeometry, DoubleSide, Euler, Group, Material, Mesh, MeshBasicMaterial, MeshPhongMaterial, Object3D, PointLight, Quaternion, SphereGeometry, Vector2, Vector3 } from 'three'
 
 import FastNoiseLite from 'fastnoise-lite'
 import { CSS2DObject } from 'three/examples/jsm/renderers/CSS2DRenderer'
 import { clone } from 'three/examples/jsm/utils/SkeletonUtils'
 import type { EntityData, ModelName } from './LevelEditor'
 import { debugState } from './debugState'
-import { dialogs } from '@/constants/dialogs'
-import { Animator } from '@/global/animator'
-import type { Entity } from '@/global/entity'
 import { Interactable, MenuType } from '@/global/entity'
+import type { Entity } from '@/global/entity'
+import { Animator } from '@/global/animator'
+import { dialogs } from '@/constants/dialogs'
 
 import { assets, ecs } from '@/global/init'
 import { save } from '@/global/save'
@@ -23,16 +23,16 @@ import { itemsData } from '@/constants/items'
 import { Direction } from '@/lib/directions'
 import { inMap } from '@/lib/hierarchy'
 import { getSecondaryColliders } from '@/lib/models'
-import { GardenPlotMaterial } from '@/shaders/materials'
+import { GardenPlotMaterial, GrassMaterial } from '@/shaders/materials'
 import { RoomType } from '@/states/dungeon/generateDungeon'
 import { cropBundle } from '@/states/farm/farming'
 import { openMenu } from '@/states/farm/openInventory'
 import { wateringCanBundle } from '@/states/farm/wateringCan'
 import { dialogBundle } from '@/states/game/dialog'
 import { doorSide } from '@/states/game/spawnDoor'
+import { spawnMarker } from '@/states/game/spawnMarker'
 import { lockPlayer, unlockPlayer } from '@/utils/dialogHelpers'
 import { sleep } from '@/utils/sleep'
-import { spawnMarker } from '@/states/game/spawnMarker'
 
 export const customModels = {
 	door: doorSide,
@@ -161,19 +161,24 @@ export const props: Props = [
 	{
 		name: 'bush',
 		models: ['Bush_1', 'Bush_2', 'SM_Env_Bush_01', 'SM_Env_Bush_02', 'SM_Env_Bush_03', 'SM_Env_Bush_04'],
-		bundle: (entity) => {
-			const mats: MeshPhongMaterial[] = []
+		bundle(entity) {
+			const materials: MeshPhongMaterial[] = []
 			entity.model.traverse((node) => {
-				if (node instanceof Mesh) {
-					node.material.uniforms.pos.value = entity.position.clone()
-					mats.push(node.material)
+				const height = entity.size?.y ?? 5
+				if (node instanceof Mesh && node.material) {
+					const mat = new GrassMaterial({ color: node.material.color, map: node.material.map })
+					mat.setUniforms({
+						pos: new Vector2(entity.position.x, entity.position.z),
+						height,
+					})
+					node.material = mat
+					materials.push(mat)
 				}
 			})
-
 			return {
 				...entity,
-				withTimeUniform: mats,
 				bush: true,
+				withTimeUniform: materials,
 			}
 		},
 	},
@@ -355,6 +360,22 @@ export const props: Props = [
 	{
 		name: 'Flower/plants',
 		models: ['SM_Env_Flower_01', 'SM_Env_Flower_02', 'SM_Env_Flower_03', 'SM_Env_Flower_05', 'SM_Env_Flower_06', 'SM_Env_Flower_07', 'SM_Env_Flower_08', 'SM_Env_Grass_01', 'SM_Env_Grass_02', 'grass&vines', 'SM_Env_Flowers_01', 'SM_Env_Flowers_02', 'SM_Env_Plant_01', 'SM_Env_Plant_02', 'SM_Env_Plant_03', 'Creepy_Flower', 'Creepy_Grass', 'SM_Env_Lillypad_Large_01', 'SM_Env_Lillypad_Large_02', 'SM_Env_Lillypad_Large_03', 'SM_Env_Lillypad_Small_01', 'SM_Env_Reeds_01', 'SM_Env_Reeds_02', 'SM_Env_RicePlant_01', 'SM_Env_RicePlant_02'],
+		bundle(entity) {
+			const materials: MeshPhongMaterial[] = []
+			entity.model.traverse((node) => {
+				const height = entity.size?.y ?? 5
+				if (node instanceof Mesh && node.material) {
+					const mat = new GrassMaterial({ color: node.material.color, map: node.material.map })
+					mat.setUniforms({
+						pos: new Vector2(entity.position.x, entity.position.z),
+						height,
+					})
+					node.material = mat
+					materials.push(mat)
+				}
+			})
+			return { ...entity, withTimeUniform: materials }
+		},
 	},
 
 	{
@@ -376,7 +397,6 @@ export const props: Props = [
 				entity.doorLevel = data.doorLevel
 				entity.doorLocked = true
 			}
-
 			return {
 				...entity,
 				vineGate: true,

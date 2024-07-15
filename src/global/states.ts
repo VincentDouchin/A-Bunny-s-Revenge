@@ -7,7 +7,7 @@ export const app = new StateMananger()
 export const coreState = app.create()
 export const gameState = app.create()
 export interface FarmRessources {
-	previousState?: 'dungeon'
+	previousState?: 'dungeon' | 'ruins'
 }
 export const campState = app.create<FarmRessources>()
 export const setupState = app.create()
@@ -27,4 +27,4 @@ export interface DungeonRessources {
 }
 
 export const dungeonState = app.create<DungeonRessources>()
-app.exclusive(setupState, campState, dungeonState, genDungeonState)
+app.exclusive(setupState, campState, dungeonState, genDungeonState, ruinsIntro)

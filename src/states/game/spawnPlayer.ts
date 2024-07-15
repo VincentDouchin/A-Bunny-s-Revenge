@@ -98,10 +98,21 @@ export const playerBundle = (health: number, weapon: weapons | null) => {
 	return player
 }
 
+const markerQuery = ecs.with('markerName', 'position', 'rotation').where(e => e.markerName === 'player-from-ruins')
+const getPlayerPosition = (ressources: FarmRessources) => {
+	if (ressources.previousState === 'dungeon') {
+		return { position: new Vector3(), rotation: new Quaternion() }
+	} else if (ressources.previousState === 'ruins' && markerQuery.first) {
+		return markerQuery.first
+	}
+	return {
+		position: new Vector3().fromArray(save.playerPosition),
+		rotation: new Quaternion().fromArray(save.playerRotation),
+	}
+}
+
 export const spawnCharacter: System<FarmRessources> = (ressources) => {
-	const [position, rotation] = ressources?.previousState === 'dungeon'
-		? [new Vector3(), new Quaternion()]
-		: [new Vector3().fromArray(save.playerPosition), new Quaternion().fromArray(save.playerRotation)]
+	const { position, rotation } = getPlayerPosition(ressources)
 	if (ressources?.previousState === 'dungeon') {
 		updateSave(s => s.modifiers = [])
 	}

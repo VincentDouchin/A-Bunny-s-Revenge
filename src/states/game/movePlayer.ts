@@ -3,7 +3,7 @@ import { updateSave } from '@/global/save'
 import { playStep } from '@/global/sounds'
 import { cutSceneState, openMenuState, pausedState } from '@/global/states'
 import { throttle } from '@/lib/state'
-import { footstepsBundle } from '@/particles/footsteps'
+import { spawnFootstep } from '@/particles/footsteps'
 
 const movementQuery = ecs.with('body', 'rotation', 'movementForce', 'speed')
 const playerQuery = movementQuery.with('playerControls', 'position', 'state', 'lastStep', 'playerAnimator', 'modifiers')
@@ -17,10 +17,7 @@ export const playerSteps = () => {
 						playStep('random')
 						player.lastStep[foot] = true
 						const honey = player.modifiers.hasModifier('honeySpot')
-						ecs.add({
-							parent: player,
-							...footstepsBundle(foot, honey),
-						})
+						spawnFootstep(foot, player.position, honey)
 					}
 				} else {
 					player.lastStep[foot] = false

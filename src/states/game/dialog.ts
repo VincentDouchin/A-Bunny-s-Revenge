@@ -3,7 +3,6 @@ import { CylinderGeometry, Group, Mesh, MeshBasicMaterial, Quaternion, SphereGeo
 import { dialogs } from '@/constants/dialogs'
 import { type Entity, Interactable } from '@/global/entity'
 import { ecs, gameTweens, time } from '@/global/init'
-import { addTag } from '@/lib/hierarchy'
 import { hasQuest, questsUnlocks } from '@/utils/dialogHelpers'
 
 export const dialogBundle = (key: keyof typeof dialogs) => {
@@ -18,7 +17,7 @@ export const talkToNPC = () => {
 	for (const player of playerQuery) {
 		for (const npc of dialogQuery) {
 			if (player.playerControls.get('primary').justPressed) {
-				addTag(npc, 'activeDialog')
+				ecs.addComponent(npc, 'activeDialog', true)
 			}
 		}
 	}
@@ -69,3 +68,25 @@ export const addQuestMarkers = () => questMarkerQuery.onEntityAdded.subscribe((e
 		ecs.update(e, { questMarkerContainer })
 	}
 })
+
+const dialogTriggerQuery = ecs.with('position', 'dialogTrigger')
+export const triggerDialog = () => {
+	for (const player of playerQuery) {
+		for (const marker of dialogTriggerQuery) {
+			if (marker.position.distanceTo(player.position) < 10) {
+				const dialog = {
+					intro1: dialogs.PlayerIntro2,
+				}[marker.dialogTrigger]
+				if (dialog) {
+					player.targetMovementForce?.setScalar(0)
+					player.movementForce?.setScalar(0)
+					ecs.update(player, {
+						dialog: dialog(),
+						activeDialog: 'instant',
+					})
+					ecs.remove(marker)
+				}
+			}
+		}
+	}
+}

@@ -28,24 +28,23 @@ export const getTrimeshCollider = (node: Mesh) => {
 	return ColliderDesc.trimesh(vertices, indices).setTranslation(...node.position.toArray())
 }
 export const getSecondaryColliders = (model: Object3D) => {
-	const secondaryColliders: ColliderDesc[] = []
+	const secondaryCollidersDesc: ColliderDesc[] = []
 	const nodesToRemove: Object3D[] = []
 	model.traverse((node) => {
 		if (node.name.includes('collider') && node instanceof Mesh && node.geometry instanceof BufferGeometry) {
 			nodesToRemove.push(node)
-			secondaryColliders.push(getTrimeshCollider(node))
+			secondaryCollidersDesc.push(getTrimeshCollider(node))
 		}
 	})
 	nodesToRemove.forEach(node => node.removeFromParent())
-	if (secondaryColliders.length > 0) {
-		return { secondaryColliders } as const satisfies Entity
+	if (secondaryCollidersDesc.length > 0) {
+		return { secondaryCollidersDesc } as const satisfies Entity
 	}
 	return {}
 }
 export const getBoundingBox = (modelName: ModelName, model: Object3D<Object3DEventMap>, colliderData: CollidersData, scale: number) => {
 	const collider = colliderData[modelName]
 	const mainCollider = model.getObjectByName('mainCollider')
-
 	if (collider) {
 		const size = new Vector3()
 		if (collider.size) {

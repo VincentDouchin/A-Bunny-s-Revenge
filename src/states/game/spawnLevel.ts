@@ -99,6 +99,7 @@ export const spawnTrees = (level: Level, parent: Entity, dungeonLevel?: number, 
 	}
 	for (const [pos, tree] of treeMap.entries()) {
 		tree.setUniform('pos', pos)
+		tree.setUniform('height', 15)
 	}
 }
 export const spawnGrass = (level: Level, parent: Entity, dungeonLevel?: number) => {
@@ -161,6 +162,7 @@ export const spawnGrass = (level: Level, parent: Entity, dungeonLevel?: number) 
 	})
 	for (const [handle, pos] of instances.entries()) {
 		handle.setUniform('pos', pos)
+		handle.setUniform('height', 3)
 	}
 }
 
@@ -337,14 +339,13 @@ export const updateTimeUniforms = () => {
 		if (Array.isArray(entity.withTimeUniform)) {
 			for (const mat of entity.withTimeUniform) {
 				(mat as any).uniforms.time.value = time.elapsed / 1000
+				if (entity.shake) {
+					(mat as any).uniforms.shake.value = entity.shake
+				}
 			}
 		}
 		if (entity.instanceHandle) {
 			entity.instanceHandle.setUniform('time', time.elapsed / 1000)
 		}
 	}
-}
-
-export const generatenavGrid = () => {
-
 }

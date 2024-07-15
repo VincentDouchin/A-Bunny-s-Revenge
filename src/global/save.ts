@@ -89,9 +89,9 @@ export const resetSave = async (newSave?: SaveData) => {
 	await set(context.save, newSave ?? blankSave())
 }
 
-export const addItem = (entity: With<Entity, 'inventoryId' | 'inventory' | 'inventorySize'>, item: Item, stack = true) => {
+export const addItem = async (entity: With<Entity, 'inventoryId' | 'inventory' | 'inventorySize'>, item: Item, stack = true) => {
 	let wasAdded = false
-	updateSave((s) => {
+	await updateSave((s) => {
 		const inventory = s.inventories[entity.inventoryId]
 		const existingItem = inventory.find(it => it && it.name === item.name && stack)
 		if (existingItem) {

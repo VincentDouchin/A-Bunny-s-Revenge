@@ -1,6 +1,6 @@
 import type { items, voices, weapons } from '@assets/assets'
 import type { Collider, ColliderDesc, KinematicCharacterController, RigidBody, RigidBodyDesc, Shape } from '@dimforge/rapier3d-compat'
-import type { With } from 'miniplex'
+import type { Query, With } from 'miniplex'
 import type { BufferGeometry, Camera, Group, Light, Mesh, MeshPhongMaterial, Object3D, Object3DEventMap, Quaternion, Scene, ShaderMaterial, Sprite, Vector3, WebGLRenderer } from 'three'
 import type { BatchedRenderer, ParticleEmitter } from 'three.quarks'
 import type { CSS2DObject } from 'three/examples/jsm/renderers/CSS2DRenderer'
@@ -139,7 +139,8 @@ export interface Entity {
 	body?: RigidBody
 	colliderDesc?: ColliderDesc
 	collider?: Collider
-	secondaryColliders?: ColliderDesc[]
+	secondaryCollidersDesc?: ColliderDesc[]
+	secondaryColliders?: Collider[]
 	size?: Vector3
 	controller?: KinematicCharacterController
 	// ! Behaviors
@@ -211,6 +212,7 @@ export interface Entity {
 	// ! Dialog
 	dialog?: Dialog
 	dialogHeight?: number
+	dialogTrigger?: string
 	activeDialog?: true | 'instant'
 	dialogContainer?: CSS2DObject
 	// ! Health
@@ -252,6 +254,7 @@ export interface Entity {
 	lootChance?: Stat
 	// ! Level Editor
 	entityId?: string
+	markerName?: string
 	// ! FSM
 	state?: States[keyof States]
 	// ! Minigame
@@ -283,6 +286,9 @@ export interface Entity {
 	// ! Money
 	acorn?: true
 	// ! Berry Bush
+	bush?: true
+	shake?: number
+	shaken?: number
 	berries?: Set<Mesh<BufferGeometry, MeshPhongMaterial>>
 	dash?: Dash
 	dashDisplay?: Sprite
@@ -331,3 +337,5 @@ type UnionToTuple<T, L = LastOf<T>> =
     [T] extends [never] ? [] : [...UnionToTuple<Exclude<T, L>>, L]
 export type ComponentsOfType<T> = KeysOfType<Required<Entity>, T>
 export type AllComponentsOfType<T> = UnionToTuple<ComponentsOfType<T>>
+
+export type QueryEntity<Q extends Query<any>> = Q extends Query<infer E> ? E : never

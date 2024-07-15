@@ -5,7 +5,6 @@ import type { Query, With } from 'miniplex'
 import { Vector3 } from 'three'
 import { range } from './mapFunctions'
 import { sleep } from './sleep'
-import { addTag } from '@/lib/hierarchy'
 import { cutSceneState } from '@/global/states'
 import { assets, coroutines, ecs, gameTweens } from '@/global/init'
 import type { Entity } from '@/global/entity'
@@ -18,9 +17,9 @@ import { recipes } from '@/constants/recipes'
 import { addItem, removeItem, save, updateSave } from '@/global/save'
 import { playSound } from '@/global/sounds'
 import { getWorldPosition } from '@/lib/transforms'
-import { addToast } from '@/ui/Toaster'
-import { addToHand } from '@/states/game/equip'
 import { heartEmitter } from '@/particles/heartParticles'
+import { addToHand } from '@/states/game/equip'
+import { addToast } from '@/ui/Toaster'
 
 const playerQuery = ecs.with('player', 'position', 'collider')
 const movingPlayerQuery = playerQuery.with('movementForce')
@@ -61,7 +60,7 @@ export const unlockRecipe = (item: items) => {
 	updateSave(s => s.unlockedRecipes.push(item))
 	addToast({ type: 'recipe', recipe: item })
 }
-export const addItemToPlayer = (item: Item) => {
+export const addItemToPlayer = async (item: Item) => {
 	const player = playerInventoryQuery.first
 	if (player) {
 		if (item.health) {
@@ -75,7 +74,7 @@ export const addItemToPlayer = (item: Item) => {
 		} else if (item.recipe) {
 			unlockRecipe(item.recipe)
 		} else {
-			addItem(player, item)
+			await addItem(player, item)
 			addToast({ type: 'addedItem', item: item.name, quantity: item.quantity })
 		}
 	}
@@ -178,7 +177,7 @@ export const questsUnlocks: Record<QuestName, () => boolean> = {
 }
 
 export const hasItem = (itemName: items | ((item: Item) => boolean)) => {
-	for (const item of save.inventories.player) {
+	for (const item of save.inventories.player.filter(Boolean)) {
 		if (typeof itemName === 'string') {
 			if (item.name === itemName) return true
 		} else {
@@ -200,7 +199,7 @@ export const enterHouse = async () => {
 		playSound(['glitchedtones_Door+Bedroom+Open+01', 'glitchedtones_Door+Bedroom+Open+02'])
 		await house.houseAnimator.playClamped('DoorOpen')
 		movePlayerTo(house.position)
-		addTag(house, 'activeDialog')
+		ecs.addComponent(house, 'activeDialog', 'instant')
 		await sleep(500)
 		await house.houseAnimator.playClamped('DoorClose')
 		playSound(['zapsplat_household_door_backdoor_close_002_56921', 'zapsplat_household_door_backdoor_close_004_56923'])
