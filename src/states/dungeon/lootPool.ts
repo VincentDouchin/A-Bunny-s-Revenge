@@ -6,8 +6,7 @@ import { spawnAcorns } from './acorn'
 import { type Drop, enemyData } from '@/constants/enemies'
 import type { Item } from '@/constants/items'
 import type { Entity } from '@/global/entity'
-import { ecs } from '@/global/init'
-import { save } from '@/global/save'
+import { ecs, save } from '@/global/init'
 import { getRandom, range, shuffle } from '@/utils/mapFunctions'
 
 export const lootPool = (drops: Drop[], player: With<Entity, 'lootChance' | 'lootQuantity'>, quantity?: number) => {

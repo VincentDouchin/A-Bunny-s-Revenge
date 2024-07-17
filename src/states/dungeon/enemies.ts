@@ -7,8 +7,7 @@ import { enemyData } from '@/constants/enemies'
 import { EnemySizes, Sizes } from '@/constants/sizes'
 import { Animator } from '@/global/animator'
 import { EnemyAttackStyle, type Entity, Faction } from '@/global/entity'
-import { assets, ecs, levelsData, time } from '@/global/init'
-import { updateSave } from '@/global/save'
+import { assets, ecs, levelsData, save, time } from '@/global/init'
 import type { DungeonRessources } from '@/global/states'
 import { collisionGroups } from '@/lib/collisionGroups'
 import { inMap } from '@/lib/hierarchy'
@@ -88,5 +87,5 @@ export const tickInactiveTimer = () => {
 
 const bossQuery = ecs.with('boss')
 export const unlockDungeon: Subscriber<DungeonRessources> = ressources => bossQuery.onEntityRemoved.subscribe(() => {
-	updateSave(s => s.unlockedPaths = Math.max(s.unlockedPaths, ressources.dungeonLevel + 1))
+	save.unlockedPaths = Math.max(save.unlockedPaths, ressources.dungeonLevel + 1)
 })

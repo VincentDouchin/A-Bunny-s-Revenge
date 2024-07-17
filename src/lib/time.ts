@@ -1,8 +1,7 @@
 import { Easing } from '@tweenjs/tween.js'
 import { Clock } from 'three'
 import { clamp } from 'three/src/math/MathUtils'
-import { throttle } from '@solid-primitives/scheduled'
-import { save, updateSave } from '@/global/save'
+import { save } from '@/global/init'
 
 export class Time extends Clock {
 	delta = 0
@@ -25,16 +24,14 @@ export class DayTime {
 		this.dayLight = save.daytime.dayLight
 	}
 
-	saveTime = throttle(() => {
-		updateSave((s) => {
-			s.daytime = {
-				current: this.current,
-				dayToNight: this.dayToNight,
-				timePassed: this.timePassed,
-				dayLight: this.dayLight,
-			}
-		})
-	}, 1000)
+	saveTime = () => {
+		save.daytime = {
+			current: this.current,
+			dayToNight: this.dayToNight,
+			timePassed: this.timePassed,
+			dayLight: this.dayLight,
+		}
+	}
 
 	tick(delta: number) {
 		this.current += (delta / this.dayLength * (this.dayToNight ? 1 : -1))

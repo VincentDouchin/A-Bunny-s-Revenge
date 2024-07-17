@@ -12,8 +12,10 @@ import { getSobelShader, outlineShader } from '@/shaders/EdgePass'
 import { getGameRenderGroup } from '@/debug/debugUi'
 
 export const scene = new Scene()
-export const renderer = new WebGLRenderer({ alpha: false, powerPreference: 'high-performance' })
+export const renderer = new WebGLRenderer({ alpha: false })
+renderer.debug.checkShaderErrors = false
 renderer.setPixelRatio(1)
+
 const cssRenderer = new CSS2DRenderer()
 
 export const width = window.innerWidth

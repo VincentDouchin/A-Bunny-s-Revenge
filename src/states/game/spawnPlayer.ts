@@ -15,9 +15,9 @@ import { Animator } from '@/global/animator'
 import type { Entity, PlayerAnimations } from '@/global/entity'
 import { Faction } from '@/global/entity'
 
-import { assets, ecs } from '@/global/init'
+import { assets, ecs, save } from '@/global/init'
 import { menuInputMap, playerInputMap } from '@/global/inputMaps'
-import { save, updateSave } from '@/global/save'
+
 import type { DungeonRessources, FarmRessources } from '@/global/states'
 import { openMenuState } from '@/global/states'
 
@@ -100,27 +100,22 @@ export const playerBundle = (health: number, weapon: weapons | null) => {
 
 const markerQuery = ecs.with('markerName', 'position', 'rotation').where(e => e.markerName === 'player-from-ruins')
 const getPlayerPosition = (ressources: FarmRessources) => {
-	if (ressources.previousState === 'dungeon') {
-		return {
-			position: new Vector3(),
-			rotation: new Quaternion(),
-		}
-	} else if (ressources.previousState === 'ruins' && markerQuery.first) {
+	if (ressources.previousState === 'ruins' && markerQuery.first) {
 		return {
 			position: markerQuery.first.position.clone(),
 			rotation: new Quaternion(),
 		}
 	}
 	return {
-		position: new Vector3().fromArray(save.playerPosition),
-		rotation: new Quaternion().fromArray(save.playerRotation),
+		position: new Vector3(),
+		rotation: new Quaternion(),
 	}
 }
 
 export const spawnCharacter: System<FarmRessources> = (ressources) => {
 	const { position, rotation } = getPlayerPosition(ressources)
 	if (ressources?.previousState === 'dungeon') {
-		updateSave(s => s.modifiers = [])
+		save.modifiers = []
 	}
 
 	ecs.add({

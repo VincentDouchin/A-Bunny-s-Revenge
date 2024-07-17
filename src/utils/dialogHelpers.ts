@@ -6,7 +6,7 @@ import { Vector3 } from 'three'
 import { range } from './mapFunctions'
 import { sleep } from './sleep'
 import { cutSceneState } from '@/global/states'
-import { assets, coroutines, ecs, gameTweens } from '@/global/init'
+import { addItem, assets, coroutines, ecs, gameTweens, removeItem, save } from '@/global/init'
 import type { Entity } from '@/global/entity'
 import { quests } from '@/constants/quests'
 import type { QuestName, QuestStepKey } from '@/constants/quests'
@@ -14,7 +14,6 @@ import type { QuestName, QuestStepKey } from '@/constants/quests'
 import { dialogs } from '@/constants/dialogs'
 import type { Item } from '@/constants/items'
 import { recipes } from '@/constants/recipes'
-import { addItem, removeItem, save, updateSave } from '@/global/save'
 import { playSound } from '@/global/sounds'
 import { getWorldPosition } from '@/lib/transforms'
 import { heartEmitter } from '@/particles/heartParticles'
@@ -57,7 +56,7 @@ export const movePlayerTo = (dest: Vector3) => {
 }
 export const playerInventoryQuery = ecs.with('inventoryId', 'inventory', 'inventorySize', 'player', 'currentHealth', 'maxHealth')
 export const unlockRecipe = (item: items) => {
-	updateSave(s => s.unlockedRecipes.push(item))
+	save.unlockedRecipes.push(item)
 	addToast({ type: 'recipe', recipe: item })
 }
 export const addItemToPlayer = async (item: Item) => {
@@ -104,25 +103,23 @@ export const canCompleteQuest = (name: QuestName) => {
 
 export const completeQuest = <Q extends QuestName>(name: Q) => {
 	if (canCompleteQuest(name)) {
-		updateSave((s) => {
-			const quest = s.quests[name]
-			if (quest) {
-				for (let i = 0; i < quests[name].steps.length; i++) {
-					const step = quests[name].steps[i]
-					for (const item of step.items ?? []) {
-						removeItemFromPlayer(item)
-					}
-					quest[i] = true
+		const quest = save.quests[name]
+		if (quest) {
+			for (let i = 0; i < quests[name].steps.length; i++) {
+				const step = quests[name].steps[i]
+				for (const item of step.items ?? []) {
+					removeItemFromPlayer(item)
 				}
+				quest[i] = true
 			}
-		})
+		}
 	}
 }
 
 const questMarkersQuery = ecs.with('questMarker', 'questMarkerContainer')
 export const addQuest = async (name: QuestName) => {
 	if (!(name in save.quests)) {
-		await updateSave(s => s.quests[name] = range(0, quests[name].steps.length, () => false))
+		save.quests[name] = range(0, quests[name].steps.length, () => false)
 		const toUnlock: items[] = []
 		for (const step of quests[name].steps) {
 			for (const item of step.items) {
@@ -146,14 +143,12 @@ export const addQuest = async (name: QuestName) => {
 }
 
 export const completeQuestStep = <Q extends QuestName>(questName: Q, step: QuestStepKey<Q>) => {
-	updateSave((s) => {
-		const quest = s.quests[questName]
-		if (quest) {
-			const index = quests[questName].steps.findIndex(s => s.key === step)
-			quest[index] = true
-			addToast({ type: 'questStep', step: quests[questName].steps[index] })
-		}
-	})
+	const quest = save.quests[questName]
+	if (quest) {
+		const index = quests[questName].steps.findIndex(s => s.key === step)
+		quest[index] = true
+		addToast({ type: 'questStep', step: quests[questName].steps[index] })
+	}
 }
 
 export const hasCompletedQuest = (name: QuestName) => {

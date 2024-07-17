@@ -49,6 +49,7 @@ const updateWorldPosition = () => {
 			if (body.isFixed()) {
 				body.setTranslation(worldPosition, true)
 				worldPositionQuery.remove(entity)
+				group.matrixAutoUpdate = false
 			}
 		} catch (e) {
 			console.error(e, entity)

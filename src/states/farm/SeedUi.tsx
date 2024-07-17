@@ -7,8 +7,7 @@ import { ItemDisplay } from './InventoryUi'
 import type { Item } from '@/constants/items'
 import { getSeed } from '@/constants/items'
 import type { Entity } from '@/global/entity'
-import { ecs, ui } from '@/global/init'
-import { updateSave } from '@/global/save'
+import { ecs, save, ui } from '@/global/init'
 import { InputIcon } from '@/ui/InputIcon'
 import { Menu, menuItem } from '@/ui/components/Menu'
 import { GoldContainer, OutlineText } from '@/ui/components/styledComponents'
@@ -48,7 +47,7 @@ export const SeedUi = () => {
 				const chooseSeed = (seed: Item, entity: Entity) => {
 					const crop = getSeed(seed.name)
 					if (crop) {
-						updateSave(s => s.selectedSeed = crop)
+						save.selectedSeed = crop
 						ecs.removeComponent(entity, 'menuType')
 					}
 				}

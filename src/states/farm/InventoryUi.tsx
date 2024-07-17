@@ -7,18 +7,16 @@ import type { Accessor, JSX, JSXElement, Setter } from 'solid-js'
 import { For, Show, createEffect, createMemo, createSignal, onCleanup, onMount } from 'solid-js'
 import { css } from 'solid-styled'
 import atom from 'solid-use/atom'
-import { MealAmount, extra, getAmountEaten } from '../dungeon/HealthUi'
+import { MealAmount, amountEaten, extra } from '../dungeon/HealthUi'
 import { setInitialHealth } from '../dungeon/health'
 import { MealBuffs, RecipeDescription } from './RecipesUi'
-import { isMeal, itemsData } from '@/constants/items'
 import type { Item } from '@/constants/items'
-
+import { isMeal, itemsData } from '@/constants/items'
 import type { Recipe } from '@/constants/recipes'
 import { recipes } from '@/constants/recipes'
 import { MenuType } from '@/global/entity'
-import { assets, ecs, ui } from '@/global/init'
+import { assets, ecs, save, ui } from '@/global/init'
 import { modifiers } from '@/global/modifiers'
-import { save, updateSave } from '@/global/save'
 import { thumbnailRenderer } from '@/lib/thumbnailRenderer'
 import { InputIcon } from '@/ui/InputIcon'
 import type { MenuDir } from '@/ui/components/Menu'
@@ -492,11 +490,11 @@ export const InventoryUi = () => {
 																				<OutlineText><div class="item-name">{data().name}</div></OutlineText>
 																				<Show when={meal()}>
 																					{(meal) => {
-																						const disabled = ui.sync(() => (getAmountEaten() + meal().amount) > 5)
+																						const disabled = ui.sync(() => (amountEaten() + meal().amount) > 5)
 																						const consumeMeal = (itemName: items) => {
 																							if (!disabled() && isMeal(itemName)) {
 																								removeItemFromPlayer({ name: itemName, quantity: 1 })
-																								updateSave(s => s.modifiers.push(itemName))
+																								save.modifiers.push(itemName)
 																								player().modifiers.addModifier(itemName)
 																								setInitialHealth()
 																							}

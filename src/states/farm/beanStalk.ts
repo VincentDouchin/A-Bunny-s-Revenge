@@ -7,8 +7,7 @@ import { itemBundle } from '../game/items'
 import { getIntersections } from '../game/sensor'
 import { getGrowthStages, updateCropsSave } from './farming'
 import { Interactable } from '@/global/entity'
-import { assets, dayTime, ecs, gameTweens } from '@/global/init'
-import { save } from '@/global/save'
+import { assets, dayTime, ecs, gameTweens, save } from '@/global/init'
 import { inMap } from '@/lib/hierarchy'
 import { getWorldPosition } from '@/lib/transforms'
 import { completeQuestStep, hasCompletedStep, hasQuest, removeItemFromPlayer } from '@/utils/dialogHelpers'
@@ -40,8 +39,6 @@ const magicParticles = () => {
 
 const MAGIC_BEAN_CROP_ID = 'magic_bean'
 
-const getSave = () => save
-
 export const addBeanStalkHole = () => {
 	const holeModel = assets.models.plantedHole.scene.clone()
 	holeModel.scale.multiplyScalar(3)
@@ -62,7 +59,7 @@ export const addBeanStalkHole = () => {
 		} else {
 			gameTweens.add(new Tween(beanStalkModel.scale).to(beanStalkModel.scale.clone().setScalar(scale), 2000).easing(Easing.Bounce.Out))
 		}
-		const crop = getSave().crops[MAGIC_BEAN_CROP_ID] ?? {
+		const crop = save.crops[MAGIC_BEAN_CROP_ID] ?? {
 			luck: 0,
 			name: 'magic_bean',
 			planted: dayTime.dayLight,

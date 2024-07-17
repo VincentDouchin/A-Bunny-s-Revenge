@@ -24,6 +24,26 @@
 			],
 			"type": "object"
 		},
+		"Meals": {
+			"enum": [
+				"cookie",
+				"roasted_carrot",
+				"carrot_soup",
+				"tomato_soup",
+				"honey_glazed_carrot",
+				"beetroot_salad",
+				"ham_honey",
+				"slime_bread",
+				"slime_dumpling",
+				"carrot_cake",
+				"pumpkin_bread",
+				"flan",
+				"pumpkin_bowl",
+				"strawberry_pie",
+				"hummus"
+			],
+			"type": "string"
+		},
 		"SaveData": {
 			"additionalProperties": false,
 			"properties": {
@@ -96,7 +116,7 @@
 				},
 				"modifiers": {
 					"items": {
-						"$ref": "#/definitions/items"
+						"$ref": "#/definitions/Meals"
 					},
 					"type": "array"
 				},
@@ -152,85 +172,6 @@
 						}
 					]
 				},
-				"settings": {
-					"additionalProperties": false,
-					"properties": {
-						"ambianceMute": {
-							"type": "boolean"
-						},
-						"ambianceVolume": {
-							"type": "number"
-						},
-						"controls": {
-							"enum": [
-								"mouse",
-								"keyboard"
-							],
-							"type": "string"
-						},
-						"difficulty": {
-							"enum": [
-								"normal",
-								"easy"
-							],
-							"type": "string"
-						},
-						"disableShadows": {
-							"type": "boolean"
-						},
-						"fullscreen": {
-							"type": [
-								"boolean",
-								"null"
-							]
-						},
-						"lockCamera": {
-							"type": "boolean"
-						},
-						"musicMute": {
-							"type": "boolean"
-						},
-						"musicVolume": {
-							"type": "number"
-						},
-						"mute": {
-							"type": "boolean"
-						},
-						"showControls": {
-							"type": "boolean"
-						},
-						"soundEffectsMute": {
-							"type": "boolean"
-						},
-						"soundEffectsVolume": {
-							"type": "number"
-						},
-						"uiScale": {
-							"type": "number"
-						},
-						"volume": {
-							"type": "number"
-						}
-					},
-					"required": [
-						"volume",
-						"mute",
-						"fullscreen",
-						"controls",
-						"showControls",
-						"musicVolume",
-						"musicMute",
-						"ambianceVolume",
-						"ambianceMute",
-						"soundEffectsVolume",
-						"soundEffectsMute",
-						"disableShadows",
-						"lockCamera",
-						"uiScale",
-						"difficulty"
-					],
-					"type": "object"
-				},
 				"unlockedPaths": {
 					"type": "number"
 				},
@@ -249,7 +190,6 @@
 				"selectedSeed",
 				"inventories",
 				"modifiers",
-				"settings",
 				"unlockedRecipes",
 				"unlockedPaths",
 				"acorns",
@@ -266,7 +206,8 @@
 				"pumpkin",
 				"wheat",
 				"haricot",
-				"magic_bean"
+				"magic_bean",
+				"potato"
 			],
 			"type": "string"
 		},
@@ -299,11 +240,14 @@
 				"magic_bean",
 				"milk",
 				"parsley",
+				"potato",
+				"potato_seeds",
 				"pumpkin",
 				"pumpkin_bowl",
 				"pumpkin_bread",
 				"pumpkin_seeds",
 				"recipe",
+				"recipe_book",
 				"redSnapper",
 				"roasted_carrot",
 				"slime_bread",

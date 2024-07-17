@@ -3,7 +3,7 @@ import { World as MiniplexWorld } from 'miniplex'
 import { loadAssets } from './assets'
 import type { Entity } from './entity'
 import { loadLevelData } from './levelData'
-import { getSave, useSettings } from './save'
+import { useSave, useSettings } from './save'
 import { CoroutinesManager } from '@/lib/coroutines'
 import { InputManager } from '@/lib/inputs'
 import { MusicManager } from '@/lib/musicManager'
@@ -12,8 +12,9 @@ import { TweenGroup } from '@/lib/tweens'
 import { UIManager } from '@/lib/uiManager'
 
 await init()
-await getSave()
+// await getSave()
 export const settings = await useSettings()
+export const { save, resetSave, addItem, removeItem } = await useSave()
 export const world = new RapierWorld({ x: 0, y: -9.81 * 20, z: 0 })
 export const assets = await loadAssets()
 export const time = new Time()

@@ -1,5 +1,5 @@
-import { ecs } from '@/global/init'
-import { save, updateSave } from '@/global/save'
+import { ecs, save } from '@/global/init'
+
 import type { DungeonRessources } from '@/global/states'
 import type { System } from '@/lib/state'
 import { addItemToPlayer } from '@/utils/dialogHelpers'
@@ -13,7 +13,7 @@ export const buyItems: System<DungeonRessources> = ({ dungeon }) => {
 				ecs.remove(item)
 				if (dungeon.items) dungeon.items[item.stallPosition] = null
 				addItemToPlayer({ name: item.itemLabel, quantity: 1, recipe: item.recipe })
-				updateSave(s => s.acorns -= item.price)
+				save.acorns -= item.price
 				return
 			}
 		}

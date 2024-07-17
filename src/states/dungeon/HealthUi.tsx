@@ -10,8 +10,7 @@ import { range } from '@/utils/mapFunctions'
 import { useGame } from '@/ui/store'
 import { OutlineText } from '@/ui/components/styledComponents'
 import { thumbnailRenderer } from '@/lib/thumbnailRenderer'
-import { save } from '@/global/save'
-import { assets, coroutines, ui } from '@/global/init'
+import { assets, coroutines, save, ui } from '@/global/init'
 import { itemsData } from '@/constants/items'
 
 export const MealAmount = (props: { amount: Accessor<number>, size?: 'small' | 'big', extra?: Accessor<number> }) => {
@@ -107,8 +106,8 @@ export const MealAmount = (props: { amount: Accessor<number>, size?: 'small' | '
 	)
 }
 export const extra = atom(0)
-export const getAmountEaten = () => save.modifiers.reduce((acc, v) => acc + (itemsData[v]?.meal ?? 0), 0)
 const acornRenderer = thumbnailRenderer(64)
+export const amountEaten = createMemo(() => save.modifiers.reduce((acc, v) => acc + (itemsData[v]?.meal ?? 0), 0))
 export const HealthUi = () => {
 	const context = useGame()
 
@@ -226,7 +225,7 @@ export const HealthUi = () => {
 				const visible = atom(false)
 				onMount(() => setTimeout(() => visible(true), 100))
 				const isVisible = createMemo(() => ovenQuery().length === 0 && cauldronQuery().length === 0 && visible())
-				const amount = ui.sync(getAmountEaten)
+
 				return (
 					<Transition name="traverse-down">
 						<Show when={isVisible()}>
@@ -238,7 +237,7 @@ export const HealthUi = () => {
 										<OutlineText>{healthDisplay()}</OutlineText>
 									</div>
 								</div>
-								<MealAmount amount={amount} extra={extra} />
+								<MealAmount amount={amountEaten} extra={extra} />
 								<div class="acorn">
 									{element}
 									<OutlineText>{acorns()}</OutlineText>

@@ -10,8 +10,7 @@ import { Sizes } from '@/constants/sizes'
 import { itemsData } from '@/constants/items'
 import type { crops } from '@/constants/items'
 
-import { assets, dayTime, ecs, gameTweens } from '@/global/init'
-import { removeItem, save, updateSave } from '@/global/save'
+import { assets, dayTime, ecs, gameTweens, removeItem, save } from '@/global/init'
 import { playSound } from '@/global/sounds'
 import { removeEntityRef } from '@/lib/hierarchy'
 import { modelColliderBundle } from '@/lib/models'
@@ -22,11 +21,9 @@ const playerQuery = ecs.with('playerControls', 'movementForce', 'inventory', 'in
 const plantedSpotQuery = ecs.with('plantableSpot', 'planted', 'group', 'model')
 
 export const updateCropsSave = () => {
-	updateSave((s) => {
-		s.crops = plantedSpotQuery.entities.reduce((acc, v) => {
-			return { ...acc, [v.plantableSpot]: v.planted.crop }
-		}, {})
-	})
+	save.crops = plantedSpotQuery.entities.reduce((acc, v) => {
+		return { ...acc, [v.plantableSpot]: v.planted.crop }
+	}, {})
 }
 export const maxStage = (name: crops) => (assets.crops[name]?.stages.length ?? 1) - 1
 export const cropBundle = (grow: boolean, crop: NonNullable<Entity['crop']>) => {

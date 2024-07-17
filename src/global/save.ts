@@ -1,16 +1,19 @@
 import type { items } from '@assets/assets'
+import { trackStore } from '@solid-primitives/deep'
+import { createScheduled, debounce } from '@solid-primitives/scheduled'
 import { get, set } from 'idb-keyval'
 import type { With } from 'miniplex'
 import { createEffect } from 'solid-js'
+import { createMutable, unwrap } from 'solid-js/store'
 import { createObject } from 'solid-proxies'
 import { Quaternion, Vector3 } from 'three'
-import { createScheduled, debounce } from '@solid-primitives/scheduled'
 import { context } from './context'
 import type { Crop, Entity } from './entity'
 import type { QuestName } from '@/constants/quests'
 import type { Item, Meals, crops } from '@/constants/items'
 
-export interface SaveData {
+// eslint-disable-next-line ts/consistent-type-definitions
+export type SaveData = {
 	crops: Record<string, NonNullable<Crop>>
 	playerPosition: number[]
 	playerRotation: number[]
@@ -24,7 +27,7 @@ export interface SaveData {
 	daytime: { current: number, dayToNight: boolean, timePassed: number, dayLight: number }
 }
 
-const blankSettings = () => ({
+const blankSettings = (): Settings => ({
 	volume: 100,
 	mute: false,
 	fullscreen: null,
@@ -62,7 +65,7 @@ export type Settings = {
 	difficulty: 'normal' | 'easy'
 }
 export const useSettings = async () => {
-	const existingSettings = await get('settings')
+	const existingSettings = await get<Settings>('settings')
 	const settings = createObject<Settings>(existingSettings ?? blankSettings())
 	const scheduled = createScheduled(fn => debounce(fn, 5000))
 	createEffect(() => {
@@ -87,28 +90,23 @@ const blankSave = (): SaveData => ({
 	daytime: { current: 0, dayToNight: true, timePassed: 0, dayLight: 0 },
 })
 
-export const save: Readonly<SaveData> = blankSave()
-
-export const getSave = async () => {
-	const saveName = context.save
-	const data = await get<SaveData>(saveName)
-	if (data) {
-		Object.assign(save, data)
+export const useSave = async () => {
+	const existingSave = await get<SaveData>('save')
+	const save = createMutable(existingSave ?? blankSave())
+	const scheduled = createScheduled(fn => debounce(fn, 2000))
+	createEffect(() => {
+		if (scheduled()) {
+			trackStore(save)
+			set(context.save, unwrap(save))
+		}
+	})
+	const resetSave = (newSave: SaveData = blankSave()) => {
+		Object.assign(save, newSave)
+		return set(context.save, unwrap(save))
 	}
-}
-export const updateSave = async (saveFn: (save: SaveData) => void, saved = true) => {
-	saveFn(save)
-	saved && await set(context.save, save)
-}
-export const resetSave = async (newSave?: SaveData) => {
-	Object.assign(save, blankSave())
-	await set(context.save, newSave ?? blankSave())
-}
-
-export const addItem = async (entity: With<Entity, 'inventoryId' | 'inventory' | 'inventorySize'>, item: Item, stack = true) => {
-	let wasAdded = false
-	await updateSave((s) => {
-		const inventory = s.inventories[entity.inventoryId]
+	const addItem = async (entity: With<Entity, 'inventoryId' | 'inventory' | 'inventorySize'>, item: Item, stack = true) => {
+		let wasAdded = false
+		const inventory = save.inventories[entity.inventoryId]
 		const existingItem = inventory.find(it => it && it.name === item.name && stack)
 		if (existingItem) {
 			wasAdded = true
@@ -122,12 +120,10 @@ export const addItem = async (entity: With<Entity, 'inventoryId' | 'inventory' |
 				}
 			}
 		}
-	})
-	return wasAdded
-}
-export const removeItem = (entity: With<Entity, 'inventoryId' | 'inventory' | 'inventorySize'>, item: Item, slot?: number) => {
-	updateSave((s) => {
-		const inventory = s.inventories[entity.inventoryId]
+		return wasAdded
+	}
+	const removeItem = (entity: With<Entity, 'inventoryId' | 'inventory' | 'inventorySize'>, item: Item, slot?: number) => {
+		const inventory = save.inventories[entity.inventoryId]
 		const existingItemIndex = inventory.findIndex((it, i) => it && it.name === item.name && (slot === undefined || i === slot))
 		const existingItem = inventory[existingItemIndex]
 		if (existingItem) {
@@ -136,5 +132,6 @@ export const removeItem = (entity: With<Entity, 'inventoryId' | 'inventory' | 'i
 				delete inventory[existingItemIndex]
 			}
 		}
-	})
+	}
+	return { save, resetSave, addItem, removeItem }
 }

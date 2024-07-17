@@ -3,7 +3,6 @@ import { ActiveCollisionTypes, ColliderDesc, RigidBodyDesc } from '@dimforge/rap
 import type { With } from 'miniplex'
 import type { BufferGeometry, Object3DEventMap } from 'three'
 import { Color, ConeGeometry, DoubleSide, Euler, Group, Material, Mesh, MeshBasicMaterial, MeshPhongMaterial, Object3D, PointLight, Quaternion, SphereGeometry, Vector2, Vector3 } from 'three'
-
 import FastNoiseLite from 'fastnoise-lite'
 import { CSS2DObject } from 'three/examples/jsm/renderers/CSS2DRenderer'
 import { clone } from 'three/examples/jsm/utils/SkeletonUtils'
@@ -13,12 +12,9 @@ import { Interactable, MenuType } from '@/global/entity'
 import type { Entity } from '@/global/entity'
 import { Animator } from '@/global/animator'
 import { dialogs } from '@/constants/dialogs'
-
-import { assets, ecs } from '@/global/init'
-import { save } from '@/global/save'
+import { assets, ecs, save } from '@/global/init'
 import type { DungeonRessources, FarmRessources } from '@/global/states'
 import { dungeonState, genDungeonState } from '@/global/states'
-
 import { itemsData } from '@/constants/items'
 import { Direction } from '@/lib/directions'
 import { inMap } from '@/lib/hierarchy'

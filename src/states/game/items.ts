@@ -3,12 +3,11 @@ import { RigidBodyType } from '@dimforge/rapier3d-compat'
 import { Easing, Tween } from '@tweenjs/tween.js'
 import { AdditiveBlending, Mesh, MeshBasicMaterial, SphereGeometry, Vector3 } from 'three'
 import type { Entity } from '@/global/entity'
-import { assets, ecs, gameTweens } from '@/global/init'
+import { assets, ecs, gameTweens, save } from '@/global/init'
 import { playSound } from '@/global/sounds'
 import { addTag, inMap } from '@/lib/hierarchy'
 import { modelColliderBundle } from '@/lib/models'
 import { addItemToPlayer } from '@/utils/dialogHelpers'
-import { updateSave } from '@/global/save'
 import { sleep } from '@/utils/sleep'
 
 export const itemsQuery = ecs.with('item', 'position', 'model').without('collecting')
@@ -103,7 +102,7 @@ export const collectItems = (force = false) => async () => {
 								addItemToPlayer({ name: item.itemLabel, quantity: 1, recipe: item.recipe, health: item.health })
 							}
 							if (item.acorn) {
-								updateSave(s => s.acorns++)
+								save.acorns++
 							}
 						}),
 					)

@@ -17,6 +17,9 @@ import { ConverFBXToGLB } from './scripts/convertFbx2GLB'
 
 export default defineConfig(async () => {
 	const config: UserConfig = {
+		optimizeDeps: {
+			exclude: ['@solid-primitives/deep'],
+		},
 		plugins: [
 			await assetPipeline('./assets/**/*.*', [
 				new GenerateAssetNames(),

@@ -42,7 +42,7 @@ import { dayNight, playNightMusic } from './states/game/dayNight'
 import { addQuestMarkers, talkToNPC, triggerDialog, turnNPCHead } from './states/game/dialog'
 import { equip } from './states/game/equip'
 import { bobItems, collectItems, popItems, stopItems } from './states/game/items'
-import { canPlayerMove, movePlayer, playerSteps, savePlayerFromTheEmbraceOfTheVoid, savePlayerPosition, stopPlayer } from './states/game/movePlayer'
+import { canPlayerMove, movePlayer, playerSteps, savePlayerFromTheEmbraceOfTheVoid, stopPlayer } from './states/game/movePlayer'
 import { pauseGame } from './states/game/pauseGame'
 import { allowDoorCollision, collideWithDoorCamp, collideWithDoorClearing, collideWithDoorDungeon, collideWithDoorRuins, doorLocking, unlockDoorClearing, unlockDoorDungeon } from './states/game/spawnDoor'
 import { spawnCrossRoad, spawnDungeon, spawnFarm, spawnLevelData, spawnRuins, updateTimeUniforms } from './states/game/spawnLevel'
@@ -98,7 +98,7 @@ campState
 	.onEnter(runIf(() => mainMenuState.disabled, spawnCharacter, setInitialHealth), moveCamera(true))
 	.onEnter(compileShaders)
 	.onUpdate(collideWithDoorCamp, playNightMusic, waterCrops, growCrops, growMagicBean, harvestMagicBean)
-	.onUpdate(runIf(canPlayerMove, plantSeed, harvestCrop, openPlayerInventory, savePlayerPosition))
+	.onUpdate(runIf(canPlayerMove, plantSeed, harvestCrop, openPlayerInventory))
 	.onExit(despawnOfType('map'))
 ruinsIntro
 	.onEnter(spawnRuins, spawnLevelData, moveCamera(true), startIntro)

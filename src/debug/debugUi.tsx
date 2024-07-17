@@ -9,9 +9,8 @@ import { ColorCorrection, ToonEditor } from './toonEditor'
 import { recipes } from '@/constants/recipes'
 import { params } from '@/global/context'
 import { RenderGroup } from '@/global/entity'
-import { dayTime, ecs, ui, world } from '@/global/init'
+import { dayTime, ecs, save, ui, world } from '@/global/init'
 import { cameraQuery, getTargetSize, height, scene, updateRenderSize, width } from '@/global/rendering'
-import { resetSave, updateSave } from '@/global/save'
 import { campState } from '@/global/states'
 import { RapierDebugRenderer } from '@/lib/debugRenderer'
 import { encounters } from '@/states/dungeon/encounters'
@@ -61,14 +60,12 @@ export const DebugUi = () => {
 		})
 	}
 	const destroyCrops = () => {
-		updateSave((s) => {
-			s.crops = {}
-			campState.enable({ })
-		})
+		save.crops = {}
+		campState.enable({})
 	}
 	const reset = async () => {
 		campState.disable()
-		await resetSave()
+		await reset()
 		window.location.reload()
 	}
 	const showUiListener = (e: KeyboardEvent) => {
@@ -347,7 +344,7 @@ export const DebugUi = () => {
 							{recipe => (
 								<div>
 									{recipe}
-									<button onClick={() => updateSave(s => s.unlockedRecipes.push(recipe))}>enable</button>
+									<button onClick={() => save.unlockedRecipes.push(recipe)}>enable</button>
 								</div>
 							)}
 						</For>

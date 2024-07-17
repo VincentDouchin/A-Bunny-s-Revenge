@@ -152,11 +152,11 @@ export class State<R = void> {
 		})
 	}
 
-	toggle(ressources: R) {
+	async toggle(ressources: R) {
 		if (this.enabled) {
-			this.disable()
+			await this.disable()
 		} else {
-			this.enable(ressources)
+			await this.enable(ressources)
 		}
 	}
 
