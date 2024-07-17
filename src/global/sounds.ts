@@ -1,9 +1,8 @@
 import type { soundEffects } from '@assets/assets'
 import soundsData from '@assets/soundsData.json'
-import { assets } from './init'
-import { save } from './save'
-import { getRandom } from '@/utils/mapFunctions'
+import { assets, settings } from './init'
 import { useLocalStorage } from '@/utils/useLocalStorage'
+import { getRandom } from '@/utils/mapFunctions'
 
 const setMuted = (sounds: soundAssets | 'global', muted: boolean) => {
 	if (sounds === 'global') {
@@ -15,15 +14,15 @@ const setMuted = (sounds: soundAssets | 'global', muted: boolean) => {
 	}
 }
 export const setAllMuted = () => {
-	setMuted('global', save.settings.mute)
-	setMuted('ambiance', save.settings.ambianceMute)
-	setMuted('music', save.settings.musicMute)
-	setMuted('soundEffects', save.settings.soundEffectsMute)
+	setMuted('global', settings.mute)
+	setMuted('ambiance', settings.ambianceMute)
+	setMuted('music', settings.musicMute)
+	setMuted('soundEffects', settings.soundEffectsMute)
 }
 
 export const initHowler = () => {
 	const init = () => {
-		Howler.volume(save.settings.volume / 100)
+		Howler.volume(settings.volume / 100)
 		setAllMuted()
 	}
 	if (Howler.ctx.state === 'suspended') {
@@ -49,7 +48,7 @@ export const playSFX = <K extends string = string>(soundAsset: soundAssets) => (
 			: sound
 	const soundPlayer = assets[soundAsset][selectedSound]
 	const volume = localSoundData[soundAsset][selectedSound]?.volume ?? 1
-	soundPlayer.volume(volume * save.settings.soundEffectsVolume / 100)
+	soundPlayer.volume(volume * settings.soundEffectsVolume / 100)
 	if (options?.playbackRate) {
 		soundPlayer.rate(options.playbackRate)
 	}

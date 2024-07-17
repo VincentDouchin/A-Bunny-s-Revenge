@@ -5,8 +5,7 @@ import { FullScreenQuad } from 'three/examples/jsm/postprocessing/Pass'
 import { CSS2DRenderer } from 'three/examples/jsm/renderers/CSS2DRenderer'
 import { params } from './context'
 import { RenderGroup } from './entity'
-import { ecs } from './init'
-import { save } from './save'
+import { ecs, settings } from './init'
 import { mainMenuState } from './states'
 import { gameCameraQuery } from '@/states/mainMenu/mainMenuRendering'
 import { getSobelShader, outlineShader } from '@/shaders/EdgePass'
@@ -43,7 +42,7 @@ export const updateRenderSize = (newSize?: Vector2) => {
 }
 export const initThree = () => {
 	renderer.clear()
-	renderer.shadowMap.enabled = !save.settings.disableShadows
+	renderer.shadowMap.enabled = !settings.disableShadows
 	renderer.shadowMap.type = BasicShadowMap
 	renderer.domElement.classList.add('main')
 	document.body.appendChild(renderer.domElement)
@@ -94,7 +93,7 @@ export const renderGame = () => {
 	cssRenderer.render(scene, camera)
 }
 
-export const compileShaders = () => {
+export const compileShaders = async () => {
 	const { scene, renderer } = getGameRenderGroup()
 	const invisible: Object3D[] = []
 	scene.traverse((node) => {
@@ -104,7 +103,7 @@ export const compileShaders = () => {
 		}
 	})
 	for (const { camera } of gameCameraQuery) {
-		renderer.compile(scene, camera)
+		await renderer.compileAsync(scene, camera)
 	}
 	for (const node of invisible) {
 		node.visible = false

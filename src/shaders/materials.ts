@@ -2,7 +2,7 @@ import { Color, MeshPhongMaterial, Vector2, Vector3 } from 'three'
 
 import noise from '@/shaders/glsl/lib/cnoise.glsl?raw'
 
-import { MaterialExtension, addUniform, addVarying, extendMaterial, importLib, insertAfer, insertBefore, override, remove, replace, replaceInclude, unpack } from '@/lib/materialExtension'
+import { MaterialExtension, addUniform, addVarying, extendMaterial, importLib, insertAfter, insertBefore, override, remove, replace, replaceInclude, unpack } from '@/lib/materialExtension'
 import { gradient } from '@/shaders/glsl/lib/generateGradient'
 import water from '@/shaders/glsl/water.glsl?raw'
 import { useLocalStorage } from '@/utils/useLocalStorage'
@@ -43,7 +43,7 @@ const vineGateMaterial = new MaterialExtension({ time: 0 })
 `),
 	).vert(
 		addVarying('worldPos', 'vec4'),
-		insertAfer('#include <worldpos_vertex>', /* glsl */`
+		insertAfter('#include <worldpos_vertex>', /* glsl */`
 	worldPos = vec4( transformed, 1.0 );
 	`),
 	)
@@ -121,7 +121,7 @@ export const vegetationExtension = new MaterialExtension({ pos: new Vector2(), t
 		importLib(noise),
 		addUniform('pos', 'vec2'),
 		unpack('project_vertex'),
-		replace('mvPosition = modelViewMatrix * mvPosition;', /* glsl */`
+		insertAfter('vec4 mvPosition = vec4( transformed, 1.0 );', /* glsl */`
 		float noise = cnoise(vec3(pos.xy,time+shake));
 		float height_factor = mvPosition.y / height;
 		float shakeX = (shake > 0.) ? sin(shake) * 3. : 0.;
@@ -132,7 +132,7 @@ export const vegetationExtension = new MaterialExtension({ pos: new Vector2(), t
 			(cos(noise)+shakeY)*height_factor,
 			0.
 		);
-		mvPosition = modelViewMatrix * (mvPosition + displacement);
+		mvPosition = mvPosition + displacement;
 		`),
 	)
 

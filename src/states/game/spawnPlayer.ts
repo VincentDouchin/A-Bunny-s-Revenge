@@ -101,9 +101,15 @@ export const playerBundle = (health: number, weapon: weapons | null) => {
 const markerQuery = ecs.with('markerName', 'position', 'rotation').where(e => e.markerName === 'player-from-ruins')
 const getPlayerPosition = (ressources: FarmRessources) => {
 	if (ressources.previousState === 'dungeon') {
-		return { position: new Vector3(), rotation: new Quaternion() }
+		return {
+			position: new Vector3(),
+			rotation: new Quaternion(),
+		}
 	} else if (ressources.previousState === 'ruins' && markerQuery.first) {
-		return markerQuery.first
+		return {
+			position: markerQuery.first.position.clone(),
+			rotation: new Quaternion(),
+		}
 	}
 	return {
 		position: new Vector3().fromArray(save.playerPosition),

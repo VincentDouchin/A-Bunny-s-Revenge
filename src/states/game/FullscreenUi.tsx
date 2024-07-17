@@ -1,6 +1,6 @@
 import { Show, createSignal } from 'solid-js'
 import { Transition } from 'solid-transition-group'
-import { save, updateSave } from '@/global/save'
+import { settings } from '@/global/init'
 
 const requestFullScreen = () => {
 	document.documentElement.requestFullscreen()
@@ -13,14 +13,14 @@ export const isStandalone = () => {
 }
 
 export const FullscreenUi = () => {
-	const [show, setShow] = createSignal(!isStandalone() && (save.settings.fullscreen === null || save.settings.fullscreen === undefined))
+	const [show, setShow] = createSignal(!isStandalone() && (settings.fullscreen === null || settings.fullscreen === undefined))
 	const enabledFullScreen = () => {
 		requestFullScreen()
-		updateSave(s => s.settings.fullscreen = true)
+		settings.fullscreen = true
 		setShow(false)
 	}
 	const disableFullScreen = () => {
-		updateSave(s => s.settings.fullscreen = false)
+		settings.fullscreen = false
 		setShow(false)
 	}
 	return (

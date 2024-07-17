@@ -2,12 +2,12 @@ import type { Accessor } from 'solid-js'
 import { For, Show, createEffect, createMemo, createSignal, onCleanup, onMount } from 'solid-js'
 import type { MeshPhongMaterial, PlaneGeometry, Vector3 } from 'three'
 import { CanvasTexture, CircleGeometry, DoubleSide, Mesh, MeshBasicMaterial, Raycaster, Vector2 } from 'three'
+import { debounce, throttle } from '@solid-primitives/scheduled'
 import type { Level, LevelImage } from './LevelEditor'
 import { getGameRenderGroup } from './debugUi'
 import { loadImage } from '@/global/assetLoaders'
 import { ecs } from '@/global/init'
 import { cameraQuery } from '@/global/rendering'
-import { throttle } from '@/lib/state'
 import { getdisplacementMap, setDisplacement, spawnGrass, spawnGroundAndTrees, spawnTrees } from '@/states/game/spawnLevel'
 import { getScreenBuffer } from '@/utils/buffer'
 
@@ -99,8 +99,8 @@ export const MapEditor = ({
 		)
 		buffer().fill()
 	}
-	const respawnTrees = throttle(100, () => spawnTrees(activeLevel(), ground(), undefined, false))
-	const longClickListener = throttle(10, (event: MouseEvent) => {
+	const respawnTrees = debounce(() => spawnTrees(activeLevel(), ground(), undefined, false), 100)
+	const longClickListener = throttle((event: MouseEvent) => {
 		event.preventDefault()
 		const camera = cameraQuery.first?.camera
 		if (!camera || !fakeGround) return
@@ -143,7 +143,7 @@ export const MapEditor = ({
 			for (const tree of treeQuery) {
 				ecs.remove(tree)
 			}
-			respawnTrees({})
+			respawnTrees()
 		}
 		if (canvases[selectedColor()] === 'grass') {
 			for (const grass of grassQuery) {
@@ -162,7 +162,7 @@ export const MapEditor = ({
 			const mat = waterMat()
 			mat.map?.needsUpdate && (mat.map.needsUpdate = true)
 		}
-	})
+	}, 10)
 
 	const displayWater = () => {
 		const waterMap = new CanvasTexture(activeLevel().water)

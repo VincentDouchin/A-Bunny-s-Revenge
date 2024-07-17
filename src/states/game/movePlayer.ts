@@ -1,8 +1,8 @@
+import { throttle } from '@solid-primitives/scheduled'
 import { ecs, inputManager } from '@/global/init'
 import { updateSave } from '@/global/save'
 import { playStep } from '@/global/sounds'
 import { cutSceneState, openMenuState, pausedState } from '@/global/states'
-import { throttle } from '@/lib/state'
 import { spawnFootstep } from '@/particles/footsteps'
 
 const movementQuery = ecs.with('body', 'rotation', 'movementForce', 'speed')
@@ -45,7 +45,7 @@ export const movePlayer = () => {
 
 export const canPlayerMove = () => !openMenuState.enabled && !cutSceneState.enabled && !pausedState.enabled
 
-export const savePlayerPosition = throttle(1000, () => {
+export const savePlayerPosition = throttle(() => {
 	const player = playerQuery.first
 	if (player) {
 		updateSave((s) => {
@@ -53,7 +53,7 @@ export const savePlayerPosition = throttle(1000, () => {
 			s.playerRotation = player.rotation.toArray()
 		})
 	}
-})
+}, 1000)
 export const savePlayerFromTheEmbraceOfTheVoid = () => {
 	const player = playerQuery.first
 	if (player && player.position.y < -10) {

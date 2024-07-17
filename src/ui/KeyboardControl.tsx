@@ -4,12 +4,11 @@ import { Transition } from 'solid-transition-group'
 import atom from 'solid-use/atom'
 import { InputIcon } from './InputIcon'
 import { getInteractables } from './Interactions'
+import { StateUi } from './components/StateUi'
 import { OutlineText } from './components/styledComponents'
 import { useGame } from './store'
-import { StateUi } from './components/StateUi'
 import { campState, dungeonState } from '@/global/states'
-import { ui } from '@/global/init'
-import { save } from '@/global/save'
+import { settings, ui } from '@/global/init'
 
 export const KeyboardControls = () => {
 	const context = useGame()
@@ -44,7 +43,7 @@ export const KeyboardControls = () => {
 				const farm = ui.sync(() => campState.enabled)
 				const visible = atom(false)
 				onMount(() => setTimeout(() => visible(true), 100))
-				const showControls = ui.sync(() => save.settings.showControls)
+				const showControls = ui.sync(() => settings.showControls)
 				return (
 					<Transition name="traverse-up">
 						<Show when={showControls() && visible()}>

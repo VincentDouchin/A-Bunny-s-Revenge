@@ -108,6 +108,7 @@ export const playerBehaviorPlugin = behaviorPlugin(
 		enter: async (e, setupState) => {
 			if (e.combo.lastAttack === 0) {
 				!pausedState.enabled && playSound(['Slash_Attack_Heavy_1', 'Slash_Attack_Heavy_2', 'Slash_Attack_Heavy_3'])
+
 				await e.playerAnimator.playOnce('lightAttack', { timeScale: getAttackSpeed(e) }, 0.5)
 			}
 			if (e.combo.lastAttack === 1) {

@@ -16,10 +16,10 @@ export class StateMananger {
 		return new State<R>(this)
 	}
 
-	enable<S extends State<R>, R>(state: S, ressources: R) {
+	async enable<S extends State<R>, R>(state: S, ressources: R) {
 		this.states.set(state, ressources)
 		for (const system of state._enter) {
-			system(ressources)
+			await system(ressources)
 		}
 		if (state._subscribers.length) {
 			this.callbacks.set(state, state._subscribers.map(s => s(ressources)))
@@ -172,17 +172,6 @@ export const runIf = <R>(condition: () => boolean, ...systems: System<R>[]) => (
 	}
 }
 
-export const throttle = <R>(delay: number, ...systems: System<R>[]) => {
-	let time = Date.now()
-	return (ressources: R) => {
-		if (Date.now() - time >= delay) {
-			for (const system of systems) {
-				system(ressources)
-			}
-			time = Date.now()
-		}
-	}
-}
 export const set = <R>(systems: System<R>[]): System<R> => (ressources: R) => {
 	for (const system of systems) {
 		system(ressources)

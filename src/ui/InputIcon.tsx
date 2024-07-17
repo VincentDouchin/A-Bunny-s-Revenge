@@ -1,15 +1,14 @@
 import { For, Show, createMemo } from 'solid-js'
 import { useGame } from './store'
 import { XBOXSeries } from '@/constants/keys'
-import { assets, inputManager } from '@/global/init'
+import { assets, inputManager, settings } from '@/global/init'
 import type { Input } from '@/lib/inputs'
-import { save } from '@/global/save'
 
 export const InputIcon = (props: { input: Input, size?: number }) => {
 	const context = useGame()
 	const icons = createMemo(() => {
 		if (context?.controls() === 'keyboard') {
-			return inputManager.getKeyName(props.input, save.settings.controls).map(key => assets.buttons(key))
+			return inputManager.getKeyName(props.input, settings.controls).map(key => assets.buttons(key))
 		} else if (props.input.axes.length > 0) {
 			return props.input.axes.map(([axis]) => assets.buttons(XBOXSeries.axes[Math.floor(axis / 2)]))
 		} else if (props.input.buttons.length > 0) {

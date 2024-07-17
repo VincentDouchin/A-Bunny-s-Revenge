@@ -1,6 +1,6 @@
 import VolumeOn from '@assets/icons/volume-high-solid.svg'
 import VolumeOff from '@assets/icons/volume-xmark-solid.svg'
-import { For, Show, createEffect, createMemo, createSignal } from 'solid-js'
+import { For, Show, createEffect, createMemo } from 'solid-js'
 import { css } from 'solid-styled'
 import atom from 'solid-use/atom'
 import { type MenuDir, menuItem } from './components/Menu'
@@ -8,95 +8,61 @@ import { CheckBox, OutlineText, SwitchButtons } from './components/styledCompone
 import { useGame } from './store'
 import { isStandalone } from '@/states/game/FullscreenUi'
 import { setAllMuted } from '@/global/sounds'
-import { save, updateSave } from '@/global/save'
-import type { SaveData } from '@/global/save'
 import { renderer } from '@/global/rendering'
-import { ui } from '@/global/init'
+import { settings, ui } from '@/global/init'
 // eslint-disable-next-line no-unused-expressions
 menuItem
 
 export const Settings = (props: { menu: MenuDir }) => {
 	const context = useGame()
 	const inputs = createMemo(() => context?.player().menuInputs)
-	// ! VOLUME
-
 	// ! FULLSCREEN
 	const fullscreenSelected = atom(false)
-	const toggleFullscreen = () => {
-		updateSave(s => s.settings.fullscreen = !s.settings.fullscreen)
-	}
-	const fullscreen = ui.sync(() => Boolean(save.settings.fullscreen))
 	// ! CONTROLS
 	const controlsSelected = atom(false)
-	const controls = atom(save.settings.controls)
-	const setControls = (selectedControls: 'mouse' | 'keyboard') => {
-		updateSave(s => s.settings.controls = selectedControls)
-		controls(selectedControls)
-	}
 	// ! SHOW CONTROLS
 	const showControlsSelected = atom(false)
-	const showControls = atom(save.settings.showControls)
-	const setShowControl = (show: boolean) => {
-		updateSave(s => s.settings.showControls = show)
-		showControls(show)
-	}
 	// ! SHADOWS
 	const shadowsSelected = atom(false)
-	const shadows = atom(!save.settings.disableShadows)
 	const setShadows = (shadowsEnabled: boolean) => {
-		shadows(shadowsEnabled)
-		updateSave(s => s.settings.disableShadows = !shadowsEnabled)
-		renderer.shadowMap.enabled = shadowsEnabled
+		settings.disableShadows = shadowsEnabled
+		renderer.shadowMap.enabled = !shadowsEnabled
 	}
 	// ! LOCK CAMERA
 	const lockCameraSelected = atom(false)
-	const lockCamera = atom(save.settings.lockCamera)
-	const setLockCamera = (locked: boolean) => {
-		lockCamera(locked)
-		updateSave(s => s.settings.lockCamera = locked)
-	}
 	// ! UI SCALE
 	const uiScaleSelected = atom(false)
-	const uiScale = atom(save.settings.uiScale ?? 10)
-	const setUiScale = async (scale: number) => {
-		uiScale(scale)
-		await updateSave(s => s.settings.uiScale = scale)
-		ui.setFontSize()
-	}
+	createEffect(() => {
+		ui.setFontSize(settings.uiScale)
+	})
 	ui.updateSync(() => {
 		if (uiScaleSelected()) {
 			if (inputs()?.get('left').justPressed) {
-				setUiScale(Math.max(uiScale() - 1, 2))
+				settings.uiScale = Math.max(settings.uiScale - 1, 2)
 			}
 			if (inputs()?.get('right').justPressed) {
-				setUiScale(Math.min(uiScale() + 1, 15))
+				settings.uiScale = Math.min(settings.uiScale + 1, 15)
 			}
 		}
 	})
 	// ! UI OPACITY
 	const uiOpacitySelected = atom(false)
-	const uiOpacity = atom(save.settings.uiOpacity ?? 10)
-	const setUiOpacity = async (scale: number) => {
-		uiOpacity(scale)
-		await updateSave(s => s.settings.uiOpacity = scale)
-		ui.setUiOpacity()
-	}
+	createEffect(() => {
+		ui.setUiOpacity(settings.uiOpacity)
+	})
 	ui.updateSync(() => {
 		if (uiOpacitySelected()) {
 			if (inputs()?.get('left').justPressed) {
-				setUiOpacity(Math.max(uiOpacity() - 10, 0))
+				settings.uiOpacity = Math.max(settings.uiOpacity - 10, 0)
 			}
 			if (inputs()?.get('right').justPressed) {
-				setUiOpacity(Math.min(uiOpacity() + 10, 100))
+				settings.uiOpacity = Math.min(settings.uiOpacity + 10, 100)
 			}
 		}
 	})
 	// ! DIFFICULTY
 	const difficultySelected = atom(false)
-	const difficulty = atom<'normal' | 'easy'>(save.settings.difficulty ?? 'normal')
-	createEffect(() => {
-		updateSave(s => s.settings.difficulty = difficulty())
-	})
+
 	css/* css */`
 		.settings-container{
 			display: grid;
@@ -143,34 +109,31 @@ export const Settings = (props: { menu: MenuDir }) => {
 		['Music', 'musicVolume', 'musicMute'],
 		['Ambiance', 'ambianceVolume', 'ambianceMute'],
 		['Sound Effects', 'soundEffectsVolume', 'soundEffectsMute'],
-	] as const satisfies ReadonlyArray<readonly [string, keyof SaveData['settings'], keyof SaveData['settings'] ]>
+	] as const satisfies ReadonlyArray<readonly [string, keyof typeof settings, keyof typeof settings ]>
 	return (
 		<div class="settings-container">
 
 			<For each={specificVolumes}>
 				{([title, volumeName, muteName]) => {
 					const selected = atom(false)
-					const volume = atom(save.settings[volumeName])
-					const [mute, setMute] = createSignal(save.settings[muteName])
 					const muteSound = async () => {
-						setMute(x => !x)
-						Howler.mute(mute())
-						await updateSave(s => s.settings[muteName] = mute())
+						settings[muteName] = !settings[muteName]
+
+						Howler.mute(settings[muteName])
 						setAllMuted()
 					}
 
 					const setVolume = (volumeAmount: number) => {
-						volume(volumeAmount)
-						updateSave(s => s.settings[volumeName] = volumeAmount)
+						settings[volumeName] = volumeAmount
 						Howler.volume(volumeAmount / 100)
 					}
 					ui.updateSync(() => {
 						if (selected()) {
 							if (inputs()?.get('left').justPressed) {
-								setVolume(Math.max(volume() - 5, 0))
+								settings[volumeName] = Math.max(settings[volumeName] - 5, 0)
 							}
 							if (inputs()?.get('right').justPressed) {
-								setVolume(Math.min(volume() + 5, 100))
+								settings[volumeName] = Math.min(settings[volumeName] + 5, 100)
 							}
 						}
 					})
@@ -186,11 +149,11 @@ export const Settings = (props: { menu: MenuDir }) => {
 							</div>
 							<div class="volume">
 								<div onClick={muteSound}>
-									{mute() && <VolumeOff />}
-									{!mute() && <VolumeOn />}
+									{settings[muteName] && <VolumeOff />}
+									{!settings[muteName] && <VolumeOn />}
 								</div>
-								<input type="range" class="input-range" value={volume()} onChange={e => setVolume(e.target.valueAsNumber)}></input>
-								<OutlineText>{String(volume())}</OutlineText>
+								<input type="range" class="input-range" value={settings[volumeName]} onChange={e => setVolume(e.target.valueAsNumber)}></input>
+								<OutlineText>{String(settings[volumeName])}</OutlineText>
 							</div>
 						</>
 					)
@@ -201,49 +164,49 @@ export const Settings = (props: { menu: MenuDir }) => {
 				<div
 					use:menuItem={[props.menu, false, fullscreenSelected, () => ['left', 'right'], true]}
 					class={fullscreenSelected() ? 'selected' : 'unselected'}
-					onClick={toggleFullscreen}
+					onClick={() => settings.fullscreen = !settings.fullscreen}
 				>
 					<OutlineText>Auto fullscreen</OutlineText>
 				</div>
-				<CheckBox value={fullscreen} onClick={toggleFullscreen}></CheckBox>
+				<CheckBox value={settings.fullscreen ?? false} onClick={() => settings.fullscreen = !settings.fullscreen}></CheckBox>
 			</Show>
 			<div
 				use:menuItem={[props.menu, false, controlsSelected, () => ['left', 'right'], true]}
 				class={controlsSelected() ? 'selected' : 'unselected'}
-				onClick={() => setControls(controls() === 'keyboard' ? 'mouse' : 'keyboard')}
+				onClick={() => settings.controls = (settings.controls === 'keyboard' ? 'mouse' : 'keyboard')}
 			>
 				<OutlineText>Control Preference</OutlineText>
 
 			</div>
 			<SwitchButtons
 				options={['mouse', 'keyboard']}
-				value={controls}
-				setValue={setControls}
+				value={settings.controls}
+				setValue={controls => settings.controls = controls}
 			/>
 			<div
 				use:menuItem={[props.menu, false, showControlsSelected, () => ['left', 'right'], true]}
 				class={showControlsSelected() ? 'selected' : 'unselected'}
-				onClick={() => setShowControl(!showControls())}
+				onClick={() => settings.showControls = !settings.showControls}
 			>
 				<OutlineText>Display controls</OutlineText>
 			</div>
-			<CheckBox value={showControls} onClick={setShowControl}></CheckBox>
+			<CheckBox value={settings.showControls} onClick={(show: boolean) => settings.showControls = show}></CheckBox>
 			<div
 				use:menuItem={[props.menu, false, shadowsSelected, () => ['left', 'right'], true]}
 				class={shadowsSelected() ? 'selected' : 'unselected'}
-				onClick={() => setShadows(!shadows())}
+				onClick={() => setShadows(!settings.disableShadows)}
 			>
 				<OutlineText>Shadows</OutlineText>
 			</div>
-			<CheckBox value={shadows} onClick={setShadows}></CheckBox>
+			<CheckBox value={settings.disableShadows} onClick={setShadows}></CheckBox>
 			<div
 				use:menuItem={[props.menu, false, lockCameraSelected, () => ['left', 'right'], true]}
 				class={lockCameraSelected() ? 'selected' : 'unselected'}
-				onClick={() => setLockCamera(!lockCamera())}
+				onClick={() => settings.lockCamera = !settings.lockCamera}
 			>
 				<OutlineText>Lock Camera to player</OutlineText>
 			</div>
-			<CheckBox value={lockCamera} onClick={setLockCamera}></CheckBox>
+			<CheckBox value={settings.lockCamera} onClick={locked => settings.lockCamera = locked}></CheckBox>
 			<div
 				use:menuItem={[props.menu, false, uiScaleSelected, () => ['left', 'right'], true]}
 				class={uiScaleSelected() ? 'selected' : 'unselected'}
@@ -254,13 +217,13 @@ export const Settings = (props: { menu: MenuDir }) => {
 				<input
 					type="range"
 					class="input-range"
-					value={uiScale()}
+					value={settings.uiScale}
 					min="2"
 					max="15"
-					onChange={e => setUiScale(e.target.valueAsNumber)}
+					onChange={e => settings.uiScale = e.target.valueAsNumber}
 				>
 				</input>
-				<OutlineText>{String(Math.min(uiScale() / 10))}</OutlineText>
+				<OutlineText>{String(Math.min(settings.uiScale / 10))}</OutlineText>
 			</div>
 			<div
 				use:menuItem={[props.menu, false, uiOpacitySelected, () => ['left', 'right'], true]}
@@ -272,26 +235,26 @@ export const Settings = (props: { menu: MenuDir }) => {
 				<input
 					type="range"
 					class="input-range"
-					value={uiOpacity()}
+					value={settings.uiOpacity}
 					min="0"
 					step={10}
 					max="100"
-					onChange={e => setUiOpacity(e.target.valueAsNumber)}
+					onChange={e => settings.uiOpacity = e.target.valueAsNumber}
 				>
 				</input>
-				<OutlineText>{String(uiOpacity())}</OutlineText>
+				<OutlineText>{String(settings.uiOpacity)}</OutlineText>
 			</div>
 			<div
 				use:menuItem={[props.menu, false, difficultySelected, () => ['left', 'right'], true]}
 				class={difficultySelected() ? 'selected' : 'unselected'}
-				onClick={() => difficulty(difficulty() === 'easy' ? 'normal' : 'easy')}
+				onClick={() => settings.difficulty = settings.difficulty === 'easy' ? 'normal' : 'easy'}
 			>
 				<OutlineText>Difficulty</OutlineText>
 			</div>
 			<SwitchButtons
 				options={['easy', 'normal']}
-				value={difficulty}
-				setValue={difficulty}
+				value={settings.difficulty}
+				setValue={difficulty => settings.difficulty = difficulty}
 			/>
 		</div>
 	)

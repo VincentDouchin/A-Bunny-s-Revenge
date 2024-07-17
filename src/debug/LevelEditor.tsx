@@ -9,6 +9,7 @@ import { MapControls } from 'three/examples/jsm/controls/MapControls'
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader'
 import { generateUUID } from 'three/src/math/MathUtils'
 import atom from 'solid-use/atom'
+import { throttle } from '@solid-primitives/scheduled'
 import { EntityEditor } from './EntityEditor'
 import { MapEditor } from './MapEditor'
 import { debugState } from './debugState'
@@ -23,7 +24,6 @@ import { loadLevelData } from '@/global/levelData'
 import { updateRenderSize } from '@/global/rendering'
 import { campState, dungeonState } from '@/global/states'
 import { inMap } from '@/lib/hierarchy'
-import { throttle } from '@/lib/state'
 import { thumbnailRenderer } from '@/lib/thumbnailRenderer'
 import { ToonMaterial } from '@/shaders/materials'
 import { HEIGHT, getdisplacementMap, setDisplacement, spawnGroundAndTrees, spawnLevelData } from '@/states/game/spawnLevel'
@@ -159,7 +159,7 @@ export const LevelEditor = () => {
 						await delMany(['levels', 'levelData', 'colliderData'])
 						window.location.reload()
 					}
-					const saveChanges = throttle(2000, () => {
+					const saveChanges = throttle(() => {
 						if (!disableSave()) {
 							const rawLevels: RawLevel[] = levels().map(level => ({
 								...level,
@@ -171,10 +171,10 @@ export const LevelEditor = () => {
 							}))
 							set('levels', rawLevels)
 						}
-					})
+					}, 2000)
 					createEffect(() => {
 						Object.assign(levelsData.levels, levels())
-						saveChanges({})
+						saveChanges()
 					})
 
 					const updateLevel = (level: Level) => (newLevel: Partial<Level>) => {
@@ -270,7 +270,7 @@ export const LevelEditor = () => {
 						if (confirm('delete level?')) {
 							setLevels(x => x.filter((_, i) => i !== levelIndex))
 							Object.assign(levelsData.levels, levels())
-							saveChanges({})
+							saveChanges()
 							window.location.reload()
 						}
 					}

@@ -3,8 +3,7 @@ import type { With } from 'miniplex'
 import { Vector3 } from 'three'
 import { params } from '@/global/context'
 import type { Entity } from '@/global/entity'
-import { ecs, inputManager, time } from '@/global/init'
-import { save } from '@/global/save'
+import { ecs, inputManager, settings, time } from '@/global/init'
 import { openMenuState, pausedState } from '@/global/states'
 
 export const getMovementForce = ({ movementForce, speed, targetMovementForce }: With<Entity, 'movementForce' | 'speed' >) => {
@@ -22,7 +21,7 @@ export const getPlayerRotation = (e: With<Entity, 'position' | 'playerControls'>
 	if (lockOn) {
 		return lockOn.position.clone().sub(e.position).normalize()
 	}
-	if (!openMenuState.enabled && save.settings.controls === 'mouse') {
+	if (!openMenuState.enabled && settings.controls === 'mouse') {
 		if (inputManager.controls() === 'gamepad') {
 			return new Vector3(
 				e.playerControls.get('lookLeft').pressed - e.playerControls.get('lookRight').pressed,
@@ -56,7 +55,7 @@ export const applyRotate = (entity: With<Entity, 'rotation' | 'targetRotation'>,
 	}
 }
 export const takeDamage = (entity: With<Entity, 'currentHealth'>, damage: number) => {
-	if (save.settings.difficulty === 'easy') {
+	if (settings.difficulty === 'easy') {
 		if (entity.player) {
 			damage *= 0.5
 		} else {

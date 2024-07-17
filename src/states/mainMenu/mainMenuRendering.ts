@@ -51,9 +51,9 @@ const drawUnderline = (ctx: CanvasRenderingContext2D, x: number, y: number, w: n
 	)
 	ctx.globalAlpha = 0.8
 }
-export type RenderMainMenuFn = (direction?: Direction, offset?: number) => MenuOptions
+export type RenderMainMenuFn = (direction?: Direction | MenuOptions | null, offset?: number) => MenuOptions
 const menu = ['Continue', 'New Game'] as const
-const mainMenuTexture = (mat: MeshStandardMaterial) => {
+const mainMenuTexture = (mat: MeshStandardMaterial): RenderMainMenuFn => {
 	let selected = 0
 	const optionsDimensions: Partial<Record<MenuOptions, { y: number, w: number }>> = {}
 	const pageRight = imgToCanvas(assets.textures.parchment.source.data)
@@ -77,7 +77,7 @@ const mainMenuTexture = (mat: MeshStandardMaterial) => {
 
 	let lastClone: HTMLCanvasElement | null = null
 	let map: CanvasTexture | null = null
-	return (direction?: Direction | null, offset = 0) => {
+	return (direction, offset = 0) => {
 		const oldSelected = selected
 		if (direction === 'south') {
 			selected = Math.min(selected + 1, menu.length - 1)
@@ -87,6 +87,10 @@ const mainMenuTexture = (mat: MeshStandardMaterial) => {
 		}
 		if (selected !== oldSelected) {
 			playSound('004_Hover_04')
+		}
+
+		if (typeof direction === 'string' && menu.includes(direction)) {
+			selected = menu.indexOf(direction)
 		}
 		if (direction || direction === null || offset) {
 			const clone = cloneCanvas(pageRight.canvas)
@@ -314,17 +318,37 @@ export const clickOnMenuButton = () => {
 			}
 		}
 	}
+	const hoverListener = (e: MouseEvent) => {
+		for (const camera of mainMenuCameraQuery) {
+			const ray = new Raycaster()
+			const pointer = new Vector2()
+			pointer.x = (e.clientX / window.innerWidth) * 2 - 1
+			pointer.y = -(e.clientY / window.innerHeight) * 2 + 1
+			ray.setFromCamera(pointer, camera.camera)
+			for (const { model, menuButton } of mainMenuButtonsQuery) {
+				const intsersect = ray.intersectObject(model)
+				if (intsersect.length) {
+					for (const mainMenu of menuTextureQuery) {
+						mainMenu.menuTexture(menuButton)
+					}
+				}
+			}
+		}
+	}
 	const touchListener = (e: TouchEvent) => {
 		for (const touch of e.changedTouches) {
 			click(touch.clientX, touch.clientY)
 		}
 	}
+
 	const clickListener = (e: MouseEvent) => click(e.clientX, e.clientY)
+	const hoverSub = windowEvent('pointermove', hoverListener)
 	const clickSub = windowEvent('touchstart', touchListener)
 	const touchSub = windowEvent('click', clickListener)
 	return () => {
 		clickSub()
 		touchSub()
+		hoverSub()
 	}
 }
 export const spawnPlayerContinueGame = async () => {

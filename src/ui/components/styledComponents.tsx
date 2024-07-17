@@ -1,6 +1,6 @@
 import CheckSquare from '@assets/icons/square-check-solid.svg'
 import Square from '@assets/icons/square-regular.svg'
-import { type Accessor, For, type JSX, type JSXElement, Match, Switch } from 'solid-js'
+import { For, type JSX, type JSXElement, Match, Switch } from 'solid-js'
 import { css } from 'solid-styled'
 
 interface OutlineTextProps {
@@ -61,7 +61,7 @@ export const InventoryTitle = (props: { children: JSXElement, color?: string }) 
 	)
 }
 
-export const SwitchButtons = <T extends string,>(props: { options: T[], value: Accessor<T>, setValue: (value: T) => void }) => {
+export const SwitchButtons = <T extends string,>(props: { options: T[], value: T, setValue: (value: T) => void }) => {
 	css/* css */`
 	.container{
 		display:grid;
@@ -93,7 +93,7 @@ export const SwitchButtons = <T extends string,>(props: { options: T[], value: A
 					return (
 						<div
 							onClick={() => props.setValue(option)}
-							class={`${props.value() === option ? 'selected' : 'unselected'} switch-button`}
+							class={`${props.value === option ? 'selected' : 'unselected'} switch-button`}
 						>
 							{option}
 						</div>
@@ -104,7 +104,7 @@ export const SwitchButtons = <T extends string,>(props: { options: T[], value: A
 	)
 }
 
-export const CheckBox = (props: { value: Accessor<boolean>, onClick: (value: boolean) => void }) => {
+export const CheckBox = (props: { value: boolean, onClick: (value: boolean) => void }) => {
 	css/* css */`
 	.checkbox{
 		width: 1em;
@@ -115,12 +115,12 @@ export const CheckBox = (props: { value: Accessor<boolean>, onClick: (value: boo
 	}
 	`
 	return (
-		<div class="checkbox" onClick={() => props.onClick(!props.value())}>
+		<div class="checkbox" onClick={() => props.onClick(!props.value)}>
 			<Switch>
-				<Match when={props.value()}>
+				<Match when={props.value}>
 					<CheckSquare />
 				</Match>
-				<Match when={!props.value()}>
+				<Match when={!props.value}>
 					<Square />
 				</Match>
 			</Switch>

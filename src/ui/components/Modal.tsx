@@ -8,7 +8,7 @@ import type { Atom } from 'solid-use/atom'
 import atom from 'solid-use/atom'
 import { useGame } from '../store'
 import { GoldContainer } from './styledComponents'
-import { save } from '@/global/save'
+import { settings } from '@/global/init'
 
 const CloseButton = () => {
 	const context = useGame()
@@ -32,7 +32,7 @@ const CloseButton = () => {
 	}
 	`
 	return (
-		<Show when={context?.usingTouch() || save.settings.controls === 'mouse'}>
+		<Show when={context?.usingTouch() || settings.controls === 'mouse'}>
 
 			<div
 				class="close-button icon-container"

@@ -1,14 +1,14 @@
 import { Vector2 } from 'three'
+import { throttle } from '@solid-primitives/scheduled'
 import { RoomType, assignPlanAndEnemies } from '../dungeon/generateDungeon'
 import { setMainCameraPosition } from '../mainMenu/mainMenuRendering'
 import { updateCameraZoom } from '@/global/camera'
 import { params } from '@/global/context'
-import { time } from '@/global/init'
+import { settings, time } from '@/global/init'
 import { updateRenderSize } from '@/global/rendering'
-import { save } from '@/global/save'
 import { app, campState, dungeonState, mainMenuState, ruinsIntro } from '@/global/states'
 import { Direction } from '@/lib/directions'
-import { throttle } from '@/lib/state'
+
 import { windowEvent } from '@/lib/uiManager'
 
 export const setupGame = async () => {
@@ -56,7 +56,7 @@ export const stopOnLosingFocus = () => {
 	const focusListener = () => {
 		time.start()
 		app.start()
-		Howler.mute(save.settings.mute)
+		Howler.mute(settings.mute)
 	}
 	document.addEventListener('visibilitychange', listener)
 	window.addEventListener('blur', blurListener)
@@ -99,16 +99,16 @@ export const disablePortrait = () => {
 	return () => mediaMatch.removeEventListener('change', listener)
 }
 export const enableFullscreen = () => windowEvent('pointerup', () => {
-	if (save.settings.fullscreen) {
+	if (settings.fullscreen) {
 		document.documentElement.requestFullscreen()
 	}
 })
 
-export const resize = () => windowEvent('resize', throttle(100, () => {
+export const resize = () => windowEvent('resize', throttle(() => {
 	updateRenderSize()
 	updateCameraZoom()
 	if (mainMenuState.enabled) {
 		updateRenderSize(new Vector2(window.innerWidth, window.innerHeight))
 		updateCameraZoom(10)
 	}
-}))
+}, 100))

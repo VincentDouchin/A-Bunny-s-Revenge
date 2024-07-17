@@ -2,10 +2,9 @@ import { Tween } from '@tweenjs/tween.js'
 import { OrthographicCamera, PerspectiveCamera, Vector3 } from 'three'
 import { params } from './context'
 import { RenderGroup } from './entity'
-import { ecs, gameTweens, levelsData, time } from './init'
-import { save } from './save'
-import { debugState } from '@/debug/debugState'
+import { ecs, gameTweens, levelsData, settings, time } from './init'
 import { Direction } from '@/lib/directions'
+import { debugState } from '@/debug/debugState'
 
 export const initCamera = () => {
 	const h = 600
@@ -103,7 +102,7 @@ export const moveCamera = (init = false) => () => {
 		if (!debugState.enabled) {
 			const lerpSpeed = time.delta / 1000 * 5
 			if (cameraTargetQuery.size > 0) {
-				if (init || save.settings.lockCamera) {
+				if (init || settings.lockCamera) {
 					cameraLookat.copy(target)
 				} else {
 					cameraLookat.lerp(target, lerpSpeed)
@@ -113,7 +112,7 @@ export const moveCamera = (init = false) => () => {
 			cameraLookat.add({ x: cameraShake.x, y: 0, z: cameraShake.y })
 			camera.lookAt(cameraLookat)
 			const newPosition = cameraLookat.clone().add(cameraOffset ?? new Vector3(params.cameraOffsetX, params.cameraOffsetY, params.cameraOffsetZ))
-			if (init || save.settings.lockCamera) {
+			if (init || settings.lockCamera) {
 				position.copy(newPosition)
 			} else {
 				position.lerp(newPosition, lerpSpeed)

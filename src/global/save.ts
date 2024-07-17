@@ -1,7 +1,10 @@
-import { get, set } from 'idb-keyval'
-import { Quaternion, Vector3 } from 'three'
-import type { With } from 'miniplex'
 import type { items } from '@assets/assets'
+import { get, set } from 'idb-keyval'
+import type { With } from 'miniplex'
+import { createEffect } from 'solid-js'
+import { createObject } from 'solid-proxies'
+import { Quaternion, Vector3 } from 'three'
+import { createScheduled, debounce } from '@solid-primitives/scheduled'
 import { context } from './context'
 import type { Crop, Entity } from './entity'
 import type { QuestName } from '@/constants/quests'
@@ -15,28 +18,59 @@ export interface SaveData {
 	selectedSeed: null | crops
 	inventories: Record<string, Item[]>
 	modifiers: Meals[]
-	settings: {
-		volume: number
-		mute: boolean
-		fullscreen: boolean | null
-		controls: 'mouse' | 'keyboard'
-		showControls: boolean
-		musicVolume: number
-		musicMute: boolean
-		ambianceVolume: number
-		ambianceMute: boolean
-		soundEffectsVolume: number
-		soundEffectsMute: boolean
-		disableShadows: boolean
-		lockCamera: boolean
-		uiScale: number
-		uiOpacity: number
-		difficulty: 'normal' | 'easy'
-	}
 	unlockedRecipes: items[]
 	unlockedPaths: number
 	acorns: number
 	daytime: { current: number, dayToNight: boolean, timePassed: number, dayLight: number }
+}
+
+const blankSettings = () => ({
+	volume: 100,
+	mute: false,
+	fullscreen: null,
+	controls: 'mouse',
+	showControls: true,
+	musicVolume: 100,
+	musicMute: false,
+	ambianceVolume: 100,
+	ambianceMute: false,
+	soundEffectsVolume: 100,
+	soundEffectsMute: false,
+	disableShadows: true,
+	lockCamera: false,
+	uiScale: 10,
+	uiOpacity: 50,
+	difficulty: 'normal',
+})
+// eslint-disable-next-line ts/consistent-type-definitions
+export type Settings = {
+	volume: number
+	mute: boolean
+	fullscreen: boolean | null
+	controls: 'mouse' | 'keyboard'
+	showControls: boolean
+	musicVolume: number
+	musicMute: boolean
+	ambianceVolume: number
+	ambianceMute: boolean
+	soundEffectsVolume: number
+	soundEffectsMute: boolean
+	disableShadows: boolean
+	lockCamera: boolean
+	uiScale: number
+	uiOpacity: number
+	difficulty: 'normal' | 'easy'
+}
+export const useSettings = async () => {
+	const existingSettings = await get('settings')
+	const settings = createObject<Settings>(existingSettings ?? blankSettings())
+	const scheduled = createScheduled(fn => debounce(fn, 5000))
+	createEffect(() => {
+		if (scheduled()) {
+			set('settings', { ...settings })
+		}
+	})
+	return settings
 }
 
 const blankSave = (): SaveData => ({
@@ -47,24 +81,6 @@ const blankSave = (): SaveData => ({
 	selectedSeed: null,
 	inventories: {},
 	modifiers: [],
-	settings: {
-		volume: 100,
-		mute: false,
-		fullscreen: null,
-		controls: 'mouse',
-		showControls: true,
-		musicVolume: 100,
-		musicMute: false,
-		ambianceVolume: 100,
-		ambianceMute: false,
-		soundEffectsVolume: 100,
-		soundEffectsMute: false,
-		disableShadows: true,
-		lockCamera: false,
-		uiScale: 10,
-		uiOpacity: 50,
-		difficulty: 'normal',
-	},
 	unlockedRecipes: [],
 	unlockedPaths: 0,
 	acorns: 0,

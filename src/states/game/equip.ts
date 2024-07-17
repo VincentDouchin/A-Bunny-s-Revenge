@@ -5,7 +5,7 @@ import { ecs } from '@/global/init'
 
 export const addToHand = (entity: With<Entity, 'model'>, model: Object3D) => {
 	entity.model.traverse((node) => {
-		if (node.name === 'DEF_FingerL' || node.name === 'handr') {
+		if (node.name === 'DEF_FingerL' || node.name === 'handslotr') {
 			node.parent?.add(model)
 		}
 	})
