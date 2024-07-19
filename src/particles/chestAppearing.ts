@@ -9,7 +9,7 @@ export const chestAppearing = () => {
 	const system = new ParticleSystem({
 		duration: 3,
 		looping: false,
-		prewarm: true,
+		prewarm: false,
 		instancingGeometry: geo,
 		startLife: new IntervalValue(5, 4),
 		startSpeed: new IntervalValue(4, 5),

@@ -1,4 +1,3 @@
-import { Tween } from '@tweenjs/tween.js'
 import { For, Show, createMemo, onCleanup, onMount } from 'solid-js'
 import { Portal } from 'solid-js/web'
 import { css } from 'solid-styled'
@@ -8,7 +7,7 @@ import { updateCameraZoom } from '@/global/camera'
 import { params } from '@/global/context'
 import type { Entity } from '@/global/entity'
 import { MenuType } from '@/global/entity'
-import { ecs, gameTweens, time, ui } from '@/global/init'
+import { ecs, time, tweens, ui } from '@/global/init'
 import { cameraQuery } from '@/global/rendering'
 import { addTag } from '@/lib/hierarchy'
 import { getWorldPosition } from '@/lib/transforms'
@@ -27,11 +26,14 @@ export const CuttingBoardMinigameUi = () => {
 							// const output = ui.sync(() => board.recipesQueued?.[0]?.output)
 							let targetEntity: Entity | null = null
 							onMount(() => {
-								gameTweens.add(new Tween([params.zoom]).to([20], 1000).onUpdate(([zoom]) => {
-									updateCameraZoom(zoom)
-								}))
+								tweens.add({
+									from: params.zoom,
+									to: 20,
+									duration: 1000,
+									onUpdate: updateCameraZoom,
+								})
 								for (const camera of cameraQuery) {
-									ecs.removeComponent(camera, 'lockX')
+									ecs.removeComponent(camera, 'fixedCamera')
 									ecs.addComponent(camera, 'cameraOffset', new Vector3(0, 50, -10).applyQuaternion(board.rotation))
 								}
 								const position = getWorldPosition(board.group)
@@ -42,14 +44,17 @@ export const CuttingBoardMinigameUi = () => {
 								ecs.removeComponent(player(), 'cameratarget')
 							})
 							onCleanup(() => {
-								gameTweens.add(new Tween([15]).to([params.zoom], 1000).onUpdate(([zoom]) => {
-									updateCameraZoom(zoom)
-								}))
+								tweens.add({
+									from: 20,
+									to: params.zoom,
+									duration: 1000,
+									onUpdate: updateCameraZoom,
+								})
 								targetEntity && ecs.remove(targetEntity)
 								addTag(player(), 'cameratarget')
 								for (const camera of cameraQuery) {
 									ecs.removeComponent(camera, 'cameraOffset')
-									ecs.addComponent(camera, 'lockX', true)
+									ecs.addComponent(camera, 'fixedCamera', true)
 								}
 							})
 							ui.updateSync(() => {

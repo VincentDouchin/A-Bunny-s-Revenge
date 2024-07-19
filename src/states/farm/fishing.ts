@@ -1,11 +1,10 @@
 import { ColliderDesc, RigidBodyDesc, RigidBodyType } from '@dimforge/rapier3d-compat'
-import { Tween } from '@tweenjs/tween.js'
 import { between } from 'randomish'
 import { BufferGeometry, CatmullRomCurve3, Mesh, MeshBasicMaterial, PlaneGeometry, Quaternion, SphereGeometry, Vector3 } from 'three'
 import { openMenu } from './openInventory'
 import { fishBehaviorPlugin } from '@/behaviors/fishBehavior'
 import { MenuType } from '@/global/entity'
-import { assets, ecs, gameTweens } from '@/global/init'
+import { assets, ecs, tweens } from '@/global/init'
 import { scene } from '@/global/rendering'
 import { playSound } from '@/global/sounds'
 import { MeshLine, MeshLineMaterial } from '@/lib/MeshLine'
@@ -14,8 +13,8 @@ import { inMap } from '@/lib/hierarchy'
 import type { State } from '@/lib/state'
 import { Timer } from '@/lib/timer'
 import { getWorldPosition } from '@/lib/transforms'
-import { range } from '@/utils/mapFunctions'
 import { addItemToPlayer } from '@/utils/dialogHelpers'
+import { range } from '@/utils/mapFunctions'
 
 const fishingPoleBundle = () => {
 	const poleModel = assets.models.fishing_pole.scene.clone()
@@ -132,7 +131,12 @@ const fishBundle = (parentPos: Vector3) => {
 	)
 	model.rotateX(-Math.PI / 2)
 	model.rotateZ(Math.PI / 2)
-	gameTweens.add(new Tween(model.material).to({ opacity: 0.5 }, 2000))
+	tweens.add({
+		from: model.material.opacity,
+		to: 0.5,
+		duration: 2000,
+		onUpdate: f => model.material.opacity = f,
+	})
 	const rot = new Quaternion().setFromAxisAngle(new Vector3(0, 1, 0), Math.PI * 2 * Math.random())
 	const dist = 20
 	return {
@@ -161,10 +165,17 @@ const despawnFish = () => {
 			if (getWorldPosition(spawner.group).distanceTo(fish.position) > 50) {
 				if (fish.model instanceof Mesh && fish.model.material) {
 					ecs.removeComponent(fish, 'fish')
-					gameTweens.add(new Tween(fish.model.material).to({ opacity: 0 }, 2000).onComplete(() => {
-						ecs.remove(fish)
-						ecs.add(fishBundle(getWorldPosition(spawner.group)))
-					}))
+					const mat = fish.model.material
+					tweens.add({
+						destroy: fish,
+						from: mat.opacity,
+						to: 0,
+						duration: 2000,
+						onUpdate: f => mat.opacity = f,
+						onComplete: () => {
+							ecs.add(fishBundle(getWorldPosition(spawner.group)))
+						},
+					})
 				}
 			}
 		}

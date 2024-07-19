@@ -1,8 +1,8 @@
-import { Easing, Tween } from '@tweenjs/tween.js'
+import { circIn } from 'popmotion'
 import { CylinderGeometry, Group, Mesh, MeshBasicMaterial, Quaternion, SphereGeometry, Vector3 } from 'three'
 import { dialogs } from '@/constants/dialogs'
 import { type Entity, Interactable } from '@/global/entity'
-import { ecs, gameTweens, time } from '@/global/init'
+import { ecs, time, tweens } from '@/global/init'
 import { hasQuest, questsUnlocks } from '@/utils/dialogHelpers'
 
 export const dialogBundle = (key: keyof typeof dialogs) => {
@@ -58,13 +58,19 @@ export const addQuestMarkers = () => questMarkerQuery.onEntityAdded.subscribe((e
 		questMarkerContainer.add(line)
 		questMarkerContainer.position.setY(15)
 		questMarkerContainer.renderOrder = 100
-		gameTweens.add(new Tween(line.scale).to(new Vector3(2, 0.5, 2), 500)
-			.onUpdate(scale => line.position.setY(3 + (4 * scale.y) / 2))
-			.yoyo(true)
-			.delay(1000)
-			.easing(Easing.Elastic.Out)
-			.repeat(Number.POSITIVE_INFINITY),
-		)
+		tweens.add({
+			from: line.scale.clone(),
+			to: new Vector3(2, 0.5, 2),
+			duration: 500,
+			parent: e,
+			ease: circIn,
+			repeat: Number.POSITIVE_INFINITY,
+			repeatType: 'mirror',
+			onUpdate: (f) => {
+				line.scale.copy(f)
+				line.position.setY(3 + (4 * f.y) / 2)
+			},
+		})
 		ecs.update(e, { questMarkerContainer })
 	}
 })

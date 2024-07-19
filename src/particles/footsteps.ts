@@ -1,6 +1,5 @@
 import { CircleGeometry, Mesh, MeshBasicMaterial, Quaternion, Vector3 } from 'three'
-import { Tween } from '@tweenjs/tween.js'
-import { ecs, gameTweens } from '@/global/init'
+import { ecs, tweens } from '@/global/init'
 
 const geo = new CircleGeometry(1, 8)
 
@@ -13,7 +12,11 @@ export const spawnFootstep = (direction: 'left' | 'right', position: Vector3, ho
 		position: position.clone().add(new Vector3((direction === 'left' ? -1 : 1) * 1.3, 1, 0)),
 		rotation: new Quaternion().setFromAxisAngle(new Vector3(1, 0, 0), -Math.PI / 2),
 	})
-	gameTweens.add(new Tween(mat).to({ opacity: 0 }, 1000).onComplete(() => {
-		ecs.remove(footstep)
-	}))
+	tweens.add({
+		from: mat.opacity,
+		to: 0,
+		duration: 1000,
+		onUpdate: o => mat.opacity = o,
+		destroy: footstep,
+	})
 }

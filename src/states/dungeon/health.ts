@@ -1,7 +1,6 @@
-import { Tween } from '@tweenjs/tween.js'
 import { Material, Mesh } from 'three'
 import { type Entity, Faction } from '@/global/entity'
-import { ecs, gameTweens } from '@/global/init'
+import { ecs, tweens } from '@/global/init'
 import { Stat } from '@/lib/stats'
 import { enemyDefeated } from '@/particles/enemyDefeated'
 import type { ToonMaterial } from '@/shaders/materials'
@@ -28,13 +27,13 @@ export const setInitialHealth = () => {
 const deadEntities = ecs.with('state', 'body', 'movementForce', 'model', 'faction').where(e => e.state === 'dead')
 export const killAnimation = () => deadEntities.onEntityAdded.subscribe((e) => {
 	ecs.removeComponent(e, 'body')
-	const tween = new Tween([1]).to([0])
 	if (e.faction === Faction.Enemy) {
 		ecs.add({
 			position: e.position?.clone(),
 			emitter: enemyDefeated(),
 			autoDestroy: true,
 		})
+		const mats = new Array<Material>()
 		e.model.traverse((node) => {
 			if (node instanceof Mesh) {
 				node.castShadow = false
@@ -42,11 +41,16 @@ export const killAnimation = () => deadEntities.onEntityAdded.subscribe((e) => {
 				if (mat instanceof Material) {
 					mat.transparent = true
 					mat.depthWrite = false
-					tween.onUpdate(([val]) => mat.opacity = val)
+					mats.push(mat)
 				}
 			}
 		})
+		tweens.add({
+			destroy: e,
+			from: 1,
+			to: 0,
+			duration: 2000,
+			onUpdate: f => mats.forEach(m => m.opacity = f),
+		})
 	}
-	tween.onComplete(() => ecs.remove(e))
-	gameTweens.add(tween)
 })

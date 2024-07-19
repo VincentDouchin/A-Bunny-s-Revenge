@@ -1,6 +1,6 @@
 import { createMap } from 'solid-proxies'
 import atom from 'solid-use/atom'
-import { Vector3 } from 'three'
+import { Vector2, Vector3 } from 'three'
 import { keys, metaKeys, mouse } from '@/constants/keys'
 
 export const GAMEPAD_AXIS = {
@@ -55,6 +55,7 @@ export class InputManager {
 	mouseMoving = atom(false)
 	mouseWorldPosition = new Vector3()
 	mouseWheel = new Vector3()
+	mousePosition = new Vector2()
 	constructor() {
 		window.addEventListener('wheel', (e) => {
 			this.mouseWheel.x = e.deltaX
@@ -86,12 +87,19 @@ export class InputManager {
 		window.addEventListener('mouseup', (e) => {
 			this.mouse[e.button] = false
 		})
+		window.addEventListener('mousemove', (e) => {
+			this.mousePosition.set(e.clientX, e.clientY)
+		})
 
 		if (navigator.keyboard) {
 			navigator.keyboard.getLayoutMap().then((map) => {
 				this.layoutMap = map
 			})
 		}
+	}
+
+	get mousePositionNormalized() {
+		return this.mousePosition.clone().divide({ x: window.innerWidth, y: -window.innerHeight }).multiplyScalar(2).add({ x: -1, y: 1 })
 	}
 
 	getKeyName(input: Input, controls: 'mouse' | 'keyboard') {

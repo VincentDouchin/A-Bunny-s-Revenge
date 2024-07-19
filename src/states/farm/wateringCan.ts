@@ -1,16 +1,15 @@
-import { Tween } from '@tweenjs/tween.js'
 import type { With } from 'miniplex'
 import type { Quaternion } from 'three'
 import { CircleGeometry, Mesh, MeshBasicMaterial, Vector3 } from 'three'
 import { ApplyForce, ColorRange, ConeEmitter, ConstantValue, IntervalValue, ParticleSystem, RandomQuatGenerator, RenderMode } from 'three.quarks'
 import { getIntersections } from '../game/sensor'
 import { updateCropsSave } from './farming'
-import { colorToVec4 } from '@/particles/honeySplatParticles'
-import { getWorldRotation } from '@/lib/transforms'
-import { batchRendererQuery } from '@/lib/particles'
-import { assets, ecs, gameTweens } from '@/global/init'
-import { Interactable } from '@/global/entity'
 import type { Entity } from '@/global/entity'
+import { Interactable } from '@/global/entity'
+import { assets, ecs, tweens } from '@/global/init'
+import { batchRendererQuery } from '@/lib/particles'
+import { getWorldRotation } from '@/lib/transforms'
+import { colorToVec4 } from '@/particles/honeySplatParticles'
 
 const waterParticles = (rotation: Quaternion) => {
 	const system = new ParticleSystem({
@@ -60,12 +59,12 @@ export const updateSpotWatered = (plot: With<Entity, 'model' | 'planted'>, water
 	if (instant) {
 		updateUniform(end)
 	} else {
-		const tween = new Tween([start])
-			.to([end], 2000)
-			.onUpdate(([f]) => {
-				updateUniform(f)
-			})
-		gameTweens.add(tween)
+		tweens.add({
+			from: start,
+			to: end,
+			duration: 1000,
+			onUpdate: updateUniform,
+		})
 	}
 }
 const plantsToWaterQuery = ecs.with('interactable', 'collider', 'parent', 'crop').where(e => e.interactable === Interactable.Water)

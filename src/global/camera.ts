@@ -1,8 +1,9 @@
-import { Tween } from '@tweenjs/tween.js'
+import { easeOut } from 'popmotion'
 import { OrthographicCamera, PerspectiveCamera, Vector3 } from 'three'
 import { params } from './context'
 import { RenderGroup } from './entity'
-import { ecs, gameTweens, levelsData, settings, time } from './init'
+import { ecs, levelsData, settings, time, tweens } from './init'
+import { mainMenuState } from './states'
 import { Direction } from '@/lib/directions'
 import { debugState } from '@/debug/debugState'
 
@@ -17,20 +18,22 @@ export const initCamera = () => {
 		0.0001,
 		1000,
 	)
+	// camera.rotateX(-0.3)
 	camera.updateProjectionMatrix()
 	ecs.add({
 		renderGroup: RenderGroup.Game,
 		camera,
-		lockX: true,
+		fixedCamera: true,
 		position: new Vector3(),
 		mainCamera: true,
 		cameraLookat: new Vector3(),
 		cameraShake: new Vector3(),
+		cameraOffset: new Vector3(),
 	})
 }
 const cameraQuery = ecs.with('camera')
 const gameCameraQuery = ecs.with('camera', 'position', 'mainCamera', 'cameraLookat', 'cameraShake')
-const cameraTargetQuery = ecs.with('cameratarget', 'worldPosition')
+export const cameraTargetQuery = ecs.with('cameratarget', 'worldPosition')
 const doorsQuery = ecs.with('door', 'position').without('vineGate')
 export const updateCameraZoom = (zoom: number = params.zoom) => {
 	for (const { camera } of cameraQuery) {
@@ -53,15 +56,16 @@ export const updateCameraZoom = (zoom: number = params.zoom) => {
 export const addCameraShake = () => {
 	const camera = gameCameraQuery.first
 	if (camera) {
-		const randomTween = (amount: number) => new Tween(camera.cameraShake).to(new Vector3().randomDirection().normalize().multiplyScalar(amount / 10), 20).repeat(1).yoyo(true)
-		const tween = randomTween(11)
-		let lastTween = tween
-		for (let i = 10; i > 0; i--) {
-			const newTween = randomTween(i)
-			lastTween.chain(newTween)
-			lastTween = newTween
-		}
-		gameTweens.add(tween)
+		const dir = new Vector3().randomDirection().multiplyScalar(5)
+		tweens.add({
+			from: 1,
+			to: 0,
+			duration: 500,
+			ease: easeOut,
+			onUpdate: (f) => {
+				camera.cameraShake.lerpVectors(new Vector3(), dir, Math.cos(f * 20) * f)
+			},
+		})
 	}
 }
 const OFFSETZ = 30
@@ -69,56 +73,58 @@ const OFFSETX = 50
 const MAP_OFFSET = 10
 const levelQuery = ecs.with('map')
 export const moveCamera = (init = false) => () => {
-	for (const { position, camera, cameraLookat, cameraOffset, cameraShake, lockX } of gameCameraQuery) {
+	for (const { position, camera, cameraOffset, cameraShake, fixedCamera } of gameCameraQuery) {
 		const target = new Vector3()
-		for (const { worldPosition } of cameraTargetQuery) {
-			target.copy(worldPosition)
-			for (const door of doorsQuery) {
-				if (door.door === Direction.N) {
-					target.z = Math.min(target.z, door.position.z - OFFSETZ)
+		if (mainMenuState.disabled) {
+			for (const { worldPosition } of cameraTargetQuery) {
+				target.copy(worldPosition)
+				for (const door of doorsQuery) {
+					if (door.door === Direction.N) {
+						target.z = Math.min(target.z, door.position.z - OFFSETZ)
+					}
+					if (door.door === Direction.S) {
+						target.z = Math.max(target.z, door.position.z + OFFSETZ)
+					}
+					if (door.door === Direction.W) {
+						target.x = Math.min(target.x, door.position.x - OFFSETX)
+					}
+					if (door.door === Direction.E) {
+						target.x = Math.max(target.x, door.position.x + OFFSETX)
+					}
 				}
-				if (door.door === Direction.S) {
-					target.z = Math.max(target.z, door.position.z + OFFSETZ)
-				}
-				if (door.door === Direction.W) {
-					target.x = Math.min(target.x, door.position.x - OFFSETX)
-				}
-				if (door.door === Direction.E) {
-					target.x = Math.max(target.x, door.position.x + OFFSETX)
-				}
-			}
-			const mapId = levelQuery.first?.map
-			if (mapId) {
-				const levelSize = levelsData.levels.find(level => level.id === mapId)?.size
-				if (levelSize && camera instanceof OrthographicCamera) {
-					target.x = Math.min(target.x, levelSize.x / 2 + camera.left - MAP_OFFSET)
-					target.x = Math.max(target.x, -levelSize.x / 2 + camera.right + MAP_OFFSET)
-					target.z = Math.min(target.z, levelSize.y / 2 + camera.bottom - MAP_OFFSET * 4)
-					target.z = Math.max(target.z, -levelSize.y / 2 + camera.top + MAP_OFFSET * 5)
+				const mapId = levelQuery.first?.map
+				if (mapId) {
+					const levelSize = levelsData.levels.find(level => level.id === mapId)?.size
+					if (levelSize && camera instanceof OrthographicCamera) {
+						target.x = Math.min(target.x, levelSize.x / 2 + camera.left - MAP_OFFSET)
+						target.x = Math.max(target.x, -levelSize.x / 2 + camera.right + MAP_OFFSET)
+						target.z = Math.min(target.z, levelSize.y / 2 + camera.bottom - MAP_OFFSET * 4)
+						target.z = Math.max(target.z, -levelSize.y / 2 + camera.top + MAP_OFFSET * 5)
+					}
 				}
 			}
 		}
 
 		if (!debugState.enabled) {
-			const lerpSpeed = time.delta / 1000 * 5
-			if (cameraTargetQuery.size > 0) {
-				if (init || settings.lockCamera) {
-					cameraLookat.copy(target)
-				} else {
-					cameraLookat.lerp(target, lerpSpeed)
-				}
-			}
+			const lerpSpeed = time.delta / 1000 * 3
 
-			cameraLookat.add({ x: cameraShake.x, y: 0, z: cameraShake.y })
-			camera.lookAt(cameraLookat)
-			const newPosition = cameraLookat.clone().add(cameraOffset ?? new Vector3(params.cameraOffsetX, params.cameraOffsetY, params.cameraOffsetZ))
+			const offset = new Vector3(params.cameraOffsetX, params.cameraOffsetY, params.cameraOffsetZ)
+			const newPosition = target.clone().add({ x: cameraShake.x, y: 0, z: cameraShake.y })
+			if (cameraOffset) {
+				newPosition.add(cameraOffset)
+			}
+			if (fixedCamera) {
+				newPosition.add(offset)
+			}
 			if (init || settings.lockCamera) {
 				position.copy(newPosition)
 			} else {
 				position.lerp(newPosition, lerpSpeed)
 			}
-			if (lockX) {
-				position.setX(newPosition.x)
+			if (fixedCamera) {
+				camera.lookAt(position.clone().sub(offset))
+			} else {
+				camera.lookAt(target)
 			}
 		}
 	}

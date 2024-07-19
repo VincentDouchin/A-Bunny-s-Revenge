@@ -10,7 +10,7 @@ import { StateUi } from './components/StateUi'
 import { GameProvider } from './store'
 import { Errors } from './Errors'
 import { DebugUi } from '@/debug/debugUi'
-import { campState, dungeonState, genDungeonState } from '@/global/states'
+import { campState, dungeonState, genDungeonState, mainMenuState } from '@/global/states'
 import { EnemyHealthBarUi } from '@/states/dungeon/EnemyHealthBarUi'
 import { HealthUi } from '@/states/dungeon/HealthUi'
 import { LoseUi } from '@/states/dungeon/LoseUi'
@@ -63,7 +63,9 @@ export const UI = () => {
 					<EnemyHealthBarUi />
 				</StateUi>
 				<FishingMinigameUi />
-				<KeyboardControls />
+				<StateUi state={mainMenuState} disabled>
+					<KeyboardControls />
+				</StateUi>
 				<TouchControls />
 				<InteractionUi />
 				<TopRight />

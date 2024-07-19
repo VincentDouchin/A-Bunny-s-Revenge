@@ -1,6 +1,6 @@
 import { ColliderDesc, RigidBodyDesc } from '@dimforge/rapier3d-compat'
-import { Tween } from '@tweenjs/tween.js'
 import type { With } from 'miniplex'
+import { circIn } from 'popmotion'
 import { between } from 'randomish'
 import { AdditiveBlending, Mesh, MeshBasicMaterial, PlaneGeometry, Vector3 } from 'three'
 import type { EntityState } from '../lib/behaviors'
@@ -11,7 +11,7 @@ import { stunBundle } from '../states/dungeon/stun'
 import { applyMove, applyRotate, getMovementForce, takeDamage } from './behaviorHelpers'
 import type { Entity } from '@/global/entity'
 import { EnemyAttackStyle, Faction } from '@/global/entity'
-import { assets, coroutines, ecs, gameTweens, time, world } from '@/global/init'
+import { assets, coroutines, ecs, time, tweens, world } from '@/global/init'
 import { playSound } from '@/global/sounds'
 import { collisionGroups } from '@/lib/collisionGroups'
 import { inMap } from '@/lib/hierarchy'
@@ -22,8 +22,8 @@ import { dash } from '@/particles/dashParticles'
 import { impact } from '@/particles/impact'
 import { pollenBundle } from '@/particles/pollenParticles'
 import { selectNewLockedEnemey } from '@/states/dungeon/locking'
-import { sleep } from '@/utils/sleep'
 import { getIntersections } from '@/states/game/sensor'
+import { sleep } from '@/utils/sleep'
 
 export const playerQuery = ecs.with('position', 'strength', 'body', 'critChance', 'critDamage', 'combo', 'playerAnimator', 'weapon', 'player', 'collider', 'sensor', 'rotation').where(({ faction }) => faction === Faction.Player)
 
@@ -169,7 +169,16 @@ const hit: EnemyState = {
 			const force = player.position.clone().sub(e.position).normalize().multiplyScalar(-50000)
 			e.body.applyImpulse(force, true)
 			// ! damage flash
-			gameTweens.add(new Tween(e.group.scale).to(new Vector3(0.8, 1.2, 0.8), 200).repeat(1).yoyo(true))
+			const originalScale = e.group.scale.clone()
+			tweens.add({
+				from: originalScale,
+				to: new Vector3(0.8, 1.5, 0.8),
+				duration: 300,
+				ease: circIn,
+				repeat: 1,
+				repeatType: 'reverse',
+				onUpdate: f => e.group.scale.copy(f),
+			})
 			flash(e, 200, 'damage')
 			await e.enemyAnimator.playClamped('hit')
 			if (e.currentHealth <= 0) {
@@ -471,16 +480,18 @@ export const jumpingEnemyBehaviorPlugin = enemyBehavior(EnemyAttackStyle.Jumping
 					colliderDesc: ColliderDesc.cylinder(1, 1).setSensor(true),
 					position: e.position.clone(),
 				})
-				gameTweens.add(new Tween([2]).to([15], 300)
-					.onUpdate(([s]) => {
-						impact.scale.setScalar(s)
+				tweens.add({
+					from: 2,
+					to: 15,
+					duration: 300,
+					destroy: impactEntity,
+					onUpdate: (f) => {
+						impact.scale.setScalar(f)
 						if (impactEntity.collider) {
-							impactEntity.collider.setRadius(s * 0.8)
+							impactEntity.collider.setRadius(f * 0.8)
 						}
-					})
-					.onComplete(() => {
-						ecs.remove(impactEntity)
-					}))
+					},
+				})
 			})
 		},
 		update: (e, setState, { force, touchedByPlayer }) => {

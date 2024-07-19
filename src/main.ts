@@ -5,7 +5,7 @@ import { playerBehaviorPlugin } from './behaviors/playerBehavior'
 import { debugPlugin } from './debug/debugPlugin'
 import { updateAnimations } from './global/animations'
 import { initCamera, initializeCameraPosition, moveCamera } from './global/camera'
-import { coroutines, gameTweens, inputManager, musicManager, time, ui } from './global/init'
+import { coroutines, inputManager, musicManager, resetSave, time, tweens, ui } from './global/init'
 import { tickModifiersPlugin } from './global/modifiers'
 import { updateMousePosition } from './global/mousePosition'
 import { compileShaders, initThree, renderGame } from './global/rendering'
@@ -49,8 +49,9 @@ import { spawnCrossRoad, spawnDungeon, spawnFarm, spawnLevelData, spawnRuins, up
 import { losingBattle, spawnCharacter, spawnPlayerClearing, spawnPlayerDungeon } from './states/game/spawnPlayer'
 import { interactionPlugin } from './states/game/touchItem'
 import { updateWeaponArc } from './states/game/weapon'
-import { startIntro } from './states/intro/startIntro'
-import { clickOnMenuButton, initMainMenuCamPos, intiMainMenuRendering, renderMainMenu, selectMainMenu, setMainCameraPosition, spawnPlayerContinueGame } from './states/mainMenu/mainMenuRendering'
+import { enableCutscene, startIntro } from './states/intro/startIntro'
+import { intiMainMenuRendering } from './states/mainMenu/initMainMenu'
+import { clickOnMenuButton, initMainMenuCamPos, renderMainMenu, selectMainMenu, setupWindow, spawnPlayerContinueGame } from './states/mainMenu/mainMenuRendering'
 import { disablePortrait, enableFullscreen, resize, setupGame, stopOnLosingFocus } from './states/setup/setupGame'
 import { UI, errors } from './ui/UI'
 
@@ -71,9 +72,9 @@ gameState
 	.addPlugins(debugPlugin, fishingPlugin, interactionPlugin, tickModifiersPlugin('speed', 'maxHealth', 'strength', 'critChance', 'critDamage', 'attackSpeed', 'lootQuantity', 'lootChance'))
 
 	.addSubscriber(initializeCameraPosition, bobItems, enableInventoryState, killAnimation, popItems, addHealthBarContainer, ...equip('wateringCan', 'weapon', 'fishingPole'), ...doorLocking, addDashDisplay, addQuestMarkers)
+	.onPreUpdate(runIf(() => !pausedState.enabled, tweens.tick))
 	.onPreUpdate(stopItems)
-	.onPreUpdate(runIf(() => !pausedState.enabled, () => gameTweens.update(time.elapsed)))
-	.onUpdate(
+	.onPreUpdate(
 		runIf(canPlayerMove, movePlayer, updateDashDisplay),
 		runIf(() => !pausedState.enabled, playerSteps, dayNight, updateTimeUniforms, applyDeathTimer, triggerDialog),
 		runIf(() => !openMenuState.enabled, pauseGame),
@@ -83,10 +84,14 @@ gameState
 	.onPostUpdate(renderGame, rotateStun, runIf(() => !openMenuState.enabled, interact))
 	.enable()
 mainMenuState
-	.onEnter(intiMainMenuRendering, setMainCameraPosition)
-	.onUpdate(renderMainMenu, selectMainMenu)
-	.addSubscriber(clickOnMenuButton, initMainMenuCamPos)
-	.onExit(removeStateEntity(mainMenuState), spawnPlayerContinueGame)
+	.onEnter(intiMainMenuRendering, setupWindow)
+	.onUpdate(renderMainMenu, selectMainMenu, clickOnMenuButton)
+	.addSubscriber(...initMainMenuCamPos)
+	.onExit(
+		removeStateEntity(mainMenuState),
+		runIf(() => ruinsIntro.enabled, () => resetSave(), startIntro),
+		runIf(() => campState.enabled, spawnPlayerContinueGame),
+	)
 openMenuState
 	.onEnter(stopPlayer)
 	.addSubscriber(disableInventoryState)
@@ -101,9 +106,10 @@ campState
 	.onUpdate(runIf(canPlayerMove, plantSeed, harvestCrop, openPlayerInventory))
 	.onExit(despawnOfType('map'))
 ruinsIntro
-	.onEnter(spawnRuins, spawnLevelData, moveCamera(true), startIntro)
-	.onEnter(compileShaders)
+	.onEnter(spawnRuins, spawnLevelData)
+	.onEnter(compileShaders, moveCamera(true))
 	.onUpdate(collideWithDoorRuins)
+	.addSubscriber(enableCutscene)
 	.onExit(despawnOfType('map'))
 genDungeonState
 	.addSubscriber(unlockDoorClearing)

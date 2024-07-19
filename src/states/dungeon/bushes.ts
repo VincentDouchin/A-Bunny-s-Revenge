@@ -1,10 +1,9 @@
 import type { BufferGeometry, Mesh, MeshPhongMaterial } from 'three'
 import { Vector3 } from 'three'
-import { Easing, Tween } from '@tweenjs/tween.js'
 import { itemBundle } from '../game/items'
 import { getIntersections } from '../game/sensor'
-import { ecs, gameTweens } from '@/global/init'
 import { shakenLeaves } from '@/particles/bushShaken'
+import { ecs, tweens } from '@/global/init'
 
 const dropBerries = (amount: number, bushPosition: Vector3, berries: Set<Mesh<BufferGeometry, MeshPhongMaterial>>) => {
 	for (let i = 0; i < amount; i++) {
@@ -56,15 +55,19 @@ export const dropBerriesOnHit = () => {
 							position: new Vector3(),
 							emitter: shakenLeaves(),
 						})
-						gameTweens.add(new Tween([0]).to([10], 500).easing(Easing.Sinusoidal.InOut).onUpdate(([f]) => {
-							bush.shake = f
-						}).onComplete(() => {
-							if (bush.shaken === 2) {
-								ecs.remove(bush)
-							} else {
-								ecs.removeComponent(bush, 'shake')
-							}
-						}))
+						tweens.add({
+							from: 0,
+							to: 1,
+							duration: 500,
+							onUpdate: f => bush.shake = Math.sin(f * 10) * f,
+							onComplete: () => {
+								if (bush.shaken === 2) {
+									ecs.remove(bush)
+								} else {
+									ecs.removeComponent(bush, 'shake')
+								}
+							},
+						})
 					}
 				}
 			}

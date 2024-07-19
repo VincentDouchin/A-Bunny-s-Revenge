@@ -1,9 +1,9 @@
-import { Easing, Tween } from '@tweenjs/tween.js'
 import type { With } from 'miniplex'
+import { circIn, circOut, createExpoIn } from 'popmotion'
 import { between } from 'randomish'
 import { Vector3 } from 'three'
 import { CSS2DObject } from 'three/examples/jsm/renderers/CSS2DRenderer'
-import { ecs, gameTweens } from '@/global/init'
+import { ecs, tweens } from '@/global/init'
 import type { Entity } from '@/global/entity'
 
 export const spawnDamageNumber = (amount: number, enemy: With<Entity, 'position' | 'size'>, crit: boolean) => {
@@ -14,17 +14,37 @@ export const spawnDamageNumber = (amount: number, enemy: With<Entity, 'position'
 	const y = enemy.size.y
 	const top = y + between(2, 4)
 	const position = enemy.position.clone().add(new Vector3(0, y, 0))
-	const down = new Tween([top]).to([y], 200).onUpdate(([val]) => position.y = val).easing(Easing.Circular.In)
-	const up = new Tween(position).to({ y: top }, 200).chain(down).easing(Easing.Circular.Out)
-	const size = new Tween([7]).to([0]).easing(Easing.Exponential.Out).onUpdate(([val]) => el.style.fontSize = `${val}em`)
+	const damageNumber = ecs.add({ model: mesh, position })
+	tweens.async({
+		from: y,
+		to: top,
+		duration: 200,
+		onUpdate: f => damageNumber.position.y = f,
+		ease: circIn,
+	}, {
+		from: top,
+		to: top - between(2, 4),
+		duration: 200,
+		ease: circOut,
+		onUpdate: f => damageNumber.position.y = f,
+	})
+	tweens.add({
+		from: 4,
+		to: 0,
+		duration: 400,
+		ease: createExpoIn(1),
+		onUpdate: f => el.style.fontSize = `${f}em`,
+	})
 	const origin = enemy.position.clone()
 	const direction = new Vector3().randomDirection()
-	const throwing = new Tween([0]).to([between(2, 5)], 400).onUpdate(([val]) => {
-		position.x = origin.x + direction.x * val
-		position.z = origin.z + direction.z * val
+	tweens.add({
+		from: 0,
+		destroy: damageNumber,
+		to: between(2, 5),
+		duration: 400,
+		onUpdate: (f) => {
+			damageNumber.position.x = origin.x + direction.x * f
+			damageNumber.position.z = origin.z + direction.z * f
+		},
 	})
-
-	const damageNumber = ecs.add({ model: mesh, position })
-	gameTweens.add(throwing, down, up, size)
-	throwing.onComplete(() => ecs.remove(damageNumber))
 }

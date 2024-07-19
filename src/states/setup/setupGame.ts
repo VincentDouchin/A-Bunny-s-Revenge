@@ -1,7 +1,6 @@
-import { Vector2 } from 'three'
 import { throttle } from '@solid-primitives/scheduled'
+import { Vector2 } from 'three'
 import { RoomType, assignPlanAndEnemies } from '../dungeon/generateDungeon'
-import { setMainCameraPosition } from '../mainMenu/mainMenuRendering'
 import { updateCameraZoom } from '@/global/camera'
 import { params } from '@/global/context'
 import { settings, time } from '@/global/init'
@@ -29,8 +28,6 @@ export const setupGame = async () => {
 		updateRenderSize()
 	} else if (!params.skipMainMenu) {
 		mainMenuState.enable()
-		setMainCameraPosition()
-		campState.enable({})
 	} else {
 		campState.enable({})
 		updateRenderSize()

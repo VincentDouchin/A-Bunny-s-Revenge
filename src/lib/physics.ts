@@ -5,7 +5,6 @@ import { pausedState } from '@/global/states'
 
 const bodiesQuery = ecs.with('bodyDesc', 'position').without('body')
 const colliderQueries = ecs.with('colliderDesc', 'body').without('collider')
-const rotationWithBodyQuery = ecs.with('body', 'rotation')
 const secondaryCollidersQuery = ecs.with('body', 'secondaryCollidersDesc')
 
 const bodiesToRemove = new Set<RigidBody>()
@@ -31,21 +30,23 @@ export const stepWorld = () => {
 			body.setRotation(entity.rotation, true)
 		}
 		body.userData = entity
+		ecs.removeComponent(entity, 'bodyDesc')
 		callBacks.push(() => {
 			ecs.addComponent(entity, 'body', body)
-			ecs.removeComponent(entity, 'bodyDesc')
 		})
 	}
 	for (const entity of colliderQueries) {
 		const collider = world.createCollider(entity.colliderDesc, entity.body)
+		ecs.removeComponent(entity, 'colliderDesc')
 		callBacks.push(() => {
 			ecs.addComponent(entity, 'collider', collider)
-			ecs.removeComponent(entity, 'colliderDesc')
 		})
 	}
 	for (const entity of secondaryCollidersQuery) {
 		const colliders = entity.secondaryCollidersDesc.map(desc => world.createCollider(desc, entity.body))
-		ecs.addComponent(entity, 'secondaryColliders', colliders)
+		callBacks.push(() => {
+			ecs.addComponent(entity, 'secondaryColliders', colliders)
+		})
 		ecs.removeComponent(entity, 'secondaryCollidersDesc')
 	}
 	world.step()
@@ -64,9 +65,6 @@ export const stepWorld = () => {
 	}
 	secondaryCollidersToRemove.clear()
 	callBacks.forEach(callBack => callBack())
-	for (const entity of rotationWithBodyQuery) {
-		entity.body.setRotation(entity.rotation, true)
-	}
 }
 export const physicsPlugin = (state: State) => {
 	state

@@ -1,33 +1,33 @@
-import { Tween } from '@tweenjs/tween.js'
 import type { With } from 'miniplex'
 import { Color, Mesh, Vector3 } from 'three'
 import type { Entity } from '@/global/entity'
-import { ecs, gameTweens, time } from '@/global/init'
+import { ecs, time, tweens } from '@/global/init'
 import { CharacterMaterial } from '@/shaders/materials'
 
 export const flash = (entity: With<Entity, 'model'>, duration: number, type: 'preparing' | 'damage' | 'poisoned' = 'preparing') => {
-	const tween = new Tween({ flash: 0 })
-		.to({ flash: 1 }, duration)
-		.yoyo(true)
-		.repeat(1)
-	tween.onUpdate(({ flash }) => {
-		entity.model.traverse((node) => {
-			if (node instanceof Mesh && node.material instanceof CharacterMaterial) {
-				node.material.uniforms.flash.value = flash
-				if (type === 'preparing') {
-					node.material.uniforms.flashColor.value = new Vector3(1, 1, 1)
+	return tweens.async({
+		from: 0,
+		to: 1,
+		repeat: 1,
+		repeatType: 'reverse',
+		duration,
+		onUpdate: (f) => {
+			entity.model.traverse((node) => {
+				if (node instanceof Mesh && node.material instanceof CharacterMaterial) {
+					node.material.uniforms.flash.value = f
+					if (type === 'preparing') {
+						node.material.uniforms.flashColor.value = new Vector3(1, 1, 1)
+					}
+					if (type === 'damage') {
+						node.material.uniforms.flashColor.value = new Vector3(1, 0, 0)
+					}
+					if (type === 'poisoned') {
+						node.material.uniforms.flashColor.value = new Vector3(...new Color(0x9DE64E).toArray())
+					}
 				}
-				if (type === 'damage') {
-					node.material.uniforms.flashColor.value = new Vector3(1, 0, 0)
-				}
-				if (type === 'poisoned') {
-					node.material.uniforms.flashColor.value = new Vector3(...new Color(0x9DE64E).toArray())
-				}
-			}
-		})
+			})
+		},
 	})
-	gameTweens.add(tween)
-	return tween
 }
 
 export const calculateDamage = (entity: With<Entity, 'strength' | 'critChance' | 'critDamage' | 'combo'>) => {

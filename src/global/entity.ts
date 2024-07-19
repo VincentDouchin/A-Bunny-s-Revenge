@@ -22,7 +22,7 @@ import type { Timer } from '@/lib/timer'
 import type { WeaponArc } from '@/shaders/weaponArc'
 import type { Room } from '@/states/dungeon/generateDungeon'
 import type { Dash } from '@/states/game/dash'
-import type { MenuOptions, RenderMainMenuFn } from '@/states/mainMenu/mainMenuRendering'
+import type { MainMenuBook } from '@/states/mainMenu/book'
 
 export type PlayerAnimations = 'idle' | 'running' | 'lightAttack' | 'slashAttack' | 'heavyAttack' | 'hit' | 'dying' | 'fishing'
 export type EnemyAnimations = 'idle' | 'running' | 'attacking' | 'hit' | 'dead'
@@ -113,6 +113,7 @@ export interface Entity {
 	cameraShake?: Vector3
 	initialCameratarget?: true
 	followCamera?: true
+	fixedCamera?: true
 	mainCamera?: true
 	cameraLookat?: Vector3
 	cameraOffset?: Vector3
@@ -278,11 +279,8 @@ export interface Entity {
 	weaponName?: weapons
 	weaponStand?: weapons
 	// ! Main menu
-	menuSelected?: MenuOptions
-	menuTexture?: RenderMainMenuFn
-	windowShader?: ShaderMaterial
 	stateEntity?: State
-	menuButton?: MenuOptions
+	menuBook?: MainMenuBook
 	// ! Money
 	acorn?: true
 	// ! Berry Bush

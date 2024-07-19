@@ -12,21 +12,6 @@ import type { Crop, Entity } from './entity'
 import type { QuestName } from '@/constants/quests'
 import type { Item, Meals, crops } from '@/constants/items'
 
-// eslint-disable-next-line ts/consistent-type-definitions
-export type SaveData = {
-	crops: Record<string, NonNullable<Crop>>
-	playerPosition: number[]
-	playerRotation: number[]
-	quests: Partial<Record<QuestName, Array<boolean>>>
-	selectedSeed: null | crops
-	inventories: Record<string, Item[]>
-	modifiers: Meals[]
-	unlockedRecipes: items[]
-	unlockedPaths: number
-	acorns: number
-	daytime: { current: number, dayToNight: boolean, timePassed: number, dayLight: number }
-}
-
 const blankSettings = (): Settings => ({
 	volume: 100,
 	mute: false,
@@ -76,6 +61,21 @@ export const useSettings = async () => {
 	return settings
 }
 
+// eslint-disable-next-line ts/consistent-type-definitions
+export type SaveData = {
+	crops: Record<string, NonNullable<Crop>>
+	playerPosition: number[]
+	playerRotation: number[]
+	quests: Partial<Record<QuestName, Array<boolean>>>
+	selectedSeed: null | crops
+	inventories: Record<string, Item[]>
+	modifiers: Meals[]
+	unlockedRecipes: items[]
+	unlockedPaths: number
+	acorns: number
+	started: boolean
+	daytime: { current: number, dayToNight: boolean, timePassed: number, dayLight: number }
+}
 const blankSave = (): SaveData => ({
 	crops: {},
 	playerPosition: new Vector3().toArray(),
@@ -87,6 +87,7 @@ const blankSave = (): SaveData => ({
 	unlockedRecipes: [],
 	unlockedPaths: 0,
 	acorns: 0,
+	started: false,
 	daytime: { current: 0, dayToNight: true, timePassed: 0, dayLight: 0 },
 })
 
@@ -106,7 +107,9 @@ export const useSave = async () => {
 	}
 	const addItem = async (entity: With<Entity, 'inventoryId' | 'inventory' | 'inventorySize'>, item: Item, stack = true) => {
 		let wasAdded = false
+		save.inventories[entity.inventoryId] ??= []
 		const inventory = save.inventories[entity.inventoryId]
+
 		const existingItem = inventory.find(it => it && it.name === item.name && stack)
 		if (existingItem) {
 			wasAdded = true

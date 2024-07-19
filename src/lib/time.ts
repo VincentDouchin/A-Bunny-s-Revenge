@@ -1,4 +1,4 @@
-import { Easing } from '@tweenjs/tween.js'
+import { easeInOut } from 'popmotion'
 import { Clock } from 'three'
 import { clamp } from 'three/src/math/MathUtils'
 import { save } from '@/global/init'
@@ -46,6 +46,6 @@ export class DayTime {
 	}
 
 	intensity() {
-		return clamp(Easing.Quadratic.InOut(this.current * this.current), 0, 1)
+		return clamp(easeInOut(this.current * this.current), 0, 1)
 	}
 }

@@ -1,14 +1,14 @@
-import { Easing, Tween } from '@tweenjs/tween.js'
 import type { With } from 'miniplex'
-import { Mesh, Quaternion, Vector3 } from 'three'
+import { circOut } from 'popmotion'
 import { between } from 'randomish'
+import { Mesh, Quaternion, Vector3 } from 'three'
 import type { Entity } from '@/global/entity'
-import { ecs, gameTweens, time } from '@/global/init'
+import { ecs, time, tweens } from '@/global/init'
+import { playSound } from '@/global/sounds'
 import { behaviorPlugin } from '@/lib/behaviors'
 import { fishParticles } from '@/particles/fishParticles'
-import { sleep } from '@/utils/sleep'
 import { stopFishing } from '@/states/farm/fishing'
-import { playSound } from '@/global/sounds'
+import { sleep } from '@/utils/sleep'
 
 const fishComponents = ['fish', 'group', 'rotation', 'position', 'targetRotation'] as const satisfies readonly (keyof Entity)[]
 const fishQuery = ecs.with(...fishComponents)
@@ -43,15 +43,18 @@ export const fishBehaviorPlugin = behaviorPlugin(fishQuery, 'fish', fishParamete
 			if (!e.fishingProgress) {
 				ecs.update(e, { fishingProgress: { attempts: 0, sucess: 0, done: false } })
 			}
-
-			gameTweens.add(
-				new Tween(e.position)
-					.to(e.position.clone().add(new Vector3(0, 0, -2).applyQuaternion(e.rotation)), between(300, 600))
-					.yoyo(true)
-					.repeat(1)
-					.easing(Easing.Circular.Out)
-					.onComplete(() => setState('bounce')),
-			)
+			const from = e.position.clone()
+			const dest = new Vector3(0, 0, -2).applyQuaternion(e.rotation).add(e.position)
+			tweens.add({
+				from: 0,
+				to: 1,
+				repeat: 1,
+				duration: between(300, 600),
+				ease: circOut,
+				repeatType: 'mirror',
+				onComplete: () => setState('bounce'),
+				onUpdate: f => e.position.lerpVectors(from, dest, f),
+			})
 		},
 		update(_e, setState, { bobber }) {
 			if (!bobber)setState('wander')
@@ -80,7 +83,18 @@ export const fishBehaviorPlugin = behaviorPlugin(fishQuery, 'fish', fishParamete
 			playSound(['zapsplat_sport_fishing_sinker_tackle_hit_water_plop_001_13669', 'zapsplat_sport_fishing_sinker_tackle_hit_water_plop_002_13670'])
 			ecs.add({ parent: e, emitter: fishParticles(), position: new Vector3(0, 0, 3), autoDestroy: true })
 			if (bobberPosition) {
-				gameTweens.add(new Tween(bobberPosition).to(bobberPosition.clone().add(new Vector3(0, -2, 0)), 250).repeat(1).yoyo(true).easing(Easing.Circular.Out))
+				const originalPosition = bobberPosition.clone()
+				const targetPosition = new Vector3(0, -2, 0).add(originalPosition)
+				tweens.add({
+					from: 0,
+					to: 1,
+					duration: 250,
+					repeat: 1,
+					repeatType: 'mirror',
+					ease: circOut,
+					onUpdate: f => bobberPosition.lerpVectors(originalPosition, targetPosition, f),
+
+				})
 			}
 			await sleep(500)
 			if (bobber) {
@@ -112,7 +126,14 @@ export const fishBehaviorPlugin = behaviorPlugin(fishQuery, 'fish', fishParamete
 		enter(e) {
 			e.targetRotation.setFromAxisAngle(new Vector3(0, 1, 0), Math.PI * 2 * Math.random())
 			if (e.model instanceof Mesh && e.model.material) {
-				gameTweens.add(new Tween(e.model.material).to({ opacity: 0 }, 2000).onComplete(() => ecs.remove(e)))
+				const mat = e.model.material
+				tweens.add({
+					destroy: e,
+					from: mat.opacity,
+					to: 0,
+					duration: 2000,
+					onUpdate: f => mat.opacity = f,
+				})
 			}
 		},
 		update(e) {

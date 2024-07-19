@@ -49,7 +49,7 @@ export const applyMove = (entity: With<Entity, 'body' >, force: Vector3) => {
 	}
 }
 export const applyRotate = (entity: With<Entity, 'rotation' | 'targetRotation'>, force: Vector3) => {
-	if (pausedState.enabled) return
+	if (pausedState.enabled || openMenuState.enabled) return
 	if (force.length() > 0) {
 		entity.targetRotation.setFromAxisAngle(new Vector3(0, 1, 0), Math.atan2(force.x, force.z))
 	}

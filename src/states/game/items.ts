@@ -1,9 +1,9 @@
 import type { items } from '@assets/assets'
 import { RigidBodyType } from '@dimforge/rapier3d-compat'
-import { Easing, Tween } from '@tweenjs/tween.js'
+import { createBackIn, easeInOut, linear } from 'popmotion'
 import { AdditiveBlending, Mesh, MeshBasicMaterial, SphereGeometry, Vector3 } from 'three'
 import type { Entity } from '@/global/entity'
-import { assets, ecs, gameTweens, save } from '@/global/init'
+import { assets, ecs, save, tweens } from '@/global/init'
 import { playSound } from '@/global/sounds'
 import { addTag, inMap } from '@/lib/hierarchy'
 import { modelColliderBundle } from '@/lib/models'
@@ -33,18 +33,26 @@ export const itemBundle = (item: items) => {
 	} as const satisfies Entity
 }
 export const bobItems = () => itemsQuery.onEntityAdded.subscribe((entity) => {
-	const rotationTween = new Tween({ rotation: 0 })
-		.to({ rotation: Math.PI * 2 }, 2000)
-		.repeat(Number.POSITIVE_INFINITY)
-		.onUpdate(({ rotation }) => entity.rotation?.setFromAxisAngle(new Vector3(0, 1, 0), rotation))
-	const positionTween = new Tween(entity.model.position)
-		.to({ y: 5 }, 2000)
-		.repeat(Number.POSITIVE_INFINITY).yoyo(true).easing(Easing.Quadratic.InOut)
-	gameTweens.add(rotationTween, positionTween)
-
-	ecs.addComponent(entity, 'onDestroy', () => {
-		gameTweens.remove(rotationTween)
-		gameTweens.remove(positionTween)
+	tweens.add({
+		parent: entity,
+		duration: 2000,
+		from: 0,
+		to: Math.PI * 2,
+		repeat: Number.POSITIVE_INFINITY,
+		onUpdate: (f) => {
+			entity.rotation?.setFromAxisAngle(new Vector3(0, 1, 0), f)
+		},
+		ease: linear,
+	})
+	tweens.add({
+		parent: entity,
+		duration: 2000,
+		from: entity.model.position.y,
+		to: entity.model.position.y + 5,
+		repeat: Number.POSITIVE_INFINITY,
+		onUpdate: f => entity.model.position.y = f,
+		ease: easeInOut,
+		repeatType: 'mirror',
 	})
 })
 
@@ -90,22 +98,26 @@ export const collectItems = (force = false) => async () => {
 					addTag(item, 'collecting')
 					const initialPosition = item.position.clone()
 					const initialScale = item.model.scale.clone()
-					gameTweens.add(new Tween([0])
-						.easing(Easing.Back.In)
-						.to([1], dist * 30).onUpdate(([i]) => {
-							item.position.lerpVectors(initialPosition, { ...player.position, y: 4 }, i)
-							item.model.scale.lerpVectors(initialScale, initialScale.clone().multiplyScalar(0.5), i)
-						}).onComplete(() => {
+					tweens.add({
+						destroy: item,
+						from: 0,
+						to: 1,
+						ease: createBackIn(3),
+						duration: dist * 30,
+						onUpdate: (f) => {
+							item.position.lerpVectors(initialPosition, { ...player.position, y: 4 }, f)
+							item.model.scale.lerpVectors(initialScale, initialScale.clone().multiplyScalar(0.5), f)
+						},
+						onComplete: () => {
 							playSound('zapsplat_multimedia_alert_action_collect_pick_up_point_or_item_79293')
-							ecs.remove(item)
 							if (item.itemLabel) {
 								addItemToPlayer({ name: item.itemLabel, quantity: 1, recipe: item.recipe, health: item.health })
 							}
 							if (item.acorn) {
 								save.acorns++
 							}
-						}),
-					)
+						},
+					})
 				}
 			}
 		}

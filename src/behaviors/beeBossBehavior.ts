@@ -1,9 +1,8 @@
-import { Tween } from '@tweenjs/tween.js'
 import { Vector3 } from 'three'
 import { applyMove, applyRotate, getMovementForce, takeDamage } from './behaviorHelpers'
 import { playerQuery } from './enemyBehavior'
 import { EnemyAttackStyle } from '@/global/entity'
-import { ecs, gameTweens } from '@/global/init'
+import { ecs, tweens } from '@/global/init'
 import { playSound } from '@/global/sounds'
 import { behaviorPlugin } from '@/lib/behaviors'
 import { spawnDamageNumber } from '@/particles/damageNumber'
@@ -128,7 +127,14 @@ export const beeBossBehaviorPlugin = behaviorPlugin(
 				takeDamage(e, damage)
 				spawnDamageNumber(damage, e, crit)
 			}
-			gameTweens.add(new Tween(e.group.scale).to(new Vector3(0.8, 1.2, 0.8), 200).repeat(1).yoyo(true))
+			tweens.add({
+				from: e.group.scale.clone(),
+				to: new Vector3(0.8, 1.2, 0.8),
+				duration: 200,
+				repeat: 1,
+				repeatType: 'mirror',
+				onUpdate: f => e.group.scale.copy(f),
+			})
 			flash(e, 200, 'damage')
 			await e.enemyAnimator.playOnce('hit')
 			if (e.currentHealth <= 0) {

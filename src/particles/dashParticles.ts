@@ -10,7 +10,7 @@ export const dash = (duration: number) => {
 	const system = new ParticleSystem({
 		duration,
 		looping: false,
-		prewarm: true,
+		prewarm: false,
 		instancingGeometry: geo,
 		startColor: new ColorRange(new Vector4(1, 1, 1, 0.2), new Vector4(0.7, 0.7, 0.7, 0.5)),
 		startLife: new ConstantValue(5.0),

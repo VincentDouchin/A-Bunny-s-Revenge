@@ -8,7 +8,7 @@ import { CoroutinesManager } from '@/lib/coroutines'
 import { InputManager } from '@/lib/inputs'
 import { MusicManager } from '@/lib/musicManager'
 import { DayTime, Time } from '@/lib/time'
-import { TweenGroup } from '@/lib/tweens'
+import { tweensManager } from '@/lib/tweens'
 import { UIManager } from '@/lib/uiManager'
 
 await init()
@@ -25,4 +25,4 @@ export const inputManager = new InputManager()
 export const levelsData = await loadLevelData()
 export const dayTime = new DayTime(600_000)
 export const musicManager = new MusicManager()
-export const gameTweens = new TweenGroup()
+export const tweens = tweensManager(time, ecs)

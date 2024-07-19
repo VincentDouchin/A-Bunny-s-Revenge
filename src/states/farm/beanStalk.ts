@@ -1,13 +1,13 @@
 import { ColliderDesc, RigidBodyDesc } from '@dimforge/rapier3d-compat'
 import { Color, MeshBasicMaterial, PlaneGeometry, Vector3, Vector4 } from 'three'
 
-import { Easing, Tween } from '@tweenjs/tween.js'
+import { bounceOut } from 'popmotion'
 import { Bezier, ConstantColor, ConstantValue, IntervalValue, ParticleSystem, PiecewiseBezier, RenderMode, SizeOverLife, SphereEmitter } from 'three.quarks'
 import { itemBundle } from '../game/items'
 import { getIntersections } from '../game/sensor'
 import { getGrowthStages, updateCropsSave } from './farming'
 import { Interactable } from '@/global/entity'
-import { assets, dayTime, ecs, gameTweens, save } from '@/global/init'
+import { assets, dayTime, ecs, save, tweens } from '@/global/init'
 import { inMap } from '@/lib/hierarchy'
 import { getWorldPosition } from '@/lib/transforms'
 import { completeQuestStep, hasCompletedStep, hasQuest, removeItemFromPlayer } from '@/utils/dialogHelpers'
@@ -57,7 +57,13 @@ export const addBeanStalkHole = () => {
 		if (grown) {
 			beanStalkModel.scale.setScalar(scale)
 		} else {
-			gameTweens.add(new Tween(beanStalkModel.scale).to(beanStalkModel.scale.clone().setScalar(scale), 2000).easing(Easing.Bounce.Out))
+			tweens.add({
+				from: beanStalkModel.scale.clone(),
+				to: new Vector3(20, 20, 20),
+				ease: bounceOut,
+				duration: 2000,
+				onUpdate: f => beanStalkModel.scale.copy(f),
+			})
 		}
 		const crop = save.crops[MAGIC_BEAN_CROP_ID] ?? {
 			luck: 0,

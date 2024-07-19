@@ -1,4 +1,4 @@
-import { Easing } from '@tweenjs/tween.js'
+import { easeOut } from 'popmotion'
 import { between } from 'randomish'
 import { CircleGeometry, CylinderGeometry, Mesh, MeshBasicMaterial } from 'three'
 import { Bezier, CircleEmitter, ColorRange, ConstantValue, IntervalValue, ParticleSystem, PiecewiseBezier, RandomQuatGenerator, RenderMode, SizeOverLife } from 'three.quarks'
@@ -60,7 +60,7 @@ export const spawnPoisonTrail = () => {
 	for (const trail of trailQuery) {
 		trail.trail.timer?.tick(time.delta)
 		if (trail.model instanceof Mesh) {
-			trail.model.material.opacity = Easing.Cubic.Out((1 - trail.trail.timer.percent()) / 2)
+			trail.model.material.opacity = easeOut((1 - trail.trail.timer.percent()) / 2)
 		}
 		if (trail.trail.timer.finished()) {
 			// @ts-expect-error wrong type

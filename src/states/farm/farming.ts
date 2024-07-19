@@ -1,6 +1,6 @@
 import { RigidBodyType } from '@dimforge/rapier3d-compat'
-import { Easing, Tween } from '@tweenjs/tween.js'
 import type { With } from 'miniplex'
+import { createBackIn, reverseEasing } from 'popmotion'
 import { Vector3 } from 'three'
 import { randFloat } from 'three/src/math/MathUtils'
 import { itemBundle } from '../game/items'
@@ -10,7 +10,7 @@ import { Sizes } from '@/constants/sizes'
 import { itemsData } from '@/constants/items'
 import type { crops } from '@/constants/items'
 
-import { assets, dayTime, ecs, gameTweens, removeItem, save } from '@/global/init'
+import { assets, dayTime, ecs, removeItem, save, tweens } from '@/global/init'
 import { playSound } from '@/global/sounds'
 import { removeEntityRef } from '@/lib/hierarchy'
 import { modelColliderBundle } from '@/lib/models'
@@ -54,10 +54,13 @@ export const cropBundle = (grow: boolean, crop: NonNullable<Entity['crop']>) => 
 
 	if (stage === 0) {
 		modelBundle.model.scale.setScalar(0)
-		const tween = new Tween({ scale: 0 }).to({ scale: 10 }, 1000).easing(Easing.Elastic.Out).onUpdate(({ scale }) => {
-			modelBundle.model.scale.setScalar(scale)
+		tweens.add({
+			from: 0,
+			to: 10,
+			duration: 500,
+			ease: reverseEasing(createBackIn(3)),
+			onUpdate: f => modelBundle.model.scale.setScalar(f),
 		})
-		gameTweens.add(tween)
 	}
 	if (stage === maxStage(crop.name)) {
 		bundle.interactable = Interactable.Harvest

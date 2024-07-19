@@ -1,6 +1,5 @@
 import Exit from '@assets/icons/arrow-left-solid.svg'
 import Fire from '@assets/icons/fire-solid.svg'
-import { Tween } from '@tweenjs/tween.js'
 import type { With } from 'miniplex'
 import { between } from 'randomish'
 import { For, Show, createMemo, createSignal, onCleanup, onMount } from 'solid-js'
@@ -13,18 +12,18 @@ import { updateCameraZoom } from '@/global/camera'
 import { params } from '@/global/context'
 import type { Entity } from '@/global/entity'
 import { MenuType } from '@/global/entity'
-import { ecs, gameTweens, time, ui } from '@/global/init'
+import { ecs, time, tweens, ui } from '@/global/init'
 import { cameraQuery } from '@/global/rendering'
 import { playSound } from '@/global/sounds'
 import { addTag } from '@/lib/hierarchy'
 import { getWorldPosition } from '@/lib/transforms'
 import { fireParticles } from '@/particles/fireParticles'
 import { smoke } from '@/particles/smoke'
+import { InputIcon } from '@/ui/InputIcon'
 import { TouchButton } from '@/ui/TouchControls'
 import { OutlineText } from '@/ui/components/styledComponents'
 import { useGame, useQuery } from '@/ui/store'
 import { sleep } from '@/utils/sleep'
-import { InputIcon } from '@/ui/InputIcon'
 
 export const ovenQuery = useQuery(ecs.with('menuType', 'recipesQueued', 'ovenAnimator', 'position').where(({ menuType }) => menuType === MenuType.OvenMinigame))
 
@@ -41,13 +40,17 @@ export const OvenMinigameUi = () => {
 							let targetEntity: Entity | null = null
 							let lightEntity: With<Entity, 'light' | 'emitter'> | null = null
 							onMount(() => {
-								gameTweens.add(new Tween([params.zoom]).to([15], 1000).onUpdate(([zoom]) => {
-									updateCameraZoom(zoom)
-								}))
 								for (const camera of cameraQuery) {
-									// ecs.removeComponent(camera, 'lockX')
+									ecs.removeComponent(camera, 'fixedCamera')
+									ecs.removeComponent(camera, 'cameraOffset')
 									ecs.addComponent(camera, 'cameraOffset', new Vector3(0, 30, 80).applyQuaternion(oven.rotation!))
 								}
+								tweens.add({
+									from: params.zoom,
+									to: 15,
+									duration: 1000,
+									onUpdate: updateCameraZoom,
+								})
 								const position = getWorldPosition(oven.group!)
 								targetEntity = ecs.add({
 									worldPosition: position.add(new Vector3(0, 10, 0)),
@@ -70,25 +73,34 @@ export const OvenMinigameUi = () => {
 								lightEntity = ecs.add({ light, parent: oven, position: new Vector3(0, 0, 0), emitter: fireParticles() })
 							})
 							onCleanup(() => {
-								gameTweens.add(new Tween([15]).to([params.zoom], 1000).onUpdate(([zoom]) => {
-									updateCameraZoom(zoom)
-								}))
+								tweens.add({
+									from: 15,
+									to: params.zoom,
+									duration: 1000,
+									onUpdate: updateCameraZoom,
+								})
 								targetEntity && ecs.remove(targetEntity)
 								addTag(player(), 'cameratarget')
 								for (const camera of cameraQuery) {
 									ecs.removeComponent(camera, 'cameraOffset')
+									addTag(camera, 'fixedCamera')
 								}
 								ecs.removeComponent(oven, 'cameratarget')
 								for (const smokeTrail of smokeTrails) {
 									smokeTrail.emitter.system.looping = false
 								}
-								gameTweens.add(new Tween([1]).to([0], 4000).onUpdate(([f]) => {
-									if (lightEntity) {
-										lightEntity.light.intensity = f * 10
-										// @ts-expect-error wrong type
-										lightEntity.emitter.system.emissionOverTime = new ConstantValue(f * 2 / 30)
-									}
-								}))
+								tweens.add({
+									from: 1,
+									to: 0,
+									duration: 4000,
+									onUpdate: (f) => {
+										if (lightEntity) {
+											lightEntity.light.intensity = f * 10
+											// @ts-expect-error wrong type
+											lightEntity.emitter.system.emissionOverTime = new ConstantValue(f * 2 / 30)
+										}
+									},
+								})
 							})
 							const [bar, setBar] = createSignal(50)
 							const [target, setTarget] = createSignal(50)

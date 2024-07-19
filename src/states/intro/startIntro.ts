@@ -6,6 +6,7 @@ import { sleep } from '@/utils/sleep'
 import { dialogs } from '@/constants/dialogs'
 
 const playerQuery = ecs.with('player', 'position', 'rotation', 'targetRotation')
+
 export const startIntro = async () => {
 	cutSceneState.enable()
 	const player = playerQuery.first
@@ -17,4 +18,9 @@ export const startIntro = async () => {
 			activeDialog: 'instant',
 		})
 	}
+}
+
+export const enableCutscene = () => {
+	cutSceneState.enable()
+	return () => cutSceneState.disable()
 }

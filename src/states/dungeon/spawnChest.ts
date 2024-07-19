@@ -1,5 +1,5 @@
 import { ColliderDesc, RigidBodyDesc } from '@dimforge/rapier3d-compat'
-import { Easing, Tween } from '@tweenjs/tween.js'
+import { createBackIn, reverseEasing } from 'popmotion'
 import { Vector3 } from 'three'
 import { clone } from 'three/examples/jsm/utils/SkeletonUtils'
 import { collectItems } from '../game/items'
@@ -8,7 +8,7 @@ import { dropBundle, lootPool } from './lootPool'
 import { chestLoot } from '@/constants/chestLoot'
 import { Animator } from '@/global/animator'
 import { Faction } from '@/global/entity'
-import { assets, ecs, gameTweens } from '@/global/init'
+import { assets, ecs, tweens } from '@/global/init'
 import { playSound } from '@/global/sounds'
 import type { DungeonRessources } from '@/global/states'
 import { inMap } from '@/lib/hierarchy'
@@ -38,21 +38,26 @@ export const spawnChest = (dungeonLevel: number) => {
 			chestAnimator: new Animator(chest, assets.models.Chest.animations),
 			emitter: chestAppearing(),
 		})
-		gameTweens.add(new Tween(chest.scale).to(new Vector3(8, 8, 8)).onComplete(async () => {
-			chestEntity.chestAnimator.playClamped('chest_open')
-
-			await sleep(200)
-			for (let i = 0; i < items.length; i++) {
-				const item = items[i]
-				await sleep(100)
-				const angle = Math.PI / 2 + ((0.5 * Math.random()) * (Math.random() < 0.5 ? 1 : -1))
-				ecs.add({
-					...dropBundle(item),
-					position: new Vector3(0, 5, 0),
-					popDirection: new Vector3(Math.cos(angle), 1, -Math.sin(angle)).multiplyScalar(2),
-				})
-			}
-		}).easing(Easing.Exponential.Out))
+		tweens.add({
+			from: 0,
+			to: 8,
+			ease: reverseEasing(createBackIn(4)),
+			onUpdate: f => chest.scale.setScalar(f),
+			onComplete: async () => {
+				chestEntity.chestAnimator.playClamped('chest_open')
+				await sleep(200)
+				for (let i = 0; i < items.length; i++) {
+					const item = items[i]
+					await sleep(100)
+					const angle = Math.PI / 2 + ((0.5 * Math.random()) * (Math.random() < 0.5 ? 1 : -1))
+					ecs.add({
+						...dropBundle(item),
+						position: new Vector3(0, 5, 0),
+						popDirection: new Vector3(Math.cos(angle), 1, -Math.sin(angle)).multiplyScalar(2),
+					})
+				}
+			},
+		})
 	}
 }
 

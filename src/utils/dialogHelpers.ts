@@ -1,12 +1,12 @@
 import type { items } from '@assets/assets'
 import { ActiveCollisionTypes, ShapeType } from '@dimforge/rapier3d-compat'
-import { Easing, Tween } from '@tweenjs/tween.js'
 import type { Query, With } from 'miniplex'
+import { createBackIn, reverseEasing } from 'popmotion'
 import { Vector3 } from 'three'
 import { range } from './mapFunctions'
 import { sleep } from './sleep'
 import { cutSceneState } from '@/global/states'
-import { addItem, assets, coroutines, ecs, gameTweens, removeItem, save } from '@/global/init'
+import { addItem, assets, coroutines, ecs, removeItem, save, tweens } from '@/global/init'
 import type { Entity } from '@/global/entity'
 import { quests } from '@/constants/quests'
 import type { QuestName, QuestStepKey } from '@/constants/quests'
@@ -172,6 +172,7 @@ export const questsUnlocks: Record<QuestName, () => boolean> = {
 }
 
 export const hasItem = (itemName: items | ((item: Item) => boolean)) => {
+	if (!save.inventories.player) return
 	for (const item of save.inventories.player.filter(Boolean)) {
 		if (typeof itemName === 'string') {
 			if (item.name === itemName) return true
@@ -224,7 +225,12 @@ export const aliceJumpDown = async () => {
 		const followPosition = () => {
 			alice.body.setTranslation(getWorldPosition(alice.group).add(new Vector3(0, 10, 0)), true)
 		}
-		gameTweens.add(new Tween(alice.position).to(new Vector3(0, -15, 5).applyQuaternion(alice.rotation).add(alice.position), alice.kayAnimator.animationClips.Jump_Full_Long.duration * 1000 / 2 - 200))
+		tweens.add({
+			from: alice.position.clone(),
+			to: new Vector3(0, -15, 5).applyQuaternion(alice.rotation).add(alice.position),
+			duration: alice.kayAnimator.animationClips.Jump_Full_Long.duration * 1000 / 2 - 200,
+			onUpdate: f => alice.position.copy(f),
+		})
 		followPosition()
 		await alice.kayAnimator.playClamped('Jump_Full_Long', { timeScale: 2 })
 		alice.kayAnimator.playAnimation('Idle')
@@ -238,17 +244,24 @@ export const aliceJumpDown = async () => {
 		alice.kayAnimator.playAnimation('Idle')
 		alice.collider.setSensor(false)
 		alice.collider.setActiveCollisionTypes(ActiveCollisionTypes.ALL)
-		gameTweens.add(new Tween(alice.group.scale).to(alice.group.scale.clone().multiplyScalar(8), 2000).easing(Easing.Bounce.InOut).onUpdate((scale) => {
-			if (alice.collider.shape.type === ShapeType.Cylinder) {
-				alice.collider.setRadius(scale.length())
-			}
-		}).onComplete(() => {
-			ecs.removeComponent(alice, 'dialog')
-			completeQuestStep('alice_1', 'makeHummus')
-			ecs.update(alice, {
-				dialog: dialogs.AliceBig(),
-				activeDialog: true,
-			})
-		}))
+		tweens.add({
+			from: alice.group.scale.clone(),
+			to: alice.group.scale.clone().multiplyScalar(8),
+			duration: 2000,
+			ease: reverseEasing(createBackIn(3)),
+			onUpdate: (f) => {
+				if (alice.collider.shape.type === ShapeType.Cylinder) {
+					alice.collider.setRadius(f.length())
+				}
+				alice.group.scale.copy(f) },
+			onComplete: () => {
+				ecs.removeComponent(alice, 'dialog')
+				completeQuestStep('alice_1', 'makeHummus')
+				ecs.update(alice, {
+					dialog: dialogs.AliceBig(),
+					activeDialog: true,
+				})
+			},
+		})
 	}
 }

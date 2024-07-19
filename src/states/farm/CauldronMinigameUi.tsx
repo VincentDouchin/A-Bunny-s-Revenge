@@ -1,6 +1,5 @@
 import Exit from '@assets/icons/arrow-left-solid.svg'
 import Spoon from '@assets/icons/spoon-solid.svg'
-import { Tween } from '@tweenjs/tween.js'
 import { between } from 'randomish'
 import { Show, createMemo, createSignal, onCleanup, onMount } from 'solid-js'
 import { Portal } from 'solid-js/web'
@@ -12,7 +11,7 @@ import { updateCameraZoom } from '@/global/camera'
 import { params } from '@/global/context'
 import type { Entity } from '@/global/entity'
 import { MenuType } from '@/global/entity'
-import { ecs, gameTweens, inputManager, time, ui } from '@/global/init'
+import { ecs, inputManager, time, tweens, ui } from '@/global/init'
 import { cameraQuery } from '@/global/rendering'
 import { playSound } from '@/global/sounds'
 import { addTag } from '@/lib/hierarchy'
@@ -34,18 +33,24 @@ export const CauldronMinigameUi = () => {
 						{(cauldron) => {
 							let lightEntity: Entity | null = null
 							onMount(() => {
-								gameTweens.add(new Tween([params.zoom]).to([15], 1000).onUpdate(([zoom]) => {
-									updateCameraZoom(zoom)
-								}))
+								tweens.add({
+									from: params.zoom,
+									to: 15,
+									duration: 1000,
+									onUpdate: updateCameraZoom,
+								})
 								const light = new PointLight(new Color(0xFF0000), 10, 10)
 								light.position.setY(5)
 								lightEntity = ecs.add({ light, parent: cauldron(), position: new Vector3(0, 0, 0), emitter: fireParticles() })
 							})
 							onCleanup(() => {
 								lightEntity && ecs.remove(lightEntity)
-								gameTweens.add(new Tween([15]).to([params.zoom], 1000).onUpdate(([zoom]) => {
-									updateCameraZoom(zoom)
-								}))
+								tweens.add({
+									from: 15,
+									to: params.zoom,
+									duration: 1000,
+									onUpdate: updateCameraZoom,
+								})
 							})
 							const output = ui.sync(() => cauldron().recipesQueued[0]?.output)
 							let targetEntity: Entity | null = null
@@ -64,6 +69,8 @@ export const CauldronMinigameUi = () => {
 									worldPosition: new Vector3(0, 0, 1).add(cauldronPosition),
 								})
 								for (const camera of cameraQuery) {
+									ecs.removeComponent(camera, 'fixedCamera')
+									ecs.removeComponent(camera, 'cameraOffset')
 									ecs.addComponent(camera, 'cameraOffset', new Vector3(0, 40, -1).applyQuaternion(cauldron().rotation))
 								}
 
@@ -72,6 +79,7 @@ export const CauldronMinigameUi = () => {
 							onCleanup(() => {
 								for (const camera of cameraQuery) {
 									ecs.removeComponent(camera, 'cameraOffset')
+									addTag(camera, 'fixedCamera')
 								}
 								targetEntity && ecs.remove(targetEntity)
 								addTag(player(), 'cameratarget')

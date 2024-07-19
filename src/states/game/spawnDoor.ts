@@ -1,9 +1,8 @@
-import { Tween } from '@tweenjs/tween.js'
 import { DoubleSide, Group, Mesh, MeshBasicMaterial, PlaneGeometry, ShaderMaterial } from 'three'
 import { RoomType, genDungeon } from '../dungeon/generateDungeon'
 import type { QueryEntity } from '@/global/entity'
 import { Faction } from '@/global/entity'
-import { ecs, gameTweens, save, world } from '@/global/init'
+import { ecs, save, tweens, world } from '@/global/init'
 import { playSound } from '@/global/sounds'
 import type { DungeonRessources } from '@/global/states'
 import { campState, dungeonState, genDungeonState } from '@/global/states'
@@ -137,8 +136,11 @@ export const unlockDoors = () => doorToUnlockQuery.onEntityAdded.subscribe((e) =
 		if (vinesBottom) {
 			playSound('zapsplat_foley_tree_palm_front_dead_large_dry_movement_ground_001_99605', { playbackRate: 1.5 })
 			const initialPosition = vinesBottom.position.y
-			gameTweens.add(
-				new Tween([0]).to([1], 5000).onUpdate(([f]) => {
+			tweens.add({
+				from: 0,
+				to: 1,
+				duration: 5000,
+				onUpdate: (f) => {
 					vinesBottom.position.y = initialPosition - 30 * f
 					vinesBottom.traverse((node) => {
 						if (node instanceof Mesh && node.material instanceof VineGateMaterial) {
@@ -146,8 +148,8 @@ export const unlockDoors = () => doorToUnlockQuery.onEntityAdded.subscribe((e) =
 							node.material.depthWrite = false
 						}
 					})
-				}),
-			)
+				},
+			})
 		}
 	}
 	if (e.emitter) {

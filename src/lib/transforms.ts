@@ -49,7 +49,6 @@ const updateWorldPosition = () => {
 			if (body.isFixed()) {
 				body.setTranslation(worldPosition, true)
 				worldPositionQuery.remove(entity)
-				group.matrixAutoUpdate = false
 			}
 		} catch (e) {
 			console.error(e, entity)
@@ -81,8 +80,8 @@ const updateRotation = () => {
 export const transformsPlugin = (state: State) => {
 	state
 		.addSubscriber(addWorldPosition, swapPosition)
-		.onPreUpdate(updateGroupPosition, updateRotation)
-		.onPostUpdate(updateWorldPosition)
+		// Access bodies in pre update before clean up in physics plugin
+		.onPreUpdate(updateGroupPosition, updateRotation, updateWorldPosition)
 }
 
 export const isInIntersectionWithCollider = (collider: Collider) => {

@@ -104,3 +104,13 @@ export const shuffle = <T>(array: T[]) => {
 	}
 	return arr
 }
+
+export const once = (fn: (...args: any[]) => void) => {
+	let called = false
+	return () => {
+		if (!called) {
+			called = true
+			fn()
+		}
+	}
+}
