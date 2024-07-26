@@ -1,4 +1,4 @@
-export type System<R> = (ressources: R) => void
+export type System<R> = (ressources: R) => void | Promise<void>
 export type Subscriber<R> = (ressources: R) => () => void
 
 export class StateMananger {
@@ -67,7 +67,11 @@ export class StateMananger {
 
 	exclusive(...states: State<any>[]) {
 		for (const state of states) {
-			state.onEnter(...states.filter(s => s !== state).map(s => () => this.states.has(s) && s.disable()))
+			state.onEnter(...states.filter(s => s !== state).map(s => () => {
+				if (this.states.has(s)) {
+					s.disable()
+				}
+			}))
 		}
 	}
 
@@ -144,11 +148,14 @@ export class State<R = void> {
 	}
 
 	enable(ressources: R) {
-		this.#app.queue.add(() => {
-			if (this.enabled) {
-				this.disable()
-			}
-			this.#app.enable(this, ressources)
+		return new Promise<void>((resolve) => {
+			this.#app.queue.add(() => {
+				if (this.enabled) {
+					this.disable()
+				}
+				this.#app.enable(this, ressources)
+				resolve()
+			})
 		})
 	}
 

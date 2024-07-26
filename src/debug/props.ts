@@ -63,6 +63,7 @@ export interface ExtraData {
 	'Vine gate': {
 		direction: Direction
 		doorLevel: number
+		unlocked: boolean
 	}
 	'sign': {
 		text: string
@@ -376,7 +377,7 @@ export const props: Props = [
 
 	{
 		name: 'Vine gate',
-		data: { direction: Direction.N, doorLevel: 0 },
+		data: { direction: Direction.N, doorLevel: 0, unlocked: false },
 		models: ['Gate_Vines'],
 		bundle(entity, { data }, ressources) {
 			entity.model.traverse((node) => {
@@ -392,6 +393,9 @@ export const props: Props = [
 			if (genDungeonState.enabled && data.direction === Direction.N) {
 				entity.doorLevel = data.doorLevel
 				entity.doorLocked = true
+			}
+			if (data.unlocked) {
+				entity.unlocked = true
 			}
 			return {
 				...entity,

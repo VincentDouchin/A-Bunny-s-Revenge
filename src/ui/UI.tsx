@@ -28,6 +28,7 @@ import { OverlayUi } from '@/states/game/overlayUi'
 import { LockIndicator } from '@/states/dungeon/lockIndicator'
 import { ui } from '@/global/init'
 import { debugState } from '@/debug/debugState'
+import { MainMenuUi } from '@/states/mainMenu/MainMenuUi'
 
 export const errors = createArray<string>([])
 export const UI = () => {
@@ -36,11 +37,7 @@ export const UI = () => {
 		<GameProvider>
 			<DebugUi />
 			<Show when={!debug()}>
-				<Errors />
-				<PauseUi />
-				<FullscreenUi />
-				<LoseUi />
-				<DialogUi />
+
 				<StateUi state={campState}>
 					<RecipesUi />
 					<OvenMinigameUi />
@@ -62,10 +59,18 @@ export const UI = () => {
 				<StateUi state={dungeonState}>
 					<EnemyHealthBarUi />
 				</StateUi>
-				<FishingMinigameUi />
 				<StateUi state={mainMenuState} disabled>
 					<KeyboardControls />
 				</StateUi>
+				<StateUi state={mainMenuState}>
+					<MainMenuUi />
+				</StateUi>
+				<Errors />
+				<PauseUi />
+				<FullscreenUi />
+				<LoseUi />
+				<DialogUi />
+				<FishingMinigameUi />
 				<TouchControls />
 				<InteractionUi />
 				<TopRight />

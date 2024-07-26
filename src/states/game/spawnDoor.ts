@@ -48,7 +48,8 @@ const doorQuery = ecs.with('collider', 'door')
 const playerQuery = ecs.with('collider', 'playerControls', 'currentHealth').without('ignoreDoor')
 const enemyQuery = ecs.with('faction').where(({ faction }) => faction === Faction.Enemy)
 const doorToLockQuery = doorQuery.with('doorLocked')
-const doorToUnlockQuery = doorQuery.without('doorLocked')
+const doorToUnlockQuery = doorQuery.without('doorLocked', 'unlocked')
+const unlockeVineDoorsQuery = doorQuery.with('unlocked', 'vineGate')
 
 const onCollideWithDoor = <S extends State<any>>(
 	fn: (door: QueryEntity<typeof doorQuery>, player: QueryEntity<typeof playerQuery>, ressources: S extends State<infer R> ? R : never) => void,
@@ -156,4 +157,12 @@ export const unlockDoors = () => doorToUnlockQuery.onEntityAdded.subscribe((e) =
 		e.emitter.system.looping = false
 	}
 })
-export const doorLocking = [lockDoors, unlockDoors]
+
+const hideVinesDoors = () => unlockeVineDoorsQuery.onEntityAdded.subscribe((e) => {
+	e.collider.setSensor(true)
+	const vinesBottom = e.model?.getObjectByName('GATE')
+	if (vinesBottom) {
+		vinesBottom.position.y -= 30
+	}
+})
+export const doorLocking = [lockDoors, unlockDoors, hideVinesDoors]

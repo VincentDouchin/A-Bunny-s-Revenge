@@ -21,7 +21,7 @@ export class UIManager {
 	listeners = new Set<() => void>()
 
 	render(ui: () => JSXElement) {
-		return render(() =>
+		render(() =>
 			<Dynamic component={ui}></Dynamic>, this.root)
 	}
 

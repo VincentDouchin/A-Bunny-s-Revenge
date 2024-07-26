@@ -226,6 +226,19 @@ export const EntityEditor = ({ entity, levelData, setLevelData, setSelectedEntit
 															}}
 														/>
 													)}
+													{key === 'unlocked' && (
+														<div>
+															<input
+																type="checkbox"
+																checked={val}
+																onChange={(e) => {
+																	e.stopImmediatePropagation()
+																	updateData({ ...data(), unlocked: e.target.checked })
+																}}
+															/>
+															<span>Unlocked</span>
+														</div>
+													)}
 												</div>
 											)
 										}}

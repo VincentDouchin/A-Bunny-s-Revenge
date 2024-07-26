@@ -174,6 +174,7 @@ export interface Entity {
 	vineGate?: true
 	doorLevel?: number
 	doorLocked?: true
+	unlocked?: true
 	tree?: true
 	obstacle?: true
 	grass?: true
