@@ -134,7 +134,7 @@ export const spawnPlayerDungeon: System<DungeonRessources> = (ressources) => {
 			const rotation = door.rotation.clone().multiply(new Quaternion().setFromAxisAngle(new Vector3(0, 1, 0), Math.PI))
 			ecs.add({
 				...playerBundle(ressources.playerHealth, ressources.weapon),
-				position: new Vector3(...door.position.toArray()).add(new Vector3(0, 0, -20).applyQuaternion(door.rotation)),
+				position: door.position.clone().add(new Vector3(0, 0, -20).applyQuaternion(door.rotation)),
 				rotation,
 				targetRotation: rotation.clone(),
 			})

@@ -26,6 +26,7 @@
 	--meal-color: #f3a833;
 	font-size: 2vh;
 }
+
 html,
 body,
 * {
@@ -195,7 +196,10 @@ button.button:hover {
 .no-events {
 	pointer-events: none;
 }
-*:not(.no-events) {
+.ui-container {
+	pointer-events: none;
+}
+.ui-container > *:not(.no-events) {
 	pointer-events: auto;
 }
 

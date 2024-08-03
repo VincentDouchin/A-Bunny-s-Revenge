@@ -85,6 +85,7 @@ export const DialogUi = () => {
 	css/* css */`
 	.dialog-container {
 		color: white;
+		transform:translateY(-50%);
 		font-family: NanoPlus;
 		font-size: 2rem;
 		background: hsl(0, 0%, 0%, 50%);
@@ -106,7 +107,7 @@ export const DialogUi = () => {
 	return (
 		<For each={dialogQuery()}>
 			{(entity) => {
-				const currentDialog = atom<IteratorResult<string | string[] | void | false> | null>(null)
+				const currentDialog = atom<IteratorResult<string | string[] | void | boolean> | null>(null)
 				const element = atom<HTMLElement | null>(null)
 				const finished = atom(false)
 				let cancelCurrentDialog: (() => void) | null = null
@@ -116,11 +117,12 @@ export const DialogUi = () => {
 						dialogContainer.position.y = entity.dialogHeight ?? entity.size?.y ?? 4
 						element(dialogContainer.element)
 						ecs.update(entity, { dialogContainer })
-						currentDialog(await entity.dialog.next())
+						const next = await entity.dialog.next()
+						currentDialog(next)
 					} else {
 						if (finished()) {
 							currentDialog(await entity.dialog.next())
-							if (!currentDialog()?.value || currentDialog()?.done) {
+							if (currentDialog()?.done || currentDialog() === null) {
 								ecs.removeComponent(entity, 'dialogContainer')
 								ecs.removeComponent(entity, 'activeDialog')
 							}
@@ -155,9 +157,9 @@ export const DialogUi = () => {
 				})
 
 				return (
-					<Show when={currentDialog()?.value ? element() : false}>
+					<Show when={typeof currentDialog()?.value === 'string' ? element() : false}>
 						{(el) => {
-							const text = ui.sync(() => currentDialog()?.value || '')
+							const text = createMemo(() => currentDialog()?.value)
 							onCleanup(() => {
 								currentDialog(null)
 								element(null)

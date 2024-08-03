@@ -10,7 +10,7 @@ export const Errors = () => {
 	}
 	`
 	return (
-		<div class="errors">
+		<div class="errors no-events">
 			<For each={errors}>
 				{(error) => {
 					return <div>{error}</div>

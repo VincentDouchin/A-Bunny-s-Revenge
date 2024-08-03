@@ -6,15 +6,19 @@ import { css } from 'solid-styled'
 interface OutlineTextProps {
 	children: JSX.Element
 	size?: string
+	color?: string
+	textSize?: string
 }
 export const OutlineText = (props: OutlineTextProps) => {
 	css/* css */`
 	.outline-text {
 		line-height: 1.2;
+		font-size:${props?.textSize ?? '1em'};
 		padding: var(--size);
 		letter-spacing: calc(0.5 * var(--size));
 		--size: ${props.size ?? '0.1em'};
 		--size-minus: calc(-1 * var(--size));
+		color:${props.color ?? 'white'};
 		text-shadow:
 			0 var(--size) black,
 			var(--size) var(--size) black,
@@ -77,6 +81,7 @@ export const SwitchButtons = <T extends string,>(props: { options: T[], value: T
 		overflow: hidden;
 	}
 	.selected{
+		color: white;
 		border: solid 2px var(--gold);
 		box-shadow:inset 0 0 1rem 0 black;
 	}

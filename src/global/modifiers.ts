@@ -1,4 +1,4 @@
-import type { AllComponentsOfType, ComponentsOfType } from './entity'
+import type { ComponentsOfType } from './entity'
 import { ecs, time } from './init'
 import type { Meals } from '@/constants/items'
 import type { State } from '@/lib/state'
@@ -205,7 +205,7 @@ export class ModifierContainer {
 }
 
 const modifiersQuery = ecs.with('modifiers')
-export const tickModifiersPlugin = (...stats: AllComponentsOfType<Stat>) => (s: State) => {
+export const tickModifiersPlugin = (...stats: ComponentsOfType<Stat>[]) => (s: State) => {
 	s.onPreUpdate(() => {
 		for (const entity of modifiersQuery) {
 			entity.modifiers.tick(time.delta)

@@ -88,6 +88,8 @@ export const EntityEditor = ({ entity, levelData, setLevelData, setSelectedEntit
 				createEffect(() => {
 					ecs.removeComponent(entity(), 'model')
 					const model = getModel(entityData().model)
+					const mainCollider = model.getObjectByName('mainCollider')
+					mainCollider?.removeFromParent()
 					model.scale.setScalar(entityData().scale)
 					const collider = colliderData()[entityData().model]
 					ecs.removeComponent(entity(), 'body')

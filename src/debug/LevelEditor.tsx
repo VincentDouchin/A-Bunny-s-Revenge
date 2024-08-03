@@ -57,7 +57,7 @@ export type LevelImage = NonNullable<{ [k in keyof Level]: Level[k] extends HTML
 
 export type RawLevel = { [k in keyof Level]: Level[k] extends HTMLCanvasElement ? string : Level[k] }
 
-export type LevelType = 'farm' | 'crossroad' | 'dungeon' | 'ruins'
+export type LevelType = 'farm' | 'crossroad' | 'dungeon' | 'ruins' | 'intro' | 'cellar'
 
 export interface Level {
 	path: HTMLCanvasElement
@@ -70,6 +70,7 @@ export interface Level {
 	type?: LevelType
 	navgrid?: NavCell[][]
 	size: { x: number, y: number }
+	containCamera: boolean
 }
 const addedEntitiesQuery = ecs.with('entityId', 'model', 'group', 'position', 'rotation')
 const mapQuery = useQuery(ecs.with('map'))
@@ -152,6 +153,7 @@ export const LevelEditor = () => {
 							size: { x: 100, y: 100 },
 							name: `level n°${x.length + 1}`,
 							id,
+							containCamera: true,
 						}])
 						setActiveLevelIndex(levels().length - 1)
 					}
@@ -465,7 +467,13 @@ export const LevelEditor = () => {
 														<option value="crossroad">Crossroad</option>
 														<option value="dungeon">Dungeon</option>
 														<option value="ruins">Ruins</option>
+														<option value="intro">Intro</option>
+														<option value="cellar">Cellar</option>
 													</select>
+												</div>
+												<div>
+													contain camera
+													<input type="checkbox" checked={level().containCamera} onChange={e => updateLevelSize(x => x.containCamera = e.target.checked)}></input>
 												</div>
 												<div>
 													width

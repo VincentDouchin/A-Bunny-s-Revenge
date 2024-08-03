@@ -78,28 +78,31 @@ export const moveCamera = (init = false) => () => {
 		if (mainMenuState.disabled) {
 			for (const { worldPosition } of cameraTargetQuery) {
 				target.copy(worldPosition)
-				for (const door of doorsQuery) {
-					if (door.door === Direction.N) {
-						target.z = Math.min(target.z, door.position.z - OFFSETZ)
-					}
-					if (door.door === Direction.S) {
-						target.z = Math.max(target.z, door.position.z + OFFSETZ)
-					}
-					if (door.door === Direction.W) {
-						target.x = Math.min(target.x, door.position.x - OFFSETX)
-					}
-					if (door.door === Direction.E) {
-						target.x = Math.max(target.x, door.position.x + OFFSETX)
-					}
-				}
 				const mapId = levelQuery.first?.map
 				if (mapId) {
-					const levelSize = levelsData.levels.find(level => level.id === mapId)?.size
-					if (levelSize && camera instanceof OrthographicCamera) {
-						target.x = Math.min(target.x, levelSize.x / 2 + camera.left - MAP_OFFSET)
-						target.x = Math.max(target.x, -levelSize.x / 2 + camera.right + MAP_OFFSET)
-						target.z = Math.min(target.z, levelSize.y / 2 + camera.bottom - MAP_OFFSET * 4)
-						target.z = Math.max(target.z, -levelSize.y / 2 + camera.top + MAP_OFFSET * 5)
+					const level = levelsData.levels.find(level => level.id === mapId)
+					if (level && level.containCamera) {
+						for (const door of doorsQuery) {
+							if (door.door === Direction.N) {
+								target.z = Math.min(target.z, door.position.z - OFFSETZ)
+							}
+							if (door.door === Direction.S) {
+								target.z = Math.max(target.z, door.position.z + OFFSETZ)
+							}
+							if (door.door === Direction.W) {
+								target.x = Math.min(target.x, door.position.x - OFFSETX)
+							}
+							if (door.door === Direction.E) {
+								target.x = Math.max(target.x, door.position.x + OFFSETX)
+							}
+						}
+						const levelSize = level?.size
+						if (camera instanceof OrthographicCamera) {
+							target.x = Math.min(target.x, levelSize.x / 2 + camera.left - MAP_OFFSET)
+							target.x = Math.max(target.x, -levelSize.x / 2 + camera.right + MAP_OFFSET)
+							target.z = Math.min(target.z, levelSize.y / 2 + camera.bottom - MAP_OFFSET * 4)
+							target.z = Math.max(target.z, -levelSize.y / 2 + camera.top + MAP_OFFSET * 5)
+						}
 					}
 				}
 			}

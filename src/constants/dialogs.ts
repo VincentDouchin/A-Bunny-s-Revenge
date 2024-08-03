@@ -1,25 +1,32 @@
 import { itemsData } from './items'
 import type { Dialog } from '@/global/entity'
+import { ecs } from '@/global/init'
 import { cutSceneState } from '@/global/states'
+import { pickUpBasket } from '@/states/intro/startIntro'
 import { dialog, t } from '@/translations'
-import { addItemToPlayer, addQuest, aliceJumpDown, canCompleteQuest, completeQuest, enterHouse, hasCompletedQuest, hasEaten, hasItem, hasQuest, leaveHouse, lockPlayer, unlockPlayer } from '@/utils/dialogHelpers'
+import { TutorialWindow } from '@/ui/Tutorial'
+import { addItemToPlayer, addQuest, aliceJumpDown, canCompleteQuest, completeQuest, enterHouse, hasCompletedQuest, hasEaten, hasItem, hasQuest, leaveHouse, lockPlayer, sleepPlayer, unlockPlayer } from '@/utils/dialogHelpers'
 
 export const dialogs = {
-	*PlayerIntro1() {
-		yield 'Oh no I got lost again!'
-		yield 'I need to find the way back home before grandma gets too worried'
-		cutSceneState.disable()
-	},
-	*PlayerIntro2() {
+	async *PlayerIntro1() {
 		cutSceneState.enable()
-		yield 'I think I see some light through the trees!'
-		yield 'But I need to find something to cut down the bushes to go through'
-		cutSceneState.disable()
+		await sleepPlayer()
+		yield 'Huh?'
+		yield 'Where am I?'
+		yield '...'
+		yield 'Oh that\'s right'
+		yield 'Grandma sent me into the Woods to get some ingredients for the Cooking Festival.'
+		yield 'I laid down for a moment to rest and I guess I fell asleep'
+		yield 'I should try to find my way back…'
+		ecs.add({ tutorial: TutorialWindow.Movement })
 	},
-	*PlayerIntro3() {
+	async *pickupBasket() {
 		cutSceneState.enable()
-		yield 'Oh a recipe book!'
-		yield 'I should be able to find a recipe to make for the next festival!'
+		yield 'So that’s where I left my Basket of Ingredients!'
+		await pickUpBasket()
+	},
+	*pickupBasket2() {
+		yield 'Now I can go back Home and get started on dinner with Grandma!'
 		cutSceneState.disable()
 	},
 	async *GrandmasDoor() {

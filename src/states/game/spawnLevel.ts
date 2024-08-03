@@ -1,7 +1,7 @@
 import { ActiveEvents, ColliderDesc, RigidBodyDesc, RigidBodyType } from '@dimforge/rapier3d-compat'
 import FastNoiseLite from 'fastnoise-lite'
 import type { Vec2, Vector4Like } from 'three'
-import { CanvasTexture, Euler, Group, Mesh, PlaneGeometry, Quaternion, Vector2, Vector3 } from 'three'
+import { CanvasTexture, Euler, Group, Mesh, MeshToonMaterial, PlaneGeometry, Quaternion, Vector2, Vector3 } from 'three'
 import { encounters } from '../dungeon/encounters'
 import { RoomType } from '../dungeon/generateDungeon'
 import { spawnLight } from './spawnLights'
@@ -217,11 +217,17 @@ export const setDisplacement = (geo: PlaneGeometry, canvas: HTMLCanvasElement) =
 		displacementVal *= HEIGHT
 		const index = i / 4
 		const x = index % width
-		const y = Math.ceil(index / width) + 1
-
+		const y = Math.floor(index / width) + 1
 		positionAttribute.setZ(width * (height - y) + x, displacementVal)
 	}
 	positionAttribute.needsUpdate = true
+}
+
+const getWoodFlooring = ({ x, y }: { x: number, y: number }) => {
+	const map = assets.textures.planks
+	map.repeat.set(x / 32, y / 32)
+	const mat = new MeshToonMaterial({ map })
+	return mat
 }
 
 export const spawnGroundAndTrees = (level: Level, dungeonLevel?: number) => {
@@ -232,18 +238,18 @@ export const spawnGroundAndTrees = (level: Level, dungeonLevel?: number) => {
 	// ! Ground
 	const levelTexture = new CanvasTexture(level.path)
 	levelTexture.flipY = false
-	const groundMesh = new Mesh(
-		new PlaneGeometry(level.size.x, level.size.y, Math.floor(level.size.x * canvasScale), Math.floor(level.size.y * canvasScale)),
-		new GroundMaterial({}).setUniforms({
+	const cellar = level.type === 'cellar'
+	const mat = cellar
+		? getWoodFlooring(level.size)
+		: new GroundMaterial({}).setUniforms({
 			level: levelTexture,
 			size: new Vector2(level.size.x, level.size.y),
 			ground: assets.textures.Dirt4_Dark,
-		}),
+		})
+	const groundMesh = new Mesh(
+		new PlaneGeometry(level.size.x, level.size.y, Math.floor(level.size.x * canvasScale) - 1, Math.floor(level.size.y * canvasScale) - 1),
+		mat,
 	)
-	// if (dungeonLevel === 1) {
-	// 	groundMesh.material.uniforms.grassColor.value = new Color(0x645176)
-	// 	groundMesh.material.uniforms.topColor.value = new Color(0x795E97)
-	// }
 	setDisplacement(groundMesh.geometry, displacementMap)
 	groundMesh.geometry.computeVertexNormals()
 	groundMesh.geometry.computeTangents()
@@ -282,16 +288,13 @@ export const spawnGroundAndTrees = (level: Level, dungeonLevel?: number) => {
 	spawnGrass(level, ground, dungeonLevel)
 }
 
-const spawnLevel = (type: LevelType) => () => {
+export const spawnLevel = (type: LevelType) => () => {
 	const level = levelsData.levels.find(level => level.type === type)
 	if (!level) throw new Error('can\'t find level')
 	ecs.add({ map: level.id })
 	spawnGroundAndTrees(level)
 }
 
-export const spawnFarm = spawnLevel('farm')
-export const spawnCrossRoad = spawnLevel('crossroad')
-export const spawnRuins = spawnLevel('ruins')
 export const spawnDungeon: System<DungeonRessources> = ({ dungeon, dungeonLevel }) => {
 	ecs.add({ map: dungeon.plan.id, dungeon })
 	spawnGroundAndTrees(dungeon.plan, dungeonLevel)

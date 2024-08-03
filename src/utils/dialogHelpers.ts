@@ -11,6 +11,7 @@ import type { Entity } from '@/global/entity'
 import { quests } from '@/constants/quests'
 import type { QuestName, QuestStepKey } from '@/constants/quests'
 
+import { applyMove, applyRotate } from '@/behaviors/behaviorHelpers'
 import { dialogs } from '@/constants/dialogs'
 import type { Item } from '@/constants/items'
 import { recipes } from '@/constants/recipes'
@@ -21,7 +22,7 @@ import { addToHand } from '@/states/game/equip'
 import { addToast } from '@/ui/Toaster'
 
 const playerQuery = ecs.with('player', 'position', 'collider')
-const movingPlayerQuery = playerQuery.with('movementForce')
+const movingPlayerQuery = playerQuery.with('body', 'targetRotation', 'rotation')
 export const houseQuery = ecs.with('npcName', 'position', 'collider', 'rotation', 'houseAnimator').where(({ npcName }) => npcName === 'Grandma')
 export const doorQuery = ecs.with('npcName', 'collider').where(({ npcName }) => npcName === 'door')
 export const setSensor = <T extends With<Entity, 'collider'>>(query: Query<T>, sensor: boolean) => {
@@ -45,14 +46,22 @@ export const movePlayerTo = (dest: Vector3) => {
 			player.movementForce = dest.clone().sub(player.position).normalize()
 			coroutines.add(function* () {
 				while (player.position.distanceTo(dest) > 2) {
-					player.movementForce = dest.clone().sub(player.position).normalize()
+					applyMove(player, dest.clone().sub(player.position).normalize())
+					applyRotate(player, dest.clone().sub(player.position).normalize())
 					yield
 				}
-				player.movementForce.setScalar(0)
+				player.movementForce?.setScalar(0)
 				resolve()
 			})
 		}
 	})
+}
+export const sleepPlayer = async () => {
+	const player = playerQuery.first
+	if (player) {
+		player.modifiers?.addModifier('sleepingPowder')
+		await sleep(5000)
+	}
 }
 export const playerInventoryQuery = ecs.with('inventoryId', 'inventory', 'inventorySize', 'player', 'currentHealth', 'maxHealth')
 export const unlockRecipe = (item: items) => {

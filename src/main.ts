@@ -9,8 +9,8 @@ import { coroutines, inputManager, musicManager, resetSave, time, tweens, ui } f
 import { tickModifiersPlugin } from './global/modifiers'
 import { updateMousePosition } from './global/mousePosition'
 import { compileShaders, initThree, renderGame } from './global/rendering'
-import { initHowler } from './global/sounds'
-import { app, campState, coreState, dungeonState, gameState, genDungeonState, mainMenuState, openMenuState, pausedState, ruinsIntro, setupState } from './global/states'
+import { initHowler, playAmbience } from './global/sounds'
+import { app, campState, coreState, dungeonState, gameState, genDungeonState, introState, mainMenuState, openMenuState, pausedState, setupState } from './global/states'
 import { despawnOfType, hierarchyPlugin, removeStateEntity } from './lib/hierarchy'
 import { updateModels } from './lib/modelsProperties'
 import { particlesPlugin } from './lib/particles'
@@ -45,7 +45,7 @@ import { bobItems, collectItems, popItems, stopItems } from './states/game/items
 import { canPlayerMove, movePlayer, playerSteps, savePlayerFromTheEmbraceOfTheVoid, stopPlayer } from './states/game/movePlayer'
 import { pauseGame } from './states/game/pauseGame'
 import { allowDoorCollision, collideWithDoorCamp, collideWithDoorClearing, collideWithDoorDungeon, collideWithDoorRuins, doorLocking, unlockDoorClearing, unlockDoorDungeon } from './states/game/spawnDoor'
-import { spawnCrossRoad, spawnDungeon, spawnFarm, spawnLevelData, spawnRuins, updateTimeUniforms } from './states/game/spawnLevel'
+import { spawnDungeon, spawnLevel, spawnLevelData, updateTimeUniforms } from './states/game/spawnLevel'
 import { losingBattle, spawnCharacter, spawnPlayerClearing, spawnPlayerDungeon } from './states/game/spawnPlayer'
 import { interactionPlugin } from './states/game/touchItem'
 import { updateWeaponArc } from './states/game/weapon'
@@ -61,7 +61,7 @@ coreState
 	.onEnter(() => ui.render(UI), initHowler)
 	.addSubscriber(resize, disablePortrait, enableFullscreen, stopOnLosingFocus)
 	.onPreUpdate(() => time.tick(), coroutines.tick, savePlayerFromTheEmbraceOfTheVoid, updateMousePosition())
-	.onUpdate(runIf(() => !pausedState.enabled, updateAnimations('playerAnimator', 'basketAnimator', 'enemyAnimator', 'ovenAnimator', 'houseAnimator', 'chestAnimator', 'kayAnimator')))
+	.onUpdate(runIf(() => !pausedState.enabled, updateAnimations('playerAnimator', 'basketAnimator', 'enemyAnimator', 'ovenAnimator', 'houseAnimator', 'chestAnimator', 'kayAnimator', 'cellarDoorAnimator')))
 	.onUpdate(inputManager.update, ui.update, moveCamera())
 	.enable()
 setupState
@@ -89,7 +89,7 @@ mainMenuState
 	.addSubscriber(...initMainMenuCamPos)
 	.onExit(
 		removeStateEntity(mainMenuState),
-		runIf(() => ruinsIntro.enabled, () => resetSave(), startIntro),
+		runIf(() => introState.enabled, () => resetSave(), startIntro),
 		runIf(() => campState.enabled, spawnPlayerContinueGame),
 	)
 openMenuState
@@ -99,21 +99,23 @@ openMenuState
 	.onUpdate(closePlayerInventory)
 campState
 	.addSubscriber(...interactablePlantableSpot)
-	.onEnter(spawnFarm, spawnLevelData, initPlantableSpotsInteractions, spawnGodRay, addBeanStalkHole)
+	.onEnter(spawnLevel('farm'), spawnLevelData, initPlantableSpotsInteractions, spawnGodRay, addBeanStalkHole)
 	.onEnter(runIf(() => mainMenuState.disabled, spawnCharacter, setInitialHealth), moveCamera(true))
 	.onEnter(compileShaders)
-	.onUpdate(collideWithDoorCamp, playNightMusic, waterCrops, growCrops, growMagicBean, harvestMagicBean)
+	.onUpdate(runIf(() => mainMenuState.disabled, playNightMusic, playAmbience))
+	.onUpdate(collideWithDoorCamp, waterCrops, growCrops, growMagicBean, harvestMagicBean)
 	.onUpdate(runIf(canPlayerMove, plantSeed, harvestCrop, openPlayerInventory))
 	.onExit(despawnOfType('map'))
-ruinsIntro
-	.onEnter(spawnRuins, spawnLevelData)
+introState
+	.onEnter(spawnLevel('intro'), spawnLevelData)
 	.onEnter(compileShaders, moveCamera(true))
 	.onUpdate(collideWithDoorRuins)
+	.onUpdate(runIf(() => mainMenuState.disabled, playAmbience))
 	.addSubscriber(enableCutscene)
 	.onExit(despawnOfType('map'))
 genDungeonState
 	.addSubscriber(unlockDoorClearing)
-	.onEnter(spawnCrossRoad, spawnLevelData, spawnPlayerClearing, setInitialHealth, spawnWeaponsChoice, moveCamera(true))
+	.onEnter(spawnLevel('crossroad'), spawnLevelData, spawnPlayerClearing, setInitialHealth, spawnWeaponsChoice, moveCamera(true))
 	.onEnter(compileShaders)
 	.onUpdate(collideWithDoorClearing)
 	.onExit(despawnOfType('map'))

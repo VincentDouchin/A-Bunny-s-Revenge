@@ -3,7 +3,7 @@ import type { ShaderMaterial } from 'three'
 import { CanvasTexture, Mesh, MeshBasicMaterial, Object3D } from 'three'
 import { assets, save, tweens } from '@/global/init'
 import { playSound } from '@/global/sounds'
-import { campState, ruinsIntro } from '@/global/states'
+import { campState, introState } from '@/global/states'
 import { drawnHouseShader } from '@/shaders/drawnHouseShader'
 import { cloneCanvas, imgToCanvas } from '@/utils/buffer'
 
@@ -121,12 +121,12 @@ export class MainMenuBook extends Object3D {
 				duration: 1000,
 				onPlay() {
 					if (newSelected === 'Continue') {
-						ruinsIntro.disable()
+						introState.disable()
 						campState.enable({})
 					}
 					if (newSelected === 'New Game') {
 						campState.disable()
-						ruinsIntro.enable()
+						introState.enable()
 					}
 				},
 				onUpdate: f => this.windowShader.uniforms.windowSize.value = f,

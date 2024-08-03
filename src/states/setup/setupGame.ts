@@ -1,11 +1,12 @@
 import { throttle } from '@solid-primitives/scheduled'
 import { Vector2 } from 'three'
 import { RoomType, assignPlanAndEnemies } from '../dungeon/generateDungeon'
+import { startIntro } from '../intro/startIntro'
 import { updateCameraZoom } from '@/global/camera'
 import { params } from '@/global/context'
 import { settings, time } from '@/global/init'
 import { updateRenderSize } from '@/global/rendering'
-import { app, campState, dungeonState, mainMenuState, ruinsIntro } from '@/global/states'
+import { app, campState, cutSceneState, dungeonState, introState, mainMenuState } from '@/global/states'
 import { Direction } from '@/lib/directions'
 
 import { windowEvent } from '@/lib/uiManager'
@@ -24,7 +25,9 @@ export const setupGame = async () => {
 		updateRenderSize()
 		updateCameraZoom()
 	} else if (params.debugIntro) {
-		ruinsIntro.enable()
+		await introState.enable()
+		setTimeout(() => startIntro(), 2000)
+		cutSceneState.disable()
 		updateRenderSize()
 	} else if (!params.skipMainMenu) {
 		mainMenuState.enable()

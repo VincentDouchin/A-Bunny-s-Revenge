@@ -1,25 +1,26 @@
 import type { fruit_trees, gardenPlots, models, vegetation } from '@assets/assets'
 import { ActiveCollisionTypes, ColliderDesc, RigidBodyDesc } from '@dimforge/rapier3d-compat'
+import FastNoiseLite from 'fastnoise-lite'
 import type { With } from 'miniplex'
 import type { BufferGeometry, Object3DEventMap } from 'three'
 import { Color, ConeGeometry, DoubleSide, Euler, Group, Material, Mesh, MeshBasicMaterial, MeshPhongMaterial, Object3D, PointLight, Quaternion, SphereGeometry, Vector2, Vector3 } from 'three'
-import FastNoiseLite from 'fastnoise-lite'
 import { CSS2DObject } from 'three/examples/jsm/renderers/CSS2DRenderer'
 import { clone } from 'three/examples/jsm/utils/SkeletonUtils'
 import type { EntityData, ModelName } from './LevelEditor'
 import { debugState } from './debugState'
-import { Interactable, MenuType } from '@/global/entity'
-import type { Entity } from '@/global/entity'
-import { Animator } from '@/global/animator'
 import { dialogs } from '@/constants/dialogs'
-import { assets, ecs, save } from '@/global/init'
-import type { DungeonRessources, FarmRessources } from '@/global/states'
-import { dungeonState, genDungeonState } from '@/global/states'
 import { itemsData } from '@/constants/items'
+import { Animator } from '@/global/animator'
+import type { Entity } from '@/global/entity'
+import { Interactable, MenuType } from '@/global/entity'
+import { assets, ecs, levelsData, save } from '@/global/init'
+import type { DungeonRessources, FarmRessources } from '@/global/states'
+import { cutSceneState, dungeonState, genDungeonState } from '@/global/states'
 import { Direction } from '@/lib/directions'
 import { inMap } from '@/lib/hierarchy'
 import { getSecondaryColliders } from '@/lib/models'
 import { GardenPlotMaterial, GrassMaterial } from '@/shaders/materials'
+import type { Room } from '@/states/dungeon/generateDungeon'
 import { RoomType } from '@/states/dungeon/generateDungeon'
 import { cropBundle } from '@/states/farm/farming'
 import { openMenu } from '@/states/farm/openInventory'
@@ -27,6 +28,7 @@ import { wateringCanBundle } from '@/states/farm/wateringCan'
 import { dialogBundle } from '@/states/game/dialog'
 import { doorSide } from '@/states/game/spawnDoor'
 import { spawnMarker } from '@/states/game/spawnMarker'
+import { PLAYER_DEFAULT_HEALTH, playerBundle } from '@/states/game/spawnPlayer'
 import { lockPlayer, unlockPlayer } from '@/utils/dialogHelpers'
 import { sleep } from '@/utils/sleep'
 
@@ -82,10 +84,67 @@ export interface PlacableProp<N extends string> {
 	data?: N extends keyof ExtraData ? ExtraData[N] : undefined
 	bundle?: BundleFn<EntityData<N extends keyof ExtraData ? NonNullable<ExtraData[N]> : never>>
 }
-type propNames = 'log' | 'door' | 'rock' | 'board' | 'oven' | 'CookingPot' | 'stove' | 'Flower/plants' | 'sign' | 'plots' | 'bush' | 'fence' | 'house' | 'mushrooms' | 'lamp' | 'Kitchen' | 'berry bushes' | 'bench' | 'well' | 'fruit trees' | 'stall' | 'Vine gate' | 'fishing deck' | 'pillar' | 'marker'
+type propNames = 'log' | 'door' | 'rock' | 'board' | 'oven' | 'CookingPot' | 'stove' | 'Flower/plants' | 'sign' | 'plots' | 'bush' | 'fence' | 'house' | 'mushrooms' | 'lamp' | 'Kitchen' | 'berry bushes' | 'bench' | 'well' | 'fruit trees' | 'stall' | 'Vine gate' | 'fishing deck' | 'pillar' | 'marker' | 'cellar' | 'cellar_door' | 'scaffolds' | 'cellar_props' | 'cellar_wall'
 
 type Props = ({ [k in propNames]: PlacableProp<k> }[propNames])[]
 export const props: Props = [
+	{
+		name: 'cellar',
+		models: ['stairs'],
+		bundle(e) {
+			ecs.add({
+				...playerBundle(PLAYER_DEFAULT_HEALTH, null),
+				position: e.position.clone().add(new Vector3(0, e.size!.y, 0)),
+				rotation: e.rotation.clone(),
+				targetRotation: e.rotation.clone(),
+			})
+			return e
+		},
+	},
+	{
+		name: 'cellar_props',
+		models: ['barrel', 'barrel_small', 'crate', 'bookshelf', 'keg', 'box_large', 'box_small', 'box_stack', 'trunk'],
+	},
+	{
+		name: 'cellar_wall',
+		models: ['cellar_wall', 'cellar_wall2', 'cellar_wall3', 'cellar_wall_corner'],
+	},
+	{
+		name: 'cellar_door',
+		models: ['cellar_entrance'],
+		bundle: (e) => {
+			return {
+				...e,
+				interactable: Interactable.Open,
+				cellarDoorAnimator: new Animator(e.model, assets.models.cellar_entrance.animations),
+				async onPrimary(e, player) {
+					cutSceneState.enable()
+					await e.cellarDoorAnimator?.playClamped('doorOpen')
+					cutSceneState.disable()
+					const cellar: Room = {
+						plan: levelsData.levels.find(l => l.type === 'cellar')!,
+						doors: { [Direction.S]: null },
+						enemies: ['Armabee', 'Armabee', 'Armabee', 'Armabee'],
+						type: RoomType.Entrance,
+						encounter: null,
+					}
+					await sleep(1000)
+					dungeonState.enable({
+						direction: Direction.N,
+						weapon: 'Ladle',
+						dungeon: cellar,
+						dungeonLevel: 1,
+						playerHealth: player.maxHealth!.value,
+						firstEntry: true,
+					})
+				},
+			}
+		},
+	},
+	{
+		name: 'scaffolds',
+		models: ['scaffold1', 'scaffold2', 'scaffold3', 'scaffold4'],
+	},
 	{
 		name: 'log',
 		models: ['WoodLog', 'WoodLog_Moss', 'TreeStump', 'TreeStump_Moss'],
@@ -123,7 +182,7 @@ export const props: Props = [
 				entity.doorLevel = data.data.doorLevel
 				entity.doorLocked = true
 			}
-			if (ressources && 'dungeon' in ressources && data.data.direction) {
+			if (ressources && 'dungeon' in ressources && data.data.direction && ressources.dungeon.plan.type === 'dungeon') {
 				const isBossEntrance = ressources.dungeon.doors[data.data.direction]?.type === RoomType.Boss
 				const isBossRoom = ressources.dungeon.type === RoomType.Boss && ressources.dungeon.doors[data.data.direction] !== null
 				const isEntrance = ressources.dungeon.type === RoomType.Entrance && ressources.dungeon.doors[data.data.direction] === null
@@ -143,6 +202,9 @@ export const props: Props = [
 					Object.assign(entity, getSecondaryColliders(model))
 					entity.model = model
 				}
+			}
+			if (ressources && 'dungeon' in ressources && ressources.dungeon.plan.type === 'cellar') {
+				entity.model = new Object3D()
 			}
 			return {
 				door: data.data.direction,

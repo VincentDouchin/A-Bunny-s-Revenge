@@ -29,6 +29,8 @@ interface Animations {
 
 'BunnyOvenPacked' : 'Closing' | 'Closing_OvenArmature' | 'Opening' | 'Opening_OvenArmature'
 
+'cellar_entrance' : 'doorOpen'
+
 'Chest' : 'chest_open'
 
 'Devilu_A' : 'Attack' | 'Damage' | 'Die' | 'Idle' | 'Move'

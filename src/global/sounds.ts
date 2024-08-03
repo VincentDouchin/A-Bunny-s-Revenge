@@ -1,6 +1,6 @@
 import type { soundEffects } from '@assets/assets'
 import soundsData from '@assets/soundsData.json'
-import { assets, settings } from './init'
+import { assets, dayTime, musicManager, settings } from './init'
 import { useLocalStorage } from '@/utils/useLocalStorage'
 import { getRandom } from '@/utils/mapFunctions'
 
@@ -63,3 +63,11 @@ export const playSFX = <K extends string = string>(soundAsset: soundAssets) => (
 export const playSound = playSFX<soundEffects>('soundEffects')
 export const playVoice = playSFX('voices')
 export const playStep = playSFX('steps')
+
+export const playAmbience = () => {
+	if (dayTime.current >= 0.8 && dayTime.dayToNight === true) {
+		musicManager.playAmbience('ambience_night')
+	} else {
+		musicManager.playAmbience('ambience_day')
+	}
+}

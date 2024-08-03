@@ -56,12 +56,19 @@ const updateWorldPosition = () => {
 	}
 }
 
-const bodiesQuery = ecs.with('body', 'position').where(({ body }) => body.isDynamic() || body.isKinematic())
+const bodiesQuery = ecs.with('body', 'position').without('directedDynamic').where(({ body }) => body.isDynamic() || body.isKinematic())
+const directedDynamicQuery = ecs.with('body', 'position').with('directedDynamic')
 const updateGroupPosition = () => {
 	for (const entity of bodiesQuery) {
 		const { body, position } = entity
 		const bodyPos = body.translation()
 		position.copy(bodyPos)
+	}
+	for (const { body, position, group } of directedDynamicQuery) {
+		body.setTranslation(position, true)
+		if (group) {
+			group.position.copy(position)
+		}
 	}
 }
 const rotationQuery = ecs.with('rotation')

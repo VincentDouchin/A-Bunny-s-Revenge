@@ -7,7 +7,7 @@ import { params } from '@/global/context'
 import { RenderGroup } from '@/global/entity'
 import { ecs, inputManager, save, tweens } from '@/global/init'
 import { getTargetSize, updateRenderSize } from '@/global/rendering'
-import { campState, cutSceneState, mainMenuState, ruinsIntro } from '@/global/states'
+import { campState, cutSceneState, introState, mainMenuState } from '@/global/states'
 import { doorQuery, hasQuest, leaveHouse, setSensor } from '@/utils/dialogHelpers'
 import { once } from '@/utils/mapFunctions'
 
@@ -61,7 +61,7 @@ export const setupWindow = () => {
 	if (save.started) {
 		campState.enable({})
 	} else {
-		ruinsIntro.enable()
+		introState.enable()
 	}
 }
 

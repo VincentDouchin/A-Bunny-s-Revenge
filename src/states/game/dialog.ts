@@ -81,7 +81,7 @@ export const triggerDialog = () => {
 		for (const marker of dialogTriggerQuery) {
 			if (marker.position.distanceTo(player.position) < 10) {
 				const dialog = {
-					intro1: dialogs.PlayerIntro2,
+					pickupBasket: dialogs.pickupBasket,
 				}[marker.dialogTrigger]
 				if (dialog) {
 					player.targetMovementForce?.setScalar(0)

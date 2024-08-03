@@ -9,6 +9,8 @@ import { TouchControls } from './TouchControls'
 import { StateUi } from './components/StateUi'
 import { GameProvider } from './store'
 import { Errors } from './Errors'
+import { KeyItem } from './KeyItem'
+import { TutorialUi } from './Tutorial'
 import { DebugUi } from '@/debug/debugUi'
 import { campState, dungeonState, genDungeonState, mainMenuState } from '@/global/states'
 import { EnemyHealthBarUi } from '@/states/dungeon/EnemyHealthBarUi'
@@ -75,6 +77,8 @@ export const UI = () => {
 				<InteractionUi />
 				<TopRight />
 				<OverlayUi />
+				<KeyItem />
+				<TutorialUi />
 			</Show>
 
 		</GameProvider>

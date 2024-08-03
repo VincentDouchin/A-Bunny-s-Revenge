@@ -45,7 +45,20 @@ export const getSecondaryColliders = (model: Object3D) => {
 export const getBoundingBox = (modelName: ModelName, model: Object3D<Object3DEventMap>, colliderData: CollidersData, scale: number) => {
 	const collider = colliderData[modelName]
 	const mainCollider = model.getObjectByName('mainCollider')
-	if (collider) {
+	if (mainCollider instanceof Mesh && mainCollider.geometry instanceof BufferGeometry) {
+		const size = new Vector3()
+		mainCollider.scale.copy(model.scale)
+		mainCollider.updateMatrix()
+		mainCollider.geometry.applyMatrix4(mainCollider.matrix)
+		mainCollider.geometry.computeBoundingBox()
+		mainCollider.geometry.boundingBox!.getSize(size)
+		mainCollider.removeFromParent()
+		return {
+			bodyDesc: RigidBodyDesc.fixed().lockRotations(),
+			colliderDesc: getTrimeshCollider(mainCollider),
+			size,
+		} as const satisfies Entity
+	} else if (collider) {
 		const size = new Vector3()
 		if (collider.size) {
 			size.set(...collider.size)
@@ -62,16 +75,6 @@ export const getBoundingBox = (modelName: ModelName, model: Object3D<Object3DEve
 				size,
 			} as const satisfies Entity
 		}
-	} else if (mainCollider instanceof Mesh && mainCollider.geometry instanceof BufferGeometry) {
-		mainCollider.removeFromParent()
-		const size = new Vector3()
-		mainCollider.geometry.computeBoundingBox()
-		mainCollider.geometry.boundingBox!.getSize(size)
-		return {
-			bodyDesc: RigidBodyDesc.fixed().lockRotations(),
-			colliderDesc: getTrimeshCollider(mainCollider),
-			size,
-		} as const satisfies Entity
 	}
 }
 export const modelColliderBundle = (model: Object3D<Object3DEventMap>, type = RigidBodyType.Dynamic, sensor = false, size?: Vector3, shape: 'ball' | 'cuboid' = 'cuboid') => {
@@ -105,10 +108,8 @@ export const capsuleColliderBundle = (model: Object3D<Object3DEventMap>, size: V
 export const characterControllerBundle = () => {
 	const controller = world.createCharacterController(0.1)
 	controller.setApplyImpulsesToDynamicBodies(true)
-	controller.setCharacterMass(0.2)
-	controller.enableSnapToGround(0.02)
-	// controller.setMaxSlopeClimbAngle(Math.PI / 180 * 120)
-	controller.enableAutostep(0.5, 0.2, true)
+	controller.setCharacterMass(0.1)
+	controller.enableAutostep(0.5, 0, true)
 	return { controller } as const satisfies Entity
 }
 export const traverseFind = <T extends Constructor<Object3D<Object3DEventMap>> = Constructor<Object3D<Object3DEventMap>>>(obj: Object3D<Object3DEventMap>, fn: (node: Object3D<Object3DEventMap>) => boolean, instance?: T): InstanceType<T> | null => {

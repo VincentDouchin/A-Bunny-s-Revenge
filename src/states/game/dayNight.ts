@@ -23,8 +23,5 @@ export const dayNight = () => {
 export const playNightMusic = () => {
 	if (dayTime.current >= 0.8 && dayTime.dayToNight === true) {
 		musicManager.playTheme('garden_night')
-		musicManager.playAmbience('ambience_night')
-	} else {
-		musicManager.playAmbience('ambience_day')
 	}
 }

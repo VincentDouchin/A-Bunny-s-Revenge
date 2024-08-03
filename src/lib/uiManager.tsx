@@ -11,7 +11,7 @@ export class UIManager {
 		el.style.inset = '0'
 		el.style.display = 'grid'
 		el.style.zIndex = '1'
-		el.classList.add('no-events')
+		el.classList.add('ui-container')
 		document.body.appendChild(el)
 		this.root = el
 		this.setFontSize(settings.uiScale)

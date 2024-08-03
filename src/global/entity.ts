@@ -23,10 +23,11 @@ import type { WeaponArc } from '@/shaders/weaponArc'
 import type { Room } from '@/states/dungeon/generateDungeon'
 import type { Dash } from '@/states/game/dash'
 import type { MainMenuBook } from '@/states/mainMenu/book'
+import type { TutorialWindow } from '@/ui/Tutorial'
 
 export type PlayerAnimations = 'idle' | 'running' | 'lightAttack' | 'slashAttack' | 'heavyAttack' | 'hit' | 'dying' | 'fishing'
 export type EnemyAnimations = 'idle' | 'running' | 'attacking' | 'hit' | 'dead'
-export type Dialog = Generator<string | string[] | void | false, void, number | void> | AsyncGenerator<string | string[] | void | false, void, number | void>
+export type Dialog = Generator<string | string[] | void | boolean, void, number | void> | AsyncGenerator<string | string[] | void | boolean, void, number | void>
 export enum Faction {
 	Player,
 	Enemy,
@@ -142,6 +143,7 @@ export interface Entity {
 	collider?: Collider
 	secondaryCollidersDesc?: ColliderDesc[]
 	secondaryColliders?: Collider[]
+	directedDynamic?: true
 	size?: Vector3
 	controller?: KinematicCharacterController
 	// ! Behaviors
@@ -154,6 +156,7 @@ export interface Entity {
 	houseAnimator?: Animator<Animations['House']>
 	chestAnimator?: Animator<Animations['Chest']>
 	kayAnimator?: Animator<Animations['ALICE_animated']>
+	cellarDoorAnimator?: Animator<Animations['cellar_entrance']>
 	// ! Farming
 	sensor?: { shape: Shape, distance: number }
 	crop?: Crop
@@ -197,6 +200,8 @@ export interface Entity {
 	inventorySize?: number
 	menuType?: MenuType
 	inventoryId?: string
+	// ! Tuto
+	tutorial?: TutorialWindow
 	// ! Cooking
 	displayedItem?: Entity
 	// ! Player
@@ -239,6 +244,7 @@ export interface Entity {
 	sneeze?: Timer<false>
 	poisoned?: Timer<false>
 	sleepy?: Timer<false>
+	sleeping?: true // intro
 	pollen?: true
 	sleepingPowder?: true
 	modifiers?: ModifierContainer
@@ -271,9 +277,7 @@ export interface Entity {
 	ambientLight?: 'night' | 'day'
 	withTimeUniform?: true | (ShaderMaterial | MeshPhongMaterial)[]
 	// ! Basket
-	basket?: With<Entity, 'inventory' | 'inventoryId' | 'inventorySize'>
-	following?: boolean
-	followTarget?: With<Entity, 'position'>
+	basket?: true
 	// ! Weapon
 	weapon?: With<Entity, 'model' | 'weaponName' | 'weaponArc'>
 	weaponArc?: WeaponArc
