@@ -61,6 +61,8 @@ export const sleepPlayer = async () => {
 	if (player) {
 		player.modifiers?.addModifier('sleepingPowder')
 		await sleep(5000)
+		await player.playerAnimator?.playClamped('wakeUp')
+		ecs.update(player, { state: 'idle' })
 	}
 }
 export const playerInventoryQuery = ecs.with('inventoryId', 'inventory', 'inventorySize', 'player', 'currentHealth', 'maxHealth')

@@ -13,7 +13,9 @@ export const weaponBundle = (weaponName: weapons) => {
 	tip.name = 'tip'
 	tip.position.setZ(4)
 	model.add(tip)
-	model.scale.setScalar(data.scale)
+	model.rotateX(Math.PI / 2)
+	model.rotateY(-Math.PI / 2)
+	model.scale.setScalar(data.scale / 4.5)
 	return ecs.add({ model, weaponName, weaponArc: new WeaponArc() })
 }
 const weaponArcQuery = ecs.with('weapon', 'group', 'state')

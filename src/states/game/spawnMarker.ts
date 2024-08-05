@@ -16,10 +16,12 @@ import { assets } from '@/global/init'
 
 export const spawnMarker = (name: string): Entity => {
 	if (name === 'playerIntro') {
-		return {
+		const player = {
 			...playerBundle(PLAYER_DEFAULT_HEALTH, null),
-			sleeping: true,
 		}
+		player.playerAnimator.playAnimation('sleeping')
+		player.state = 'managed'
+		return player
 	}
 	if (name === 'basketIntro') {
 		const model = assets.models.basket.scene.clone()

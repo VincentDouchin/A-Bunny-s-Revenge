@@ -29,26 +29,29 @@ import type { System } from '@/lib/state'
 import { Stat } from '@/lib/stats'
 import { Timer } from '@/lib/timer'
 
-const playerAnimationMap: Record<PlayerAnimations, Animations['Bunny']> = {
-	idle: 'IDLE_NEW',
-	running: 'RUN_ALT',
-	lightAttack: 'ATTACK_NEW_1',
-	slashAttack: 'ATTACK_NEW_2',
-	heavyAttack: 'NEW_ATTACK_3',
-	hit: 'HURT',
-	dying: 'DEATH',
-	fishing: 'FIGHT_ACTION1',
+const playerAnimationMap: Record<PlayerAnimations, Animations['BunnyClothed']> = {
+	idle: 'Idle',
+	running: 'Running_B',
+	lightAttack: '1H_Melee_Attack_Slice_Diagonal',
+	slashAttack: '1H_Melee_Attack_Chop',
+	heavyAttack: '1H_Melee_Attack_Stab',
+	hit: 'Hit_A',
+	dying: 'Death_A',
+	fishing: '1H_Melee_Attack_Slice_Diagonal',
+	sleeping: 'Lie_Idle',
+	wakeUp: 'Lie_StandUp',
 }
 
 export const PLAYER_DEFAULT_HEALTH = 10
 
 export const playerBundle = (health: number, weapon: weapons | null) => {
-	const model = clone(assets.characters.Bunny.scene)
+	const model = clone(assets.characters.BunnyClothed.scene)
 	model.traverse((node) => {
 		if (node instanceof Mesh && node.material.map) {
 			node.material.map.colorSpace = LinearSRGBColorSpace
 		}
 	})
+	model.scale.multiplyScalar(4.5)
 	const bundle = capsuleColliderBundle(model, Sizes.character)
 	bundle.bodyDesc.setLinearDamping(20)
 	const debuffsContainer = new CSS2DObject(document.createElement('div'))
@@ -61,7 +64,7 @@ export const playerBundle = (health: number, weapon: weapons | null) => {
 		...inventoryBundle(Number.POSITIVE_INFINITY, 'player'),
 		...bundle,
 		...characterControllerBundle(),
-		playerAnimator: new Animator(bundle.model, assets.characters.Bunny.animations, playerAnimationMap),
+		playerAnimator: new Animator(bundle.model, assets.characters.BunnyClothed.animations, playerAnimationMap),
 		...inMap(),
 		cameratarget: true,
 		faction: Faction.Player,

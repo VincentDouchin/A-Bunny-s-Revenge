@@ -11,6 +11,7 @@ export const dialogs = {
 	async *PlayerIntro1() {
 		cutSceneState.enable()
 		await sleepPlayer()
+
 		yield 'Huh?'
 		yield 'Where am I?'
 		yield '...'

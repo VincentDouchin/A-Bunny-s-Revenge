@@ -25,7 +25,7 @@ import type { Dash } from '@/states/game/dash'
 import type { MainMenuBook } from '@/states/mainMenu/book'
 import type { TutorialWindow } from '@/ui/Tutorial'
 
-export type PlayerAnimations = 'idle' | 'running' | 'lightAttack' | 'slashAttack' | 'heavyAttack' | 'hit' | 'dying' | 'fishing'
+export type PlayerAnimations = 'idle' | 'running' | 'lightAttack' | 'slashAttack' | 'heavyAttack' | 'hit' | 'dying' | 'fishing' | 'sleeping' | 'wakeUp'
 export type EnemyAnimations = 'idle' | 'running' | 'attacking' | 'hit' | 'dead'
 export type Dialog = Generator<string | string[] | void | boolean, void, number | void> | AsyncGenerator<string | string[] | void | boolean, void, number | void>
 export enum Faction {
@@ -82,7 +82,7 @@ export enum EnemyAttackStyle {
 
 export interface States {
 	basket: 'idle' | 'running'
-	player: 'idle' | 'running' | 'attack' | 'dying' | 'dead' | 'picking' | 'dash' | 'hit' | 'stun' | 'poisoned'
+	player: 'idle' | 'running' | 'attack' | 'dying' | 'dead' | 'picking' | 'dash' | 'hit' | 'stun' | 'poisoned' | 'managed'
 	enemy: 'idle' | 'running' | 'attack' | 'hit' | 'dying' | 'dead' | 'waitingAttack' | 'attackCooldown' | 'stun' | 'wander'
 	boss: 'idle' | 'running' | 'rangeAttack' | 'attack' | 'dying' | 'dead' | 'waitingAttack' | 'attackCooldown' | 'hit'
 	fish: 'going' | 'hooked' | 'wander' | 'bounce' | 'runaway'
