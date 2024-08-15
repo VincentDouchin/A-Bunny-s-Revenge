@@ -21,6 +21,7 @@ import { menuInputMap, playerInputMap } from '@/global/inputMaps'
 import type { DungeonRessources, FarmRessources } from '@/global/states'
 import { openMenuState } from '@/global/states'
 
+import { dialogs } from '@/constants/dialogs'
 import { ModifierContainer } from '@/global/modifiers'
 import { collisionGroups } from '@/lib/collisionGroups'
 import { inMap } from '@/lib/hierarchy'
@@ -79,6 +80,7 @@ export const playerBundle = (health: number, weapon: weapons | null) => {
 		critChance: new Stat(0.05),
 		critDamage: new Stat(0.20),
 		attackSpeed: new Stat(1),
+		npcName: 'Player',
 		lastStep: { right: false, left: false },
 		...healthBundle(10, health),
 		...behaviorBundle('player', 'idle'),
@@ -98,35 +100,32 @@ export const playerBundle = (health: number, weapon: weapons | null) => {
 	for (const item of save.modifiers) {
 		player.modifiers.addModifier(item)
 	}
+
 	return player
 }
 
 const markerQuery = ecs.with('markerName', 'position', 'rotation').where(e => e.markerName === 'player-from-ruins')
-const getPlayerPosition = (ressources: FarmRessources) => {
-	if (ressources.previousState === 'ruins' && markerQuery.first) {
-		return {
-			position: markerQuery.first.position.clone(),
-			rotation: new Quaternion(),
-		}
-	}
-	return {
-		position: new Vector3(),
-		rotation: new Quaternion(),
-	}
-}
 
 export const spawnCharacter: System<FarmRessources> = (ressources) => {
-	const { position, rotation } = getPlayerPosition(ressources)
+	const fromIntro = ressources.previousState === 'ruins' && markerQuery.first
+	const player = {
+		...playerBundle(PLAYER_DEFAULT_HEALTH, null),
+		position: new Vector3(),
+		rotation: new Quaternion(),
+		targetRotation: new Quaternion(),
+	}
+	if (fromIntro) {
+		player.position.copy(fromIntro.position)
+		Object.assign(player, { withChildren: () => {
+			ecs.add({ dialog: dialogs.PlayerIntro2() })
+		} })
+	}
+
 	if (ressources?.previousState === 'dungeon') {
 		save.modifiers = []
 	}
 
-	ecs.add({
-		...playerBundle(PLAYER_DEFAULT_HEALTH, null),
-		position,
-		rotation,
-		targetRotation: rotation.clone(),
-	})
+	ecs.add(player)
 }
 
 const doorQuery = ecs.with('door', 'position', 'rotation')

@@ -109,7 +109,8 @@ export const characterControllerBundle = () => {
 	const controller = world.createCharacterController(0.1)
 	controller.setApplyImpulsesToDynamicBodies(true)
 	controller.setCharacterMass(0.1)
-	controller.enableAutostep(0.5, 0, true)
+	controller.enableAutostep(4, 0, false)
+	controller.setMaxSlopeClimbAngle(Math.PI / 2 * 1.5)
 	return { controller } as const satisfies Entity
 }
 export const traverseFind = <T extends Constructor<Object3D<Object3DEventMap>> = Constructor<Object3D<Object3DEventMap>>>(obj: Object3D<Object3DEventMap>, fn: (node: Object3D<Object3DEventMap>) => boolean, instance?: T): InstanceType<T> | null => {

@@ -37,11 +37,15 @@ export const TutorialUi = () => {
 	}
 	.controls{
 		font-size: 2rem;
-		width: 40rem;
+		width: 100%;
 	}
 	.keys{
 		display: flex;
 		gap:1rem;
+	}
+	.dpad{
+		display:grid;
+		grid-template-areas: ". forward ." "left backward right "
 	}
 	`
 	return (
@@ -83,15 +87,15 @@ export const TutorialUi = () => {
 																<div class="control-method">
 																	<OutlineText textSize="2rem">Do you prefer using the mouse or the keyboard to direct the player?</OutlineText>
 																	<div class="controls">
-																		<SwitchButtons options={['keyboard', 'mouse'] as const} value={settings.controls} setValue={val => settings.controls = val} />
+																		<SwitchButtons options={['keyboard', 'mouse']} value={settings.controls} setValue={val => settings.controls = val} />
 																	</div>
 																	<OutlineText textSize="1.5rem">You can change this option in the settings later</OutlineText>
 																	<br />
 																	<div class="gamepad-controls">
 
-																		<div class="keys">
+																		<div class="dpad">
 																			<For each={['right', 'left', 'forward', 'backward'] as const}>
-																				{dir => <InputIcon size={3} input={player().playerControls.get(dir)} />}
+																				{dir => <div style={{ 'grid-area': dir }}><InputIcon size={3} input={player().playerControls.get(dir)} /></div>}
 																			</For>
 																		</div>
 																		<OutlineText textSize="2rem">Use the keys to move the player.</OutlineText>

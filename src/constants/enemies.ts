@@ -4,6 +4,7 @@ import { Rarity } from './items'
 
 import type { EnemyAnimations, Entity, States } from '@/global/entity'
 import { EnemyAttackStyle } from '@/global/entity'
+import { between } from '@/utils/mapFunctions'
 
 export interface Drop extends Item {
 	rarity: Rarity
@@ -12,7 +13,7 @@ export interface Drop extends Item {
 export interface Enemy<Name extends keyof Animations> {
 	name: string
 	health: number
-	scale: number
+	scale: number | (() => number)
 	speed: number
 	boss: boolean
 	behavior: keyof States
@@ -21,7 +22,7 @@ export interface Enemy<Name extends keyof Animations> {
 	animationMap: Record<EnemyAnimations, Animations[Name]>
 	components?: () => Entity
 }
-const enemyNames = ['Armabee', 'Armabee_Evolved', 'Shaga_A', 'Big_Boar_A', 'Snailo_A', 'Snailo_B', 'Porin_A', 'Forest_Butterfly_A', 'Racco_A', 'Platopo_A', 'Batty_A', 'Big_Boar_C', 'Magicbook_A', 'Devilu_A', 'Big_Boar_B'] as const satisfies readonly characters[]
+const enemyNames = ['Armabee', 'Armabee_Evolved', 'Shaga_A', 'Big_Boar_A', 'Snailo_A', 'Snailo_B', 'Porin_A', 'Forest_Butterfly_A', 'Racco_A', 'Platopo_A', 'Batty_A', 'Big_Boar_C', 'Magicbook_A', 'Devilu_A', 'Big_Boar_B', 'soot_sprite'] as const satisfies readonly characters[]
 
 export type enemy = (typeof enemyNames)[number]
 
@@ -34,6 +35,24 @@ const genericEnemyAnimationMap: Record<EnemyAnimations, Animations['Big_Boar_A']
 }
 
 export const enemyData: { [k in enemy]: Enemy<k> } = {
+	// ! Cellar
+	soot_sprite: {
+		name: 'Soot sprite',
+		health: 1,
+		scale: () => between(4, 6),
+		speed: 1,
+		boss: false,
+		drops: [],
+		behavior: 'enemy',
+		attackStyle: EnemyAttackStyle.Melee,
+		animationMap: {
+			idle: 'idle',
+			running: 'running',
+			attacking: 'attack',
+			dead: 'death',
+			hit: 'hit',
+		},
+	},
 	Armabee: {
 		name: 'Armabee',
 		health: 3,

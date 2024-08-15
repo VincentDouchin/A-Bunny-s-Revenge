@@ -10,9 +10,8 @@ const playerQuery = ecs.with('player', 'position', 'rotation', 'targetRotation')
 export const startIntro = async () => {
 	const player = playerQuery.first
 	if (player) {
-		ecs.update(player, {
+		ecs.add({
 			dialog: dialogs.PlayerIntro1(),
-			activeDialog: 'instant',
 		})
 	}
 }
@@ -28,19 +27,6 @@ export const pickUpBasket = async () => {
 		const dest = basket.position.clone().add(new Vector3(0, 0, 5).applyQuaternion(basket.rotation))
 		await movePlayerTo(dest)
 		ecs.remove(basket)
-		const basketItem = assets.models.basket.scene
-		basketItem.scale.setScalar(0.6)
-		await displayKeyItem(basketItem, 'Basket of ingredients')
-		const player = playerQuery.first
-		if (player) {
-			ecs.removeComponent(player, 'dialog')
-			ecs.removeComponent(player, 'activeDialog')
-			setTimeout(() => {
-				ecs.update(player, {
-					dialog: dialogs.pickupBasket2(),
-					activeDialog: 'instant',
-				})
-			}, 1000)
-		}
+		await displayKeyItem(assets.models.basket.scene, 'Basket of ingredients', 0.6)
 	}
 }

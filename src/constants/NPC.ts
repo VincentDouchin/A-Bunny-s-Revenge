@@ -1,1 +1,1 @@
-export const NPC = ['Panda', 'Grandma', 'door', 'Jack', 'Owl', 'Alice'] as const
+export const NPC = ['Grandma', 'door', 'Jack', 'Owl', 'Alice', 'Player'] as const

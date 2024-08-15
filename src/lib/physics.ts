@@ -6,7 +6,6 @@ import { pausedState } from '@/global/states'
 const bodiesQuery = ecs.with('bodyDesc', 'position').without('body')
 const colliderQueries = ecs.with('colliderDesc', 'body').without('collider')
 const secondaryCollidersQuery = ecs.with('body', 'secondaryCollidersDesc')
-
 const bodiesToRemove = new Set<RigidBody>()
 const collidersToRemove = new Set<Collider>()
 const secondaryCollidersToRemove = new Set<Collider[]>()

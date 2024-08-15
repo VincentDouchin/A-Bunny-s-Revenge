@@ -39,7 +39,10 @@ export const applyMove = (entity: With<Entity, 'body' >, force: Vector3) => {
 	if (pausedState.enabled) return
 	const { body, controller, collider } = entity
 	if (controller && collider && body.isKinematic()) {
-		controller.computeColliderMovement(collider, force.add(new Vector3(0, -0.15, 0)), QueryFilterFlags.EXCLUDE_SENSORS | QueryFilterFlags.EXCLUDE_SOLIDS, undefined)
+		if (!controller.computedGrounded()) {
+			force.add(new Vector3(0, -0.2, 0))
+		}
+		controller.computeColliderMovement(collider, force, QueryFilterFlags.EXCLUDE_SENSORS | QueryFilterFlags.EXCLUDE_SOLIDS, undefined)
 		const movement = controller.computedMovement()
 		const bodyPos = body.translation()
 		const dest = new Vector3(bodyPos.x, bodyPos.y, bodyPos.z).add(movement)

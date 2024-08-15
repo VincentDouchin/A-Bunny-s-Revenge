@@ -21,7 +21,8 @@ import { getRandom } from '@/utils/mapFunctions'
 export const enemyBundle = (name: enemy, level: number) => {
 	const enemy = enemyData[name]
 	const model = assets.characters[name]
-	model.scene.scale.setScalar(enemy.scale)
+	const scale = typeof enemy.scale === 'function' ? enemy.scale() : enemy.scale
+	model.scene.scale.setScalar(scale)
 	const bundle = modelColliderBundle(model.scene, RigidBodyType.Dynamic, false, EnemySizes[name] ?? Sizes.character, 'ball')
 	bundle.bodyDesc.setLinearDamping(20)
 	bundle.bodyDesc.setCcdEnabled(true)

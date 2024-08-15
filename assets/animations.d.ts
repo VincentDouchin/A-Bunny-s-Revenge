@@ -100,4 +100,6 @@ interface Animations {
 'Snailo_C' : 'Attack' | 'Damage' | 'Die' | 'Idle' | 'Move'
 
 'Snailo_D' : 'Attack' | 'Damage' | 'Die' | 'Idle' | 'Move'
+
+'soot_sprite' : 'attack' | 'death' | 'hit' | 'idle' | 'running'
 }

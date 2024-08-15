@@ -260,6 +260,11 @@ export const spawnGroundAndTrees = (level: Level, dungeonLevel?: number) => {
 	const heights = canvasToArray(heightfieldMap).map(pixel => pixel.y / 255)
 	const heightfield = new Float32Array(heights.length)
 	heightfield.set(heights)
+	const colliderNorth = ColliderDesc.cuboid(level.size.x / 2, 50, 1).setTranslation(0, 0, level.size.y + 0.5 / 2)
+	const colliderSouth = ColliderDesc.cuboid(level.size.x / 2, 50, 1).setTranslation(0, 0, -(level.size.y + 0.5) / 2)
+	const colliderEast = ColliderDesc.cuboid(1, 50, level.size.y / 2).setTranslation(level.size.x / 2 + 0.5, 0, 0)
+	const colliderWest = ColliderDesc.cuboid(1, 50, level.size.y / 2).setTranslation(-(level.size.x / 2 + 0.5), 0, 0)
+	const secondaryCollidersDesc = [colliderNorth, colliderSouth, colliderEast, colliderWest]
 	const ground = ecs.add({
 		model: groundMesh,
 
@@ -278,6 +283,7 @@ export const spawnGroundAndTrees = (level: Level, dungeonLevel?: number) => {
 			.setCollisionGroups(collisionGroups('floor', ['enemy', 'player']))
 			.setActiveEvents(ActiveEvents.COLLISION_EVENTS),
 		ground: true,
+		secondaryCollidersDesc,
 	})
 	ecs.add({
 		parent: ground,

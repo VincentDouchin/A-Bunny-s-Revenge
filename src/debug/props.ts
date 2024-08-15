@@ -25,11 +25,10 @@ import { RoomType } from '@/states/dungeon/generateDungeon'
 import { cropBundle } from '@/states/farm/farming'
 import { openMenu } from '@/states/farm/openInventory'
 import { wateringCanBundle } from '@/states/farm/wateringCan'
-import { dialogBundle } from '@/states/game/dialog'
 import { doorSide } from '@/states/game/spawnDoor'
 import { spawnMarker } from '@/states/game/spawnMarker'
 import { PLAYER_DEFAULT_HEALTH, playerBundle } from '@/states/game/spawnPlayer'
-import { lockPlayer, unlockPlayer } from '@/utils/dialogHelpers'
+import { hasCompletedStep, lockPlayer, unlockPlayer } from '@/utils/dialogHelpers'
 import { sleep } from '@/utils/sleep'
 
 export const customModels = {
@@ -93,7 +92,7 @@ export const props: Props = [
 		models: ['stairs'],
 		bundle(e) {
 			ecs.add({
-				...playerBundle(PLAYER_DEFAULT_HEALTH, null),
+				...playerBundle(PLAYER_DEFAULT_HEALTH, 'Ladle'),
 				position: e.position.clone().add(new Vector3(0, e.size!.y, 0)),
 				rotation: e.rotation.clone(),
 				targetRotation: e.rotation.clone(),
@@ -104,6 +103,12 @@ export const props: Props = [
 	{
 		name: 'cellar_props',
 		models: ['barrel', 'barrel_small', 'crate', 'bookshelf', 'keg', 'box_large', 'box_small', 'box_stack', 'trunk'],
+		bundle: (e) => {
+			return {
+				...e,
+				crate: true,
+			}
+		},
 	},
 	{
 		name: 'cellar_wall',
@@ -117,6 +122,8 @@ export const props: Props = [
 				...e,
 				interactable: Interactable.Open,
 				cellarDoorAnimator: new Animator(e.model, assets.models.cellar_entrance.animations),
+				questMarker: ['intro_quest#2_find_pot'],
+				questMarkerPosition: new Vector3(0, 10, -5),
 				async onPrimary(e, player) {
 					cutSceneState.enable()
 					await e.cellarDoorAnimator?.playClamped('doorOpen')
@@ -124,9 +131,10 @@ export const props: Props = [
 					const cellar: Room = {
 						plan: levelsData.levels.find(l => l.type === 'cellar')!,
 						doors: { [Direction.S]: null },
-						enemies: ['Armabee', 'Armabee', 'Armabee', 'Armabee'],
+						enemies: ['soot_sprite', 'soot_sprite', 'soot_sprite', 'soot_sprite'],
 						type: RoomType.Entrance,
 						encounter: null,
+						chest: true,
 					}
 					await sleep(1000)
 					dungeonState.enable({
@@ -361,7 +369,6 @@ export const props: Props = [
 			const dialog = function*() {
 				while (true) {
 					yield data.data.text
-					yield false
 				}
 			}
 			return {
@@ -480,16 +487,23 @@ export const props: Props = [
 							ecs.add({ parent, nightLight })
 						} else if (node.name === 'door') {
 							const position = node.position.clone().multiply(entity.model.scale)
-							ecs.add({
+							const door: Entity = {
 								parent,
-								npcName: 'door',
 								position,
 								group: new Group(),
-								dialog: dialogs.GrandmasDoor(),
 								interactable: Interactable.Enter,
 								bodyDesc: RigidBodyDesc.fixed().lockRotations(),
 								colliderDesc: ColliderDesc.cuboid(5, 7, 1).setSensor(true).setActiveCollisionTypes(ActiveCollisionTypes.ALL),
-							})
+								questMarker: ['intro_quest#1_see_grandma', 'intro_quest#3_bring_pot_to_grandma'],
+								questMarkerPosition: new Vector3(0, 15, 5),
+								onPrimary(entity) {
+									if (!hasCompletedStep('intro_quest', '1_see_grandma') && entity.questMarkerContainer) {
+										ecs.add({ dialog: dialogs.GrandmaIntro() })
+									}
+								},
+							}
+
+							ecs.add(door)
 						} else if (node instanceof Mesh) {
 							ecs.add({ parent, emissiveMat: node.material })
 							node.material.emissive = new Color(0xFFFF00)
@@ -500,7 +514,7 @@ export const props: Props = [
 				npcName: 'Grandma',
 				houseAnimator: new Animator(entity.model, assets.models.House.animations),
 				voice: 'f1',
-				dialog: dialogs.GrandmasHouse(),
+				// dialog: dialogs.GrandmasHouse(),
 			}
 		},
 	},
@@ -658,7 +672,7 @@ export const props: Props = [
 						const owl = ecs.add({
 							...inMap(),
 							model: owlModel,
-							...dialogBundle('Seller'),
+							// ...dialogBundle('Seller'),
 							kayAnimator: new Animator(owlModel, assets.characters.OWL_animated.animations),
 							rotation: new Quaternion(),
 							targetRotation,

@@ -25,6 +25,7 @@ const enemyQuery = ecs.with('faction', 'state', 'strength', 'collider', 'positio
 const enemyWithSensor = enemyQuery.with('sensor')
 const enemyWithoutSensor = enemyQuery.without('sensor')
 const interactionQuery = ecs.with('interactionContainer')
+const dialogQuery = ecs.with('dialog')
 const getAttackingEnemy = (player: With<Entity, PlayerComponents>) => {
 	if (player.hitTimer.running()) return null
 	for (const enemy of enemyWithoutSensor) {
@@ -57,6 +58,7 @@ export const playerBehaviorPlugin = behaviorPlugin(
 		const canDash = e.dash.finished() && !e.modifiers.hasModifier('honeySpot')
 		const { force, isMoving } = getMovementForce(e)
 		const direction = getPlayerRotation(e, force)
+
 		return { force, isMoving, direction, touchedByEnemy: attackingEnemy, sneezing, poisoned, canDash }
 	},
 )({
@@ -71,12 +73,10 @@ export const playerBehaviorPlugin = behaviorPlugin(
 				setState('running')
 			}
 			if (!campState.enabled || debugOptions.attackInFarm()) {
-				if (e.playerControls.get('primary').justReleased && e.weapon) {
-					if (interactionQuery.size === 0) {
-						setState('attack')
-					}
+				if (e.playerControls.get('primary').justPressed && e.weapon && interactionQuery.size === 0 && dialogQuery.size === 0) {
+					setState('attack')
 				}
-				if (e.playerControls.get('secondary').justReleased && canDash) {
+				if (e.playerControls.get('secondary').justPressed && canDash) {
 					setState('dash')
 				}
 			}
@@ -95,10 +95,10 @@ export const playerBehaviorPlugin = behaviorPlugin(
 				setState('idle')
 			}
 			if ((!campState.enabled || debugOptions.attackInFarm())) {
-				if (e.playerControls.get('primary').justReleased && e.weapon) {
+				if (e.playerControls.get('primary').justPressed && e.weapon && interactionQuery.size === 0 && dialogQuery.size === 0) {
 					setState('attack')
 				}
-				if (e.playerControls.get('secondary').justReleased && canDash) {
+				if (e.playerControls.get('secondary').justPressed && canDash) {
 					setState('dash')
 				}
 			}

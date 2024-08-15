@@ -13,7 +13,6 @@ const weaponNames = ['Hoe', 'Ladle', 'ScissorWeapon', 'SwordWeapon'] as const sa
 const displayWeapon = (weaponName: weapons, parent: Entity) => {
 	const weaponModel = assets.weapons[weaponName].scene.clone()
 	weaponModel.scale.setScalar(weaponsData[weaponName].scale * 1.2)
-	weaponModel.rotateX(Math.PI / 2 * 3)
 	const weapon = ecs.add({
 		model: weaponModel,
 		position: new Vector3(0, 7, 0),

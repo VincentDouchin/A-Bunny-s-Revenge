@@ -1,14 +1,13 @@
 import { easeInOut } from 'popmotion'
 import { PerspectiveCamera, Raycaster, Vector2, Vector3 } from 'three'
 import { PLAYER_DEFAULT_HEALTH, playerBundle } from '../game/spawnPlayer'
-import { dialogs } from '@/constants/dialogs'
 import { updateCameraZoom } from '@/global/camera'
 import { params } from '@/global/context'
 import { RenderGroup } from '@/global/entity'
 import { ecs, inputManager, save, tweens } from '@/global/init'
 import { getTargetSize, updateRenderSize } from '@/global/rendering'
 import { campState, cutSceneState, introState, mainMenuState } from '@/global/states'
-import { doorQuery, hasQuest, leaveHouse, setSensor } from '@/utils/dialogHelpers'
+import { doorQuery, leaveHouse, setSensor } from '@/utils/dialogHelpers'
 import { once } from '@/utils/mapFunctions'
 
 export type MenuOptions = 'Continue' | 'New Game' | 'Settings' | 'Credits'
@@ -146,16 +145,7 @@ export const spawnPlayerContinueGame = async () => {
 			rotation: house.rotation.clone(),
 			targetRotation: house.rotation.clone(),
 		})
-		if (!hasQuest('grandma_start')) {
-			for (const house of houseQuery) {
-				ecs.update(house, {
-					dialog: dialogs.GrandmaStart(),
-					activeDialog: true,
-				})
-			}
-		} else {
-			await leaveHouse()
-		}
+		await leaveHouse()
 	}
 	cutSceneState.disable()
 }

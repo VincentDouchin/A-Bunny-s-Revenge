@@ -1,5 +1,4 @@
 import type { weapons } from '@assets/assets'
-import { Object3D } from 'three'
 import { weaponsData } from '@/constants/weapons'
 import { assets, ecs } from '@/global/init'
 import { scene } from '@/global/rendering'
@@ -9,12 +8,7 @@ import { WeaponArc } from '@/shaders/weaponArc'
 export const weaponBundle = (weaponName: weapons) => {
 	const data = weaponsData[weaponName]
 	const model = assets.weapons[weaponName].scene.clone()
-	const tip = new Object3D()
-	tip.name = 'tip'
-	tip.position.setZ(4)
-	model.add(tip)
-	model.rotateX(Math.PI / 2)
-	model.rotateY(-Math.PI / 2)
+	model.rotateZ(Math.PI / 2)
 	model.scale.setScalar(data.scale / 4.5)
 	return ecs.add({ model, weaponName, weaponArc: new WeaponArc() })
 }

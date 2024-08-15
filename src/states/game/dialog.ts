@@ -1,27 +1,28 @@
 import { circIn } from 'popmotion'
 import { CylinderGeometry, Group, Mesh, MeshBasicMaterial, Quaternion, SphereGeometry, Vector3 } from 'three'
 import { dialogs } from '@/constants/dialogs'
-import { type Entity, Interactable } from '@/global/entity'
+import type { Dialog, Entity, QueryEntity } from '@/global/entity'
+import { Interactable } from '@/global/entity'
 import { ecs, time, tweens } from '@/global/init'
-import { hasQuest, questsUnlocks } from '@/utils/dialogHelpers'
+import { showMarker } from '@/utils/dialogHelpers'
 
-export const dialogBundle = (key: keyof typeof dialogs) => {
+export const dialogBundle = (dialog: Dialog) => {
 	return {
-		dialog: dialogs[key](),
+		dialog,
 		interactable: Interactable.Talk,
 	} as const satisfies Entity
 }
-const dialogQuery = ecs.with('dialog', 'interactionContainer')
+// const dialogQuery = ecs.with('dialog', 'interactionContainer')
 const playerQuery = ecs.with('player', 'playerControls', 'position', 'rotation')
-export const talkToNPC = () => {
-	for (const player of playerQuery) {
-		for (const npc of dialogQuery) {
-			if (player.playerControls.get('primary').justPressed) {
-				ecs.addComponent(npc, 'activeDialog', true)
-			}
-		}
-	}
-}
+// export const talkToNPC = () => {
+// 	for (const player of playerQuery) {
+// 		for (const npc of dialogQuery) {
+// 			if (player.playerControls.get('primary').justPressed) {
+// 				// ecs.addComponent(npc, 'activeDialog', true)
+// 			}
+// 		}
+// 	}
+// }
 
 const npcQuery = ecs.with('npc', 'model', 'position', 'rotation', 'group')
 export const turnNPCHead = () => {
@@ -47,16 +48,24 @@ export const turnNPCHead = () => {
 }
 
 const questMarkerQuery = ecs.with('questMarker')
-export const addQuestMarkers = () => questMarkerQuery.onEntityAdded.subscribe((e) => {
-	if (!hasQuest(e.questMarker) && questsUnlocks[e.questMarker]()) {
+export const displayQuestMarker = (e: QueryEntity<typeof questMarkerQuery>) => {
+	if (e.questMarker.some(showMarker)) {
 		const questMarkerContainer = new Group()
 		const mat = new MeshBasicMaterial({ color: 0xFFFF33, depthWrite: false })
 		const dot = new Mesh(new SphereGeometry(0.5), mat)
 		const line = new Mesh(new CylinderGeometry(0.5, 0.5, 4), mat)
 		line.position.setY(3)
+
+		if (e.rotation) {
+			questMarkerContainer.rotation.setFromQuaternion(e.rotation.clone().invert())
+		}
 		questMarkerContainer.add(dot)
 		questMarkerContainer.add(line)
-		questMarkerContainer.position.setY(15)
+		if (e.questMarkerPosition) {
+			questMarkerContainer.position.copy(e.questMarkerPosition.clone())
+		} else {
+			questMarkerContainer.position.setY(15)
+		}
 		questMarkerContainer.renderOrder = 100
 		tweens.add({
 			from: line.scale.clone(),
@@ -73,7 +82,8 @@ export const addQuestMarkers = () => questMarkerQuery.onEntityAdded.subscribe((e
 		})
 		ecs.update(e, { questMarkerContainer })
 	}
-})
+}
+export const addQuestMarkers = () => questMarkerQuery.onEntityAdded.subscribe(displayQuestMarker)
 
 const dialogTriggerQuery = ecs.with('position', 'dialogTrigger')
 export const triggerDialog = () => {
@@ -86,9 +96,8 @@ export const triggerDialog = () => {
 				if (dialog) {
 					player.targetMovementForce?.setScalar(0)
 					player.movementForce?.setScalar(0)
-					ecs.update(player, {
+					ecs.add({
 						dialog: dialog(),
-						activeDialog: 'instant',
 					})
 					ecs.remove(marker)
 				}

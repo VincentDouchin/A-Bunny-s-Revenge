@@ -10,7 +10,7 @@ import type { ModifierContainer } from './modifiers'
 import type { NPC } from '@/constants/NPC'
 import type { enemy } from '@/constants/enemies'
 import type { Item, crops } from '@/constants/items'
-import type { QuestName } from '@/constants/quests'
+import type { QuestMarkers } from '@/constants/quests'
 import type { Recipe } from '@/constants/recipes'
 import type { MenuInputMap, PlayerInputMap } from '@/global/inputMaps'
 import type { MeshLine, MeshLineMaterial } from '@/lib/MeshLine'
@@ -27,7 +27,7 @@ import type { TutorialWindow } from '@/ui/Tutorial'
 
 export type PlayerAnimations = 'idle' | 'running' | 'lightAttack' | 'slashAttack' | 'heavyAttack' | 'hit' | 'dying' | 'fishing' | 'sleeping' | 'wakeUp'
 export type EnemyAnimations = 'idle' | 'running' | 'attacking' | 'hit' | 'dead'
-export type Dialog = Generator<string | string[] | void | boolean, void, number | void> | AsyncGenerator<string | string[] | void | boolean, void, number | void>
+export type Dialog = Generator<string | void, void, void> | AsyncGenerator<string | void, void, void>
 export enum Faction {
 	Player,
 	Enemy,
@@ -214,14 +214,17 @@ export interface Entity {
 	npc?: true
 	voice?: voices
 	npcName?: (typeof NPC)[number]
-	questMarker?: QuestName
+	questMarker?: QuestMarkers[]
 	questMarkerContainer?: Group
+	questMarkerPosition?: Vector3
 	// ! Dialog
-	dialog?: Dialog
 	dialogHeight?: number
 	dialogTrigger?: string
-	activeDialog?: true | 'instant'
+	dialog?: Dialog
+	// activeDialog?:true
 	dialogContainer?: CSS2DObject
+
+	// activeDialog?: true | 'instant'
 	// ! Health
 	currentHealth?: number
 	maxHealth?: Stat
@@ -323,6 +326,8 @@ export interface Entity {
 	fishSpawner?: true
 	// ! Lock on
 	lockedOn?: CSS2DObject
+	// ! Cellar
+	crate?: true
 
 }
 export type Bundle<C extends keyof Entity> = () => With<Entity, C>

@@ -3,8 +3,6 @@ import { Portal } from 'solid-js/web'
 import { css } from 'solid-styled'
 import type { Atom } from 'solid-use/atom'
 import atom from 'solid-use/atom'
-import { Quaternion, Vector3 } from 'three'
-import { CSS2DObject } from 'three/examples/jsm/renderers/CSS2DRenderer'
 import { OutlineText } from './components/styledComponents'
 import { useGame, useQuery } from './store'
 import { soundDialog } from '@/lib/dialogSound'
@@ -78,7 +76,9 @@ export const DialogText = (props: { text: string, finished: Atom<boolean> }) => 
 	)
 }
 
-const dialogQuery = useQuery(ecs.with('dialog', 'activeDialog'))
+const dialogQuery = useQuery(ecs.with('dialog'))
+const dialogContainerQuery = ecs.with('dialogContainer')
+const talkingQuery = useQuery(dialogContainerQuery)
 export const DialogUi = () => {
 	const context = useGame()!
 
@@ -102,48 +102,51 @@ export const DialogUi = () => {
 		translate: 1rem -50%;
 		font-family: NanoPlus;
 		font-size: 1.5rem;
+		top: -50%;
+		z-index: 1;
 	}
 `
 	return (
 		<For each={dialogQuery()}>
 			{(entity) => {
-				const currentDialog = atom<IteratorResult<string | string[] | void | boolean> | null>(null)
-				const element = atom<HTMLElement | null>(null)
+				const currentDialog = atom<string | null>(null)
+				const waiting = atom(false)
+
 				const finished = atom(false)
-				let cancelCurrentDialog: (() => void) | null = null
-				const stepDialog = async () => {
-					if (!entity.dialogContainer) {
-						const dialogContainer = new CSS2DObject(document.createElement('div'))
-						dialogContainer.position.y = entity.dialogHeight ?? entity.size?.y ?? 4
-						element(dialogContainer.element)
-						ecs.update(entity, { dialogContainer })
+				const stepDialog = async (force = false) => {
+					if (finished() || force) {
+						if (waiting()) return
+						currentDialog(null)
+						waiting(true)
 						const next = await entity.dialog.next()
-						currentDialog(next)
-					} else {
-						if (finished()) {
-							currentDialog(await entity.dialog.next())
-							if (currentDialog()?.done || currentDialog() === null) {
-								ecs.removeComponent(entity, 'dialogContainer')
-								ecs.removeComponent(entity, 'activeDialog')
-							}
-						} else {
-							finished(true)
+						waiting(false)
+						if (next.value) {
+							currentDialog(next.value)
 						}
+						if (next.done) {
+							if (entity.npcName) {
+								ecs.removeComponent(entity, 'dialog')
+							} else {
+								ecs.remove(entity)
+							}
+						}
+					} else {
+						finished(true)
 					}
 				}
 				onMount(() => {
-					if (entity.targetRotation && entity.position && entity.kayAnimator?.current === 'Idle') {
-						const rot = context.player().position.clone().sub(entity.position)
-						const angle = Math.atan2(rot.x, rot.z)
-						entity.targetRotation.copy(new Quaternion().setFromAxisAngle(new Vector3(0, 1, 0), angle))
-					}
-					if (entity.activeDialog === 'instant') {
-						stepDialog()
+					stepDialog(true)
+				})
+				onCleanup(() => {
+					for (const entity of dialogContainerQuery) {
+						ecs.removeComponent(entity, 'dialogContainer')
 					}
 				})
+				let cancelCurrentDialog: (() => void) | null = null
 				createEffect(() => {
-					if (entity.voice) {
-						const { cancel, play } = soundDialog(entity.voice, currentDialog()?.value)
+					const dialog = currentDialog()
+					if (entity.voice && dialog) {
+						const { cancel, play } = soundDialog(entity.voice, dialog)
 						play()
 						cancelCurrentDialog = cancel
 					}
@@ -155,25 +158,31 @@ export const DialogUi = () => {
 						stepDialog()
 					}
 				})
+				const talking = createMemo(() => talkingQuery()[0])
 
 				return (
-					<Show when={typeof currentDialog()?.value === 'string' ? element() : false}>
-						{(el) => {
-							const text = createMemo(() => currentDialog()?.value)
-							onCleanup(() => {
-								currentDialog(null)
-								element(null)
-							})
+					<Show when={talking()}>
+						{(talking) => {
+							const text = createMemo(() => currentDialog())
+
 							return (
-								<Portal mount={el()}>
-									<Show when={entity.npcName}>
-										<OutlineText>
-											<div class="npc-name">{entity.npcName}</div>
-										</OutlineText>
+								<Portal mount={talking().dialogContainer.element}>
+									<Show when={text()}>
+										{(text) => {
+											return (
+												<>
+													<Show when={talking().npcName}>
+														<OutlineText>
+															<div class="npc-name">{talking().npcName}</div>
+														</OutlineText>
+													</Show>
+													<div class="dialog-container">
+														<DialogText text={text()} finished={finished} />
+													</div>
+												</>
+											)
+										}}
 									</Show>
-									<div class="dialog-container">
-										<DialogText text={text()} finished={finished} />
-									</div>
 								</Portal>
 							)
 						}}

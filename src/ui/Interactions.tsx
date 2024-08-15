@@ -43,7 +43,7 @@ export const getInteractables = (
 			case Interactable.FillWateringCan: return [{ text: Interactable.FillWateringCan, icon: Water }]
 			case Interactable.Read:
 			case Interactable.Talk: return [
-				entity.activeDialog ? undefined : { text: entity.interactable, icon: Talk },
+				entity.dialogContainer ? undefined : { text: entity.interactable, icon: Talk },
 			]
 			case Interactable.Cauldron:
 			case Interactable.Oven:

@@ -32,19 +32,20 @@ export const disableInventoryState = () => openInventoryQuery.onEntityRemoved.su
 export const toggleMenuState = [enableInventoryState, disableInventoryState]
 
 const interactableQuery = ecs.with('collider', 'interactionContainer', 'interactable')
+const dialogQuery = ecs.with('dialog')
 const primaryQuery = interactableQuery.with('onPrimary')
 const secondaryQuery = interactableQuery.with('onSecondary')
 export const interact = () => {
 	for (const entity of primaryQuery) {
 		for (const player of playerInventoryClosedQuery) {
-			if (player.playerControls.get('primary').justPressed) {
+			if (player.playerControls.get('primary').justPressed && dialogQuery.size === 0) {
 				entity.onPrimary(entity, player)
 			}
 		}
 	}
 	for (const entity of secondaryQuery) {
 		for (const player of playerInventoryClosedQuery) {
-			if (player.playerControls.get('secondary').justPressed) {
+			if (player.playerControls.get('secondary').justPressed && dialogQuery.size === 0) {
 				entity.onSecondary(entity, player)
 			}
 		}

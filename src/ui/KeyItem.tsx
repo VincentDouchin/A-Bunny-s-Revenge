@@ -1,4 +1,4 @@
-import { Show } from 'solid-js'
+import { Show, onCleanup } from 'solid-js'
 import { css } from 'solid-styled'
 import { Transition } from 'solid-transition-group'
 import atom from 'solid-use/atom'
@@ -8,7 +8,9 @@ import { sleep } from '@/utils/sleep'
 import { thumbnailRenderer } from '@/lib/thumbnailRenderer'
 
 const keyItem = atom<null | { model: Object3D, name: string }>(null)
-export const displayKeyItem = async (model: Object3D, name: string) => {
+export const displayKeyItem = async (modelToDisplay: Object3D, name: string, scale = 1) => {
+	const model = modelToDisplay.clone()
+	model.scale.setScalar(scale)
 	keyItem({ model, name })
 	await sleep(5000)
 	keyItem(null)
@@ -94,7 +96,8 @@ export const KeyItem = () => {
 		<Transition name="slide">
 			<Show when={keyItem()}>
 				{(item) => {
-					const { element } = renderer.spin(item().model)
+					const { element, clear } = renderer.spin(item().model)
+					onCleanup(clear)
 					return (
 						<div class="key-item-container">
 							<GoldContainer>

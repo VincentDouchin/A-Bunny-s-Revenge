@@ -23,6 +23,7 @@ import { applyArchingForce, detroyProjectiles, honeySplat, sleepyEffects, stepIn
 import { applyDeathTimer, tickHitCooldown } from './states/dungeon/battle'
 import { dropBerriesOnHit } from './states/dungeon/bushes'
 import { buyItems } from './states/dungeon/buyItems'
+import { addcrateInteractable } from './states/dungeon/cellar'
 import { spawnWeaponsChoice } from './states/dungeon/chooseWeapon'
 import { removeEnemyFromSpawn, spawnEnemies, tickInactiveTimer, unlockDungeon } from './states/dungeon/enemies'
 import { killAnimation, killEntities, setInitialHealth } from './states/dungeon/health'
@@ -32,14 +33,13 @@ import { spawnDrops } from './states/dungeon/lootPool'
 import { spawnPoisonTrail } from './states/dungeon/poisonTrail'
 import { endBattleSpawnChest } from './states/dungeon/spawnChest'
 import { rotateStun } from './states/dungeon/stun'
-import { addBeanStalkHole, growMagicBean, harvestMagicBean } from './states/farm/beanStalk'
 import { growCrops, harvestCrop, initPlantableSpotsInteractions, interactablePlantableSpot, plantSeed } from './states/farm/farming'
 import { fishingPlugin } from './states/farm/fishing'
 import { closePlayerInventory, disableInventoryState, enableInventoryState, interact, openPlayerInventory } from './states/farm/openInventory'
 import { waterCrops } from './states/farm/wateringCan'
 import { addDashDisplay, updateDashDisplay } from './states/game/dash'
 import { dayNight, playNightMusic } from './states/game/dayNight'
-import { addQuestMarkers, talkToNPC, triggerDialog, turnNPCHead } from './states/game/dialog'
+import { addQuestMarkers, triggerDialog, turnNPCHead } from './states/game/dialog'
 import { equip } from './states/game/equip'
 import { bobItems, collectItems, popItems, stopItems } from './states/game/items'
 import { canPlayerMove, movePlayer, playerSteps, savePlayerFromTheEmbraceOfTheVoid, stopPlayer } from './states/game/movePlayer'
@@ -80,7 +80,7 @@ gameState
 		runIf(() => !openMenuState.enabled, pauseGame),
 	)
 	.addPlugins(playerBehaviorPlugin, rangeEnemyBehaviorPlugin, chargingEnemyBehaviorPlugin, meleeEnemyBehaviorPlugin, beeBossBehaviorPlugin, jumpingEnemyBehaviorPlugin, basketBehaviorPlugin, sporeBehaviorPlugin, chargingTwiceEnemyBehaviorPlugin, rangeThriceEnemyBehaviorPlugin)
-	.onUpdate(collectItems(), talkToNPC, turnNPCHead, dropBerriesOnHit, updateWeaponArc, sleepyEffects)
+	.onUpdate(collectItems(), turnNPCHead, dropBerriesOnHit, updateWeaponArc, sleepyEffects)
 	.onPostUpdate(renderGame, rotateStun, runIf(() => !openMenuState.enabled, interact))
 	.enable()
 mainMenuState
@@ -99,11 +99,11 @@ openMenuState
 	.onUpdate(closePlayerInventory)
 campState
 	.addSubscriber(...interactablePlantableSpot)
-	.onEnter(spawnLevel('farm'), spawnLevelData, initPlantableSpotsInteractions, spawnGodRay, addBeanStalkHole)
+	.onEnter(spawnLevel('farm'), spawnLevelData, initPlantableSpotsInteractions, spawnGodRay)
 	.onEnter(runIf(() => mainMenuState.disabled, spawnCharacter, setInitialHealth), moveCamera(true))
 	.onEnter(compileShaders)
 	.onUpdate(runIf(() => mainMenuState.disabled, playNightMusic, playAmbience))
-	.onUpdate(collideWithDoorCamp, waterCrops, growCrops, growMagicBean, harvestMagicBean)
+	.onUpdate(collideWithDoorCamp, waterCrops, growCrops)
 	.onUpdate(runIf(canPlayerMove, plantSeed, harvestCrop, openPlayerInventory))
 	.onExit(despawnOfType('map'))
 introState
@@ -129,6 +129,8 @@ dungeonState
 		runIf(() => !pausedState.enabled, tickHitCooldown, tickSneeze, tickPoison, tickInactiveTimer, tickSleepy),
 	)
 	.onUpdate(detroyProjectiles, honeySplat, stepInHoney, endBattleSpawnChest, spawnPoisonTrail, lockOnEnemy, buyItems)
+	// Cellar
+	.addSubscriber(addcrateInteractable)
 	.onExit(despawnOfType('map'))
 pausedState
 	.onEnter(() => time.stop(), musicManager.pause)
