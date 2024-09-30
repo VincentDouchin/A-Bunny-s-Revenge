@@ -238,7 +238,7 @@ const makeCratesInteractable = () => enemiesQuery.onEntityRemoved.subscribe(() =
 // ! Carrots
 
 const addCarrotMarkers = () => cropsQuery.onEntityAdded.subscribe((e) => {
-	if (!hasCompletedStep('intro_quest', '4_get_carrots')) {
+	if (!hasCompletedStep('intro_quest', '4_get_carrots') && e.crop.stage > 0) {
 		ecs.addComponent(e, 'questMarker', ['intro_quest#4_get_carrots'])
 	}
 })
@@ -280,19 +280,19 @@ const completePickupCarrots = () => harvestCropEvent.subscribe((entityId, crop) 
 		}
 	}
 })
+export const spawnIntroPlayer = addActors({ playerIntro: () => {
+	const player = { ...playerBundle(PLAYER_DEFAULT_HEALTH, null) }
+	player.playerAnimator.playAnimation('sleeping')
+	player.state = 'managed'
+	return player
+} })
 const introQuestActors = addActors({
 	playerFromIntro: (e) => {
 		if (isPlayerFirstEnteringFarm()) {
 			save.playerPosition = e.position.toArray()
 		}
 	},
-	playerIntro: () => {
-		const player = { ...playerBundle(PLAYER_DEFAULT_HEALTH, null) }
-		player.playerAnimator.playAnimation('sleeping')
-		player.state = 'managed'
 
-		return player
-	},
 	basketIntro: () => {
 		const model = assets.models.basket.scene.clone()
 		model.scale.setScalar(5)

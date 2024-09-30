@@ -7,7 +7,6 @@ import { settings, time } from '@/global/init'
 import { updateRenderSize } from '@/global/rendering'
 import { app, campState, cutSceneState, dungeonState, introState, mainMenuState } from '@/global/states'
 import { Direction } from '@/lib/directions'
-
 import { windowEvent } from '@/lib/uiManager'
 import { startIntro } from '@/quests/introQuest'
 

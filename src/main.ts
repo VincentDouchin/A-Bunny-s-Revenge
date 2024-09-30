@@ -17,8 +17,8 @@ import { physicsPlugin } from './lib/physics'
 import { addToScene } from './lib/registerComponents'
 import { runIf } from './lib/state'
 import { transformsPlugin } from './lib/transforms'
-import { enableCutscene, introQuestPlugin, startIntro } from './quests/introQuest'
-import { addQuest, addQuestMarkers, enableQuests } from './quests/questHelpers'
+import { enableCutscene, introQuestPlugin, spawnIntroPlayer, startIntro } from './quests/introQuest'
+import { addQuestMarkers, enableQuests } from './quests/questHelpers'
 import { spawnGodRay } from './shaders/godrays'
 import { applyArchingForce, detroyProjectiles, honeySplat, sleepyEffects, stepInHoney, tickPoison, tickSleepy, tickSneeze } from './states/dungeon/attacks'
 import { applyDeathTimer, tickHitCooldown } from './states/dungeon/battle'
@@ -106,7 +106,8 @@ campState
 	.onUpdate(runIf(canPlayerMove, plantSeed, harvestCrop, openPlayerInventory))
 	.onExit(despawnOfType('map'))
 introState
-	.onEnter(spawnLevel('intro'), spawnLevelData, () => addQuest('intro_quest'))
+	.onEnter(spawnLevel('intro'), spawnLevelData)
+	.addPlugins(spawnIntroPlayer)
 	.onEnter(compileShaders, moveCamera(true))
 	.onUpdate(collideWithDoorRuins)
 	.onUpdate(runIf(() => mainMenuState.disabled, playAmbience))

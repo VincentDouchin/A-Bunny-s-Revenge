@@ -4,50 +4,50 @@ import kuwahara from '@/shaders/glsl/lib/kuwahara.glsl?raw'
 import sobel from '@/shaders/glsl/lib/sobel.glsl?raw'
 import { target } from '@/global/rendering'
 
-export const getDepthShader = (target: WebGLRenderTarget) => ({
-	uniforms: {
-		tDepth: new Uniform<Texture>(target.depthTexture),
-		cameraNear: { value: 0.1 },
-		cameraFar: { value: 100 },
-		orthographic: { value: true },
-	},
-	vertexShader: /* glsl */`
+// export const getDepthShader = (target: WebGLRenderTarget) => ({
+// 	uniforms: {
+// 		tDepth: new Uniform<Texture>(target.depthTexture),
+// 		cameraNear: { value: 0.1 },
+// 		cameraFar: { value: 100 },
+// 		orthographic: { value: true },
+// 	},
+// 	vertexShader: /* glsl */`
 
-		varying vec2 vUv;
+// 		varying vec2 vUv;
 
-		void main() {
+// 		void main() {
 
-			vUv = uv;
+// 			vUv = uv;
 
-			gl_Position = projectionMatrix * modelViewMatrix * vec4( position, 1.0 );
+// 			gl_Position = projectionMatrix * modelViewMatrix * vec4( position, 1.0 );
 
-		}`,
-	fragmentShader: /* glsl */`
-		precision highp sampler2D;
-		uniform sampler2D tDepth;
-		uniform sampler2D tDiffuse;
-		uniform float cameraNear;
-		uniform float cameraFar;
-		uniform bool orthographic;
-		uniform vec2 resolution;
-		varying vec2 vUv;
+// 		}`,
+// 	fragmentShader: /* glsl */`
+// 		precision highp sampler2D;
+// 		uniform sampler2D tDepth;
+// 		uniform sampler2D tDiffuse;
+// 		uniform float cameraNear;
+// 		uniform float cameraFar;
+// 		uniform bool orthographic;
+// 		uniform vec2 resolution;
+// 		varying vec2 vUv;
 
-		#include <packing>
-        float readDepth( sampler2D depthSampler, vec2 coord ) {
-            float fragCoordZ = texture2D( depthSampler, coord ).x;
-            float viewZ = orthographic 
-            	? orthographicDepthToViewZ( fragCoordZ, cameraNear, cameraFar )
-				: perspectiveDepthToViewZ( fragCoordZ, cameraNear, cameraFar );
-            return viewZToOrthographicDepth( viewZ, cameraNear, cameraFar );
-        }
+// 		#include <packing>
+//         float readDepth( sampler2D depthSampler, vec2 coord ) {
+//             float fragCoordZ = texture2D( depthSampler, coord ).x;
+//             float viewZ = orthographic
+//             	? orthographicDepthToViewZ( fragCoordZ, cameraNear, cameraFar )
+// 				: perspectiveDepthToViewZ( fragCoordZ, cameraNear, cameraFar );
+//             return viewZToOrthographicDepth( viewZ, cameraNear, cameraFar );
+//         }
 
-		void main() {
-			float depth = readDepth( tDepth, vUv );
-        	gl_FragColor.rgb = 1.0 - vec3( depth );
-			gl_FragColor.a = 1.0;
+// 		void main() {
+// 			float depth = readDepth( tDepth, vUv );
+//         	gl_FragColor.rgb = 1.0 - vec3( depth );
+// 			gl_FragColor.a = 1.0;
 
-		}`,
-})
+// 		}`,
+// })
 
 export const outlineShader = (target: WebGLRenderTarget, outlineTarget: WebGLRenderTarget) => ({
 	name: 'outlineShader',
@@ -58,12 +58,11 @@ export const outlineShader = (target: WebGLRenderTarget, outlineTarget: WebGLRen
 
 	},
 	vertexShader: /* glsl */`
-
-		varying vec2 vUv;
-		void main() {
-			vUv = uv;
-			gl_Position = projectionMatrix * modelViewMatrix * vec4( position, 1.0 );
-		}`,
+	varying vec2 vUv;
+	void main() {
+		vUv = uv;
+		gl_Position = projectionMatrix * modelViewMatrix * vec4( position, 1.0 );
+	}`,
 	fragmentShader: /* glsl */`
 	uniform sampler2D tDepth;
 	uniform sampler2D outlineDepth;
@@ -102,13 +101,11 @@ export const getSobelShader = (x: number, y: number, diffuseTarget: WebGLRenderT
 	},
 
 	vertexShader: /* glsl */`
-
-		varying vec2 vUv;
-		void main() {
-			vUv = uv;
-			gl_Position = projectionMatrix * modelViewMatrix * vec4( position, 1.0 );
-		}`,
-
+	varying vec2 vUv;
+	void main() {
+		vUv = uv;
+		gl_Position = projectionMatrix * modelViewMatrix * vec4( position, 1.0 );
+	}`,
 	fragmentShader: /* glsl */`
 		precision highp sampler2D;
 		uniform sampler2D tDepth;
@@ -146,9 +143,10 @@ export const getSobelShader = (x: number, y: number, diffuseTarget: WebGLRenderT
 
 			// Adjust saturation
 			float grey = dot(color.rgb, vec3(0.299, 0.587, 0.114));
+			
 			color.rgb = mix(vec3(grey), color.rgb, saturation);
 			color.rgb = mulRGB * pow(color.rgb + addRGB, powRGB );
-			color = sobel(outline,uv,resolution*2.)>0. 
+			color = sobel(outline,uv,resolution)>0. 
 				? vec4(1.)
 				: color;
 			gl_FragColor = color;
