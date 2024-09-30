@@ -22,6 +22,7 @@
 		"@solid-primitives/scheduled": "^1.4.3",
 		"@tauri-apps/api": "^2.0.0-beta.13",
 		"astar-typescript": "^1.2.7",
+		"eventery": "^0.0.4",
 		"fastnoise-lite": "^1.1.1",
 		"howler": "^2.2.4",
 		"idb-keyval": "^6.2.1",

@@ -2,23 +2,15 @@ import type { items } from '@assets/assets'
 import type { Query, With } from 'miniplex'
 import { Vector3 } from 'three'
 import { CSS2DObject } from 'three/examples/jsm/renderers/CSS2DRenderer'
-import { ColliderDesc, RigidBodyDesc } from '@dimforge/rapier3d-compat'
-import { range } from './mapFunctions'
 import { sleep } from './sleep'
-import { cutSceneState } from '@/global/states'
-import { addItem, coroutines, ecs, removeItem, save } from '@/global/init'
-import type { Entity } from '@/global/entity'
-import { quests } from '@/constants/quests'
-import type { QuestMarkers, QuestName, QuestStepKey } from '@/constants/quests'
-
 import { applyMove, applyRotate } from '@/behaviors/behaviorHelpers'
 import type { Item } from '@/constants/items'
-import { recipes } from '@/constants/recipes'
+import type { Entity } from '@/global/entity'
+import { addItem, coroutines, ecs, removeItem, save } from '@/global/init'
 import { playSound } from '@/global/sounds'
+import { cutSceneState } from '@/global/states'
 import { heartEmitter } from '@/particles/heartParticles'
-import { displayQuestMarker } from '@/states/game/dialog'
 import { addToast } from '@/ui/Toaster'
-import { Direction } from '@/lib/directions'
 
 const npcNameQuery = ecs.with('npcName')
 export const speaker = (name?: Entity['npcName']) => {
@@ -32,17 +24,6 @@ export const speaker = (name?: Entity['npcName']) => {
 		} else {
 			ecs.removeComponent(npc, 'dialogContainer')
 		}
-	}
-}
-
-export const unlockCellar = () => {
-	const cellarDoorMarker = ecs.with('markerName').where(e => e.markerName === 'cellar-door').first
-	if (cellarDoorMarker) {
-		ecs.update(cellarDoorMarker, {
-			door: Direction.E,
-			colliderDesc: ColliderDesc.cuboid(10, 20, 3).setSensor(false),
-			bodyDesc: RigidBodyDesc.fixed(),
-		})
 	}
 }
 
@@ -119,105 +100,6 @@ export const removeItemFromPlayer = (item: Item) => {
 	if (player) {
 		removeItem(player, item)
 		addToast({ type: 'removedItem', item: item.name, quantity: item.quantity })
-	}
-}
-
-// ! Quests
-
-export const canCompleteQuest = (name: QuestName) => {
-	const player = playerInventoryQuery.first
-	if (player) {
-		return quests[name].steps.every((step, i) => {
-			return save.quests[name]?.[i] === true || step.items?.every((item: Item) => {
-				return player.inventory.some((saveItem) => {
-					return saveItem && saveItem.name === item.name && saveItem.quantity >= item.quantity
-				})
-			})
-		})
-	}
-}
-
-export const completeQuest = <Q extends QuestName>(name: Q) => {
-	if (canCompleteQuest(name)) {
-		const quest = save.quests[name]
-		if (quest) {
-			for (let i = 0; i < quests[name].steps.length; i++) {
-				const step = quests[name].steps[i]
-				for (const item of step.items ?? []) {
-					removeItemFromPlayer(item)
-				}
-				quest[i] = true
-			}
-		}
-	}
-}
-
-const questMarkersQuery = ecs.with('questMarker')
-export const addQuest = async (name: QuestName) => {
-	if (!(name in save.quests)) {
-		save.quests[name] = range(0, quests[name].steps.length, () => false)
-		const toUnlock: items[] = []
-		for (const step of quests[name].steps) {
-			for (const item of step.items as unknown as Item[]) {
-				if (!save.unlockedRecipes.includes(item.name) && recipes.some(r => r.output.name === item.name)) {
-					toUnlock.push(item.name)
-				}
-			}
-		}
-		for (const unlockedRecipe of toUnlock) {
-			await unlockRecipe(unlockedRecipe)
-		}
-		for (const npc of questMarkersQuery) {
-			const marker = npc.questMarker.find(q => q.split('#')[0] === name)
-			if (marker) {
-				const markers = [...npc.questMarker].filter(m => m !== marker)
-				ecs.removeComponent(npc, 'questMarker')
-				ecs.removeComponent(npc, 'questMarkerContainer')
-				ecs.addComponent(npc, 'questMarker', markers)
-			}
-		}
-
-		addToast({ type: 'quest', quest: name })
-	}
-}
-
-export const completeQuestStep = <Q extends QuestName>(questName: Q, step: QuestStepKey<Q>) => {
-	const quest = save.quests[questName]
-	if (quest) {
-		const index = quests[questName].steps.findIndex(s => s.key === step)
-		quest[index] = true
-		addToast({ type: 'questStep', step: quests[questName].steps[index] })
-		for (const entity of questMarkersQuery) {
-			displayQuestMarker(entity)
-			if (entity.questMarker.includes(`${questName}#${step}`)) {
-				ecs.removeComponent(entity, 'questMarkerContainer')
-			}
-		}
-	}
-}
-
-export const hasCompletedQuest = (name: QuestName) => {
-	return Boolean(save.quests[name]?.every(step => step === true))
-}
-
-export const hasCompletedStep = <Q extends QuestName>(questName: Q, step: QuestStepKey<Q>) => {
-	const index = quests[questName]?.steps.findIndex(s => s.key === step)
-	return save.quests[questName]?.[index]
-}
-
-export const hasQuest = <T extends QuestName>(name: QuestMarkers) => {
-	const [quest, key] = name.split('#') as [T, QuestStepKey<T>]
-	const index = quests[quest].steps.findIndex(step => step.key === key)
-	return quest in save.quests && save.quests[quest]?.[index]
-}
-
-export const showMarker = <T extends QuestName>(name: QuestMarkers) => {
-	const [quest, key] = name.split('#') as [T, QuestStepKey<T>]
-	const index = quests[quest].steps.findIndex(step => step.key === key)
-	if (index === 0) {
-		return quests[quest].unlock()
-	} else {
-		return quest in save.quests && save.quests[quest]?.[index - 1] && !save.quests[quest]?.[index]
 	}
 }
 

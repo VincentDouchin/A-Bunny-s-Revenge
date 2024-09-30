@@ -27,4 +27,5 @@ export interface DungeonRessources {
 }
 
 export const dungeonState = app.create<DungeonRessources>()
+export const introQuest = app.create()
 app.exclusive(setupState, campState, dungeonState, genDungeonState, introState)

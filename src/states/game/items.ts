@@ -85,15 +85,15 @@ export const stopItems = () => {
 }
 
 const playerQuery = ecs.with('player', 'position', 'inventory', 'inventoryId', 'inventorySize')
-export const collectItems = (force = false) => async () => {
+export const collectItems = (force: boolean) => async () => {
 	for (const player of playerQuery) {
 		for (const item of itemsQuery) {
 			if (item) {
 				const dist = item.position.clone().setY(0).distanceTo(player.position.clone().setY(0))
 				if (dist < 10 || force) {
 					ecs.removeComponent(item, 'body')
-					if (force) await sleep(100)
 					itemsQuery.remove(item)
+					if (force) await sleep(100)
 
 					addTag(item, 'collecting')
 					const initialPosition = item.position.clone()

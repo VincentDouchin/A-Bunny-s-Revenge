@@ -12,6 +12,7 @@ import { updateCameraZoom } from '@/global/camera'
 import { params } from '@/global/context'
 import type { Entity } from '@/global/entity'
 import { MenuType } from '@/global/entity'
+import { cookedMealEvent } from '@/global/events'
 import { ecs, time, tweens, ui } from '@/global/init'
 import { cameraQuery } from '@/global/rendering'
 import { playSound } from '@/global/sounds'
@@ -156,6 +157,7 @@ export const OvenMinigameUi = () => {
 												})
 											}
 											await sleep(500)
+											cookedMealEvent.emit('oven', output().name)
 											playSound('zapsplat_foley_rubble_rock_drop_onto_pile_others_medium_sized_006_108147')
 											oven.ovenAnimator.playClamped('Closing')
 										})

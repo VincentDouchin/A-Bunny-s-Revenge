@@ -1,7 +1,6 @@
 import { throttle } from '@solid-primitives/scheduled'
 import { Vector2 } from 'three'
 import { RoomType, assignPlanAndEnemies } from '../dungeon/generateDungeon'
-import { startIntro } from '../intro/startIntro'
 import { updateCameraZoom } from '@/global/camera'
 import { params } from '@/global/context'
 import { settings, time } from '@/global/init'
@@ -10,6 +9,7 @@ import { app, campState, cutSceneState, dungeonState, introState, mainMenuState 
 import { Direction } from '@/lib/directions'
 
 import { windowEvent } from '@/lib/uiManager'
+import { startIntro } from '@/quests/introQuest'
 
 export const setupGame = async () => {
 	if (params.debugBoss) {

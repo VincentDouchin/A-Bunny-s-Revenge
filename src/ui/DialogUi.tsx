@@ -9,6 +9,44 @@ import { soundDialog } from '@/lib/dialogSound'
 import { ecs, ui } from '@/global/init'
 import { params } from '@/global/context'
 
+interface Letter {
+	letter: string
+	color: string | null
+}
+
+const colorMap: Record<string, string> = {
+	blue: '#36c5f4',
+	green: '#9de64e',
+	gold: '#f3a833',
+}
+
+function splitLetters(sentence: string) {
+	const words = sentence.split(' ').map((word) => {
+		const letters: Letter[] = []
+		let color: string | null = null
+		const lettersToParse = word.split('')
+		for (let i = 0; i < lettersToParse.length; i++) {
+			const letter = lettersToParse[i]
+			if (letter === '#') {
+				const nextPountIndex = lettersToParse.findIndex((l, j) => j > i && l === '#')
+				const newColor = lettersToParse.slice(i + 1, nextPountIndex).join('').toLowerCase()
+				const colorName = colorMap?.[newColor] ?? newColor
+				if (colorName === color) {
+					color = null
+				} else {
+					color = colorName
+				}
+				i += newColor.length + 1
+				continue
+			}
+
+			letters.push({ letter, color })
+		}
+		return letters
+	})
+	return words
+}
+
 export const DialogText = (props: { text: string, finished: Atom<boolean> }) => {
 	css/* css */`
 	@keyframes letter-pop {
@@ -55,17 +93,17 @@ export const DialogText = (props: { text: string, finished: Atom<boolean> }) => 
 			clearInterval(interval)
 		})
 	})
-	const words = createMemo(() => props.text.split(' '))
+	const words = createMemo(() => splitLetters(props.text))
 	return (
 		<For each={words()}>
 			{(word, wi) => {
-				const length = createMemo(() => words().reduce((acc, v, j) => j < wi() ? acc + v.split('').length : acc, 0))
+				const length = createMemo(() => words().reduce((acc, v, j) => j < wi() ? acc + v.length : acc, 0))
 
 				return (
 					<div class="word">
-						<For each={word.split('')}>
+						<For each={word}>
 							{(ch, i) => {
-								return <div class={`${(letterVisible() > (i() + 1 + length()) || props.finished()) ? 'letter-visible' : 'letter-hidden'}`}>{ch}</div>
+								return <div class={`${(letterVisible() > (i() + 1 + length()) || props.finished()) ? 'letter-visible' : 'letter-hidden'}`} style={{ color: ch.color ?? 'white' }}>{ch.letter}</div>
 							}}
 						</For>
 						<div class="space"></div>
@@ -104,8 +142,7 @@ export const DialogUi = () => {
 		font-size: 1.5rem;
 		top: -50%;
 		z-index: 1;
-	}
-`
+	}`
 	return (
 		<For each={dialogQuery()}>
 			{(entity) => {

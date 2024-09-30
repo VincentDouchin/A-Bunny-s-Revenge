@@ -1,4 +1,3 @@
-import { basketBehaviorPlugin } from './behaviors/basketBehavior'
 import { beeBossBehaviorPlugin } from './behaviors/beeBossBehavior'
 import { chargingEnemyBehaviorPlugin, chargingTwiceEnemyBehaviorPlugin, jumpingEnemyBehaviorPlugin, meleeEnemyBehaviorPlugin, rangeEnemyBehaviorPlugin, rangeThriceEnemyBehaviorPlugin, sporeBehaviorPlugin } from './behaviors/enemyBehavior'
 import { playerBehaviorPlugin } from './behaviors/playerBehavior'
@@ -10,7 +9,7 @@ import { tickModifiersPlugin } from './global/modifiers'
 import { updateMousePosition } from './global/mousePosition'
 import { compileShaders, initThree, renderGame } from './global/rendering'
 import { initHowler, playAmbience } from './global/sounds'
-import { app, campState, coreState, dungeonState, gameState, genDungeonState, introState, mainMenuState, openMenuState, pausedState, setupState } from './global/states'
+import { app, campState, coreState, dungeonState, gameState, genDungeonState, introQuest, introState, mainMenuState, openMenuState, pausedState, setupState } from './global/states'
 import { despawnOfType, hierarchyPlugin, removeStateEntity } from './lib/hierarchy'
 import { updateModels } from './lib/modelsProperties'
 import { particlesPlugin } from './lib/particles'
@@ -18,12 +17,13 @@ import { physicsPlugin } from './lib/physics'
 import { addToScene } from './lib/registerComponents'
 import { runIf } from './lib/state'
 import { transformsPlugin } from './lib/transforms'
+import { enableCutscene, introQuestPlugin, startIntro } from './quests/introQuest'
+import { addQuest, addQuestMarkers, enableQuests } from './quests/questHelpers'
 import { spawnGodRay } from './shaders/godrays'
 import { applyArchingForce, detroyProjectiles, honeySplat, sleepyEffects, stepInHoney, tickPoison, tickSleepy, tickSneeze } from './states/dungeon/attacks'
 import { applyDeathTimer, tickHitCooldown } from './states/dungeon/battle'
 import { dropBerriesOnHit } from './states/dungeon/bushes'
 import { buyItems } from './states/dungeon/buyItems'
-import { addcrateInteractable } from './states/dungeon/cellar'
 import { spawnWeaponsChoice } from './states/dungeon/chooseWeapon'
 import { removeEnemyFromSpawn, spawnEnemies, tickInactiveTimer, unlockDungeon } from './states/dungeon/enemies'
 import { killAnimation, killEntities, setInitialHealth } from './states/dungeon/health'
@@ -39,7 +39,7 @@ import { closePlayerInventory, disableInventoryState, enableInventoryState, inte
 import { waterCrops } from './states/farm/wateringCan'
 import { addDashDisplay, updateDashDisplay } from './states/game/dash'
 import { dayNight, playNightMusic } from './states/game/dayNight'
-import { addQuestMarkers, triggerDialog, turnNPCHead } from './states/game/dialog'
+import { turnNPCHead } from './states/game/dialog'
 import { equip } from './states/game/equip'
 import { bobItems, collectItems, popItems, stopItems } from './states/game/items'
 import { canPlayerMove, movePlayer, playerSteps, savePlayerFromTheEmbraceOfTheVoid, stopPlayer } from './states/game/movePlayer'
@@ -49,7 +49,6 @@ import { spawnDungeon, spawnLevel, spawnLevelData, updateTimeUniforms } from './
 import { losingBattle, spawnCharacter, spawnPlayerClearing, spawnPlayerDungeon } from './states/game/spawnPlayer'
 import { interactionPlugin } from './states/game/touchItem'
 import { updateWeaponArc } from './states/game/weapon'
-import { enableCutscene, startIntro } from './states/intro/startIntro'
 import { intiMainMenuRendering } from './states/mainMenu/initMainMenu'
 import { clickOnMenuButton, initMainMenuCamPos, renderMainMenu, selectMainMenu, setupWindow, spawnPlayerContinueGame } from './states/mainMenu/mainMenuRendering'
 import { disablePortrait, enableFullscreen, resize, setupGame, stopOnLosingFocus } from './states/setup/setupGame'
@@ -70,17 +69,17 @@ setupState
 
 gameState
 	.addPlugins(debugPlugin, fishingPlugin, interactionPlugin, tickModifiersPlugin('speed', 'maxHealth', 'strength', 'critChance', 'critDamage', 'attackSpeed', 'lootQuantity', 'lootChance'))
-
 	.addSubscriber(initializeCameraPosition, bobItems, enableInventoryState, killAnimation, popItems, addHealthBarContainer, ...equip('wateringCan', 'weapon', 'fishingPole'), ...doorLocking, addDashDisplay, addQuestMarkers)
+	.onEnter(enableQuests)
 	.onPreUpdate(runIf(() => !pausedState.enabled, tweens.tick))
 	.onPreUpdate(stopItems)
 	.onPreUpdate(
 		runIf(canPlayerMove, movePlayer, updateDashDisplay),
-		runIf(() => !pausedState.enabled, playerSteps, dayNight, updateTimeUniforms, applyDeathTimer, triggerDialog),
+		runIf(() => !pausedState.enabled, playerSteps, dayNight, updateTimeUniforms, applyDeathTimer),
 		runIf(() => !openMenuState.enabled, pauseGame),
 	)
-	.addPlugins(playerBehaviorPlugin, rangeEnemyBehaviorPlugin, chargingEnemyBehaviorPlugin, meleeEnemyBehaviorPlugin, beeBossBehaviorPlugin, jumpingEnemyBehaviorPlugin, basketBehaviorPlugin, sporeBehaviorPlugin, chargingTwiceEnemyBehaviorPlugin, rangeThriceEnemyBehaviorPlugin)
-	.onUpdate(collectItems(), turnNPCHead, dropBerriesOnHit, updateWeaponArc, sleepyEffects)
+	.addPlugins(playerBehaviorPlugin, rangeEnemyBehaviorPlugin, chargingEnemyBehaviorPlugin, meleeEnemyBehaviorPlugin, beeBossBehaviorPlugin, jumpingEnemyBehaviorPlugin, sporeBehaviorPlugin, chargingTwiceEnemyBehaviorPlugin, rangeThriceEnemyBehaviorPlugin)
+	.onUpdate(collectItems(false), turnNPCHead, dropBerriesOnHit, updateWeaponArc, sleepyEffects)
 	.onPostUpdate(renderGame, rotateStun, runIf(() => !openMenuState.enabled, interact))
 	.enable()
 mainMenuState
@@ -107,7 +106,7 @@ campState
 	.onUpdate(runIf(canPlayerMove, plantSeed, harvestCrop, openPlayerInventory))
 	.onExit(despawnOfType('map'))
 introState
-	.onEnter(spawnLevel('intro'), spawnLevelData)
+	.onEnter(spawnLevel('intro'), spawnLevelData, () => addQuest('intro_quest'))
 	.onEnter(compileShaders, moveCamera(true))
 	.onUpdate(collideWithDoorRuins)
 	.onUpdate(runIf(() => mainMenuState.disabled, playAmbience))
@@ -129,12 +128,12 @@ dungeonState
 		runIf(() => !pausedState.enabled, tickHitCooldown, tickSneeze, tickPoison, tickInactiveTimer, tickSleepy),
 	)
 	.onUpdate(detroyProjectiles, honeySplat, stepInHoney, endBattleSpawnChest, spawnPoisonTrail, lockOnEnemy, buyItems)
-	// Cellar
-	.addSubscriber(addcrateInteractable)
 	.onExit(despawnOfType('map'))
 pausedState
 	.onEnter(() => time.stop(), musicManager.pause)
 	.onExit(() => time.start(), musicManager.play)
+
+introQuest.addPlugins(introQuestPlugin)
 
 const animate = () => {
 	try {

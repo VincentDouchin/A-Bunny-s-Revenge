@@ -44,8 +44,8 @@ export const doorSide = () => {
 	return door
 }
 
-const doorQuery = ecs.with('collider', 'door')
-const playerQuery = ecs.with('collider', 'playerControls', 'currentHealth').without('ignoreDoor')
+const doorQuery = ecs.with('collider', 'door', 'rotation')
+const playerQuery = ecs.with('collider', 'playerControls', 'currentHealth', 'position').without('ignoreDoor')
 const enemyQuery = ecs.with('faction').where(({ faction }) => faction === Faction.Enemy)
 const doorToLockQuery = doorQuery.with('doorLocked')
 const doorToUnlockQuery = doorQuery.without('doorLocked', 'unlocked')
@@ -84,7 +84,9 @@ export const collideWithDoorDungeon = onCollideWithDoor<typeof dungeonState>((do
 		}
 	}
 })
-export const collideWithDoorCamp = onCollideWithDoor(() => genDungeonState.enable())
+export const collideWithDoorCamp = onCollideWithDoor(() => {
+	genDungeonState.enable()
+})
 
 export const collideWithDoorClearing = onCollideWithDoor((door, player) => {
 	if (door.doorLevel !== undefined && player.weapon) {

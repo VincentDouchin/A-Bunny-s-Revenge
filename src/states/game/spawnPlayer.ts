@@ -21,7 +21,6 @@ import { menuInputMap, playerInputMap } from '@/global/inputMaps'
 import type { DungeonRessources, FarmRessources } from '@/global/states'
 import { openMenuState } from '@/global/states'
 
-import { dialogs } from '@/constants/dialogs'
 import { ModifierContainer } from '@/global/modifiers'
 import { collisionGroups } from '@/lib/collisionGroups'
 import { inMap } from '@/lib/hierarchy'
@@ -104,22 +103,24 @@ export const playerBundle = (health: number, weapon: weapons | null) => {
 	return player
 }
 
-const markerQuery = ecs.with('markerName', 'position', 'rotation').where(e => e.markerName === 'player-from-ruins')
-
 export const spawnCharacter: System<FarmRessources> = (ressources) => {
-	const fromIntro = ressources.previousState === 'ruins' && markerQuery.first
+	const position = new Vector3().fromArray(save.playerPosition)
+	const rotation = new Quaternion().fromArray(save.playerRotation)
+	// const fromIntro = ressources.previousState === 'ruins' && markerQuery.first
 	const player = {
 		...playerBundle(PLAYER_DEFAULT_HEALTH, null),
-		position: new Vector3(),
-		rotation: new Quaternion(),
-		targetRotation: new Quaternion(),
+		position,
+		rotation,
+		targetRotation: rotation.clone(),
 	}
-	if (fromIntro) {
-		player.position.copy(fromIntro.position)
-		Object.assign(player, { withChildren: () => {
-			ecs.add({ dialog: dialogs.PlayerIntro2() })
-		} })
-	}
+	// if (fromIntro) {
+	// player.position.copy(fromIntro.position)
+	// Object.assign(player, {
+	// 	withChildren: () => {
+	// 		ecs.add({ dialog: dialogs.PlayerIntro2() })
+	// 	},
+	// })
+	// }
 
 	if (ressources?.previousState === 'dungeon') {
 		save.modifiers = []

@@ -16,9 +16,10 @@ import { removeEntityRef } from '@/lib/hierarchy'
 import { modelColliderBundle } from '@/lib/models'
 import { getWorldPosition } from '@/lib/transforms'
 import { sleep } from '@/utils/sleep'
+import { harvestCropEvent } from '@/global/events'
 
 const playerQuery = ecs.with('playerControls', 'movementForce', 'inventory', 'inventoryId', 'inventorySize')
-const plantedSpotQuery = ecs.with('plantableSpot', 'planted', 'group', 'model')
+const plantedSpotQuery = ecs.with('plantableSpot', 'planted', 'group', 'model', 'entityId')
 
 export const updateCropsSave = () => {
 	save.crops = plantedSpotQuery.entities.reduce((acc, v) => {
@@ -144,6 +145,7 @@ export const harvestCrop = async () => {
 						await sleep(100)
 					}
 					playSound(['zapsplat_foley_fern_pull_from_ground_18385', 'zapsplat_foley_moss_grass_clump_pull_rip_from_ground_70635'])
+					harvestCropEvent.emit(spot.entityId, spot.planted.crop.name)
 					removeEntityRef(spot, 'planted')
 				}
 			}

@@ -20,6 +20,7 @@ import { cauldronSparkles } from '@/particles/cauldronSparkles'
 import { fireParticles } from '@/particles/fireParticles'
 import { useGame, useQuery } from '@/ui/store'
 import { TouchButton } from '@/ui/TouchControls'
+import { cookedMealEvent } from '@/global/events'
 
 export const cauldronQuery = useQuery(ecs.with('menuType', 'interactionContainer', 'group', 'rotation', 'recipesQueued', 'spoon').where(({ menuType }) => menuType === MenuType.CauldronGame))
 export const CauldronMinigameUi = () => {
@@ -115,6 +116,7 @@ export const CauldronMinigameUi = () => {
 												for (let i = 0; i < output().quantity; i++) {
 													ecs.add({ ...itemBundle(output().name), position: cauldronPosition.clone().add(new Vector3(0, 15, 0)), groundLevel: cauldronPosition.y })
 												}
+												cookedMealEvent.emit('cookingPot', output().name)
 												setProgress(0)
 												cauldron().recipesQueued.shift()
 												playSound('cauldron2')

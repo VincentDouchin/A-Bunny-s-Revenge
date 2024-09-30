@@ -8,27 +8,23 @@ import { CSS2DObject } from 'three/examples/jsm/renderers/CSS2DRenderer'
 import { clone } from 'three/examples/jsm/utils/SkeletonUtils'
 import type { EntityData, ModelName } from './LevelEditor'
 import { debugState } from './debugState'
-import { dialogs } from '@/constants/dialogs'
 import { itemsData } from '@/constants/items'
 import { Animator } from '@/global/animator'
-import type { Entity } from '@/global/entity'
+import type { Actor, Entity } from '@/global/entity'
 import { Interactable, MenuType } from '@/global/entity'
-import { assets, ecs, levelsData, save } from '@/global/init'
+import { assets, ecs, save } from '@/global/init'
 import type { DungeonRessources, FarmRessources } from '@/global/states'
-import { cutSceneState, dungeonState, genDungeonState } from '@/global/states'
+import { dungeonState, genDungeonState } from '@/global/states'
 import { Direction } from '@/lib/directions'
 import { inMap } from '@/lib/hierarchy'
 import { getSecondaryColliders } from '@/lib/models'
 import { GardenPlotMaterial, GrassMaterial } from '@/shaders/materials'
-import type { Room } from '@/states/dungeon/generateDungeon'
 import { RoomType } from '@/states/dungeon/generateDungeon'
 import { cropBundle } from '@/states/farm/farming'
 import { openMenu } from '@/states/farm/openInventory'
 import { wateringCanBundle } from '@/states/farm/wateringCan'
 import { doorSide } from '@/states/game/spawnDoor'
-import { spawnMarker } from '@/states/game/spawnMarker'
-import { PLAYER_DEFAULT_HEALTH, playerBundle } from '@/states/game/spawnPlayer'
-import { hasCompletedStep, lockPlayer, unlockPlayer } from '@/utils/dialogHelpers'
+import { lockPlayer, unlockPlayer } from '@/utils/dialogHelpers'
 import { sleep } from '@/utils/sleep'
 
 export const customModels = {
@@ -70,7 +66,7 @@ export interface ExtraData {
 		text: string
 	}
 	'marker': {
-		name: string
+		name: Actor | null
 	}
 
 }
@@ -90,25 +86,12 @@ export const props: Props = [
 	{
 		name: 'cellar',
 		models: ['stairs'],
-		bundle(e) {
-			ecs.add({
-				...playerBundle(PLAYER_DEFAULT_HEALTH, 'Ladle'),
-				position: e.position.clone().add(new Vector3(0, e.size!.y, 0)),
-				rotation: e.rotation.clone(),
-				targetRotation: e.rotation.clone(),
-			})
-			return e
-		},
+		bundle: e => ({ ...e, actor: 'cellarStairs' }),
 	},
 	{
 		name: 'cellar_props',
 		models: ['barrel', 'barrel_small', 'crate', 'bookshelf', 'keg', 'box_large', 'box_small', 'box_stack', 'trunk'],
-		bundle: (e) => {
-			return {
-				...e,
-				crate: true,
-			}
-		},
+		bundle: e => ({ ...e, crate: true }),
 	},
 	{
 		name: 'cellar_wall',
@@ -122,30 +105,7 @@ export const props: Props = [
 				...e,
 				interactable: Interactable.Open,
 				cellarDoorAnimator: new Animator(e.model, assets.models.cellar_entrance.animations),
-				questMarker: ['intro_quest#2_find_pot'],
-				questMarkerPosition: new Vector3(0, 10, -5),
-				async onPrimary(e, player) {
-					cutSceneState.enable()
-					await e.cellarDoorAnimator?.playClamped('doorOpen')
-					cutSceneState.disable()
-					const cellar: Room = {
-						plan: levelsData.levels.find(l => l.type === 'cellar')!,
-						doors: { [Direction.S]: null },
-						enemies: ['soot_sprite', 'soot_sprite', 'soot_sprite', 'soot_sprite'],
-						type: RoomType.Entrance,
-						encounter: null,
-						chest: true,
-					}
-					await sleep(1000)
-					dungeonState.enable({
-						direction: Direction.N,
-						weapon: 'Ladle',
-						dungeon: cellar,
-						dungeonLevel: 1,
-						playerHealth: player.maxHealth!.value,
-						firstEntry: true,
-					})
-				},
+				actor: 'cellarDoor',
 			}
 		},
 	},
@@ -161,15 +121,14 @@ export const props: Props = [
 	{
 		name: 'marker',
 		models: ['marker'],
-		data: { name: '' },
+		data: { name: null },
 		bundle(e, data) {
-			if (debugState.enabled) return e
-
+			if (debugState.enabled || !data.data.name) return e
 			return {
+				actor: data.data.name,
 				position: e.position,
 				rotation: e.rotation,
 				targetRotation: e.rotation.clone(),
-				...spawnMarker(data.data.name),
 				...inMap(),
 			}
 		},
@@ -291,6 +250,7 @@ export const props: Props = [
 				ovenAnimator: new Animator(entity.model, assets.models.BunnyOvenPacked.animations),
 				interactable: Interactable.Oven,
 				onPrimary: openMenu(MenuType.Oven),
+				actor: 'oven',
 				onSecondary: (e) => {
 					e.recipesQueued?.length && openMenu(MenuType.OvenMinigame)(e)
 				},
@@ -312,6 +272,8 @@ export const props: Props = [
 			...entity,
 			interactable: Interactable.Cauldron,
 			onPrimary: openMenu(MenuType.Cauldron),
+			actor: 'cookingPot',
+			questMarker: ['intro_quest#5_cook_meal'],
 			onSecondary: (e) => {
 				e.recipesQueued?.length && openMenu(MenuType.CauldronGame)(e)
 			},
@@ -490,17 +452,12 @@ export const props: Props = [
 							const door: Entity = {
 								parent,
 								position,
+								rotation: new Quaternion(),
 								group: new Group(),
 								interactable: Interactable.Enter,
 								bodyDesc: RigidBodyDesc.fixed().lockRotations(),
 								colliderDesc: ColliderDesc.cuboid(5, 7, 1).setSensor(true).setActiveCollisionTypes(ActiveCollisionTypes.ALL),
-								questMarker: ['intro_quest#1_see_grandma', 'intro_quest#3_bring_pot_to_grandma'],
-								questMarkerPosition: new Vector3(0, 15, 5),
-								onPrimary(entity) {
-									if (!hasCompletedStep('intro_quest', '1_see_grandma') && entity.questMarkerContainer) {
-										ecs.add({ dialog: dialogs.GrandmaIntro() })
-									}
-								},
+								actor: 'houseDoor',
 							}
 
 							ecs.add(door)
@@ -514,7 +471,6 @@ export const props: Props = [
 				npcName: 'Grandma',
 				houseAnimator: new Animator(entity.model, assets.models.House.animations),
 				voice: 'f1',
-				// dialog: dialogs.GrandmasHouse(),
 			}
 		},
 	},

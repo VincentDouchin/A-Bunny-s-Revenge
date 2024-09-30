@@ -79,6 +79,8 @@ export enum EnemyAttackStyle {
 	Spore,
 	BeeBoss,
 }
+export const actors = ['cellarDoor', 'houseDoor', 'playerIntro', 'basketIntro', 'playerFromIntro', 'cellarStairs', 'oven', 'cookingPot'] as const
+export type Actor = (typeof actors)[number]
 
 export interface States {
 	basket: 'idle' | 'running'
@@ -217,14 +219,11 @@ export interface Entity {
 	questMarker?: QuestMarkers[]
 	questMarkerContainer?: Group
 	questMarkerPosition?: Vector3
+	actor?: Actor
 	// ! Dialog
 	dialogHeight?: number
-	dialogTrigger?: string
 	dialog?: Dialog
-	// activeDialog?:true
 	dialogContainer?: CSS2DObject
-
-	// activeDialog?: true | 'instant'
 	// ! Health
 	currentHealth?: number
 	maxHealth?: Stat
@@ -265,7 +264,6 @@ export interface Entity {
 	lootChance?: Stat
 	// ! Level Editor
 	entityId?: string
-	markerName?: string
 	// ! FSM
 	state?: States[keyof States]
 	// ! Minigame
@@ -279,8 +277,6 @@ export interface Entity {
 	emissiveMat?: MeshPhongMaterial
 	ambientLight?: 'night' | 'day'
 	withTimeUniform?: true | (ShaderMaterial | MeshPhongMaterial)[]
-	// ! Basket
-	basket?: true
 	// ! Weapon
 	weapon?: With<Entity, 'model' | 'weaponName' | 'weaponArc'>
 	weaponArc?: WeaponArc

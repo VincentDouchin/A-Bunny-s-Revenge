@@ -16,7 +16,7 @@ import { getSize } from '@/lib/models'
 import type { Direction } from '@/lib/directions'
 import { cameraQuery } from '@/global/rendering'
 import { ecs } from '@/global/init'
-import type { Entity } from '@/global/entity'
+import { type Actor, type Entity, actors } from '@/global/entity'
 
 export const EntityEditor = ({ entity, levelData, setLevelData, setSelectedEntity, colliderData, setColliderData }: {
 	entity: Accessor<NonNullable<With<Entity, 'entityId' | 'position' | 'rotation' | 'model'>>>
@@ -190,7 +190,7 @@ export const EntityEditor = ({ entity, levelData, setLevelData, setSelectedEntit
 								return (
 									<For each={entries(data())}>
 										{([key, val]) => {
-											const updateData = (newData: ExtraData[keyof ExtraData]) => updateEntity({ data: { ...data(), ...newData } })
+											const updateData = (newData: Partial<ExtraData[keyof ExtraData]>) => updateEntity({ data: { ...data(), ...newData } })
 											return (
 												<div>
 													{key === 'direction' && (
@@ -204,7 +204,7 @@ export const EntityEditor = ({ entity, levelData, setLevelData, setSelectedEntit
 															<option value="east">east</option>
 														</select>
 													)}
-													{key === 'doorLevel' && (<input type="number" value={val} onChange={e => updateData({ ...data(), doorLevel: e.target.valueAsNumber })}></input>) }
+													{key === 'doorLevel' && (<input type="number" value={val} onChange={e => updateData({ doorLevel: e.target.valueAsNumber })}></input>) }
 													{key === 'text' && (
 														<input
 															type="text"
@@ -212,21 +212,23 @@ export const EntityEditor = ({ entity, levelData, setLevelData, setSelectedEntit
 															placeholder="Sign text"
 															onChange={(e) => {
 																e.stopImmediatePropagation()
-																updateData({ ...data(), text: e.target.value })
+																updateData({ text: e.target.value })
 															}}
 														>
 														</input>
 													)}
 													{key === 'name' && (
-														<input
-															type="text"
-															placeholder="marker name"
-															value={val}
-															onChange={(e) => {
-																e.stopImmediatePropagation()
-																updateData({ ...data(), name: e.target.value })
-															}}
-														/>
+														<div>
+															<select
+																value={val}
+																onChange={(e) => {
+																	updateData({ name: e.target.value as Actor })
+																}}
+															>
+																{actors.map(a => <option selected={val === a} value={a}>{a}</option>)}
+															</select>
+															{val}
+														</div>
 													)}
 													{key === 'unlocked' && (
 														<div>

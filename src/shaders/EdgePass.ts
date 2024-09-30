@@ -91,7 +91,6 @@ export const getSobelShader = (x: number, y: number, diffuseTarget: WebGLRenderT
 		outline: new Uniform<Texture>(outlineTarget.texture),
 		resolution: new Uniform(new Vector2(x, y)),
 		edgeColor: new Uniform(new Color(0x4D3533)),
-		pixelSize: new Uniform(1),
 		brightness: new Uniform(0),
 		contrast: new Uniform(1),
 		saturation: new Uniform(1),
@@ -118,7 +117,6 @@ export const getSobelShader = (x: number, y: number, diffuseTarget: WebGLRenderT
 		uniform vec3 edgeColor;
 		uniform vec2 resolution;
 		varying vec2 vUv;
-		uniform float pixelSize;
 		uniform float brightness;
 		uniform float contrast;
 		uniform float saturation;
@@ -133,27 +131,25 @@ export const getSobelShader = (x: number, y: number, diffuseTarget: WebGLRenderT
 		#include <packing>
 	
 		void main() {
-			vec2 d = pixelSize / resolution;
 			vec2 uv = vUv;
 			float G = sobel(tDepth,uv,resolution);	
 			float Gfactor = clamp(step(G * 5.0,0.1)+0.8,0.0,1.0);
 			vec3 tex_color = texture2D(tDiffuse,uv).rgb;
 			float dark = step(0.4,(tex_color.r+tex_color.g+tex_color.b) /3.);
-			// gl_FragColor = k; 
 			vec4 color = vec4(mix(edgeColor,tex_color,Gfactor),1.); 
 			
 			// Adjust brightness
 			color.rgb += brightness;
 
 			// Adjust contrast
-			color.rgb = ((color.rgb - 0.5) * contrast + 0.5);
+			color.rgb = (color.rgb - 0.5) * contrast + 0.5;
 
 			// Adjust saturation
 			float grey = dot(color.rgb, vec3(0.299, 0.587, 0.114));
 			color.rgb = mix(vec3(grey), color.rgb, saturation);
-			color.rgb = mulRGB * pow( ( color.rgb + addRGB ), powRGB );
-			color = (sobel(outline,uv,resolution*2.)>0.) 
-				? mix(vec4(1.), color, 0.) 
+			color.rgb = mulRGB * pow(color.rgb + addRGB, powRGB );
+			color = sobel(outline,uv,resolution*2.)>0. 
+				? vec4(1.)
 				: color;
 			gl_FragColor = color;
 		}`,

@@ -1,3 +1,6 @@
+import type { Query } from 'miniplex'
+import type { Entity } from '@/global/entity'
+
 export type System<R> = (ressources: R) => void | Promise<void>
 export type Subscriber<R> = (ressources: R) => () => void
 
@@ -183,4 +186,13 @@ export const set = <R>(systems: System<R>[]): System<R> => (ressources: R) => {
 	for (const system of systems) {
 		system(ressources)
 	}
+}
+
+export const enterAndSubscribe = <E extends Entity>(query: Query<E>, fn: (e: E) => void) => (s: State) => {
+	s.onEnter(() => {
+		for (const entity of query) {
+			fn(entity)
+		}
+	})
+	s.addSubscriber(() => query.onEntityAdded.subscribe(fn))
 }

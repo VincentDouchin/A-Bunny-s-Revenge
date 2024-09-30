@@ -29,7 +29,8 @@ export const playerSteps = () => {
 }
 
 export const movePlayer = () => {
-	for (const { playerControls, movementForce } of playerQuery) {
+	for (const e of playerQuery) {
+		const { playerControls, movementForce } = e
 		movementForce.setScalar(0)
 		movementForce.x += playerControls.get('left').pressed
 		movementForce.x -= playerControls.get('right').pressed
