@@ -174,7 +174,7 @@ const introQuestDialogs = {
 		speaker('Player')
 		yield 'Now that I harvested the carrots I can cook something for the festival!'
 	},
-	async *turnAwayFromDoor(player: With<Entity, 'position' | 'state'>, callback: () => void) {
+	*turnAwayFromDoor(player: With<Entity, 'position' | 'state'>, callback: () => void) {
 		cutSceneState.enable()
 		stopPlayer()
 		speaker('Player')
@@ -184,6 +184,11 @@ const introQuestDialogs = {
 			callback()
 		})
 	},
+	*dontEnterCellar() {
+		speaker('Player')
+		yield 'I shouldn\'t enter the cellar without a weapon, #GOLD#Grandma#GOLD# told me it was infested with Dust Motes'
+	},
+
 }
 const lockDoor = () => doorQuery.onEntityAdded.subscribe((e) => {
 	ecs.update(e, { doorLocked: true })
@@ -346,30 +351,34 @@ const introQuestActors = addActors({
 		questMarker: ['intro_quest#2_find_pot'],
 		questMarkerPosition: new Vector3(0, 10, -5),
 		async onPrimary(e, player) {
-			cutSceneState.enable()
-			await e.cellarDoorAnimator?.playClamped('doorOpen')
-			cutSceneState.disable()
-			const cellar: Room = {
-				plan: levelsData.levels.find(l => l.type === 'cellar')!,
-				doors: { [Direction.S]: null },
-				enemies: ['soot_sprite', 'soot_sprite', 'soot_sprite', 'soot_sprite'],
-				type: RoomType.Entrance,
-				encounter: null,
-				chest: true,
+			if (hasCompletedStep('intro_quest', '1_see_grandma')) {
+				cutSceneState.enable()
+				await e.cellarDoorAnimator?.playClamped('doorOpen')
+				cutSceneState.disable()
+				const cellar: Room = {
+					plan: levelsData.levels.find(l => l.type === 'cellar')!,
+					doors: { [Direction.S]: null },
+					enemies: ['soot_sprite', 'soot_sprite', 'soot_sprite', 'soot_sprite'],
+					type: RoomType.Entrance,
+					encounter: null,
+					chest: true,
+				}
+				const playerPosition = player.position!.clone().add(new Vector3(-5, 0, 0))
+				const playerRotation = player.rotation!.clone()
+				save.playerPosition = playerPosition.toArray()
+				save.playerRotation = playerRotation.toArray()
+				await sleep(1000)
+				dungeonState.enable({
+					direction: Direction.N,
+					weapon: 'Ladle',
+					dungeon: cellar,
+					dungeonLevel: 1,
+					playerHealth: player.maxHealth!.value,
+					firstEntry: true,
+				})
+			} else {
+				ecs.add({ dialog: introQuestDialogs.dontEnterCellar() })
 			}
-			const playerPosition = player.position!.clone().add(new Vector3(-5, 0, 0))
-			const playerRotation = player.rotation!.clone()
-			save.playerPosition = playerPosition.toArray()
-			save.playerRotation = playerRotation.toArray()
-			await sleep(1000)
-			dungeonState.enable({
-				direction: Direction.N,
-				weapon: 'Ladle',
-				dungeon: cellar,
-				dungeonLevel: 1,
-				playerHealth: player.maxHealth!.value,
-				firstEntry: true,
-			})
 		},
 	}),
 })

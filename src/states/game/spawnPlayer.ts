@@ -106,21 +106,12 @@ export const playerBundle = (health: number, weapon: weapons | null) => {
 export const spawnCharacter: System<FarmRessources> = (ressources) => {
 	const position = new Vector3().fromArray(save.playerPosition)
 	const rotation = new Quaternion().fromArray(save.playerRotation)
-	// const fromIntro = ressources.previousState === 'ruins' && markerQuery.first
 	const player = {
 		...playerBundle(PLAYER_DEFAULT_HEALTH, null),
 		position,
 		rotation,
 		targetRotation: rotation.clone(),
 	}
-	// if (fromIntro) {
-	// player.position.copy(fromIntro.position)
-	// Object.assign(player, {
-	// 	withChildren: () => {
-	// 		ecs.add({ dialog: dialogs.PlayerIntro2() })
-	// 	},
-	// })
-	// }
 
 	if (ressources?.previousState === 'dungeon') {
 		save.modifiers = []
