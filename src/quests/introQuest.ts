@@ -29,9 +29,8 @@ const basketQuery = ecs.with('actor', 'position', 'rotation').where(e => e.actor
 const playerQuery = ecs.with('player', 'position', 'rotation', 'targetRotation', 'state')
 const plantableSpotsQuery = ecs.with('plantableSpot', 'position', 'entityId').without('planted')
 const cropsQuery = ecs.with('crop')
-const dialogQuery = ecs.with('dialog')
 const plantedQuery = ecs.with('planted', 'position')
-const doorQuery = ecs.with('door')
+const doorQuery = ecs.with('door', 'position').where(e => e.door === Direction.N)
 const CARROTS_TO_HARVEST = 3
 // ! Basket
 const pickUpBasket = async () => {
@@ -54,12 +53,6 @@ const unlockCellar = () => {
 		completeQuestStep('intro_quest', '2_find_pot')
 	}
 }
-
-const lockDoor = () => doorQuery.onEntityAdded.subscribe((e) => {
-	if (e.door === Direction.N) {
-		ecs.update(e, { doorLocked: true })
-	}
-})
 
 const introQuestDialogs = {
 	async *PlayerIntro1(player: With<Entity, 'state'>) {
@@ -181,15 +174,44 @@ const introQuestDialogs = {
 		speaker('Player')
 		yield 'Now that I harvested the carrots I can cook something for the festival!'
 	},
-
+	async *turnAwayFromDoor(player: With<Entity, 'position' | 'state'>, callback: () => void) {
+		cutSceneState.enable()
+		stopPlayer()
+		speaker('Player')
+		yield 'I should go help grandma cook something for the festival before going.'
+		movePlayerTo(new Vector3(0, 0, -20).add(player.position)).then(() => {
+			cutSceneState.disable()
+			callback()
+		})
+	},
+}
+const lockDoor = () => doorQuery.onEntityAdded.subscribe((e) => {
+	ecs.update(e, { doorLocked: true })
+})
+const turnAwayFromDoor = () => {
+	let closeToDoor = false
+	return () => {
+		for (const door of doorQuery) {
+			for (const player of playerQuery) {
+				if (door.position.distanceTo(player.position) < 20 && !closeToDoor) {
+					closeToDoor = true
+					ecs.add({ dialog: introQuestDialogs.turnAwayFromDoor(player, () => closeToDoor = false) })
+				}
+			}
+		}
+	}
 }
 
 const getCloseToBasket = () => {
-	for (const basket of basketQuery) {
-		for (const player of playerQuery) {
-			if (player.position.distanceTo(basket.position) < 20 && dialogQuery.size === 0) {
-				stopPlayer()
-				ecs.add({ dialog: introQuestDialogs.pickupBasket() })
+	let closeToBasket = false
+	return () => {
+		for (const basket of basketQuery) {
+			for (const player of playerQuery) {
+				if (player.position.distanceTo(basket.position) < 20 && !closeToBasket) {
+					closeToBasket = true
+					stopPlayer()
+					ecs.add({ dialog: introQuestDialogs.pickupBasket() })
+				}
 			}
 		}
 	}
@@ -375,5 +397,5 @@ export const introQuestPlugin = (state: State) => {
 	state
 		.addPlugins(introQuestActors)
 		.addSubscriber(playerFromIntroDialog, spawnPlayerCellar, makeCratesInteractable, displayCarrots, addCarrotMarkers, completePickupCarrots, cookMeal, lockDoor)
-		.onUpdate(getCloseToBasket, displayFarmingTutorial)
+		.onUpdate(getCloseToBasket(), displayFarmingTutorial, turnAwayFromDoor())
 }
