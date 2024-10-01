@@ -18,16 +18,8 @@ renderer.setPixelRatio(1)
 
 const cssRenderer = new CSS2DRenderer()
 
-// export const width = window.innerWidth
-// export const height = window.innerHeight
-export const getTargetSize = (height = params.renderHeight) => {
-	const ratio = window.innerWidth / window.innerHeight
-	const width = height * ratio
-	return new Vector2(width, height)
-}
-const targetSize = getTargetSize()
-export const width = targetSize.x
-export const height = targetSize.y
+export const width = window.innerWidth
+export const height = window.innerHeight
 export const target = new WebGLRenderTarget(width, height, { depthBuffer: true })
 target.depthTexture = new DepthTexture(width, height)
 const outlineTarget = new WebGLRenderTarget(width, height, { depthBuffer: true })
@@ -39,9 +31,20 @@ const outlineMat = new ShaderMaterial(outlineShader(target, outlineTarget))
 const outlineQuad = new FullScreenQuad(outlineMat)
 export const sobelMat = new ShaderMaterial(getSobelShader(width, height, target, outlineTarget2))
 const sobelQuad = new FullScreenQuad(sobelMat)
-
+export const getTargetSize = (height = params.renderHeight) => {
+	const ratio = window.innerWidth / window.innerHeight
+	const width = height * ratio
+	return new Vector2(width, height)
+}
 export const updateRenderSize = (newSize?: Vector2) => {
 	newSize ??= getTargetSize()
+	sobelMat.uniforms.resolution.value = newSize
+	target.setSize(newSize.x, newSize.y)
+	// target.depthTexture = new DepthTexture(newSize.x, newSize.y)
+	outlineTarget.setSize(newSize.x, newSize.y)
+	// outlineTarget.depthTexture = new DepthTexture(newSize.x, newSize.y)
+	outlineTarget2.setSize(newSize.x, newSize.y)
+	// finalTarget.setSize(newSize.x, newSize.y)
 	renderer.setSize(newSize.x, newSize.y)
 	cssRenderer.setSize(window.innerWidth, window.innerHeight)
 }

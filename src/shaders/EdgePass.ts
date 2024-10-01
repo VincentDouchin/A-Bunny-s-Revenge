@@ -129,8 +129,8 @@ export const getSobelShader = (x: number, y: number, diffuseTarget: WebGLRenderT
 	
 		void main() {
 			vec2 uv = vUv;
-			float G = sobel(tDepth,uv,resolution);	
-			float Gfactor = clamp(step(G * 5.0,0.1)+0.8,0.0,1.0);
+			float G = sobel2(tDepth,uv,resolution);	
+			float Gfactor = clamp(step(G * 5.0,0.01)+0.8,0.0,1.0);
 			vec3 tex_color = texture2D(tDiffuse,uv).rgb;
 			float dark = step(0.4,(tex_color.r+tex_color.g+tex_color.b) /3.);
 			vec4 color = vec4(mix(edgeColor,tex_color,Gfactor),1.); 
@@ -146,7 +146,7 @@ export const getSobelShader = (x: number, y: number, diffuseTarget: WebGLRenderT
 			
 			color.rgb = mix(vec3(grey), color.rgb, saturation);
 			color.rgb = mulRGB * pow(color.rgb + addRGB, powRGB );
-			color = sobel(outline,uv,resolution)>0. 
+			color = sobel2(outline,uv,resolution)>0. 
 				? vec4(1.)
 				: color;
 			gl_FragColor = color;

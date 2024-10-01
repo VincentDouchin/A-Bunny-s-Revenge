@@ -31,7 +31,7 @@ const plantableSpotsQuery = ecs.with('plantableSpot', 'position', 'entityId').wi
 const cropsQuery = ecs.with('crop')
 const dialogQuery = ecs.with('dialog')
 const plantedQuery = ecs.with('planted', 'position')
-
+const doorQuery = ecs.with('door')
 const CARROTS_TO_HARVEST = 3
 // ! Basket
 const pickUpBasket = async () => {
@@ -54,6 +54,12 @@ const unlockCellar = () => {
 		completeQuestStep('intro_quest', '2_find_pot')
 	}
 }
+
+const lockDoor = () => doorQuery.onEntityAdded.subscribe((e) => {
+	if (e.door === Direction.N) {
+		ecs.update(e, { doorLocked: true })
+	}
+})
 
 const introQuestDialogs = {
 	async *PlayerIntro1(player: With<Entity, 'state'>) {
@@ -368,6 +374,6 @@ const cookMeal = () => cookedMealEvent.subscribe((cooking, recipe) => {
 export const introQuestPlugin = (state: State) => {
 	state
 		.addPlugins(introQuestActors)
-		.addSubscriber(playerFromIntroDialog, spawnPlayerCellar, makeCratesInteractable, displayCarrots, addCarrotMarkers, completePickupCarrots, cookMeal)
+		.addSubscriber(playerFromIntroDialog, spawnPlayerCellar, makeCratesInteractable, displayCarrots, addCarrotMarkers, completePickupCarrots, cookMeal, lockDoor)
 		.onUpdate(getCloseToBasket, displayFarmingTutorial)
 }
