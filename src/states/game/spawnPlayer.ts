@@ -19,7 +19,6 @@ import { assets, ecs, save } from '@/global/init'
 import { menuInputMap, playerInputMap } from '@/global/inputMaps'
 
 import type { DungeonRessources, FarmRessources } from '@/global/states'
-import { openMenuState } from '@/global/states'
 
 import { ModifierContainer } from '@/global/modifiers'
 import { collisionGroups } from '@/lib/collisionGroups'
@@ -148,9 +147,3 @@ export const spawnPlayerClearing = () => {
 		}
 	}
 }
-const playerQuery = ecs.with('player', 'position')
-
-export const losingBattle = () => playerQuery.onEntityRemoved.subscribe((e) => {
-	openMenuState.enable()
-	ecs.add({ ...inMap(), position: e.position, cameratarget: true })
-})

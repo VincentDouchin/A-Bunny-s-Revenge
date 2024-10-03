@@ -12,7 +12,7 @@ import { InputIcon } from '@/ui/InputIcon'
 import { inMap } from '@/lib/hierarchy'
 import { playSound } from '@/global/sounds'
 
-const playerUi = useQuery(ecs.with('player'))
+const playerUi = useQuery(ecs.with('player', 'state').where(e => e.state !== 'dead'))
 export const LoseUi = () => {
 	const noPlayer = createMemo(() => playerUi().length === 0)
 	const retry = () => {

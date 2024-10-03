@@ -1,5 +1,5 @@
 import type { Accessor, Component, JSX } from 'solid-js'
-import { createEffect, createRoot, createSignal, onCleanup } from 'solid-js'
+import { createEffect, createMemo, createRoot, createSignal, onCleanup } from 'solid-js'
 
 import type { Atom } from 'solid-use/atom'
 import { generateUUID } from 'three/src/math/MathUtils'
@@ -65,6 +65,7 @@ declare module 'solid-js' {
 export interface MenuDir {
 	refs: Map<string, HTMLElement>
 	inverseRefs: Map<HTMLElement, string>
+	selectedRef: Accessor<HTMLElement | undefined>
 	setSelected: (id: string) => void
 	setSelectedRef: (el: HTMLElement) => void
 	selected: Accessor<string>
@@ -142,8 +143,9 @@ export function Menu(props: { children: Component<MenuItemProps>, inputs?: MenuI
 			setSelected(id)
 		}
 	}
+	const selectedRef = createMemo(() => refs.get(selected()))
 	ui.updateSync(update)
-	const menu: MenuDir = { refs, inverseRefs, setSelected, selected, setSelectedRef, disabledDirections }
+	const menu: MenuDir = { refs, inverseRefs, setSelected, selected, selectedRef, setSelectedRef, disabledDirections }
 
 	return (
 

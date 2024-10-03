@@ -46,7 +46,7 @@ import { canPlayerMove, movePlayer, playerSteps, savePlayerFromTheEmbraceOfTheVo
 import { pauseGame } from './states/game/pauseGame'
 import { allowDoorCollision, collideWithDoorCamp, collideWithDoorClearing, collideWithDoorDungeon, collideWithDoorRuins, doorLocking, unlockDoorClearing, unlockDoorDungeon } from './states/game/spawnDoor'
 import { spawnDungeon, spawnLevel, spawnLevelData, updateTimeUniforms } from './states/game/spawnLevel'
-import { losingBattle, spawnCharacter, spawnPlayerClearing, spawnPlayerDungeon } from './states/game/spawnPlayer'
+import { spawnCharacter, spawnPlayerClearing, spawnPlayerDungeon } from './states/game/spawnPlayer'
 import { interactionPlugin } from './states/game/touchItem'
 import { updateWeaponArc } from './states/game/weapon'
 import { intiMainMenuRendering } from './states/mainMenu/initMainMenu'
@@ -121,7 +121,7 @@ genDungeonState
 	.onExit(despawnOfType('map'))
 
 dungeonState
-	.addSubscriber(spawnDrops, losingBattle, removeEnemyFromSpawn, applyArchingForce, unlockDungeon)
+	.addSubscriber(spawnDrops, removeEnemyFromSpawn, applyArchingForce, unlockDungeon)
 	.onEnter(spawnDungeon, spawnLevelData, spawnEnemies, spawnPlayerDungeon, moveCamera(true))
 	.onEnter(compileShaders)
 	.onUpdate(

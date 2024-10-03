@@ -4,6 +4,7 @@ import { ecs, tweens } from '@/global/init'
 import { Stat } from '@/lib/stats'
 import { enemyDefeated } from '@/particles/enemyDefeated'
 import type { ToonMaterial } from '@/shaders/materials'
+import { openMenuState } from '@/global/states'
 
 export const healthBundle = (health: number, current?: number) => ({
 	currentHealth: current ?? health,
@@ -52,5 +53,7 @@ export const killAnimation = () => deadEntities.onEntityAdded.subscribe((e) => {
 			duration: 2000,
 			onUpdate: f => mats.forEach(m => m.opacity = f),
 		})
+	} else if (e.faction === Faction.Player) {
+		openMenuState.enable()
 	}
 })

@@ -24,7 +24,6 @@ import { Menu, menuItem } from '@/ui/components/Menu'
 import { Modal } from '@/ui/components/Modal'
 import { GoldContainer, InventoryTitle, OutlineText } from '@/ui/components/styledComponents'
 import { Tabs } from '@/ui/components/tabs'
-import { Settings } from '@/ui/settings'
 import { useGame } from '@/ui/store'
 import { removeItemFromPlayer } from '@/utils/dialogHelpers'
 import { range } from '@/utils/mapFunctions'
@@ -440,7 +439,7 @@ export const InventoryUi = () => {
 						}
 					}
 				})
-				const tabs = ['inventory', 'recipes', 'settings']
+				const tabs = ['inventory', 'recipes']
 				const selectedTab = atom('inventory')
 				const recipesOutput = createMemo(() => recipes.map(r => r.output))
 				const playerInventory = ui.sync(() => player().inventory.filter(Boolean))
@@ -559,9 +558,7 @@ export const InventoryUi = () => {
 															</div>
 														</div>
 													</Show>
-													<Show when={selectedTab() === 'settings'}>
-														<Settings menu={menu} />
-													</Show>
+
 												</div>
 											</GoldContainer>
 										</>
