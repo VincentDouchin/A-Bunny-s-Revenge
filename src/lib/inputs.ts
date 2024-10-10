@@ -77,6 +77,13 @@ export class InputManager {
 		})
 		window.addEventListener('touchstart', () => {
 			this.controls('touch')
+			this.mouse[0] = true
+		})
+		window.addEventListener('touchend', () => {
+			this.mouse[0] = false
+		})
+		window.addEventListener('touchcancel', () => {
+			this.mouse[0] = false
 		})
 		window.addEventListener('mousedown', (e) => {
 			this.mouse[e.button] = true
@@ -224,7 +231,7 @@ export class Input {
 	}
 }
 
-export class TouchController< Buttons extends string> {
+export class TouchController<Buttons extends string> {
 	#buttons = createMap<Buttons, number>()
 	constructor(...buttons: Buttons[]) {
 		for (const button of buttons) {

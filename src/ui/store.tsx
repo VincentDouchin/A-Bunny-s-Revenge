@@ -2,7 +2,7 @@ import type { Query } from 'miniplex'
 import type { Accessor, JSXElement } from 'solid-js'
 import { createContext, createMemo, createSignal, useContext } from 'solid-js'
 import { ecs, inputManager, ui } from '@/global/init'
-import { openMenuState, pausedState } from '@/global/states'
+import { mainMenuState, openMenuState, pausedState } from '@/global/states'
 import type { ControlType } from '@/lib/inputs'
 import { playerInventoryQuery } from '@/utils/dialogHelpers'
 
@@ -37,9 +37,10 @@ export function GameProvider(props: { children: JSXElement | JSXElement[] }) {
 	const usingKeyboard = createMemo(() => inputManager.controls() === 'keyboard')
 	const usingGamepad = createMemo(() => inputManager.controls() === 'gamepad')
 	const isPauseState = ui.sync(() => pausedState.enabled)
+	const isMainMenuState = ui.sync(() => mainMenuState.enabled)
 	const players = useQuery(playerQuery)
 	const player = createMemo(() => players()?.[0])
-	const showTouch = createMemo(() => usingTouch() && !isMenuOpen() && !isPauseState())
+	const showTouch = createMemo(() => usingTouch() && !isMenuOpen() && !isPauseState() && !isMainMenuState())
 	const tutorials = useQuery(tutoQuery)
 	const tuto = createMemo(() => tutorials()?.[0])
 	const data = {

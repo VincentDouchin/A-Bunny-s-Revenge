@@ -9,9 +9,7 @@ import { createObject } from 'solid-proxies'
 import { Quaternion, Vector3 } from 'three'
 import { context } from './context'
 import type { Crop, Entity } from './entity'
-import type { QuestName, QuestStepKey, quests } from '@/constants/quests'
 import type { Item, Meals, crops } from '@/constants/items'
-import type { Prettify } from '@/types/vite.end'
 
 const blankSettings = (): Settings => ({
 	volume: 100,
@@ -67,7 +65,7 @@ export type SaveData = {
 	crops: Record<string, NonNullable<Crop>>
 	playerPosition: number[]
 	playerRotation: number[]
-	quests: Prettify<{ [name in QuestName]?: { steps: Prettify<Record<QuestStepKey<name>, boolean>>, data: ReturnType<(typeof quests)[name]['data']> } }>
+	quests: Record<string, { steps: Record<string, boolean>, data: any }>
 	selectedSeed: null | crops
 	inventories: Record<string, Item[]>
 	modifiers: Meals[]

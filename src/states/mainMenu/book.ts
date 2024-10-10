@@ -122,7 +122,7 @@ export class MainMenuBook extends Object3D {
 				onPlay() {
 					if (newSelected === 'Continue') {
 						introState.disable()
-						campState.enable({})
+						campState.enable({ door: 'clearing' })
 					}
 					if (newSelected === 'New Game') {
 						campState.disable()

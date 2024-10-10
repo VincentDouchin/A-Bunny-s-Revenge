@@ -61,7 +61,7 @@ export const DebugUi = () => {
 	}
 	const destroyCrops = () => {
 		save.crops = {}
-		campState.enable({})
+		campState.enable({ door: 'clearing' })
 	}
 	const reset = async () => {
 		campState.disable()

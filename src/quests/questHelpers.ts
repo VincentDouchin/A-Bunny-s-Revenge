@@ -1,6 +1,7 @@
 import type { items } from '@assets/assets'
 import { circIn } from 'popmotion'
 import { CylinderGeometry, Group, Mesh, MeshBasicMaterial, SphereGeometry, Vector3 } from 'three'
+import { Event } from 'eventery'
 import type { Item } from '@/constants/items'
 import type { QuestMarkers, QuestName, QuestStepKey } from '@/constants/quests'
 import { quests } from '@/constants/quests'
@@ -15,7 +16,7 @@ import { entries } from '@/utils/mapFunctions'
 
 const actorsQuery = ecs.with('actor', 'position', 'rotation')
 
-const setActor = (e: QueryEntity<typeof actorsQuery>, actors: Partial<Record<Actor, (e: QueryEntity<typeof actorsQuery>) => Entity | void >>) => {
+const setActor = (e: QueryEntity<typeof actorsQuery>, actors: Partial<Record<Actor, (e: QueryEntity<typeof actorsQuery>) => Entity | void>>) => {
 	for (const [actor, fn] of entries(actors)) {
 		if (e.actor === actor && fn) {
 			const entity = fn(e)
@@ -26,7 +27,7 @@ const setActor = (e: QueryEntity<typeof actorsQuery>, actors: Partial<Record<Act
 		}
 	}
 }
-export const addActors = (actors: Partial<Record<Actor, (e: QueryEntity<typeof actorsQuery>) => Entity | void >>) => (s: State) => {
+export const addActors = (actors: Partial<Record<Actor, (e: QueryEntity<typeof actorsQuery>) => Entity | void>>) => (s: State) => {
 	s.addSubscriber(() => actorsQuery.onEntityAdded.subscribe((e) => {
 		setActor(e, actors)
 	}))
@@ -120,7 +121,6 @@ export const displayQuestMarker = (e: QueryEntity<typeof questMarkerQuery>) => {
 export const addQuestMarkers = () => questMarkerQuery.onEntityAdded.subscribe(displayQuestMarker)
 export const addQuest = async <Name extends QuestName>(name: Name) => {
 	if (!(name in save.quests)) {
-		// @ts-expect-error I'm not sure how to solve this one
 		save.quests[name] = {
 			steps: quests[name].steps.reduce((acc, v) => ({ ...acc, [v.key]: false }), {} as Record<QuestStepKey<Name>, false>),
 			data: quests[name].data(),
@@ -170,7 +170,7 @@ export const completeQuestStep = <Q extends QuestName>(questName: Q, step: Quest
 }
 
 export const hasCompletedQuest = (name: QuestName) => {
-	return Boolean(save.quests[name] && Object.values(save.quests[name]?.steps)?.every(step => step === true))
+	return Boolean(save.quests[name]) && Object.values(save.quests[name]?.steps ?? {})?.every(step => step === true)
 }
 
 export const hasCompletedStep = <Q extends QuestName>(questName: Q, step: QuestStepKey<Q>) => {
@@ -183,7 +183,7 @@ export const hasQuest = <T extends QuestName>(name: QuestMarkers) => {
 }
 
 export const isQuestActive = (name: QuestName) => {
-	return save.quests[name] && Object.values(save.quests[name].steps)?.some(s => s === false)
+	return save.quests[name] && Object.values(save.quests[name]?.steps ?? {})?.some(s => s === false)
 }
 
 export const enableQuests = async () => {
@@ -191,5 +191,34 @@ export const enableQuests = async () => {
 		if (isQuestActive(quest) && quests[quest].state) {
 			await quests[quest].state.enable()
 		}
+	}
+}
+
+interface Step {
+	name: string
+	description: string
+	items: Item[]
+}
+export class Quest<S extends string = never> {
+	steps: Step[] = []
+	events: { [key: string]: Event<[void]> } = {}
+	constructor(public name: string) { }
+	addStep<s extends string>(name: s, description: string, items: Item[] = []) {
+		this.steps.push({ name, description, items })
+		this.events[name] = new Event()
+		return this as unknown as Quest<S | s>
+	}
+
+	hasCompleted(step: S) {
+		return save.quests[this.name].steps[step]
+	}
+
+	onCompleteStep(step: S, fn: () => void) {
+		this.events[step]?.subscribe(fn)
+		return this
+	}
+
+	completeStep(step: S) {
+		save.quests[this.name].steps[step] = true
 	}
 }

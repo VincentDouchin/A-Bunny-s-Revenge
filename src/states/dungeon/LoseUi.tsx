@@ -17,7 +17,7 @@ export const LoseUi = () => {
 	const noPlayer = createMemo(() => playerUi().length === 0)
 	const retry = () => {
 		openMenuState.disable()
-		campState.enable({})
+		campState.enable({ door: 'clearing' })
 	}
 
 	css/* css */`

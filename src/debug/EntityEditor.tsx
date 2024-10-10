@@ -13,12 +13,13 @@ import { getModel } from './props'
 import { entries } from '@/utils/mapFunctions'
 import { ToonMaterial } from '@/shaders/materials'
 import { getSize } from '@/lib/models'
-import type { Direction } from '@/lib/directions'
+import { cardinalDirections } from '@/lib/directions'
 import { cameraQuery } from '@/global/rendering'
 import { ecs } from '@/global/init'
-import { type Actor, type Entity, actors } from '@/global/entity'
+import { type Actor, type Entity, actors, farmDoors } from '@/global/entity'
 
 export const EntityEditor = ({ entity, levelData, setLevelData, setSelectedEntity, colliderData, setColliderData }: {
+	map: Accessor<string>
 	entity: Accessor<NonNullable<With<Entity, 'entityId' | 'position' | 'rotation' | 'model'>>>
 	levelData: Accessor<LevelData>
 	setLevelData: Setter<LevelData>
@@ -191,18 +192,17 @@ export const EntityEditor = ({ entity, levelData, setLevelData, setSelectedEntit
 									<For each={entries(data())}>
 										{([key, val]) => {
 											const updateData = (newData: Partial<ExtraData[keyof ExtraData]>) => updateEntity({ data: { ...data(), ...newData } })
+											const doors = [...cardinalDirections, ...farmDoors]
 											return (
 												<div>
 													{key === 'direction' && (
 														<select
 															value={val}
-															onChange={e => updateData({ ...data(), direction: e.target.value as Direction })}
+															onChange={e => updateData({ direction: e.target.value })}
 														>
-															<option value="north">north</option>
-															<option value="south">south</option>
-															<option value="west">west</option>
-															<option value="east">east</option>
+															{doors.map(door => <option value={door}>{door}</option>)}
 														</select>
+
 													)}
 													{key === 'doorLevel' && (<input type="number" value={val} onChange={e => updateData({ doorLevel: e.target.valueAsNumber })}></input>) }
 													{key === 'text' && (
@@ -237,7 +237,7 @@ export const EntityEditor = ({ entity, levelData, setLevelData, setSelectedEntit
 																checked={val}
 																onChange={(e) => {
 																	e.stopImmediatePropagation()
-																	updateData({ ...data(), unlocked: e.target.checked })
+																	updateData({ unlocked: e.target.checked })
 																}}
 															/>
 															<span>Unlocked</span>

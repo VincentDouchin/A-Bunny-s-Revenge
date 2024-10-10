@@ -41,7 +41,7 @@ export const SaveEditor = () => {
 						editor.destroy()
 						campState.disable()
 						await sleep(2000)
-						campState.enable({})
+						campState.enable({ door: 'clearing' })
 					})
 				})
 

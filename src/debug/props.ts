@@ -15,7 +15,7 @@ import { Interactable, MenuType } from '@/global/entity'
 import { assets, ecs, save } from '@/global/init'
 import type { DungeonRessources, FarmRessources } from '@/global/states'
 import { dungeonState, genDungeonState } from '@/global/states'
-import { Direction } from '@/lib/directions'
+import { Direction, isCardialDirection } from '@/lib/directions'
 import { inMap } from '@/lib/hierarchy'
 import { getSecondaryColliders } from '@/lib/models'
 import { GardenPlotMaterial, GrassMaterial } from '@/shaders/materials'
@@ -27,16 +27,20 @@ import { doorSide } from '@/states/game/spawnDoor'
 import { lockPlayer, unlockPlayer } from '@/utils/dialogHelpers'
 import { sleep } from '@/utils/sleep'
 
+const markerModel = () => {
+	const mesh = new Mesh(new SphereGeometry(3), new MeshBasicMaterial())
+	const arrow = new Mesh(new ConeGeometry(2, 5), new MeshBasicMaterial({ color: 0xFF0000 }))
+	arrow.position.set(0, 0, 3)
+	arrow.rotateX(Math.PI / 2)
+	mesh.add(arrow)
+	return mesh
+}
+
 export const customModels = {
+
 	door: doorSide,
-	marker: () => {
-		const mesh = new Mesh(new SphereGeometry(3), new MeshBasicMaterial())
-		const arrow = new Mesh(new ConeGeometry(2, 5), new MeshBasicMaterial({ color: 0xFF0000 }))
-		arrow.position.set(0, 0, 3)
-		arrow.rotateX(Math.PI / 2)
-		mesh.add(arrow)
-		return mesh
-	},
+	doorMarker: markerModel,
+	marker: markerModel,
 } as const satisfies Record<string, () => Object3D<Object3DEventMap>>
 export type customModel = keyof typeof customModels
 export const getModel = (key: ModelName): Object3D => {
@@ -54,7 +58,7 @@ export const getModel = (key: ModelName): Object3D => {
 }
 export interface ExtraData {
 	'door': {
-		direction: Direction
+		direction: string
 		doorLevel: number
 	}
 	'Vine gate': {
@@ -79,7 +83,7 @@ export interface PlacableProp<N extends string> {
 	data?: N extends keyof ExtraData ? ExtraData[N] : undefined
 	bundle?: BundleFn<EntityData<N extends keyof ExtraData ? NonNullable<ExtraData[N]> : never>>
 }
-type propNames = 'log' | 'door' | 'rock' | 'board' | 'oven' | 'CookingPot' | 'stove' | 'Flower/plants' | 'sign' | 'plots' | 'bush' | 'fence' | 'house' | 'mushrooms' | 'lamp' | 'Kitchen' | 'berry bushes' | 'bench' | 'well' | 'fruit trees' | 'stall' | 'Vine gate' | 'fishing deck' | 'pillar' | 'marker' | 'cellar' | 'cellar_door' | 'scaffolds' | 'cellar_props' | 'cellar_wall'
+export type propNames = 'log' | 'door' | 'rock' | 'board' | 'oven' | 'CookingPot' | 'stove' | 'Flower/plants' | 'sign' | 'plots' | 'bush' | 'fence' | 'house' | 'mushrooms' | 'lamp' | 'Kitchen' | 'berry bushes' | 'bench' | 'well' | 'fruit trees' | 'stall' | 'Vine gate' | 'fishing deck' | 'pillar' | 'marker' | 'cellar' | 'cellar_door' | 'scaffolds' | 'cellar_props' | 'cellar_wall'
 
 type Props = ({ [k in propNames]: PlacableProp<k> }[propNames])[]
 export const props: Props = [
@@ -136,7 +140,7 @@ export const props: Props = [
 	{
 		name: 'door',
 		data: { direction: Direction.N, doorLevel: 0 },
-		models: ['door'],
+		models: ['door', 'doorMarker'],
 		bundle: (entity, data, ressources) => {
 			if (dungeonState.enabled && ressources && 'dungeon' in ressources) {
 				const isBattle = [RoomType.Battle, RoomType.Boss, RoomType.Entrance].includes(ressources.dungeon.type)
@@ -150,25 +154,29 @@ export const props: Props = [
 				entity.doorLocked = true
 			}
 			if (ressources && 'dungeon' in ressources && data.data.direction && ressources.dungeon.plan.type === 'dungeon') {
-				const isBossEntrance = ressources.dungeon.doors[data.data.direction]?.type === RoomType.Boss
-				const isBossRoom = ressources.dungeon.type === RoomType.Boss && ressources.dungeon.doors[data.data.direction] !== null
-				const isEntrance = ressources.dungeon.type === RoomType.Entrance && ressources.dungeon.doors[data.data.direction] === null
-				let model: Object3D | null = null
-				if (isBossEntrance || isBossRoom) {
-					model = assets.models.Gate_Thorns.scene.clone()
-					entity.vineGate = true
-					if (isBossRoom) {
+				const next = isCardialDirection(data.data.direction) && ressources.dungeon.doors[data.data.direction]
+				if (next) {
+					const isBossEntrance = next?.type === RoomType.Boss
+					const isBossRoom = ressources.dungeon.type === RoomType.Boss && next !== null
+					const isEntrance = ressources.dungeon.type === RoomType.Entrance && next === null
+					let model: Object3D | null = null
+					if (isBossEntrance || isBossRoom) {
+						model = assets.models.Gate_Thorns.scene.clone()
+						entity.vineGate = true
+						if (isBossRoom) {
+							model.rotateY(Math.PI)
+						}
+					} else if (isEntrance) {
+						model = assets.models.Gate_Vines.scene.clone()
+						entity.vineGate = true
 						model.rotateY(Math.PI)
 					}
-				} else if (isEntrance) {
-					model = assets.models.Gate_Vines.scene.clone()
-					entity.vineGate = true
-					model.rotateY(Math.PI)
+					if (model) {
+						Object.assign(entity, getSecondaryColliders(model))
+						entity.model = model
+					}
 				}
-				if (model) {
-					Object.assign(entity, getSecondaryColliders(model))
-					entity.model = model
-				}
+				return {}
 			}
 			if (ressources && 'dungeon' in ressources && ressources.dungeon.plan.type === 'cellar') {
 				entity.model = new Object3D()

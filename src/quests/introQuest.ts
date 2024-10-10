@@ -24,7 +24,6 @@ const enemiesQuery = ecs.with('faction').where(e => e.faction === Faction.Enemy)
 const cratesQuery = ecs.with('crate').without('interactable')
 const cratesToOpenQuery = ecs.with('crate').with('interactable', 'onPrimary')
 const dungeonQuery = ecs.with('dungeon')
-const cellarStairsQuery = ecs.with('actor', 'position', 'rotation', 'size').where(e => e.actor === 'cellarStairs')
 const basketQuery = ecs.with('actor', 'position', 'rotation').where(e => e.actor === 'basketIntro')
 const playerQuery = ecs.with('player', 'position', 'rotation', 'targetRotation', 'state')
 const plantableSpotsQuery = ecs.with('plantableSpot', 'position', 'entityId').without('planted')
@@ -32,7 +31,16 @@ const cropsQuery = ecs.with('crop')
 const plantedQuery = ecs.with('planted', 'position')
 const doorQuery = ecs.with('door', 'position').where(e => e.door === Direction.N)
 const CARROTS_TO_HARVEST = 3
+
+// const introQuest = new Quest('intro_quest')
+// 	.addStep('0_find_basket', 'Find your basket of ingredients')
+// 	.addStep('1_see_grandma', 'Talk to grandma')
+// 	.addStep('2_find_pot', 'Find the cooking pot in the cellar')
+// 	.addStep('3_bring_pot_to_grandma', 'Bring the pot')
+// 	.addStep('4_get_carrots', 'Get some carrots for the meal', [{ name: 'carrot', quantity: 4 }])
+// 	.addStep('5_cook_meal', 'Make a carrot soup for the festival')
 // ! Basket
+
 const pickUpBasket = async () => {
 	for (const basket of basketQuery) {
 		const dest = basket.position.clone().add(new Vector3(0, 0, 5).applyQuaternion(basket.rotation))
@@ -46,7 +54,7 @@ const unlockCellar = () => {
 	const cellarDoorMarker = ecs.with('actor').where(e => e.actor === 'cellarStairs').first
 	if (cellarDoorMarker) {
 		ecs.update(cellarDoorMarker, {
-			door: Direction.E,
+			door: 'cellar',
 			colliderDesc: ColliderDesc.cuboid(10, 20, 3).setSensor(false),
 			bodyDesc: RigidBodyDesc.fixed(),
 		})
@@ -190,6 +198,7 @@ const introQuestDialogs = {
 	},
 
 }
+
 const lockDoor = () => doorQuery.onEntityAdded.subscribe((e) => {
 	ecs.update(e, { doorLocked: true })
 })
@@ -243,14 +252,6 @@ const playerFromIntroDialog = () => playerQuery.onEntityAdded.subscribe(() => {
 	}
 })
 // ! Cellar
-const spawnPlayerCellar = () => cellarStairsQuery.onEntityAdded.subscribe((e) => {
-	ecs.add({
-		...playerBundle(PLAYER_DEFAULT_HEALTH, 'Ladle'),
-		position: e.position.clone().add(new Vector3(0, e.size.y, 0)),
-		rotation: e.rotation.clone(),
-		targetRotation: e.rotation.clone(),
-	})
-})
 const makeCratesInteractable = () => enemiesQuery.onEntityRemoved.subscribe(() => {
 	if (enemiesQuery.size === 1 && dungeonQuery.first?.dungeon.plan.type === 'cellar') {
 		const cauldronCrate = getRandom(cratesQuery.entities)
@@ -313,18 +314,15 @@ const completePickupCarrots = () => harvestCropEvent.subscribe((entityId, crop) 
 		}
 	}
 })
-export const spawnIntroPlayer = addActors({ playerIntro: () => {
-	const player = { ...playerBundle(PLAYER_DEFAULT_HEALTH, null) }
-	player.playerAnimator.playAnimation('sleeping')
-	player.state = 'managed'
-	return player
-} })
-const introQuestActors = addActors({
-	playerFromIntro: (e) => {
-		if (isPlayerFirstEnteringFarm()) {
-			save.playerPosition = e.position.toArray()
-		}
+export const spawnIntroPlayer = addActors({
+	playerIntro: () => {
+		const player = { ...playerBundle(PLAYER_DEFAULT_HEALTH, null) }
+		player.playerAnimator.playAnimation('sleeping')
+		player.state = 'managed'
+		return player
 	},
+})
+const introQuestActors = addActors({
 
 	basketIntro: () => {
 		const model = assets.models.basket.scene.clone()
@@ -346,7 +344,8 @@ const introQuestActors = addActors({
 					})
 				}
 			},
-		} },
+		}
+	},
 	cellarDoor: () => ({
 		questMarker: ['intro_quest#2_find_pot'],
 		questMarkerPosition: new Vector3(0, 10, -5),
@@ -369,7 +368,7 @@ const introQuestActors = addActors({
 				save.playerRotation = playerRotation.toArray()
 				await sleep(1000)
 				dungeonState.enable({
-					direction: Direction.N,
+					direction: 'cellar',
 					weapon: 'Ladle',
 					dungeon: cellar,
 					dungeonLevel: 1,
@@ -405,6 +404,6 @@ const cookMeal = () => cookedMealEvent.subscribe((cooking, recipe) => {
 export const introQuestPlugin = (state: State) => {
 	state
 		.addPlugins(introQuestActors)
-		.addSubscriber(playerFromIntroDialog, spawnPlayerCellar, makeCratesInteractable, displayCarrots, addCarrotMarkers, completePickupCarrots, cookMeal, lockDoor)
+		.addSubscriber(playerFromIntroDialog, makeCratesInteractable, displayCarrots, addCarrotMarkers, completePickupCarrots, cookMeal, lockDoor)
 		.onUpdate(getCloseToBasket(), displayFarmingTutorial, turnAwayFromDoor())
 }

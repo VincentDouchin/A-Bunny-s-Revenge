@@ -58,7 +58,7 @@ export const renderMainMenu = () => {
 }
 export const setupWindow = () => {
 	if (save.started) {
-		campState.enable({})
+		campState.enable({ door: 'clearing' })
 	} else {
 		introState.enable()
 	}

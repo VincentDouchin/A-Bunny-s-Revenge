@@ -44,7 +44,7 @@ import { equip } from './states/game/equip'
 import { bobItems, collectItems, popItems, stopItems } from './states/game/items'
 import { canPlayerMove, movePlayer, playerSteps, savePlayerFromTheEmbraceOfTheVoid, stopPlayer } from './states/game/movePlayer'
 import { pauseGame } from './states/game/pauseGame'
-import { allowDoorCollision, collideWithDoorCamp, collideWithDoorClearing, collideWithDoorDungeon, collideWithDoorRuins, doorLocking, unlockDoorClearing, unlockDoorDungeon } from './states/game/spawnDoor'
+import { allowDoorCollision, collideWithDoorCamp, collideWithDoorClearing, collideWithDoorDungeon, collideWithDoorIntro, doorLocking, unlockDoorClearing, unlockDoorDungeon } from './states/game/spawnDoor'
 import { spawnDungeon, spawnLevel, spawnLevelData, updateTimeUniforms } from './states/game/spawnLevel'
 import { spawnCharacter, spawnPlayerClearing, spawnPlayerDungeon } from './states/game/spawnPlayer'
 import { interactionPlugin } from './states/game/touchItem'
@@ -109,7 +109,7 @@ introState
 	.onEnter(spawnLevel('intro'), spawnLevelData)
 	.addPlugins(spawnIntroPlayer)
 	.onEnter(compileShaders, moveCamera(true))
-	.onUpdate(collideWithDoorRuins)
+	.onUpdate(collideWithDoorIntro)
 	.onUpdate(runIf(() => mainMenuState.disabled, playAmbience))
 	.addSubscriber(enableCutscene)
 	.onExit(despawnOfType('map'))

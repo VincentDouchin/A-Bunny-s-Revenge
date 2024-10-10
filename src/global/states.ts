@@ -1,5 +1,6 @@
 import type { weapons } from '@assets/assets'
 import { StateMananger } from './../lib/state'
+import type { farmDoors } from './entity'
 import type { Room } from '@/states/dungeon/generateDungeon'
 import type { Direction } from '@/lib/directions'
 
@@ -7,7 +8,7 @@ export const app = new StateMananger()
 export const coreState = app.create()
 export const gameState = app.create()
 export interface FarmRessources {
-	previousState?: 'dungeon' | 'ruins'
+	door: (typeof farmDoors)[number]
 }
 export const campState = app.create<FarmRessources>()
 export const setupState = app.create()
@@ -19,7 +20,7 @@ export const mainMenuState = app.create()
 export const introState = app.create()
 export interface DungeonRessources {
 	dungeon: Room
-	direction: Direction
+	direction: Direction | (typeof farmDoors)[number]
 	playerHealth: number
 	firstEntry: boolean
 	dungeonLevel: number

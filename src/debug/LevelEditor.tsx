@@ -228,7 +228,7 @@ export const LevelEditor = () => {
 						campState.disable()
 						ecs.add({ map: level.id })
 						spawnGroundAndTrees(level)
-						spawnLevelData({})
+						spawnLevelData()
 						ecs.add({ ...playerBundle(PLAYER_DEFAULT_HEALTH, null), position: new Vector3(0, 10, 0) })
 					}
 					const draw = createMemo(() => selectedTab() === 'draw map')
@@ -503,6 +503,7 @@ export const LevelEditor = () => {
 									<Show when={selectedEntity()}>
 										{entity => (
 											<EntityEditor
+												map={map}
 												entity={entity}
 												levelData={levelData}
 												setLevelData={setLevelData}

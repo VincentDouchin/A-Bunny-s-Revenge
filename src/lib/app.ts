@@ -1,49 +1,87 @@
-import type { DungeonRessources, FarmRessources } from '@/global/states'
-
-// type EnableCommand<S extends string, Ressources extends Record<string, any>> =
-
-interface Commands<Ressources extends Partial<Record<States[number], any>>, States extends string[]> {
-	enable: <S extends States[number]>(...args: S extends keyof Ressources ? [S, Ressources[S]] : [S]) => void
+interface Commands<States extends string[], Ressources> {
+	enable: <S extends States[number]>(...args: S extends keyof Ressources ? Ressources[S] extends object ? [state: S, ressources: Ressources[S]] : [state: S] : never) => Promise<void>
 	disable: (state: States[number]) => void
 	isEnabled: (state: States[number]) => boolean
 	isDisabled: (state: States[number]) => boolean
 }
 
-type System<A extends App<any, any>> = A extends App< infer Ressources, infer States>
-	? (commands: Commands<Ressources, States>) => (void | System<A> | Promise<void>)
+type AppStates<A extends App<any, any>> = A extends App<infer States, any> ? States[number] : never
+
+export type System<A extends App<any, any>, S extends AppStates<A> | undefined = undefined> = A extends App<infer States, infer Ressources>
+	? (commands: Commands<States, Ressources>, ressources: S extends keyof Ressources ? Ressources[S] : undefined) => (void | System<A> | Promise<void>)
 	: never
-
 type Schedule = 'enter' | 'preUpdate' | 'update' | 'postUpdate' | 'exit'
-
-interface Schedulers<A extends App<any, any>> {
-	onEnter: (...systems: System<A>[]) => void
-	onPreUpdate: (...systems: System<A>[]) => void
-	onUpdate: (...systems: System<A>[]) => void
-	onPostUpdate: (...systems: System<A>[]) => void
-	onExit: (...systems: System<A>[]) => void
-}
-
-class App<Ressources extends Partial<Record<States[number], any>>, States extends string[] = []> {
+export type Plugin<A extends App<any, any>> = (app: A) => void
+export class AppBuilder<States extends string[] = [], Ressources extends Partial<Record<States[number], unknown>> = Partial<Record<string, never>>> {
 	states: Set<States[number]>[] = []
 	enabledStates: { [S in States[number]]?: Ressources[S] } = {}
+
+	addState<S extends string>(...states: S[]) {
+		this.states.push(new Set(states))
+
+		return this as unknown as AppBuilder<[...States, S], Ressources>
+	}
+
+	bindRessource<S extends States[number], R>() {
+		return this as AppBuilder<States, Ressources & { [key in S]: R }>
+	}
+
+	setInitialState<S extends States[number]>(...args: S extends keyof Ressources ? Ressources[S] extends object ? [state: S, ressources: Ressources[S]] : [state: S] : never) {
+		const [state, ressources] = args
+		this.enabledStates[state] = ressources
+		return this
+	}
+
+	build() {
+		return new App<States, Ressources>(this.states, this.enabledStates)
+	}
+}
+class App<States extends string[], Ressources extends Partial<Record<States[number], any>>> {
 	systems: { [S in States[number]]?: {
-		[schedule in Schedule]: Set<System<this>>
+		[schedule in Schedule]: Set<System<this, any>>
 	} & { cleanup: Set<() => void> } } = {}
 
 	#queue = new Set<() => void>()
 
 	#callbackId: number | null = null
+	constructor(private states: Set<States[number]>[], private enabledStates: { [S in States[number]]?: Ressources[S] }) {
+		for (const stateSet of states) {
+			for (const state of stateSet) {
+				this.systems[state] = {
+					enter: new Set(),
+					preUpdate: new Set(),
+					update: new Set(),
+					postUpdate: new Set(),
+					exit: new Set(),
+					cleanup: new Set(),
+				}
+			}
+		}
+	}
 
-	commands: Commands<Ressources, States> = {
-		enable: async (...args) => {
+	runIf = (fn: (cmd: Commands<States, Ressources>) => boolean) => <S extends AppStates<this>>(...systems: System<this, S>[]) => {
+		return (cmd: Commands<States, Ressources>, ressources: S extends keyof Ressources ? Ressources[S] : undefined) => {
+			if (fn(cmd)) {
+				for (const system of systems) {
+					system(cmd, ressources)
+				}
+			}
+		}
+	}
+
+	runIfEnabled = <S extends AppStates<this>>(state: S) => this.runIf(cmd => cmd.isEnabled(state))
+	runIfDisabled = <S extends AppStates<this>>(state: S) => this.runIf(cmd => cmd.isDisabled(state))
+
+	commands: Commands<States, Ressources> = {
+		enable: async <S extends States[number]>(...args: S extends keyof Ressources ? Ressources[S] extends object ? [state: S, ressources: Ressources[S]] : [state: S] : never) => {
 			const [state, ressources] = args
-			this.enabledStates[state] = ressources
+			this.enabledStates[state] = ressources as Ressources[S]
 			const systems = this.systems[state]?.enter ?? []
 			for (const system of systems) {
-				const unsub = await system(this.commands)
+				const unsub = await system(this.commands, ressources as Ressources[S])
 				if (unsub) {
 					const cleanup = () => {
-						unsub(this.commands)
+						unsub(this.commands, ressources as Ressources[S])
 						this.systems[state]?.cleanup.delete(cleanup)
 					}
 					this.systems[state]?.cleanup.add(cleanup)
@@ -58,7 +96,8 @@ class App<Ressources extends Partial<Record<States[number], any>>, States extend
 				}
 			}
 		},
-		disable: (state) => {
+		disable: <S extends States[number]>(state: S) => {
+			const ressources = this.enabledStates[state]
 			delete this.enabledStates[state]
 			this.systems[state]?.cleanup.forEach((callBack) => {
 				callBack()
@@ -66,63 +105,56 @@ class App<Ressources extends Partial<Record<States[number], any>>, States extend
 			this.systems[state]?.cleanup.clear()
 			const systems = this.systems[state]?.exit ?? []
 			for (const system of systems) {
-				system(this.commands)
+				system(this.commands, ressources as Ressources[S])
 			}
 		},
-		isEnabled: (state) => {
+		isEnabled: <S extends States[number]>(state: S) => {
 			return state in this.enabledStates
 		},
-		isDisabled: (state) => {
+		isDisabled: <S extends States[number]>(state: S) => {
 			return !(state in this.enabledStates)
 		},
 	}
 
-	schedulers = (state: States[number]): Schedulers<this> => {
-		const scheduler = (schedule: Schedule) => (...systems: System<this>[]) => {
-			for (const system of systems) {
-				this.systems[state]?.[schedule].add(system)
-			}
-		}
-		return {
-			onEnter: scheduler('enter'),
-			onPreUpdate: scheduler('preUpdate'),
-			onUpdate: scheduler('update'),
-			onPostUpdate: scheduler('postUpdate'),
-			onExit: scheduler('exit'),
+	addSystems<S extends AppStates<this>>(schedule: Schedule, state: S, ...systems: System<this, S>[]) {
+		for (const system of systems) {
+			this.systems[state]?.[schedule].add(system)
 		}
 	}
 
-	addState<S extends string>(...states: S[]) {
-		this.states.push(new Set(states))
-		for (const state of states) {
-			this.systems[state] = {
-				enter: new Set(),
-				preUpdate: new Set(),
-				update: new Set(),
-				postUpdate: new Set(),
-				exit: new Set(),
-				cleanup: new Set(),
-			}
-		}
-		return this as unknown as App<Ressources, [...States, S]>
+	onEnter<S extends AppStates<this>>(state: S, ...systems: System<this, S>[]) {
+		this.addSystems('enter', state, ...systems)
+		return this
 	}
 
-	bindRessource<S extends States[number], R >() {
-		return this as App<Ressources & { [key in S]: R }, States >
+	onUpdate<S extends AppStates<this>>(state: S, ...systems: System<this, S>[]) {
+		this.addSystems('update', state, ...systems)
+		return this
 	}
 
-	addSystems<S extends States[number]>(state: S, fn: (s: Schedulers<this>) => void) {
-		fn(this.schedulers(state))
+	onPreUpdate<S extends AppStates<this>>(state: S, ...systems: System<this, S>[]) {
+		this.addSystems('preUpdate', state, ...systems)
+		return this
+	}
+
+	onPostUpdate<S extends AppStates<this>>(state: S, ...systems: System<this, S>[]) {
+		this.addSystems('postUpdate', state, ...systems)
+		return this
+	}
+
+	onEnxit<S extends AppStates<this>>(state: S, ...systems: System<this, S>[]) {
+		this.addSystems('exit', state, ...systems)
 		return this
 	}
 
 	#runSchedule(schedule: Schedule) {
 		const states = Object.keys(this.enabledStates) as States[number][]
 		for (const state of states) {
+			const ressources = this.enabledStates[state]
 			const systems = this.systems[state]?.[schedule]
 			if (systems) {
 				for (const system of systems) {
-					system(this.commands)
+					system(this.commands, ressources as Ressources[typeof state])
 				}
 			}
 		}
@@ -138,8 +170,11 @@ class App<Ressources extends Partial<Record<States[number], any>>, States extend
 		this.#queue.clear()
 	}
 
-	addPlugin<A extends App<any, any>>(plugin: (app: App<Ressources, States>) => A) {
-		return plugin(this) as A
+	addPlugins(...plugins: ((app: this) => void)[]) {
+		for (const plugin of plugins) {
+			plugin(this)
+		}
+		return this
 	}
 
 	animate = () => {
@@ -147,7 +182,12 @@ class App<Ressources extends Partial<Record<States[number], any>>, States extend
 		this.#callbackId = window.requestAnimationFrame(this.animate)
 	}
 
-	start() {
+	async start() {
+		for (const state of Object.keys(this.enabledStates) as AppStates<this>[]) {
+			const ressources = this.enabledStates[state] as Ressources[typeof state]
+			// @ts-expect-error to fix later
+			await this.commands.enable<typeof state>(state, ressources)
+		}
 		this.animate()
 	}
 
@@ -158,14 +198,3 @@ class App<Ressources extends Partial<Record<States[number], any>>, States extend
 		}
 	}
 }
-const spawnPlayer: System<typeof app> = ({ enable }) => {
-	enable('intro')
-}
-
-export const app = new App()
-	.addState('farm', 'dungeon', 'intro')
-	.bindRessource<'farm', FarmRessources>()
-	.bindRessource<'dungeon', DungeonRessources>()
-	.addSystems('farm', ({ onEnter }) => {
-		onEnter(spawnPlayer)
-	})

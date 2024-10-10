@@ -1,12 +1,12 @@
 import { DoubleSide, Group, Mesh, MeshBasicMaterial, PlaneGeometry, ShaderMaterial } from 'three'
 import { RoomType, genDungeon } from '../dungeon/generateDungeon'
 import type { QueryEntity } from '@/global/entity'
-import { Faction } from '@/global/entity'
+import { Faction, farmDoors } from '@/global/entity'
 import { ecs, save, tweens, world } from '@/global/init'
 import { playSound } from '@/global/sounds'
 import type { DungeonRessources } from '@/global/states'
 import { campState, dungeonState, genDungeonState } from '@/global/states'
-import { Direction, otherDirection } from '@/lib/directions'
+import { Direction, isCardialDirection, otherDirection } from '@/lib/directions'
 import type { State, System } from '@/lib/state'
 import { doorClosed } from '@/particles/doorClosed'
 import vertexShader from '@/shaders/glsl/main.vert?raw'
@@ -72,18 +72,18 @@ export const unlockDoorDungeon = () => {
 		playSound('zapsplat_multimedia_game_tone_twinkle_bright_collect_gain_level_up_50730')
 	}
 }
+
 export const collideWithDoorDungeon = onCollideWithDoor<typeof dungeonState>((door, player, { dungeon, dungeonLevel, weapon }) => {
-	const nextRoom = dungeon.doors[door.door]
-	if (nextRoom) {
-		dungeonState.enable({ dungeon: nextRoom, direction: otherDirection[door.door], playerHealth: player.currentHealth, firstEntry: false, dungeonLevel, weapon })
-	} else {
-		if (dungeon.type === RoomType.Boss) {
-			campState.enable({ previousState: 'dungeon' })
+	if (isCardialDirection(door.door)) {
+		const nextRoom = dungeon.doors[door.door]
+		if (nextRoom) {
+			dungeonState.enable({ dungeon: nextRoom, direction: otherDirection[door.door], playerHealth: player.currentHealth, firstEntry: false, dungeonLevel, weapon })
 		} else {
-			campState.enable({})
+			campState.enable({ door: 'clearing' })
 		}
 	}
 })
+
 export const collideWithDoorCamp = onCollideWithDoor(() => {
 	genDungeonState.enable()
 })
@@ -94,13 +94,13 @@ export const collideWithDoorClearing = onCollideWithDoor((door, player) => {
 		dungeonState.enable({ dungeon, direction: Direction.S, firstEntry: true, playerHealth: player.currentHealth, dungeonLevel: door.doorLevel, weapon: player.weapon.weaponName })
 	}
 	if (door.doorLevel === undefined) {
-		campState.enable({})
+		campState.enable({ door: 'clearing' })
 	}
 })
 
-export const collideWithDoorRuins = onCollideWithDoor((door) => {
-	if (door.door === Direction.E) {
-		campState.enable({ previousState: 'ruins' })
+export const collideWithDoorIntro = onCollideWithDoor(({ door }) => {
+	if (farmDoors.includes(door)) {
+		campState.enable({ door: door as typeof farmDoors[number] })
 	}
 })
 const doorClearingQuery = doorQuery.with('doorLevel')
