@@ -6,6 +6,7 @@ export class GenerateAssetNames extends AssetTransformer {
 	path = ['assets', 'assets.ts']
 	async add(path: PathInfo) {
 		const fileName = path.name?.replace('-optimized', '')
+		console.log(path.folder)
 		if (path.folder && fileName && path.folder !== 'assets') {
 			this.folders[path.folder] ??= new Set()
 			this.folders[path.folder].add(fileName)

@@ -119,14 +119,14 @@ export const selectMainMenu = () => {
 
 export const clickOnMenuButton = () => {
 	for (const camera of mainMenuCameraQuery) {
-		for (const { menuBook } of menuBookQuery) {
+		for (const { menuBook, menuInputs } of menuBookQuery) {
 			const ray = new Raycaster()
 			ray.setFromCamera(inputManager.mousePositionNormalized, camera.camera)
 			for (const [button, model] of menuBook.buttons.entries()) {
 				const intsersect = ray.intersectObject(model)
 				if (intsersect.length) {
 					menuBook.select(button)
-					if (inputManager.mouse[0]) {
+					if (menuInputs.get('click').justPressed) {
 						menuBook.confirm()?.then(transitionToGame)
 					}
 				}

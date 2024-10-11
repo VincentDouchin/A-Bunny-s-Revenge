@@ -201,7 +201,7 @@ export const EntityEditor = ({ entity, levelData, setLevelData, setSelectedEntit
 															value={val}
 															onChange={e => updateData({ direction: e.target.value as Doors })}
 														>
-															{doors.map(door => <option value={door}>{door}</option>)}
+															{doors.map(door => <option selected={val === door} value={door}>{door}</option>)}
 														</select>
 
 													)}

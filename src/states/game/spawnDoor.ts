@@ -49,7 +49,7 @@ const playerQuery = ecs.with('collider', 'playerControls', 'currentHealth', 'pos
 const enemyQuery = ecs.with('faction').where(({ faction }) => faction === Faction.Enemy)
 const doorToLockQuery = doorQuery.with('doorLocked')
 const doorToUnlockQuery = doorQuery.without('doorLocked', 'unlocked')
-const unlockeVineDoorsQuery = doorQuery.with('unlocked', 'vineGate')
+const unlockeVineDoorsQuery = doorQuery.with('unlocked', 'doorType').where(e => e.doorType === 'vine')
 
 const onCollideWithDoor = <S extends State<any>>(
 	fn: (door: QueryEntity<typeof doorQuery>, player: QueryEntity<typeof playerQuery>, ressources: S extends State<infer R> ? R : never) => void,
@@ -78,14 +78,16 @@ export const collideWithDoorDungeon = onCollideWithDoor<typeof dungeonState>((do
 		const nextRoom = dungeon.doors[door.door]
 		if (nextRoom) {
 			dungeonState.enable({ dungeon: nextRoom, direction: otherDirection[door.door], playerHealth: player.currentHealth, firstEntry: false, dungeonLevel, weapon })
-		} else {
-			campState.enable({ door: 'clearing' })
 		}
+	} else {
+		campState.enable({ door: door.door })
 	}
 })
 
-export const collideWithDoorCamp = onCollideWithDoor(() => {
-	genDungeonState.enable()
+export const collideWithDoorCamp = onCollideWithDoor(({ door }) => {
+	if (door === 'clearing') {
+		genDungeonState.enable()
+	}
 })
 
 export const collideWithDoorClearing = onCollideWithDoor((door, player) => {
@@ -127,14 +129,14 @@ export const allowDoorCollision: System<DungeonRessources> = () => {
 
 const lockDoors = () => doorToLockQuery.onEntityAdded.subscribe((e) => {
 	e.collider.setSensor(false)
-	if (!e.vineGate) {
+	if (e.doorType === 'fog') {
 		ecs.update(e, { emitter: doorClosed() })
 	}
 })
 export const unlockDoors = () => doorToUnlockQuery.onEntityAdded.subscribe((e) => {
 	e.collider.setSensor(true)
 
-	if (e.vineGate) {
+	if (e.doorType === 'vine') {
 		const vinesBottom = e.model?.getObjectByName('GATE')
 		if (vinesBottom) {
 			playSound('zapsplat_foley_tree_palm_front_dead_large_dry_movement_ground_001_99605', { playbackRate: 1.5 })

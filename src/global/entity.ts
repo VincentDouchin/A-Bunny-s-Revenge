@@ -178,7 +178,7 @@ export interface Entity {
 	onSecondary?: (entity: Entity, player: Entity) => void
 	// ! Camp
 	door?: Direction | (typeof farmDoors)[number]
-	vineGate?: true
+	doorType?: 'vine' | 'fog' | 'marker'
 	doorLevel?: number
 	doorLocked?: true
 	unlocked?: true

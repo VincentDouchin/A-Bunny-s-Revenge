@@ -23,7 +23,7 @@ export const playerInputMap = () => {
 	return { playerControls: map } as const satisfies Entity
 }
 
-const menuInputs = ['up', 'down', 'left', 'right', 'validate', 'cancel', 'tab', 'tabLeft', 'tabRight'] as const
+const menuInputs = ['up', 'down', 'left', 'right', 'validate', 'cancel', 'tab', 'tabLeft', 'tabRight', 'click'] as const
 export type MenuInputMap = InputMap<typeof menuInputs[number]>
 export const menuInputMap = () => {
 	const map = inputManager.createMap(menuInputs, true).setGamepads(0)
@@ -36,5 +36,6 @@ export const menuInputMap = () => {
 	map.get('tab').setKeys('ControlLeft')
 	map.get('tabLeft').setButtons(GAMEPAD_BUTTON.L)
 	map.get('tabRight').setButtons(GAMEPAD_BUTTON.R)
+	map.get('click').setMouse(MOUSE_BUTTONS.LEFT)
 	return { menuInputs: map } as const satisfies Entity
 }

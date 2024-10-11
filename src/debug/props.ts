@@ -153,6 +153,14 @@ export const props: Props = [
 				entity.doorLevel = data.data.doorLevel
 				entity.doorLocked = true
 			}
+			if (data.model === 'door') {
+				entity.doorType = 'fog'
+			}
+			if (data.model === 'doorMarker') {
+				entity.doorType = 'marker'
+				entity.model = new Object3D()
+			}
+
 			if (ressources && 'dungeon' in ressources && data.data.direction && ressources.dungeon.plan.type === 'dungeon') {
 				const next = isCardialDirection(data.data.direction) && ressources.dungeon.doors[data.data.direction]
 				if (next) {
@@ -162,13 +170,13 @@ export const props: Props = [
 					let model: Object3D | null = null
 					if (isBossEntrance || isBossRoom) {
 						model = assets.models.Gate_Thorns.scene.clone()
-						entity.vineGate = true
+						entity.doorType = 'vine'
 						if (isBossRoom) {
 							model.rotateY(Math.PI)
 						}
 					} else if (isEntrance) {
 						model = assets.models.Gate_Vines.scene.clone()
-						entity.vineGate = true
+						entity.doorType = 'vine'
 						model.rotateY(Math.PI)
 					}
 					if (model) {
@@ -177,9 +185,7 @@ export const props: Props = [
 					}
 				}
 			}
-			if (ressources && 'dungeon' in ressources && ressources.dungeon.plan.type === 'cellar') {
-				entity.model = new Object3D()
-			}
+
 			return {
 				door: data.data.direction,
 				...entity,
