@@ -98,15 +98,15 @@ export const playerBundle = (health: number, weapon: weapons | null) => {
 
 	return player
 }
-const actorsQuery = ecs.with('actor', 'position', 'rotation')
+const doorQuery = ecs.with('door', 'position', 'rotation')
 export const spawnCharacter: System<FarmRessources> = (ressources) => {
 	const position = new Vector3()
 	const rotation = new Quaternion()
 	if (ressources.door) {
-		const door = actorsQuery.entities.find(e => e.actor === ressources.door)
+		const door = doorQuery.entities.find(e => e.door === ressources.door)
 		if (door) {
 			position.copy(door.position)
-			rotation.copy(door.rotation)
+			rotation.copy(door.rotation).multiply(new Quaternion().setFromAxisAngle(new Vector3(0, 1, 0), Math.PI))
 		}
 	}
 	const player = {
@@ -119,12 +119,11 @@ export const spawnCharacter: System<FarmRessources> = (ressources) => {
 	ecs.add(player)
 }
 
-const doorQuery = ecs.with('door', 'position', 'rotation')
 export const spawnPlayerDungeon: System<DungeonRessources> = (ressources) => {
 	const isStart = ressources.dungeon.type === RoomType.Entrance && ressources.firstEntry
 	for (const door of doorQuery) {
 		if ((isStart && isCardialDirection(door.door)) ? ressources.dungeon.doors[door.door] === null : door.door === ressources.direction) {
-			const rotation = door.rotation.clone()
+			const rotation = door.rotation.clone().multiply(new Quaternion().setFromAxisAngle(new Vector3(0, 1, 0), Math.PI))
 			ecs.add({
 				...playerBundle(ressources.playerHealth, ressources.weapon),
 				position: door.position.clone(),

@@ -81,6 +81,7 @@ export enum EnemyAttackStyle {
 }
 export const actors = ['cellarDoor', 'houseDoor', 'playerIntro', 'basketIntro', 'intro', 'cellarStairs', 'oven', 'cookingPot'] as const
 export const farmDoors = ['intro', 'cellar', 'clearing'] as const
+export type Doors = typeof farmDoors[number] | Direction
 export type Actor = (typeof actors)[number]
 
 export interface States {

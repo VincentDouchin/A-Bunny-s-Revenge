@@ -16,7 +16,8 @@ import { getSize } from '@/lib/models'
 import { cardinalDirections } from '@/lib/directions'
 import { cameraQuery } from '@/global/rendering'
 import { ecs } from '@/global/init'
-import { type Actor, type Entity, actors, farmDoors } from '@/global/entity'
+import type { Actor, Doors, Entity } from '@/global/entity'
+import { actors, farmDoors } from '@/global/entity'
 
 export const EntityEditor = ({ entity, levelData, setLevelData, setSelectedEntity, colliderData, setColliderData }: {
 	map: Accessor<string>
@@ -198,7 +199,7 @@ export const EntityEditor = ({ entity, levelData, setLevelData, setSelectedEntit
 													{key === 'direction' && (
 														<select
 															value={val}
-															onChange={e => updateData({ direction: e.target.value })}
+															onChange={e => updateData({ direction: e.target.value as Doors })}
 														>
 															{doors.map(door => <option value={door}>{door}</option>)}
 														</select>

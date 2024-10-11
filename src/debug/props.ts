@@ -10,7 +10,7 @@ import type { EntityData, ModelName } from './LevelEditor'
 import { debugState } from './debugState'
 import { itemsData } from '@/constants/items'
 import { Animator } from '@/global/animator'
-import type { Actor, Entity } from '@/global/entity'
+import type { Actor, Doors, Entity } from '@/global/entity'
 import { Interactable, MenuType } from '@/global/entity'
 import { assets, ecs, save } from '@/global/init'
 import type { DungeonRessources, FarmRessources } from '@/global/states'
@@ -58,7 +58,7 @@ export const getModel = (key: ModelName): Object3D => {
 }
 export interface ExtraData {
 	'door': {
-		direction: string
+		direction: Doors
 		doorLevel: number
 	}
 	'Vine gate': {
@@ -176,7 +176,6 @@ export const props: Props = [
 						entity.model = model
 					}
 				}
-				return {}
 			}
 			if (ressources && 'dungeon' in ressources && ressources.dungeon.plan.type === 'cellar') {
 				entity.model = new Object3D()
