@@ -1,7 +1,7 @@
 import type { Query } from 'miniplex'
 import type { Accessor, JSXElement } from 'solid-js'
 import { createContext, createMemo, createSignal, useContext } from 'solid-js'
-import { ecs, inputManager, ui } from '@/global/init'
+import { inputManager, ui } from '@/global/init'
 import { mainMenuState, openMenuState, pausedState } from '@/global/states'
 import type { ControlType } from '@/lib/inputs'
 import { playerInventoryQuery } from '@/utils/dialogHelpers'
@@ -15,11 +15,9 @@ const GameContext = createContext<{
 	usingGamepad: Accessor<boolean>
 	isPauseState: Accessor<boolean>
 	player: Accessor<typeof playerQuery['entities'][number]>
-	tuto: Accessor<typeof tutoQuery['entities'][number]>
 
 }>()
 const playerQuery = playerInventoryQuery.with('playerControls', 'maxHealth', 'currentHealth', 'maxHealth', 'currentHealth', 'strength', 'menuInputs', 'sneeze', 'debuffsContainer', 'poisoned', 'position', 'sleepy', 'modifiers')
-export const tutoQuery = ecs.with('tutorial')
 export const useQuery = <T,>(query: Query<T>) => {
 	const [entities, setEntities] = createSignal(query.entities, { equals: false })
 	query.onEntityAdded.subscribe(() => {
@@ -41,8 +39,6 @@ export function GameProvider(props: { children: JSXElement | JSXElement[] }) {
 	const players = useQuery(playerQuery)
 	const player = createMemo(() => players()?.[0])
 	const showTouch = createMemo(() => usingTouch() && !isMenuOpen() && !isPauseState() && !isMainMenuState())
-	const tutorials = useQuery(tutoQuery)
-	const tuto = createMemo(() => tutorials()?.[0])
 	const data = {
 		player,
 		controls,
@@ -52,7 +48,6 @@ export function GameProvider(props: { children: JSXElement | JSXElement[] }) {
 		usingGamepad,
 		usingTouch,
 		isPauseState,
-		tuto,
 	}
 
 	return (

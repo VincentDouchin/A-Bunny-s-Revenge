@@ -60,7 +60,6 @@
 		"fluent-ffmpeg": "^2.1.2",
 		"glob": "^10.3.10",
 		"jsdom": "^24.0.0",
-		"lint-staged": "^15.2.2",
 		"new-javascript": "^0.4.1",
 		"ts-json-schema-generator": "^1.5.0",
 		"type-fest": "^4.21.0",
@@ -72,8 +71,5 @@
 		"vite-plugin-solid-svg": "^0.8.1",
 		"vite-plugin-wasm": "^3.3.0",
 		"vitest": "^1.5.0"
-	},
-	"lint-staged": {
-		"*": "eslint . --fix"
 	}
 }

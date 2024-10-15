@@ -1,21 +1,30 @@
-import { Show, onCleanup } from 'solid-js'
+import { Show, onCleanup, onMount } from 'solid-js'
 import { css } from 'solid-styled'
 import { Transition } from 'solid-transition-group'
+import atom from 'solid-use/atom'
 import { InputIcon } from './InputIcon'
 import { GoldContainer, OutlineText } from './components/styledComponents'
 import { useGame } from './store'
-import { MovementTutorial } from './tutorials/movement'
 import { FarmingTutorial } from './tutorials/farming'
+import { MovementTutorial } from './tutorials/movement'
 import { cutSceneState } from '@/global/states'
-import { ecs, ui } from '@/global/init'
+import { ui } from '@/global/init'
+import { showTutorialEvent } from '@/global/events'
 
 export enum TutorialWindow {
-	Movement,
-	Farming,
+	Movement = 'movement',
+	Farming = 'farming',
 }
 
 export const TutorialUi = () => {
 	const context = useGame()
+	const showTurorial = atom<null | TutorialWindow>(null)
+	onMount(() => {
+		const unsub = showTutorialEvent.subscribe((e) => {
+			showTurorial(e)
+		})
+		onCleanup(unsub)
+	})
 	css/* css */`
 	.tutorial-container {
 		margin:auto;
@@ -26,13 +35,13 @@ export const TutorialUi = () => {
 	`
 	return (
 		<Transition name="slide">
-			<Show when={context?.tuto()}>
-				{(tutoEntity) => {
+			<Show when={showTurorial()}>
+				{(tutorial) => {
 					return (
 						<Show when={context?.player()}>
 							{(player) => {
 								const close = () => {
-									ecs.remove(tutoEntity())
+									showTurorial(null)
 								}
 
 								ui.updateSync(() => {
@@ -46,10 +55,10 @@ export const TutorialUi = () => {
 								return (
 									<div class="tutorial-container">
 										<GoldContainer>
-											<Show when={tutoEntity().tutorial === TutorialWindow.Movement}>
+											<Show when={tutorial() === TutorialWindow.Movement}>
 												<MovementTutorial context={context} player={player} />
 											</Show>
-											<Show when={tutoEntity().tutorial === TutorialWindow.Farming}>
+											<Show when={tutorial() === TutorialWindow.Farming}>
 												<FarmingTutorial />
 											</Show>
 											<button class="styled" onClick={close}>

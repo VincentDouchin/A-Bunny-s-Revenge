@@ -23,7 +23,6 @@ import type { WeaponArc } from '@/shaders/weaponArc'
 import type { Room } from '@/states/dungeon/generateDungeon'
 import type { Dash } from '@/states/game/dash'
 import type { MainMenuBook } from '@/states/mainMenu/book'
-import type { TutorialWindow } from '@/ui/Tutorial'
 
 export type PlayerAnimations = 'idle' | 'running' | 'lightAttack' | 'slashAttack' | 'heavyAttack' | 'hit' | 'dying' | 'fishing' | 'sleeping' | 'wakeUp'
 export type EnemyAnimations = 'idle' | 'running' | 'attacking' | 'hit' | 'dead'
@@ -204,8 +203,6 @@ export interface Entity {
 	inventorySize?: number
 	menuType?: MenuType
 	inventoryId?: string
-	// ! Tuto
-	tutorial?: TutorialWindow
 	// ! Cooking
 	displayedItem?: Entity
 	// ! Player
@@ -314,7 +311,7 @@ export interface Entity {
 	beanstalk?: true
 	magicHaricot?: Entity
 	// ! Fishing
-	fishingPole?: With<Entity, 'model' >
+	fishingPole?: With<Entity, 'model'>
 	fishingLine?: Mesh<MeshLine, MeshLineMaterial>
 	fishingSpot?: true
 	bobber?: With<Entity, 'position'>
@@ -334,13 +331,13 @@ export type KeysOfType<T, U> = {
 	[K in keyof T]: T[K] extends U ? K : never;
 }[keyof T]
 type UnionToIntersection<U> =
-    (U extends any ? (k: U) => void : never) extends ((k: infer I) => void) ? I : never
+	(U extends any ? (k: U) => void : never) extends ((k: infer I) => void) ? I : never
 
 type LastOf<T> =
-    UnionToIntersection<T extends any ? () => T : never> extends () => infer R ? R : never
+	UnionToIntersection<T extends any ? () => T : never> extends () => infer R ? R : never
 
 type UnionToTuple<T, L = LastOf<T>> =
-    [T] extends [never] ? [] : [...UnionToTuple<Exclude<T, L>>, L]
+	[T] extends [never] ? [] : [...UnionToTuple<Exclude<T, L>>, L]
 export type ComponentsOfType<T> = KeysOfType<Required<Entity>, T>
 export type AllComponentsOfType<T> = UnionToTuple<ComponentsOfType<T>>
 

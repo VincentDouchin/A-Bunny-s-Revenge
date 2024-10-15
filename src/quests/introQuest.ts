@@ -4,7 +4,7 @@ import { addActors, addQuest, completeQuestStep, hasCompletedStep } from './ques
 import type { enemy } from '@/constants/enemies'
 import type { Entity } from '@/global/entity'
 import { Faction, Interactable } from '@/global/entity'
-import { completeQuestStepEvent, cookedMealEvent, harvestCropEvent } from '@/global/events'
+import { completeQuestStepEvent, cookedMealEvent, harvestCropEvent, showTutorialEvent } from '@/global/events'
 import { assets, ecs, inputManager, levelsData, save } from '@/global/init'
 import { cutSceneState, dungeonState, mainMenuState } from '@/global/states'
 import type { State } from '@/lib/state'
@@ -73,7 +73,7 @@ const introQuestDialogs = {
 		yield 'I laid down for a moment to rest and I guess I fell asleep'
 		yield 'I should try to find my way back…'
 		if (inputManager.controls() !== 'touch') {
-			ecs.add({ tutorial: TutorialWindow.Movement })
+			showTutorialEvent.emit(TutorialWindow.Movement)
 		}
 		addQuest('intro_quest')
 		player.state = 'idle'
@@ -391,7 +391,7 @@ const displayFarmingTutorial = () => {
 		for (const player of playerQuery) {
 			for (const crop of plantedQuery) {
 				if (player.position.distanceTo(crop.position)) {
-					ecs.add({ tutorial: TutorialWindow.Farming })
+					showTutorialEvent.emit(TutorialWindow.Farming)
 					save.quests.intro_quest.data['4_get_carrots'].tuto = true
 				}
 			}
