@@ -1,7 +1,7 @@
 import { easeInOut } from 'popmotion'
 import { PerspectiveCamera, Raycaster, Vector2, Vector3 } from 'three'
 import { PLAYER_DEFAULT_HEALTH, playerBundle } from '../game/spawnPlayer'
-import { updateCameraZoom } from '@/global/camera'
+import { moveCamera, updateCameraZoom } from '@/global/camera'
 import { params } from '@/global/context'
 import { RenderGroup } from '@/global/entity'
 import { ecs, inputManager, save, tweens } from '@/global/init'
@@ -31,6 +31,7 @@ export const setMainCameraPosition = () => {
 			const offset = new Vector3(params.cameraOffsetX, params.cameraOffsetY, params.cameraOffsetZ)
 			// reset gamecam
 			gamecam.position.copy(offset)
+			gamecam.position.copy(offset)
 			gamecam.camera.lookAt(new Vector3())
 			gamecam.camera.updateMatrixWorld()
 
@@ -40,6 +41,7 @@ export const setMainCameraPosition = () => {
 
 			gamecam.cameraOffset?.setX(worldPosition.x - screenPos.x)
 			gamecam.cameraOffset?.setZ(worldPosition.z)
+			moveCamera(true)()
 		}
 	}
 }

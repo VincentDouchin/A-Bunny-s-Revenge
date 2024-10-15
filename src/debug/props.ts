@@ -50,7 +50,7 @@ export const getModel = (key: ModelName): Object3D => {
 	}
 	for (const model of ['vegetation', 'gardenPlots', 'fruitTrees', 'models'] as const) {
 		if (key in assets[model]) {
-		// @ts-expect-error okok
+			// @ts-expect-error okok
 			return clone(assets[model][key].scene)
 		}
 	}
@@ -75,7 +75,7 @@ export interface ExtraData {
 
 }
 
-type BundleFn<E extends EntityData<any>> = (entity: With<Entity, 'entityId' | 'model' | 'position' | 'rotation' >, data: NonNullable<E>, ressources: FarmRessources | DungeonRessources | void) => Entity
+type BundleFn<E extends EntityData<any>> = (entity: With<Entity, 'entityId' | 'model' | 'position' | 'rotation'>, data: NonNullable<E>, ressources: FarmRessources | DungeonRessources | void) => Entity
 
 export interface PlacableProp<N extends string> {
 	name: N
@@ -156,7 +156,7 @@ export const props: Props = [
 			if (data.model === 'door') {
 				entity.doorType = 'fog'
 			}
-			if (data.model === 'doorMarker') {
+			if (data.model === 'doorMarker' && debugState.disabled) {
 				entity.doorType = 'marker'
 				entity.model = new Object3D()
 			}
@@ -276,7 +276,8 @@ export const props: Props = [
 						position: new Vector3(),
 					})
 				},
-			} },
+			}
+		},
 	},
 	{
 		name: 'CookingPot',
@@ -341,7 +342,7 @@ export const props: Props = [
 		data: { text: '' },
 		models: ['WoodenSign', 'WoodenSign2'],
 		bundle: (entity, data) => {
-			const dialog = function*() {
+			const dialog = function* () {
 				while (true) {
 					yield data.data.text
 				}

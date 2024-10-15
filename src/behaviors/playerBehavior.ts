@@ -17,7 +17,7 @@ import { stunBundle } from '@/states/dungeon/stun'
 import { getIntersections } from '@/states/game/sensor'
 import { sleep } from '@/utils/sleep'
 
-const ANIMATION_SPEED = 1
+const ANIMATION_SPEED = 1.3
 const playerComponents = ['playerAnimator', 'movementForce', 'speed', 'body', 'rotation', 'playerControls', 'combo', 'attackSpeed', 'dash', 'collider', 'currentHealth', 'model', 'hitTimer', 'size', 'sneeze', 'targetRotation', 'poisoned', 'size', 'position', 'targetMovementForce', 'sleepy', 'modifiers'] as const satisfies readonly (keyof Entity)[]
 type PlayerComponents = (typeof playerComponents)[number]
 const playerQuery = ecs.with(...playerComponents)
@@ -62,7 +62,7 @@ export const playerBehaviorPlugin = behaviorPlugin(
 		return { force, isMoving, direction, touchedByEnemy: attackingEnemy, sneezing, poisoned, canDash }
 	},
 )({
-	idle: {
+	idle: () => ({
 		enter: e => e.playerAnimator.playAnimation('idle'),
 		update: (e, setState, { isMoving, touchedByEnemy, sneezing, canDash, poisoned, direction }) => {
 			if (touchedByEnemy) return setState('hit')
@@ -81,9 +81,9 @@ export const playerBehaviorPlugin = behaviorPlugin(
 				}
 			}
 		},
-	},
-	running: {
-		enter: e => e.playerAnimator.playAnimation('running'),
+	}),
+	running: () => ({
+		enter: e => e.playerAnimator.playAnimation('running', { timeScale: 1.3 }),
 		update: (e, setState, { isMoving, force, touchedByEnemy, sneezing, canDash, poisoned, direction }) => {
 			if (touchedByEnemy) return setState('hit')
 			if (sneezing) return setState('stun')
@@ -103,51 +103,55 @@ export const playerBehaviorPlugin = behaviorPlugin(
 				}
 			}
 		},
-	},
-	attack: {
-		enter: async (e, setupState) => {
-			if (e.combo.lastAttack === 0) {
-				!pausedState.enabled && playSound(['Slash_Attack_Heavy_1', 'Slash_Attack_Heavy_2', 'Slash_Attack_Heavy_3'])
+	}),
+	attack: () => {
+		let justEntered = false
+		return {
+			async enter(e, setupState) {
+				justEntered = true
+				if (e.combo.lastAttack === 0) {
+					!pausedState.enabled && playSound(['Slash_Attack_Heavy_1', 'Slash_Attack_Heavy_2', 'Slash_Attack_Heavy_3'])
 
-				await e.playerAnimator.playOnce('lightAttack', { timeScale: getAttackSpeed(e) }, 0.5)
-			}
-			if (e.combo.lastAttack === 1) {
-				!pausedState.enabled && playSound(['Slash_Attack_Light_1', 'Slash_Attack_Light_2'])
-				await e.playerAnimator.playOnce('slashAttack', { timeScale: getAttackSpeed(e) }, 0.2)
-			}
-			if (e.combo.lastAttack === 2) {
-				!pausedState.enabled && playSound(['Slash_Attack_Heavy_1', 'Slash_Attack_Heavy_2', 'Slash_Attack_Heavy_3'])
-				await e.playerAnimator.playClamped('heavyAttack', { timeScale: getAttackSpeed(e) })
-			}
-			e.combo.lastAttack = 0
-			setupState('idle')
-		},
-		update: (e, setState, { isMoving, force, touchedByEnemy, sneezing, poisoned, direction }) => {
-			if (touchedByEnemy) return setState('hit')
-			if (sneezing) return setState('stun')
-			if (poisoned) return setState('poisoned')
-			if (isMoving) {
-				applyRotate(e, direction)
-				applyMove(e, force.multiplyScalar(0.5))
-			}
-			if (e.playerControls.get('primary').justPressed) {
-				if (e.combo.lastAttack === 0 && e.playerAnimator.current === 'lightAttack') {
-					e.combo.lastAttack = 1
-				} else if (e.combo.lastAttack === 1 && e.playerAnimator.current === 'slashAttack') {
-					e.combo.lastAttack = 2
+					await e.playerAnimator.playOnce('lightAttack', { timeScale: getAttackSpeed(e) }, 0.5)
 				}
-			}
-		},
+				if (e.combo.lastAttack === 1) {
+					!pausedState.enabled && playSound(['Slash_Attack_Light_1', 'Slash_Attack_Light_2'])
+					await e.playerAnimator.playOnce('slashAttack', { timeScale: getAttackSpeed(e) }, 0.2)
+				}
+				if (e.combo.lastAttack === 2) {
+					!pausedState.enabled && playSound(['Slash_Attack_Heavy_1', 'Slash_Attack_Heavy_2', 'Slash_Attack_Heavy_3'])
+					await e.playerAnimator.playClamped('heavyAttack', { timeScale: getAttackSpeed(e) })
+				}
+				e.combo.lastAttack = 0
+				setupState('idle')
+			},
+			update(e, setState, { isMoving, touchedByEnemy, sneezing, poisoned, direction }) {
+				if (touchedByEnemy) return setState('hit')
+				if (sneezing) return setState('stun')
+				if (poisoned) return setState('poisoned')
+				if (isMoving) {
+					applyRotate(e, direction)
+				}
+				if (e.playerControls.get('primary').justPressed && !justEntered) {
+					if (e.combo.lastAttack === 0 && e.playerAnimator.current === 'lightAttack') {
+						e.combo.lastAttack = 1
+					} else if (e.combo.lastAttack === 1 && e.playerAnimator.current === 'slashAttack') {
+						e.combo.lastAttack = 2
+					}
+				}
+				justEntered = false
+			},
+		}
 	},
-	dying: {
+	dying: () => ({
 		enter: async (e, setState) => {
 			await e.playerAnimator.playClamped('dying')
 			setState('dead')
 		},
-	},
-	dead: {},
-	picking: {},
-	dash: {
+	}),
+	dead: () => ({}),
+	picking: () => ({}),
+	dash: () => ({
 		enter: async (e, setState) => {
 			playSound('zapsplat_cartoon_whoosh_swipe_fast_grab_dash_007_74748')
 			e.playerAnimator.playAnimation('running')
@@ -163,8 +167,8 @@ export const playerBehaviorPlugin = behaviorPlugin(
 		exit: (e) => {
 			e.dash.reset()
 		},
-	},
-	hit: {
+	}),
+	hit: () => ({
 		enter: async (e, setState, { touchedByEnemy }) => {
 			if (touchedByEnemy) {
 				takeDamage(e, touchedByEnemy.strength.value)
@@ -181,16 +185,16 @@ export const playerBehaviorPlugin = behaviorPlugin(
 		exit: (e) => {
 			e.hitTimer.reset()
 		},
-	},
-	stun: {
+	}),
+	stun: () => ({
 		enter: async (e, setState) => {
 			ecs.update(e, stunBundle(e.size.y))
 			await sleep(1000)
 			e.sneeze.reset()
 			setState('idle')
 		},
-	},
-	poisoned: {
+	}),
+	poisoned: () => ({
 		enter: (e, setState) => {
 			e.poisoned.enabled = false
 			flash(e, 500, 'poisoned')
@@ -208,8 +212,8 @@ export const playerBehaviorPlugin = behaviorPlugin(
 				e.poisoned.reset()
 			})
 		},
-	},
-	managed: {},
+	}),
+	managed: () => ({}),
 },
 
 )

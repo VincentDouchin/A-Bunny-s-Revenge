@@ -5,7 +5,7 @@ import type { enemy } from '@/constants/enemies'
 import type { Entity } from '@/global/entity'
 import { Faction, Interactable } from '@/global/entity'
 import { completeQuestStepEvent, cookedMealEvent, harvestCropEvent } from '@/global/events'
-import { assets, ecs, levelsData, save } from '@/global/init'
+import { assets, ecs, inputManager, levelsData, save } from '@/global/init'
 import { cutSceneState, dungeonState, mainMenuState } from '@/global/states'
 import type { State } from '@/lib/state'
 import type { Room } from '@/states/dungeon/generateDungeon'
@@ -72,7 +72,9 @@ const introQuestDialogs = {
 		yield '#GOLD#Grandma#GOLD# sent me into the #GREEN#Woods#GREEN# to get some ingredients for the Cooking Festival.'
 		yield 'I laid down for a moment to rest and I guess I fell asleep'
 		yield 'I should try to find my way back…'
-		ecs.add({ tutorial: TutorialWindow.Movement })
+		if (inputManager.controls() !== 'touch') {
+			ecs.add({ tutorial: TutorialWindow.Movement })
+		}
 		addQuest('intro_quest')
 		player.state = 'idle'
 		ecs.reindex(player)

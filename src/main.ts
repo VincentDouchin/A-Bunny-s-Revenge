@@ -82,15 +82,7 @@ gameState
 	.onUpdate(collectItems(false), turnNPCHead, dropBerriesOnHit, updateWeaponArc, sleepyEffects)
 	.onPostUpdate(renderGame, rotateStun, runIf(() => !openMenuState.enabled, interact))
 	.enable()
-mainMenuState
-	.onEnter(intiMainMenuRendering, setupWindow)
-	.onUpdate(renderMainMenu, selectMainMenu, clickOnMenuButton)
-	.addSubscriber(...initMainMenuCamPos)
-	.onExit(
-		removeStateEntity(mainMenuState),
-		runIf(() => introState.enabled, () => resetSave(), startIntro),
-		runIf(() => campState.enabled, spawnPlayerContinueGame),
-	)
+
 openMenuState
 	.onEnter(stopPlayer)
 	.addSubscriber(disableInventoryState)
@@ -105,6 +97,15 @@ campState
 	.onUpdate(collideWithDoorCamp, waterCrops, growCrops)
 	.onUpdate(runIf(canPlayerMove, plantSeed, harvestCrop, openPlayerInventory))
 	.onExit(despawnOfType('map'))
+mainMenuState
+	.onEnter(intiMainMenuRendering, setupWindow)
+	.onUpdate(renderMainMenu, selectMainMenu, clickOnMenuButton)
+	.addSubscriber(...initMainMenuCamPos)
+	.onExit(
+		removeStateEntity(mainMenuState),
+		runIf(() => introState.enabled, () => resetSave(), startIntro),
+		runIf(() => campState.enabled, spawnPlayerContinueGame),
+	)
 introState
 	.onEnter(spawnLevel('intro'), spawnLevelData)
 	.addPlugins(spawnIntroPlayer)

@@ -16,9 +16,11 @@ export type StateFn<C extends keyof Entity, B extends keyof States, F extends St
 type StateEntity<C extends keyof Entity> = With<With<Entity, C>, 'behaviorController' | 'state'>
 
 export interface EntityState<C extends keyof Entity, B extends keyof States, F extends StateParameters<C>> {
-	enter?: StateFn<C, B, F>
-	update?: StateFn<C, B, F>
-	exit?: StateFn<C, B, F>
+	(): {
+		enter?: StateFn<C, B, F>
+		update?: StateFn<C, B, F>
+		exit?: StateFn<C, B, F>
+	}
 }
 
 export const behaviorPlugin = <C extends keyof Entity, B extends keyof States, F extends StateParameters<C>>(
@@ -35,25 +37,25 @@ export const behaviorPlugin = <C extends keyof Entity, B extends keyof States, F
 				}
 			}
 			const stateQuery = query.where(e => e.state === entityState)
-			const { enter, update, exit } = stateManager
-			if (enter && !pausedState.enabled) {
-				state.addSubscriber(() => stateQuery.onEntityAdded.subscribe((e) => {
+			const { enter, update, exit } = stateManager()
+			state.addSubscriber(() => stateQuery.onEntityAdded.subscribe((e) => {
+				if (enter && !pausedState.enabled) {
 					enter(e, setState(e, entityState), fn(e))
-				}))
-			}
-			if (update && !pausedState.enabled) {
-				state.onPostUpdate(() => {
+				}
+			}))
+			state.onPostUpdate(() => {
+				if (update && !pausedState.enabled) {
 					for (const entity of stateQuery) {
 						update(entity, setState(entity, entityState), fn(entity))
 					}
-				})
-			}
-			if (exit && !pausedState.enabled) {
-				state.addSubscriber(() => stateQuery.onEntityRemoved.subscribe(async (e) => {
+				}
+			})
+			state.addSubscriber(() => stateQuery.onEntityRemoved.subscribe(async (e) => {
+				if (exit && !pausedState.enabled) {
 					await sleep(1)
 					exit(e, setState(e, entityState), fn(e))
-				}))
-			}
+				}
+			}))
 		}
 	}
 }

@@ -29,7 +29,7 @@ export const beeBossBehaviorPlugin = behaviorPlugin(
 		return { ...getMovementForce(e), player, direction, touchedByPlayer }
 	},
 )({
-	idle: {
+	idle: () => ({
 		enter: (e) => {
 			e.enemyAnimator.playAnimation('idle')
 		},
@@ -44,8 +44,8 @@ export const beeBossBehaviorPlugin = behaviorPlugin(
 				}
 			}
 		},
-	},
-	running: {
+	}),
+	running: () => ({
 		enter: (e) => {
 			e.enemyAnimator.playAnimation('running')
 		},
@@ -64,8 +64,8 @@ export const beeBossBehaviorPlugin = behaviorPlugin(
 				}
 			}
 		},
-	},
-	attack: {
+	}),
+	attack: () => ({
 		enter: async (e, setState) => {
 			await e.enemyAnimator.playClamped('attacking')
 			return setState('attackCooldown')
@@ -73,8 +73,8 @@ export const beeBossBehaviorPlugin = behaviorPlugin(
 		update: (_e, setState, { touchedByPlayer }) => {
 			if (touchedByPlayer) return setState('hit')
 		},
-	},
-	rangeAttack: {
+	}),
+	rangeAttack: () => ({
 		enter: async (e, setState) => {
 			flash(e, 1000, 'preparing')
 			await sleep(1000)
@@ -91,8 +91,8 @@ export const beeBossBehaviorPlugin = behaviorPlugin(
 			}
 			applyRotate(e, force)
 		},
-	},
-	waitingAttack: {
+	}),
+	waitingAttack: () => ({
 		enter: async (e, setState) => {
 			e.enemyAnimator.playAnimation('idle')
 			flash(e, 200, 'preparing')
@@ -102,8 +102,8 @@ export const beeBossBehaviorPlugin = behaviorPlugin(
 		update: (_e, setState, { touchedByPlayer }) => {
 			if (touchedByPlayer) return setState('hit')
 		},
-	},
-	attackCooldown: {
+	}),
+	attackCooldown: () => ({
 		enter: async (e, setState) => {
 			e.enemyAnimator.playAnimation('running')
 			await sleep(1000)
@@ -118,8 +118,8 @@ export const beeBossBehaviorPlugin = behaviorPlugin(
 			applyRotate(e, force)
 			applyMove(e, force.multiplyScalar(0.5))
 		},
-	},
-	hit: {
+	}),
+	hit: () => ({
 		enter: async (e, setState, { player }) => {
 			playSound(['Hit_Metal_on_flesh', 'Hit_Metal_on_leather', 'Hit_Wood_on_flesh', 'Hit_Wood_on_leather'])
 			if (player) {
@@ -146,12 +146,12 @@ export const beeBossBehaviorPlugin = behaviorPlugin(
 		exit: (e) => {
 			e.hitTimer.reset()
 		},
-	},
-	dying: {
+	}),
+	dying: () => ({
 		enter: async (e, setState) => {
 			await e.enemyAnimator.playClamped('dead')
 			return setState('dead')
 		},
-	},
-	dead: {},
+	}),
+	dead: () => ({}),
 })

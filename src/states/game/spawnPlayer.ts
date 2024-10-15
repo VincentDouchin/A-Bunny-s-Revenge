@@ -49,6 +49,7 @@ export const playerBundle = (health: number, weapon: weapons | null) => {
 	})
 	model.scale.multiplyScalar(4.5)
 	const bundle = capsuleColliderBundle(model, Sizes.character)
+	bundle.bodyDesc.setAdditionalMass(1)
 	bundle.bodyDesc.setLinearDamping(20)
 	const debuffsContainer = new CSS2DObject(document.createElement('div'))
 	debuffsContainer.position.setY(15)

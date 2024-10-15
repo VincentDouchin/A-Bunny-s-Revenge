@@ -23,7 +23,7 @@ const fishParameters = (e: With<Entity, (typeof fishComponents)[number]>) => {
 }
 
 export const fishBehaviorPlugin = behaviorPlugin(fishQuery, 'fish', fishParameters)({
-	going: {
+	going: () => ({
 		enter(e, _setState, { bobberPosition }) {
 			if (bobberPosition) {
 				e.group.lookAt(bobberPosition.clone().setY(e.position.y))
@@ -37,8 +37,8 @@ export const fishBehaviorPlugin = behaviorPlugin(fishQuery, 'fish', fishParamete
 				setState('hooked')
 			}
 		},
-	},
-	hooked: {
+	}),
+	hooked: () => ({
 		enter(e, setState) {
 			if (!e.fishingProgress) {
 				ecs.update(e, { fishingProgress: { attempts: 0, sucess: 0, done: false } })
@@ -57,11 +57,11 @@ export const fishBehaviorPlugin = behaviorPlugin(fishQuery, 'fish', fishParamete
 			})
 		},
 		update(_e, setState, { bobber }) {
-			if (!bobber)setState('wander')
+			if (!bobber) setState('wander')
 		},
 
-	},
-	wander: {
+	}),
+	wander: () => ({
 		update(e, setState, { distance }) {
 			e.position.add(new Vector3(0, 0, 2).multiplyScalar(time.delta / 1000).applyQuaternion(e.rotation))
 			e.fish.tick(time.delta)
@@ -73,8 +73,8 @@ export const fishBehaviorPlugin = behaviorPlugin(fishQuery, 'fish', fishParamete
 				setState('going')
 			}
 		},
-	},
-	bounce: {
+	}),
+	bounce: () => ({
 		async enter(e, setState, { bobber, bobberPosition }) {
 			if (e.fishingProgress) {
 				e.fishingProgress.attempts += 1
@@ -121,8 +121,8 @@ export const fishBehaviorPlugin = behaviorPlugin(fishQuery, 'fish', fishParamete
 			}
 		},
 
-	},
-	runaway: {
+	}),
+	runaway: () => ({
 		enter(e) {
 			e.targetRotation.setFromAxisAngle(new Vector3(0, 1, 0), Math.PI * 2 * Math.random())
 			if (e.model instanceof Mesh && e.model.material) {
@@ -139,5 +139,5 @@ export const fishBehaviorPlugin = behaviorPlugin(fishQuery, 'fish', fishParamete
 		update(e) {
 			e.position.add(new Vector3(0, 0, 6).multiplyScalar(time.delta / 1000).applyQuaternion(e.rotation))
 		},
-	},
+	}),
 })
