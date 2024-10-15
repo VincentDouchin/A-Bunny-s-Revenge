@@ -190,15 +190,17 @@ export class Input {
 			if (this.#manager.keys[key])
 				this.pressed = 1
 		}
-		for (const bubtton of this.mouse) {
-			if (this.#manager.mouse[bubtton]) {
-				this.pressed = 1
+		if (this.#manager.controls() !== 'touch') {
+			for (const bubtton of this.mouse) {
+				if (this.#manager.mouse[bubtton]) {
+					this.pressed = 1
+				}
 			}
-		}
-		for (const [axis, direction] of this.mouseWheel) {
-			const amount = this.#manager.mouseWheel[axis]
-			if (amount !== 0 && Math.sign(amount) === direction) {
-				this.pressed = 1
+			for (const [axis, direction] of this.mouseWheel) {
+				const amount = this.#manager.mouseWheel[axis]
+				if (amount !== 0 && Math.sign(amount) === direction) {
+					this.pressed = 1
+				}
 			}
 		}
 		for (const gamepad of gamepads) {
