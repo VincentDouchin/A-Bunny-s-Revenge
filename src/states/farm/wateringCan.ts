@@ -39,8 +39,11 @@ const waterParticles = (rotation: Quaternion) => {
 }
 
 export const wateringCanBundle = () => {
+	const model = assets.models.WateringCan.scene.clone()
+	model.scale.setScalar(0.3)
+	model.rotateY(-Math.PI / 2)
 	return ecs.add({
-		model: assets.models.WateringCan.scene.clone(),
+		model,
 		waterAmount: 0,
 	})
 }

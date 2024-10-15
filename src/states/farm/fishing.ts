@@ -18,7 +18,9 @@ import { range } from '@/utils/mapFunctions'
 
 const fishingPoleBundle = () => {
 	const poleModel = assets.models.fishing_pole.scene.clone()
-	poleModel.scale.setScalar(10)
+	poleModel.scale.setScalar(3)
+	poleModel.rotateY(-Math.PI / 2)
+	poleModel.rotateX(Math.PI / 3)
 	const line = new MeshLine()
 	line.setGeometry(new BufferGeometry().setFromPoints([new Vector3(), new Vector3()]))
 	const mat = new MeshLineMaterial({ color: 0xFFFFFF, lineWidth: 0.3 })
