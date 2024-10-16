@@ -36,6 +36,6 @@ export const menuInputMap = () => {
 	map.get('tab').setKeys('ControlLeft')
 	map.get('tabLeft').setButtons(GAMEPAD_BUTTON.L)
 	map.get('tabRight').setButtons(GAMEPAD_BUTTON.R)
-	map.get('click').setMouse(MOUSE_BUTTONS.LEFT)
+	map.get('click').setMouse(MOUSE_BUTTONS.LEFT).setTouch()
 	return { menuInputs: map } as const satisfies Entity
 }

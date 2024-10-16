@@ -53,6 +53,7 @@ export class InputManager {
 
 	layoutMap: KeyboardLayoutMap | null = null
 	mouseMoving = atom(false)
+	touch = false
 	mouseWorldPosition = new Vector3()
 	mouseWheel = new Vector3()
 	mousePosition = new Vector2()
@@ -77,13 +78,13 @@ export class InputManager {
 		})
 		window.addEventListener('touchstart', () => {
 			this.controls('touch')
-			this.mouse[0] = true
+			this.touch = true
 		})
 		window.addEventListener('touchend', () => {
-			this.mouse[0] = false
+			this.touch = false
 		})
 		window.addEventListener('touchcancel', () => {
-			this.mouse[0] = false
+			this.touch = false
 		})
 		window.addEventListener('mousedown', (e) => {
 			this.mouse[e.button] = true
@@ -147,6 +148,7 @@ export class Input {
 	mouse: number[] = []
 	mouseWheel: [MOUSE_WHEEL, 1 | -1][] = []
 	#manager: InputManager
+	#touch = false
 
 	constructor(manager: InputManager) {
 		this.#manager = manager
@@ -157,6 +159,11 @@ export class Input {
 		for (const key of keys) {
 			this.#manager.keys[key] = 0
 		}
+		return this
+	}
+
+	setTouch() {
+		this.#touch = true
 		return this
 	}
 
@@ -190,17 +197,19 @@ export class Input {
 			if (this.#manager.keys[key])
 				this.pressed = 1
 		}
-		if (this.#manager.controls() !== 'touch') {
-			for (const bubtton of this.mouse) {
-				if (this.#manager.mouse[bubtton]) {
-					this.pressed = 1
-				}
+
+		for (const bubtton of this.mouse) {
+			if (this.#manager.mouse[bubtton]) {
+				this.pressed = 1
 			}
-			for (const [axis, direction] of this.mouseWheel) {
-				const amount = this.#manager.mouseWheel[axis]
-				if (amount !== 0 && Math.sign(amount) === direction) {
-					this.pressed = 1
-				}
+		}
+		if (this.#touch && this.#manager.touch) {
+			this.pressed = 1
+		}
+		for (const [axis, direction] of this.mouseWheel) {
+			const amount = this.#manager.mouseWheel[axis]
+			if (amount !== 0 && Math.sign(amount) === direction) {
+				this.pressed = 1
 			}
 		}
 		for (const gamepad of gamepads) {
