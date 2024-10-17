@@ -444,7 +444,7 @@ export const props: Props = [
 			}
 			return {
 				...entity,
-				vineGate: true,
+				doorType: 'vine',
 				door: data?.direction ?? Direction.N,
 			}
 		},

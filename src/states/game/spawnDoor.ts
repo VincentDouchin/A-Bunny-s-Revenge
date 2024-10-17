@@ -78,10 +78,11 @@ export const collideWithDoorDungeon = onCollideWithDoor<typeof dungeonState>((do
 		const nextRoom = dungeon.doors[door.door]
 		if (nextRoom) {
 			dungeonState.enable({ dungeon: nextRoom, direction: otherDirection[door.door], playerHealth: player.currentHealth, firstEntry: false, dungeonLevel, weapon })
+			return
 		}
-	} else {
-		campState.enable({ door: door.door })
 	}
+
+	campState.enable({ door: 'clearing' })
 })
 
 export const collideWithDoorCamp = onCollideWithDoor(({ door }) => {

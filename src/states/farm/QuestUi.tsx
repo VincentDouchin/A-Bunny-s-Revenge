@@ -57,6 +57,7 @@ export const QuestUi = () => {
 							}
 							.quest-description{
 								font-size: 1.5rem;
+								margin:auto 0;
 							}
 							.step-container{
 								display: grid;

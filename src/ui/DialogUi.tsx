@@ -21,9 +21,9 @@ const colorMap: Record<string, string> = {
 }
 
 function splitLetters(sentence: string) {
+	let color: string | null = null
 	const words = sentence.split(' ').map((word) => {
 		const letters: Letter[] = []
-		let color: string | null = null
 		const lettersToParse = word.split('')
 		for (let i = 0; i < lettersToParse.length; i++) {
 			const letter = lettersToParse[i]
@@ -180,14 +180,6 @@ export const DialogUi = () => {
 					}
 				})
 				let cancelCurrentDialog: (() => void) | null = null
-				createEffect(() => {
-					const dialog = currentDialog()
-					if (entity.voice && dialog) {
-						const { cancel, play } = soundDialog(entity.voice, dialog)
-						play()
-						cancelCurrentDialog = cancel
-					}
-				})
 
 				ui.updateSync(async () => {
 					if (context.player().playerControls.get('primary').justReleased) {
@@ -201,7 +193,15 @@ export const DialogUi = () => {
 					<Show when={talking()}>
 						{(talking) => {
 							const text = createMemo(() => currentDialog())
-
+							createEffect(() => {
+								const dialog = currentDialog()
+								const voice = talking().voice
+								if (voice && dialog) {
+									const { cancel, play } = soundDialog(voice, dialog)
+									play()
+									cancelCurrentDialog = cancel
+								}
+							})
 							return (
 								<Portal mount={talking().dialogContainer.element}>
 									<Show when={text()}>

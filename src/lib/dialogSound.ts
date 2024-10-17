@@ -3,8 +3,7 @@ import { playVoice } from '@/global/sounds'
 
 export const soundDialog = (voice: voices, dialog: string = '') => {
 	let isCanceled = false
-	const filteredDialog = dialog.replace(/[^a-z\s]/gi, '').toLocaleLowerCase()
-
+	const filteredDialog = dialog.replace(/[^a-z\s]/gi, '').toLocaleLowerCase().replace(/[^aeiou\W\d]/gi, '')
 	return {
 		cancel: () => {
 			isCanceled = true
