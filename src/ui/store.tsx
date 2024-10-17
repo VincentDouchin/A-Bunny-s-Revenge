@@ -1,10 +1,10 @@
+import type { ControlType } from '@/lib/inputs'
 import type { Query } from 'miniplex'
 import type { Accessor, JSXElement } from 'solid-js'
-import { createContext, createMemo, createSignal, useContext } from 'solid-js'
 import { inputManager, ui } from '@/global/init'
 import { mainMenuState, openMenuState, pausedState } from '@/global/states'
-import type { ControlType } from '@/lib/inputs'
 import { playerInventoryQuery } from '@/utils/dialogHelpers'
+import { createContext, createMemo, createSignal, useContext } from 'solid-js'
 
 const GameContext = createContext<{
 	controls: Accessor<ControlType>

@@ -1,10 +1,9 @@
-import type { characters, items } from '@assets/assets'
-import type { Item } from './items'
-import { Rarity } from './items'
-
 import type { EnemyAnimations, Entity, States } from '@/global/entity'
+import type { items } from '@assets/assets'
+import type { Item } from './items'
 import { EnemyAttackStyle } from '@/global/entity'
 import { between } from '@/utils/mapFunctions'
+import { Rarity } from './items'
 
 export interface Drop extends Item {
 	rarity: Rarity
@@ -22,9 +21,7 @@ export interface Enemy<Name extends keyof Animations> {
 	animationMap: Record<EnemyAnimations, Animations[Name]>
 	components?: () => Entity
 }
-const enemyNames = ['Armabee', 'Armabee_Evolved', 'Shaga_A', 'Big_Boar_A', 'Snailo_A', 'Snailo_B', 'Porin_A', 'Forest_Butterfly_A', 'Racco_A', 'Platopo_A', 'Batty_A', 'Big_Boar_C', 'Magicbook_A', 'Devilu_A', 'Big_Boar_B', 'soot_sprite'] as const satisfies readonly characters[]
-
-export type enemy = (typeof enemyNames)[number]
+export type enemy = 'Armabee' | 'Armabee_Evolved' | 'Shaga_A' | 'Big_Boar_A' | 'Snailo_A' | 'Snailo_B' | 'Porin_A' | 'Forest_Butterfly_A' | 'Racco_A' | 'Platopo_A' | 'Batty_A' | 'Big_Boar_C' | 'Magicbook_A' | 'Devilu_A' | 'Big_Boar_B' | 'soot_sprite'
 
 const genericEnemyAnimationMap: Record<EnemyAnimations, Animations['Big_Boar_A']> = {
 	idle: 'Idle',

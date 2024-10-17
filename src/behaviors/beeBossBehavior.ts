@@ -1,6 +1,3 @@
-import { Vector3 } from 'three'
-import { applyMove, applyRotate, getMovementForce, takeDamage } from './behaviorHelpers'
-import { playerQuery } from './enemyBehavior'
 import { EnemyAttackStyle } from '@/global/entity'
 import { ecs, tweens } from '@/global/init'
 import { playSound } from '@/global/sounds'
@@ -11,6 +8,9 @@ import { calculateDamage, flash } from '@/states/dungeon/battle'
 import { getIntersections } from '@/states/game/sensor'
 import { getRandom } from '@/utils/mapFunctions'
 import { sleep } from '@/utils/sleep'
+import { Vector3 } from 'three'
+import { applyMove, applyRotate, getMovementForce, takeDamage } from './behaviorHelpers'
+import { playerQuery } from './enemyBehavior'
 
 const pollenQuery = ecs.with('pollen')
 const rangedAttacks = () => pollenQuery.size > 5

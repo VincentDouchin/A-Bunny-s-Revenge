@@ -1,10 +1,10 @@
-import { QueryFilterFlags } from '@dimforge/rapier3d-compat'
-import type { With } from 'miniplex'
-import { Vector3 } from 'three'
-import { params } from '@/global/context'
 import type { Entity } from '@/global/entity'
+import type { With } from 'miniplex'
+import { params } from '@/global/context'
 import { ecs, inputManager, settings, time } from '@/global/init'
 import { openMenuState, pausedState } from '@/global/states'
+import { QueryFilterFlags } from '@dimforge/rapier3d-compat'
+import { Vector3 } from 'three'
 
 export const getMovementForce = ({ movementForce, speed, targetMovementForce }: With<Entity, 'movementForce' | 'speed' >) => {
 	const targetForce = movementForce.clone().multiplyScalar(speed.value * params.speedUp * time.delta / 1000)

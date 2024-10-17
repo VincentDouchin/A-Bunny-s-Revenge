@@ -1,6 +1,6 @@
+import type { Entity } from '@/global/entity'
 import { CircleGeometry, MeshBasicMaterial, Vector3, Vector4 } from 'three'
 import { Bezier, ColorRange, ConstantValue, IntervalValue, ParticleSystem, PiecewiseBezier, PointEmitter, RenderMode, SizeOverLife } from 'three.quarks'
-import type { Entity } from '@/global/entity'
 
 const geo = new CircleGeometry(1, 8)
 

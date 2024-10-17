@@ -1,8 +1,8 @@
-import type { ambiance, music } from '@assets/assets'
-import soundsData from '@assets/soundsData.json'
-import { assets, settings } from '@/global/init'
 import type { soundAssets } from '@/global/sounds'
+import type { ambiance, music } from '@assets/assets'
+import { assets, settings } from '@/global/init'
 import { useLocalStorage } from '@/utils/useLocalStorage'
+import soundsData from '@assets/soundsData.json'
 
 type sounds = Record<soundAssets, Record<string, { volume: number }>>
 const [localSoundData] = useLocalStorage<sounds>('soundsData', soundsData)

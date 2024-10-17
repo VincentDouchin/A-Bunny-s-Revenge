@@ -1,16 +1,16 @@
+import { settings, ui } from '@/global/init'
+import { renderer } from '@/global/rendering'
+import { setAllMuted } from '@/global/sounds'
+import { isStandalone } from '@/states/game/FullscreenUi'
 import VolumeOn from '@assets/icons/volume-high-solid.svg'
 import VolumeOff from '@assets/icons/volume-xmark-solid.svg'
-import { For, Show, createEffect, createMemo } from 'solid-js'
+import { createEffect, createMemo, For, Show } from 'solid-js'
 import { css } from 'solid-styled'
 import atom from 'solid-use/atom'
 import { type MenuDir, menuItem } from './components/Menu'
 import { CheckBox, OutlineText, SwitchButtons } from './components/styledComponents'
 import { useGame } from './store'
-import { isStandalone } from '@/states/game/FullscreenUi'
-import { setAllMuted } from '@/global/sounds'
-import { renderer } from '@/global/rendering'
-import { settings, ui } from '@/global/init'
-// eslint-disable-next-line no-unused-expressions
+
 menuItem
 
 export const Settings = (props: { menu: MenuDir }) => {

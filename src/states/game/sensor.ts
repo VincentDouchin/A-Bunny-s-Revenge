@@ -1,8 +1,8 @@
-import type { With } from 'miniplex'
-import { Vector3 } from 'three'
-import type { Collider } from '@dimforge/rapier3d-compat'
 import type { Entity } from '@/global/entity'
+import type { Collider } from '@dimforge/rapier3d-compat'
+import type { With } from 'miniplex'
 import { world } from '@/global/init'
+import { Vector3 } from 'three'
 
 export const getIntersections = (e: With<Entity, 'position' | 'rotation' | 'sensor'>, group?: number, callback?: (collider: Collider) => boolean) => {
 	const position = new Vector3(0, 0, e.sensor.distance).applyQuaternion(e.rotation).add(e.position)

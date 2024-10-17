@@ -1,17 +1,17 @@
-import { For, Show, createMemo, onCleanup, onMount } from 'solid-js'
-import { Portal } from 'solid-js/web'
-import { css } from 'solid-styled'
-import atom from 'solid-use/atom'
-import { Vector3 } from 'three'
+import type { Entity } from '@/global/entity'
 import { updateCameraZoom } from '@/global/camera'
 import { params } from '@/global/context'
-import type { Entity } from '@/global/entity'
 import { MenuType } from '@/global/entity'
 import { ecs, time, tweens, ui } from '@/global/init'
 import { cameraQuery } from '@/global/rendering'
 import { addTag } from '@/lib/hierarchy'
 import { getWorldPosition } from '@/lib/transforms'
 import { useGame, useQuery } from '@/ui/store'
+import { createMemo, For, onCleanup, onMount, Show } from 'solid-js'
+import { Portal } from 'solid-js/web'
+import { css } from 'solid-styled'
+import atom from 'solid-use/atom'
+import { Vector3 } from 'three'
 
 const boardQuery = useQuery(ecs.with('menuType', 'recipesQueued', 'position', 'rotation', 'group', 'minigameContainer').where(({ menuType }) => menuType === MenuType.BenchGame))
 

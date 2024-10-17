@@ -1,8 +1,8 @@
+import type { PathInfo } from './assetPipeline'
 import { createWriteStream } from 'node:fs'
 import { rename } from 'node:fs/promises'
 import { path as ffmpegPath } from '@ffmpeg-installer/ffmpeg'
 import ffmpeg from 'fluent-ffmpeg'
-import type { PathInfo } from './assetPipeline'
 import { AssetTransformer } from './assetPipeline'
 
 export class ConverAudioFiles extends AssetTransformer {

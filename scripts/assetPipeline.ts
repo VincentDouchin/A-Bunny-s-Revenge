@@ -1,9 +1,9 @@
 import type { Stats } from 'node:fs'
+import type { PluginOption } from 'vite'
 import { stat, writeFile } from 'node:fs/promises'
 import path from 'node:path'
 import process from 'node:process'
 import { glob } from 'glob'
-import type { PluginOption } from 'vite'
 
 export abstract class AssetTransformer {
 	content = ''

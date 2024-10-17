@@ -1,7 +1,7 @@
+import type { PathInfo } from './assetPipeline'
 import { NodeIO } from '@gltf-transform/core'
 import { ALL_EXTENSIONS } from '@gltf-transform/extensions'
 import draco3d from 'draco3dgltf'
-import type { PathInfo } from './assetPipeline'
 import { AssetTransformer } from './assetPipeline'
 
 export class ExtractAnimations extends AssetTransformer {

@@ -1,13 +1,13 @@
+import type { SaveData } from '@/global/save'
 import type { JSONEditorOptions } from 'jsoneditor'
-import JSONEditor from 'jsoneditor'
-import { Show, createSignal, onCleanup, onMount } from 'solid-js'
-import { unwrap } from 'solid-js/store'
-import { debugState } from './debugState'
 import saveDataSchema from '@/debug/saveDataSchema.json'
 import { resetSave, save } from '@/global/init'
-import type { SaveData } from '@/global/save'
 import { campState } from '@/global/states'
 import { sleep } from '@/utils/sleep'
+import JSONEditor from 'jsoneditor'
+import { createSignal, onCleanup, onMount, Show } from 'solid-js'
+import { unwrap } from 'solid-js/store'
+import { debugState } from './debugState'
 
 const theme = `<link href="https://cdnjs.cloudflare.com/ajax/libs/jsoneditor/10.0.0/jsoneditor.min.css" rel="stylesheet" type="text/css">`
 export const SaveEditor = () => {

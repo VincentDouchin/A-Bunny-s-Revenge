@@ -1,13 +1,11 @@
-import { Color, MeshPhongMaterial, Vector2, Vector3 } from 'three'
-
+import { addUniform, addVarying, extendMaterial, importLib, insertAfter, insertBefore, MaterialExtension, override, remove, replace, replaceInclude, unpack } from '@/lib/materialExtension'
 import noise from '@/shaders/glsl/lib/cnoise.glsl?raw'
-
-import { MaterialExtension, addUniform, addVarying, extendMaterial, importLib, insertAfter, insertBefore, override, remove, replace, replaceInclude, unpack } from '@/lib/materialExtension'
 import { gradient } from '@/shaders/glsl/lib/generateGradient'
 import water from '@/shaders/glsl/water.glsl?raw'
 import { useLocalStorage } from '@/utils/useLocalStorage'
+import { Color, MeshPhongMaterial, Vector2, Vector3 } from 'three'
 
-const toonExtension = new MaterialExtension({ }).frag(
+const toonExtension = new MaterialExtension({}).frag(
 	override('vec4 diffuseColor ', 'vec4(1.,1.,1.,opacity)'),
 	importLib(gradient),
 	replaceInclude('map_fragment', ''),
@@ -41,7 +39,8 @@ const vineGateMaterial = new MaterialExtension({ time: 0 })
 	float op = (worldPos.y+ 40. * time )/30.;
 	color.a = min(color.a, (1. - op) );
 `),
-	).vert(
+	)
+	.vert(
 		addVarying('worldPos', 'vec4'),
 		insertAfter('#include <worldpos_vertex>', /* glsl */`
 	worldPos = vec4( transformed, 1.0 );

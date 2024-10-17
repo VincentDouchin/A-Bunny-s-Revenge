@@ -1,14 +1,14 @@
-import { Show, onMount } from 'solid-js'
+import { settings, ui } from '@/global/init'
+import { campState, dungeonState } from '@/global/states'
+import { onMount, Show } from 'solid-js'
 import { css } from 'solid-styled'
 import { Transition } from 'solid-transition-group'
 import atom from 'solid-use/atom'
-import { InputIcon } from './InputIcon'
-import { getInteractables } from './Interactions'
 import { StateUi } from './components/StateUi'
 import { OutlineText } from './components/styledComponents'
+import { InputIcon } from './InputIcon'
+import { getInteractables } from './Interactions'
 import { useGame } from './store'
-import { campState, dungeonState } from '@/global/states'
-import { settings, ui } from '@/global/init'
 
 export const KeyboardControls = () => {
 	const context = useGame()

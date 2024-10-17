@@ -1,10 +1,10 @@
-import { Material, Mesh } from 'three'
+import type { ToonMaterial } from '@/shaders/materials'
 import { type Entity, Faction } from '@/global/entity'
 import { ecs, tweens } from '@/global/init'
+import { openMenuState } from '@/global/states'
 import { Stat } from '@/lib/stats'
 import { enemyDefeated } from '@/particles/enemyDefeated'
-import type { ToonMaterial } from '@/shaders/materials'
-import { openMenuState } from '@/global/states'
+import { Material, Mesh } from 'three'
 
 export const healthBundle = (health: number, current?: number) => ({
 	currentHealth: current ?? health,

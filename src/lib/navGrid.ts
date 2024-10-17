@@ -1,9 +1,9 @@
+import { ecs, world } from '@/global/init'
+import { scene } from '@/global/rendering'
 import { Cuboid } from '@dimforge/rapier3d-compat'
 import { AStarFinder } from 'astar-typescript'
 import { Color, InstancedMesh, Matrix4, MeshBasicMaterial, Quaternion, SphereGeometry, type Vec2, Vector2, Vector3 } from 'three'
 import { Direction } from './directions'
-import { scene } from '@/global/rendering'
-import { ecs, world } from '@/global/init'
 
 const RESOLUTION = 5
 export enum NavCell {
@@ -147,7 +147,7 @@ export class NavGrid {
 				return this.gridToWorld({ x: next[0], y: next[1] })
 			}
 		} catch (e) {
-
+			console.error(e)
 		}
 	}
 }

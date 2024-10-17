@@ -1,13 +1,13 @@
-import { RigidBodyDesc } from '@dimforge/rapier3d-compat'
-import { between } from 'randomish'
-import type { Object3D, Object3DEventMap } from 'three'
-import { Vector3 } from 'three'
 import type { Entity } from '@/global/entity'
+import type { Object3D, Object3DEventMap } from 'three'
 import { assets, ecs } from '@/global/init'
 import { playSound } from '@/global/sounds'
 import { inMap } from '@/lib/hierarchy'
 import { getSize } from '@/lib/models'
 import { sleep } from '@/utils/sleep'
+import { RigidBodyDesc } from '@dimforge/rapier3d-compat'
+import { between } from 'randomish'
+import { Vector3 } from 'three'
 
 export const spawnBouncyItems = (entity: Entity, itemModel: Object3D<Object3DEventMap>) => async (amount: number, position: Vector3) => {
 	const size = getSize(itemModel)

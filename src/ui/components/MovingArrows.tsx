@@ -1,5 +1,5 @@
-import CaretRight from '@assets/icons/caret-right-solid.svg'
 import type { Accessor } from 'solid-js'
+import CaretRight from '@assets/icons/caret-right-solid.svg'
 import { Portal } from 'solid-js/web'
 import { css } from 'solid-styled'
 

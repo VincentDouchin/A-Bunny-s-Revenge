@@ -1,6 +1,3 @@
-import { easeInOut } from 'popmotion'
-import { PerspectiveCamera, Raycaster, Vector2, Vector3 } from 'three'
-import { PLAYER_DEFAULT_HEALTH, playerBundle } from '../game/spawnPlayer'
 import { moveCamera, updateCameraZoom } from '@/global/camera'
 import { params } from '@/global/context'
 import { RenderGroup } from '@/global/entity'
@@ -9,6 +6,9 @@ import { getTargetSize, updateRenderSize } from '@/global/rendering'
 import { campState, cutSceneState, introState, mainMenuState } from '@/global/states'
 import { doorQuery, leaveHouse, setSensor } from '@/utils/dialogHelpers'
 import { once } from '@/utils/mapFunctions'
+import { easeInOut } from 'popmotion'
+import { PerspectiveCamera, Raycaster, Vector2, Vector3 } from 'three'
+import { PLAYER_DEFAULT_HEALTH, playerBundle } from '../game/spawnPlayer'
 
 export type MenuOptions = 'Continue' | 'New Game' | 'Settings' | 'Credits'
 

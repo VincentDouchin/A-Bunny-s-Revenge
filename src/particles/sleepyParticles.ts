@@ -1,6 +1,6 @@
+import { assets } from '@/global/init'
 import { MeshBasicMaterial, PlaneGeometry } from 'three'
 import { Bezier, ConeEmitter, ConstantValue, IntervalValue, ParticleSystem, PiecewiseBezier, RandomQuatGenerator, RenderMode, SizeOverLife } from 'three.quarks'
-import { assets } from '@/global/init'
 
 export const sleepyEmitter = () => {
 	const system = new ParticleSystem({

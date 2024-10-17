@@ -1,15 +1,15 @@
-import { Show, onCleanup, onMount } from 'solid-js'
+import { showTutorialEvent } from '@/global/events'
+import { ui } from '@/global/init'
+import { cutSceneState } from '@/global/states'
+import { onCleanup, onMount, Show } from 'solid-js'
 import { css } from 'solid-styled'
 import { Transition } from 'solid-transition-group'
 import atom from 'solid-use/atom'
-import { InputIcon } from './InputIcon'
 import { GoldContainer, OutlineText } from './components/styledComponents'
+import { InputIcon } from './InputIcon'
 import { useGame } from './store'
 import { FarmingTutorial } from './tutorials/farming'
 import { MovementTutorial } from './tutorials/movement'
-import { cutSceneState } from '@/global/states'
-import { ui } from '@/global/init'
-import { showTutorialEvent } from '@/global/events'
 
 export enum TutorialWindow {
 	Movement = 'movement',

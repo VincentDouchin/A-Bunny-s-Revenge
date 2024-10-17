@@ -1,16 +1,16 @@
-import type { items } from '@assets/assets'
-import type { Query, With } from 'miniplex'
-import { Vector3 } from 'three'
-import { CSS2DObject } from 'three/examples/jsm/renderers/CSS2DRenderer'
-import { sleep } from './sleep'
-import { applyMove, applyRotate } from '@/behaviors/behaviorHelpers'
 import type { Item } from '@/constants/items'
 import type { Entity } from '@/global/entity'
+import type { items } from '@assets/assets'
+import type { Query, With } from 'miniplex'
+import { applyMove, applyRotate } from '@/behaviors/behaviorHelpers'
 import { addItem, coroutines, ecs, removeItem, save } from '@/global/init'
 import { playSound } from '@/global/sounds'
 import { cutSceneState } from '@/global/states'
 import { heartEmitter } from '@/particles/heartParticles'
 import { addToast } from '@/ui/Toaster'
+import { Vector3 } from 'three'
+import { CSS2DObject } from 'three/examples/jsm/renderers/CSS2DRenderer'
+import { sleep } from './sleep'
 
 const npcNameQuery = ecs.with('npcName')
 export const speaker = (name?: Entity['npcName']) => {

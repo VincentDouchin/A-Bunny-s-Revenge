@@ -1,8 +1,8 @@
+import { dungeonState } from '@/global/states'
+import { MiniMapUi } from '@/states/dungeon/MinimapUi'
 import { css } from 'solid-styled'
 import { StateUi } from './components/StateUi'
 import { Toaster } from './Toaster'
-import { dungeonState } from '@/global/states'
-import { MiniMapUi } from '@/states/dungeon/MinimapUi'
 
 export const TopRight = () => {
 	css/* css */`

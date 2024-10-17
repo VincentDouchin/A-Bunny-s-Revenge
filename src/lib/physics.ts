@@ -1,7 +1,7 @@
 import type { Collider, RigidBody } from '@dimforge/rapier3d-compat'
-import { type State, runIf } from './state'
 import { ecs, world } from '@/global/init'
 import { pausedState } from '@/global/states'
+import { runIf, type State } from './state'
 
 const bodiesQuery = ecs.with('bodyDesc', 'position').without('body')
 const colliderQueries = ecs.with('colliderDesc', 'body').without('collider')

@@ -1,8 +1,8 @@
 import type { soundEffects } from '@assets/assets'
+import { getRandom } from '@/utils/mapFunctions'
+import { useLocalStorage } from '@/utils/useLocalStorage'
 import soundsData from '@assets/soundsData.json'
 import { assets, dayTime, musicManager, settings } from './init'
-import { useLocalStorage } from '@/utils/useLocalStorage'
-import { getRandom } from '@/utils/mapFunctions'
 
 const setMuted = (sounds: soundAssets | 'global', muted: boolean) => {
 	if (sounds === 'global') {

@@ -1,15 +1,15 @@
-import { World as RapierWorld, init } from '@dimforge/rapier3d-compat'
-import { World as MiniplexWorld } from 'miniplex'
-import { loadAssets } from './assets'
 import type { Entity } from './entity'
-import { loadLevelData } from './levelData'
-import { useSave, useSettings } from './save'
 import { CoroutinesManager } from '@/lib/coroutines'
 import { InputManager } from '@/lib/inputs'
 import { MusicManager } from '@/lib/musicManager'
 import { DayTime, Time } from '@/lib/time'
 import { tweensManager } from '@/lib/tweens'
 import { UIManager } from '@/lib/uiManager'
+import { init, World as RapierWorld } from '@dimforge/rapier3d-compat'
+import { World as MiniplexWorld } from 'miniplex'
+import { loadAssets } from './assets'
+import { loadLevelData } from './levelData'
+import { useSave, useSettings } from './save'
 
 await init()
 // await getSave()

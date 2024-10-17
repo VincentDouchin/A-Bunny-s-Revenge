@@ -1,6 +1,6 @@
+import type { Entity } from '@/global/entity'
 import type { Query } from 'miniplex'
 import type { State } from './state'
-import type { Entity } from '@/global/entity'
 import { ecs } from '@/global/init'
 
 const updateAndApply = <T extends Entity>(query: Query<T>, fn: (entity: T) => void) => {

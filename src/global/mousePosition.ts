@@ -1,7 +1,7 @@
-import { Plane, Raycaster, Vector2, Vector3 } from 'three'
-import { throttle } from '@solid-primitives/scheduled'
-import { inputManager } from './init'
 import { gameCameraQuery } from '@/states/mainMenu/mainMenuRendering'
+import { throttle } from '@solid-primitives/scheduled'
+import { Plane, Raycaster, Vector2, Vector3 } from 'three'
+import { inputManager } from './init'
 
 export const updateMousePosition = () => {
 	const mousePosition = new Vector2()

@@ -1,13 +1,13 @@
-import { For, Show, createEffect, createMemo, onCleanup, onMount } from 'solid-js'
+import type { Atom } from 'solid-use/atom'
+import { params } from '@/global/context'
+import { ecs, ui } from '@/global/init'
+import { soundDialog } from '@/lib/dialogSound'
+import { createEffect, createMemo, For, onCleanup, onMount, Show } from 'solid-js'
 import { Portal } from 'solid-js/web'
 import { css } from 'solid-styled'
-import type { Atom } from 'solid-use/atom'
 import atom from 'solid-use/atom'
 import { OutlineText } from './components/styledComponents'
 import { useGame, useQuery } from './store'
-import { soundDialog } from '@/lib/dialogSound'
-import { ecs, ui } from '@/global/init'
-import { params } from '@/global/context'
 
 interface Letter {
 	letter: string

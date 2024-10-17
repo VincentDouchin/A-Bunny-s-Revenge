@@ -1,7 +1,6 @@
-import { ecs, save } from '@/global/init'
-
 import type { DungeonRessources } from '@/global/states'
 import type { System } from '@/lib/state'
+import { ecs, save } from '@/global/init'
 import { addItemToPlayer } from '@/utils/dialogHelpers'
 
 const sellableItemsQuery = ecs.with('price', 'interactionContainer', 'itemLabel', 'stallPosition')

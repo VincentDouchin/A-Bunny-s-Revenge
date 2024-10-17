@@ -1,10 +1,10 @@
-import type { ComponentsOfType } from './entity'
-import { ecs, time } from './init'
 import type { Meals } from '@/constants/items'
 import type { State } from '@/lib/state'
 import type { Stat } from '@/lib/stats'
+import type { ComponentsOfType } from './entity'
 import { ModStage, ModType } from '@/lib/stats'
 import { Timer } from '@/lib/timer'
+import { ecs, time } from './init'
 
 export interface Modifier {
 	stat: ComponentsOfType<Stat>

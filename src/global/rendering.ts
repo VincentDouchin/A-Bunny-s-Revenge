@@ -1,15 +1,14 @@
 import type { Object3D } from 'three'
-import { BasicShadowMap, DepthTexture, LinearSRGBColorSpace, MeshBasicMaterial, Scene, ShaderMaterial, Vector2, WebGLRenderTarget, WebGLRenderer } from 'three'
-
+import { getGameRenderGroup } from '@/debug/debugUi'
+import { getSobelShader, outlineShader } from '@/shaders/EdgePass'
+import { gameCameraQuery } from '@/states/mainMenu/mainMenuRendering'
+import { BasicShadowMap, DepthTexture, LinearSRGBColorSpace, MeshBasicMaterial, Scene, ShaderMaterial, Vector2, WebGLRenderer, WebGLRenderTarget } from 'three'
 import { FullScreenQuad } from 'three/examples/jsm/postprocessing/Pass'
 import { CSS2DRenderer } from 'three/examples/jsm/renderers/CSS2DRenderer'
 import { params } from './context'
 import { RenderGroup } from './entity'
 import { ecs, settings } from './init'
 import { mainMenuState } from './states'
-import { gameCameraQuery } from '@/states/mainMenu/mainMenuRendering'
-import { getSobelShader, outlineShader } from '@/shaders/EdgePass'
-import { getGameRenderGroup } from '@/debug/debugUi'
 
 export const scene = new Scene()
 export const renderer = new WebGLRenderer({ alpha: false })

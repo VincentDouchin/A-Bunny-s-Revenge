@@ -1,6 +1,6 @@
-import { CSS2DObject } from 'three/examples/jsm/renderers/CSS2DRenderer'
 import type { Entity } from '@/global/entity'
 import { ecs } from '@/global/init'
+import { CSS2DObject } from 'three/examples/jsm/renderers/CSS2DRenderer'
 
 const playerQuery = ecs.with('player', 'position', 'playerControls')
 const enemiesQuery = ecs.with('enemyName', 'position', 'state').where(e => e.state !== 'dying')

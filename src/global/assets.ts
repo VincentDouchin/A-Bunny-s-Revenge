@@ -1,17 +1,16 @@
+import type { crops } from '@/constants/items'
 import type { characters, fruit_trees, items, mainMenuAssets, models, particles, textures, trees, vegetation, weapons } from '@assets/assets'
 import type { ColorRepresentation, Material, Side, TextureFilter } from 'three'
-import { DoubleSide, FrontSide, Mesh, MeshBasicMaterial, MeshPhysicalMaterial, MeshStandardMaterial, NearestFilter, RepeatWrapping, SRGBColorSpace, Texture } from 'three'
-
-import assetManifest from '@assets/assetManifest.json'
-import { Howl } from 'howler'
 import type { GLTF } from 'three/examples/jsm/loaders/GLTFLoader'
 import type { Constructor } from 'type-fest'
-import { getExtension, getFileName, loadAudio, loadGLB, loadImage, loaderProgress, textureLoader } from './assetLoaders'
-import type { crops } from '@/constants/items'
 import { thumbnailRenderer } from '@/lib/thumbnailRenderer'
 import { CharacterMaterial, GardenPlotMaterial, GrassMaterial, ToonMaterial, TreeMaterial, VineGateMaterial } from '@/shaders/materials'
 import { getScreenBuffer } from '@/utils/buffer'
 import { asyncMapValues, entries, groupByObject, mapKeys, mapValues } from '@/utils/mapFunctions'
+import assetManifest from '@assets/assetManifest.json'
+import { Howl } from 'howler'
+import { DoubleSide, FrontSide, Mesh, MeshBasicMaterial, MeshPhysicalMaterial, MeshStandardMaterial, NearestFilter, RepeatWrapping, SRGBColorSpace, Texture } from 'three'
+import { getExtension, getFileName, loadAudio, loaderProgress, loadGLB, loadImage, textureLoader } from './assetLoaders'
 
 type Glob = Record<string, () => Promise<any>>
 type GlobEager<T = string> = Record<string, T>
@@ -20,7 +19,7 @@ const typeGlob = <K extends string>(glob: Record<string, any>) => async <F exten
 	return await fn(glob) as Record<K, Awaited<ReturnType<F>>[string]>
 }
 
-type getToonOptions = (key: string, materialName: string, name: string, node: Mesh)=>({
+type getToonOptions = (key: string, materialName: string, name: string, node: Mesh) => ({
 	color?: ColorRepresentation
 	material?: Constructor<Material>
 	side?: Side

@@ -1,7 +1,7 @@
-import { debugOptions, debugState } from './debugState'
-import { ecs } from '@/global/init'
 import type { State } from '@/lib/state'
+import { ecs } from '@/global/init'
 import { windowEvent } from '@/lib/uiManager'
+import { debugOptions, debugState } from './debugState'
 
 const enableDebugState = () => windowEvent('keydown', (e) => {
 	if (e.key === 'F3') {

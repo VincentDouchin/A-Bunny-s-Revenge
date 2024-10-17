@@ -1,7 +1,7 @@
-import { beforeEach, describe, expect, it, vi } from 'vitest'
 import { World } from 'miniplex'
+import { beforeEach, describe, expect, it, vi } from 'vitest'
 import levelsData from '../assets/levels/data.json'
-import { RoomType, genDungeon } from '../src/states/dungeon/generateDungeon'
+import { genDungeon, RoomType } from '../src/states/dungeon/generateDungeon'
 
 describe('dungeon generator', () => {
 	beforeEach(() => {

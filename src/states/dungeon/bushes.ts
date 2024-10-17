@@ -1,9 +1,9 @@
 import type { BufferGeometry, Mesh, MeshPhongMaterial } from 'three'
+import { ecs, tweens } from '@/global/init'
+import { shakenLeaves } from '@/particles/bushShaken'
 import { Vector3 } from 'three'
 import { itemBundle } from '../game/items'
 import { getIntersections } from '../game/sensor'
-import { shakenLeaves } from '@/particles/bushShaken'
-import { ecs, tweens } from '@/global/init'
 
 const dropBerries = (amount: number, bushPosition: Vector3, berries: Set<Mesh<BufferGeometry, MeshPhongMaterial>>) => {
 	for (let i = 0; i < amount; i++) {

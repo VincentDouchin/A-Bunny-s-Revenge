@@ -1,12 +1,12 @@
-import soundsData from '@assets/soundsData.json'
-import { For, Show, createEffect, createMemo, createSignal, onCleanup, onMount } from 'solid-js'
-import { css } from 'solid-styled'
-import { assets } from '@/global/init'
 import type { soundAssets } from '@/global/sounds'
+import { assets } from '@/global/init'
 import { pausedState } from '@/global/states'
 import { windowEvent } from '@/lib/uiManager'
 import { entries } from '@/utils/mapFunctions'
 import { useLocalStorage } from '@/utils/useLocalStorage'
+import soundsData from '@assets/soundsData.json'
+import { createEffect, createMemo, createSignal, For, onCleanup, onMount, Show } from 'solid-js'
+import { css } from 'solid-styled'
 
 type sounds = Record<soundAssets, Record<string, { volume: number }>>
 const [localSoundData, setLocalSoundData] = useLocalStorage<sounds>('soundsData', soundsData)

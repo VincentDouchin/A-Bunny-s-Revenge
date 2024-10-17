@@ -1,6 +1,6 @@
 import type { ColorRepresentation, Texture, Vector2 } from 'three'
-import { Color, ShaderMaterial, Uniform } from 'three'
 import vertexShader from '@/shaders/glsl/main.vert?raw'
+import { Color, ShaderMaterial, Uniform } from 'three'
 
 export const outlinePass = (texture: Texture, size: Vector2, color: ColorRepresentation = 0x000000) => new ShaderMaterial({
 	uniforms: {

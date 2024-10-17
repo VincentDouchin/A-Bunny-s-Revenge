@@ -1,7 +1,7 @@
+import type { Settings } from '@/global/save'
 import type { JSXElement } from 'solid-js'
 import { createSignal, onCleanup } from 'solid-js'
 import { Dynamic, render } from 'solid-js/web'
-import type { Settings } from '@/global/save'
 
 export class UIManager {
 	root: HTMLElement

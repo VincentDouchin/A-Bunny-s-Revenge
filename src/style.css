@@ -14,11 +14,7 @@
 	--gold-shiny: #fcce5a;
 	--gold-tarnished: #a26d3f;
 	--grey: grey;
-	--black-transparent: linear-gradient(
-		to bottom,
-		hsla(0, 0%, 0%, 0.4),
-		hsla(0, 0%, 0%, 0.2)
-	);
+	--black-transparent: linear-gradient(to bottom, hsla(0, 0%, 0%, 0.4), hsla(0, 0%, 0%, 0.2));
 	--gold-transparent: linear-gradient(
 		to bottom,
 		color-mix(in srgb, var(--gold), transparent 60%),
@@ -261,13 +257,7 @@ input[type='range']::-webkit-slider-thumb {
 	width: var(--loaded);
 	transition: width ease 0.2s;
 	height: 100%;
-	background: repeating-linear-gradient(
-		90deg,
-		black 0rem,
-		black 2rem,
-		white 2rem,
-		white 3rem
-	);
+	background: repeating-linear-gradient(90deg, black 0rem, black 2rem, white 2rem, white 3rem);
 	display: block;
 	z-index: 101;
 }

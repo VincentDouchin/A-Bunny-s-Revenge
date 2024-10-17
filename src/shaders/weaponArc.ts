@@ -1,6 +1,6 @@
 import type { Vector3, Vector3Tuple } from 'three'
-import { BufferAttribute, BufferGeometry, DoubleSide, Mesh, ShaderMaterial } from 'three'
 import { range } from '@/utils/mapFunctions'
+import { BufferAttribute, BufferGeometry, DoubleSide, Mesh, ShaderMaterial } from 'three'
 
 export const weaponArcMaterial = new ShaderMaterial({
 	side: DoubleSide,

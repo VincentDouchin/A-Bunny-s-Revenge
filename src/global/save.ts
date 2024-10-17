@@ -1,15 +1,15 @@
+import type { crops, Item, Meals } from '@/constants/items'
 import type { items } from '@assets/assets'
+import type { With } from 'miniplex'
+import type { Crop, Entity } from './entity'
 import { trackStore } from '@solid-primitives/deep'
 import { createScheduled, debounce } from '@solid-primitives/scheduled'
 import { get, set } from 'idb-keyval'
-import type { With } from 'miniplex'
 import { createEffect } from 'solid-js'
 import { createMutable, unwrap } from 'solid-js/store'
 import { createObject } from 'solid-proxies'
 import { Quaternion, Vector3 } from 'three'
 import { context } from './context'
-import type { Crop, Entity } from './entity'
-import type { Item, Meals, crops } from '@/constants/items'
 
 const blankSettings = (): Settings => ({
 	volume: 100,

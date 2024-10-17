@@ -1,9 +1,3 @@
-import CheckSquare from '@assets/icons/square-check-solid.svg'
-import Square from '@assets/icons/square-regular.svg'
-import { For, Show, createEffect, createSignal, onMount } from 'solid-js'
-import { css } from 'solid-styled'
-import atom from 'solid-use/atom'
-import { IconDisplay, ItemDisplay } from './InventoryUi'
 import type { Quest, QuestName } from '@/constants/quests'
 import { quests } from '@/constants/quests'
 import { MenuType } from '@/global/entity'
@@ -14,7 +8,13 @@ import { GoldContainer, InventoryTitle, OutlineText } from '@/ui/components/styl
 import { InputIcon } from '@/ui/InputIcon'
 import { useGame, useQuery } from '@/ui/store'
 import { entries } from '@/utils/mapFunctions'
-// eslint-disable-next-line no-unused-expressions
+import CheckSquare from '@assets/icons/square-check-solid.svg'
+import Square from '@assets/icons/square-regular.svg'
+import { createEffect, createSignal, For, onMount, Show } from 'solid-js'
+import { css } from 'solid-styled'
+import atom from 'solid-use/atom'
+import { IconDisplay, ItemDisplay } from './InventoryUi'
+
 menuItem
 const openBulletinBoardQuery = useQuery(ecs.with('menuType').where(e => e.menuType === MenuType.Quest))
 

@@ -1,10 +1,10 @@
-import type { Query, With } from 'miniplex'
 import type { Entity, States } from '@/global/entity'
-import { ecs } from '@/global/init'
 import type { State } from '@/lib/state'
+import type { Query, With } from 'miniplex'
+import { ecs } from '@/global/init'
+import { pausedState } from '@/global/states'
 import { entries } from '@/utils/mapFunctions'
 import { sleep } from '@/utils/sleep'
-import { pausedState } from '@/global/states'
 
 export type StateParameters<C extends keyof Entity> = (e: StateEntity<C>) => any
 export type StateFn<C extends keyof Entity, B extends keyof States, F extends StateParameters<C>> = (

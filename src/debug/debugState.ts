@@ -1,6 +1,6 @@
 import type { Atom } from 'solid-use/atom'
-import atom from 'solid-use/atom'
 import { app } from '@/global/states'
+import atom from 'solid-use/atom'
 
 interface DebugOptions {
 	attackInFarm: Atom<boolean>

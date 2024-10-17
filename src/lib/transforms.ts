@@ -1,9 +1,9 @@
 import type { Collider } from '@dimforge/rapier3d-compat'
 import type { Object3D, Object3DEventMap } from 'three'
-import { Quaternion, Vector3 } from 'three'
-import { Direction } from './directions'
 import type { State } from './state'
 import { ecs, time, world } from '@/global/init'
+import { Quaternion, Vector3 } from 'three'
+import { Direction } from './directions'
 
 export const getWorldPosition = (obj: Object3D<Object3DEventMap>) => {
 	const pos = new Vector3()

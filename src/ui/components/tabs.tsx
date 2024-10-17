@@ -1,14 +1,14 @@
 import type { JSXElement } from 'solid-js'
-import { For, Show, createEffect, createMemo } from 'solid-js'
+import type { Atom } from 'solid-use/atom'
+import { ui } from '@/global/init'
+import { createEffect, createMemo, For, Show } from 'solid-js'
 import { createArray } from 'solid-proxies'
 import { css } from 'solid-styled'
-import type { Atom } from 'solid-use/atom'
 import atom from 'solid-use/atom'
 import { InputIcon } from '../InputIcon'
 import { useGame } from '../store'
 import { type MenuDir, menuItem } from './Menu'
-import { ui } from '@/global/init'
-// eslint-disable-next-line no-unused-expressions
+
 menuItem
 interface TabsProps<T extends string> {
 	tabs: T[]

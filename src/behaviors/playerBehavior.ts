@@ -1,11 +1,7 @@
+import type { Entity } from '@/global/entity'
 import type { With } from 'miniplex'
-import { Vector3 } from 'three'
-import { behaviorPlugin } from '../lib/behaviors'
-import { flash } from '../states/dungeon/battle'
-import { applyMove, applyRotate, getMovementForce, getPlayerRotation, takeDamage } from './behaviorHelpers'
 import { debugOptions } from '@/debug/debugState'
 import { addCameraShake } from '@/global/camera'
-import type { Entity } from '@/global/entity'
 import { EnemyAttackStyle, Faction } from '@/global/entity'
 import { ecs, world } from '@/global/init'
 import { playSound } from '@/global/sounds'
@@ -16,6 +12,10 @@ import { poisonBubbles } from '@/states/dungeon/poisonTrail'
 import { stunBundle } from '@/states/dungeon/stun'
 import { getIntersections } from '@/states/game/sensor'
 import { sleep } from '@/utils/sleep'
+import { Vector3 } from 'three'
+import { behaviorPlugin } from '../lib/behaviors'
+import { flash } from '../states/dungeon/battle'
+import { applyMove, applyRotate, getMovementForce, getPlayerRotation, takeDamage } from './behaviorHelpers'
 
 const ANIMATION_SPEED = 1.3
 const playerComponents = ['playerAnimator', 'movementForce', 'speed', 'body', 'rotation', 'playerControls', 'combo', 'attackSpeed', 'dash', 'collider', 'currentHealth', 'model', 'hitTimer', 'size', 'sneeze', 'targetRotation', 'poisoned', 'size', 'position', 'targetMovementForce', 'sleepy', 'modifiers'] as const satisfies readonly (keyof Entity)[]

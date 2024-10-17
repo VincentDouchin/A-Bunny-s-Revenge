@@ -1,12 +1,11 @@
-import { ActiveCollisionTypes, ColliderDesc, RigidBodyDesc, RigidBodyType } from '@dimforge/rapier3d-compat'
-import type { Object3D, Object3DEventMap } from 'three'
-import { Box3, BufferGeometry, Mesh, Quaternion, Vector3 } from 'three'
-
-import { clone } from 'three/examples/jsm/utils/SkeletonUtils.js'
-import type { Constructor } from 'type-fest'
 import type { CollidersData, ModelName } from '@/debug/LevelEditor'
 import type { Entity } from '@/global/entity'
+import type { Object3D, Object3DEventMap } from 'three'
+import type { Constructor } from 'type-fest'
 import { world } from '@/global/init'
+import { ActiveCollisionTypes, ColliderDesc, RigidBodyDesc, RigidBodyType } from '@dimforge/rapier3d-compat'
+import { Box3, BufferGeometry, Mesh, Quaternion, Vector3 } from 'three'
+import { clone } from 'three/examples/jsm/utils/SkeletonUtils.js'
 
 const cloneMaterials = (model: Object3D<Object3DEventMap>) => {
 	model.traverse((node) => {

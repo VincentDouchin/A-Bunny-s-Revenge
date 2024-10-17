@@ -1,6 +1,6 @@
+import type { State } from '@/lib/state'
 import type { icons } from '@assets/assets'
 import type { Item } from './items'
-import type { State } from '@/lib/state'
 import { introQuest } from '@/global/states'
 
 export interface QuestStep {

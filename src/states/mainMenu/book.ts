@@ -1,11 +1,11 @@
-import { easeInOut } from 'popmotion'
 import type { ShaderMaterial } from 'three'
-import { CanvasTexture, Mesh, MeshBasicMaterial, Object3D } from 'three'
 import { assets, save, tweens } from '@/global/init'
 import { playSound } from '@/global/sounds'
 import { campState, introState } from '@/global/states'
 import { drawnHouseShader } from '@/shaders/drawnHouseShader'
 import { cloneCanvas, imgToCanvas } from '@/utils/buffer'
+import { easeInOut } from 'popmotion'
+import { CanvasTexture, Mesh, MeshBasicMaterial, Object3D } from 'three'
 
 type MenuOption = 'Continue' | 'New Game' | 'Settings' | 'Credits'
 

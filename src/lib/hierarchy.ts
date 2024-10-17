@@ -1,7 +1,7 @@
 import type { With } from 'miniplex'
 import type { ComponentsOfType, Entity } from '../global/entity'
-import { ecs } from '../global/init'
 import type { State } from './state'
+import { ecs } from '../global/init'
 import { set } from './state'
 
 const mapQuery = ecs.with('map')

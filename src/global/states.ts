@@ -1,8 +1,8 @@
-import type { weapons } from '@assets/assets'
-import { StateMananger } from './../lib/state'
-import type { farmDoors } from './entity'
-import type { Room } from '@/states/dungeon/generateDungeon'
 import type { Direction } from '@/lib/directions'
+import type { Room } from '@/states/dungeon/generateDungeon'
+import type { weapons } from '@assets/assets'
+import type { farmDoors } from './entity'
+import { StateMananger } from './../lib/state'
 
 export const app = new StateMananger()
 export const coreState = app.create()

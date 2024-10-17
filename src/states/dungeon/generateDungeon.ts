@@ -1,11 +1,11 @@
-import { encounters } from './encounters'
 import type { enemy } from '@/constants/enemies'
-import { enemyGroups } from '@/constants/enemyGroups'
-import { type Item, getSellableItems } from '@/constants/items'
 import type { Level } from '@/debug/LevelEditor'
+import { enemyGroups } from '@/constants/enemyGroups'
+import { getSellableItems, type Item } from '@/constants/items'
 import { levelsData } from '@/global/init'
-import { Direction, cardinalDirections, otherDirection } from '@/lib/directions'
+import { cardinalDirections, Direction, otherDirection } from '@/lib/directions'
 import { getRandom, mapValues } from '@/utils/mapFunctions'
+import { encounters } from './encounters'
 
 // ! ROOMS
 type Connections = Partial<Record<Direction, number | null>>

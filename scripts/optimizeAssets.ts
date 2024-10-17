@@ -1,10 +1,10 @@
-import { rename } from 'node:fs/promises'
 import type { Transform } from '@gltf-transform/core'
+import type { PathInfo } from './assetPipeline'
+import { rename } from 'node:fs/promises'
 import { Logger, NodeIO } from '@gltf-transform/core'
 import { ALL_EXTENSIONS } from '@gltf-transform/extensions'
 import { dedup, draco, resample, textureCompress } from '@gltf-transform/functions'
 import draco3d from 'draco3dgltf'
-import type { PathInfo } from './assetPipeline'
 import { AssetTransformer } from './assetPipeline'
 
 export const getFileName = (path: string) => {

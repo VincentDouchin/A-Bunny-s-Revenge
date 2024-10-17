@@ -1,5 +1,5 @@
+import { addUniform, extendMaterial, MaterialExtension, removeInclude, replace, unpack } from '@/lib/materialExtension'
 import { Color, SpriteMaterial } from 'three'
-import { MaterialExtension, addUniform, extendMaterial, removeInclude, replace, unpack } from '@/lib/materialExtension'
 
 const dashExtension = new MaterialExtension({
 	angle: 0,

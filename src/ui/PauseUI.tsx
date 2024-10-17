@@ -1,4 +1,6 @@
-import { Show, createEffect } from 'solid-js'
+import { ui } from '@/global/init'
+import { pausedState } from '@/global/states'
+import { createEffect, Show } from 'solid-js'
 import { css } from 'solid-styled'
 import atom from 'solid-use/atom'
 import { Menu, menuItem } from './components/Menu'
@@ -7,10 +9,7 @@ import { MovingArrows } from './components/MovingArrows'
 import { GoldContainer, OutlineText } from './components/styledComponents'
 import { Settings } from './settings'
 import { useGame } from './store'
-import { pausedState } from '@/global/states'
-import { ui } from '@/global/init'
 
-// eslint-disable-next-line no-unused-expressions
 menuItem
 
 export const PauseUi = () => {

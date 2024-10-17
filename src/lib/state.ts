@@ -1,5 +1,5 @@
-import type { Query } from 'miniplex'
 import type { Entity } from '@/global/entity'
+import type { Query } from 'miniplex'
 
 export type System<R> = (ressources: R) => void | Promise<void>
 export type Subscriber<R> = (ressources: R) => () => void

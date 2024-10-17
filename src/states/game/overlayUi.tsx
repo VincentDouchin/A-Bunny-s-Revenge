@@ -1,7 +1,7 @@
+import { dayTime, ui } from '@/global/init'
 import { createMemo } from 'solid-js'
 import { Portal } from 'solid-js/web'
 import { css } from 'solid-styled'
-import { dayTime, ui } from '@/global/init'
 
 export const OverlayUi = () => {
 	const timeOfDay = ui.sync(() => dayTime.current)

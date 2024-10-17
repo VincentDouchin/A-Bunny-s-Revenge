@@ -1,14 +1,14 @@
-import type { With } from 'miniplex'
-import { circOut } from 'popmotion'
-import { between } from 'randomish'
-import { Mesh, Quaternion, Vector3 } from 'three'
 import type { Entity } from '@/global/entity'
+import type { With } from 'miniplex'
 import { ecs, time, tweens } from '@/global/init'
 import { playSound } from '@/global/sounds'
 import { behaviorPlugin } from '@/lib/behaviors'
 import { fishParticles } from '@/particles/fishParticles'
 import { stopFishing } from '@/states/farm/fishing'
 import { sleep } from '@/utils/sleep'
+import { circOut } from 'popmotion'
+import { between } from 'randomish'
+import { Mesh, Quaternion, Vector3 } from 'three'
 
 const fishComponents = ['fish', 'group', 'rotation', 'position', 'targetRotation'] as const satisfies readonly (keyof Entity)[]
 const fishQuery = ecs.with(...fishComponents)

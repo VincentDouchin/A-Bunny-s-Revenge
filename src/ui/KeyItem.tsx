@@ -1,11 +1,11 @@
-import { Show, onCleanup } from 'solid-js'
+import type { Object3D } from 'three'
+import { thumbnailRenderer } from '@/lib/thumbnailRenderer'
+import { sleep } from '@/utils/sleep'
+import { onCleanup, Show } from 'solid-js'
 import { css } from 'solid-styled'
 import { Transition } from 'solid-transition-group'
 import atom from 'solid-use/atom'
-import type { Object3D } from 'three'
 import { GoldContainer, OutlineText } from './components/styledComponents'
-import { sleep } from '@/utils/sleep'
-import { thumbnailRenderer } from '@/lib/thumbnailRenderer'
 
 const keyItem = atom<null | { model: Object3D, name: string }>(null)
 export const displayKeyItem = async (modelToDisplay: Object3D, name: string, scale = 1) => {

@@ -1,13 +1,13 @@
+import type { Entity } from '@/global/entity'
 import type { weapons } from '@assets/assets'
+import { weaponsData } from '@/constants/weapons'
+import { Interactable } from '@/global/entity'
+import { assets, coroutines, ecs } from '@/global/init'
+import { genDungeonState } from '@/global/states'
+import { inMap } from '@/lib/hierarchy'
 import { ActiveCollisionTypes, ColliderDesc, RigidBodyDesc } from '@dimforge/rapier3d-compat'
 import { Quaternion, Vector3 } from 'three'
 import { weaponBundle } from '../game/weapon'
-import { assets, coroutines, ecs } from '@/global/init'
-import { weaponsData } from '@/constants/weapons'
-import type { Entity } from '@/global/entity'
-import { Interactable } from '@/global/entity'
-import { inMap } from '@/lib/hierarchy'
-import { genDungeonState } from '@/global/states'
 
 const weaponNames = ['Hoe', 'Ladle', 'ScissorWeapon', 'SwordWeapon'] as const satisfies readonly weapons[]
 const displayWeapon = (weaponName: weapons, parent: Entity) => {

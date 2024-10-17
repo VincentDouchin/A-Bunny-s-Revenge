@@ -1,9 +1,9 @@
+import type { Entity } from '@/global/entity'
 import type { ColorRepresentation } from 'three'
+import { between } from 'randomish'
 import { CircleGeometry, Color, MeshPhongMaterial, Vector3 } from 'three'
 import { Bezier, ColorOverLife, ColorRange, ConstantValue, Gradient, IntervalValue, ParticleSystem, PiecewiseBezier, RenderMode, SizeOverLife, SphereEmitter } from 'three.quarks'
-import { between } from 'randomish'
 import { colorToVec4 } from './honeySplatParticles'
-import type { Entity } from '@/global/entity'
 
 export const pollenBundle = (colorStart: ColorRepresentation, colorEnd: ColorRepresentation) => {
 	const system = new ParticleSystem({

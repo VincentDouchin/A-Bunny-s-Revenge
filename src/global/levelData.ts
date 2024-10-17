@@ -1,8 +1,7 @@
+import type { CollidersData, Level, LevelData, LevelImage, RawLevel } from '@/debug/LevelEditor'
 import data from '@assets/levels/data.json'
 import { get } from 'idb-keyval'
-
 import { dataUrlToCanvas } from './assetLoaders'
-import type { CollidersData, Level, LevelData, LevelImage, RawLevel } from '@/debug/LevelEditor'
 
 export const loadLevelData = async () => {
 	const levelData = data.levelData as unknown as LevelData

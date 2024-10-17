@@ -1,7 +1,7 @@
-import type { Entity } from './entity'
-import { inputManager } from './init'
 import type { InputMap } from '@/lib/inputs'
+import type { Entity } from './entity'
 import { GAMEPAD_AXIS, GAMEPAD_BUTTON, MOUSE_BUTTONS, MOUSE_WHEEL } from '@/lib/inputs'
+import { inputManager } from './init'
 
 const playerInputs = ['left', 'right', 'forward', 'backward', 'inventory', 'primary', 'secondary', 'pause', 'lookRight', 'lookLeft', 'lookForward', 'lookBackward', 'lock'] as const
 export type PlayerInputMap = InputMap<typeof playerInputs[number]>

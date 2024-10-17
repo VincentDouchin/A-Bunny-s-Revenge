@@ -1,11 +1,11 @@
+import { debugState } from '@/debug/debugState'
+import { Direction } from '@/lib/directions'
 import { easeOut } from 'popmotion'
 import { OrthographicCamera, PerspectiveCamera, Vector3 } from 'three'
 import { params } from './context'
 import { RenderGroup } from './entity'
 import { ecs, levelsData, settings, time, tweens } from './init'
 import { mainMenuState } from './states'
-import { Direction } from '@/lib/directions'
-import { debugState } from '@/debug/debugState'
 
 export const initCamera = () => {
 	const h = 600

@@ -1,8 +1,8 @@
-import { For, Show, createMemo } from 'solid-js'
-import { useGame } from './store'
+import type { Input } from '@/lib/inputs'
 import { XBOXSeries } from '@/constants/keys'
 import { assets, inputManager, settings } from '@/global/init'
-import type { Input } from '@/lib/inputs'
+import { createMemo, For, Show } from 'solid-js'
+import { useGame } from './store'
 
 export const InputIcon = (props: { input: Input, size?: number }) => {
 	const context = useGame()

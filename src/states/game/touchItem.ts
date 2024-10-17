@@ -1,9 +1,9 @@
+import type { Entity } from '@/global/entity'
+import type { State } from '@/lib/state'
+import { ecs } from '@/global/init'
 import { Vector3 } from 'three'
 import { CSS2DObject } from 'three/examples/jsm/renderers/CSS2DRenderer'
 import { getIntersections } from './sensor'
-import { ecs } from '@/global/init'
-import type { Entity } from '@/global/entity'
-import type { State } from '@/lib/state'
 
 const interactableQuery = ecs.with('interactable')
 const playerQuery = ecs.with('playerControls', 'sensor', 'position', 'rotation')

@@ -1,17 +1,11 @@
-import { ActiveCollisionTypes, ColliderDesc, RigidBodyDesc, RigidBodyType } from '@dimforge/rapier3d-compat'
-import type { With } from 'miniplex'
-import { ConeGeometry, Mesh, MeshBasicMaterial, MeshPhongMaterial, MeshToonMaterial, Quaternion, SphereGeometry, Vector3 } from 'three'
-
-import { between } from 'randomish'
 import type { ComponentsOfType, Entity } from '@/global/entity'
-import { Faction } from '@/global/entity'
-
-import { assets, ecs, time, world } from '@/global/init'
-import { modelColliderBundle } from '@/lib/models'
-import type { Stat } from '@/lib/stats'
-
 import type { Modifiers } from '@/global/modifiers'
+import type { Stat } from '@/lib/stats'
+import type { With } from 'miniplex'
+import { Faction } from '@/global/entity'
+import { assets, ecs, time, world } from '@/global/init'
 import { inMap } from '@/lib/hierarchy'
+import { modelColliderBundle } from '@/lib/models'
 import { Timer } from '@/lib/timer'
 import { getWorldPosition } from '@/lib/transforms'
 import { honeyDrippingParticles, honeySplatParticlesBundle } from '@/particles/honeySplatParticles'
@@ -19,6 +13,9 @@ import { pollenBundle } from '@/particles/pollenParticles'
 import { projectileTrail } from '@/particles/projectileTrail'
 import { sleepyEmitter } from '@/particles/sleepyParticles'
 import { sleep } from '@/utils/sleep'
+import { ActiveCollisionTypes, ColliderDesc, RigidBodyDesc, RigidBodyType } from '@dimforge/rapier3d-compat'
+import { between } from 'randomish'
+import { ConeGeometry, Mesh, MeshBasicMaterial, MeshPhongMaterial, MeshToonMaterial, Quaternion, SphereGeometry, Vector3 } from 'three'
 
 const projectileBundle = (rotation: Quaternion, origin: Vector3, strength: Stat) => {
 	const model = new Mesh(new ConeGeometry(1, 4, 7), new MeshToonMaterial({ color: 0x2C1E31 }))
@@ -56,7 +53,7 @@ export const projectilesCircleAttack = async ({ group, strength }: With<Entity, 
 	}
 }
 
-export const honeyProjectile = ({ group, rotation }: With<Entity, 'group' | 'rotation' >) => {
+export const honeyProjectile = ({ group, rotation }: With<Entity, 'group' | 'rotation'>) => {
 	const origin = getWorldPosition(group)
 	const size = 2
 	const model = new Mesh(
@@ -68,7 +65,7 @@ export const honeyProjectile = ({ group, rotation }: With<Entity, 'group' | 'rot
 	bundle.bodyDesc.gravityScale = 0.7
 	bundle.bodyDesc.setLinvel(0, -8, 0)
 	bundle.colliderDesc.setMass(1)
-	ecs.add ({
+	ecs.add({
 		...bundle,
 		...inMap(),
 		rotation: rotation.clone(),

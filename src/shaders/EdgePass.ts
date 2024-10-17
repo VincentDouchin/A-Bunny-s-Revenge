@@ -1,8 +1,8 @@
 import type { Texture, WebGLRenderTarget } from 'three'
-import { Color, Uniform, Vector2 } from 'three'
+import { target } from '@/global/rendering'
 import kuwahara from '@/shaders/glsl/lib/kuwahara.glsl?raw'
 import sobel from '@/shaders/glsl/lib/sobel.glsl?raw'
-import { target } from '@/global/rendering'
+import { Color, Uniform, Vector2 } from 'three'
 
 // export const getDepthShader = (target: WebGLRenderTarget) => ({
 // 	uniforms: {

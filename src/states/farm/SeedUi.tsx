@@ -1,18 +1,18 @@
+import type { Item } from '@/constants/items'
+import type { Entity } from '@/global/entity'
+import { getSeed } from '@/constants/items'
+import { ecs, save, ui } from '@/global/init'
+import { Menu, menuItem } from '@/ui/components/Menu'
+import { GoldContainer, OutlineText } from '@/ui/components/styledComponents'
+import { InputIcon } from '@/ui/InputIcon'
+import { useGame, useQuery } from '@/ui/store'
 import { createSignal, onMount } from 'solid-js'
 import { For, Portal, Show } from 'solid-js/web'
 import { css } from 'solid-styled'
 import { Transition } from 'solid-transition-group'
 import atom from 'solid-use/atom'
 import { ItemDisplay } from './InventoryUi'
-import type { Item } from '@/constants/items'
-import { getSeed } from '@/constants/items'
-import type { Entity } from '@/global/entity'
-import { ecs, save, ui } from '@/global/init'
-import { InputIcon } from '@/ui/InputIcon'
-import { Menu, menuItem } from '@/ui/components/Menu'
-import { GoldContainer, OutlineText } from '@/ui/components/styledComponents'
-import { useGame, useQuery } from '@/ui/store'
-// eslint-disable-next-line no-unused-expressions
+
 menuItem
 const seedQuery = useQuery(ecs.with('menuType', 'interactionContainer', 'plantableSpot'))
 const playerMenuInputs = ecs.with('player', 'menuInputs')

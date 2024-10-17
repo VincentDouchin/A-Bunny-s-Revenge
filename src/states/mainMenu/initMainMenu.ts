@@ -1,5 +1,3 @@
-import { Mesh, PerspectiveCamera, PlaneGeometry, Scene, Vector2, Vector3 } from 'three'
-import { MainMenuBook } from './book'
 import { updateCameraZoom } from '@/global/camera'
 import { params } from '@/global/context'
 import { RenderGroup } from '@/global/entity'
@@ -8,6 +6,8 @@ import { menuInputMap } from '@/global/inputMaps'
 import { renderer } from '@/global/rendering'
 import { mainMenuState } from '@/global/states'
 import { mainMenuBackgound } from '@/shaders/mainMenuBackground'
+import { Mesh, PerspectiveCamera, PlaneGeometry, Scene, Vector2, Vector3 } from 'three'
+import { MainMenuBook } from './book'
 
 const ZOOM_OUT = -5
 

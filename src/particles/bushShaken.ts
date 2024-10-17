@@ -1,6 +1,6 @@
+import { assets } from '@/global/init'
 import { DoubleSide, MeshStandardMaterial, PlaneGeometry, Vector3 } from 'three'
 import { AxisAngleGenerator, Bezier, ConstantValue, ForceOverLife, HemisphereEmitter, IntervalValue, ParticleSystem, PiecewiseBezier, RandomQuatGenerator, RenderMode, Rotation3DOverLife, SizeOverLife } from 'three.quarks'
-import { assets } from '@/global/init'
 
 export const shakenLeaves = () => {
 	const geo = new PlaneGeometry(3, 6)

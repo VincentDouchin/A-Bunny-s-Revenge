@@ -1,28 +1,27 @@
 import type { Euler, Material, Object3D, Object3DEventMap, Vec2, Vector4Like } from 'three'
-import { DynamicDrawUsage, Group, LoadingManager, Matrix4, Mesh, TextureLoader, Vector3 } from 'three'
-
+import { getScreenBuffer } from '@/utils/buffer'
+import { useLocalStorage } from '@/utils/useLocalStorage'
 import assetManifest from '@assets/assetManifest.json'
 import { createStore, del, entries, set } from 'idb-keyval'
-import { InstancedUniformsMesh } from 'three-instanced-uniforms-mesh'
+import { DynamicDrawUsage, Group, LoadingManager, Matrix4, Mesh, TextureLoader, Vector3 } from 'three'
 import draco_decoder from 'three/examples/jsm/libs/draco/draco_decoder.wasm?url'
 import draco_wasm_wrapper from 'three/examples/jsm/libs/draco/draco_wasm_wrapper.js?url'
 import { DRACOLoader } from 'three/examples/jsm/loaders/DRACOLoader'
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader'
-import { useLocalStorage } from '@/utils/useLocalStorage'
-import { getScreenBuffer } from '@/utils/buffer'
+import { InstancedUniformsMesh } from 'three-instanced-uniforms-mesh'
 
 export type stringCaster<K extends string> = (s: string) => K
 export const getFileName = <K extends string>(path: string) => {
-	return	path.split(/[./]/g).at(-2) ?? '' as K
+	return path.split(/[./]/g).at(-2) ?? '' as K
 }
 export const getFolderName = (path: string) => {
-	return	path.split(/[./]/g).at(-3) ?? ''
+	return path.split(/[./]/g).at(-3) ?? ''
 }
 export const getExtension = (path: string) => {
-	return	path.split(/[./]/g).at(-1) ?? ''
+	return path.split(/[./]/g).at(-1) ?? ''
 }
 export const getPathPart = (part: number) => (path: string) => {
-	return	path.split(/[./]/g).at(part) ?? ''
+	return path.split(/[./]/g).at(part) ?? ''
 }
 
 export const textureLoader = new TextureLoader()
@@ -179,7 +178,8 @@ export const loaderProgress = (manifest: Record<string, { size: number, modified
 	document.body.appendChild(loadElement)
 	const total = Object.entries(manifest)
 		.filter(([x]) => getExtension(x) !== 'json')
-		.map(x => x[1].size).reduce((a, b) => a + b, 0)
+		.map(x => x[1].size)
+		.reduce((a, b) => a + b, 0)
 	const loader = (key: string) => {
 		loaded += manifest[key]?.size
 		const percent = Math.round(loaded / total * 100)

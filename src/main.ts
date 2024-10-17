@@ -52,7 +52,7 @@ import { updateWeaponArc } from './states/game/weapon'
 import { intiMainMenuRendering } from './states/mainMenu/initMainMenu'
 import { clickOnMenuButton, initMainMenuCamPos, renderMainMenu, selectMainMenu, setupWindow, spawnPlayerContinueGame } from './states/mainMenu/mainMenuRendering'
 import { disablePortrait, enableFullscreen, resize, setupGame, stopOnLosingFocus } from './states/setup/setupGame'
-import { UI, errors } from './ui/UI'
+import { errors, UI } from './ui/UI'
 
 coreState
 	.addPlugins(hierarchyPlugin, transformsPlugin, physicsPlugin, addToScene('camera', 'light', 'model', 'dialogContainer', 'emitter', 'interactionContainer', 'minigameContainer', 'healthBarContainer', 'dashDisplay', 'stun', 'debuffsContainer', 'weaponArc', 'questMarkerContainer', 'lockedOn'), updateModels, particlesPlugin)

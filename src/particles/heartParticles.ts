@@ -1,7 +1,7 @@
+import { assets } from '@/global/init'
 import { MeshBasicMaterial, PlaneGeometry } from 'three'
 import { Bezier, ColorRange, ConeEmitter, ConstantValue, IntervalValue, ParticleSystem, PiecewiseBezier, RandomQuatGenerator, RenderMode, SizeOverLife } from 'three.quarks'
 import { colorToVec4 } from './honeySplatParticles'
-import { assets } from '@/global/init'
 
 export const heartEmitter = () => {
 	const system = new ParticleSystem({

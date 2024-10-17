@@ -1,6 +1,6 @@
 import type { AnimationAction, AnimationBlendMode, AnimationClip, Object3D, Object3DEventMap } from 'three'
-import { AnimationMixer, LoopOnce } from 'three'
 import { entries } from '@/utils/mapFunctions'
+import { AnimationMixer, LoopOnce } from 'three'
 
 interface playOptions { timeScale?: number, weight?: number, clamped?: boolean, loopOnce?: boolean, blending?: AnimationBlendMode }
 export class Animator<K extends string> extends AnimationMixer {

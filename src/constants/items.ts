@@ -1,8 +1,7 @@
 import type { items } from '@assets/assets'
-
-import { entries, shuffle } from '@/utils/mapFunctions'
-import { modifiers } from '@/global/modifiers'
 import { save } from '@/global/init'
+import { modifiers } from '@/global/modifiers'
+import { entries, shuffle } from '@/utils/mapFunctions'
 
 export const cropNames = ['carrot', 'beet', 'tomato', 'lettuce', 'pumpkin', 'wheat', 'haricot', 'magic_bean', 'potato'] as const satisfies readonly items[]
 export const fruitNames = ['apple'] as const

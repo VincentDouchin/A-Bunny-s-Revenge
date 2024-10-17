@@ -1,10 +1,10 @@
+import { MenuType } from '@/global/entity'
+import { ecs } from '@/global/init'
+import { useGame, useQuery } from '@/ui/store'
+import { TouchButton } from '@/ui/TouchControls'
 import Exit from '@assets/icons/arrow-left-solid.svg'
 import Fish from '@assets/icons/fish-solid.svg'
 import { For, Show } from 'solid-js'
-import { MenuType } from '@/global/entity'
-import { ecs } from '@/global/init'
-import { TouchButton } from '@/ui/TouchControls'
-import { useGame, useQuery } from '@/ui/store'
 
 const fishingQuery = useQuery(ecs.with('menuType').where(e => e.menuType === MenuType.Fishing))
 export const FishingMinigameUi = () => {

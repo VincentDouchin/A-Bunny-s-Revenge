@@ -1,8 +1,8 @@
-import type { With } from 'miniplex'
-import { Color, Mesh, Vector3 } from 'three'
 import type { Entity } from '@/global/entity'
+import type { With } from 'miniplex'
 import { ecs, time, tweens } from '@/global/init'
 import { CharacterMaterial } from '@/shaders/materials'
+import { Color, Mesh, Vector3 } from 'three'
 
 export const flash = (entity: With<Entity, 'model'>, duration: number, type: 'preparing' | 'damage' | 'poisoned' = 'preparing') => {
 	return tweens.async({

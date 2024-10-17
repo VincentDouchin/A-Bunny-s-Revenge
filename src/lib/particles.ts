@@ -1,8 +1,8 @@
-import { BatchedRenderer } from 'three.quarks'
-import { type State, runIf } from './state'
 import { ecs, time } from '@/global/init'
-import { pausedState } from '@/global/states'
 import { gameRenderGroupQuery } from '@/global/rendering'
+import { pausedState } from '@/global/states'
+import { BatchedRenderer } from 'three.quarks'
+import { runIf, type State } from './state'
 
 const initBatchRender = () => {
 	let initiated = false

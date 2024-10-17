@@ -1,14 +1,14 @@
-import type { items } from '@assets/assets'
-import { RigidBodyType } from '@dimforge/rapier3d-compat'
-import { createBackIn, easeInOut, linear } from 'popmotion'
-import { AdditiveBlending, Mesh, MeshBasicMaterial, SphereGeometry, Vector3 } from 'three'
 import type { Entity } from '@/global/entity'
+import type { items } from '@assets/assets'
 import { assets, ecs, save, tweens } from '@/global/init'
 import { playSound } from '@/global/sounds'
 import { addTag, inMap } from '@/lib/hierarchy'
 import { modelColliderBundle } from '@/lib/models'
 import { addItemToPlayer } from '@/utils/dialogHelpers'
 import { sleep } from '@/utils/sleep'
+import { RigidBodyType } from '@dimforge/rapier3d-compat'
+import { createBackIn, easeInOut, linear } from 'popmotion'
+import { AdditiveBlending, Mesh, MeshBasicMaterial, SphereGeometry, Vector3 } from 'three'
 
 export const itemsQuery = ecs.with('item', 'position', 'model').without('collecting')
 

@@ -1,5 +1,5 @@
-import { CircleGeometry, Mesh, MeshBasicMaterial, Quaternion, Vector3 } from 'three'
 import { ecs, tweens } from '@/global/init'
+import { CircleGeometry, Mesh, MeshBasicMaterial, Quaternion, Vector3 } from 'three'
 
 const geo = new CircleGeometry(1, 8)
 

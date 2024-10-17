@@ -1,19 +1,18 @@
+import type { UserConfig } from 'vite'
 import path from 'node:path'
 import process from 'node:process'
-import type { UserConfig } from 'vite'
 import { defineConfig } from 'vite'
+import { VitePWA } from 'vite-plugin-pwa'
 import solidPlugin from 'vite-plugin-solid'
 import solidStyledPlugin from 'vite-plugin-solid-styled'
-
-import { VitePWA } from 'vite-plugin-pwa'
 import solidSvg from 'vite-plugin-solid-svg'
 import { assetPipeline } from './scripts/assetPipeline'
 import { ConverAudioFiles } from './scripts/convertAudioFiles'
+import { ConverFBXToGLB } from './scripts/convertFbx2GLB'
 import { ExtractAnimations } from './scripts/extractAnimations'
 import { GenerateAssetManifest } from './scripts/generateAssetManifest'
 import { GenerateAssetNames } from './scripts/generateAssetNames'
 import { OptimizeAssets } from './scripts/optimizeAssets'
-import { ConverFBXToGLB } from './scripts/convertFbx2GLB'
 
 export default defineConfig(async () => {
 	const config: UserConfig = {

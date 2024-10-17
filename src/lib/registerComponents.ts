@@ -1,8 +1,8 @@
 import type { Object3D } from 'three'
+import type { State } from './state'
 import { Group } from 'three'
 import { type ComponentsOfType, RenderGroup } from '../global/entity'
 import { ecs } from '../global/init'
-import type { State } from './state'
 
 const gameSceneQuery = ecs.with('scene', 'renderGroup').where(e => e.renderGroup === RenderGroup.Game)
 export const addToScene = (...components: Array<Exclude<ComponentsOfType<Object3D>, 'group'>>) => (state: State) => {

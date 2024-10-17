@@ -1,16 +1,16 @@
-import { DoubleSide, Group, Mesh, MeshBasicMaterial, PlaneGeometry, ShaderMaterial } from 'three'
-import { RoomType, genDungeon } from '../dungeon/generateDungeon'
 import type { QueryEntity } from '@/global/entity'
+import type { DungeonRessources } from '@/global/states'
+import type { State, System } from '@/lib/state'
 import { Faction, farmDoors } from '@/global/entity'
 import { ecs, save, tweens, world } from '@/global/init'
 import { playSound } from '@/global/sounds'
-import type { DungeonRessources } from '@/global/states'
 import { campState, dungeonState, genDungeonState } from '@/global/states'
 import { Direction, isCardialDirection, otherDirection } from '@/lib/directions'
-import type { State, System } from '@/lib/state'
 import { doorClosed } from '@/particles/doorClosed'
 import vertexShader from '@/shaders/glsl/main.vert?raw'
 import { VineGateMaterial } from '@/shaders/materials'
+import { DoubleSide, Group, Mesh, MeshBasicMaterial, PlaneGeometry, ShaderMaterial } from 'three'
+import { genDungeon, RoomType } from '../dungeon/generateDungeon'
 
 export const doorSide = () => {
 	const mesh = new Mesh(
