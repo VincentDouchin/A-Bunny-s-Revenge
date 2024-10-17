@@ -47,8 +47,9 @@ export enum Interactable {
 	Water = 'water',
 	Buy = 'buy',
 	MagicBean = 'Plant magic bean',
-	Fishing = 'Use fishing pole',
+	Fishing = 'use fishing pole',
 	Read = 'read',
+	PickUp = 'pick up',
 }
 export enum MenuType {
 	Oven,

@@ -69,6 +69,7 @@ export const completeQuest = <Q extends QuestName>(name: Q) => {
 export const showMarker = <T extends QuestName>(name: QuestMarkers) => {
 	const [questName, key] = name.split('#') as [T, QuestStepKey<T>]
 	const savedQuest = save.quests[questName]
+	debugger
 	if (savedQuest) {
 		const index = quests[questName].steps.findIndex(step => step.key === key)
 		const prevKey: QuestStepKey<T> | undefined = quests[questName].steps[index - 1]?.key

@@ -7,6 +7,7 @@ import { Faction, Interactable } from '@/global/entity'
 import { completeQuestStepEvent, cookedMealEvent, harvestCropEvent, showTutorialEvent } from '@/global/events'
 import { assets, ecs, inputManager, levelsData, save } from '@/global/init'
 import { cutSceneState, dungeonState, mainMenuState } from '@/global/states'
+import { modelColliderBundle } from '@/lib/models'
 import { RoomType } from '@/states/dungeon/generateDungeon'
 import { cropBundle } from '@/states/farm/farming'
 import { stopPlayer } from '@/states/game/movePlayer'
@@ -15,6 +16,7 @@ import { displayKeyItem } from '@/ui/KeyItem'
 import { TutorialWindow } from '@/ui/Tutorial'
 import { addItemToPlayer, enterHouse, leaveHouse, movePlayerTo, sleepPlayer, speaker, unlockRecipe } from '@/utils/dialogHelpers'
 import { sleep } from '@/utils/sleep'
+import { RigidBodyType } from '@dimforge/rapier3d-compat'
 import { Vector3 } from 'three'
 import { addActors, addQuest, completeQuestStep, hasCompletedStep } from './questHelpers'
 
@@ -22,12 +24,13 @@ const enemiesQuery = ecs.with('faction').where(e => e.faction === Faction.Enemy)
 const cratesQuery = ecs.with('crate').without('interactable')
 const cratesToOpenQuery = ecs.with('crate').with('interactable', 'onPrimary')
 const dungeonQuery = ecs.with('dungeon')
-const basketQuery = ecs.with('actor', 'position', 'rotation').where(e => e.actor === 'basketIntro')
 const playerQuery = ecs.with('player', 'position', 'rotation', 'targetRotation', 'state')
 const plantableSpotsQuery = ecs.with('plantableSpot', 'position', 'entityId').without('planted')
 const cropsQuery = ecs.with('crop')
 const plantedQuery = ecs.with('planted', 'position')
-const clearingDoorQuery = ecs.with('door', 'position').where(e => e.door === 'clearing')
+const doorQuery = ecs.with('door', 'position')
+const clearingDoorQuery = doorQuery.where(e => e.door === 'clearing')
+const introDoorQuery = doorQuery.where(e => e.door === 'intro')
 const CARROTS_TO_HARVEST = 3
 
 // const introQuest = new Quest('intro_quest')
@@ -39,14 +42,6 @@ const CARROTS_TO_HARVEST = 3
 // 	.addStep('5_cook_meal', 'Make a carrot soup for the festival')
 // ! Basket
 
-const pickUpBasket = async () => {
-	for (const basket of basketQuery) {
-		const dest = basket.position.clone().add(new Vector3(0, 0, 5).applyQuaternion(basket.rotation))
-		await movePlayerTo(dest)
-		ecs.remove(basket)
-		await displayKeyItem(assets.models.basket.scene, 'Basket of ingredients', 0.6)
-	}
-}
 const cellarDoorQuery = ecs.with('door').where(e => e.door === 'cellar')
 const lockCellar = () => cellarDoorQuery.onEntityAdded.subscribe((e) => {
 	if (!hasCompletedStep('intro_quest', '2_find_pot')) {
@@ -80,13 +75,14 @@ const introQuestDialogs = {
 		ecs.reindex(player)
 	},
 
-	async *pickupBasket() {
+	async *pickupBasket(basket: Entity) {
 		speaker('Player')
 		cutSceneState.enable()
 		yield 'So that\'s where I left my #BLUE#basket#BLUE!'
-		yield await pickUpBasket()
+		ecs.remove(basket)
+		yield await displayKeyItem(assets.models.basket.scene, 'Basket of ingredients', 0.6)
 		completeQuestStep('intro_quest', '0_find_basket')
-		yield 'Now I can go back Home and get started on dinner with Grandma!'
+		yield 'Now I can go back #GREEN#Home#GREEN# and get started on dinner with Grandma!'
 		cutSceneState.disable()
 	},
 	async *PlayerIntro2() {
@@ -200,8 +196,20 @@ const introQuestDialogs = {
 
 }
 
-const lockDoor = () => clearingDoorQuery.onEntityAdded.subscribe((e) => {
+const lockClearingDoor = () => clearingDoorQuery.onEntityAdded.subscribe((e) => {
 	ecs.update(e, { doorLocked: true })
+})
+const lockIntroDoor = () => introDoorQuery.onEntityAdded.subscribe((e) => {
+	if (!hasCompletedStep('intro_quest', '0_find_basket')) {
+		ecs.update(e, { doorLocked: true })
+	}
+})
+const unlockIntroDoor = () => completeQuestStepEvent.subscribe((e) => {
+	if (e === 'intro_quest#0_find_basket') {
+		for (const door of introDoorQuery) {
+			ecs.removeComponent(door, 'doorLocked')
+		}
+	}
 })
 const turnAwayFromDoor = () => {
 	let closeToDoor = false
@@ -217,20 +225,6 @@ const turnAwayFromDoor = () => {
 	}
 }
 
-const getCloseToBasket = () => {
-	let closeToBasket = false
-	return () => {
-		for (const basket of basketQuery) {
-			for (const player of playerQuery) {
-				if (player.position.distanceTo(basket.position) < 20 && !closeToBasket) {
-					closeToBasket = true
-					stopPlayer()
-					ecs.add({ dialog: introQuestDialogs.pickupBasket() })
-				}
-			}
-		}
-	}
-}
 export const startIntro = async () => {
 	const player = playerQuery.first
 	if (player) {
@@ -330,7 +324,15 @@ const introQuestActors = addActors({
 	basketIntro: () => {
 		const model = assets.models.basket.scene.clone()
 		model.scale.setScalar(5)
-		return { model, questMarker: ['intro_quest#0_find_basket'] }
+		const bundle = modelColliderBundle(model, RigidBodyType.Fixed, true)
+		return {
+			...bundle,
+			questMarker: ['intro_quest#0_find_basket'],
+			interactable: Interactable.PickUp,
+			onPrimary(basket) {
+				ecs.add({ dialog: introQuestDialogs.pickupBasket(basket) })
+			},
+		}
 	},
 	houseDoor: () => {
 		return {
@@ -411,6 +413,6 @@ const cookMeal = () => cookedMealEvent.subscribe((cooking, recipe) => {
 export const introQuestPlugin = (state: State) => {
 	state
 		.addPlugins(introQuestActors)
-		.addSubscriber(playerFromIntroDialog, makeCratesInteractable, displayCarrots, addCarrotMarkers, completePickupCarrots, cookMeal, lockDoor, lockCellar)
-		.onUpdate(getCloseToBasket(), displayFarmingTutorial, turnAwayFromDoor())
+		.addSubscriber(playerFromIntroDialog, makeCratesInteractable, displayCarrots, addCarrotMarkers, completePickupCarrots, cookMeal, lockClearingDoor, lockCellar, lockIntroDoor, unlockIntroDoor)
+		.onUpdate(displayFarmingTutorial, turnAwayFromDoor())
 }
