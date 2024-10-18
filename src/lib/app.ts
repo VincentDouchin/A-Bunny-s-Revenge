@@ -151,7 +151,7 @@ class App<States extends string[], Ressources extends Record<string, any> = Reco
 	}
 
 	#transitionSheduler = <S extends AppStates<this>>(schedule: 'enter' | 'exit', state: S): Schedulers<this, S>['onEnter' | 'onExit'] => {
-		return (...systems: TransitionSystem<this, any>[]) => {
+		return (...systems) => {
 			const set: SystemSet<this, S, TransitionSystem<this, S>> = { systems }
 			this.#systems[state]![schedule].add(set)
 			return {
@@ -162,8 +162,8 @@ class App<States extends string[], Ressources extends Record<string, any> = Reco
 		}
 	}
 
-	#updateScheduler = <S extends AppStates<this>>(schedule: 'preUpdate' | 'update' | 'postUpdate', state: S): Schedulers<this, S>['onEnter' | 'onExit'] => {
-		return (...systems: UpdateSystem<this, any>[]) => {
+	#updateScheduler = <S extends AppStates<this>>(schedule: 'preUpdate' | 'update' | 'postUpdate', state: S): Schedulers<this, S>['onPreUpdate' | 'onUpdate' | 'onPostUpdate'] => {
+		return (...systems) => {
 			const set: SystemSet<this, S, UpdateSystem<this, S>> = { systems }
 			this.#systems[state]![schedule].add(set)
 			return {
