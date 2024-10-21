@@ -1,34 +1,42 @@
-interface Commands<States extends string[], Ressources> {
+export type Commands<A extends App<any, any>> = A extends App<infer States, infer Ressources> ? {
 	enable: <S extends States[number]>(...args: S extends keyof Ressources ? [S, Ressources[S]] : [S]) => Promise<void>
-	disable: (state: States[number]) => void
+	disable: (state: States[number]) => Promise<void>
 	isEnabled: (state: States[number]) => boolean
 	isDisabled: (state: States[number]) => boolean
-}
+} : never
 
-type AppStates<A extends App<any, any>> = A extends App<infer States, any> ? States[number] : never
+export type AppStates<A extends App<any, any>> = A extends App<infer States, any> ? States[number] : never
 
-type ConditionSystem<A extends App<any, any>, S extends AppStates<A> | undefined = undefined> = A extends App<infer States, infer Ressources>
-	? (commands: Commands<States, Ressources>, ressources: S extends keyof Ressources ? Ressources[S] : undefined) => boolean
+type ConditionSystem<A extends App<any, any>, S extends AppStates<A> | undefined = undefined> = A extends App<any, infer Ressources>
+	? (commands: Commands<A>, ressources: S extends keyof Ressources ? Ressources[S] : undefined) => boolean
 	: never
 
-export type UpdateSystem<A extends App<any, any>, S extends AppStates<A> | undefined = undefined> = A extends App<infer States, infer Ressources>
-	? (commands: Commands<States, Ressources>, ressources: S extends keyof Ressources ? Ressources[S] : undefined) => void
+export type UpdateSystem<A extends App<any, any>, S extends AppStates<A> | undefined = undefined> = A extends App<any, infer Ressources>
+	? (commands: Commands<A>, ressources: S extends keyof Ressources ? Ressources[S] : undefined) => void
 	: never
 
-export type TransitionSystem<A extends App<any, any>, S extends AppStates<A> | undefined = undefined> = A extends App<infer States, infer Ressources>
-	? (commands: Commands<States, Ressources>, ressources: S extends keyof Ressources ? Ressources[S] : undefined) => Promise<void> | void | UpdateSystem<A, S>
+export type TransitionSystem<A extends App<any, any>, S extends AppStates<A> | undefined = undefined> = A extends App<any, infer Ressources>
+	? (commands: Commands<A>, ressources: S extends keyof Ressources ? Ressources[S] : undefined) => Promise<void> | void
+	: never
+
+export type SubscriberSystem<A extends App<any, any>, S extends AppStates<A> | undefined = undefined> = A extends App<any, infer Ressources>
+	? (commands: Commands<A>, ressources: S extends keyof Ressources ? Ressources[S] : undefined) => () => void
 	: never
 
 type Systems<A extends App<any, any>> = {
 	[S in AppStates<A>]?: {
+		subscribers: Set<SubscriberSystem<A, S>>
 		enter: Set<{ systems: TransitionSystem<A, S>[], condition?: ConditionSystem<A, S> }>
 		exit: Set<{ systems: TransitionSystem<A, S>[], condition?: ConditionSystem<A, S> }>
 		preUpdate: Set<{ systems: UpdateSystem<A, S>[], condition?: ConditionSystem<A, S> }>
 		update: Set<{ systems: UpdateSystem<A, S>[], condition?: ConditionSystem<A, S> }>
 		postUpdate: Set<{ systems: UpdateSystem<A, S>[], condition?: ConditionSystem<A, S> }>
-
-	} & { cleanUp: Set<() => void> }
+		cleanUp: Set<() => void>
+	}
 }
+export type Ressources<A extends App<any, any>, S extends AppStates<A>> = A extends App<any, infer R>
+	? R[S]
+	: never
 
 type Schedule = 'enter' | 'preUpdate' | 'update' | 'postUpdate' | 'exit'
 export type Plugin<A extends App<any, any>> = (app: A) => void
@@ -37,6 +45,7 @@ interface SystemSet<A extends App<any, any>, S extends AppStates<A>, SystemType 
 	condition?: ConditionSystem<A, S>
 }
 interface Schedulers<A extends App<any, any>, S extends AppStates<A>> {
+	addSubscribers: (...systems: SubscriberSystem<A, S>[]) => void
 	onEnter: (...systems: TransitionSystem<A, S>[]) => { runIf: (condition: ConditionSystem<A, S>) => void }
 	onPreUpdate: (...systems: UpdateSystem<A, S>[]) => { runIf: (condition: ConditionSystem<A, S>) => void }
 	onUpdate: (...systems: UpdateSystem<A, S>[]) => { runIf: (condition: ConditionSystem<A, S>) => void }
@@ -58,8 +67,8 @@ export class AppBuilder<States extends string[] = [], Ressources extends Record<
 		return this as unknown as AppBuilder<States, Ressources extends Record<string, never> ? { [key in S]: R } : Ressources & { [key in S]: R }>
 	}
 
-	setInitialState<S extends States[number]>(...args: S extends keyof Ressources ? Ressources[S] extends object ? [state: S, ressources: Ressources[S]] : [state: S] : never) {
-		const [state, ressources] = args
+	setInitialState<S extends States[number]>(...args: S extends keyof Ressources ? Ressources extends Record<string, never> ? [state: S] : [state: S, ressouces: Ressources[S]] : [state: S]) {
+		const [state, ressources] = args as [S, Ressources[S]]
 		this.enabledStates[state] = ressources
 		return this
 	}
@@ -82,6 +91,7 @@ class App<States extends string[], Ressources extends Record<string, any> = Reco
 		for (const stateSet of appBuilder.states) {
 			for (const state of stateSet) {
 				this.#systems[state as AppStates<this>] = {
+					subscribers: new Set(),
 					enter: new Set(),
 					preUpdate: new Set(),
 					update: new Set(),
@@ -93,7 +103,7 @@ class App<States extends string[], Ressources extends Record<string, any> = Reco
 		}
 	}
 
-	#commands: Commands<States, Ressources> = {
+	#commands: Commands<App<States, Ressources>> = {
 		enable: async <S extends States[number]>(...args: S extends keyof Ressources ? [S, Ressources[S]] : [S]) => new Promise((resolve) => {
 			this.#queue.add(async () => {
 				const [state, ressources] = args
@@ -112,20 +122,19 @@ class App<States extends string[], Ressources extends Record<string, any> = Reco
 						continue
 					}
 					for (const system of set.systems) {
-						const unsub = await system(this.#commands, ressources as Ressources[S])
-						if (unsub) {
-							const cleanup = () => {
-								unsub(this.#commands, ressources as Ressources[S])
-								this.#systems[state]?.cleanUp.delete(cleanup)
-							}
-							this.#systems[state]?.cleanUp.add(cleanup)
-						}
+						await system(this.#commands, ressources as Ressources[S])
 					}
+				}
+				const subscriberSets = this.#systems[state]?.subscribers ?? []
+
+				for (const sub of subscriberSets) {
+					const unsub = sub(this.#commands, ressources as Ressources[S])
+					this.#systems[state]?.cleanUp.add(unsub)
 				}
 				resolve()
 			})
 		}),
-		disable: <S extends States[number]>(state: S) => {
+		disable: async <S extends States[number]>(state: S) => {
 			const ressources = this.#enabledStates[state]
 			delete this.#enabledStates[state]
 			this.#systems[state]?.cleanUp.forEach((callBack) => {
@@ -138,7 +147,7 @@ class App<States extends string[], Ressources extends Record<string, any> = Reco
 					continue
 				}
 				for (const system of set.systems) {
-					system(this.#commands, ressources as Ressources[S])
+					await system(this.#commands, ressources as Ressources[S])
 				}
 			}
 		},
@@ -176,6 +185,11 @@ class App<States extends string[], Ressources extends Record<string, any> = Reco
 
 	#schedulers = <S extends AppStates<this>>(state: S): Schedulers<this, S> => {
 		return {
+			addSubscribers: (...subscribers: SubscriberSystem<this, S>[]) => {
+				for (const subscriber of subscribers) {
+					this.#systems[state]?.subscribers.add(subscriber)
+				}
+			},
 			onEnter: this.#transitionSheduler('enter', state),
 			onPreUpdate: this.#updateScheduler('preUpdate', state),
 			onUpdate: this.#updateScheduler('update', state),
@@ -247,9 +261,10 @@ class App<States extends string[], Ressources extends Record<string, any> = Reco
 }
 
 const app = new AppBuilder()
-	.addState('hello', 'there')
+	.addState('hello', 'there', 'mister')
 	.bindRessource<'hello', { hi: string }>()
 	.bindRessource<'there', { general: string }>()
+	.setInitialState('mister')
 	.setInitialState('hello', { hi: 'grievous' })
 	.build()
 
