@@ -186,10 +186,12 @@ export const props: Props = [
 					}
 				}
 			}
+			if (data.data.boundary) {
+				entity.boundary = data.data.boundary
+			}
 
 			return {
 				door: data.data.direction,
-				boundary: data.data.boundary,
 				...entity,
 			}
 		},
