@@ -31,7 +31,7 @@ export const setupGame = async () => {
 	} else if (!params.skipMainMenu) {
 		mainMenuState.enable()
 	} else {
-		campState.enable({ door: 'clearing' })
+		campState.enable({ door: null })
 		updateRenderSize()
 		updateCameraZoom()
 	}

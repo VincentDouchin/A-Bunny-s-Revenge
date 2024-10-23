@@ -1,6 +1,6 @@
 import type { Actor, Doors, Entity } from '@/global/entity'
 import type { DungeonRessources, FarmRessources } from '@/global/states'
-import type { fruit_trees, gardenPlots, models, vegetation } from '@assets/assets'
+import type { fruit_trees, gardenPlots, models, vegetation, village } from '@assets/assets'
 import type { With } from 'miniplex'
 import type { BufferGeometry, Object3DEventMap } from 'three'
 import type { EntityData, ModelName } from './LevelEditor'
@@ -48,7 +48,7 @@ export const getModel = (key: ModelName): Object3D => {
 		// @ts-expect-error okok
 		return customModels[key]()
 	}
-	for (const model of ['vegetation', 'gardenPlots', 'fruitTrees', 'models'] as const) {
+	for (const model of ['vegetation', 'gardenPlots', 'fruitTrees', 'models', 'village'] as const) {
 		if (key in assets[model]) {
 			// @ts-expect-error okok
 			return clone(assets[model][key].scene)
@@ -60,6 +60,7 @@ export interface ExtraData {
 	'door': {
 		direction: Doors
 		doorLevel: number
+		boundary: Direction | null
 	}
 	'Vine gate': {
 		direction: Direction
@@ -79,11 +80,11 @@ type BundleFn<E extends EntityData<any>> = (entity: With<Entity, 'entityId' | 'm
 
 export interface PlacableProp<N extends string> {
 	name: N
-	models: (models | customModel | vegetation | gardenPlots | fruit_trees)[]
+	models: (models | customModel | vegetation | gardenPlots | fruit_trees | village)[]
 	data?: N extends keyof ExtraData ? ExtraData[N] : undefined
 	bundle?: BundleFn<EntityData<N extends keyof ExtraData ? NonNullable<ExtraData[N]> : never>>
 }
-export type propNames = 'log' | 'door' | 'rock' | 'board' | 'oven' | 'CookingPot' | 'stove' | 'Flower/plants' | 'sign' | 'plots' | 'bush' | 'fence' | 'house' | 'mushrooms' | 'lamp' | 'Kitchen' | 'berry bushes' | 'bench' | 'well' | 'fruit trees' | 'stall' | 'Vine gate' | 'fishing deck' | 'pillar' | 'marker' | 'cellar' | 'cellar_door' | 'scaffolds' | 'cellar_props' | 'cellar_wall'
+export type propNames = 'log' | 'door' | 'rock' | 'board' | 'oven' | 'CookingPot' | 'stove' | 'Flower/plants' | 'sign' | 'plots' | 'bush' | 'fence' | 'house' | 'mushrooms' | 'lamp' | 'Kitchen' | 'berry bushes' | 'bench' | 'well' | 'fruit trees' | 'stall' | 'Vine gate' | 'fishing deck' | 'pillar' | 'marker' | 'cellar' | 'cellar_door' | 'scaffolds' | 'cellar_props' | 'cellar_wall' | 'village'
 
 type Props = ({ [k in propNames]: PlacableProp<k> }[propNames])[]
 export const props: Props = [
@@ -139,7 +140,7 @@ export const props: Props = [
 	},
 	{
 		name: 'door',
-		data: { direction: Direction.N, doorLevel: 0 },
+		data: { direction: Direction.N, doorLevel: 0, boundary: null },
 		models: ['door', 'doorMarker'],
 		bundle: (entity, data, ressources) => {
 			if (dungeonState.enabled && ressources && 'dungeon' in ressources) {
@@ -188,6 +189,7 @@ export const props: Props = [
 
 			return {
 				door: data.data.direction,
+				boundary: data.data.boundary,
 				...entity,
 			}
 		},
@@ -663,5 +665,9 @@ export const props: Props = [
 	{
 		name: 'pillar',
 		models: ['pillarDown', 'pillarUp'],
+	},
+	{
+		name: 'village',
+		models: ['P_BLD_house_01', 'P_BLD_house_02', 'P_BLD_house_03', 'P_BLD_house_04', 'P_BLD_house_05', 'P_BLD_house_06', 'P_BLD_house_07', 'P_BLD_house_08', 'P_BLD_house_09', 'P_BLD_house_10', 'P_BLD_house_11', 'P_BLD_house_12', 'P_BLD_house_13', 'P_BLD_house_14'],
 	},
 ]

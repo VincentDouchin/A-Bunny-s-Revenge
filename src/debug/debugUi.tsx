@@ -120,22 +120,6 @@ export const DebugUi = () => {
 			1000,
 		))
 	}
-	const changeZoom = (zoom: number) => {
-		params.zoom = zoom
-		const camera = cameraQuery.first
-		if (!camera) return
-		if (camera.camera instanceof PerspectiveCamera) {
-			camera.camera.zoom = window.innerWidth / window.innerHeight / zoom
-			camera.camera.updateProjectionMatrix()
-		}
-		if (camera.camera instanceof OrthographicCamera) {
-			camera.camera.left = -width / 2 / params.zoom
-			camera.camera.right = width / 2 / params.zoom
-			camera.camera.top = height / 2 / params.zoom
-			camera.camera.bottom = -height / 2 / params.zoom
-			camera.camera.updateProjectionMatrix()
-		}
-	}
 	const enableAttackAnimations = () => {
 		debugOptions.attackInFarm(!debugOptions.attackInFarm())
 		for (const player of ecs.with('model', 'player')) {
@@ -199,41 +183,6 @@ export const DebugUi = () => {
 						type="number"
 						value={params.renderHeight}
 						onChange={updatePixelation}
-					>
-					</input>
-					Camera Offset X
-					<input
-						type="number"
-						value={params?.cameraOffsetX}
-						onChange={e => params.cameraOffsetX = e.target.valueAsNumber}
-					>
-					</input>
-					Camera Offset Y
-					<input
-						type="number"
-						value={params?.cameraOffsetY}
-						onChange={e => params.cameraOffsetY = e.target.valueAsNumber}
-					>
-					</input>
-					Camera Offset Z
-					<input
-						type="number"
-						value={params?.cameraOffsetZ}
-						onChange={e => params.cameraOffsetZ = e.target.valueAsNumber}
-					>
-					</input>
-					Zoom
-					<input
-						type="number"
-						value={params?.zoom}
-						onChange={e => changeZoom(e.target.valueAsNumber)}
-					>
-					</input>
-					Fov
-					<input
-						type="number"
-						value={params?.fov}
-						onChange={e => params.fov = e.target.valueAsNumber}
 					>
 					</input>
 					SpeedUp

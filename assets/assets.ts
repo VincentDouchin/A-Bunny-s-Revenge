@@ -18,5 +18,6 @@ export type steps = 'Bare Step Grass Soft A' | 'Bare Step Grass Soft B' | 'Bare 
 export type textures = 'borders' | 'bunny' | 'bunny-sleepy' | 'circle_01' | 'Dirt4_Dark' | 'emotes' | 'fish' | 'grass-dead' | 'heart' | 'parchment' | 'planks' | 'plant_19' | 'sleepy'
 export type trees = 'CommonTree_Dead_1' | 'CommonTree_Dead_2' | 'CommonTree_Dead_3' | 'CommonTree_Dead_4' | 'CommonTree_Dead_5' | 'Low_Poly_Forest_treeTall01' | 'Low_Poly_Forest_treeTall02' | 'Low_Poly_Forest_treeTall03' | 'Low_Poly_Forest_treeTall04' | 'Willow_1' | 'Willow_2'
 export type vegetation = 'Bush_1' | 'Bush_2' | 'SM_Env_Bush_01' | 'SM_Env_Bush_02' | 'SM_Env_Bush_03' | 'SM_Env_Bush_04' | 'SM_Env_Flower_01' | 'SM_Env_Flower_02' | 'SM_Env_Flower_03' | 'SM_Env_Flower_05' | 'SM_Env_Flower_06' | 'SM_Env_Flower_07' | 'SM_Env_Flower_08' | 'SM_Env_Flowers_01' | 'SM_Env_Flowers_02' | 'SM_Env_Grass_01' | 'SM_Env_Grass_02' | 'SM_Env_Plant_01' | 'SM_Env_Plant_02' | 'SM_Env_Plant_03'
+export type village = 'P_BLD_house_01' | 'P_BLD_house_02' | 'P_BLD_house_03' | 'P_BLD_house_04' | 'P_BLD_house_05' | 'P_BLD_house_06' | 'P_BLD_house_07' | 'P_BLD_house_08' | 'P_BLD_house_09' | 'P_BLD_house_10' | 'P_BLD_house_11' | 'P_BLD_house_12' | 'P_BLD_house_13' | 'P_BLD_house_14'
 export type voices = 'f1' | 'f2' | 'f3'
 export type weapons = 'Hoe' | 'Ladle' | 'ScissorWeapon' | 'SwordWeapon'

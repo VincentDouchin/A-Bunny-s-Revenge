@@ -7,9 +7,9 @@ import { initCamera, initializeCameraPosition, moveCamera } from './global/camer
 import { coroutines, inputManager, musicManager, resetSave, time, tweens, ui } from './global/init'
 import { tickModifiersPlugin } from './global/modifiers'
 import { updateMousePosition } from './global/mousePosition'
-import { compileShaders, initThree, renderGame } from './global/rendering'
+import { compileShaders, initTexturesItemsAndEnemies, initThree, renderGame } from './global/rendering'
 import { initHowler, playAmbience } from './global/sounds'
-import { app, campState, coreState, dungeonState, gameState, genDungeonState, introQuest, introState, mainMenuState, openMenuState, pausedState, setupState } from './global/states'
+import { app, campState, coreState, dungeonState, gameState, genDungeonState, introQuest, introState, mainMenuState, openMenuState, pausedState, setupState, villageState } from './global/states'
 import { despawnOfType, hierarchyPlugin, removeStateEntity } from './lib/hierarchy'
 import { updateModels } from './lib/modelsProperties'
 import { particlesPlugin } from './lib/particles'
@@ -44,7 +44,7 @@ import { equip } from './states/game/equip'
 import { bobItems, collectItems, popItems, stopItems } from './states/game/items'
 import { canPlayerMove, movePlayer, playerSteps, savePlayerFromTheEmbraceOfTheVoid, stopPlayer } from './states/game/movePlayer'
 import { pauseGame } from './states/game/pauseGame'
-import { allowDoorCollision, collideWithDoorCamp, collideWithDoorClearing, collideWithDoorDungeon, collideWithDoorIntro, doorLocking, unlockDoorClearing, unlockDoorDungeon } from './states/game/spawnDoor'
+import { allowDoorCollision, collideWithDoorCamp, collideWithDoorClearing, collideWithDoorDungeon, collideWithDoorIntro, collideWithDoorVillage, doorLocking, unlockDoorClearing, unlockDoorDungeon } from './states/game/spawnDoor'
 import { spawnDungeon, spawnLevel, spawnLevelData, updateTimeUniforms } from './states/game/spawnLevel'
 import { spawnCharacter, spawnPlayerClearing, spawnPlayerDungeon } from './states/game/spawnPlayer'
 import { interactionPlugin } from './states/game/touchItem'
@@ -57,7 +57,7 @@ import { errors, UI } from './ui/UI'
 coreState
 	.addPlugins(hierarchyPlugin, transformsPlugin, physicsPlugin, addToScene('camera', 'light', 'model', 'dialogContainer', 'emitter', 'interactionContainer', 'minigameContainer', 'healthBarContainer', 'dashDisplay', 'stun', 'debuffsContainer', 'weaponArc', 'questMarkerContainer', 'lockedOn'), updateModels, particlesPlugin)
 	.onEnter(initThree, initCamera, moveCamera(true))
-	.onEnter(() => ui.render(UI), initHowler)
+	.onEnter(() => ui.render(UI), initHowler, initTexturesItemsAndEnemies)
 	.addSubscriber(resize, disablePortrait, enableFullscreen, stopOnLosingFocus)
 	.onPreUpdate(() => time.tick(), coroutines.tick, savePlayerFromTheEmbraceOfTheVoid, updateMousePosition())
 	.onUpdate(runIf(() => !pausedState.enabled, updateAnimations('playerAnimator', 'basketAnimator', 'enemyAnimator', 'ovenAnimator', 'houseAnimator', 'chestAnimator', 'kayAnimator', 'cellarDoorAnimator')))
@@ -134,6 +134,12 @@ dungeonState
 pausedState
 	.onEnter(() => time.stop(), musicManager.pause)
 	.onExit(() => time.start(), musicManager.play)
+
+villageState
+	.onEnter(spawnLevel('village'), spawnLevelData, spawnCharacter, moveCamera(true))
+	.onEnter(compileShaders)
+	.onUpdate(collideWithDoorVillage)
+	.onExit(despawnOfType('map'))
 
 introQuest.addPlugins(introQuestPlugin)
 

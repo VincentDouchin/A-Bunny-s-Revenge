@@ -4,7 +4,7 @@ import type { State, System } from '@/lib/state'
 import { Faction, farmDoors } from '@/global/entity'
 import { ecs, save, tweens, world } from '@/global/init'
 import { playSound } from '@/global/sounds'
-import { campState, dungeonState, genDungeonState } from '@/global/states'
+import { campState, dungeonState, genDungeonState, villageState } from '@/global/states'
 import { Direction, isCardialDirection, otherDirection } from '@/lib/directions'
 import { doorClosed } from '@/particles/doorClosed'
 import vertexShader from '@/shaders/glsl/main.vert?raw'
@@ -78,17 +78,23 @@ export const collideWithDoorDungeon = onCollideWithDoor<typeof dungeonState>((do
 		const nextRoom = dungeon.doors[door.door]
 		if (nextRoom) {
 			dungeonState.enable({ dungeon: nextRoom, direction: otherDirection[door.door], playerHealth: player.currentHealth, firstEntry: false, dungeonLevel, weapon })
-			return
 		}
+	} else {
+		campState.enable({ door: door.door ?? 'clearing' })
 	}
-
-	campState.enable({ door: 'clearing' })
 })
 
 export const collideWithDoorCamp = onCollideWithDoor(({ door }) => {
 	if (door === 'clearing') {
 		genDungeonState.enable()
 	}
+	if (door === 'village') {
+		villageState.enable({ door: 'village' })
+	}
+})
+
+export const collideWithDoorVillage = onCollideWithDoor(() => {
+	campState.enable({ door: 'village' })
 })
 
 export const collideWithDoorClearing = onCollideWithDoor((door, player) => {

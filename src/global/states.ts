@@ -8,7 +8,7 @@ export const app = new StateMananger()
 export const coreState = app.create()
 export const gameState = app.create()
 export interface FarmRessources {
-	door: (typeof farmDoors)[number]
+	door: (typeof farmDoors)[number] | null
 }
 export const campState = app.create<FarmRessources>()
 export const setupState = app.create()
@@ -18,6 +18,7 @@ export const genDungeonState = app.create()
 export const pausedState = app.create()
 export const mainMenuState = app.create()
 export const introState = app.create()
+export const villageState = app.create<{ door: 'village' }>()
 export interface DungeonRessources {
 	dungeon: Room
 	direction: Direction | (typeof farmDoors)[number]
@@ -29,4 +30,4 @@ export interface DungeonRessources {
 
 export const dungeonState = app.create<DungeonRessources>()
 export const introQuest = app.create()
-app.exclusive(setupState, campState, dungeonState, genDungeonState, introState)
+app.exclusive(setupState, campState, dungeonState, genDungeonState, introState, villageState)

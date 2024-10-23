@@ -106,7 +106,7 @@ export const spawnCharacter: System<FarmRessources> = (ressources) => {
 	if (ressources.door) {
 		const door = doorQuery.entities.find(e => e.door === ressources.door)
 		if (door) {
-			position.copy(door.position)
+			position.copy(door.position).add(new Vector3(0, 0, -20).applyQuaternion(door.rotation))
 			rotation.copy(door.rotation).multiply(new Quaternion().setFromAxisAngle(new Vector3(0, 1, 0), Math.PI))
 		}
 	}

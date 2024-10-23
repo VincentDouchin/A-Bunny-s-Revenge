@@ -1,4 +1,5 @@
 import type { Actor, Doors, Entity } from '@/global/entity'
+import type { Direction } from '@/lib/directions'
 import type { With } from 'miniplex'
 import type { Accessor, Setter } from 'solid-js'
 import type { CollidersData, LevelData } from './LevelEditor'
@@ -195,13 +196,27 @@ export const EntityEditor = ({ entity, levelData, setLevelData, setSelectedEntit
 											const doors = [...cardinalDirections, ...farmDoors]
 											return (
 												<div>
+													{key === 'boundary' && (
+														<div>
+															Boundary
+															<select
+																value={val}
+																onChange={e => updateData({ boundary: e.target.value as Direction })}
+															>
+																{cardinalDirections.map(dir => <option selected={val === dir} value={dir}>{dir}</option>)}
+															</select>
+														</div>
+													)}
 													{key === 'direction' && (
-														<select
-															value={val}
-															onChange={e => updateData({ direction: e.target.value as Doors })}
-														>
-															{doors.map(door => <option selected={val === door} value={door}>{door}</option>)}
-														</select>
+														<div>
+															Door
+															<select
+																value={val}
+																onChange={e => updateData({ direction: e.target.value as Doors })}
+															>
+																{doors.map(door => <option selected={val === door} value={door}>{door}</option>)}
+															</select>
+														</div>
 
 													)}
 													{key === 'doorLevel' && (<input type="number" value={val} onChange={e => updateData({ doorLevel: e.target.valueAsNumber })}></input>) }
