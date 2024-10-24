@@ -22,7 +22,7 @@ import { ColorCorrection, ToonEditor } from './toonEditor'
 const rendererQuery = ecs.with('renderer', 'scene', 'renderGroup').where(e => e.renderGroup === RenderGroup.Game)
 
 const [localParams, setParams] = useLocalStorage('params', params)
-Object.assign(params, { ...localParams, zoom: params.zoom })
+Object.assign(params, { ...localParams, zoom: params.zoom, cameraOffsetX: 0, cameraOffsetY: 150, cameraOffsetZ: -200 })
 export const getGameRenderGroup = () => {
 	const gameRenderGroup = rendererQuery.first
 	if (gameRenderGroup) {

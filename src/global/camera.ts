@@ -7,16 +7,14 @@ import { RenderGroup } from './entity'
 import { ecs, levelsData, settings, time, tweens } from './init'
 import { mainMenuState } from './states'
 
-const ZOOM = 9
-
 export const initCamera = () => {
 	const h = 600
 	const w = h * window.innerWidth / window.innerHeight
 	const camera = new OrthographicCamera(
-		-w / 2 / ZOOM,
-		w / 2 / ZOOM,
-		h / 2 / ZOOM,
-		-h / 2 / ZOOM,
+		-w / 2 / params.zoom,
+		w / 2 / params.zoom,
+		h / 2 / params.zoom,
+		-h / 2 / params.zoom,
 		0.0001,
 		1000,
 	)
@@ -112,7 +110,7 @@ export const moveCamera = (init = false) => () => {
 
 		if (!debugState.enabled) {
 			const lerpSpeed = time.delta / 1000 * 3
-			const offset = new Vector3(0, 150, -200)
+			const offset = new Vector3(params.cameraOffsetX, params.cameraOffsetY, params.cameraOffsetZ)
 			const newPosition = target.clone().add({ x: cameraShake.x, y: 0, z: cameraShake.y })
 			if (cameraOffset) {
 				newPosition.add(cameraOffset)
