@@ -79,6 +79,52 @@ export default defineConfig(async () => {
 						},
 					],
 				},
+				workbox: {
+					// Exclude index.html from precaching
+					globPatterns: ['**/*.{js,css,ico,png,svg,webp,jpg,jpeg,json}'],
+					// Additional workbox configuration
+					cleanupOutdatedCaches: true,
+					navigationPreload: true,
+					// Custom runtime caching for other assets
+					runtimeCaching: [
+						{
+							urlPattern: /^https:\/\/fabled-recipes.netlify.app\//,
+							handler: 'NetworkFirst',
+							options: {
+								cacheName: 'fabled-recipes-pages',
+								expiration: {
+									maxEntries: 50,
+									maxAgeSeconds: 60 * 60 * 24, // 24 hours
+								},
+								networkTimeoutSeconds: 3,
+							},
+						},
+						// Cache static assets with a Cache First strategy
+						{
+							urlPattern: /\.(?:png|jpg|jpeg|svg|gif|webp)$/,
+							handler: 'StaleWhileRevalidate',
+							options: {
+								cacheName: 'fabled-recipes-images',
+								expiration: {
+									maxEntries: 100,
+									maxAgeSeconds: 30 * 24 * 60 * 60, // 30 days
+								},
+							},
+						},
+						// Cache fonts
+						{
+							urlPattern: /\.(?:woff2?|eot|ttf|otf)$/i,
+							handler: 'CacheFirst',
+							options: {
+								cacheName: 'fabled-recipes-fonts',
+								expiration: {
+									maxEntries: 10,
+									maxAgeSeconds: 60 * 60 * 24 * 365, // 1 year
+								},
+							},
+						},
+					],
+				},
 			}),
 		],
 		assetsInclude: ['**/*.glb'],
