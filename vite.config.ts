@@ -81,7 +81,7 @@ export default defineConfig(async () => {
 				},
 				workbox: {
 					globPatterns: [
-						'**/*.{js,css,ico,json,woff2}', // Explicitly exclude HTML by not including it
+						'**/*.{js,css,ico,json,woff2}',
 					],
 					globIgnores: [
 						'index.html',
@@ -91,6 +91,45 @@ export default defineConfig(async () => {
 					],
 					cleanupOutdatedCaches: true,
 					navigationPreload: true,
+					runtimeCaching: [
+						{
+							// Navigation route
+							urlPattern: ({ request }) => request.mode === 'navigate',
+							handler: 'NetworkFirst',
+							options: {
+								cacheName: 'pages-cache',
+								networkTimeoutSeconds: 3,
+								expiration: {
+									maxEntries: 50,
+									maxAgeSeconds: 24 * 60 * 60, // 24 hours
+								},
+							},
+						},
+						{
+							// Images
+							urlPattern: /\.(?:png|jpg|jpeg|svg|gif|webp)$/,
+							handler: 'StaleWhileRevalidate',
+							options: {
+								cacheName: 'images-cache',
+								expiration: {
+									maxEntries: 100,
+									maxAgeSeconds: 7 * 24 * 60 * 60, // 7 days
+								},
+							},
+						},
+						{
+							// Fonts
+							urlPattern: /\.(?:woff2?|eot|ttf|otf)$/i,
+							handler: 'CacheFirst',
+							options: {
+								cacheName: 'fonts-cache',
+								expiration: {
+									maxEntries: 10,
+									maxAgeSeconds: 365 * 24 * 60 * 60, // 1 year
+								},
+							},
+						},
+					],
 				},
 			}),
 		],
