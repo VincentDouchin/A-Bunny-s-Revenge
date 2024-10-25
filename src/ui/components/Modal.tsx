@@ -22,11 +22,12 @@ const CloseButton = () => {
 	css/* CSS */`
 	.close-button{
 		position: absolute;
-		bottom: 100%;
-		right: 0;
+		top: 0%;
+		right: 0%;
 		margin: 1rem;
 		font-size: 3rem;
 		fill: white;
+		z-index: 1;
 		line-height: 1;
 	}
 	`

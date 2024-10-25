@@ -254,7 +254,8 @@ const makeCratesInteractable = () => {
 			for (const crate of cratesQuery) {
 				ecs.update(crate, {
 					interactable: Interactable.Open,
-					onPrimary() {
+					async onPrimary(_e, player) {
+						player.playerAnimator?.playOnce('interact')
 						ecs.removeComponent(crate, 'onPrimary')
 						ecs.removeComponent(crate, 'interactable')
 						const dialog = cratesOpened < 6 ? introQuestDialogs.openCrate(cratesOpened) : introQuestDialogs.findCauldron(cratesToOpenQuery)

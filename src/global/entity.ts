@@ -24,7 +24,7 @@ import type { Animator } from './animator'
 import type { InstanceHandle } from './assetLoaders'
 import type { ModifierContainer } from './modifiers'
 
-export type PlayerAnimations = 'idle' | 'running' | 'lightAttack' | 'slashAttack' | 'heavyAttack' | 'hit' | 'dying' | 'fishing' | 'sleeping' | 'wakeUp'
+export type PlayerAnimations = 'idle' | 'runFront' | 'runLeft' | 'runRight' | 'runBack' | 'lightAttack' | 'slashAttack' | 'heavyAttack' | 'hit' | 'dying' | 'fishing' | 'sleeping' | 'wakeUp' | 'interact' | 'pickup' | 'dashFront' | 'dashLeft' | 'dashRight' | 'dashBack'
 export type EnemyAnimations = 'idle' | 'running' | 'attacking' | 'hit' | 'dead'
 export type Dialog = Generator<string | void, void, void> | AsyncGenerator<string | void, void, void>
 export enum Faction {

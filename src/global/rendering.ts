@@ -117,6 +117,7 @@ export const initTexturesItemsAndEnemies = () => {
 			initTextures(enemy.scene)
 		}
 	}
+	initTextures(assets.models.Chest.scene)
 	for (const item of objectValues(assets.items)) {
 		initTextures(item.model)
 	}

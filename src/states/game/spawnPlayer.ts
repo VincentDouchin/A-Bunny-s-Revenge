@@ -27,7 +27,10 @@ import { weaponBundle } from './weapon'
 
 const playerAnimationMap: Record<PlayerAnimations, Animations['BunnyClothed']> = {
 	idle: 'Idle',
-	running: 'Running_B',
+	runFront: 'Running_B',
+	runBack: 'Walking_Backwards',
+	runLeft: 'Running_Strafe_Left',
+	runRight: 'Running_Strafe_Right',
 	lightAttack: '1H_Melee_Attack_Slice_Diagonal',
 	slashAttack: '1H_Melee_Attack_Chop',
 	heavyAttack: '1H_Melee_Attack_Stab',
@@ -36,6 +39,12 @@ const playerAnimationMap: Record<PlayerAnimations, Animations['BunnyClothed']> =
 	fishing: '1H_Melee_Attack_Slice_Diagonal',
 	sleeping: 'Lie_Idle',
 	wakeUp: 'Lie_StandUp',
+	interact: 'Interact',
+	pickup: 'PickUp',
+	dashFront: 'Dodge_Forward',
+	dashLeft: 'Dodge_Left',
+	dashRight: 'Dodge_Right',
+	dashBack: 'Dodge_Backward'
 }
 
 export const PLAYER_DEFAULT_HEALTH = 10

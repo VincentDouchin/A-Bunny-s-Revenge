@@ -17,7 +17,7 @@ import { randFloat } from 'three/src/math/MathUtils'
 import { itemBundle } from '../game/items'
 import { updateSpotWatered } from './wateringCan'
 
-const playerQuery = ecs.with('playerControls', 'movementForce', 'inventory', 'inventoryId', 'inventorySize')
+const playerQuery = ecs.with('playerControls', 'movementForce', 'inventory', 'inventoryId', 'inventorySize', 'playerAnimator')
 const plantedSpotQuery = ecs.with('plantableSpot', 'planted', 'group', 'model', 'entityId')
 
 export const updateCropsSave = () => {
@@ -117,7 +117,7 @@ const touchedPlantablespotQuery = plantableSpotsQuery.with('interactionContainer
 
 export const harvestCrop = async () => {
 	for (const player of playerQuery) {
-		const { playerControls } = player
+		const { playerControls, playerAnimator } = player
 		if (playerControls.get('secondary').justPressed) {
 			for (const spot of touchedPlantablespotQuery) {
 				if (save.inventories.player.some((item) => {
@@ -128,24 +128,26 @@ export const harvestCrop = async () => {
 				}
 			}
 		}
-		if (playerControls.get('primary').justPressed) {
+		if (playerControls.get('primary').justPressed && playerAnimator.current !== 'pickup') {
 			for (const spot of plantedSpotQuery) {
 				if (spot.planted.interactionContainer && maxStage(spot.planted.crop.name) === spot.planted.crop.stage) {
-					const extraDrops = Math.floor(spot.planted.crop.luck)
-					const extraChance = Math.random() < (spot.planted.crop.luck % 1) ? 1 : 0
-					const totalDrops = 1 + extraDrops + extraChance
-					for (let i = 0; i < totalDrops; i++) {
-						const bundle = itemBundle(spot.planted.crop.name)
-						const position = getWorldPosition(spot.group)
-						ecs.add({
-							...bundle,
-							position: position.add(new Vector3(0, bundle.size.y + randFloat(4, 6), 0)),
-						})
-						await sleep(100)
-					}
-					playSound(['zapsplat_foley_fern_pull_from_ground_18385', 'zapsplat_foley_moss_grass_clump_pull_rip_from_ground_70635'])
-					harvestCropEvent.emit(spot.entityId, spot.planted.crop.name)
-					removeEntityRef(spot, 'planted')
+					playerAnimator.playOnce('pickup').then(async () => {
+						const extraDrops = Math.floor(spot.planted.crop.luck)
+						const extraChance = Math.random() < (spot.planted.crop.luck % 1) ? 1 : 0
+						const totalDrops = 1 + extraDrops + extraChance
+						for (let i = 0; i < totalDrops; i++) {
+							const bundle = itemBundle(spot.planted.crop.name)
+							const position = getWorldPosition(spot.group)
+							ecs.add({
+								...bundle,
+								position: position.add(new Vector3(0, bundle.size.y + randFloat(4, 6), 0)),
+							})
+							await sleep(100)
+						}
+						playSound(['zapsplat_foley_fern_pull_from_ground_18385', 'zapsplat_foley_moss_grass_clump_pull_rip_from_ground_70635'])
+						harvestCropEvent.emit(spot.entityId, spot.planted.crop.name)
+						removeEntityRef(spot, 'planted')
+					})
 				}
 			}
 		}

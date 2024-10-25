@@ -9,7 +9,7 @@ export const pollenBundle = (colorStart: ColorRepresentation, colorEnd: ColorRep
 	const system = new ParticleSystem({
 		duration: between(50, 70),
 		looping: false,
-		prewarm: true,
+		prewarm: false,
 		startColor: new ColorRange(colorToVec4(colorStart, 0.7), colorToVec4(colorEnd, 0.7)),
 		startLife: new IntervalValue(20, 30),
 		startSpeed: new IntervalValue(0.05, 0.1),

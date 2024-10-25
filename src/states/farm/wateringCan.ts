@@ -15,7 +15,7 @@ const waterParticles = (rotation: Quaternion) => {
 	const system = new ParticleSystem({
 		duration: 5,
 		looping: false,
-		prewarm: true,
+		prewarm: false,
 		instancingGeometry: new CircleGeometry(1, 8),
 		startLife: new IntervalValue(10.0, 15.0),
 		startSpeed: new ConstantValue(2),
@@ -48,7 +48,7 @@ export const wateringCanBundle = () => {
 	})
 }
 
-const wateringCanQuery = ecs.with('wateringCan', 'model', 'sensor', 'playerControls', 'position', 'rotation')
+const wateringCanQuery = ecs.with('wateringCan', 'model', 'sensor', 'playerControls', 'position', 'rotation', 'playerAnimator')
 
 export const updateSpotWatered = (plot: With<Entity, 'model' | 'planted'>, watered: boolean, instant: boolean) => {
 	const [start, end] = watered ? [0, 1] : [1, 0]
@@ -81,6 +81,7 @@ export const waterCrops = () => {
 				&& !plant.crop?.watered
 				&& getIntersections(player, undefined, c => c === plant.collider)
 			) {
+				player.playerAnimator.playOnce('pickup')
 				player.wateringCan.waterAmount -= 0.1
 				for (const plot of plantedQuery) {
 					if (plot.planted === plant) {

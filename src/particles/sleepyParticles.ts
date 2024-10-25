@@ -6,7 +6,7 @@ export const sleepyEmitter = () => {
 	const system = new ParticleSystem({
 		duration: 10,
 		looping: true,
-		prewarm: true,
+		prewarm: false,
 		instancingGeometry: new PlaneGeometry(3, 3),
 		startLife: new IntervalValue(5.0, 10.0),
 		startSpeed: new ConstantValue(2),

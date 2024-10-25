@@ -8,7 +8,7 @@ import { createEffect, createMemo, For, Show } from 'solid-js'
 import { css } from 'solid-styled'
 import atom from 'solid-use/atom'
 import { type MenuDir, menuItem } from './components/Menu'
-import { CheckBox, OutlineText, SwitchButtons } from './components/styledComponents'
+import { CheckBox, InventoryTitle, OutlineText, SwitchButtons } from './components/styledComponents'
 import { useGame } from './store'
 
 menuItem
@@ -111,151 +111,148 @@ export const Settings = (props: { menu: MenuDir }) => {
 		['Sound Effects', 'soundEffectsVolume', 'soundEffectsMute'],
 	] as const satisfies ReadonlyArray<readonly [string, keyof typeof settings, keyof typeof settings ]>
 	return (
-		<div class="settings-container">
-
-			<For each={specificVolumes}>
-				{([title, volumeName, muteName]) => {
-					const selected = atom(false)
-					const muteSound = async () => {
-						settings[muteName] = !settings[muteName]
-
-						Howler.mute(settings[muteName])
-						setAllMuted()
-					}
-
-					const setVolume = (volumeAmount: number) => {
-						settings[volumeName] = volumeAmount
-						Howler.volume(volumeAmount / 100)
-					}
-					ui.updateSync(() => {
-						if (selected()) {
-							if (inputs()?.get('left').justPressed) {
-								settings[volumeName] = Math.max(settings[volumeName] - 5, 0)
-							}
-							if (inputs()?.get('right').justPressed) {
-								settings[volumeName] = Math.min(settings[volumeName] + 5, 100)
-							}
+		<>
+			<InventoryTitle>Settings</InventoryTitle>
+			<div class="settings-container">
+				<For each={specificVolumes}>
+					{([title, volumeName, muteName]) => {
+						const selected = atom(false)
+						const muteSound = async () => {
+							settings[muteName] = !settings[muteName]
+							Howler.mute(settings[muteName])
+							setAllMuted()
 						}
-					})
-
-					return (
-						<>
-							<div
-								use:menuItem={[props.menu, title === 'Global Volume', selected, () => ['left', 'right'], true]}
-								class={selected() ? 'selected' : 'unselected'}
-								onClick={muteSound}
-							>
-								<OutlineText>{title}</OutlineText>
-							</div>
-							<div class="volume">
-								<div onClick={muteSound}>
-									{settings[muteName] && <VolumeOff />}
-									{!settings[muteName] && <VolumeOn />}
+						const setVolume = (volumeAmount: number) => {
+							settings[volumeName] = volumeAmount
+							Howler.volume(volumeAmount / 100)
+						}
+						ui.updateSync(() => {
+							if (selected()) {
+								if (inputs()?.get('left').justPressed) {
+									settings[volumeName] = Math.max(settings[volumeName] - 5, 0)
+								}
+								if (inputs()?.get('right').justPressed) {
+									settings[volumeName] = Math.min(settings[volumeName] + 5, 100)
+								}
+							}
+						})
+						return (
+							<>
+								<div
+									use:menuItem={[props.menu, title === 'Global Volume', selected, () => ['left', 'right'], true]}
+									class={selected() ? 'selected' : 'unselected'}
+									onClick={muteSound}
+								>
+									<OutlineText>{title}</OutlineText>
 								</div>
-								<input type="range" class="input-range" value={settings[volumeName]} onChange={e => setVolume(e.target.valueAsNumber)}></input>
-								<OutlineText>{String(settings[volumeName])}</OutlineText>
-							</div>
-						</>
-					)
-				}}
-			</For>
-			<Show when={!isStandalone()}>
-
+								<div class="volume">
+									<div onClick={muteSound}>
+										{settings[muteName] && <VolumeOff />}
+										{!settings[muteName] && <VolumeOn />}
+									</div>
+									<input type="range" class="input-range" value={settings[volumeName]} onChange={e => setVolume(e.target.valueAsNumber)}></input>
+									<OutlineText>{String(settings[volumeName])}</OutlineText>
+								</div>
+							</>
+						)
+					}}
+				</For>
+				<Show when={!isStandalone()}>
+					<div
+						use:menuItem={[props.menu, false, fullscreenSelected, () => ['left', 'right'], true]}
+						class={fullscreenSelected() ? 'selected' : 'unselected'}
+						onClick={() => settings.fullscreen = !settings.fullscreen}
+					>
+						<OutlineText>Auto fullscreen</OutlineText>
+					</div>
+					<CheckBox value={settings.fullscreen ?? false} onClick={() => settings.fullscreen = !settings.fullscreen}></CheckBox>
+				</Show>
 				<div
-					use:menuItem={[props.menu, false, fullscreenSelected, () => ['left', 'right'], true]}
-					class={fullscreenSelected() ? 'selected' : 'unselected'}
-					onClick={() => settings.fullscreen = !settings.fullscreen}
+					use:menuItem={[props.menu, false, controlsSelected, () => ['left', 'right'], true]}
+					class={controlsSelected() ? 'selected' : 'unselected'}
+					onClick={() => settings.controls = (settings.controls === 'keyboard' ? 'mouse' : 'keyboard')}
 				>
-					<OutlineText>Auto fullscreen</OutlineText>
+					<OutlineText>Control Preference</OutlineText>
 				</div>
-				<CheckBox value={settings.fullscreen ?? false} onClick={() => settings.fullscreen = !settings.fullscreen}></CheckBox>
-			</Show>
-			<div
-				use:menuItem={[props.menu, false, controlsSelected, () => ['left', 'right'], true]}
-				class={controlsSelected() ? 'selected' : 'unselected'}
-				onClick={() => settings.controls = (settings.controls === 'keyboard' ? 'mouse' : 'keyboard')}
-			>
-				<OutlineText>Control Preference</OutlineText>
-
-			</div>
-			<SwitchButtons
-				options={['mouse', 'keyboard']}
-				value={settings.controls}
-				setValue={controls => settings.controls = controls}
-			/>
-			<div
-				use:menuItem={[props.menu, false, showControlsSelected, () => ['left', 'right'], true]}
-				class={showControlsSelected() ? 'selected' : 'unselected'}
-				onClick={() => settings.showControls = !settings.showControls}
-			>
-				<OutlineText>Display controls</OutlineText>
-			</div>
-			<CheckBox value={settings.showControls} onClick={(show: boolean) => settings.showControls = show}></CheckBox>
-			<div
-				use:menuItem={[props.menu, false, shadowsSelected, () => ['left', 'right'], true]}
-				class={shadowsSelected() ? 'selected' : 'unselected'}
-				onClick={() => setShadows(!settings.disableShadows)}
-			>
-				<OutlineText>Shadows</OutlineText>
-			</div>
-			<CheckBox value={settings.disableShadows} onClick={setShadows}></CheckBox>
-			<div
-				use:menuItem={[props.menu, false, lockCameraSelected, () => ['left', 'right'], true]}
-				class={lockCameraSelected() ? 'selected' : 'unselected'}
-				onClick={() => settings.lockCamera = !settings.lockCamera}
-			>
-				<OutlineText>Lock Camera to player</OutlineText>
-			</div>
-			<CheckBox value={settings.lockCamera} onClick={locked => settings.lockCamera = locked}></CheckBox>
-			<div
-				use:menuItem={[props.menu, false, uiScaleSelected, () => ['left', 'right'], true]}
-				class={uiScaleSelected() ? 'selected' : 'unselected'}
-			>
-				<OutlineText>UI scale</OutlineText>
-			</div>
-			<div class="range-input-container">
-				<input
-					type="range"
-					class="input-range"
-					value={settings.uiScale}
-					min="2"
-					max="15"
-					onChange={e => settings.uiScale = e.target.valueAsNumber}
+				<SwitchButtons
+					options={['mouse', 'keyboard']}
+					value={settings.controls}
+					setValue={controls => settings.controls = controls}
+				/>
+				<div
+					use:menuItem={[props.menu, false, showControlsSelected, () => ['left', 'right'], true]}
+					class={showControlsSelected() ? 'selected' : 'unselected'}
+					onClick={() => settings.showControls = !settings.showControls}
 				>
-				</input>
-				<OutlineText>{String(Math.min(settings.uiScale / 10))}</OutlineText>
-			</div>
-			<div
-				use:menuItem={[props.menu, false, uiOpacitySelected, () => ['left', 'right'], true]}
-				class={uiOpacitySelected() ? 'selected' : 'unselected'}
-			>
-				<OutlineText>UI Opacity</OutlineText>
-			</div>
-			<div class="range-input-container">
-				<input
-					type="range"
-					class="input-range"
-					value={settings.uiOpacity}
-					min="0"
-					step={10}
-					max="100"
-					onChange={e => settings.uiOpacity = e.target.valueAsNumber}
+					<OutlineText>Display controls</OutlineText>
+				</div>
+				<CheckBox value={settings.showControls} onClick={(show: boolean) => settings.showControls = show}></CheckBox>
+				<div
+					use:menuItem={[props.menu, false, shadowsSelected, () => ['left', 'right'], true]}
+					class={shadowsSelected() ? 'selected' : 'unselected'}
+					onClick={() => setShadows(!settings.disableShadows)}
 				>
-				</input>
-				<OutlineText>{String(settings.uiOpacity)}</OutlineText>
+					<OutlineText>Shadows</OutlineText>
+				</div>
+				<CheckBox value={settings.disableShadows} onClick={setShadows}></CheckBox>
+				<div
+					use:menuItem={[props.menu, false, lockCameraSelected, () => ['left', 'right'], true]}
+					class={lockCameraSelected() ? 'selected' : 'unselected'}
+					onClick={() => settings.lockCamera = !settings.lockCamera}
+				>
+					<OutlineText>Lock Camera to player</OutlineText>
+				</div>
+				<CheckBox value={settings.lockCamera} onClick={locked => settings.lockCamera = locked}></CheckBox>
+				<div
+					use:menuItem={[props.menu, false, uiScaleSelected, () => ['left', 'right'], true]}
+					class={uiScaleSelected() ? 'selected' : 'unselected'}
+				>
+					<OutlineText>UI scale</OutlineText>
+				</div>
+				<div class="range-input-container">
+					<input
+						type="range"
+						class="input-range"
+						value={settings.uiScale}
+						min="2"
+						max="15"
+						onChange={e => settings.uiScale = e.target.valueAsNumber}
+					>
+					</input>
+					<OutlineText>{String(Math.min(settings.uiScale / 10))}</OutlineText>
+				</div>
+				<div
+					use:menuItem={[props.menu, false, uiOpacitySelected, () => ['left', 'right'], true]}
+					class={uiOpacitySelected() ? 'selected' : 'unselected'}
+				>
+					<OutlineText>UI Opacity</OutlineText>
+				</div>
+				<div class="range-input-container">
+					<input
+						type="range"
+						class="input-range"
+						value={settings.uiOpacity}
+						min="0"
+						step={10}
+						max="100"
+						onChange={e => settings.uiOpacity = e.target.valueAsNumber}
+					>
+					</input>
+					<OutlineText>{String(settings.uiOpacity)}</OutlineText>
+				</div>
+				<div
+					use:menuItem={[props.menu, false, difficultySelected, () => ['left', 'right'], true]}
+					class={difficultySelected() ? 'selected' : 'unselected'}
+					onClick={() => settings.difficulty = settings.difficulty === 'easy' ? 'normal' : 'easy'}
+				>
+					<OutlineText>Difficulty</OutlineText>
+				</div>
+				<SwitchButtons
+					options={['easy', 'normal']}
+					value={settings.difficulty}
+					setValue={difficulty => settings.difficulty = difficulty}
+				/>
 			</div>
-			<div
-				use:menuItem={[props.menu, false, difficultySelected, () => ['left', 'right'], true]}
-				class={difficultySelected() ? 'selected' : 'unselected'}
-				onClick={() => settings.difficulty = settings.difficulty === 'easy' ? 'normal' : 'easy'}
-			>
-				<OutlineText>Difficulty</OutlineText>
-			</div>
-			<SwitchButtons
-				options={['easy', 'normal']}
-				value={settings.difficulty}
-				setValue={difficulty => settings.difficulty = difficulty}
-			/>
-		</div>
+		</>
 	)
 }

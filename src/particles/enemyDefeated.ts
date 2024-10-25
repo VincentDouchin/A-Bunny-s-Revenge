@@ -6,7 +6,7 @@ export const enemyDefeated = () => {
 	const system = new ParticleSystem({
 		duration: 3,
 		looping: false,
-		prewarm: true,
+		prewarm: false,
 		instancingGeometry: new CircleGeometry(1, 8),
 		startLife: new IntervalValue(5.0, 10.0),
 		startSize: new IntervalValue(1, 2),

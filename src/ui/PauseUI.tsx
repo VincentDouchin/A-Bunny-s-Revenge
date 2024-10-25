@@ -19,6 +19,11 @@ export const PauseUi = () => {
 	createEffect(() => {
 		!paused() && setTimeout(() => settings(paused()))
 	})
+	ui.updateSync(() => {
+		if (context?.player()?.menuInputs.get('cancel').justPressed) {
+			pausedState.disable()
+		}
+	})
 	css/* css */`
 	.container{
 		display: grid;
@@ -32,7 +37,7 @@ export const PauseUi = () => {
 	return (
 		<Show when={context?.player()}>
 			{player => (
-				<Modal open={paused()} showClose={false}>
+				<Modal open={paused()} showClose={settings()}>
 					<Menu inputs={player().menuInputs}>
 						{({ menu }) => {
 							return (
@@ -73,7 +78,6 @@ export const PauseUi = () => {
 																</OutlineText>
 															</div>
 														</div>
-														{/* <button class="styled" onClick={() => pausedState.disable()}>Resume</button> */}
 													</div>
 												</GoldContainer>
 

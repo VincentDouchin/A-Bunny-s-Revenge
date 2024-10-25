@@ -4,6 +4,7 @@ import { playerBehaviorPlugin } from './behaviors/playerBehavior'
 import { debugPlugin } from './debug/debugPlugin'
 import { updateAnimations } from './global/animations'
 import { initCamera, initializeCameraPosition, moveCamera } from './global/camera'
+import { errorEvent } from './global/events'
 import { coroutines, inputManager, musicManager, resetSave, time, tweens, ui } from './global/init'
 import { tickModifiersPlugin } from './global/modifiers'
 import { updateMousePosition } from './global/mousePosition'
@@ -52,7 +53,7 @@ import { updateWeaponArc } from './states/game/weapon'
 import { intiMainMenuRendering } from './states/mainMenu/initMainMenu'
 import { clickOnMenuButton, initMainMenuCamPos, renderMainMenu, selectMainMenu, setupWindow, spawnPlayerContinueGame } from './states/mainMenu/mainMenuRendering'
 import { disablePortrait, enableFullscreen, resize, setupGame, stopOnLosingFocus } from './states/setup/setupGame'
-import { errors, UI } from './ui/UI'
+import { UI } from './ui/UI'
 
 coreState
 	.addPlugins(hierarchyPlugin, transformsPlugin, physicsPlugin, addToScene('camera', 'light', 'model', 'dialogContainer', 'emitter', 'interactionContainer', 'minigameContainer', 'healthBarContainer', 'dashDisplay', 'stun', 'debuffsContainer', 'weaponArc', 'questMarkerContainer', 'lockedOn'), updateModels, particlesPlugin)
@@ -148,7 +149,7 @@ const animate = () => {
 		app.update()
 	} catch (e) {
 		console.error(e)
-		errors.push(JSON.stringify(e))
+		errorEvent.emit(String(e))
 	}
 	requestAnimationFrame(animate)
 }

@@ -9,7 +9,7 @@ export const doorClosed = () => {
 	const system = new ParticleSystem({
 		duration: 20,
 		looping: true,
-		prewarm: true,
+		prewarm: false,
 		instancingGeometry: geo,
 		startLife: new IntervalValue(20.0, 10.0),
 		startSpeed: new IntervalValue(0.2, 0.8),

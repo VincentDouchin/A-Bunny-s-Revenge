@@ -6,7 +6,7 @@ import { openMenuState, pausedState } from '@/global/states'
 import { QueryFilterFlags } from '@dimforge/rapier3d-compat'
 import { Vector3 } from 'three'
 
-export const getMovementForce = ({ movementForce, speed, targetMovementForce }: With<Entity, 'movementForce' | 'speed' >) => {
+export const getMovementForce = ({ movementForce, speed, targetMovementForce }: With<Entity, 'movementForce' | 'speed'>) => {
 	const targetForce = movementForce.clone().multiplyScalar(speed.value * params.speedUp * time.delta / 1000)
 	const force = targetMovementForce ? targetMovementForce.lerp(targetForce, time.delta / 100) : targetForce
 
@@ -16,6 +16,27 @@ export const getMovementForce = ({ movementForce, speed, targetMovementForce }: 
 	}
 }
 const lockedOnQuery = ecs.with('lockedOn', 'position')
+
+export const getRelativeDirection = (facingDir: Vector3, movementDir: Vector3) => {
+	// Normalize the vectors
+	const facing = facingDir.clone().normalize()
+	const movement = movementDir.clone().normalize()
+
+	// Get the right vector
+	const right = facing.clone().cross(new Vector3(0, 1, 0))
+
+	// Get dot products
+	const forwardness = facing.dot(movement)
+	const rightness = right.dot(movement)
+
+	// Return the direction with the largest magnitude
+	if (Math.abs(forwardness) > Math.abs(rightness)) {
+		return forwardness > 0 ? 'front' : 'back'
+	} else {
+		return rightness > 0 ? 'right' : 'left'
+	}
+}
+
 export const getPlayerRotation = (e: With<Entity, 'position' | 'playerControls'>, force: Vector3) => {
 	const lockOn = lockedOnQuery.first
 	if (lockOn) {
@@ -35,7 +56,7 @@ export const getPlayerRotation = (e: With<Entity, 'position' | 'playerControls'>
 	}
 	return force
 }
-export const applyMove = (entity: With<Entity, 'body' >, force: Vector3) => {
+export const applyMove = (entity: With<Entity, 'body'>, force: Vector3) => {
 	if (pausedState.enabled) return
 	const { body, controller, collider } = entity
 	if (controller && collider && body.isKinematic()) {

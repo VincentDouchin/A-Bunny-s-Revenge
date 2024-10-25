@@ -6,7 +6,7 @@ export const fishParticles = () => {
 	const system = new ParticleSystem({
 		duration: 1,
 		looping: false,
-		prewarm: true,
+		prewarm: false,
 		instancingGeometry: new CircleGeometry(1, 8),
 		startLife: new IntervalValue(0.5, 1.0),
 		startSpeed: new ConstantValue(5),

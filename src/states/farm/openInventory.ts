@@ -1,7 +1,7 @@
 import type { Entity } from '@/global/entity'
 import { MenuType } from '@/global/entity'
 import { ecs } from '@/global/init'
-import { openMenuState } from '@/global/states'
+import { openMenuState, pausedState } from '@/global/states'
 
 export const openMenu = (menu: MenuType) => (e: Entity) => ecs.addComponent(e, 'menuType', menu)
 
@@ -36,17 +36,19 @@ const dialogQuery = ecs.with('dialog')
 const primaryQuery = interactableQuery.with('onPrimary')
 const secondaryQuery = interactableQuery.with('onSecondary')
 export const interact = () => {
-	for (const entity of primaryQuery) {
-		for (const player of playerInventoryClosedQuery) {
-			if (player.playerControls.get('primary').justPressed && dialogQuery.size === 0) {
-				entity.onPrimary(entity, player)
+	if (dialogQuery.size === 0 && pausedState.disabled) {
+		for (const entity of primaryQuery) {
+			for (const player of playerInventoryClosedQuery) {
+				if (player.playerControls.get('primary').justPressed) {
+					entity.onPrimary(entity, player)
+				}
 			}
 		}
-	}
-	for (const entity of secondaryQuery) {
-		for (const player of playerInventoryClosedQuery) {
-			if (player.playerControls.get('secondary').justPressed && dialogQuery.size === 0) {
-				entity.onSecondary(entity, player)
+		for (const entity of secondaryQuery) {
+			for (const player of playerInventoryClosedQuery) {
+				if (player.playerControls.get('secondary').justPressed) {
+					entity.onSecondary(entity, player)
+				}
 			}
 		}
 	}
