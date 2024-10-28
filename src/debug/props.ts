@@ -48,7 +48,7 @@ export const getModel = (key: ModelName): Object3D => {
 		// @ts-expect-error okok
 		return customModels[key]()
 	}
-	for (const model of ['vegetation', 'gardenPlots', 'fruitTrees', 'models', 'village'] as const) {
+	for (const model of ['vegetation', 'gardenPlots', 'fruitTrees', 'models'] as const) {
 		if (key in assets[model]) {
 			// @ts-expect-error okok
 			return clone(assets[model][key].scene)
