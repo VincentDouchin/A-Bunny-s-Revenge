@@ -102,13 +102,13 @@ export const renderGame = () => {
 }
 
 const initTextures = (obj: Object3D) => {
-	obj.traverse((node) => {
-		if ('material' in node && node.material instanceof Material) {
-			if ('map' in node.material && node.material.map instanceof Texture) {
-				renderer.initTexture(node.material.map)
-			}
-		}
-	})
+	// obj.traverse((node) => {
+	// 	if ('material' in node && node.material instanceof Material) {
+	// 		if ('map' in node.material && node.material.map instanceof Texture) {
+	// 			renderer.initTexture(node.material.map)
+	// 		}
+	// 	}
+	// })
 }
 
 export const initTexturesItemsAndEnemies = () => {
