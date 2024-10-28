@@ -1,5 +1,5 @@
 import type { crops } from '@/constants/items'
-import type { characters, fruit_trees, items, mainMenuAssets, models, particles, textures, trees, vegetation, village, weapons } from '@assets/assets'
+import type { characters, fruit_trees, items, mainMenuAssets, models, particles, textures, trees, vegetation, weapons } from '@assets/assets'
 import type { ColorRepresentation, Material, Side, TextureFilter } from 'three'
 import type { GLTF } from 'three/examples/jsm/loaders/GLTFLoader'
 import type { Constructor } from 'type-fest'
@@ -240,7 +240,7 @@ export const loadAssets = async () => {
 
 		// ! others
 		fonts: fontLoader(loader)(import.meta.glob('@assets/fonts/*.*', { eager: true, import: 'default' })),
-		village: typeGlob<village>(import.meta.glob('@assets/village/*.glb', { as: 'url', eager: true }))(loadGLBAsToon(loader)),
+		// village: typeGlob<village>(import.meta.glob('@assets/village/*.glb', { as: 'url', eager: true }))(loadGLBAsToon(loader)),
 
 	} as const
 	const assetsLoaded = await asyncMapValues(assets, async val => await val) as AssetsLoaded<typeof assets>
