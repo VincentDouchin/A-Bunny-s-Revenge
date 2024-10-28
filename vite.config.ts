@@ -79,34 +79,6 @@ export default defineConfig(async () => {
 						},
 					],
 				},
-				workbox: {
-					globPatterns: [
-						'**/*.{js,css,ico,json,woff2}',
-					],
-					globIgnores: [
-						'index.html',
-						'_redirects',
-						'_headers',
-						'netlify.toml',
-					],
-					cleanupOutdatedCaches: true,
-					navigationPreload: true,
-					runtimeCaching: [
-						{
-							// Navigation route
-							urlPattern: ({ request }) => request.mode === 'navigate',
-							handler: 'NetworkFirst',
-							options: {
-								cacheName: 'pages-cache',
-								networkTimeoutSeconds: 3,
-								expiration: {
-									maxEntries: 50,
-									maxAgeSeconds: 24 * 60 * 60, // 24 hours
-								},
-							},
-						},
-					],
-				},
 			}),
 		],
 		assetsInclude: ['**/*.glb'],
