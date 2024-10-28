@@ -1,5 +1,5 @@
 import { ui } from '@/global/init'
-import { pausedState } from '@/global/states'
+import { openMenuState, pausedState } from '@/global/states'
 import { createEffect, Show } from 'solid-js'
 import { css } from 'solid-styled'
 import atom from 'solid-use/atom'
@@ -20,8 +20,12 @@ export const PauseUi = () => {
 		!paused() && setTimeout(() => settings(paused()))
 	})
 	ui.updateSync(() => {
-		if (context?.player()?.menuInputs.get('cancel').justPressed) {
-			pausedState.disable()
+		if (context?.player()?.playerControls.get('pause').justPressed) {
+			if (openMenuState.disabled && pausedState.disabled) {
+				pausedState.enable()
+			} else {
+				pausedState.disable()
+			}
 		}
 	})
 	css/* css */`
