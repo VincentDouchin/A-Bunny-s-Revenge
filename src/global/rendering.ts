@@ -3,7 +3,7 @@ import { getGameRenderGroup } from '@/debug/debugUi'
 import { getSobelShader, outlineShader } from '@/shaders/EdgePass'
 import { gameCameraQuery } from '@/states/mainMenu/mainMenuRendering'
 import { entries, objectValues } from '@/utils/mapFunctions'
-import { BasicShadowMap, DepthTexture, LinearSRGBColorSpace, MeshBasicMaterial, Scene, ShaderMaterial, Vector2, WebGLRenderer, WebGLRenderTarget } from 'three'
+import { BasicShadowMap, DepthTexture, LinearSRGBColorSpace, Material, MeshBasicMaterial, Scene, ShaderMaterial, Texture, Vector2, WebGLRenderer, WebGLRenderTarget } from 'three'
 import { FullScreenQuad } from 'three/examples/jsm/postprocessing/Pass'
 import { CSS2DRenderer } from 'three/examples/jsm/renderers/CSS2DRenderer'
 import { params } from './context'
@@ -101,14 +101,14 @@ export const renderGame = () => {
 	cssRenderer.render(scene, camera)
 }
 
-const initTextures = (_obj: Object3D) => {
-	// obj.traverse((node) => {
-	// 	if ('material' in node && node.material instanceof Material) {
-	// 		if ('map' in node.material && node.material.map instanceof Texture) {
-	// 			renderer.initTexture(node.material.map)
-	// 		}
-	// 	}
-	// })
+const initTextures = (obj: Object3D) => {
+	obj.traverse((node) => {
+		if ('material' in node && node.material instanceof Material) {
+			if ('map' in node.material && node.material.map instanceof Texture) {
+				renderer.initTexture(node.material.map)
+			}
+		}
+	})
 }
 
 export const initTexturesItemsAndEnemies = () => {
