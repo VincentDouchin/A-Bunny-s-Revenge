@@ -101,7 +101,7 @@ export const renderGame = () => {
 	cssRenderer.render(scene, camera)
 }
 
-const initTextures = (obj: Object3D) => {
+const initTextures = (_obj: Object3D) => {
 	// obj.traverse((node) => {
 	// 	if ('material' in node && node.material instanceof Material) {
 	// 		if ('map' in node.material && node.material.map instanceof Texture) {
