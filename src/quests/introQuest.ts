@@ -73,6 +73,7 @@ const introQuestDialogs = {
 		addQuest('intro_quest')
 		player.state = 'idle'
 		ecs.reindex(player)
+		cutSceneState.disable()
 	},
 
 	async *pickupBasket(basket: Entity) {

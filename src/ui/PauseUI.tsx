@@ -1,6 +1,6 @@
 import { ui } from '@/global/init'
 import { openMenuState, pausedState } from '@/global/states'
-import { createEffect, Show } from 'solid-js'
+import { onCleanup, Show } from 'solid-js'
 import { css } from 'solid-styled'
 import atom from 'solid-use/atom'
 import { Menu, menuItem } from './components/Menu'
@@ -16,15 +16,19 @@ export const PauseUi = () => {
 	const paused = ui.sync(() => pausedState.enabled)
 	const context = useGame()
 	const settings = atom(false)
-	createEffect(() => {
-		!paused() && setTimeout(() => settings(paused()))
-	})
 	ui.updateSync(() => {
-		if (context?.player()?.playerControls.get('pause').justPressed) {
-			if (openMenuState.disabled && pausedState.disabled) {
-				pausedState.enable()
-			} else {
-				pausedState.disable()
+		if (openMenuState.disabled) {
+			if (context?.player()?.playerControls.get('pause').justPressed) {
+				if (openMenuState.disabled && pausedState.disabled) {
+					pausedState.enable()
+				} else {
+					pausedState.disable()
+				}
+			}
+			if (context?.player()?.menuInputs.get('cancel').justPressed) {
+				if (pausedState.enabled) {
+					pausedState.disable()
+				}
 			}
 		}
 	})
@@ -44,6 +48,9 @@ export const PauseUi = () => {
 				<Modal open={paused()} showClose={settings()}>
 					<Menu inputs={player().menuInputs}>
 						{({ menu }) => {
+							onCleanup(() => {
+								settings(false)
+							})
 							return (
 								<>
 									<Show when={!settings()}>
