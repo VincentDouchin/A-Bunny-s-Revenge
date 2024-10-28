@@ -1,12 +1,13 @@
 import type { crops } from '@/constants/items'
-import type { characters, fruit_trees, items, mainMenuAssets, models, particles, textures, trees, vegetation, weapons } from '@assets/assets'
-import type { ColorRepresentation, Material, Side, TextureFilter } from 'three'
+import type { characters, fruit_trees, items, mainMenuAssets, models, particles, textures, trees, vegetation, village, weapons } from '@assets/assets'
+
+import type { ColorRepresentation, Material, Object3D, Side, TextureFilter } from 'three'
 import type { GLTF } from 'three/examples/jsm/loaders/GLTFLoader'
 import type { Constructor } from 'type-fest'
 import { thumbnailRenderer } from '@/lib/thumbnailRenderer'
 import { CharacterMaterial, GardenPlotMaterial, GrassMaterial, ToonMaterial, TreeMaterial, VineGateMaterial } from '@/shaders/materials'
 import { getScreenBuffer } from '@/utils/buffer'
-import { asyncMapValues, entries, groupByObject, mapKeys, mapValues } from '@/utils/mapFunctions'
+import { asyncMapValues, entries, groupByObject, mapKeys, mapValues, objectValues } from '@/utils/mapFunctions'
 import assetManifest from '@assets/assetManifest.json'
 import { Howl } from 'howler'
 import { DoubleSide, FrontSide, Mesh, MeshBasicMaterial, MeshPhysicalMaterial, MeshStandardMaterial, NearestFilter, RepeatWrapping, SRGBColorSpace, Texture } from 'three'
@@ -193,6 +194,21 @@ const modelOptions: getToonOptions = (key: string, materialName: string, _name: 
 		side: key.includes('Creepy') ? DoubleSide : undefined,
 	}
 }
+
+const splitChildren = <K extends string>(glob: GlobEager) => {
+	return async (fn: (glob: GlobEager) => Promise<Record<string, GLTF>>) => {
+		const res = await fn(glob)
+		return objectValues(res).reduce((acc, glb) => {
+			return {
+				...acc,
+				...glb.scene.children.reduce((acc2, obj) => {
+					return { ...acc2, [obj.name]: obj }
+				}, {}),
+			}
+		}, {}) as Record<K, Object3D>
+	}
+}
+
 type AssetsLoaded<T extends Record<string, Promise<any> | any>> = { [K in keyof T]: Awaited<T[K]> }
 export const loadAssets = async () => {
 	const { loader, clear } = loaderProgress(assetManifest)
@@ -240,7 +256,7 @@ export const loadAssets = async () => {
 
 		// ! others
 		fonts: fontLoader(loader)(import.meta.glob('@assets/fonts/*.*', { eager: true, import: 'default' })),
-		// village: typeGlob<village>(import.meta.glob('@assets/village/*.glb', { as: 'url', eager: true }))(loadGLBAsToon(loader)),
+		village: splitChildren<village>(import.meta.glob('@assets/village/*.glb', { as: 'url', eager: true }))(loadGLBAsToon(loader)),
 
 	} as const
 	const assetsLoaded = await asyncMapValues(assets, async val => await val) as AssetsLoaded<typeof assets>
