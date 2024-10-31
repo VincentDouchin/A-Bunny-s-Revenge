@@ -65,6 +65,7 @@ export interface Level {
 	grass: HTMLCanvasElement
 	heightMap: HTMLCanvasElement
 	water: HTMLCanvasElement
+	rock: HTMLCanvasElement
 	id: string
 	name: string
 	type?: LevelType
@@ -139,6 +140,17 @@ export const LevelEditor = () => {
 					const [colliderData, setColliderData] = createSignal<CollidersData>(levelsData.colliderData)
 					// ! LEVELS
 					const [activeLevelIndex, setActiveLevelIndex] = createSignal<number>(levelsData.levels.findIndex(x => x.id === map())!)
+					const ctrl = atom(false)
+					window.addEventListener('keydown', (e) => {
+						if (e.code === 'ControlLeft') {
+							ctrl(true)
+						}
+					})
+					window.addEventListener('keyup', (e) => {
+						if (e.code === 'ControlLeft') {
+							ctrl(false)
+						}
+					})
 
 					let fakeGround: null | Mesh<PlaneGeometry> = null
 					const [levels, setLevels] = createSignal<Level[]>(levelsData.levels)
@@ -150,6 +162,7 @@ export const LevelEditor = () => {
 							grass: getScreenBuffer(100, 100).canvas,
 							heightMap: getScreenBuffer(100, 100).canvas,
 							water: getScreenBuffer(100, 100).canvas,
+							rock: getScreenBuffer(100, 100).canvas,
 							size: { x: 100, y: 100 },
 							name: `level n°${x.length + 1}`,
 							id,
@@ -170,6 +183,7 @@ export const LevelEditor = () => {
 								grass: level.grass.toDataURL(),
 								heightMap: level.heightMap.toDataURL(),
 								water: level.water.toDataURL(),
+								rock: level.rock.toDataURL(),
 							}))
 							set('levels', rawLevels)
 						}
@@ -291,7 +305,7 @@ export const LevelEditor = () => {
 						camera.position.set(...group.position.toArray())
 						const controls = new MapControls(camera, renderer.domElement)
 						createEffect(() => {
-							controls.enabled = !draw()
+							controls.enabled = !draw() || ctrl()
 						})
 						controls.update(0)
 						setFakeGround(activeLevel())

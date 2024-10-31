@@ -11,7 +11,7 @@ import { createEffect, createMemo, createSignal, For, onCleanup, onMount, Show }
 import { CanvasTexture, CircleGeometry, DoubleSide, Mesh, MeshBasicMaterial, Raycaster, Vector2 } from 'three'
 import { getGameRenderGroup } from './debugUi'
 
-type drawingColors = 'path' | 'trees' | 'trees_transparent' | 'grass' | 'heightMap' | 'water' | 'bridge'
+type drawingColors = 'path' | 'trees' | 'trees_transparent' | 'grass' | 'heightMap' | 'water' | 'bridge' | 'rock'
 const colors: Record<drawingColors, string> = {
 	path: 'rgb(255,0,0)',
 	trees: 'rgb(0,255,0)',
@@ -20,6 +20,7 @@ const colors: Record<drawingColors, string> = {
 	heightMap: 'rgba(255,255,255,1)',
 	water: 'rgba(255,255,255,1)',
 	bridge: 'rgba(255,0,0,1)',
+	rock: 'rgba(255,0,0,1)',
 }
 const canvases: Record<drawingColors, LevelImage> = {
 	path: 'path',
@@ -29,6 +30,7 @@ const canvases: Record<drawingColors, LevelImage> = {
 	heightMap: 'heightMap',
 	water: 'water',
 	bridge: 'water',
+	rock: 'rock',
 }
 const grassQuery = ecs.with('grass')
 const groundQuery = ecs.with('ground', 'model')
@@ -62,6 +64,13 @@ export const MapEditor = ({
 			levelText.flipY = false
 			if (!groundMat().uniforms?.level) return
 			groundMat().uniforms.level.value = levelText
+			groundMat().uniforms.size.value = new Vector2(activeLevel().size.x, activeLevel().size.y)
+		}
+		if (selectedColor() === 'rock') {
+			const levelText = new CanvasTexture(activeLevel().rock)
+			levelText.flipY = false
+			if (!groundMat().uniforms?.rock) return
+			groundMat().uniforms.rock.value = levelText
 			groundMat().uniforms.size.value = new Vector2(activeLevel().size.x, activeLevel().size.y)
 		}
 	})
@@ -102,6 +111,7 @@ export const MapEditor = ({
 	const respawnTrees = debounce(() => spawnTrees(activeLevel(), ground(), undefined, false), 100)
 	const longClickListener = throttle((event: MouseEvent) => {
 		event.preventDefault()
+		if (event.ctrlKey) return
 		const camera = cameraQuery.first?.camera
 		if (!camera || !fakeGround) return
 
@@ -138,6 +148,9 @@ export const MapEditor = ({
 		updateLevel({ [canvases[selectedColor()]]: selectedCanvas() })
 		if (canvases[selectedColor()] === 'path') {
 			groundMat().uniforms.level.value.needsUpdate = true
+		}
+		if (canvases[selectedColor()] === 'rock') {
+			groundMat().uniforms.rock.value.needsUpdate = true
 		}
 		if (canvases[selectedColor()] === 'trees') {
 			for (const tree of treeQuery) {
@@ -268,7 +281,7 @@ export const MapEditor = ({
 						<button onClick={download}>download</button>
 						<button onClick={upload}>upload</button>
 					</div>
-					<For each={['path', 'trees', 'trees_transparent', 'grass', 'heightMap', 'water', 'bridge'] as drawingColors[]}>
+					<For each={['path', 'trees', 'trees_transparent', 'grass', 'heightMap', 'water', 'bridge', 'rock'] as drawingColors[]}>
 						{color => <div><button style={{ width: '100%' }} onClick={() => setSelectedColor(color)} classList={{ selected: selectedColor() === color }}>{color}</button></div>}
 					</For>
 				</div>

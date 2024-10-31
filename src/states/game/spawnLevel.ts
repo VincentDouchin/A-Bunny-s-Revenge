@@ -237,13 +237,17 @@ export const spawnGroundAndTrees = (level: Level, dungeonLevel?: number) => {
 	// ! Ground
 	const levelTexture = new CanvasTexture(level.path)
 	levelTexture.flipY = false
+	const rockTexture = new CanvasTexture(level.rock)
+	rockTexture.flipY = false
 	const cellar = level.type === 'cellar'
 	const mat = cellar
 		? getWoodFlooring(level.size)
 		: new GroundMaterial({}).setUniforms({
 			level: levelTexture,
+			rock: rockTexture,
 			size: new Vector2(level.size.x, level.size.y),
 			ground: assets.textures.Dirt4_Dark,
+			rock_texture: assets.textures.Rocks1_Light,
 		})
 	const groundMesh = new Mesh(
 		new PlaneGeometry(level.size.x, level.size.y, Math.floor(level.size.x * canvasScale) - 1, Math.floor(level.size.y * canvasScale) - 1),

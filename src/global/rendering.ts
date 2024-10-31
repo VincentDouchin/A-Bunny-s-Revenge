@@ -13,7 +13,7 @@ import { mainMenuState } from './states'
 
 export const scene = new Scene()
 export const renderer = new WebGLRenderer({ alpha: false })
-renderer.debug.checkShaderErrors = false
+// renderer.debug.checkShaderErrors = false
 renderer.setPixelRatio(1)
 
 const cssRenderer = new CSS2DRenderer()
