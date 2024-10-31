@@ -1,6 +1,7 @@
 import type { Entity } from '@/global/entity'
-import type { State } from '@/lib/state'
 import { ecs } from '@/global/init'
+import { pausedState } from '@/global/states'
+import { runIf, type State } from '@/lib/state'
 import { Vector3 } from 'three'
 import { CSS2DObject } from 'three/examples/jsm/renderers/CSS2DRenderer'
 import { getIntersections } from './sensor'
@@ -53,6 +54,6 @@ const removeInteractionContainer = () => interactingQuery.onEntityRemoved.subscr
 
 export const interactionPlugin = (state: State) => {
 	state
-		.onUpdate(touchItem)
+		.onUpdate(runIf(() => pausedState.disabled, touchItem))
 		.addSubscriber(removeOutlines, addOutline, removeInteractionContainer)
 }

@@ -15,7 +15,7 @@ import { capsuleColliderBundle, characterControllerBundle } from '@/lib/models'
 import { Stat } from '@/lib/stats'
 import { Timer } from '@/lib/timer'
 import { ActiveEvents, Cuboid } from '@dimforge/rapier3d-compat'
-import { LinearSRGBColorSpace, Mesh, Quaternion, Vector3 } from 'three'
+import { Euler, LinearSRGBColorSpace, Mesh, Quaternion, Vector3 } from 'three'
 import { CSS2DObject } from 'three/examples/jsm/renderers/CSS2DRenderer'
 import { clone } from 'three/examples/jsm/utils/SkeletonUtils'
 import { behaviorBundle } from '../../lib/behaviors'
@@ -27,7 +27,10 @@ import { weaponBundle } from './weapon'
 
 const playerAnimationMap: Record<PlayerAnimations, Animations['BunnyClothed']> = {
 	idle: 'Idle',
-	running: 'Running_B',
+	runFront: 'Running_B',
+	runBack: 'Walking_Backwards',
+	runLeft: 'Running_Strafe_Left',
+	runRight: 'Running_Strafe_Right',
 	lightAttack: '1H_Melee_Attack_Slice_Diagonal',
 	slashAttack: '1H_Melee_Attack_Chop',
 	heavyAttack: '1H_Melee_Attack_Stab',
@@ -36,6 +39,12 @@ const playerAnimationMap: Record<PlayerAnimations, Animations['BunnyClothed']> =
 	fishing: '1H_Melee_Attack_Slice_Diagonal',
 	sleeping: 'Lie_Idle',
 	wakeUp: 'Lie_StandUp',
+	interact: 'Interact',
+	pickup: 'PickUp',
+	dashFront: 'Dodge_Forward',
+	dashLeft: 'Dodge_Left',
+	dashRight: 'Dodge_Right',
+	dashBack: 'Dodge_Backward',
 }
 
 export const PLAYER_DEFAULT_HEALTH = 10
@@ -106,8 +115,9 @@ export const spawnCharacter: System<FarmRessources> = (ressources) => {
 	if (ressources.door) {
 		const door = doorQuery.entities.find(e => e.door === ressources.door)
 		if (door) {
-			position.copy(door.position)
-			rotation.copy(door.rotation).multiply(new Quaternion().setFromAxisAngle(new Vector3(0, 1, 0), Math.PI))
+			const rawRotation = new Euler().setFromQuaternion(door.rotation).y
+			position.copy(door.position).add(new Vector3(0, 0, -20).applyQuaternion(door.rotation))
+			rotation.copy(new Quaternion().setFromEuler(new Euler(0, rawRotation, 0)).multiply(new Quaternion().setFromAxisAngle(new Vector3(0, 1, 0), Math.PI)))
 		}
 	}
 	const player = {

@@ -19,7 +19,6 @@ import { FullscreenUi } from '@/states/game/FullscreenUi'
 import { OverlayUi } from '@/states/game/overlayUi'
 import { MainMenuUi } from '@/states/mainMenu/MainMenuUi'
 import { Show } from 'solid-js'
-import { createArray } from 'solid-proxies'
 import { StateUi } from './components/StateUi'
 import { DialogUi } from './DialogUi'
 import { Errors } from './Errors'
@@ -32,7 +31,6 @@ import { TopRight } from './TopRight'
 import { TouchControls } from './TouchControls'
 import { TutorialUi } from './Tutorial'
 
-export const errors = createArray<string>([])
 export const UI = () => {
 	const debug = ui.sync(() => debugState.enabled)
 	return (

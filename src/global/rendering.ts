@@ -2,17 +2,18 @@ import type { Object3D } from 'three'
 import { getGameRenderGroup } from '@/debug/debugUi'
 import { getSobelShader, outlineShader } from '@/shaders/EdgePass'
 import { gameCameraQuery } from '@/states/mainMenu/mainMenuRendering'
-import { BasicShadowMap, DepthTexture, LinearSRGBColorSpace, MeshBasicMaterial, Scene, ShaderMaterial, Vector2, WebGLRenderer, WebGLRenderTarget } from 'three'
+import { entries, objectValues } from '@/utils/mapFunctions'
+import { BasicShadowMap, DepthTexture, LinearSRGBColorSpace, Material, MeshBasicMaterial, Scene, ShaderMaterial, Texture, Vector2, WebGLRenderer, WebGLRenderTarget } from 'three'
 import { FullScreenQuad } from 'three/examples/jsm/postprocessing/Pass'
 import { CSS2DRenderer } from 'three/examples/jsm/renderers/CSS2DRenderer'
 import { params } from './context'
 import { RenderGroup } from './entity'
-import { ecs, settings } from './init'
+import { assets, ecs, settings } from './init'
 import { mainMenuState } from './states'
 
 export const scene = new Scene()
 export const renderer = new WebGLRenderer({ alpha: false })
-renderer.debug.checkShaderErrors = false
+// renderer.debug.checkShaderErrors = false
 renderer.setPixelRatio(1)
 
 const cssRenderer = new CSS2DRenderer()
@@ -100,8 +101,31 @@ export const renderGame = () => {
 	cssRenderer.render(scene, camera)
 }
 
+const initTextures = (obj: Object3D) => {
+	obj.traverse((node) => {
+		if ('material' in node && node.material instanceof Material) {
+			if ('map' in node.material && node.material.map instanceof Texture) {
+				renderer.initTexture(node.material.map)
+			}
+		}
+	})
+}
+
+export const initTexturesItemsAndEnemies = () => {
+	for (const [name, enemy] of entries(assets.characters)) {
+		if (name !== 'BunnyClothed') {
+			initTextures(enemy.scene)
+		}
+	}
+	initTextures(assets.models.Chest.scene)
+	for (const item of objectValues(assets.items)) {
+		initTextures(item.model)
+	}
+}
+
 export const compileShaders = async () => {
 	const { scene, renderer } = getGameRenderGroup()
+	initTextures(scene)
 	const invisible: Object3D[] = []
 	scene.traverse((node) => {
 		if (!node.visible) {

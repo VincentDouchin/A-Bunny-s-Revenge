@@ -11,7 +11,7 @@ export const poisonBubbles = (looping = true, emission = 3) => {
 	const system = new ParticleSystem({
 		duration: 4,
 		looping,
-		prewarm: true,
+		prewarm: false,
 		instancingGeometry: new CircleGeometry(1, 8),
 		startLife: new IntervalValue(5.0, 2.0),
 		startSpeed: new ConstantValue(0.5),

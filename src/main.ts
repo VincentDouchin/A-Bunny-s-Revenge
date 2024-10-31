@@ -4,12 +4,13 @@ import { playerBehaviorPlugin } from './behaviors/playerBehavior'
 import { debugPlugin } from './debug/debugPlugin'
 import { updateAnimations } from './global/animations'
 import { initCamera, initializeCameraPosition, moveCamera } from './global/camera'
+import { errorEvent } from './global/events'
 import { coroutines, inputManager, musicManager, resetSave, time, tweens, ui } from './global/init'
 import { tickModifiersPlugin } from './global/modifiers'
 import { updateMousePosition } from './global/mousePosition'
-import { compileShaders, initThree, renderGame } from './global/rendering'
+import { compileShaders, initTexturesItemsAndEnemies, initThree, renderGame } from './global/rendering'
 import { initHowler, playAmbience } from './global/sounds'
-import { app, campState, coreState, dungeonState, gameState, genDungeonState, introQuest, introState, mainMenuState, openMenuState, pausedState, setupState } from './global/states'
+import { app, campState, coreState, dungeonState, gameState, genDungeonState, introQuest, introState, mainMenuState, openMenuState, pausedState, setupState, villageState } from './global/states'
 import { despawnOfType, hierarchyPlugin, removeStateEntity } from './lib/hierarchy'
 import { updateModels } from './lib/modelsProperties'
 import { particlesPlugin } from './lib/particles'
@@ -43,8 +44,7 @@ import { turnNPCHead } from './states/game/dialog'
 import { equip } from './states/game/equip'
 import { bobItems, collectItems, popItems, stopItems } from './states/game/items'
 import { canPlayerMove, movePlayer, playerSteps, savePlayerFromTheEmbraceOfTheVoid, stopPlayer } from './states/game/movePlayer'
-import { pauseGame } from './states/game/pauseGame'
-import { allowDoorCollision, collideWithDoorCamp, collideWithDoorClearing, collideWithDoorDungeon, collideWithDoorIntro, doorLocking, unlockDoorClearing, unlockDoorDungeon } from './states/game/spawnDoor'
+import { allowDoorCollision, collideWithDoorCamp, collideWithDoorClearing, collideWithDoorDungeon, collideWithDoorIntro, collideWithDoorVillage, doorLocking, unlockDoorClearing, unlockDoorDungeon } from './states/game/spawnDoor'
 import { spawnDungeon, spawnLevel, spawnLevelData, updateTimeUniforms } from './states/game/spawnLevel'
 import { spawnCharacter, spawnPlayerClearing, spawnPlayerDungeon } from './states/game/spawnPlayer'
 import { interactionPlugin } from './states/game/touchItem'
@@ -52,12 +52,12 @@ import { updateWeaponArc } from './states/game/weapon'
 import { intiMainMenuRendering } from './states/mainMenu/initMainMenu'
 import { clickOnMenuButton, initMainMenuCamPos, renderMainMenu, selectMainMenu, setupWindow, spawnPlayerContinueGame } from './states/mainMenu/mainMenuRendering'
 import { disablePortrait, enableFullscreen, resize, setupGame, stopOnLosingFocus } from './states/setup/setupGame'
-import { errors, UI } from './ui/UI'
+import { UI } from './ui/UI'
 
 coreState
 	.addPlugins(hierarchyPlugin, transformsPlugin, physicsPlugin, addToScene('camera', 'light', 'model', 'dialogContainer', 'emitter', 'interactionContainer', 'minigameContainer', 'healthBarContainer', 'dashDisplay', 'stun', 'debuffsContainer', 'weaponArc', 'questMarkerContainer', 'lockedOn'), updateModels, particlesPlugin)
 	.onEnter(initThree, initCamera, moveCamera(true))
-	.onEnter(() => ui.render(UI), initHowler)
+	.onEnter(() => ui.render(UI), initHowler, initTexturesItemsAndEnemies)
 	.addSubscriber(resize, disablePortrait, enableFullscreen, stopOnLosingFocus)
 	.onPreUpdate(() => time.tick(), coroutines.tick, savePlayerFromTheEmbraceOfTheVoid, updateMousePosition())
 	.onUpdate(runIf(() => !pausedState.enabled, updateAnimations('playerAnimator', 'basketAnimator', 'enemyAnimator', 'ovenAnimator', 'houseAnimator', 'chestAnimator', 'kayAnimator', 'cellarDoorAnimator')))
@@ -76,7 +76,7 @@ gameState
 	.onPreUpdate(
 		runIf(canPlayerMove, movePlayer, updateDashDisplay),
 		runIf(() => !pausedState.enabled, playerSteps, dayNight, updateTimeUniforms, applyDeathTimer),
-		runIf(() => !openMenuState.enabled, pauseGame),
+		runIf(() => !openMenuState.enabled),
 	)
 	.addPlugins(playerBehaviorPlugin, rangeEnemyBehaviorPlugin, chargingEnemyBehaviorPlugin, meleeEnemyBehaviorPlugin, beeBossBehaviorPlugin, jumpingEnemyBehaviorPlugin, sporeBehaviorPlugin, chargingTwiceEnemyBehaviorPlugin, rangeThriceEnemyBehaviorPlugin)
 	.onUpdate(collectItems(false), turnNPCHead, dropBerriesOnHit, updateWeaponArc, sleepyEffects)
@@ -135,6 +135,12 @@ pausedState
 	.onEnter(() => time.stop(), musicManager.pause)
 	.onExit(() => time.start(), musicManager.play)
 
+villageState
+	.onEnter(spawnLevel('village'), spawnLevelData, spawnCharacter, moveCamera(true))
+	.onEnter(compileShaders)
+	.onUpdate(collideWithDoorVillage)
+	.onExit(despawnOfType('map'))
+
 introQuest.addPlugins(introQuestPlugin)
 
 const animate = () => {
@@ -142,7 +148,7 @@ const animate = () => {
 		app.update()
 	} catch (e) {
 		console.error(e)
-		errors.push(JSON.stringify(e))
+		errorEvent.emit(String(e))
 	}
 	requestAnimationFrame(animate)
 }

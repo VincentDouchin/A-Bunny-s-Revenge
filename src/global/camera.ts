@@ -34,7 +34,7 @@ export const initCamera = () => {
 const cameraQuery = ecs.with('camera')
 const gameCameraQuery = ecs.with('camera', 'position', 'mainCamera', 'cameraLookat', 'cameraShake')
 export const cameraTargetQuery = ecs.with('cameratarget', 'worldPosition')
-const doorsQuery = ecs.with('door', 'position').where(e => e.doorType === 'fog')
+const doorsQuery = ecs.with('boundary', 'position').where(e => e.doorType === 'fog')
 export const updateCameraZoom = (zoom: number = params.zoom) => {
 	for (const { camera } of cameraQuery) {
 		const h = 600
@@ -83,16 +83,16 @@ export const moveCamera = (init = false) => () => {
 					const level = levelsData.levels.find(level => level.id === mapId)
 					if (level && level.containCamera) {
 						for (const door of doorsQuery) {
-							if (door.door === Direction.N) {
+							if (door.boundary === Direction.N) {
 								target.z = Math.min(target.z, door.position.z - OFFSETZ)
 							}
-							if (door.door === Direction.S) {
+							if (door.boundary === Direction.S) {
 								target.z = Math.max(target.z, door.position.z + OFFSETZ)
 							}
-							if (door.door === Direction.W) {
+							if (door.boundary === Direction.W) {
 								target.x = Math.min(target.x, door.position.x - OFFSETX)
 							}
-							if (door.door === Direction.E) {
+							if (door.boundary === Direction.E) {
 								target.x = Math.max(target.x, door.position.x + OFFSETX)
 							}
 						}
@@ -110,7 +110,6 @@ export const moveCamera = (init = false) => () => {
 
 		if (!debugState.enabled) {
 			const lerpSpeed = time.delta / 1000 * 3
-
 			const offset = new Vector3(params.cameraOffsetX, params.cameraOffsetY, params.cameraOffsetZ)
 			const newPosition = target.clone().add({ x: cameraShake.x, y: 0, z: cameraShake.y })
 			if (cameraOffset) {

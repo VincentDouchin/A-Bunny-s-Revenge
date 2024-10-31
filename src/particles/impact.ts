@@ -13,7 +13,7 @@ export const impact = () => {
 	const system = new ParticleSystem({
 		duration: 3,
 		looping: false,
-		prewarm: true,
+		prewarm: false,
 		instancingGeometry: geo,
 		startLife: new IntervalValue(2.0, 4.0),
 		startSpeed: new ConstantValue(0.6),

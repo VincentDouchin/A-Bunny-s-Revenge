@@ -11,7 +11,7 @@ export const loadLevelData = async () => {
 	Object.assign(colliderData, await get('colliderData'))
 	Object.assign(levelsUrl, await get('levels'))
 	const levels: Level[] = await Promise.all(levelsUrl.map(async (level) => {
-		const levelCanvases: LevelImage[] = ['path', 'trees', 'grass', 'heightMap', 'water']
+		const levelCanvases: LevelImage[] = ['path', 'trees', 'grass', 'heightMap', 'water', 'rock']
 		const newLevel: Partial<Level> = {}
 		for (const canvas of levelCanvases) {
 			newLevel[canvas] = await dataUrlToCanvas(level.size, level[canvas])

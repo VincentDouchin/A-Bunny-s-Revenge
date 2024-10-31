@@ -2,7 +2,7 @@ import type { TouchController } from '@/lib/inputs'
 import type { Accessor, JSX, JSXElement } from 'solid-js'
 import type { Vec2 } from 'three'
 import { ecs, ui } from '@/global/init'
-import { campState, dungeonState, pausedState } from '@/global/states'
+import { campState, dungeonState } from '@/global/states'
 import { atom } from '@/lib/uiManager'
 import Inventory from '@assets/icons/basket-shopping-solid.svg'
 import Lock from '@assets/icons/lockIndicator.svg'
@@ -55,10 +55,10 @@ export const TouchButton = <T extends string,>({ input, controller, children, in
 	}
 	:global(.input svg) {
 		filter:
-			drop-shadow(-1px -1px 0px black)
-			drop-shadow(2px -1px 0px black)
-			drop-shadow(2px 2px 0px black)
-			drop-shadow(-1px 2px 0px black);
+			drop-shadow(-0.1rem -0.1rem 0rem black)
+			drop-shadow(0.2rem -0.1rem 0rem black)
+			drop-shadow(0.2rem 0.2rem 0rem black)
+			drop-shadow(-0.1rem 0.2rem 0rem black);
 	}
 	.input-text{
 		position: absolute;
@@ -238,11 +238,16 @@ export const TouchControls = () => {
 					transform: translateX(-50%);
 					fill: hsla(0,0%,100%);
 					display: flex;
-					z-index:100;
-					opacity:0.3;
-					align-items:center;
-					gap:1rem;
-					font-size: 2rem
+					z-index: 100;
+					opacity: var(--ui-opacity);
+					align-items: center;
+					gap: 1rem;
+					font-size: 2rem;
+					background: var(--gold);
+					/* fill: black; */
+					padding: 0.2rem 1rem;
+					border-radius: 1rem;
+					box-shadow: inset 0.2em 0.2em 0 0 var(--gold-shiny), 0.2em 0.2em 0 0 black;
 				}
 				.inventory-button{
 					position: fixed;
@@ -252,12 +257,18 @@ export const TouchControls = () => {
 				`
 				const primaryInteractable = createMemo(() => interactables()[0])
 				const secondaryInteractable = createMemo(() => interactables()[1])
+				const pause = (interact: number) => playerInputs?.set('pause', interact)
 				return (
 					<div>
-						<button class="pause-button button" onTouchStart={() => pausedState.enable()}>
+						<div
+							class="pause-button input"
+							onTouchStart={() => pause(1)}
+							onTouchEnd={() => pause(0)}
+							onTouchCancel={() => pause(0)}
+						>
 							<Pause />
-							Pause
-						</button>
+							<OutlineText>Pause</OutlineText>
+						</div>
 
 						<div
 							class="joystick-container"

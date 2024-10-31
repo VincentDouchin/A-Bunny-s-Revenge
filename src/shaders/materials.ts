@@ -53,6 +53,8 @@ const groundExtension = new MaterialExtension({
 	pathColor: new Color(groundColors.pathColor),
 	pathColor2: new Color(groundColors.pathColor2),
 	grassColor: new Color(groundColors.grassColor),
+	rock: null,
+	rock_texture: null,
 	ground: null,
 })
 	.defines('USE_UV')
@@ -66,6 +68,8 @@ const groundExtension = new MaterialExtension({
 		addUniform(`topColor`, 'vec3'),
 		addUniform(`grassColor`, 'vec3'),
 		addUniform(`ground`, 'sampler2D'),
+		addUniform(`rock_texture`, 'sampler2D'),
+		addUniform(`rock`, 'sampler2D'),
 		remove('color.rgb *= diffuse;'),
 		replace('vec4 color = vec4(1.,1.,1.,opacity);', /* glsl */`
 			vec4 color = vec4(1.);
@@ -81,6 +85,7 @@ const groundExtension = new MaterialExtension({
 				: step(0.3,noise) == 1.
 					? mix(grassColor,topColor,0.2)
 					: grassColor;
+
 			vec3 normal2 = normalize( cross( dFdx( vViewPosition ), dFdy( vViewPosition ) ) );
 			float slope = dot(normal2, vec3(0.,1.,0.));
 			vec3 blending = abs( worldNormal );
@@ -96,7 +101,11 @@ const groundExtension = new MaterialExtension({
 			float path_amount = texture2D(level,vUv ).a;
 			float path_noised = step(0.5- path_amount ,cnoise(vec3(scaled_uv,1.))*(path_amount/3.));
 			vec3 grass_and_path = mix(grass,path,path_noised );
-			color.rgb = mix(tex.rgb,grass_and_path,normal_noised);
+			vec4 rock_sampled = texture2D(rock_texture,vUv * size/ 32.);
+			vec3 rock_mixed = mix(grass_and_path, rock_sampled.rgb, rock_sampled.a);
+			float rock_amount = step(0.2,texture2D(rock,vUv).a);
+			vec3 grass_and_path_and_rock = mix(grass_and_path,rock_mixed,rock_amount);
+			color.rgb = mix(tex.rgb,grass_and_path_and_rock,normal_noised);
 	`),
 	)
 

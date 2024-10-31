@@ -24,7 +24,7 @@ import type { Animator } from './animator'
 import type { InstanceHandle } from './assetLoaders'
 import type { ModifierContainer } from './modifiers'
 
-export type PlayerAnimations = 'idle' | 'running' | 'lightAttack' | 'slashAttack' | 'heavyAttack' | 'hit' | 'dying' | 'fishing' | 'sleeping' | 'wakeUp'
+export type PlayerAnimations = 'idle' | 'runFront' | 'runLeft' | 'runRight' | 'runBack' | 'lightAttack' | 'slashAttack' | 'heavyAttack' | 'hit' | 'dying' | 'fishing' | 'sleeping' | 'wakeUp' | 'interact' | 'pickup' | 'dashFront' | 'dashLeft' | 'dashRight' | 'dashBack'
 export type EnemyAnimations = 'idle' | 'running' | 'attacking' | 'hit' | 'dead'
 export type Dialog = Generator<string | void, void, void> | AsyncGenerator<string | void, void, void>
 export enum Faction {
@@ -80,7 +80,7 @@ export enum EnemyAttackStyle {
 	BeeBoss,
 }
 export const actors = ['cellarDoor', 'houseDoor', 'playerIntro', 'basketIntro', 'intro', 'cellarStairs', 'oven', 'cookingPot'] as const
-export const farmDoors = ['intro', 'cellar', 'clearing'] as const
+export const farmDoors = ['intro', 'cellar', 'clearing', 'village', 'fromVillage'] as const
 export type Doors = typeof farmDoors[number] | Direction
 export type Actor = (typeof actors)[number]
 
@@ -178,6 +178,7 @@ export interface Entity {
 	onSecondary?: (entity: Entity, player: Entity) => void
 	// ! Camp
 	door?: Direction | (typeof farmDoors)[number]
+	boundary?: Direction
 	doorType?: 'vine' | 'fog' | 'marker'
 	doorLevel?: number
 	doorLocked?: true
