@@ -1,4 +1,5 @@
-import type { State } from '@/lib/state'
+import type { app } from '@/global/states'
+import type { Plugin } from '@/lib/app'
 import { fishBehaviorPlugin } from '@/behaviors/fishBehavior'
 import { MenuType } from '@/global/entity'
 import { assets, ecs, tweens } from '@/global/init'
@@ -184,8 +185,8 @@ const despawnFish = () => {
 	}
 }
 
-export const fishingPlugin = (s: State) => {
-	s.addSubscriber(addFish)
-	s.onUpdate(useFishingPole, updateFishingLine, stopFishing(), despawnFish)
-	s.addPlugins(fishBehaviorPlugin)
+export const fishingPlugin: Plugin<typeof app> = (app) => {
+	app.addSubscribers('game', addFish)
+		.onUpdate('game', useFishingPole, updateFishingLine, stopFishing(), despawnFish)
+		.addPlugins(fishBehaviorPlugin)
 }

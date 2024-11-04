@@ -1,5 +1,4 @@
 import type { Atom } from 'solid-use/atom'
-import { app } from '@/global/states'
 import atom from 'solid-use/atom'
 
 interface DebugOptions {
@@ -11,6 +10,3 @@ export const debugOptions: DebugOptions = {
 	godMode: atom(false),
 
 }
-
-export const debugState = app.create()
-export const editorState = app.create()

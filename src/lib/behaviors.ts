@@ -1,8 +1,8 @@
 import type { Entity, States } from '@/global/entity'
-import type { State } from '@/lib/state'
+import type { app } from '@/global/states'
 import type { Query, With } from 'miniplex'
+import type { Plugin } from './app'
 import { ecs } from '@/global/init'
-import { pausedState } from '@/global/states'
 import { entries } from '@/utils/mapFunctions'
 import { sleep } from '@/utils/sleep'
 
@@ -29,7 +29,7 @@ export const behaviorPlugin = <C extends keyof Entity, B extends keyof States, F
 	fn: F,
 ) => {
 	const query = initalQuery.with('behaviorController', 'state').where(e => e.behaviorController === behaviorController)
-	return (manager: Record<States[B], EntityState<C, B, F>>) => (state: State) => {
+	return (manager: Record<States[B], EntityState<C, B, F>>): Plugin<typeof app> => (app) => {
 		for (const [entityState, stateManager] of entries(manager)) {
 			const setState = (e: StateEntity<C>, previousState: States[B]) => (state: States[B]) => {
 				if (e.state === previousState) {
@@ -38,20 +38,20 @@ export const behaviorPlugin = <C extends keyof Entity, B extends keyof States, F
 			}
 			const stateQuery = query.where(e => e.state === entityState)
 			const { enter, update, exit } = stateManager()
-			state.addSubscriber(() => stateQuery.onEntityAdded.subscribe((e) => {
-				if (enter && !pausedState.enabled) {
+			app.addSubscribers('game', () => stateQuery.onEntityAdded.subscribe((e) => {
+				if (enter && app.isDisabled('paused')) {
 					enter(e, setState(e, entityState), fn(e))
 				}
 			}))
-			state.onPostUpdate(() => {
-				if (update && !pausedState.enabled) {
+			app.onPostUpdate('game', () => {
+				if (update && app.isDisabled('paused')) {
 					for (const entity of stateQuery) {
 						update(entity, setState(entity, entityState), fn(entity))
 					}
 				}
 			})
-			state.addSubscriber(() => stateQuery.onEntityRemoved.subscribe(async (e) => {
-				if (exit && !pausedState.enabled) {
+			app.addSubscribers('game', () => stateQuery.onEntityRemoved.subscribe(async (e) => {
+				if (exit && app.isDisabled('paused')) {
 					await sleep(1)
 					exit(e, setState(e, entityState), fn(e))
 				}

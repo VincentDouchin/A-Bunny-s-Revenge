@@ -4,21 +4,19 @@ import { playerBehaviorPlugin } from './behaviors/playerBehavior'
 import { debugPlugin } from './debug/debugPlugin'
 import { updateAnimations } from './global/animations'
 import { initCamera, initializeCameraPosition, moveCamera } from './global/camera'
-import { errorEvent } from './global/events'
 import { coroutines, inputManager, musicManager, resetSave, time, tweens, ui } from './global/init'
 import { tickModifiersPlugin } from './global/modifiers'
 import { updateMousePosition } from './global/mousePosition'
 import { compileShaders, initTexturesItemsAndEnemies, initThree, renderGame } from './global/rendering'
 import { initHowler, playAmbience } from './global/sounds'
-import { app, campState, coreState, dungeonState, gameState, genDungeonState, introQuest, introState, mainMenuState, openMenuState, pausedState, setupState, villageState } from './global/states'
+import { app } from './global/states'
+import { runIf } from './lib/app'
 import { despawnOfType, hierarchyPlugin, removeStateEntity } from './lib/hierarchy'
-import { updateModels } from './lib/modelsProperties'
 import { particlesPlugin } from './lib/particles'
 import { physicsPlugin } from './lib/physics'
 import { addToScene } from './lib/registerComponents'
-import { runIf } from './lib/state'
 import { transformsPlugin } from './lib/transforms'
-import { enableCutscene, introQuestPlugin, spawnIntroPlayer, startIntro } from './quests/introQuest'
+import { enableCutscene, spawnIntroPlayer, startIntro } from './quests/introQuest'
 import { addQuestMarkers, enableQuests } from './quests/questHelpers'
 import { spawnGodRay } from './shaders/godrays'
 import { applyArchingForce, detroyProjectiles, honeySplat, sleepyEffects, stepInHoney, tickPoison, tickSleepy, tickSneeze } from './states/dungeon/attacks'
@@ -54,103 +52,83 @@ import { clickOnMenuButton, initMainMenuCamPos, renderMainMenu, selectMainMenu, 
 import { disablePortrait, enableFullscreen, resize, setupGame, stopOnLosingFocus } from './states/setup/setupGame'
 import { UI } from './ui/UI'
 
-coreState
-	.addPlugins(hierarchyPlugin, transformsPlugin, physicsPlugin, addToScene('camera', 'light', 'model', 'dialogContainer', 'emitter', 'interactionContainer', 'minigameContainer', 'healthBarContainer', 'dashDisplay', 'stun', 'debuffsContainer', 'weaponArc', 'questMarkerContainer', 'lockedOn'), updateModels, particlesPlugin)
-	.onEnter(initThree, initCamera, moveCamera(true))
-	.onEnter(() => ui.render(UI), initHowler, initTexturesItemsAndEnemies)
-	.addSubscriber(resize, disablePortrait, enableFullscreen, stopOnLosingFocus)
-	.onPreUpdate(() => time.tick(), coroutines.tick, savePlayerFromTheEmbraceOfTheVoid, updateMousePosition())
-	.onUpdate(runIf(() => !pausedState.enabled, updateAnimations('playerAnimator', 'basketAnimator', 'enemyAnimator', 'ovenAnimator', 'houseAnimator', 'chestAnimator', 'kayAnimator', 'cellarDoorAnimator')))
-	.onUpdate(inputManager.update, ui.update, moveCamera())
-	.enable()
-setupState
-	.onEnter(setupGame)
-	.enable()
-
-gameState
-	.addPlugins(debugPlugin, fishingPlugin, interactionPlugin, tickModifiersPlugin('speed', 'maxHealth', 'strength', 'critChance', 'critDamage', 'attackSpeed', 'lootQuantity', 'lootChance'))
-	.addSubscriber(initializeCameraPosition, bobItems, enableInventoryState, killAnimation, popItems, addHealthBarContainer, ...equip('wateringCan', 'weapon', 'fishingPole'), ...doorLocking, addDashDisplay, addQuestMarkers)
-	.onEnter(enableQuests)
-	.onPreUpdate(runIf(() => !pausedState.enabled, tweens.tick))
-	.onPreUpdate(stopItems)
+app
+	// ! DEFAULT
+	.addPlugins(debugPlugin, hierarchyPlugin, transformsPlugin, physicsPlugin, addToScene('camera', 'light', 'model', 'dialogContainer', 'emitter', 'interactionContainer', 'minigameContainer', 'healthBarContainer', 'dashDisplay', 'stun', 'debuffsContainer', 'weaponArc', 'questMarkerContainer', 'lockedOn'), particlesPlugin)
+	.onEnter('default', initThree, initCamera, moveCamera(true))
+	.onEnter('default', () => ui.render(UI), initHowler, initTexturesItemsAndEnemies)
+	.addSubscribers('default', resize, disablePortrait, enableFullscreen, stopOnLosingFocus)
+	.onPreUpdate('default', () => time.tick(), coroutines.tick, savePlayerFromTheEmbraceOfTheVoid, updateMousePosition())
+	.onUpdate('default', runIf(() => app.isDisabled('paused'), ...updateAnimations('playerAnimator', 'basketAnimator', 'enemyAnimator', 'ovenAnimator', 'houseAnimator', 'chestAnimator', 'kayAnimator', 'cellarDoorAnimator')))
+	.onUpdate('default', inputManager.update, ui.update, moveCamera())
+	// !SETUP
+	.onEnter('setup', setupGame)
+	// ! GAME
+	.addPlugins(fishingPlugin, interactionPlugin, tickModifiersPlugin('speed', 'maxHealth', 'strength', 'critChance', 'critDamage', 'attackSpeed', 'lootQuantity', 'lootChance'))
+	.addSubscribers('game', initializeCameraPosition, bobItems, enableInventoryState, killAnimation, popItems, addHealthBarContainer, ...equip('wateringCan', 'weapon', 'fishingPole'), ...doorLocking, addDashDisplay, addQuestMarkers)
+	.onEnter('game', enableQuests)
 	.onPreUpdate(
+		'game',
+		stopItems,
 		runIf(canPlayerMove, movePlayer, updateDashDisplay),
-		runIf(() => !pausedState.enabled, playerSteps, dayNight, updateTimeUniforms, applyDeathTimer),
-		runIf(() => !openMenuState.enabled),
+		runIf(() => app.isDisabled('paused'), tweens.tick, playerSteps, dayNight, updateTimeUniforms, applyDeathTimer),
 	)
 	.addPlugins(playerBehaviorPlugin, rangeEnemyBehaviorPlugin, chargingEnemyBehaviorPlugin, meleeEnemyBehaviorPlugin, beeBossBehaviorPlugin, jumpingEnemyBehaviorPlugin, sporeBehaviorPlugin, chargingTwiceEnemyBehaviorPlugin, rangeThriceEnemyBehaviorPlugin)
-	.onUpdate(collectItems(false), turnNPCHead, dropBerriesOnHit, updateWeaponArc, sleepyEffects)
-	.onPostUpdate(renderGame, rotateStun, runIf(() => !openMenuState.enabled, interact))
-	.enable()
-
-openMenuState
-	.onEnter(stopPlayer)
-	.addSubscriber(disableInventoryState)
-	.onExit()
-	.onUpdate(closePlayerInventory)
-campState
-	.addSubscriber(...interactablePlantableSpot)
-	.onEnter(spawnLevel('farm'), spawnLevelData, initPlantableSpotsInteractions, spawnGodRay)
-	.onEnter(runIf(() => mainMenuState.disabled, spawnCharacter, setInitialHealth), moveCamera(true))
-	.onEnter(compileShaders)
-	.onUpdate(runIf(() => mainMenuState.disabled, playNightMusic, playAmbience))
-	.onUpdate(collideWithDoorCamp, waterCrops, growCrops)
-	.onUpdate(runIf(canPlayerMove, plantSeed, harvestCrop, openPlayerInventory))
-	.onExit(despawnOfType('map'))
-mainMenuState
-	.onEnter(intiMainMenuRendering, setupWindow)
-	.onUpdate(renderMainMenu, selectMainMenu, clickOnMenuButton)
-	.addSubscriber(...initMainMenuCamPos)
+	.onUpdate('game', collectItems(false), turnNPCHead, dropBerriesOnHit, updateWeaponArc, sleepyEffects)
+	.onPostUpdate('game', renderGame, rotateStun, runIf(() => app.isDisabled('menu'), interact))
+	// ! MENU
+	.onEnter('menu', stopPlayer)
+	.addSubscribers('menu', disableInventoryState)
+	.onUpdate('menu', closePlayerInventory)
+	// ! FARM
+	.addSubscribers('farm', ...interactablePlantableSpot)
+	.onEnter('farm', spawnLevel('farm'), spawnLevelData, initPlantableSpotsInteractions, spawnGodRay, compileShaders)
+	.onEnter('farm', runIf(() => app.isDisabled('mainMenu'), spawnCharacter, setInitialHealth), moveCamera(true))
+	.onUpdate('farm', runIf(() => app.isDisabled('mainMenu'), playNightMusic, playAmbience))
+	.onUpdate('farm', collideWithDoorCamp, waterCrops, growCrops)
+	.onUpdate('farm', runIf(canPlayerMove, plantSeed, harvestCrop, openPlayerInventory))
+	.onExit('farm', ...despawnOfType('map'))
+	// ! MAIN MENU
+	.onEnter('mainMenu', intiMainMenuRendering, setupWindow)
+	.onUpdate('mainMenu', renderMainMenu, selectMainMenu, clickOnMenuButton)
+	.addSubscribers('mainMenu', ...initMainMenuCamPos)
 	.onExit(
-		removeStateEntity(mainMenuState),
-		runIf(() => introState.enabled, () => resetSave(), startIntro),
-		runIf(() => campState.enabled, spawnPlayerContinueGame),
+		'mainMenu',
+		removeStateEntity('mainMenu'),
+		runIf(() => app.isEnabled('intro'), () => resetSave(), startIntro),
+		runIf(() => app.isEnabled('farm'), spawnPlayerContinueGame),
 	)
-introState
-	.onEnter(spawnLevel('intro'), spawnLevelData)
-	.addPlugins(spawnIntroPlayer)
-	.onEnter(compileShaders, moveCamera(true))
-	.onUpdate(collideWithDoorIntro)
-	.onUpdate(runIf(() => mainMenuState.disabled, playAmbience))
-	.addSubscriber(enableCutscene)
-	.onExit(despawnOfType('map'))
-genDungeonState
-	.addSubscriber(unlockDoorClearing)
-	.onEnter(spawnLevel('crossroad'), spawnLevelData, spawnPlayerClearing, setInitialHealth, spawnWeaponsChoice, moveCamera(true))
-	.onEnter(compileShaders)
-	.onUpdate(collideWithDoorClearing)
-	.onExit(despawnOfType('map'))
-
-dungeonState
-	.addSubscriber(spawnDrops, removeEnemyFromSpawn, applyArchingForce, unlockDungeon)
-	.onEnter(spawnDungeon, spawnLevelData, spawnEnemies, spawnPlayerDungeon, moveCamera(true))
-	.onEnter(compileShaders)
+	// ! INTRO
+	.onEnter('intro', spawnLevel('intro'), spawnLevelData)
+	.addPlugins(spawnIntroPlayer('intro'))
+	.onEnter('intro', compileShaders, moveCamera(true))
+	.onUpdate('intro', collideWithDoorIntro)
+	.onUpdate('intro', runIf(() => app.isDisabled('mainMenu'), playAmbience))
+	.addSubscribers('intro', enableCutscene)
+	.onExit('intro', ...despawnOfType('map'))
+	// ! CLEARING
+	.addSubscribers('clearing', unlockDoorClearing)
+	.onEnter('clearing', spawnLevel('crossroad'), spawnLevelData, spawnPlayerClearing, setInitialHealth, spawnWeaponsChoice, moveCamera(true))
+	.onEnter('clearing', compileShaders)
+	.onUpdate('clearing', collideWithDoorClearing)
+	.onExit('clearing', ...despawnOfType('map'))
+	// ! DUNGEON
+	.addSubscribers('dungeon', spawnDrops, removeEnemyFromSpawn, applyArchingForce, unlockDungeon)
+	.onEnter('dungeon', spawnDungeon, spawnLevelData, spawnEnemies, spawnPlayerDungeon, moveCamera(true))
+	.onEnter('dungeon', compileShaders)
 	.onUpdate(
+		'dungeon',
 		runIf(canPlayerMove, allowDoorCollision, collideWithDoorDungeon, harvestCrop, killEntities, unlockDoorDungeon),
-		runIf(() => !pausedState.enabled, tickHitCooldown, tickSneeze, tickPoison, tickInactiveTimer, tickSleepy),
+		runIf(() => app.isDisabled('paused'), tickHitCooldown, tickSneeze, tickPoison, tickInactiveTimer, tickSleepy),
 	)
-	.onUpdate(detroyProjectiles, honeySplat, stepInHoney, endBattleSpawnChest, spawnPoisonTrail, lockOnEnemy, buyItems)
-	.onExit(despawnOfType('map'))
-pausedState
-	.onEnter(() => time.stop(), musicManager.pause)
-	.onExit(() => time.start(), musicManager.play)
-
-villageState
-	.onEnter(spawnLevel('village'), spawnLevelData, spawnCharacter, moveCamera(true))
-	.onEnter(compileShaders)
-	.onUpdate(collideWithDoorVillage)
-	.onExit(despawnOfType('map'))
-
-introQuest.addPlugins(introQuestPlugin)
-
-const animate = () => {
-	try {
-		app.update()
-	} catch (e) {
-		console.error(e)
-		errorEvent.emit(String(e))
-	}
-	requestAnimationFrame(animate)
-}
-
-animate()
+	.onUpdate('dungeon', detroyProjectiles, honeySplat, stepInHoney, endBattleSpawnChest, spawnPoisonTrail, lockOnEnemy, buyItems)
+	.onExit('dungeon', ...despawnOfType('map'))
+	// ! PAUSED
+	.onEnter('paused', () => time.stop(), musicManager.pause)
+	.onExit('paused', () => time.start(), musicManager.play)
+	// ! VILLAGE
+	.onEnter('village', spawnLevel('village'), spawnLevelData, spawnCharacter, moveCamera(true))
+	.onEnter('village', compileShaders)
+	.onUpdate('village', collideWithDoorVillage)
+	.onExit('village', ...despawnOfType('map'))
+	.start()

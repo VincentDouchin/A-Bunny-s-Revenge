@@ -2,7 +2,7 @@ import { updateCameraZoom } from '@/global/camera'
 import { params } from '@/global/context'
 import { settings, time } from '@/global/init'
 import { updateRenderSize } from '@/global/rendering'
-import { app, campState, cutSceneState, dungeonState, introState, mainMenuState } from '@/global/states'
+import { app } from '@/global/states'
 import { Direction } from '@/lib/directions'
 import { windowEvent } from '@/lib/uiManager'
 import { startIntro } from '@/quests/introQuest'
@@ -13,25 +13,25 @@ import { assignPlanAndEnemies, RoomType } from '../dungeon/generateDungeon'
 export const setupGame = async () => {
 	if (params.debugBoss) {
 		const bossRoom = assignPlanAndEnemies([{ position: { x: 0, y: 0 }, connections: { north: 1, south: null }, type: RoomType.Boss }], 0)
-		dungeonState.enable({ dungeon: bossRoom[0], direction: Direction.S, firstEntry: true, playerHealth: 5, dungeonLevel: 0, weapon: 'Hoe' })
+		app.enable('dungeon', { dungeon: bossRoom[0], direction: Direction.S, firstEntry: true, playerHealth: 5, dungeonLevel: 0, weapon: 'Hoe' })
 		updateRenderSize()
 		updateCameraZoom()
 	} else if (params.debugEnemies) {
 		const enemiesRoom = assignPlanAndEnemies([{ position: { x: 0, y: 0 }, connections: { north: 1, south: null, east: null }, type: RoomType.Battle }], 0)
 		enemiesRoom[0].enemies = ['Armabee']
 		enemiesRoom[0].type = RoomType.Battle
-		dungeonState.enable({ dungeon: enemiesRoom[0], direction: Direction.S, firstEntry: true, playerHealth: 5, dungeonLevel: 0, weapon: 'SwordWeapon' })
+		app.enable('dungeon', { dungeon: enemiesRoom[0], direction: Direction.S, firstEntry: true, playerHealth: 5, dungeonLevel: 0, weapon: 'SwordWeapon' })
 		updateRenderSize()
 		updateCameraZoom()
 	} else if (params.debugIntro) {
-		await introState.enable()
+		await app.enable('intro')
 		setTimeout(() => startIntro(), 2000)
-		cutSceneState.disable()
+		app.disable('cutscene')
 		updateRenderSize()
 	} else if (!params.skipMainMenu) {
-		mainMenuState.enable()
+		app.enable('mainMenu')
 	} else {
-		campState.enable({ door: null })
+		app.enable('farm', { door: null })
 		updateRenderSize()
 		updateCameraZoom()
 	}
@@ -106,7 +106,7 @@ export const enableFullscreen = () => windowEvent('pointerup', () => {
 export const resize = () => windowEvent('resize', throttle(() => {
 	updateRenderSize()
 	updateCameraZoom()
-	if (mainMenuState.enabled) {
+	if (app.isEnabled('mainMenu')) {
 		updateRenderSize(new Vector2(window.innerWidth, window.innerHeight))
 		updateCameraZoom(10)
 	}

@@ -1,12 +1,13 @@
-import type { State } from '@/lib/state'
+import type { Plugin } from '@/lib/app'
 import { ecs } from '@/global/init'
+import { app } from '@/global/states'
 import { windowEvent } from '@/lib/uiManager'
-import { debugOptions, debugState } from './debugState'
+import { debugOptions } from './debugState'
 
 const enableDebugState = () => windowEvent('keydown', (e) => {
 	if (e.key === 'F3') {
 		e.preventDefault()
-		debugState.enable()
+		app.enable('debug')
 	}
 })
 
@@ -23,8 +24,8 @@ const godMode = () => {
 	}
 }
 
-export const debugPlugin = (state: State) => {
+export const debugPlugin: Plugin<typeof app> = (state) => {
 	state
-		.addSubscriber(enableDebugState)
-		.onUpdate(attackInFarm, godMode)
+		.addSubscribers('default', enableDebugState)
+		.onUpdate('default', attackInFarm, godMode)
 }

@@ -1,7 +1,5 @@
-import type { State } from '@/lib/state'
 import type { icons } from '@assets/assets'
 import type { Item } from './items'
-import { introQuest } from '@/global/states'
 
 export interface QuestStep {
 	description?: string
@@ -10,7 +8,6 @@ export interface QuestStep {
 	key: string
 }
 export interface Quest {
-	state?: State
 	unlock: () => boolean
 	data: () => object
 	readonly name: string
@@ -20,7 +17,6 @@ export interface Quest {
 
 export const quests = {
 	intro_quest: {
-		state: introQuest,
 		unlock: () => true,
 		data: () => ({
 			'4_get_carrots': {

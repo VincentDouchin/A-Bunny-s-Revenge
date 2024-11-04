@@ -1,7 +1,8 @@
 import type { Item } from '@/constants/items'
 import type { QuestMarkers, QuestName, QuestStepKey } from '@/constants/quests'
 import type { Actor, Entity, QueryEntity } from '@/global/entity'
-import type { State } from '@/lib/state'
+import type { app } from '@/global/states'
+import type { AppStates, Plugin } from '@/lib/app'
 import type { items } from '@assets/assets'
 import { quests } from '@/constants/quests'
 import { recipes } from '@/constants/recipes'
@@ -27,11 +28,11 @@ const setActor = (e: QueryEntity<typeof actorsQuery>, actors: Partial<Record<Act
 		}
 	}
 }
-export const addActors = (actors: Partial<Record<Actor, (e: QueryEntity<typeof actorsQuery>) => Entity | void>>) => (s: State) => {
-	s.addSubscriber(() => actorsQuery.onEntityAdded.subscribe((e) => {
+export const addActors = (actors: Partial<Record<Actor, (e: QueryEntity<typeof actorsQuery>) => Entity | void>>) => (state: AppStates<typeof app>): Plugin<typeof app> => (app) => {
+	app.addSubscribers(state, () => actorsQuery.onEntityAdded.subscribe((e) => {
 		setActor(e, actors)
 	}))
-	s.onEnter(() => {
+	app.onEnter(state, () => {
 		for (const e of actorsQuery) {
 			setActor(e, actors)
 		}
@@ -62,7 +63,7 @@ export const completeQuest = <Q extends QuestName>(name: Q) => {
 				}
 				quest.steps[key] = true
 			}
-			quests[name].state.disable()
+			// quests[name].state.disable()
 		}
 	}
 }
@@ -145,7 +146,7 @@ export const addQuest = async <Name extends QuestName>(name: Name) => {
 				ecs.addComponent(npc, 'questMarker', markers)
 			}
 		}
-		if (quests[name].state.disabled) quests[name].state.enable()
+		// if (quests[name].state.disabled) quests[name].state.enable()
 		addToast({ type: 'quest', quest: name })
 	}
 }
@@ -164,7 +165,7 @@ export const completeQuestStep = <Q extends QuestName>(questName: Q, step: Quest
 		}
 		completeQuestStepEvent.emit(`${questName}#${step}`)
 		if (Object.values(quest.steps).every(s => s === true)) {
-			quests[questName].state.disable()
+			// quests[questName].state.disable()
 		}
 	}
 }
@@ -187,11 +188,11 @@ export const isQuestActive = (name: QuestName) => {
 }
 
 export const enableQuests = async () => {
-	for (const quest of Object.keys(quests) as QuestName[]) {
-		if (isQuestActive(quest) && quests[quest].state) {
-			await quests[quest].state.enable()
-		}
-	}
+	// for (const quest of Object.keys(quests) as QuestName[]) {
+	// if (isQuestActive(quest) && quests[quest].state) {
+	// await quests[quest].state.enable()
+	// }
+	// }
 }
 
 interface Step {

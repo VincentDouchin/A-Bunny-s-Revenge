@@ -1,10 +1,9 @@
 import type { QueryEntity } from '@/global/entity'
-import type { DungeonRessources } from '@/global/states'
-import type { State, System } from '@/lib/state'
+import type { AppStates, Ressources, UpdateSystem } from '@/lib/app'
 import { Faction, farmDoors } from '@/global/entity'
 import { ecs, save, tweens, world } from '@/global/init'
 import { playSound } from '@/global/sounds'
-import { campState, dungeonState, genDungeonState, villageState } from '@/global/states'
+import { app } from '@/global/states'
 import { Direction, isCardialDirection, otherDirection } from '@/lib/directions'
 import { doorClosed } from '@/particles/doorClosed'
 import vertexShader from '@/shaders/glsl/main.vert?raw'
@@ -51,9 +50,14 @@ const doorToLockQuery = doorQuery.with('doorLocked')
 const doorToUnlockQuery = doorQuery.without('doorLocked', 'unlocked')
 const unlockeVineDoorsQuery = doorQuery.with('unlocked', 'doorType').where(e => e.doorType === 'vine')
 
-const onCollideWithDoor = <S extends State<any>>(
-	fn: (door: QueryEntity<typeof doorQuery>, player: QueryEntity<typeof playerQuery>, ressources: S extends State<infer R> ? R : never) => void,
-) => (ressources: S extends State<infer R> ? R : never) => {
+const onCollideWithDoor = <S extends AppStates<typeof app>>(
+
+	fn: (
+		door: QueryEntity<typeof doorQuery>,
+		player: QueryEntity<typeof playerQuery>,
+		ressources: Ressources<typeof app, S>
+	) => void,
+) => (ressources: Ressources<typeof app, S>) => {
 	{
 		for (const door of doorQuery) {
 			for (const player of playerQuery) {
@@ -73,43 +77,43 @@ export const unlockDoorDungeon = () => {
 	}
 }
 
-export const collideWithDoorDungeon = onCollideWithDoor<typeof dungeonState>((door, player, { dungeon, dungeonLevel, weapon }) => {
+export const collideWithDoorDungeon = onCollideWithDoor<'dungeon'>((door, player, { dungeon, dungeonLevel, weapon }) => {
 	if (isCardialDirection(door.door)) {
 		const nextRoom = dungeon.doors[door.door]
 		if (nextRoom) {
-			dungeonState.enable({ dungeon: nextRoom, direction: otherDirection[door.door], playerHealth: player.currentHealth, firstEntry: false, dungeonLevel, weapon })
+			app.enable('dungeon', { dungeon: nextRoom, direction: otherDirection[door.door], playerHealth: player.currentHealth, firstEntry: false, dungeonLevel, weapon })
 		}
 	} else {
-		campState.enable({ door: door.door ?? 'clearing' })
+		app.enable('farm', { door: door.door ?? 'clearing' })
 	}
 })
 
 export const collideWithDoorCamp = onCollideWithDoor(({ door }) => {
 	if (door === 'clearing') {
-		genDungeonState.enable()
+		app.enable('clearing')
 	}
 	if (door === 'village') {
-		villageState.enable({ door: 'village' })
+		app.enable('village', { door: 'village' })
 	}
 })
 
 export const collideWithDoorVillage = onCollideWithDoor(() => {
-	campState.enable({ door: 'village' })
+	app.enable('farm', { door: 'village' })
 })
 
 export const collideWithDoorClearing = onCollideWithDoor((door, player) => {
 	if (door.doorLevel !== undefined && player.weapon) {
 		const dungeon = genDungeon(7 + door.doorLevel * 5, true, door.doorLevel).find(room => room.type === RoomType.Entrance)!
-		dungeonState.enable({ dungeon, direction: Direction.S, firstEntry: true, playerHealth: player.currentHealth, dungeonLevel: door.doorLevel, weapon: player.weapon.weaponName })
+		app.enable('dungeon', { dungeon, direction: Direction.S, firstEntry: true, playerHealth: player.currentHealth, dungeonLevel: door.doorLevel, weapon: player.weapon.weaponName })
 	}
 	if (door.doorLevel === undefined) {
-		campState.enable({ door: 'clearing' })
+		app.enable('farm', { door: 'clearing' })
 	}
 })
 
 export const collideWithDoorIntro = onCollideWithDoor(({ door }) => {
 	if (farmDoors.includes(door)) {
-		campState.enable({ door: door as typeof farmDoors[number] })
+		app.enable('farm', { door: door as typeof farmDoors[number] })
 	}
 })
 const doorClearingQuery = doorQuery.with('doorLevel')
@@ -124,7 +128,7 @@ export const unlockDoorClearing = () => playerWithWeaponQuery.onEntityAdded.subs
 })
 
 const playerInDoor = ecs.with('playerControls', 'ignoreDoor', 'collider')
-export const allowDoorCollision: System<DungeonRessources> = () => {
+export const allowDoorCollision: UpdateSystem<typeof app, 'dungeon'> = () => {
 	for (const player of playerInDoor) {
 		for (const door of doorQuery) {
 			if (door.door === player.ignoreDoor && !world.intersectionPair(player.collider, door.collider)) {

@@ -1,6 +1,6 @@
 import type { Entity, PlayerAnimations } from '@/global/entity'
-import type { DungeonRessources, FarmRessources } from '@/global/states'
-import type { System } from '@/lib/state'
+import type { app } from '@/global/states'
+import type { UpdateSystem } from '@/lib/app'
 import type { weapons } from '@assets/assets'
 import { Sizes } from '@/constants/sizes'
 import { Animator } from '@/global/animator'
@@ -109,7 +109,7 @@ export const playerBundle = (health: number, weapon: weapons | null) => {
 	return player
 }
 const doorQuery = ecs.with('door', 'position', 'rotation')
-export const spawnCharacter: System<FarmRessources> = (ressources) => {
+export const spawnCharacter: UpdateSystem<typeof app, 'farm' | 'village'> = (ressources) => {
 	const position = new Vector3()
 	const rotation = new Quaternion()
 	if (ressources.door) {
@@ -130,7 +130,7 @@ export const spawnCharacter: System<FarmRessources> = (ressources) => {
 	ecs.add(player)
 }
 
-export const spawnPlayerDungeon: System<DungeonRessources> = (ressources) => {
+export const spawnPlayerDungeon: UpdateSystem<typeof app, 'dungeon'> = (ressources) => {
 	const isStart = ressources.dungeon.type === RoomType.Entrance && ressources.firstEntry
 	for (const door of doorQuery) {
 		if ((isStart && isCardialDirection(door.door)) ? ressources.dungeon.doors[door.door] === null : door.door === ressources.direction) {

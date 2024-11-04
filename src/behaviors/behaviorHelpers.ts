@@ -2,7 +2,7 @@ import type { Entity } from '@/global/entity'
 import type { With } from 'miniplex'
 import { params } from '@/global/context'
 import { ecs, inputManager, settings, time } from '@/global/init'
-import { openMenuState, pausedState } from '@/global/states'
+import { app } from '@/global/states'
 import { QueryFilterFlags } from '@dimforge/rapier3d-compat'
 import { Vector3 } from 'three'
 
@@ -42,7 +42,7 @@ export const getPlayerRotation = (e: With<Entity, 'position' | 'playerControls'>
 	if (lockOn) {
 		return lockOn.position.clone().sub(e.position).normalize()
 	}
-	if (!openMenuState.enabled && settings.controls === 'mouse') {
+	if (app.isDisabled('menu') && settings.controls === 'mouse') {
 		if (inputManager.controls() === 'gamepad') {
 			return new Vector3(
 				e.playerControls.get('lookLeft').pressed - e.playerControls.get('lookRight').pressed,
@@ -57,7 +57,7 @@ export const getPlayerRotation = (e: With<Entity, 'position' | 'playerControls'>
 	return force
 }
 export const applyMove = (entity: With<Entity, 'body'>, force: Vector3) => {
-	if (pausedState.enabled) return
+	if (app.isEnabled('paused')) return
 	const { body, controller, collider } = entity
 	if (controller && collider && body.isKinematic()) {
 		if (!controller.computedGrounded()) {
@@ -73,7 +73,7 @@ export const applyMove = (entity: With<Entity, 'body'>, force: Vector3) => {
 	}
 }
 export const applyRotate = (entity: With<Entity, 'rotation' | 'targetRotation'>, force: Vector3) => {
-	if (pausedState.enabled || openMenuState.enabled) return
+	if (app.isEnabled('paused') || app.isEnabled('menu')) return
 	if (force.length() > 0) {
 		entity.targetRotation.setFromAxisAngle(new Vector3(0, 1, 0), Math.atan2(force.x, force.z))
 	}

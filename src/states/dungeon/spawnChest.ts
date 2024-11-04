@@ -1,5 +1,5 @@
-import type { DungeonRessources } from '@/global/states'
-import type { System } from '@/lib/state'
+import type { app } from '@/global/states'
+import type { UpdateSystem } from '@/lib/app'
 import { chestLoot } from '@/constants/chestLoot'
 import { Animator } from '@/global/animator'
 import { Faction } from '@/global/entity'
@@ -64,12 +64,12 @@ export const spawnChest = (dungeonLevel: number) => {
 const enemiesQuery = ecs.with('faction').where(({ faction }) => faction === Faction.Enemy)
 
 const chestQuery = ecs.with('chestAnimator')
-export const endBattleSpawnChest: System<DungeonRessources> = (ressources) => {
+export const endBattleSpawnChest: UpdateSystem<typeof app, 'dungeon'> = (ressources) => {
 	if (enemiesQuery.size === 0 && chestQuery.size === 0 && [RoomType.Battle, RoomType.Boss, RoomType.Entrance].includes(ressources.dungeon.type)) {
 		if (!ressources.dungeon.chest) {
 			spawnChest(ressources.dungeonLevel)
 			ressources.dungeon.chest = true
 		}
-		setTimeout(() =>	collectItems(true)(), 2000)
+		setTimeout(() => collectItems(true)(), 2000)
 	}
 }

@@ -1,6 +1,6 @@
 import type { enemy } from '@/constants/enemies'
-import type { DungeonRessources } from '@/global/states'
-import type { Subscriber, System } from '@/lib/state'
+import type { app } from '@/global/states'
+import type { SubscriberSystem, UpdateSystem } from '@/lib/app'
 import { enemyData } from '@/constants/enemies'
 import { EnemySizes, Sizes } from '@/constants/sizes'
 import { Animator } from '@/global/animator'
@@ -57,11 +57,11 @@ export const enemyBundle = (name: enemy, level: number) => {
 	return entity
 }
 const enemyQuery = ecs.with('enemyName')
-export const removeEnemyFromSpawn: Subscriber<DungeonRessources> = ({ dungeon }) => enemyQuery.onEntityRemoved.subscribe((entity) => {
+export const removeEnemyFromSpawn: SubscriberSystem<typeof app, 'dungeon'> = ({ dungeon }) => enemyQuery.onEntityRemoved.subscribe((entity) => {
 	dungeon.enemies.splice(dungeon.enemies.indexOf(entity.enemyName), 1)
 })
 const mapQuery = ecs.with('map')
-export const spawnEnemies: System<DungeonRessources> = ({ dungeon, dungeonLevel }) => {
+export const spawnEnemies: UpdateSystem<typeof app, 'dungeon'> = ({ dungeon, dungeonLevel }) => {
 	const map = mapQuery.first
 	const mapData = levelsData.levels.find(level => level.id === map?.map)
 	if (!mapData?.navgrid) throw new Error('map not found')
@@ -87,6 +87,6 @@ export const tickInactiveTimer = () => {
 }
 
 const bossQuery = ecs.with('boss')
-export const unlockDungeon: Subscriber<DungeonRessources> = ressources => bossQuery.onEntityRemoved.subscribe(() => {
+export const unlockDungeon: SubscriberSystem<typeof app, 'dungeon'> = ressources => bossQuery.onEntityRemoved.subscribe(() => {
 	save.unlockedPaths = Math.max(save.unlockedPaths, ressources.dungeonLevel + 1)
 })

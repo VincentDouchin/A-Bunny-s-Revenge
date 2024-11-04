@@ -1,7 +1,7 @@
 import type { Entity } from '@/global/entity'
+import type { app } from '@/global/states'
 import { ecs } from '@/global/init'
-import { pausedState } from '@/global/states'
-import { runIf, type State } from '@/lib/state'
+import { type Plugin, runIf } from '@/lib/app'
 import { Vector3 } from 'three'
 import { CSS2DObject } from 'three/examples/jsm/renderers/CSS2DRenderer'
 import { getIntersections } from './sensor'
@@ -52,8 +52,8 @@ const removeInteractionContainer = () => interactingQuery.onEntityRemoved.subscr
 	ecs.removeComponent(e, 'outline')
 })
 
-export const interactionPlugin = (state: State) => {
-	state
-		.onUpdate(runIf(() => pausedState.disabled, touchItem))
-		.addSubscriber(removeOutlines, addOutline, removeInteractionContainer)
+export const interactionPlugin: Plugin<typeof app> = (app) => {
+	app
+		.onUpdate('game', runIf(() => app.isDisabled('paused'), touchItem))
+		.addSubscribers('game', removeOutlines, addOutline, removeInteractionContainer)
 }

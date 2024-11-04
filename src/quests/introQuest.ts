@@ -1,12 +1,12 @@
 import type { enemy } from '@/constants/enemies'
 import type { Entity } from '@/global/entity'
-import type { State } from '@/lib/state'
+import type { Plugin } from '@/lib/app'
 import type { Room } from '@/states/dungeon/generateDungeon'
 import type { Query, With } from 'miniplex'
 import { Faction, Interactable } from '@/global/entity'
 import { completeQuestStepEvent, cookedMealEvent, harvestCropEvent, showTutorialEvent } from '@/global/events'
 import { assets, ecs, inputManager, levelsData, save } from '@/global/init'
-import { cutSceneState, dungeonState, mainMenuState } from '@/global/states'
+import { app } from '@/global/states'
 import { modelColliderBundle } from '@/lib/models'
 import { RoomType } from '@/states/dungeon/generateDungeon'
 import { cropBundle } from '@/states/farm/farming'
@@ -58,7 +58,7 @@ const unlockCellar = () => {
 const introQuestDialogs = {
 	async *PlayerIntro1(player: With<Entity, 'state'>) {
 		speaker('Player')
-		cutSceneState.enable()
+		app.enable('cutscene')
 		await sleepPlayer()
 		yield 'Huh?'
 		yield 'Where am I?'
@@ -73,29 +73,29 @@ const introQuestDialogs = {
 		addQuest('intro_quest')
 		player.state = 'idle'
 		ecs.reindex(player)
-		cutSceneState.disable()
+		app.disable('cutscene')
 	},
 
 	async *pickupBasket(basket: Entity) {
 		speaker('Player')
-		cutSceneState.enable()
+		app.enable('cutscene')
 		yield 'So that\'s where I left my #BLUE#basket#BLUE!'
 		ecs.remove(basket)
 		yield await displayKeyItem(assets.models.basket.scene, 'Basket of ingredients', 0.6)
 		completeQuestStep('intro_quest', '0_find_basket')
 		yield 'Now I can go back #GREEN#Home#GREEN# and get started on dinner with Grandma!'
-		cutSceneState.disable()
+		app.disable('cutscene')
 	},
 	async *PlayerIntro2() {
-		cutSceneState.enable()
+		app.enable('cutscene')
 		speaker('Player')
 		yield 'Finally home!'
 		yield 'I should go see #GOLD#Grandma#GOLD# so we can get started cooking.'
-		cutSceneState.disable()
+		app.disable('cutscene')
 	},
 	async *findCauldron(cratesToOpenQuery: Query<any>) {
 		speaker('Player')
-		cutSceneState.enable()
+		app.enable('cutscene')
 		yield 'Here it is! The Cooking Pot!'
 		yield await displayKeyItem(assets.models.CookingPot.scene, 'Cooking pot', 0.3)
 		yield 'What\'s this?'
@@ -108,11 +108,11 @@ const introQuestDialogs = {
 		}
 		unlockCellar()
 
-		cutSceneState.disable()
+		app.disable('cutscene')
 	},
 	*openCrate(index: number) {
 		speaker('Player')
-		cutSceneState.enable()
+		app.enable('cutscene')
 		yield [
 			'Just a box of old junk',
 			'Nothing in here I need right now',
@@ -121,7 +121,7 @@ const introQuestDialogs = {
 			'Maybe we should clean up down here.',
 			'Still no Cooking Pot',
 		][index]
-		cutSceneState.disable()
+		app.disable('cutscene')
 	},
 	async *GrandmaIntro() {
 		yield await enterHouse()
@@ -181,12 +181,12 @@ const introQuestDialogs = {
 		yield 'Now that I harvested the carrots I can cook something for the festival!'
 	},
 	*turnAwayFromDoor(player: With<Entity, 'position' | 'state'>, callback: () => void) {
-		cutSceneState.enable()
+		app.enable('cutscene')
 		stopPlayer()
 		speaker('Player')
 		yield 'I should go help grandma cook something for the festival before going.'
 		movePlayerTo(new Vector3(0, 0, -20).add(player.position)).then(() => {
-			cutSceneState.disable()
+			app.disable('cutscene')
 			callback()
 		})
 	},
@@ -236,11 +236,11 @@ export const startIntro = async () => {
 }
 
 export const enableCutscene = () => {
-	cutSceneState.enable()
-	return () => cutSceneState.disable()
+	app.enable('cutscene')
+	return () => app.disable('cutscene')
 }
 
-const isPlayerFirstEnteringFarm = () => !hasCompletedStep('intro_quest', '1_see_grandma') && hasCompletedStep('intro_quest', '0_find_basket') && mainMenuState.disabled
+const isPlayerFirstEnteringFarm = () => !hasCompletedStep('intro_quest', '1_see_grandma') && hasCompletedStep('intro_quest', '0_find_basket') && app.isDisabled('mainMenu')
 
 const playerFromIntroDialog = () => playerQuery.onEntityAdded.subscribe(() => {
 	if (isPlayerFirstEnteringFarm()) {
@@ -354,13 +354,13 @@ const introQuestActors = addActors({
 		}
 	},
 	cellarDoor: () => ({
-		questMarker: ['intro_quest#2_find_pot'],
+		questMarker: ['intro_quest#2_find_pot'] as const,
 		questMarkerPosition: new Vector3(0, 10, -5),
 		async onPrimary(e, player) {
 			if (hasCompletedStep('intro_quest', '1_see_grandma')) {
-				cutSceneState.enable()
+				app.enable('cutscene')
 				await e.cellarDoorAnimator?.playClamped('doorOpen')
-				cutSceneState.disable()
+				app.disable('cutscene')
 				const enemies: enemy[] = hasCompletedStep('intro_quest', '2_find_pot') ? [] : ['soot_sprite', 'soot_sprite', 'soot_sprite', 'soot_sprite']
 				const cellar: Room = {
 					plan: levelsData.levels.find(l => l.type === 'cellar')!,
@@ -375,7 +375,7 @@ const introQuestActors = addActors({
 				save.playerPosition = playerPosition.toArray()
 				save.playerRotation = playerRotation.toArray()
 				await sleep(1000)
-				dungeonState.enable({
+				app.enable('dungeon', {
 					direction: 'cellar',
 					weapon: 'Ladle',
 					dungeon: cellar,
@@ -412,9 +412,9 @@ const cookMeal = () => cookedMealEvent.subscribe((cooking, recipe) => {
 	}
 })
 
-export const introQuestPlugin = (state: State) => {
-	state
-		.addPlugins(introQuestActors)
-		.addSubscriber(playerFromIntroDialog, makeCratesInteractable, displayCarrots, addCarrotMarkers, completePickupCarrots, cookMeal, lockClearingDoor, lockCellar, lockIntroDoor, unlockIntroDoor)
-		.onUpdate(displayFarmingTutorial, turnAwayFromDoor())
+export const introQuestPlugin: Plugin<typeof app> = (app) => {
+	app
+		.addPlugins(introQuestActors('game'))
+		.addSubscribers('game', playerFromIntroDialog, makeCratesInteractable, displayCarrots, addCarrotMarkers, completePickupCarrots, cookMeal, lockClearingDoor, lockCellar, lockIntroDoor, unlockIntroDoor)
+		.onUpdate('game', displayFarmingTutorial, turnAwayFromDoor())
 }

@@ -1,7 +1,7 @@
 import type { ShaderMaterial } from 'three'
 import { assets, save, tweens } from '@/global/init'
 import { playSound } from '@/global/sounds'
-import { campState, introState } from '@/global/states'
+import { app } from '@/global/states'
 import { drawnHouseShader } from '@/shaders/drawnHouseShader'
 import { cloneCanvas, imgToCanvas } from '@/utils/buffer'
 import { easeInOut } from 'popmotion'
@@ -121,12 +121,12 @@ export class MainMenuBook extends Object3D {
 				duration: 1000,
 				onPlay() {
 					if (newSelected === 'Continue') {
-						introState.disable()
-						campState.enable({ door: 'clearing' })
+						app.disable('intro')
+						app.enable('farm', { door: 'clearing' })
 					}
 					if (newSelected === 'New Game') {
-						campState.disable()
-						introState.enable()
+						app.disable('farm')
+						app.enable('intro')
 					}
 				},
 				onUpdate: f => this.windowShader.uniforms.windowSize.value = f,

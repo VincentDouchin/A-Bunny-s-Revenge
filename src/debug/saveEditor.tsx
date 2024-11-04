@@ -2,12 +2,11 @@ import type { SaveData } from '@/global/save'
 import type { JSONEditorOptions } from 'jsoneditor'
 import saveDataSchema from '@/debug/saveDataSchema.json'
 import { resetSave, save } from '@/global/init'
-import { campState } from '@/global/states'
+import { app } from '@/global/states'
 import { sleep } from '@/utils/sleep'
 import JSONEditor from 'jsoneditor'
 import { createSignal, onCleanup, onMount, Show } from 'solid-js'
 import { unwrap } from 'solid-js/store'
-import { debugState } from './debugState'
 
 const theme = `<link href="https://cdnjs.cloudflare.com/ajax/libs/jsoneditor/10.0.0/jsoneditor.min.css" rel="stylesheet" type="text/css">`
 export const SaveEditor = () => {
@@ -23,7 +22,7 @@ export const SaveEditor = () => {
 				const [el, setEl] = createSignal<HTMLDivElement>()
 
 				onMount(() => {
-					debugState.enable()
+					app.enable('debug')
 					if (!document.head.innerHTML.includes(theme))
 						document.head.innerHTML += theme
 					const options: JSONEditorOptions = {
@@ -37,11 +36,11 @@ export const SaveEditor = () => {
 					const editor = new JSONEditor(el()!, options)
 					editor.set(unwrap(save))
 					onCleanup(async () => {
-						debugState.disable()
+						app.disable('debug')
 						editor.destroy()
-						campState.disable()
+						app.disable('farm')
 						await sleep(2000)
-						campState.enable({ door: 'clearing' })
+						app.enable('farm', { door: 'clearing' })
 					})
 				})
 

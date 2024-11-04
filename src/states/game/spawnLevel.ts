@@ -1,8 +1,8 @@
 import type { EntityData, Level, LevelType } from '@/debug/LevelEditor'
 import type { InstanceHandle } from '@/global/assetLoaders'
 import type { Entity } from '@/global/entity'
-import type { DungeonRessources, FarmRessources } from '@/global/states'
-import type { System } from '@/lib/state'
+import type { app } from '@/global/states'
+import type { UpdateSystem } from '@/lib/app'
 import type { Vec2, Vector4Like } from 'three'
 import { getModel, props } from '@/debug/props'
 import { canvasToArray, canvasToGrid, instanceMesh } from '@/global/assetLoaders'
@@ -304,7 +304,7 @@ export const spawnLevel = (type: LevelType) => () => {
 	spawnGroundAndTrees(level)
 }
 
-export const spawnDungeon: System<DungeonRessources> = ({ dungeon, dungeonLevel }) => {
+export const spawnDungeon: UpdateSystem<typeof app, 'dungeon'> = ({ dungeon, dungeonLevel }) => {
 	ecs.add({ map: dungeon.plan.id, dungeon })
 	spawnGroundAndTrees(dungeon.plan, dungeonLevel)
 
@@ -314,7 +314,7 @@ export const spawnDungeon: System<DungeonRessources> = ({ dungeon, dungeonLevel 
 }
 
 const mapQuery = ecs.with('map')
-export const spawnLevelData: System<FarmRessources | DungeonRessources | void> = (ressources) => {
+export const spawnLevelData: UpdateSystem<typeof app, 'dungeon' | 'farm' | void> = (ressources) => {
 	for (const { map } of mapQuery) {
 		const { levelData, colliderData } = levelsData
 		for (const [entityId, entityData] of Object.entries(levelData ?? {})) {

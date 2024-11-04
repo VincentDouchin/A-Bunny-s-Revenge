@@ -1,5 +1,5 @@
 import { ui } from '@/global/init'
-import { openMenuState, pausedState } from '@/global/states'
+import { app } from '@/global/states'
 import { onCleanup, Show } from 'solid-js'
 import { css } from 'solid-styled'
 import atom from 'solid-use/atom'
@@ -13,21 +13,20 @@ import { useGame } from './store'
 menuItem
 
 export const PauseUi = () => {
-	const paused = ui.sync(() => pausedState.enabled)
 	const context = useGame()
 	const settings = atom(false)
 	ui.updateSync(() => {
-		if (openMenuState.disabled) {
+		if (app.isDisabled('menu')) {
 			if (context?.player()?.playerControls.get('pause').justPressed) {
-				if (openMenuState.disabled && pausedState.disabled) {
-					pausedState.enable()
+				if (app.isDisabled('menu') && app.isDisabled('paused')) {
+					app.enable('paused')
 				} else {
-					pausedState.disable()
+					app.disable('paused')
 				}
 			}
 			if (context?.player()?.menuInputs.get('cancel').justPressed) {
-				if (pausedState.enabled) {
-					pausedState.disable()
+				if (app.isEnabled('paused')) {
+					app.disable('paused')
 				}
 			}
 		}
@@ -45,7 +44,7 @@ export const PauseUi = () => {
 	return (
 		<Show when={context?.player()}>
 			{player => (
-				<Modal open={paused()} showClose={settings()}>
+				<Modal open={context?.isPauseState()} showClose={settings()}>
 					<Menu inputs={player().menuInputs}>
 						{({ menu }) => {
 							onCleanup(() => {
@@ -66,7 +65,7 @@ export const PauseUi = () => {
 														<div>
 															<div
 																use:menuItem={[menu, true, resumeSelected]}
-																onClick={() => pausedState.disable()}
+																onClick={() => app.disable('paused')}
 																class="option"
 															>
 																<OutlineText

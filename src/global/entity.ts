@@ -4,10 +4,10 @@ import type { NPC } from '@/constants/NPC'
 import type { QuestMarkers } from '@/constants/quests'
 import type { Recipe } from '@/constants/recipes'
 import type { MenuInputMap, PlayerInputMap } from '@/global/inputMaps'
+import type { AppStates } from '@/lib/app'
 import type { Direction } from '@/lib/directions'
 import type { MeshLine, MeshLineMaterial } from '@/lib/MeshLine'
 import type { NavGrid } from '@/lib/navGrid'
-import type { State } from '@/lib/state'
 import type { Stat } from '@/lib/stats'
 import type { Timer } from '@/lib/timer'
 import type { WeaponArc } from '@/shaders/weaponArc'
@@ -23,6 +23,7 @@ import type { CSS2DObject } from 'three/examples/jsm/renderers/CSS2DRenderer'
 import type { Animator } from './animator'
 import type { InstanceHandle } from './assetLoaders'
 import type { ModifierContainer } from './modifiers'
+import type { app } from './states'
 
 export type PlayerAnimations = 'idle' | 'runFront' | 'runLeft' | 'runRight' | 'runBack' | 'lightAttack' | 'slashAttack' | 'heavyAttack' | 'hit' | 'dying' | 'fishing' | 'sleeping' | 'wakeUp' | 'interact' | 'pickup' | 'dashFront' | 'dashLeft' | 'dashRight' | 'dashBack'
 export type EnemyAnimations = 'idle' | 'running' | 'attacking' | 'hit' | 'dead'
@@ -102,8 +103,6 @@ export interface Crop {
 export interface Entity {
 	// ! Rendering
 	renderGroup?: RenderGroup
-	// ! Models
-	scale?: number
 	// ! Transforms
 	movementForce?: Vector3
 	targetMovementForce?: Vector3
@@ -284,7 +283,7 @@ export interface Entity {
 	weaponName?: weapons
 	weaponStand?: weapons
 	// ! Main menu
-	stateEntity?: State
+	stateEntity?: AppStates<typeof app>
 	menuBook?: MainMenuBook
 	// ! Money
 	acorn?: true

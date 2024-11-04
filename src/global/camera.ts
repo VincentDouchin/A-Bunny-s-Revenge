@@ -1,11 +1,10 @@
-import { debugState } from '@/debug/debugState'
 import { Direction } from '@/lib/directions'
 import { easeOut } from 'popmotion'
 import { OrthographicCamera, PerspectiveCamera, Vector3 } from 'three'
 import { params } from './context'
 import { RenderGroup } from './entity'
 import { ecs, levelsData, settings, time, tweens } from './init'
-import { mainMenuState } from './states'
+import { app } from './states'
 
 export const initCamera = () => {
 	const h = 600
@@ -75,7 +74,7 @@ const levelQuery = ecs.with('map')
 export const moveCamera = (init = false) => () => {
 	for (const { position, camera, cameraOffset, cameraShake, fixedCamera } of gameCameraQuery) {
 		const target = new Vector3()
-		if (mainMenuState.disabled) {
+		if (app.isDisabled('mainMenu')) {
 			for (const { worldPosition } of cameraTargetQuery) {
 				target.copy(worldPosition)
 				const mapId = levelQuery.first?.map
@@ -108,7 +107,7 @@ export const moveCamera = (init = false) => () => {
 			}
 		}
 
-		if (!debugState.enabled) {
+		if (app.isDisabled('debug')) {
 			const lerpSpeed = time.delta / 1000 * 3
 			const offset = new Vector3(params.cameraOffsetX, params.cameraOffsetY, params.cameraOffsetZ)
 			const newPosition = target.clone().add({ x: cameraShake.x, y: 0, z: cameraShake.y })

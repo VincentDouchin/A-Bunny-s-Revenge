@@ -2,7 +2,6 @@ import type { TouchController } from '@/lib/inputs'
 import type { Accessor, JSX, JSXElement } from 'solid-js'
 import type { Vec2 } from 'three'
 import { ecs, ui } from '@/global/init'
-import { campState, dungeonState } from '@/global/states'
 import { atom } from '@/lib/uiManager'
 import Inventory from '@assets/icons/basket-shopping-solid.svg'
 import Lock from '@assets/icons/lockIndicator.svg'
@@ -291,12 +290,12 @@ export const TouchControls = () => {
 								</div>
 							</div>
 						</div>
-						<StateUi state={campState}>
+						<StateUi state="farm">
 							<TouchButton input="inventory" controller={playerInputs!} size="7rem" angle="45deg" distance="15rem" text="Open inventory">
 								<Inventory />
 							</TouchButton>
 						</StateUi>
-						<StateUi state={dungeonState}>
+						<StateUi state="dungeon">
 							<TouchButton input="lock" controller={playerInputs!} size="7rem" angle="45deg" distance="15rem" text="Lock">
 								<Lock />
 							</TouchButton>

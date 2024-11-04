@@ -1,7 +1,8 @@
 import type { Meals } from '@/constants/items'
-import type { State } from '@/lib/state'
+import type { Plugin } from '@/lib/app'
 import type { Stat } from '@/lib/stats'
 import type { ComponentsOfType } from './entity'
+import type { app } from './states'
 import { ModStage, ModType } from '@/lib/stats'
 import { Timer } from '@/lib/timer'
 import { ecs, time } from './init'
@@ -205,8 +206,8 @@ export class ModifierContainer {
 }
 
 const modifiersQuery = ecs.with('modifiers')
-export const tickModifiersPlugin = (...stats: ComponentsOfType<Stat>[]) => (s: State) => {
-	s.onPreUpdate(() => {
+export const tickModifiersPlugin = (...stats: ComponentsOfType<Stat>[]): Plugin<typeof app> => (app) => {
+	app.onPreUpdate('game', () => {
 		for (const entity of modifiersQuery) {
 			entity.modifiers.tick(time.delta)
 			for (const stat of stats) {
@@ -217,7 +218,7 @@ export const tickModifiersPlugin = (...stats: ComponentsOfType<Stat>[]) => (s: S
 			}
 		}
 	})
-	s.addSubscriber(() => modifiersQuery.onEntityAdded.subscribe((entity) => {
+	app.addSubscribers('game', () => modifiersQuery.onEntityAdded.subscribe((entity) => {
 		entity.modifiers.tick(time.delta)
 		for (const stat of stats) {
 			const statComponent = entity[stat]

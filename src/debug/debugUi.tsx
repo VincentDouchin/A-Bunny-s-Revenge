@@ -3,7 +3,7 @@ import { params } from '@/global/context'
 import { RenderGroup } from '@/global/entity'
 import { dayTime, ecs, save, ui, world } from '@/global/init'
 import { cameraQuery, getTargetSize, height, scene, updateRenderSize, width } from '@/global/rendering'
-import { campState } from '@/global/states'
+import { app } from '@/global/states'
 import { RapierDebugRenderer } from '@/lib/debugRenderer'
 import { encounters } from '@/states/dungeon/encounters'
 import { playerBundle } from '@/states/game/spawnPlayer'
@@ -61,10 +61,10 @@ export const DebugUi = () => {
 	}
 	const destroyCrops = () => {
 		save.crops = {}
-		campState.enable({ door: 'clearing' })
+		app.enable('farm', { door: 'clearing' })
 	}
 	const reset = async () => {
-		campState.disable()
+		app.disable('farm')
 		await reset()
 		window.location.reload()
 	}

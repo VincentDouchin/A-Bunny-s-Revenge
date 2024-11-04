@@ -1,6 +1,7 @@
+import type { app } from '@/global/states'
 import type { Collider } from '@dimforge/rapier3d-compat'
 import type { Object3D, Object3DEventMap } from 'three'
-import type { State } from './state'
+import type { Plugin } from './app'
 import { ecs, time, world } from '@/global/init'
 import { Quaternion, Vector3 } from 'three'
 import { Direction } from './directions'
@@ -84,11 +85,10 @@ const updateRotation = () => {
 	}
 }
 
-export const transformsPlugin = (state: State) => {
-	state
-		.addSubscriber(addWorldPosition, swapPosition)
+export const transformsPlugin: Plugin<typeof app> = (app) => {
+	app.addSubscribers('default', addWorldPosition, swapPosition)
 		// Access bodies in pre update before clean up in physics plugin
-		.onPreUpdate(updateGroupPosition, updateRotation, updateWorldPosition)
+		.onPreUpdate('default', updateGroupPosition, updateRotation, updateWorldPosition)
 }
 
 export const isInIntersectionWithCollider = (collider: Collider) => {

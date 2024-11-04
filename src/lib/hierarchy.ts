@@ -1,8 +1,8 @@
+import type { app } from '@/global/states'
 import type { With } from 'miniplex'
 import type { ComponentsOfType, Entity } from '../global/entity'
-import type { State } from './state'
+import type { AppStates, Plugin } from './app'
 import { ecs } from '../global/init'
-import { set } from './state'
 
 const mapQuery = ecs.with('map')
 export const inMap = () => {
@@ -44,14 +44,14 @@ export const removeParent = (entity: Entity) => {
 	}
 }
 export const despawnOfType = (...components: (keyof Entity)[]) => {
-	return set(components.map((component) => {
+	return components.map((component) => {
 		const query = ecs.with(component)
 		return () => {
 			for (const entity of query) {
 				ecs.remove(entity)
 			}
 		}
-	}))
+	})
 }
 const withChildrenQuery = ecs.with('withChildren').without('bodyDesc')
 
@@ -66,10 +66,9 @@ const onDestroyCallBack = () => onDestroyQuery.onEntityRemoved.subscribe((e) => 
 	e.onDestroy()
 })
 
-export const hierarchyPlugin = (state: State) => {
-	state
-		.addSubscriber(onDestroyCallBack, addChildren, removeChildren, despanwChildren)
-		.onPostUpdate(addChildrenCallBack)
+export const hierarchyPlugin: Plugin<typeof app> = (app) => {
+	app.addSubscribers('default', onDestroyCallBack, addChildren, removeChildren, despanwChildren)
+	app.onPostUpdate('default', addChildrenCallBack)
 }
 export const addTag = (entity: Entity, tag: ComponentsOfType<true>) => {
 	ecs.addComponent(entity, tag, true)
@@ -82,7 +81,7 @@ export const removeEntityRef = <C extends ComponentsOfType<Entity>>(entity: With
 		ecs.remove(ref)
 	}
 }
-export const removeStateEntity = (state: State) => {
+export const removeStateEntity = (state: AppStates<typeof app>) => {
 	const stateEntities = ecs.with('stateEntity').where(e => e.stateEntity === state)
 	return () => {
 		for (const stateEntity of stateEntities) {

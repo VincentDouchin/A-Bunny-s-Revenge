@@ -3,7 +3,7 @@ import type { weapons } from '@assets/assets'
 import { weaponsData } from '@/constants/weapons'
 import { Interactable } from '@/global/entity'
 import { assets, coroutines, ecs } from '@/global/init'
-import { genDungeonState } from '@/global/states'
+import { app } from '@/global/states'
 import { inMap } from '@/lib/hierarchy'
 import { ActiveCollisionTypes, ColliderDesc, RigidBodyDesc } from '@dimforge/rapier3d-compat'
 import { Quaternion, Vector3 } from 'three'
@@ -22,7 +22,7 @@ const displayWeapon = (weaponName: weapons, parent: Entity) => {
 	})
 	coroutines.add(function* () {
 		let rotation = 0
-		while (genDungeonState.enabled) {
+		while (app.isEnabled('clearing')) {
 			yield
 			rotation += 0.02
 			weapon.rotation.setFromAxisAngle(new Vector3(0, 1, 0), rotation)

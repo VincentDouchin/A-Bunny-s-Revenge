@@ -1,6 +1,6 @@
 import { showTutorialEvent } from '@/global/events'
 import { ui } from '@/global/init'
-import { cutSceneState } from '@/global/states'
+import { app } from '@/global/states'
 import { onCleanup, onMount, Show } from 'solid-js'
 import { css } from 'solid-styled'
 import { Transition } from 'solid-transition-group'
@@ -50,7 +50,7 @@ export const TutorialUi = () => {
 									}
 								})
 								onCleanup(() => {
-									cutSceneState.disable()
+									app.disable('cutscene')
 								})
 								return (
 									<div class="tutorial-container">

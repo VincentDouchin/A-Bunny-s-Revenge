@@ -1,5 +1,4 @@
 import type { Actor, Doors, Entity } from '@/global/entity'
-import type { DungeonRessources, FarmRessources } from '@/global/states'
 import type { fruit_trees, gardenPlots, models, vegetation, village } from '@assets/assets'
 import type { With } from 'miniplex'
 import type { BufferGeometry, Object3DEventMap } from 'three'
@@ -8,7 +7,7 @@ import { itemsData } from '@/constants/items'
 import { Animator } from '@/global/animator'
 import { Interactable, MenuType } from '@/global/entity'
 import { assets, ecs, save } from '@/global/init'
-import { dungeonState, genDungeonState } from '@/global/states'
+import { app, type DungeonRessources, type FarmRessources } from '@/global/states'
 import { Direction, isCardialDirection } from '@/lib/directions'
 import { inMap } from '@/lib/hierarchy'
 import { getSecondaryColliders } from '@/lib/models'
@@ -25,7 +24,6 @@ import FastNoiseLite from 'fastnoise-lite'
 import { Color, ConeGeometry, DoubleSide, Euler, Group, Material, Mesh, MeshBasicMaterial, MeshPhongMaterial, Object3D, PointLight, Quaternion, SphereGeometry, Vector2, Vector3 } from 'three'
 import { CSS2DObject } from 'three/examples/jsm/renderers/CSS2DRenderer'
 import { clone } from 'three/examples/jsm/utils/SkeletonUtils'
-import { debugState } from './debugState'
 
 const markerModel = () => {
 	const mesh = new Mesh(new SphereGeometry(3), new MeshBasicMaterial())
@@ -128,7 +126,7 @@ export const props: Props = [
 		models: ['marker'],
 		data: { name: null },
 		bundle(e, data) {
-			if (debugState.enabled || !data.data.name) return e
+			if (app.isEnabled('debug') || !data.data.name) return e
 			return {
 				actor: data.data.name,
 				position: e.position,
@@ -143,21 +141,21 @@ export const props: Props = [
 		data: { direction: Direction.N, doorLevel: 0, boundary: null },
 		models: ['door', 'doorMarker'],
 		bundle: (entity, data, ressources) => {
-			if (dungeonState.enabled && ressources && 'dungeon' in ressources) {
+			if (app.isEnabled('dungeon') && ressources && 'dungeon' in ressources) {
 				const isBattle = [RoomType.Battle, RoomType.Boss, RoomType.Entrance].includes(ressources.dungeon.type)
 				const enemiesPresent = ressources.dungeon.enemies.length > 0
 				if (isBattle && enemiesPresent) {
 					entity.doorLocked = true
 				}
 			}
-			if (genDungeonState.enabled && data.data.direction === 'north') {
+			if (app.isEnabled('clearing') && data.data.direction === 'north') {
 				entity.doorLevel = data.data.doorLevel
 				entity.doorLocked = true
 			}
 			if (data.model === 'door') {
 				entity.doorType = 'fog'
 			}
-			if (data.model === 'doorMarker' && debugState.disabled) {
+			if (data.model === 'doorMarker' && app.isDisabled('debug')) {
 				entity.doorType = 'marker'
 				entity.model = new Object3D()
 			}
@@ -434,12 +432,12 @@ export const props: Props = [
 					node.material = node.material.clone()
 				}
 			})
-			if (dungeonState.enabled && ressources && 'dungeon' in ressources) {
+			if (app.isEnabled('dungeon') && ressources && 'dungeon' in ressources) {
 				if (![RoomType.NPC, RoomType.Item].includes(ressources.dungeon.type)) {
 					entity.doorLocked = true
 				}
 			}
-			if (genDungeonState.enabled && data.direction === Direction.N) {
+			if (app.isEnabled('clearing') && data.direction === Direction.N) {
 				entity.doorLevel = data.doorLevel
 				entity.doorLocked = true
 			}

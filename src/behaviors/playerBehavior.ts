@@ -5,7 +5,7 @@ import { addCameraShake } from '@/global/camera'
 import { EnemyAttackStyle, Faction } from '@/global/entity'
 import { ecs, world } from '@/global/init'
 import { playSound } from '@/global/sounds'
-import { campState, pausedState } from '@/global/states'
+import { app } from '@/global/states'
 import { spawnDamageNumber } from '@/particles/damageNumber'
 import { dash } from '@/particles/dashParticles'
 import { poisonBubbles } from '@/states/dungeon/poisonTrail'
@@ -72,7 +72,7 @@ export const playerBehaviorPlugin = behaviorPlugin(
 			if (isMoving) {
 				setState('running')
 			}
-			if (!campState.enabled || debugOptions.attackInFarm()) {
+			if (app.isDisabled('farm') || debugOptions.attackInFarm()) {
 				if (e.playerControls.get('primary').justPressed && e.weapon && interactionQuery.size === 0 && dialogQuery.size === 0) {
 					setState('attack')
 				}
@@ -102,7 +102,7 @@ export const playerBehaviorPlugin = behaviorPlugin(
 			} else {
 				setState('idle')
 			}
-			if ((!campState.enabled || debugOptions.attackInFarm())) {
+			if ((app.isDisabled('farm') || debugOptions.attackInFarm())) {
 				if (e.playerControls.get('primary').justPressed && e.weapon && interactionQuery.size === 0 && dialogQuery.size === 0) {
 					setState('attack')
 				}
@@ -118,16 +118,16 @@ export const playerBehaviorPlugin = behaviorPlugin(
 			async enter(e, setupState) {
 				justEntered = true
 				if (e.combo.lastAttack === 0) {
-					!pausedState.enabled && playSound(['Slash_Attack_Heavy_1', 'Slash_Attack_Heavy_2', 'Slash_Attack_Heavy_3'])
+					app.isDisabled('paused') && playSound(['Slash_Attack_Heavy_1', 'Slash_Attack_Heavy_2', 'Slash_Attack_Heavy_3'])
 
 					await e.playerAnimator.playOnce('lightAttack', { timeScale: getAttackSpeed(e) }, 0.5)
 				}
 				if (e.combo.lastAttack === 1) {
-					!pausedState.enabled && playSound(['Slash_Attack_Light_1', 'Slash_Attack_Light_2'])
+					app.isDisabled('paused') && playSound(['Slash_Attack_Light_1', 'Slash_Attack_Light_2'])
 					await e.playerAnimator.playOnce('slashAttack', { timeScale: getAttackSpeed(e) }, 0.2)
 				}
 				if (e.combo.lastAttack === 2) {
-					!pausedState.enabled && playSound(['Slash_Attack_Heavy_1', 'Slash_Attack_Heavy_2', 'Slash_Attack_Heavy_3'])
+					app.isDisabled('paused') && playSound(['Slash_Attack_Heavy_1', 'Slash_Attack_Heavy_2', 'Slash_Attack_Heavy_3'])
 					await e.playerAnimator.playClamped('heavyAttack', { timeScale: getAttackSpeed(e) })
 				}
 				e.combo.lastAttack = 0

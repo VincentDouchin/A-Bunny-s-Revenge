@@ -5,7 +5,7 @@ import type { Query, With } from 'miniplex'
 import { applyMove, applyRotate } from '@/behaviors/behaviorHelpers'
 import { addItem, coroutines, ecs, removeItem, save } from '@/global/init'
 import { playSound } from '@/global/sounds'
-import { cutSceneState } from '@/global/states'
+import { app } from '@/global/states'
 import { heartEmitter } from '@/particles/heartParticles'
 import { addToast } from '@/ui/Toaster'
 import { Vector3 } from 'three'
@@ -119,7 +119,7 @@ export const hasEaten = () => {
 }
 
 export const enterHouse = async () => {
-	cutSceneState.enable()
+	app.enable('cutscene')
 	setSensor(doorQuery, true)
 	setSensor(houseQuery, true)
 	const house = houseQuery.first
@@ -139,13 +139,13 @@ export const leaveHouse = async () => {
 		playSound(['glitchedtones_Door+Bedroom+Open+01', 'glitchedtones_Door+Bedroom+Open+02'])
 		await house.houseAnimator.playClamped('DoorOpen')
 		await movePlayerTo(new Vector3(0, 0, 50).applyQuaternion(house.rotation).add(house.position))
-		cutSceneState.disable()
+		app.disable('cutscene')
 		await sleep(1000)
 		await house.houseAnimator.playClamped('DoorClose')
 		setSensor(houseQuery, false)
 		playSound(['zapsplat_household_door_backdoor_close_002_56921', 'zapsplat_household_door_backdoor_close_004_56923'])
 	}
-	cutSceneState.disable()
+	app.disable('cutscene')
 }
 
 // ! Alice

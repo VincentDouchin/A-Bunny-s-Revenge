@@ -3,7 +3,7 @@ import { params } from '@/global/context'
 import { RenderGroup } from '@/global/entity'
 import { ecs, inputManager, save, tweens } from '@/global/init'
 import { getTargetSize, updateRenderSize } from '@/global/rendering'
-import { campState, cutSceneState, introState, mainMenuState } from '@/global/states'
+import { app } from '@/global/states'
 import { doorQuery, leaveHouse, setSensor } from '@/utils/dialogHelpers'
 import { once } from '@/utils/mapFunctions'
 import { easeInOut } from 'popmotion'
@@ -60,9 +60,9 @@ export const renderMainMenu = () => {
 }
 export const setupWindow = () => {
 	if (save.started) {
-		campState.enable({ door: 'clearing' })
+		app.enable('farm', { door: 'clearing' })
 	} else {
-		introState.enable()
+		app.enable('intro')
 	}
 }
 
@@ -97,7 +97,7 @@ export const transitionToGame = once(async () => {
 				}
 			},
 			onComplete: () => {
-				mainMenuState.disable()
+				app.disable('mainMenu')
 				save.started = true
 				gameCam.cameraOffset.setScalar(0)
 			},
@@ -137,7 +137,7 @@ export const clickOnMenuButton = () => {
 	}
 }
 export const spawnPlayerContinueGame = async () => {
-	cutSceneState.enable()
+	app.enable('cutscene')
 	for (const house of houseQuery) {
 		setSensor(houseQuery, true)
 		setSensor(doorQuery, true)
@@ -149,5 +149,5 @@ export const spawnPlayerContinueGame = async () => {
 		})
 		await leaveHouse()
 	}
-	cutSceneState.disable()
+	app.disable('cutscene')
 }

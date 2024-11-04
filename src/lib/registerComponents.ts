@@ -1,15 +1,16 @@
+import type { app } from '@/global/states'
 import type { Object3D } from 'three'
-import type { State } from './state'
+import type { Plugin } from './app'
 import { Group } from 'three'
 import { type ComponentsOfType, RenderGroup } from '../global/entity'
 import { ecs } from '../global/init'
 
 const gameSceneQuery = ecs.with('scene', 'renderGroup').where(e => e.renderGroup === RenderGroup.Game)
-export const addToScene = (...components: Array<Exclude<ComponentsOfType<Object3D>, 'group'>>) => (state: State) => {
+export const addToScene = (...components: Array<Exclude<ComponentsOfType<Object3D>, 'group'>>): Plugin<typeof app> => (app) => {
 	for (const component of components) {
 		const query = ecs.with(component, 'position')
 		const withoutGroup = query.without('group')
-		state.addSubscriber(() => withoutGroup.onEntityAdded.subscribe((entity) => {
+		app.addSubscribers('default', () => withoutGroup.onEntityAdded.subscribe((entity) => {
 			const group = new Group()
 			group.position.x = entity.position.x
 			group.position.y = entity.position.y
@@ -18,15 +19,15 @@ export const addToScene = (...components: Array<Exclude<ComponentsOfType<Object3
 			ecs.addComponent(entity, 'group', group)
 		}))
 		const withGroup = query.with('group')
-		state.addSubscriber(() => withGroup.onEntityAdded.subscribe((entity) => {
-			if (entity[component]) entity.group.add(entity[component])
+		app.addSubscribers('default', () => withGroup.onEntityAdded.subscribe((entity) => {
+			if (entity[component]) entity.group?.add(entity[component])
 		}))
-		state.addSubscriber(() => withGroup.onEntityRemoved.subscribe((entity) => {
+		app.addSubscribers('default', () => withGroup.onEntityRemoved.subscribe((entity) => {
 			if (entity[component]) entity[component].removeFromParent()
 		}))
 	}
 	const withGroup = ecs.with('group')
-	state.addSubscriber(() => withGroup.onEntityAdded.subscribe((entity) => {
+	app.addSubscribers('default', () => withGroup.onEntityAdded.subscribe((entity) => {
 		if (entity.parent?.group) {
 			entity.parent.group.add(entity.group)
 		} else {
@@ -40,7 +41,7 @@ export const addToScene = (...components: Array<Exclude<ComponentsOfType<Object3
 			entity.group.position.z = entity.position.z
 		}
 	}))
-	state.addSubscriber(() => withGroup.onEntityRemoved.subscribe((entity) => {
+	app.addSubscribers('default', () => withGroup.onEntityRemoved.subscribe((entity) => {
 		entity.group.removeFromParent()
 	}))
 }

@@ -1,8 +1,8 @@
+import type { app } from '@/global/states'
 import { ecs, time } from '@/global/init'
 import { gameRenderGroupQuery } from '@/global/rendering'
-import { pausedState } from '@/global/states'
 import { BatchedRenderer } from 'three.quarks'
-import { runIf, type State } from './state'
+import { type Plugin, runIf } from './app'
 
 const initBatchRender = () => {
 	let initiated = false
@@ -36,9 +36,8 @@ const removeEmitter = () => {
 	}
 }
 
-export const particlesPlugin = (state: State) => {
-	state
-		.addSubscriber(initBatchRender)
-		.onPreUpdate(runIf(() => !pausedState.enabled, updateParticles), removeEmitter)
-		.addSubscriber(addParticles)
+export const particlesPlugin: Plugin<typeof app> = (app) => {
+	app
+		.addSubscribers('default', initBatchRender, addParticles)
+		.onPreUpdate('default', runIf(() => app.isDisabled('paused'), updateParticles), removeEmitter)
 }

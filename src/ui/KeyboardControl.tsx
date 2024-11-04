@@ -1,5 +1,5 @@
 import { settings, ui } from '@/global/init'
-import { campState, dungeonState } from '@/global/states'
+import { app } from '@/global/states'
 import { onMount, Show } from 'solid-js'
 import { css } from 'solid-styled'
 import { Transition } from 'solid-transition-group'
@@ -40,7 +40,7 @@ export const KeyboardControls = () => {
 					gap:0.2rem;
 				}
 				`
-				const farm = ui.sync(() => campState.enabled)
+				const farm = ui.sync(() => app.isEnabled('farm'))
 				const visible = atom(false)
 				onMount(() => setTimeout(() => visible(true), 100))
 				const showControls = ui.sync(() => settings.showControls)
@@ -73,7 +73,7 @@ export const KeyboardControls = () => {
 										<OutlineText>Inventory</OutlineText>
 									</div>
 								</Show>
-								<StateUi state={dungeonState}>
+								<StateUi state="dungeon">
 									<div class="keyboard-controls">
 										<div class="controls-icons">
 											<InputIcon input={player().playerControls.get('lock')}></InputIcon>

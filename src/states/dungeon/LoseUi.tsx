@@ -3,7 +3,7 @@ import type { With } from 'miniplex'
 import { ecs, ui } from '@/global/init'
 import { menuInputMap } from '@/global/inputMaps'
 import { playSound } from '@/global/sounds'
-import { campState, openMenuState } from '@/global/states'
+import { app } from '@/global/states'
 import { inMap } from '@/lib/hierarchy'
 import { StateUi } from '@/ui/components/StateUi'
 import { InputIcon } from '@/ui/InputIcon'
@@ -16,8 +16,8 @@ const playerUi = useQuery(ecs.with('player', 'state').where(e => e.state !== 'de
 export const LoseUi = () => {
 	const noPlayer = createMemo(() => playerUi().length === 0)
 	const retry = () => {
-		openMenuState.disable()
-		campState.enable({ door: 'clearing' })
+		app.disable('menu')
+		app.enable('farm', { door: 'clearing' })
 	}
 
 	css/* css */`
@@ -43,7 +43,7 @@ export const LoseUi = () => {
 }
 	`
 	return (
-		<StateUi state={openMenuState}>
+		<StateUi state="menu">
 			<Show when={noPlayer()}>
 				{(_) =>	{
 					const context = useGame()

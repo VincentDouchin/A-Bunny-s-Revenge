@@ -1,6 +1,6 @@
 import type { soundAssets } from '@/global/sounds'
 import { assets } from '@/global/init'
-import { pausedState } from '@/global/states'
+import { app } from '@/global/states'
 import { windowEvent } from '@/lib/uiManager'
 import { entries } from '@/utils/mapFunctions'
 import { useLocalStorage } from '@/utils/useLocalStorage'
@@ -89,10 +89,10 @@ export const SoundUi = () => {
 		<Show when={showSoundUi()}>
 			{(_) => {
 				onMount(() => {
-					pausedState.enable()
+					app.enable('paused')
 				})
 				onCleanup(() => {
-					pausedState.disable()
+					app.disable('paused')
 				})
 				return (
 					<div class="sound-container">

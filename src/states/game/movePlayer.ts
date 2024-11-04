@@ -1,6 +1,6 @@
 import { ecs, inputManager } from '@/global/init'
 import { playStep } from '@/global/sounds'
-import { cutSceneState, openMenuState, pausedState } from '@/global/states'
+import { app } from '@/global/states'
 import { spawnFootstep } from '@/particles/footsteps'
 
 const movementQuery = ecs.with('body', 'rotation', 'movementForce', 'speed')
@@ -42,7 +42,7 @@ export const movePlayer = () => {
 	}
 }
 
-export const canPlayerMove = () => !openMenuState.enabled && !cutSceneState.enabled && !pausedState.enabled
+export const canPlayerMove = () => app.isDisabled('menu') && app.isDisabled('cutscene') && app.isDisabled('paused')
 
 export const savePlayerFromTheEmbraceOfTheVoid = () => {
 	const player = playerQuery.first

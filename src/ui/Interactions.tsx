@@ -4,7 +4,7 @@ import type { JSX } from 'solid-js'
 import { getSeed } from '@/constants/items'
 import { Interactable } from '@/global/entity'
 import { ecs, save, ui } from '@/global/init'
-import { dungeonState } from '@/global/states'
+import { app } from '@/global/states'
 import { WeaponStatsUi } from '@/states/dungeon/WeaponStatsUi'
 import Carrot from '@assets/icons/carrot-solid.svg'
 import Clipboard from '@assets/icons/clipboard-check-solid.svg'
@@ -58,7 +58,7 @@ export const getInteractables = (
 			default: return [{ text: entity?.interactable }]
 		}
 	}
-	if (dungeonState.enabled) {
+	if (app.isEnabled('dungeon')) {
 		return [
 			{ text: 'Attack', icon: Sword },
 			{ text: 'Dash', icon: Wind },

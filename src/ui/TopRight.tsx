@@ -1,4 +1,3 @@
-import { dungeonState } from '@/global/states'
 import { MiniMapUi } from '@/states/dungeon/MinimapUi'
 import { css } from 'solid-styled'
 import { StateUi } from './components/StateUi'
@@ -16,9 +15,8 @@ export const TopRight = () => {
 	`
 	return (
 		<div class="top-right">
-			<StateUi state={dungeonState}>
+			<StateUi state="dungeon">
 				<MiniMapUi />
-
 			</StateUi>
 			<Toaster />
 		</div>

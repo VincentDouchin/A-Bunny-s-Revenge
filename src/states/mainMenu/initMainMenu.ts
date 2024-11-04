@@ -4,7 +4,6 @@ import { RenderGroup } from '@/global/entity'
 import { coroutines, ecs } from '@/global/init'
 import { menuInputMap } from '@/global/inputMaps'
 import { renderer } from '@/global/rendering'
-import { mainMenuState } from '@/global/states'
 import { mainMenuBackgound } from '@/shaders/mainMenuBackground'
 import { Mesh, PerspectiveCamera, PlaneGeometry, Scene, Vector2, Vector3 } from 'three'
 import { MainMenuBook } from './book'
@@ -13,7 +12,7 @@ const ZOOM_OUT = -5
 
 const addBackground = (scene: Scene) => {
 	const background = new Mesh(new PlaneGeometry(20, 10), mainMenuBackgound)
-	const coroutine = coroutines.add(function*() {
+	const coroutine = coroutines.add(function* () {
 		const now = Date.now()
 		while (true) {
 			mainMenuBackgound.uniforms.time.value = now - Date.now()
@@ -34,7 +33,7 @@ export const intiMainMenuRendering = () => {
 		renderer,
 		scene,
 		renderGroup: RenderGroup.MainMenu,
-		stateEntity: mainMenuState,
+		stateEntity: 'mainMenu',
 	})
 	const camera = new PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.0001, 1000)
 	camera.name = 'mainMenu'
@@ -43,7 +42,7 @@ export const intiMainMenuRendering = () => {
 		position: new Vector3(0, 3, 0),
 		parent: mainMenuRenderGroup,
 		renderGroup: RenderGroup.MainMenu,
-		stateEntity: mainMenuState,
+		stateEntity: 'mainMenu',
 	})
 	camera.lookAt(new Vector3())
 
@@ -52,7 +51,7 @@ export const intiMainMenuRendering = () => {
 	scene.add(menuBook)
 	ecs.add({
 		menuBook,
-		stateEntity: mainMenuState,
+		stateEntity: 'mainMenu',
 		...menuInputMap(),
 		withTimeUniform: menuBook.withTimeUniforms,
 	})

@@ -1,7 +1,6 @@
-import { debugState } from '@/debug/debugState'
 import { DebugUi } from '@/debug/debugUi'
 import { ui } from '@/global/init'
-import { campState, dungeonState, genDungeonState, mainMenuState } from '@/global/states'
+import { app } from '@/global/states'
 import { EnemyHealthBarUi } from '@/states/dungeon/EnemyHealthBarUi'
 import { HealthUi } from '@/states/dungeon/HealthUi'
 import { LockIndicator } from '@/states/dungeon/lockIndicator'
@@ -32,13 +31,13 @@ import { TouchControls } from './TouchControls'
 import { TutorialUi } from './Tutorial'
 
 export const UI = () => {
-	const debug = ui.sync(() => debugState.enabled)
+	const debug = ui.sync(() => app.isEnabled('debug'))
 	return (
 		<GameProvider>
 			<DebugUi />
 			<Show when={!debug()}>
 
-				<StateUi state={campState}>
+				<StateUi state="farm">
 					<RecipesUi />
 					<OvenMinigameUi />
 					<CauldronMinigameUi />
@@ -48,21 +47,19 @@ export const UI = () => {
 					<QuestUi />
 					<HealthUi />
 				</StateUi>
-				<StateUi state={dungeonState}>
+				<StateUi state="dungeon">
 					<SneezeUi />
 					<HealthUi />
 					<LockIndicator />
-				</StateUi>
-				<StateUi state={genDungeonState}>
-					<HealthUi />
-				</StateUi>
-				<StateUi state={dungeonState}>
 					<EnemyHealthBarUi />
 				</StateUi>
-				<StateUi state={mainMenuState} disabled>
+				<StateUi state="clearing">
+					<HealthUi />
+				</StateUi>
+				<StateUi state="mainMenu" disabled>
 					<KeyboardControls />
 				</StateUi>
-				<StateUi state={mainMenuState}>
+				<StateUi state="mainMenu">
 					<MainMenuUi />
 				</StateUi>
 				<Errors />

@@ -9,7 +9,7 @@ import { CSS2DRenderer } from 'three/examples/jsm/renderers/CSS2DRenderer'
 import { params } from './context'
 import { RenderGroup } from './entity'
 import { assets, ecs, settings } from './init'
-import { mainMenuState } from './states'
+import { app } from './states'
 
 export const scene = new Scene()
 export const renderer = new WebGLRenderer({ alpha: false })
@@ -91,7 +91,7 @@ export const renderGame = () => {
 	}
 	withOutline = outlineQuery.size > 0
 
-	if (mainMenuState.enabled) {
+	if (app.isEnabled('mainMenu')) {
 		renderer.setRenderTarget(finalTarget)
 	} else {
 		renderer.setRenderTarget(null)

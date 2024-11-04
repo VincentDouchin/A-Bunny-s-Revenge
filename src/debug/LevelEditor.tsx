@@ -9,7 +9,7 @@ import { params } from '@/global/context'
 import { assets, ecs, levelsData, time, ui } from '@/global/init'
 import { loadLevelData } from '@/global/levelData'
 import { updateRenderSize } from '@/global/rendering'
-import { campState, dungeonState } from '@/global/states'
+import { app } from '@/global/states'
 import { inMap } from '@/lib/hierarchy'
 import { NavGrid } from '@/lib/navGrid'
 import { thumbnailRenderer } from '@/lib/thumbnailRenderer'
@@ -28,7 +28,6 @@ import { Mesh, MeshBasicMaterial, MeshStandardMaterial, OrthographicCamera, Plan
 import { MapControls } from 'three/examples/jsm/controls/MapControls'
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader'
 import { generateUUID } from 'three/src/math/MathUtils'
-import { debugState } from './debugState'
 import { getGameRenderGroup } from './debugUi'
 import { EntityEditor } from './EntityEditor'
 import { MapEditor } from './MapEditor'
@@ -103,14 +102,14 @@ export const LevelEditor = () => {
 
 	const showUiListener = (e: KeyboardEvent) => {
 		if (e.code === 'F2') {
-			debugState.enable()
+			app.enable('debug')
 			e.preventDefault()
 			setOpen(!open())
 		}
 	}
 	createEffect(() => {
 		if (!open()) {
-			debugState.disable()
+			app.disable('debug')
 		}
 	})
 	onMount(() => {
@@ -238,8 +237,8 @@ export const LevelEditor = () => {
 							ecs.remove(ground)
 						}
 						setFakeGround(level)
-						dungeonState.disable()
-						campState.disable()
+						app.disable('dungeon')
+						app.disable('farm')
 						ecs.add({ map: level.id })
 						spawnGroundAndTrees(level)
 						spawnLevelData()
