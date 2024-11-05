@@ -1,15 +1,4 @@
-// export type Commands<A extends App<any, any>> = A extends App<infer States, infer Ressources> ? {
-// 	enable: <S extends States[number]>(...args: S extends keyof Ressources ? [S, Ressources[S]] : [S]) => Promise<void>
-// 	disable: (state: States[number]) => Promise<void>
-// 	isEnabled: (state: States[number]) => boolean
-// 	isDisabled: (state: States[number]) => boolean
-// } : never
-
 export type AppStates<A extends App<any, any>> = A extends App<infer States, any> ? States[number] : never
-
-// type ConditionSystem<A extends App<any, any>, S extends AppStates<A> | undefined = undefined> = A extends App<any, infer Ressources>
-// 	? (ressources: S extends keyof Ressources ? Ressources[S] : undefined) => boolean
-// 	: never
 
 export type UpdateSystem<A extends App<any, any>, S extends AppStates<A> | void = void> = A extends App<any, infer Ressources>
 	? (ressources: S extends keyof Ressources ? Ressources[S] : void) => void
@@ -32,6 +21,7 @@ type Systems<A extends App<any, any>> = {
 		update: Set<UpdateSystem<A, S>>
 		postUpdate: Set<UpdateSystem<A, S>>
 		cleanUp: Set<() => void>
+		render: Set<() => void>
 	}
 }
 export type Ressources<A extends App<any, any>, S extends AppStates<A>> = A extends App<any, infer R>
@@ -40,18 +30,6 @@ export type Ressources<A extends App<any, any>, S extends AppStates<A>> = A exte
 
 type Schedule = 'enter' | 'preUpdate' | 'update' | 'postUpdate' | 'exit'
 export type Plugin<A extends App<any, any>> = (app: A) => void
-// interface SystemSet<A extends App<any, any>, S extends AppStates<A>, SystemType extends UpdateSystem<A, S> | TransitionSystem<A, S>> {
-// 	systems: SystemType[]
-// 	condition?: ConditionSystem<A, S>
-// }
-// interface Schedulers<A extends App<any, any>, S extends AppStates<A>> {
-// 	addSubscribers: (...systems: SubscriberSystem<A, S>[]) => void
-// 	onEnter: (...systems: TransitionSystem<A, S>[]) => { runIf: (condition: ConditionSystem<A, S>) => void }
-// 	onPreUpdate: (...systems: UpdateSystem<A, S>[]) => { runIf: (condition: ConditionSystem<A, S>) => void }
-// 	onUpdate: (...systems: UpdateSystem<A, S>[]) => { runIf: (condition: ConditionSystem<A, S>) => void }
-// 	onPostUpdate: (...systems: UpdateSystem<A, S>[]) => { runIf: (condition: ConditionSystem<A, S>) => void }
-// 	onExit: (...systems: TransitionSystem<A, S>[]) => { runIf: (condition: ConditionSystem<A, S>) => void }
-// }
 
 export class AppBuilder<States extends string[] = [], Ressources extends Record<string, any> = Record<string, never>> {
 	states: Set<States[number]>[] = []
@@ -77,13 +55,18 @@ export class AppBuilder<States extends string[] = [], Ressources extends Record<
 		return new App<States, Ressources>(this)
 	}
 }
-class App<States extends string[], Ressources extends Record<string, any> = Record<string, never>> {
+
+export class App<States extends string[], Ressources extends Record<string, any> = Record<string, never>> {
 	#systems: Systems<this> = {}
 
 	#states: Set<States[number]>[] = []
 	#enabledStates: { [S in States[number]]?: Ressources[S] } = {}
 	#queue = new Set<() => void>()
 
+	readonly #fixedTimeStep: number = 1000 / 60 // 60 FPS in milliseconds
+	#previousTime: number = 0
+	#accumulator: number = 0
+	#running: boolean = false
 	#callbackId: number | null = null
 	constructor(appBuilder: AppBuilder<States, Ressources>) {
 		this.#enabledStates = appBuilder.enabledStates
@@ -98,6 +81,7 @@ class App<States extends string[], Ressources extends Record<string, any> = Reco
 					postUpdate: new Set(),
 					exit: new Set(),
 					cleanUp: new Set(),
+					render: new Set(),
 				}
 			}
 		}
@@ -152,6 +136,13 @@ class App<States extends string[], Ressources extends Record<string, any> = Reco
 		return !(state in this.#enabledStates)
 	}
 
+	onRender<S extends AppStates<this>>(state: S, ...systems: (() => void)[]) {
+		for (const system of systems) {
+			this.#systems[state]?.render.add(system)
+		}
+		return this
+	}
+
 	onPreUpdate<S extends AppStates<this>>(state: S, ...systems: UpdateSystem<this, S>[]) {
 		for (const system of systems) {
 			this.#systems[state]?.preUpdate.add(system)
@@ -194,51 +185,6 @@ class App<States extends string[], Ressources extends Record<string, any> = Reco
 		return this
 	}
 
-	// #transitionSheduler = <S extends AppStates<this>>(schedule: 'enter' | 'exit', state: S): Schedulers<this, S>['onEnter' | 'onExit'] => {
-	// 	return (...systems) => {
-	// 		const set: SystemSet<this, S, TransitionSystem<this, S>> = { systems }
-	// 		this.#systems[state]![schedule].add(set)
-	// 		return {
-	// 			runIf(fn) {
-	// 				set.condition = fn
-	// 			},
-	// 		}
-	// 	}
-	// }
-
-	// #updateScheduler = <S extends AppStates<this>>(schedule: 'preUpdate' | 'update' | 'postUpdate', state: S): Schedulers<this, S>['onPreUpdate' | 'onUpdate' | 'onPostUpdate'] => {
-	// 	return (...systems) => {
-	// 		const set: SystemSet<this, S, UpdateSystem<this, S>> = { systems }
-	// 		this.#systems[state]![schedule].add(set)
-	// 		return {
-	// 			runIf(fn) {
-	// 				set.condition = fn
-	// 			},
-	// 		}
-	// 	}
-	// }
-
-	// #schedulers = <S extends AppStates<this>>(state: S): Schedulers<this, S> => {
-	// 	return {
-	// 		addSubscribers: (...subscribers: SubscriberSystem<this, S>[]) => {
-	// 			for (const subscriber of subscribers) {
-	// 				this.#systems[state]?.subscribers.add(subscriber)
-	// 			}
-	// 		},
-	// 		onEnter: this.#transitionSheduler('enter', state),
-	// 		onPreUpdate: this.#updateScheduler('preUpdate', state),
-	// 		onUpdate: this.#updateScheduler('update', state),
-	// 		onPostUpdate: this.#updateScheduler('postUpdate', state),
-	// 		onExit: this.#transitionSheduler('exit', state),
-	// 	}
-	// }
-
-	// addSystems<S extends AppStates<this>>(state: S, fn: (s: Schedulers<this, S>) => void) {
-	// 	fn(this.#schedulers(state))
-
-	// 	return this
-	// }
-
 	#runSchedule(schedule: Schedule) {
 		const states = Object.keys(this.#enabledStates) as AppStates<this>[]
 		for (const state of states) {
@@ -267,13 +213,41 @@ class App<States extends string[], Ressources extends Record<string, any> = Reco
 		return this
 	}
 
-	animate = () => {
-		this.#update()
-		this.#callbackId = window.requestAnimationFrame(this.animate)
+	loop() {
+		if (!this.#running) return
+
+		const currentTime = performance.now()
+		let deltaTime = currentTime - this.#previousTime
+
+		if (deltaTime > 250) {
+			deltaTime = 250
+		}
+
+		this.#accumulator += deltaTime
+		this.#previousTime = currentTime
+
+		while (this.#accumulator >= this.#fixedTimeStep) {
+			this.#update()
+			this.#accumulator -= this.#fixedTimeStep
+		}
+
+		this.#render()
+
+		this.#callbackId = requestAnimationFrame(() => this.loop())
+	}
+
+	#render() {
+		for (const state of Object.keys(this.#enabledStates) as AppStates<this>[]) {
+			const systems = this.#systems[state]!.render
+			for (const system of systems) {
+				system()
+			}
+		}
 	}
 
 	async start() {
-		this.animate()
+		this.#running = true
+		this.loop()
 		for (const state of Object.keys(this.#enabledStates) as States[number][]) {
 			const ressources = this.#enabledStates[state] as Ressources[typeof state]
 			const args = [state, ressources] as States[number] extends keyof Ressources ? [state: States[number], ressources: Ressources[States[number]]] : [state: States[number]]

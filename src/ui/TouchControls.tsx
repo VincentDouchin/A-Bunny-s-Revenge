@@ -1,7 +1,7 @@
 import type { TouchController } from '@/lib/inputs'
 import type { Accessor, JSX, JSXElement } from 'solid-js'
 import type { Vec2 } from 'three'
-import { ecs, ui } from '@/global/init'
+import { ecs } from '@/global/init'
 import { atom } from '@/lib/uiManager'
 import Inventory from '@assets/icons/basket-shopping-solid.svg'
 import Lock from '@assets/icons/lockIndicator.svg'
@@ -13,7 +13,7 @@ import { Vector2 } from 'three'
 import { StateUi } from './components/StateUi'
 import { OutlineText } from './components/styledComponents'
 import { getInteractables } from './Interactions'
-import { useGame } from './store'
+import { useGame, useQuery } from './store'
 
 export const TouchButton = <T extends string,>({ input, controller, children, interactable, size, distance, angle, text }: {
 	input: T
@@ -111,6 +111,7 @@ export const TouchButton = <T extends string,>({ input, controller, children, in
 
 export const TouchControls = () => {
 	const context = useGame()
+	const interactableQuery = useQuery(ecs.with('interactable', 'interactionContainer'))
 	return (
 		<Show when={context?.showTouch() && context?.player()}>
 			{(player) => {
@@ -164,8 +165,8 @@ export const TouchControls = () => {
 					playerInputs?.set('left', 0)
 					playerInputs?.set('right', 0)
 				})
-				const interactableQuery = ecs.with('interactable', 'interactionContainer')
-				const interactableEntity = ui.sync(() => interactableQuery.first)
+
+				const interactableEntity = createMemo(() => interactableQuery()[0])
 				const interactables = createMemo(() => getInteractables(player(), interactableEntity()))
 
 				const setInitialPos = (e: TouchEvent) => {

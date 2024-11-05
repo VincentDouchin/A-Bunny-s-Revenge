@@ -61,6 +61,7 @@ app
 	.onPreUpdate('default', () => time.tick(), coroutines.tick, savePlayerFromTheEmbraceOfTheVoid, updateMousePosition())
 	.onUpdate('default', runIf(() => app.isDisabled('paused'), ...updateAnimations('playerAnimator', 'basketAnimator', 'enemyAnimator', 'ovenAnimator', 'houseAnimator', 'chestAnimator', 'kayAnimator', 'cellarDoorAnimator')))
 	.onUpdate('default', inputManager.update, ui.update, moveCamera())
+	.onRender('default', renderGame)
 	// !SETUP
 	.onEnter('setup', setupGame)
 	// ! GAME
@@ -75,7 +76,7 @@ app
 	)
 	.addPlugins(playerBehaviorPlugin, rangeEnemyBehaviorPlugin, chargingEnemyBehaviorPlugin, meleeEnemyBehaviorPlugin, beeBossBehaviorPlugin, jumpingEnemyBehaviorPlugin, sporeBehaviorPlugin, chargingTwiceEnemyBehaviorPlugin, rangeThriceEnemyBehaviorPlugin)
 	.onUpdate('game', collectItems(false), turnNPCHead, dropBerriesOnHit, updateWeaponArc, sleepyEffects)
-	.onPostUpdate('game', renderGame, rotateStun, runIf(() => app.isDisabled('menu'), interact))
+	.onPostUpdate('game', rotateStun, runIf(() => app.isDisabled('menu'), interact))
 	// ! MENU
 	.onEnter('menu', stopPlayer)
 	.addSubscribers('menu', disableInventoryState)
