@@ -1,4 +1,5 @@
 import type { Entity } from './entity'
+import { QuestManager } from '@/constants/quests'
 import { CoroutinesManager } from '@/lib/coroutines'
 import { InputManager } from '@/lib/inputs'
 import { MusicManager } from '@/lib/musicManager'
@@ -10,6 +11,7 @@ import { World as MiniplexWorld } from 'miniplex'
 import { loadAssets } from './assets'
 import { loadLevelData } from './levelData'
 import { useSave, useSettings } from './save'
+import { app } from './states'
 
 await init()
 // await getSave()
@@ -26,3 +28,4 @@ export const levelsData = await loadLevelData()
 export const dayTime = new DayTime(600_000)
 export const musicManager = new MusicManager()
 export const tweens = tweensManager(time, ecs)
+export const questManager = new QuestManager(app)

@@ -10,6 +10,7 @@ import { createMutable, unwrap } from 'solid-js/store'
 import { createObject } from 'solid-proxies'
 import { Quaternion, Vector3 } from 'three'
 import { context } from './context'
+import { questManager } from './init'
 
 const blankSettings = (): Settings => ({
 	volume: 100,
@@ -65,7 +66,7 @@ export type SaveData = {
 	crops: Record<string, NonNullable<Crop>>
 	playerPosition: number[]
 	playerRotation: number[]
-	quests: Record<string, { steps: Record<string, boolean>, data: any }>
+	quests: Record<string, { steps: Record<string, boolean>, data: any, unlocked: boolean }>
 	selectedSeed: null | crops
 	inventories: Record<string, Item[]>
 	modifiers: Meals[]
@@ -102,6 +103,8 @@ export const useSave = async () => {
 	})
 	const resetSave = (newSave: SaveData = blankSave()) => {
 		Object.assign(save, newSave)
+
+		questManager.enableQuests()
 		return set(context.save, unwrap(save))
 	}
 	const addItem = async (entity: With<Entity, 'inventoryId' | 'inventory' | 'inventorySize'>, item: Item, stack = true) => {

@@ -3,11 +3,11 @@ import type { Entity } from '@/global/entity'
 import type { items } from '@assets/assets'
 import type { Query, With } from 'miniplex'
 import { applyMove, applyRotate } from '@/behaviors/behaviorHelpers'
+import { toastEvent } from '@/global/events'
 import { addItem, coroutines, ecs, removeItem, save } from '@/global/init'
 import { playSound } from '@/global/sounds'
 import { app } from '@/global/states'
 import { heartEmitter } from '@/particles/heartParticles'
-import { addToast } from '@/ui/Toaster'
 import { Vector3 } from 'three'
 import { CSS2DObject } from 'three/examples/jsm/renderers/CSS2DRenderer'
 import { sleep } from './sleep'
@@ -74,7 +74,7 @@ export const sleepPlayer = async () => {
 export const playerInventoryQuery = ecs.with('inventoryId', 'inventory', 'inventorySize', 'player', 'currentHealth', 'maxHealth')
 export const unlockRecipe = (item: items) => {
 	save.unlockedRecipes.push(item)
-	addToast({ type: 'recipe', recipe: item })
+	toastEvent.emit({ type: 'recipe', recipe: item })
 }
 export const addItemToPlayer = async (item: Item) => {
 	const player = playerInventoryQuery.first
@@ -91,7 +91,7 @@ export const addItemToPlayer = async (item: Item) => {
 			unlockRecipe(item.recipe)
 		} else {
 			await addItem(player, item)
-			addToast({ type: 'addedItem', item: item.name, quantity: item.quantity })
+			toastEvent.emit({ type: 'addedItem', item: item.name, quantity: item.quantity })
 		}
 	}
 }
@@ -99,7 +99,7 @@ export const removeItemFromPlayer = (item: Item) => {
 	const player = playerInventoryQuery.first
 	if (player) {
 		removeItem(player, item)
-		addToast({ type: 'removedItem', item: item.name, quantity: item.quantity })
+		toastEvent.emit({ type: 'removedItem', item: item.name, quantity: item.quantity })
 	}
 }
 

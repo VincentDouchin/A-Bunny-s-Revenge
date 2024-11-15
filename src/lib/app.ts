@@ -45,12 +45,6 @@ export class AppBuilder<States extends string[] = [], Ressources extends Record<
 		return this as unknown as AppBuilder<States, Ressources extends Record<string, never> ? { [key in S]: R } : Ressources & { [key in S]: R }>
 	}
 
-	setInitialState<S extends States[number]>(...args: S extends keyof Ressources ? Ressources extends Record<string, never> ? [state: S] : [state: S, ressouces: Ressources[S]] : [state: S]) {
-		const [state, ressources] = args as [S, Ressources[S]]
-		this.enabledStates[state] = ressources
-		return this
-	}
-
 	build() {
 		return new App<States, Ressources>(this)
 	}
@@ -68,6 +62,7 @@ export class App<States extends string[], Ressources extends Record<string, any>
 	#accumulator: number = 0
 	#running: boolean = false
 	#callbackId: number | null = null
+	#initCallBack: (() => (void | Promise<void>)) | null = null
 	constructor(appBuilder: AppBuilder<States, Ressources>) {
 		this.#enabledStates = appBuilder.enabledStates
 		this.#states = appBuilder.states
@@ -87,7 +82,16 @@ export class App<States extends string[], Ressources extends Record<string, any>
 		}
 	}
 
-	async enable<S extends States[number]>(...args: S extends keyof Ressources ? [S, Ressources[S]] : [S]) {
+	onInit(fn: () => (void | Promise<void>)) {
+		this.#initCallBack = fn
+		return this
+	}
+
+	get states() {
+		return this.#states.flatMap(states => [...states]) as AppStates<this>[]
+	}
+
+	async enable<S extends States[number]>(...args: S extends keyof Ressources ? [state: S, ressources: Ressources[S]] : [state: S]) {
 		return new Promise<void>((resolve) => {
 			this.#queue.add(async () => {
 				const [state, ressources] = args
@@ -97,7 +101,7 @@ export class App<States extends string[], Ressources extends Record<string, any>
 				if (otherStates) {
 					for (const otherState of otherStates) {
 						if (otherState !== state) {
-							this.disable(otherState)
+							await this.disable(otherState)
 						}
 					}
 				}
@@ -116,6 +120,7 @@ export class App<States extends string[], Ressources extends Record<string, any>
 	}
 
 	disable = async <S extends States[number]>(state: S) => {
+		if (this.isDisabled(state)) return
 		const ressources = this.#enabledStates[state]
 		delete this.#enabledStates[state]
 		this.#systems[state]?.cleanUp.forEach((callBack) => {
@@ -248,18 +253,18 @@ export class App<States extends string[], Ressources extends Record<string, any>
 	async start() {
 		this.#running = true
 		this.loop()
-		for (const state of Object.keys(this.#enabledStates) as States[number][]) {
-			const ressources = this.#enabledStates[state] as Ressources[typeof state]
-			const args = [state, ressources] as States[number] extends keyof Ressources ? [state: States[number], ressources: Ressources[States[number]]] : [state: States[number]]
-			await this.enable<typeof state>(...args)
-		}
+		this.#initCallBack && await this.#initCallBack()
+		this.#initCallBack = null
 	}
 
 	stop() {
-		if (this.#callbackId !== null) {
-			window.cancelAnimationFrame(this.#callbackId)
-			this.#callbackId = null
-		}
+		this.#queue.add(() => {
+			if (this.#callbackId !== null) {
+				window.cancelAnimationFrame(this.#callbackId)
+				this.#callbackId = null
+				this.#running = false
+			}
+		})
 	}
 }
 

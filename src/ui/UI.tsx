@@ -36,7 +36,6 @@ export const UI = () => {
 		<GameProvider>
 			<DebugUi />
 			<Show when={!debug()}>
-
 				<StateUi state="farm">
 					<RecipesUi />
 					<OvenMinigameUi />

@@ -1,11 +1,10 @@
 import type { enemy } from '@/constants/enemies'
 import type { Entity } from '@/global/entity'
-import type { Plugin } from '@/lib/app'
 import type { Room } from '@/states/dungeon/generateDungeon'
 import type { Query, With } from 'miniplex'
 import { Faction, Interactable } from '@/global/entity'
-import { completeQuestStepEvent, cookedMealEvent, harvestCropEvent, showTutorialEvent } from '@/global/events'
-import { assets, ecs, inputManager, levelsData, save } from '@/global/init'
+import { cookedMealEvent, harvestCropEvent, showTutorialEvent } from '@/global/events'
+import { assets, ecs, inputManager, levelsData, questManager, save } from '@/global/init'
 import { app } from '@/global/states'
 import { modelColliderBundle } from '@/lib/models'
 import { RoomType } from '@/states/dungeon/generateDungeon'
@@ -18,42 +17,65 @@ import { addItemToPlayer, enterHouse, leaveHouse, movePlayerTo, sleepPlayer, spe
 import { sleep } from '@/utils/sleep'
 import { RigidBodyType } from '@dimforge/rapier3d-compat'
 import { Vector3 } from 'three'
-import { addActors, addQuest, completeQuestStep, hasCompletedStep } from './questHelpers'
+import { addActors, isInMap } from './questHelpers'
 
 const enemiesQuery = ecs.with('faction').where(e => e.faction === Faction.Enemy)
 const cratesQuery = ecs.with('crate').without('interactable')
 const cratesToOpenQuery = ecs.with('crate').with('interactable', 'onPrimary')
 const dungeonQuery = ecs.with('dungeon')
 const playerQuery = ecs.with('player', 'position', 'rotation', 'targetRotation', 'state')
-const plantableSpotsQuery = ecs.with('plantableSpot', 'position', 'entityId').without('planted')
-const cropsQuery = ecs.with('crop')
-const plantedQuery = ecs.with('planted', 'position')
+const spotsQuery = ecs.with('plantableSpot', 'position', 'entityId')
+const plantableSpotsQuery = spotsQuery.without('planted')
+const plantedQuery = spotsQuery.with('planted')
 const doorQuery = ecs.with('door', 'position')
 const clearingDoorQuery = doorQuery.where(e => e.door === 'clearing')
 const introDoorQuery = doorQuery.where(e => e.door === 'intro')
 const CARROTS_TO_HARVEST = 3
 
-// const introQuest = new Quest('intro_quest')
-// 	.addStep('0_find_basket', 'Find your basket of ingredients')
-// 	.addStep('1_see_grandma', 'Talk to grandma')
-// 	.addStep('2_find_pot', 'Find the cooking pot in the cellar')
-// 	.addStep('3_bring_pot_to_grandma', 'Bring the pot')
-// 	.addStep('4_get_carrots', 'Get some carrots for the meal', [{ name: 'carrot', quantity: 4 }])
-// 	.addStep('5_cook_meal', 'Make a carrot soup for the festival')
+export const introQuest = questManager.createQuest({
+	name: 'Cook a meal for the festival',
+	state: 'introQuest',
+	steps: [{
+		key: '0_find_basket',
+		description: 'Find your basket of ingredients',
+	}, {
+		key: '1_see_grandma',
+		description: 'Talk to grandma',
+	}, {
+		key: '2_find_pot',
+		description: 'Find the cooking pot in the cellar',
+	}, {
+		key: '3_bring_pot_to_grandma',
+		description: 'Bring the pot',
+	}, {
+		key: '4_get_carrots',
+		description: 'Get some carrots for the meal',
+		items: [{ name: 'carrot', quantity: 4 }],
+	}, {
+		key: '5_cook_meal',
+		description: 'Make a carrot soup for the festival',
+	}],
+	data: {
+		planted: [] as string[],
+		harvested: [] as string[],
+		tuto: false,
+	},
+} as const)
+
 // ! Basket
 
 const cellarDoorQuery = ecs.with('door').where(e => e.door === 'cellar')
-const lockCellar = () => cellarDoorQuery.onEntityAdded.subscribe((e) => {
-	if (!hasCompletedStep('intro_quest', '2_find_pot')) {
+
+introQuest.untilIsComplete('2_find_pot', () => {
+	cellarDoorQuery.onEntityAdded.subscribe((e) => {
 		ecs.addComponent(e, 'doorLocked', true)
+	})
+	return () => {
+		for (const entity of cellarDoorQuery) {
+			ecs.removeComponent(entity, 'doorLocked')
+		}
 	}
 })
-const unlockCellar = () => {
-	for (const entity of cellarDoorQuery) {
-		ecs.removeComponent(entity, 'doorLocked')
-	}
-	completeQuestStep('intro_quest', '2_find_pot')
-}
 
 const introQuestDialogs = {
 	async *PlayerIntro1(player: With<Entity, 'state'>) {
@@ -70,10 +92,10 @@ const introQuestDialogs = {
 		if (inputManager.controls() !== 'touch') {
 			showTutorialEvent.emit(TutorialWindow.Movement)
 		}
-		addQuest('intro_quest')
 		player.state = 'idle'
 		ecs.reindex(player)
 		app.disable('cutscene')
+		introQuest.unlock()
 	},
 
 	async *pickupBasket(basket: Entity) {
@@ -82,16 +104,17 @@ const introQuestDialogs = {
 		yield 'So that\'s where I left my #BLUE#basket#BLUE!'
 		ecs.remove(basket)
 		yield await displayKeyItem(assets.models.basket.scene, 'Basket of ingredients', 0.6)
-		completeQuestStep('intro_quest', '0_find_basket')
+		introQuest.complete('0_find_basket')
 		yield 'Now I can go back #GREEN#Home#GREEN# and get started on dinner with Grandma!'
 		app.disable('cutscene')
 	},
 	async *PlayerIntro2() {
-		app.enable('cutscene')
 		speaker('Player')
+		app.enable('cutscene')
 		yield 'Finally home!'
 		yield 'I should go see #GOLD#Grandma#GOLD# so we can get started cooking.'
 		app.disable('cutscene')
+		save.started = true
 	},
 	async *findCauldron(cratesToOpenQuery: Query<any>) {
 		speaker('Player')
@@ -106,7 +129,7 @@ const introQuestDialogs = {
 			ecs.removeComponent(crate, 'interactable')
 			ecs.removeComponent(crate, 'onPrimary')
 		}
-		unlockCellar()
+		introQuest.complete('2_find_pot')
 
 		app.disable('cutscene')
 	},
@@ -141,7 +164,7 @@ const introQuestDialogs = {
 		speaker('Player')
 		yield 'Okay, I\'ll be right back!'
 		leaveHouse()
-		completeQuestStep('intro_quest', '1_see_grandma')
+		introQuest.complete('1_see_grandma')
 	},
 	*GrandmaIntro2() {
 		speaker('Player')
@@ -173,7 +196,7 @@ const introQuestDialogs = {
 		speaker('Grandma')
 		yield 'Remember to plant some more carrots after harvesting them!'
 		addItemToPlayer({ name: 'carrot_seeds', quantity: CARROTS_TO_HARVEST })
-		completeQuestStep('intro_quest', '3_bring_pot_to_grandma')
+		introQuest.complete('3_bring_pot_to_grandma')
 		leaveHouse()
 	},
 	*ItsTimeToCook() {
@@ -196,22 +219,21 @@ const introQuestDialogs = {
 	},
 
 }
-
-const lockClearingDoor = () => clearingDoorQuery.onEntityAdded.subscribe((e) => {
+introQuest.addSubscribers(() => clearingDoorQuery.onEntityAdded.subscribe((e) => {
 	ecs.update(e, { doorLocked: true })
-})
-const lockIntroDoor = () => introDoorQuery.onEntityAdded.subscribe((e) => {
-	if (!hasCompletedStep('intro_quest', '0_find_basket')) {
+}))
+
+introQuest.untilIsComplete('0_find_basket', () => {
+	introDoorQuery.onEntityAdded.subscribe((e) => {
 		ecs.update(e, { doorLocked: true })
-	}
-})
-const unlockIntroDoor = () => completeQuestStepEvent.subscribe((e) => {
-	if (e === 'intro_quest#0_find_basket') {
+	})
+	return () => {
 		for (const door of introDoorQuery) {
 			ecs.removeComponent(door, 'doorLocked')
 		}
 	}
 })
+
 const turnAwayFromDoor = () => {
 	let closeToDoor = false
 	return () => {
@@ -225,6 +247,7 @@ const turnAwayFromDoor = () => {
 		}
 	}
 }
+introQuest.onUpdate(turnAwayFromDoor())
 
 export const startIntro = async () => {
 	const player = playerQuery.first
@@ -240,18 +263,18 @@ export const enableCutscene = () => {
 	return () => app.disable('cutscene')
 }
 
-const isPlayerFirstEnteringFarm = () => !hasCompletedStep('intro_quest', '1_see_grandma') && hasCompletedStep('intro_quest', '0_find_basket') && app.isDisabled('mainMenu')
+const isPlayerFirstEnteringFarm = () => !introQuest.hasCompletedStep('1_see_grandma') && introQuest.hasCompletedStep('0_find_basket') && app.isDisabled('mainMenu')
 
-const playerFromIntroDialog = () => playerQuery.onEntityAdded.subscribe(() => {
-	if (isPlayerFirstEnteringFarm()) {
+introQuest.addSubscribers(() => playerQuery.onEntityAdded.subscribe(() => {
+	if (isPlayerFirstEnteringFarm() && isInMap('farm')) {
 		ecs.add({ dialog: introQuestDialogs.PlayerIntro2() })
 	}
-})
+}))
 // ! Cellar
-const makeCratesInteractable = () => {
+introQuest.addSubscribers(() => {
 	let cratesOpened = 0
 	return enemiesQuery.onEntityRemoved.subscribe(() => {
-		if (enemiesQuery.size === 1 && dungeonQuery.first?.dungeon.plan.type === 'cellar' && !hasCompletedStep('intro_quest', '2_find_pot')) {
+		if (enemiesQuery.size === 1 && dungeonQuery.first?.dungeon.plan.type === 'cellar' && !introQuest.hasCompletedStep('2_find_pot')) {
 			for (const crate of cratesQuery) {
 				ecs.update(crate, {
 					interactable: Interactable.Open,
@@ -267,18 +290,21 @@ const makeCratesInteractable = () => {
 			}
 		}
 	})
-}
-// ! Carrots
-
-const addCarrotMarkers = () => cropsQuery.onEntityAdded.subscribe((e) => {
-	if (!hasCompletedStep('intro_quest', '4_get_carrots') && e.crop.stage > 0) {
-		ecs.addComponent(e, 'questMarker', ['intro_quest#4_get_carrots'])
-	}
 })
-const displayCarrots = () => plantableSpotsQuery.onEntityAdded.subscribe((e) => {
+// ! Carrots
+introQuest.untilIsComplete('4_get_carrots', () => {
+	plantedQuery.onEntityAdded.subscribe((e) => {
+		if (introQuest.data.planted.includes(e.entityId)) {
+			ecs.addComponent(e, 'questMarker', [introQuest.marker('4_get_carrots')])
+		}
+	})
+})
+
+// display carrots
+introQuest.addSubscribers(() => plantableSpotsQuery.onEntityAdded.subscribe((e) => {
 	const questData = save.quests.intro_quest && save.quests.intro_quest.data['4_get_carrots']
 
-	if (!hasCompletedStep('intro_quest', '3_bring_pot_to_grandma') && questData && (questData.planted?.length < CARROTS_TO_HARVEST || (!questData.harvested.includes(e.entityId) && questData.planted.includes(e.entityId)))
+	if (!introQuest.hasCompletedStep('3_bring_pot_to_grandma') && questData && (questData.planted?.length < CARROTS_TO_HARVEST || (!questData.harvested.includes(e.entityId) && questData.planted.includes(e.entityId)))
 	) {
 		const crop = cropBundle(false, { luck: 0, name: 'carrot', planted: 0, stage: 3, watered: false })
 		delete crop.interactable
@@ -286,33 +312,32 @@ const displayCarrots = () => plantableSpotsQuery.onEntityAdded.subscribe((e) => 
 			...crop,
 			parent: e,
 			position: e.position.clone(),
-			questMarker: ['intro_quest#4_get_carrots'],
+			questMarker: [introQuest.marker('4_get_carrots')],
 		})
-		completeQuestStepEvent.subscribe((step) => {
-			if (step === 'intro_quest#3_bring_pot_to_grandma') {
-				ecs.update(planted, { interactable: Interactable.Harvest })
-				ecs.update(e, { planted })
-			}
+		introQuest.onComplete('3_bring_pot_to_grandma', () => {
+			ecs.update(planted, { interactable: Interactable.Harvest })
+			ecs.update(e, { planted })
 		})
 
 		if (!questData.planted.includes(e.entityId)) {
 			questData.planted.push(e.entityId)
 		}
 	}
-})
-const completePickupCarrots = () => harvestCropEvent.subscribe((entityId, crop) => {
+}))
+
+introQuest.addSubscribers(() => harvestCropEvent.subscribe((entityId, crop) => {
 	if (
 		crop === 'carrot'
-		&& !hasCompletedStep('intro_quest', '4_get_carrots')
+		&& !introQuest.hasCompletedStep('4_get_carrots')
 		&& save.quests.intro_quest?.data['4_get_carrots'].planted.includes(entityId)
 	) {
 		save.quests.intro_quest.data['4_get_carrots'].harvested.push(entityId)
 		if (save.quests.intro_quest.data['4_get_carrots'].harvested.length === CARROTS_TO_HARVEST) {
-			completeQuestStep('intro_quest', '4_get_carrots')
+			introQuest.complete('4_get_carrots')
 			ecs.add({ dialog: introQuestDialogs.ItsTimeToCook() })
 		}
 	}
-})
+}))
 export const spawnIntroPlayer = addActors({
 	playerIntro: () => {
 		const player = { ...playerBundle(PLAYER_DEFAULT_HEALTH, null) }
@@ -321,7 +346,7 @@ export const spawnIntroPlayer = addActors({
 		return player
 	},
 })
-const introQuestActors = addActors({
+export const introQuestActors = addActors({
 
 	basketIntro: () => {
 		const model = assets.models.basket.scene.clone()
@@ -329,23 +354,24 @@ const introQuestActors = addActors({
 		const bundle = modelColliderBundle(model, RigidBodyType.Fixed, true)
 		return {
 			...bundle,
-			questMarker: ['intro_quest#0_find_basket'],
+			questMarker: [introQuest.marker('0_find_basket')],
 			interactable: Interactable.PickUp,
 			onPrimary(basket) {
+				ecs.removeComponent(basket, 'interactable')
 				ecs.add({ dialog: introQuestDialogs.pickupBasket(basket) })
 			},
 		}
 	},
 	houseDoor: () => {
 		return {
-			questMarker: ['intro_quest#1_see_grandma', 'intro_quest#3_bring_pot_to_grandma'],
+			questMarker: [introQuest.marker('1_see_grandma'), introQuest.marker('3_bring_pot_to_grandma')],
 			questMarkerPosition: new Vector3(0, 15, 5),
 			onPrimary(entity) {
-				if (!hasCompletedStep('intro_quest', '1_see_grandma') && entity.questMarkerContainer) {
+				if (!introQuest.hasCompletedStep('1_see_grandma') && entity.questMarkerContainer) {
 					ecs.add({ dialog: introQuestDialogs.GrandmaIntro() })
 					return
 				}
-				if (hasCompletedStep('intro_quest', '2_find_pot') && !hasCompletedStep('intro_quest', '3_bring_pot_to_grandma')) {
+				if (introQuest.hasCompletedStep('2_find_pot') && !introQuest.hasCompletedStep('3_bring_pot_to_grandma')) {
 					enterHouse().then(() => {
 						ecs.add({ dialog: introQuestDialogs.GrandmaIntro2() })
 					})
@@ -354,14 +380,14 @@ const introQuestActors = addActors({
 		}
 	},
 	cellarDoor: () => ({
-		questMarker: ['intro_quest#2_find_pot'] as const,
+		questMarker: [introQuest.marker('2_find_pot')],
 		questMarkerPosition: new Vector3(0, 10, -5),
 		async onPrimary(e, player) {
-			if (hasCompletedStep('intro_quest', '1_see_grandma')) {
+			if (introQuest.hasCompletedStep('1_see_grandma')) {
 				app.enable('cutscene')
 				await e.cellarDoorAnimator?.playClamped('doorOpen')
 				app.disable('cutscene')
-				const enemies: enemy[] = hasCompletedStep('intro_quest', '2_find_pot') ? [] : ['soot_sprite', 'soot_sprite', 'soot_sprite', 'soot_sprite']
+				const enemies: enemy[] = introQuest.hasCompletedStep('2_find_pot') ? [] : ['soot_sprite', 'soot_sprite', 'soot_sprite', 'soot_sprite']
 				const cellar: Room = {
 					plan: levelsData.levels.find(l => l.type === 'cellar')!,
 					doors: {},
@@ -390,31 +416,24 @@ const introQuestActors = addActors({
 	}),
 })
 
-const displayFarmingTutorial = () => {
-	if (hasCompletedStep('intro_quest', '3_bring_pot_to_grandma') && !hasCompletedStep('intro_quest', '4_get_carrots') && save.quests.intro_quest?.data['4_get_carrots'].tuto === false) {
-		for (const player of playerQuery) {
-			for (const crop of plantedQuery) {
-				if (player.position.distanceTo(crop.position)) {
-					showTutorialEvent.emit(TutorialWindow.Farming)
-					save.quests.intro_quest.data['4_get_carrots'].tuto = true
-				}
+// display farming tuto
+introQuest.betweenSteps('3_bring_pot_to_grandma', '4_get_carrots', () => {
+	if (introQuest.data.tuto) return
+	for (const player of playerQuery) {
+		for (const crop of plantedQuery) {
+			if (player.position.distanceTo(crop.position) < 5) {
+				showTutorialEvent.emit(TutorialWindow.Farming)
+				save.quests.intro_quest.data['4_get_carrots'].tuto = true
 			}
 		}
 	}
-}
-
-const cookMeal = () => cookedMealEvent.subscribe((cooking, recipe) => {
+})
+// cook meal
+introQuest.addSubscribers(() => cookedMealEvent.subscribe((cooking, recipe) => {
 	if (cooking === 'cookingPot' && recipe === 'carrot_soup') {
 		for (const entity of clearingDoorQuery) {
 			ecs.removeComponent(entity, 'doorLocked')
 		}
-		completeQuestStep('intro_quest', '5_cook_meal')
+		introQuest.complete('5_cook_meal')
 	}
-})
-
-export const introQuestPlugin: Plugin<typeof app> = (app) => {
-	app
-		.addPlugins(introQuestActors('game'))
-		.addSubscribers('game', playerFromIntroDialog, makeCratesInteractable, displayCarrots, addCarrotMarkers, completePickupCarrots, cookMeal, lockClearingDoor, lockCellar, lockIntroDoor, unlockIntroDoor)
-		.onUpdate('game', displayFarmingTutorial, turnAwayFromDoor())
-}
+}))

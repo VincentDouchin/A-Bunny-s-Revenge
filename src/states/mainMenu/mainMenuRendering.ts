@@ -97,7 +97,7 @@ export const transitionToGame = once(async () => {
 				}
 			},
 			onComplete: () => {
-				app.disable('mainMenu')
+				app.enable('game')
 				save.started = true
 				gameCam.cameraOffset.setScalar(0)
 			},

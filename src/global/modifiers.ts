@@ -218,13 +218,4 @@ export const tickModifiersPlugin = (...stats: ComponentsOfType<Stat>[]): Plugin<
 			}
 		}
 	})
-	app.addSubscribers('game', () => modifiersQuery.onEntityAdded.subscribe((entity) => {
-		entity.modifiers.tick(time.delta)
-		for (const stat of stats) {
-			const statComponent = entity[stat]
-			if (statComponent) {
-				statComponent.modifiers = entity.modifiers.getMods(stat)
-			}
-		}
-	}))
 }

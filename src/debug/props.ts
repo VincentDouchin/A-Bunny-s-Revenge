@@ -11,6 +11,7 @@ import { app, type DungeonRessources, type FarmRessources } from '@/global/state
 import { Direction, isCardialDirection } from '@/lib/directions'
 import { inMap } from '@/lib/hierarchy'
 import { getSecondaryColliders } from '@/lib/models'
+import { introQuest } from '@/quests/introQuest'
 import { GardenPlotMaterial, GrassMaterial } from '@/shaders/materials'
 import { RoomType } from '@/states/dungeon/generateDungeon'
 import { cropBundle } from '@/states/farm/farming'
@@ -289,7 +290,7 @@ export const props: Props = [
 			interactable: Interactable.Cauldron,
 			onPrimary: openMenu(MenuType.Cauldron),
 			actor: 'cookingPot',
-			questMarker: ['intro_quest#5_cook_meal'],
+			questMarker: [introQuest.marker('5_cook_meal')],
 			onSecondary: (e) => {
 				e.recipesQueued?.length && openMenu(MenuType.CauldronGame)(e)
 			},

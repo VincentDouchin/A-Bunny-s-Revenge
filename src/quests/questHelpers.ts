@@ -1,17 +1,10 @@
-import type { Item } from '@/constants/items'
-import type { QuestMarkers, QuestName, QuestStepKey } from '@/constants/quests'
+import type { Quest2 } from '@/constants/quests'
 import type { Actor, Entity, QueryEntity } from '@/global/entity'
 import type { app } from '@/global/states'
 import type { AppStates, Plugin } from '@/lib/app'
-import type { items } from '@assets/assets'
-import { quests } from '@/constants/quests'
-import { recipes } from '@/constants/recipes'
-import { completeQuestStepEvent } from '@/global/events'
-import { ecs, save, tweens } from '@/global/init'
-import { addToast } from '@/ui/Toaster'
-import { playerInventoryQuery, removeItemFromPlayer, unlockRecipe } from '@/utils/dialogHelpers'
+import { toastEvent } from '@/global/events'
+import { ecs, levelsData, questManager, tweens } from '@/global/init'
 import { entries } from '@/utils/mapFunctions'
-import { Event } from 'eventery'
 import { circIn } from 'popmotion'
 import { CylinderGeometry, Group, Mesh, MeshBasicMaterial, SphereGeometry, Vector3 } from 'three'
 
@@ -38,52 +31,13 @@ export const addActors = (actors: Partial<Record<Actor, (e: QueryEntity<typeof a
 		}
 	})
 }
-export const canCompleteQuest = (name: QuestName) => {
-	const player = playerInventoryQuery.first
-	if (player) {
-		return quests[name].steps.every((step) => {
-			return save.quests[name]?.steps[step.key] === true || step.items?.every((item: Item) => {
-				return player.inventory.some((saveItem) => {
-					return saveItem && saveItem.name === item.name && saveItem.quantity >= item.quantity
-				})
-			})
-		})
-	}
-}
-
-export const completeQuest = <Q extends QuestName>(name: Q) => {
-	if (canCompleteQuest(name)) {
-		const quest = save.quests[name]
-		if (quest) {
-			for (let i = 0; i < quests[name].steps.length; i++) {
-				const step = quests[name].steps[i]
-				const key: QuestStepKey<Q> = step.key
-				for (const item of step.items ?? []) {
-					removeItemFromPlayer(item)
-				}
-				quest.steps[key] = true
-			}
-			// quests[name].state.disable()
-		}
-	}
-}
-export const showMarker = <T extends QuestName>(name: QuestMarkers) => {
-	const [questName, key] = name.split('#') as [T, QuestStepKey<T>]
-	const savedQuest = save.quests[questName]
-	if (savedQuest) {
-		const index = quests[questName].steps.findIndex(step => step.key === key)
-		const prevKey: QuestStepKey<T> | undefined = quests[questName].steps[index - 1]?.key
-		if (index === 0) {
-			return quests[questName].unlock()
-		} else {
-			return savedQuest.steps[prevKey] && !savedQuest.steps[key]
-		}
-	} else {
-		return false
-	}
-}
 
 const questMarkerQuery = ecs.with('questMarker')
+
+export const showMarker = ({ quest, step }: { quest: Quest2<any, any, any>, step: string }) => {
+	return quest.showMarker(step)
+}
+
 export const displayQuestMarker = (e: QueryEntity<typeof questMarkerQuery>) => {
 	if (e.questMarker.some(showMarker)) {
 		const questMarkerContainer = new Group()
@@ -117,109 +71,34 @@ export const displayQuestMarker = (e: QueryEntity<typeof questMarkerQuery>) => {
 			},
 		})
 		ecs.update(e, { questMarkerContainer })
+	} else if (e.questMarkerContainer) {
+		ecs.removeComponent(e, 'questMarkerContainer')
 	}
 }
 export const addQuestMarkers = () => questMarkerQuery.onEntityAdded.subscribe(displayQuestMarker)
-export const addQuest = async <Name extends QuestName>(name: Name) => {
-	if (!(name in save.quests)) {
-		save.quests[name] = {
-			steps: quests[name].steps.reduce((acc, v) => ({ ...acc, [v.key]: false }), {} as Record<QuestStepKey<Name>, false>),
-			data: quests[name].data(),
-		}
-		const toUnlock: items[] = []
-		for (const step of quests[name].steps) {
-			for (const item of step.items as unknown as Item[]) {
-				if (!save.unlockedRecipes.includes(item.name) && recipes.some(r => r.output.name === item.name)) {
-					toUnlock.push(item.name)
-				}
-			}
-		}
-		for (const unlockedRecipe of toUnlock) {
-			unlockRecipe(unlockedRecipe)
-		}
-		for (const npc of questMarkerQuery) {
-			const marker = npc.questMarker.find(q => q.split('#')[0] === name)
-			if (marker) {
-				const markers = [...npc.questMarker].filter(m => m !== marker)
-				ecs.removeComponent(npc, 'questMarker')
-				ecs.removeComponent(npc, 'questMarkerContainer')
-				ecs.addComponent(npc, 'questMarker', markers)
-			}
-		}
-		// if (quests[name].state.disabled) quests[name].state.enable()
-		addToast({ type: 'quest', quest: name })
-	}
-}
 
-export const completeQuestStep = <Q extends QuestName>(questName: Q, step: QuestStepKey<Q>) => {
-	const quest = save.quests[questName]
-	if (quest) {
-		const index = quests[questName].steps.findIndex(s => s.key === step)
-		quest.steps[step] = true
-		addToast({ type: 'questStep', step: quests[questName].steps[index] })
-		for (const entity of questMarkerQuery) {
-			displayQuestMarker(entity)
-			if (entity.questMarker.includes(`${questName}#${step}`)) {
-				ecs.removeComponent(entity, 'questMarkerContainer')
-			}
-		}
-		completeQuestStepEvent.emit(`${questName}#${step}`)
-		if (Object.values(quest.steps).every(s => s === true)) {
-			// quests[questName].state.disable()
+export const completeQuestStep = () => questManager.completeStepEvent.subscribe((questStep) => {
+	toastEvent.emit({ type: 'questStep', description: questStep.description })
+	for (const entity of questMarkerQuery) {
+		displayQuestMarker(entity)
+	}
+})
+
+export const displayUnlockQuestToast = () => questManager.unlockedQuestEvent.subscribe((quest) => {
+	toastEvent.emit({ type: 'quest', quest: quest.name })
+
+	for (const entity of questMarkerQuery) {
+		displayQuestMarker(entity)
+	}
+})
+
+const mapQuery = ecs.with('map')
+export const isInMap = (map: string) => {
+	const mapId = levelsData.levels.find(level => level.name === map)?.id
+	for (const { map } of mapQuery) {
+		if (map === mapId) {
+			return true
 		}
 	}
-}
-
-export const hasCompletedQuest = (name: QuestName) => {
-	return Boolean(save.quests[name]) && Object.values(save.quests[name]?.steps ?? {})?.every(step => step === true)
-}
-
-export const hasCompletedStep = <Q extends QuestName>(questName: Q, step: QuestStepKey<Q>) => {
-	return save.quests[questName]?.steps[step]
-}
-
-export const hasQuest = <T extends QuestName>(name: QuestMarkers) => {
-	const [quest, key] = name.split('#') as [T, QuestStepKey<T>]
-	return quest in save.quests && save.quests[quest]?.steps[key]
-}
-
-export const isQuestActive = (name: QuestName) => {
-	return save.quests[name] && Object.values(save.quests[name]?.steps ?? {})?.some(s => s === false)
-}
-
-export const enableQuests = async () => {
-	// for (const quest of Object.keys(quests) as QuestName[]) {
-	// if (isQuestActive(quest) && quests[quest].state) {
-	// await quests[quest].state.enable()
-	// }
-	// }
-}
-
-interface Step {
-	name: string
-	description: string
-	items: Item[]
-}
-export class Quest<S extends string = never> {
-	steps: Step[] = []
-	events: { [key: string]: Event<[void]> } = {}
-	constructor(public name: string) { }
-	addStep<s extends string>(name: s, description: string, items: Item[] = []) {
-		this.steps.push({ name, description, items })
-		this.events[name] = new Event()
-		return this as unknown as Quest<S | s>
-	}
-
-	hasCompleted(step: S) {
-		return save.quests[this.name].steps[step]
-	}
-
-	onCompleteStep(step: S, fn: () => void) {
-		this.events[step]?.subscribe(fn)
-		return this
-	}
-
-	completeStep(step: S) {
-		save.quests[this.name].steps[step] = true
-	}
+	return false
 }

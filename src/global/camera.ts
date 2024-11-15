@@ -17,7 +17,6 @@ export const initCamera = () => {
 		0.0001,
 		1000,
 	)
-	// camera.rotateX(-0.3)
 	camera.updateProjectionMatrix()
 	ecs.add({
 		renderGroup: RenderGroup.Game,

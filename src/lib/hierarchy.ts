@@ -1,7 +1,7 @@
 import type { app } from '@/global/states'
 import type { With } from 'miniplex'
 import type { ComponentsOfType, Entity } from '../global/entity'
-import type { AppStates, Plugin } from './app'
+import type { Plugin } from './app'
 import { ecs } from '../global/init'
 
 const mapQuery = ecs.with('map')
@@ -81,11 +81,13 @@ export const removeEntityRef = <C extends ComponentsOfType<Entity>>(entity: With
 		ecs.remove(ref)
 	}
 }
-export const removeStateEntity = (state: AppStates<typeof app>) => {
-	const stateEntities = ecs.with('stateEntity').where(e => e.stateEntity === state)
-	return () => {
-		for (const stateEntity of stateEntities) {
-			ecs.remove(stateEntity)
-		}
+export const removeStateEntityPlugin: Plugin<typeof app> = (app) => {
+	for (const state of app.states) {
+		const stateEntities = ecs.with('stateEntity').where(e => e.stateEntity === state)
+		app.onExit(state, () => {
+			for (const stateEntity of stateEntities) {
+				ecs.remove(stateEntity)
+			}
+		})
 	}
 }

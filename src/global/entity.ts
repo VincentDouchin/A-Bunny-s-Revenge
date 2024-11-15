@@ -1,7 +1,7 @@
 import type { enemy } from '@/constants/enemies'
 import type { crops, Item } from '@/constants/items'
 import type { NPC } from '@/constants/NPC'
-import type { QuestMarkers } from '@/constants/quests'
+import type { Quest2 } from '@/constants/quests'
 import type { Recipe } from '@/constants/recipes'
 import type { MenuInputMap, PlayerInputMap } from '@/global/inputMaps'
 import type { AppStates } from '@/lib/app'
@@ -216,7 +216,7 @@ export interface Entity {
 	npc?: true
 	voice?: voices
 	npcName?: (typeof NPC)[number]
-	questMarker?: QuestMarkers[]
+	questMarker?: { quest: Quest2<any, any, any>, step: string }[]
 	questMarkerContainer?: Group
 	questMarkerPosition?: Vector3
 	actor?: Actor

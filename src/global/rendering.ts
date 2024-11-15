@@ -40,13 +40,9 @@ export const updateRenderSize = (newSize?: Vector2) => {
 	newSize ??= getTargetSize()
 	sobelMat.uniforms.resolution.value = newSize
 	target.setSize(newSize.x, newSize.y)
-	// target.depthTexture = new DepthTexture(newSize.x, newSize.y)
 	outlineTarget.setSize(newSize.x, newSize.y)
-	// outlineTarget.depthTexture = new DepthTexture(newSize.x, newSize.y)
 	outlineTarget2.setSize(newSize.x, newSize.y)
-	// finalTarget.setSize(newSize.x, newSize.y)
 	renderer.setSize(newSize.x, newSize.y)
-	cssRenderer.setSize(window.innerWidth, window.innerHeight)
 }
 export const initThree = () => {
 	renderer.clear()
@@ -66,14 +62,13 @@ export const initThree = () => {
 export const gameRenderGroupQuery = ecs.with('renderer', 'renderGroup', 'scene').where(e => e.renderGroup === RenderGroup.Game)
 export const cameraQuery = ecs.with('camera', 'renderGroup').where(e => e.renderGroup === RenderGroup.Game)
 const outlineQuery = ecs.with('outline')
-let withOutline = false
 export const renderGame = () => {
 	const camera = cameraQuery.first?.camera
 	if (!camera) return
 	// Base scene
 	renderer.setRenderTarget(target)
 	renderer.render(scene, camera)
-	if (outlineQuery.size) {
+	if (outlineQuery.size > 0) {
 		// outline entities
 		camera.layers.set(1)
 		scene.overrideMaterial = new MeshBasicMaterial()
@@ -84,12 +79,10 @@ export const renderGame = () => {
 		// outline entities with depth
 		renderer.setRenderTarget(outlineTarget2)
 		outlineQuad.render(renderer)
-	}
-	if (withOutline && outlineQuery.size === 0) {
+	} else {
 		renderer.setRenderTarget(outlineTarget2)
 		renderer.clear()
 	}
-	withOutline = outlineQuery.size > 0
 
 	if (app.isEnabled('mainMenu')) {
 		renderer.setRenderTarget(finalTarget)

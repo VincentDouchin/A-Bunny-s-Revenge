@@ -6,7 +6,7 @@ import { clamp } from 'three/src/math/MathUtils'
 export class Time extends Clock {
 	delta = 0
 	elapsed = 0
-	tick() {
+	tick = () => {
 		this.delta = this.getDelta() * 1000
 		this.elapsed += this.delta
 	}
