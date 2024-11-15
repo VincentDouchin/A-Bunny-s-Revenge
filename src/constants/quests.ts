@@ -5,10 +5,10 @@ import { save } from '@/global/init'
 import { Event } from 'eventery'
 
 export type QuestStep = Readonly<{
-	description: string
-	items?: readonly Item[]
-	icon?: icons
-	key: string
+	readonly description: string
+	readonly items?: ReadonlyArray<Item>
+	readonly icon?: icons
+	readonly key: string
 }>
 
 export class QuestManager<A extends App<any, any>> {
@@ -38,12 +38,12 @@ export class QuestManager<A extends App<any, any>> {
 	}
 }
 
-export class Quest2<A extends App<any, Record<string, never>>, S extends QuestStep[] = [], D extends Record<string, any> = Record<string, never>> {
+export class Quest2<A extends App<any, Record<string, never>>, S extends ReadonlyArray<QuestStep> = [], D extends Record<string, any> = Record<string, never>> {
 	#subscribers = {} as Record<S[number]['key'], Set<() => (() => void) | void>>
 	name: string
 	data: D
 	#app: A
-	#steps: S
+	#steps: Readonly<S>
 	#manager: QuestManager<A>
 	state: AppStates<A>
 	unlocked = false

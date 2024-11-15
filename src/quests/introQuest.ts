@@ -1,4 +1,5 @@
 import type { enemy } from '@/constants/enemies'
+import type { QuestStep } from '@/constants/quests'
 import type { Entity } from '@/global/entity'
 import type { Room } from '@/states/dungeon/generateDungeon'
 import type { Query, With } from 'miniplex'
@@ -54,7 +55,7 @@ export const introQuest = questManager.createQuest({
 	}, {
 		key: '5_cook_meal',
 		description: 'Make a carrot soup for the festival',
-	}],
+	}] as QuestStep[],
 	data: {
 		planted: [] as string[],
 		harvested: [] as string[],
