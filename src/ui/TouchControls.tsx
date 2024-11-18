@@ -28,6 +28,8 @@ export const TouchButton = <T extends string,>({ input, controller, children, in
 	const isPressed = createMemo(() => controller?.get(input))
 	const interact = (value: number) => () => {
 		controller.set(input, value)
+		const amount = value === 0 ? 50 : 100
+		navigator.vibrate(amount)
 	}
 	const textToDisplay = createMemo(() => text ?? (interactable && interactable()?.text))
 	css/* css */`

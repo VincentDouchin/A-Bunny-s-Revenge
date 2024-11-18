@@ -122,6 +122,7 @@ app
 	// ! DUNGEON
 	.addSubscribers('dungeon', spawnDrops, removeEnemyFromSpawn, applyArchingForce, unlockDungeon)
 	.onEnter('dungeon', spawnDungeon, spawnLevelData, spawnEnemies, spawnPlayerDungeon, moveCamera(true))
+	.onEnter('dungeon', compileShaders, initTexturesItemsAndEnemies)
 	.onEnter('dungeon')
 	.onUpdate(
 		'dungeon',

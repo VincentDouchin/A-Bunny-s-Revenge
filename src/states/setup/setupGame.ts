@@ -9,6 +9,7 @@ import { startIntro } from '@/quests/introQuest'
 import { throttle } from '@solid-primitives/scheduled'
 import { Vector2 } from 'three'
 import { assignPlanAndEnemies, RoomType } from '../dungeon/generateDungeon'
+import { setMainCameraPosition } from '../mainMenu/mainMenuRendering'
 
 export const setupGame = async () => {
 	if (params.debugBoss) {
@@ -104,10 +105,12 @@ export const enableFullscreen = () => windowEvent('pointerup', () => {
 })
 
 export const resize = () => windowEvent('resize', throttle(() => {
-	updateRenderSize()
-	updateCameraZoom()
 	if (app.isEnabled('mainMenu')) {
+		updateCameraZoom()
 		updateRenderSize(new Vector2(window.innerWidth, window.innerHeight))
-		updateCameraZoom(10)
+		setMainCameraPosition()
+	} else {
+		updateRenderSize()
+		updateCameraZoom()
 	}
 }, 100))

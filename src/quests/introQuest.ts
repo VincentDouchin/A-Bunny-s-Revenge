@@ -303,16 +303,24 @@ introQuest.untilIsComplete('4_get_carrots', () => {
 
 // display carrots
 introQuest.addSubscribers(() => plantableSpotsQuery.onEntityAdded.subscribe((e) => {
-	const questData = save.quests.intro_quest && save.quests.intro_quest.data['4_get_carrots']
-
-	if (!introQuest.hasCompletedStep('3_bring_pot_to_grandma') && questData && (questData.planted?.length < CARROTS_TO_HARVEST || (!questData.harvested.includes(e.entityId) && questData.planted.includes(e.entityId)))
+	const questData = introQuest.data
+	if (
+		!introQuest.hasCompletedStep('3_bring_pot_to_grandma')
+		&& questData
+		&& (
+			questData.planted?.length < CARROTS_TO_HARVEST
+			|| (
+				!questData.harvested.includes(e.entityId)
+				&& questData.planted.includes(e.entityId)
+			)
+		)
 	) {
 		const crop = cropBundle(false, { luck: 0, name: 'carrot', planted: 0, stage: 3, watered: false })
 		delete crop.interactable
 		const planted = ecs.add({
 			...crop,
 			parent: e,
-			position: e.position.clone(),
+			position: new Vector3(),
 			questMarker: [introQuest.marker('4_get_carrots')],
 		})
 		introQuest.onComplete('3_bring_pot_to_grandma', () => {
