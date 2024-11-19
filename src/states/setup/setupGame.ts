@@ -12,6 +12,11 @@ import { assignPlanAndEnemies, RoomType } from '../dungeon/generateDungeon'
 import { setMainCameraPosition } from '../mainMenu/mainMenuRendering'
 
 export const setupGame = async () => {
+	if (!params.skipMainMenu) {
+		app.enable('mainMenu')
+		return
+	}
+	app.enable('game')
 	if (params.debugBoss) {
 		const bossRoom = assignPlanAndEnemies([{ position: { x: 0, y: 0 }, connections: { north: 1, south: null }, type: RoomType.Boss }], 0)
 		app.enable('dungeon', { dungeon: bossRoom[0], direction: Direction.S, firstEntry: true, playerHealth: 5, dungeonLevel: 0, weapon: 'Hoe' })
@@ -29,8 +34,6 @@ export const setupGame = async () => {
 		setTimeout(() => startIntro(), 2000)
 		app.disable('cutscene')
 		updateRenderSize()
-	} else if (!params.skipMainMenu) {
-		app.enable('mainMenu')
 	} else {
 		app.enable('farm', { door: null })
 		updateRenderSize()

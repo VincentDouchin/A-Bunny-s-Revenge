@@ -5,7 +5,7 @@ import type { AppStates, Plugin } from '@/lib/app'
 import { toastEvent } from '@/global/events'
 import { ecs, levelsData, questManager, tweens } from '@/global/init'
 import { entries } from '@/utils/mapFunctions'
-import { circIn } from 'popmotion'
+import { bounceOut, circIn } from 'popmotion'
 import { CylinderGeometry, Group, Mesh, MeshBasicMaterial, SphereGeometry, Vector3 } from 'three'
 
 const actorsQuery = ecs.with('actor', 'position', 'rotation')
@@ -68,6 +68,16 @@ export const displayQuestMarker = (e: QueryEntity<typeof questMarkerQuery>) => {
 			onUpdate: (f) => {
 				line.scale.copy(f)
 				line.position.setY(3 + (4 * f.y) / 2)
+			},
+		})
+		tweens.add({
+			from: 0,
+			to: 1,
+			duration: 1_000,
+			parent: e,
+			ease: bounceOut,
+			onUpdate: (f) => {
+				questMarkerContainer.scale.setScalar(f * f)
 			},
 		})
 		ecs.update(e, { questMarkerContainer })

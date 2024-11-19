@@ -57,9 +57,13 @@ export const introQuest = questManager.createQuest({
 		description: 'Make a carrot soup for the festival',
 	}] as QuestStep[],
 	data: {
-		planted: [] as string[],
-		harvested: [] as string[],
+		planted: [],
+		harvested: [],
 		tuto: false,
+	} as {
+		planted: string[]
+		harvested: string[]
+		tuto: boolean
 	},
 } as const)
 
@@ -296,7 +300,7 @@ introQuest.addSubscribers(() => {
 introQuest.untilIsComplete('4_get_carrots', () => {
 	plantedQuery.onEntityAdded.subscribe((e) => {
 		if (introQuest.data.planted.includes(e.entityId)) {
-			ecs.addComponent(e, 'questMarker', [introQuest.marker('4_get_carrots')])
+			ecs.addComponent(e.planted, 'questMarker', [introQuest.marker('4_get_carrots')])
 		}
 	})
 })
@@ -338,10 +342,10 @@ introQuest.addSubscribers(() => harvestCropEvent.subscribe((entityId, crop) => {
 	if (
 		crop === 'carrot'
 		&& !introQuest.hasCompletedStep('4_get_carrots')
-		&& save.quests.intro_quest?.data['4_get_carrots'].planted.includes(entityId)
+		&& introQuest.data.planted.includes(entityId)
 	) {
-		save.quests.intro_quest.data['4_get_carrots'].harvested.push(entityId)
-		if (save.quests.intro_quest.data['4_get_carrots'].harvested.length === CARROTS_TO_HARVEST) {
+		introQuest.data.harvested.push(entityId)
+		if (introQuest.data.harvested.length === CARROTS_TO_HARVEST) {
 			introQuest.complete('4_get_carrots')
 			ecs.add({ dialog: introQuestDialogs.ItsTimeToCook() })
 		}
@@ -432,7 +436,7 @@ introQuest.betweenSteps('3_bring_pot_to_grandma', '4_get_carrots', () => {
 		for (const crop of plantedQuery) {
 			if (player.position.distanceTo(crop.position) < 5) {
 				showTutorialEvent.emit(TutorialWindow.Farming)
-				save.quests.intro_quest.data['4_get_carrots'].tuto = true
+				introQuest.data.tuto = true
 			}
 		}
 	}
