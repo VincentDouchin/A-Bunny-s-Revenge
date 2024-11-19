@@ -132,6 +132,7 @@ export const harvestCrop = async () => {
 			for (const spot of plantedSpotQuery) {
 				if (spot.planted.interactionContainer && maxStage(spot.planted.crop.name) === spot.planted.crop.stage) {
 					playerAnimator.playOnce('pickup').then(async () => {
+						playerAnimator.playAnimation('idle')
 						const extraDrops = Math.floor(spot.planted.crop.luck)
 						const extraChance = Math.random() < (spot.planted.crop.luck % 1) ? 1 : 0
 						const totalDrops = 1 + extraDrops + extraChance

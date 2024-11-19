@@ -77,11 +77,13 @@ export class Quest2<A extends App<any, Record<string, never>>, S extends Readonl
 	}
 
 	unlock() {
-		save.quests[this.name].unlocked = true
-		this.unlocked = true
-		// @ts-expect-error fix this later
-		this.#app.enable(this.state)
-		this.#manager.unlockedQuestEvent.emit(this)
+		if (this.#steps.some(s => !this.hasCompletedStep(s.key))) {
+			save.quests[this.name].unlocked = true
+			this.unlocked = true
+			// @ts-expect-error fix this later
+			this.#app.enable(this.state)
+			this.#manager.unlockedQuestEvent.emit(this)
+		}
 	}
 
 	getStep(step: S[number]['key']): QuestStep {
@@ -94,6 +96,9 @@ export class Quest2<A extends App<any, Record<string, never>>, S extends Readonl
 			subscribers()
 		}
 		this.#manager.completeStepEvent.emit(this.getStep(step))
+		if (this.#steps.findIndex(s => s.key === step) === this.#steps.length - 1) {
+			this.#app.disable(this.state)
+		}
 	}
 
 	#previousStep(step: S[number]['key']): S[number]['key'] | undefined {
