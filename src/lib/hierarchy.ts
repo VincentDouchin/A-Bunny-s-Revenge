@@ -1,8 +1,8 @@
 import type { app } from '@/global/states'
 import type { With } from 'miniplex'
 import type { ComponentsOfType, Entity } from '../global/entity'
-import type { Plugin } from './app'
 import { ecs } from '../global/init'
+import { type Plugin, set } from './app'
 
 const mapQuery = ecs.with('map')
 export const inMap = () => {
@@ -44,14 +44,14 @@ export const removeParent = (entity: Entity) => {
 	}
 }
 export const despawnOfType = (...components: (keyof Entity)[]) => {
-	return components.map((component) => {
+	return set(components.map((component) => {
 		const query = ecs.with(component)
 		return () => {
 			for (const entity of query) {
 				ecs.remove(entity)
 			}
 		}
-	})
+	}))
 }
 const withChildrenQuery = ecs.with('withChildren').without('bodyDesc')
 

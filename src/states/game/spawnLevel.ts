@@ -2,7 +2,7 @@ import type { EntityData, Level, LevelType } from '@/debug/LevelEditor'
 import type { InstanceHandle } from '@/global/assetLoaders'
 import type { Entity } from '@/global/entity'
 import type { app } from '@/global/states'
-import type { UpdateSystem } from '@/lib/app'
+import type { AppStates, UpdateSystem } from '@/lib/app'
 import type { Vec2, Vector4Like } from 'three'
 import { getModel, props } from '@/debug/props'
 import { canvasToArray, canvasToGrid, instanceMesh } from '@/global/assetLoaders'
@@ -297,15 +297,15 @@ export const spawnGroundAndTrees = (level: Level, dungeonLevel?: number) => {
 	spawnGrass(level, ground, dungeonLevel)
 }
 
-export const spawnLevel = (type: LevelType) => () => {
+export const spawnLevel = (type: LevelType, stateEntity: AppStates<typeof app>) => () => {
 	const level = levelsData.levels.find(level => level.type === type)
 	if (!level) throw new Error('can\'t find level')
-	ecs.add({ map: level.id })
+	ecs.add({ map: level.id, stateEntity })
 	spawnGroundAndTrees(level)
 }
 
 export const spawnDungeon: UpdateSystem<typeof app, 'dungeon'> = ({ dungeon, dungeonLevel }) => {
-	ecs.add({ map: dungeon.plan.id, dungeon })
+	ecs.add({ map: dungeon.plan.id, dungeon, stateEntity: 'dungeon' })
 	spawnGroundAndTrees(dungeon.plan, dungeonLevel)
 
 	if (dungeon.type === RoomType.NPC && dungeon.encounter) {

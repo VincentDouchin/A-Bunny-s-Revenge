@@ -10,12 +10,11 @@ import { assets, ecs, levelsData, time, ui } from '@/global/init'
 import { loadLevelData } from '@/global/levelData'
 import { updateRenderSize } from '@/global/rendering'
 import { app } from '@/global/states'
-import { inMap } from '@/lib/hierarchy'
+import { despawnOfType, inMap } from '@/lib/hierarchy'
 import { NavGrid } from '@/lib/navGrid'
 import { thumbnailRenderer } from '@/lib/thumbnailRenderer'
 import { ToonMaterial } from '@/shaders/materials'
 import { getdisplacementMap, HEIGHT, setDisplacement, spawnGroundAndTrees, spawnLevelData } from '@/states/game/spawnLevel'
-import { PLAYER_DEFAULT_HEALTH, playerBundle } from '@/states/game/spawnPlayer'
 import { useQuery } from '@/ui/store'
 import { getScreenBuffer } from '@/utils/buffer'
 import { entries, getRandom } from '@/utils/mapFunctions'
@@ -29,6 +28,7 @@ import { MapControls } from 'three/examples/jsm/controls/MapControls'
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader'
 import { generateUUID } from 'three/src/math/MathUtils'
 import { getGameRenderGroup } from './debugUi'
+import { EntitiesSelector } from './EntitiesSelector'
 import { EntityEditor } from './EntityEditor'
 import { MapEditor } from './MapEditor'
 import { getModel, props } from './props'
@@ -130,10 +130,10 @@ export const LevelEditor = () => {
 			<Show when={open() && map()}>
 				{(map) => {
 					const { scene, renderer } = getGameRenderGroup()
-					const [selectedTab, setSelectedTab] = createSignal<'place props' | 'draw map'>('place props')
+					const selectedTab = atom<'place props' | 'draw map' | 'entities'>('place props')
 					const [random, setRandom] = createSignal(false)
 					const [selectedProp, setSelectedProp] = createSignal<PlacableProp<any> | null>(null)
-					const [selectedEntity, setSelectedEntity] = createSignal<With<Entity, 'entityId' | 'model' | 'position' | 'rotation'> | null>(null)
+					const selectedEntity = atom<With<Entity, 'entityId' | 'model' | 'position' | 'rotation'> | null>(null)
 					const [selectedModel, setSelectedModel] = createSignal<null | ModelName>(null)
 					const [levelData, setLevelData] = createSignal<LevelData>(levelsData.levelData)
 					const [colliderData, setColliderData] = createSignal<CollidersData>(levelsData.colliderData)
@@ -226,6 +226,7 @@ export const LevelEditor = () => {
 						scene.add(fakeGround)
 					}
 					const switchLevel = (level: Level) => {
+						despawnOfType('map')
 						navgridDisplayed(false)
 						if (navgrid) {
 							navgrid.mesh?.removeFromParent()
@@ -242,7 +243,6 @@ export const LevelEditor = () => {
 						ecs.add({ map: level.id })
 						spawnGroundAndTrees(level)
 						spawnLevelData()
-						ecs.add({ ...playerBundle(PLAYER_DEFAULT_HEALTH, null), position: new Vector3(0, 10, 0) })
 					}
 					const draw = createMemo(() => selectedTab() === 'draw map')
 					const uploadModel = () => {
@@ -377,8 +377,8 @@ export const LevelEditor = () => {
 									},
 								})
 								if (!event.ctrlKey) {
-									setSelectedEntity(null)
-									setSelectedEntity(placed)
+									selectedEntity(null)
+									selectedEntity(placed)
 									setSelectedProp(null)
 								}
 							} else {
@@ -397,14 +397,14 @@ export const LevelEditor = () => {
 									})
 								}
 								if (selected) {
-									setSelectedEntity(selected)
+									selectedEntity(selected)
 								}
 							}
 						}
 					}
 					const unSelect = (e: MouseEvent) => {
 						e.preventDefault()
-						setSelectedEntity(null)
+						selectedEntity(null)
 						setSelectedProp(null)
 					}
 					onMount(() => {
@@ -513,10 +513,9 @@ export const LevelEditor = () => {
 										{entity => (
 											<EntityEditor
 												map={map}
-												entity={entity}
+												selectedEntity={entity}
 												levelData={levelData}
 												setLevelData={setLevelData}
-												setSelectedEntity={setSelectedEntity}
 												colliderData={colliderData}
 												setColliderData={setColliderData}
 											/>
@@ -557,8 +556,8 @@ export const LevelEditor = () => {
 								</Show>
 								<div>
 									<div>
-										<For each={['place props', 'draw map'] as const}>
-											{tab => <button classList={{ selected: tab === selectedTab() }} onClick={() => setSelectedTab(tab)}>{tab}</button>}
+										<For each={['place props', 'draw map', 'entities'] as const}>
+											{tab => <button classList={{ selected: tab === selectedTab() }} onClick={() => selectedTab(tab)}>{tab}</button>}
 										</For>
 									</div>
 									<Show when={selectedTab() === 'place props'}>
@@ -584,6 +583,9 @@ export const LevelEditor = () => {
 										<Show when={activeLevel()}>
 											{active => <MapEditor activeLevel={active} updateLevel={updateLevel(active())} switchLevel={() => switchLevel(activeLevel())} fakeGround={fakeGround} />}
 										</Show>
+									</Show>
+									<Show when={selectedTab() === 'entities'}>
+										<EntitiesSelector selectedEntity={selectedEntity} />
 									</Show>
 								</div>
 							</div>

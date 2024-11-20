@@ -2,6 +2,7 @@ import type { Actor, Doors, Entity } from '@/global/entity'
 import type { Direction } from '@/lib/directions'
 import type { With } from 'miniplex'
 import type { Accessor, Setter } from 'solid-js'
+import type { Atom } from 'solid-use/atom'
 import type { CollidersData, LevelData } from './LevelEditor'
 import type { ExtraData } from './props'
 import { actors, farmDoors } from '@/global/entity'
@@ -19,22 +20,23 @@ import { TransformControls } from 'three/examples/jsm/controls/TransformControls
 import { getGameRenderGroup } from './debugUi'
 import { getModel } from './props'
 
-export const EntityEditor = ({ entity, levelData, setLevelData, setSelectedEntity, colliderData, setColliderData }: {
+export const EntityEditor = ({ selectedEntity, levelData, setLevelData, colliderData, setColliderData }: {
 	map: Accessor<string>
-	entity: Accessor<NonNullable<With<Entity, 'entityId' | 'position' | 'rotation' | 'model'>>>
+	selectedEntity: Atom<With<Entity, 'entityId' | 'position' | 'rotation' | 'model'> | null>
 	levelData: Accessor<LevelData>
 	setLevelData: Setter<LevelData>
-	setSelectedEntity: Setter<With<Entity, 'entityId' | 'model' | 'position' | 'rotation'> | null>
 	setColliderData: Setter<CollidersData>
 	colliderData: Accessor<CollidersData>
 }) => {
-	const entityData = createMemo(() => levelData()[entity().entityId])
+	const entity = selectedEntity()
+	if (!entity) return <></>
+	const entityData = createMemo(() => levelData()[entity.entityId])
 	return (
 		<Show when={entityData()}>
 			{ (entityData) => {
 				const modelCollider = createMemo(() => colliderData()[entityData().model])
 				const updateEntity = (newEntity: Partial<LevelData[string]>) => {
-					setLevelData({ ...levelData(), [entity().entityId]: { ...entityData(), ...newEntity } })
+					setLevelData({ ...levelData(), [entity.entityId]: { ...entityData(), ...newEntity } })
 				}
 				const [scale, setScale] = createSignal(entityData().scale)
 				const [defaultScale, setDefaultScale] = createSignal(Boolean(colliderData()[entityData().model]?.scale))
@@ -68,14 +70,14 @@ export const EntityEditor = ({ entity, levelData, setLevelData, setSelectedEntit
 				scene.add(dummy)
 				transform.attach(dummy)
 
-				entity().group?.getWorldPosition(dummy.position)
-				dummy.rotation.setFromQuaternion(entity().rotation)
+				entity.group?.getWorldPosition(dummy.position)
+				dummy.rotation.setFromQuaternion(entity.rotation)
 				const [editingCollider, setEditingCollider] = createSignal(false)
 
 				const transformListener = () => {
-					entity().position.set(dummy.position.x, dummy.position.y, dummy.position.z)
-					entity().rotation.setFromEuler(dummy.rotation)
-					updateEntity({ position: entity().position.toArray(), rotation: entity().rotation.toJSON() })
+					entity.position.set(dummy.position.x, dummy.position.y, dummy.position.z)
+					entity.rotation.setFromEuler(dummy.rotation)
+					updateEntity({ position: entity.position.toArray(), rotation: entity.rotation.toJSON() })
 				}
 
 				transform.addEventListener('objectChange', transformListener)
@@ -88,17 +90,17 @@ export const EntityEditor = ({ entity, levelData, setLevelData, setSelectedEntit
 				})
 
 				createEffect(() => {
-					ecs.removeComponent(entity(), 'model')
+					ecs.removeComponent(entity, 'model')
 					const model = getModel(entityData().model)
 					const mainCollider = model.getObjectByName('mainCollider')
 					mainCollider?.removeFromParent()
 					model.scale.setScalar(entityData().scale)
 					const collider = colliderData()[entityData().model]
-					ecs.removeComponent(entity(), 'body')
-					ecs.removeComponent(entity(), 'bodyDesc')
-					ecs.removeComponent(entity(), 'collider')
-					ecs.removeComponent(entity(), 'colliderDesc')
-					ecs.removeComponent(entity(), 'size')
+					ecs.removeComponent(entity, 'body')
+					ecs.removeComponent(entity, 'bodyDesc')
+					ecs.removeComponent(entity, 'collider')
+					ecs.removeComponent(entity, 'colliderDesc')
+					ecs.removeComponent(entity, 'size')
 					if (collider?.offset !== undefined) {
 						const size = new Vector3()
 						if (collider.size) {
@@ -108,17 +110,17 @@ export const EntityEditor = ({ entity, levelData, setLevelData, setSelectedEntit
 							const boxSize = new Box3().setFromObject(model)
 							boxSize.getSize(size)
 						}
-						ecs.update(entity(), {
+						ecs.update(entity, {
 							bodyDesc: new RigidBodyDesc(collider.type).lockRotations(),
 							colliderDesc: ColliderDesc.cuboid(size.x / 2, size.y / 2, size.z / 2).setSensor(collider.sensor).setTranslation(...new Vector3(...(collider.offset ?? [0, 0, 0])).multiplyScalar(scale()).toArray()),
 							size,
 						})
 					}
-					ecs.addComponent(entity(), 'model', model)
+					ecs.addComponent(entity, 'model', model)
 				})
-				const entityRef = entity()
+				const entityRef = entity
 				const deleteSelected = () => {
-					setSelectedEntity(null)
+					selectedEntity(null)
 					ecs.remove(entityRef)
 					if (entityRef.entityId in levelData()) {
 						const newdata = { ...levelData(), [entityRef.entityId]: null }
@@ -173,7 +175,7 @@ export const EntityEditor = ({ entity, levelData, setLevelData, setSelectedEntit
 									text.colorSpace = SRGBColorSpace
 									text.flipY = false
 									const mat = new ToonMaterial({ map: text })
-									entity().model.traverse((x) => {
+									entity.model.traverse((x) => {
 										if (x instanceof Mesh) {
 											x.material = mat
 										}
@@ -273,7 +275,7 @@ export const EntityEditor = ({ entity, levelData, setLevelData, setSelectedEntit
 								</button>
 							)}
 						</For>
-						<div>{entity().entityId}</div>
+						<div>{entity.entityId}</div>
 						<button onClick={deleteSelected}>Delete entity</button>
 						<div>
 							scale
@@ -351,11 +353,11 @@ export const EntityEditor = ({ entity, levelData, setLevelData, setSelectedEntit
 
 						</div>
 
-						<Show when={editingCollider() && entity() && entityData()}>
+						<Show when={editingCollider() && entity && entityData()}>
 							{(_) => {
 								const colliderTransform = new TransformControls(camera, renderer.domElement)
 								onMount(() => {
-									const size = entity()?.size ?? getSize(entity().model)
+									const size = entity?.size ?? getSize(entity.model)
 									const box = new Mesh(
 										new BoxGeometry(size.x, size.y, size.z),
 										new MeshBasicMaterial({ color: `red`, opacity: 0.5, transparent: true }),
@@ -363,7 +365,7 @@ export const EntityEditor = ({ entity, levelData, setLevelData, setSelectedEntit
 
 									box.position.copy(new Vector3(...modelCollider()!.offset).multiplyScalar(scale()))
 									scene.add(colliderTransform)
-									entity().group!.add(box)
+									entity.group!.add(box)
 									colliderTransform.attach(box)
 									const listener = colliderTransformListener(box)
 									colliderTransform.addEventListener('objectChange', listener)

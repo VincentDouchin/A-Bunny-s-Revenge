@@ -277,3 +277,9 @@ export const runIf = (condition: () => boolean, ...systems: ((...args: any[]) =>
 		}
 	}
 }
+
+export const set = <A extends App<any, any>, S extends AppStates<A>>(systems: UpdateSystem<A, S>[]) => (args: Ressources<A, S>) => {
+	for (const system of systems) {
+		system(args)
+	}
+}

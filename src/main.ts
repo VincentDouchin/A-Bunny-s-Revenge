@@ -11,7 +11,7 @@ import { compileShaders, initTexturesItemsAndEnemies, initThree, renderGame } fr
 import { initHowler, playAmbience } from './global/sounds'
 import { app } from './global/states'
 import { runIf } from './lib/app'
-import { despawnOfType, hierarchyPlugin, removeStateEntityPlugin } from './lib/hierarchy'
+import { hierarchyPlugin, removeStateEntityPlugin } from './lib/hierarchy'
 import { particlesPlugin } from './lib/particles'
 import { physicsPlugin } from './lib/physics'
 import { addToScene } from './lib/registerComponents'
@@ -89,12 +89,11 @@ app
 	.onUpdate('menu', closePlayerInventory)
 	// ! FARM
 	.addSubscribers('farm', ...interactablePlantableSpot)
-	.onEnter('farm', spawnLevel('farm'), spawnLevelData, initPlantableSpotsInteractions, spawnGodRay, compileShaders, initTexturesItemsAndEnemies)
+	.onEnter('farm', spawnLevel('farm', 'farm'), spawnLevelData, initPlantableSpotsInteractions, spawnGodRay, compileShaders, initTexturesItemsAndEnemies)
 	.onEnter('farm', runIf(() => app.isDisabled('mainMenu'), spawnCharacter, setInitialHealth), moveCamera(true))
 	.onUpdate('farm', runIf(() => app.isDisabled('mainMenu'), playNightMusic, playAmbience))
 	.onUpdate('farm', collideWithDoorCamp, waterCrops, growCrops)
 	.onUpdate('farm', runIf(canPlayerMove, plantSeed, harvestCrop, openPlayerInventory))
-	.onExit('farm', ...despawnOfType('map'))
 	// ! MAIN MENU
 	.onEnter('mainMenu', intiMainMenuRendering, setupWindow)
 	.onRender('mainMenu', renderMainMenu)
@@ -106,19 +105,17 @@ app
 		runIf(() => app.isEnabled('farm'), spawnPlayerContinueGame),
 	)
 	// ! INTRO
-	.onEnter('intro', spawnLevel('intro'), spawnLevelData)
+	.onEnter('intro', spawnLevel('intro', 'intro'), spawnLevelData)
 	.addPlugins(spawnIntroPlayer('intro'))
 	.onEnter('intro')
 	.onUpdate('intro', collideWithDoorIntro)
 	.onUpdate('intro', runIf(() => app.isDisabled('mainMenu'), playAmbience))
 	.addSubscribers('intro', enableCutscene)
-	.onExit('intro', ...despawnOfType('map'))
 	// ! CLEARING
 	.addSubscribers('clearing', unlockDoorClearing)
-	.onEnter('clearing', spawnLevel('crossroad'), spawnLevelData, spawnPlayerClearing, setInitialHealth, spawnWeaponsChoice, moveCamera(true))
+	.onEnter('clearing', spawnLevel('crossroad', 'clearing'), spawnLevelData, spawnPlayerClearing, setInitialHealth, spawnWeaponsChoice, moveCamera(true))
 	.onEnter('clearing')
 	.onUpdate('clearing', collideWithDoorClearing)
-	.onExit('clearing', ...despawnOfType('map'))
 	// ! DUNGEON
 	.addSubscribers('dungeon', spawnDrops, removeEnemyFromSpawn, applyArchingForce, unlockDungeon)
 	.onEnter('dungeon', spawnDungeon, spawnLevelData, spawnEnemies, spawnPlayerDungeon, moveCamera(true))
@@ -130,15 +127,13 @@ app
 		runIf(() => app.isDisabled('paused'), tickHitCooldown, tickSneeze, tickPoison, tickInactiveTimer, tickSleepy),
 	)
 	.onUpdate('dungeon', detroyProjectiles, honeySplat, stepInHoney, endBattleSpawnChest, spawnPoisonTrail, lockOnEnemy, buyItems)
-	.onExit('dungeon', ...despawnOfType('map'))
 	// ! PAUSED
 	.onEnter('paused', () => time.stop(), musicManager.pause)
 	.onExit('paused', () => time.start(), musicManager.play)
 	// ! VILLAGE
-	.onEnter('village', spawnLevel('village'), spawnLevelData, spawnCharacter, moveCamera(true))
+	.onEnter('village', spawnLevel('village', 'village'), spawnLevelData, spawnCharacter, moveCamera(true))
 	.onEnter('village', compileShaders, initTexturesItemsAndEnemies)
 	.onUpdate('village', collideWithDoorVillage)
-	.onExit('village', ...despawnOfType('map'))
 
 	.addPlugins(introQuestActors('game'))
 	.start()
