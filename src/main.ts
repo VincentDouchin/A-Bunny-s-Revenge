@@ -11,7 +11,7 @@ import { compileShaders, initTexturesItemsAndEnemies, initThree, renderGame } fr
 import { initHowler, playAmbience } from './global/sounds'
 import { app } from './global/states'
 import { runIf } from './lib/app'
-import { hierarchyPlugin, removeStateEntityPlugin } from './lib/hierarchy'
+import { despawnOfType, hierarchyPlugin, removeStateEntityPlugin } from './lib/hierarchy'
 import { particlesPlugin } from './lib/particles'
 import { physicsPlugin } from './lib/physics'
 import { addToScene } from './lib/registerComponents'
@@ -127,6 +127,7 @@ app
 		runIf(() => app.isDisabled('paused'), tickHitCooldown, tickSneeze, tickPoison, tickInactiveTimer, tickSleepy),
 	)
 	.onUpdate('dungeon', detroyProjectiles, honeySplat, stepInHoney, endBattleSpawnChest, spawnPoisonTrail, lockOnEnemy, buyItems)
+	.onExit('dungeon', despawnOfType('map'))
 	// ! PAUSED
 	.onEnter('paused', () => time.stop(), musicManager.pause)
 	.onExit('paused', () => time.start(), musicManager.play)
