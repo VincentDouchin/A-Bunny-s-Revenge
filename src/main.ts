@@ -114,7 +114,7 @@ app
 	// ! CLEARING
 	.addSubscribers('clearing', unlockDoorClearing)
 	.onEnter('clearing', spawnLevel('crossroad', 'clearing'), spawnLevelData, spawnPlayerClearing, setInitialHealth, spawnWeaponsChoice, moveCamera(true))
-	.onEnter('clearing')
+	.onEnter('clearing', initTexturesItemsAndEnemies, compileShaders)
 	.onUpdate('clearing', collideWithDoorClearing)
 	// ! DUNGEON
 	.addSubscribers('dungeon', spawnDrops, removeEnemyFromSpawn, applyArchingForce, unlockDungeon)

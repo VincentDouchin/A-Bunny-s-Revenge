@@ -81,6 +81,7 @@ export const collideWithDoorDungeon = onCollideWithDoor<'dungeon'>((door, player
 	if (isCardialDirection(door.door)) {
 		const nextRoom = dungeon.doors[door.door]
 		if (nextRoom) {
+			app.disable('dungeon')
 			app.enable('dungeon', { dungeon: nextRoom, direction: otherDirection[door.door], playerHealth: player.currentHealth, firstEntry: false, dungeonLevel, weapon })
 		}
 	} else {
