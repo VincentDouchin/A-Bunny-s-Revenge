@@ -83,9 +83,9 @@ export const collideWithDoorDungeon = onCollideWithDoor<'dungeon'>((door, player
 		if (nextRoom) {
 			app.disable('dungeon')
 			app.enable('dungeon', { dungeon: nextRoom, direction: otherDirection[door.door], playerHealth: player.currentHealth, firstEntry: false, dungeonLevel, weapon })
+		} else {
+			app.enable('farm', { door: 'clearing' })
 		}
-	} else {
-		app.enable('farm', { door: door.door ?? 'clearing' })
 	}
 })
 
