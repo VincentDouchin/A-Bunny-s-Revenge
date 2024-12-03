@@ -1,3 +1,4 @@
+import { type enemy, enemyData } from '@/constants/enemies'
 import { recipes } from '@/constants/recipes'
 import { params } from '@/global/context'
 import { RenderGroup } from '@/global/entity'
@@ -19,6 +20,7 @@ import { SaveEditor } from './saveEditor'
 import { SoundUi } from './SoundUi'
 import { ColorCorrection, ToonEditor } from './toonEditor'
 
+export const [selectedBoss, setSelectedBoss] = useLocalStorage<{ boss: enemy }>('selectedBoss', { boss: 'spider_king' })
 const rendererQuery = ecs.with('renderer', 'scene', 'renderGroup').where(e => e.renderGroup === RenderGroup.Game)
 
 const [localParams, setParams] = useLocalStorage('params', params)
@@ -80,6 +82,7 @@ export const DebugUi = () => {
 		pathColor2: '#A26D3F',
 		grassColor: '#26854C',
 	})
+
 	const updateGroundColor = (key: string, value: string) => {
 		setGroundColor(d => ({ ...d, [key]: value }))
 		for (const ground of groundQuery) {
@@ -204,7 +207,14 @@ export const DebugUi = () => {
 					Skip main menu
 					<input type="checkbox" checked={params.skipMainMenu} onChange={e => setParams(d => ({ ...d, skipMainMenu: e.target.checked }))}></input>
 					Debug Boss
-					<input type="checkbox" checked={params.debugBoss} onChange={e => setParams(d => ({ ...d, debugBoss: e.target.checked }))}></input>
+					<div>
+						<input type="checkbox" checked={params.debugBoss} onChange={e => setParams(d => ({ ...d, debugBoss: e.target.checked }))}></input>
+						<select onChange={e => setSelectedBoss(_ => ({ boss: e.target.value as enemy }))}>
+							{entries(enemyData).filter(([_, { boss }]) => boss).map(([name]) => {
+								return <option selected={name === selectedBoss.boss} value={name}>{name}</option>
+							})}
+						</select>
+					</div>
 					Debug Enemies
 					<input type="checkbox" checked={params.debugEnemies} onChange={e => setParams(d => ({ ...d, debugEnemies: e.target.checked }))}></input>
 					Debug Intro

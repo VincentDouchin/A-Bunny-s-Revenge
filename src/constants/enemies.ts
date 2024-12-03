@@ -1,5 +1,5 @@
 import type { EnemyAnimations, Entity, States } from '@/global/entity'
-import type { items } from '@assets/assets'
+import type { characters, items } from '@assets/assets'
 import type { Item } from './items'
 import { EnemyAttackStyle } from '@/global/entity'
 import { between } from '@/utils/mapFunctions'
@@ -21,7 +21,8 @@ export interface Enemy<Name extends keyof Animations> {
 	animationMap: Record<EnemyAnimations, Animations[Name]>
 	components?: () => Entity
 }
-export type enemy = 'Armabee' | 'Armabee_Evolved' | 'Shaga_A' | 'Big_Boar_A' | 'Snailo_A' | 'Snailo_B' | 'Porin_A' | 'Forest_Butterfly_A' | 'Racco_A' | 'Platopo_A' | 'Batty_A' | 'Big_Boar_C' | 'Magicbook_A' | 'Devilu_A' | 'Big_Boar_B' | 'soot_sprite'
+export const enemies = ['Armabee', 'Armabee_Evolved', 'Shaga_A', 'Big_Boar_A', 'Snailo_A', 'Snailo_B', 'Porin_A', 'Forest_Butterfly_A', 'Racco_A', 'Platopo_A', 'Batty_A', 'Big_Boar_C', 'Magicbook_A', 'Devilu_A', 'Big_Boar_B', 'soot_sprite', 'spider_king', 'plant_chewer', 'werewolf', 'death_mage'] as const satisfies characters[]
+export type enemy = (typeof enemies)[number]
 
 const genericEnemyAnimationMap: Record<EnemyAnimations, Animations['Big_Boar_A']> = {
 	idle: 'Idle',
@@ -231,4 +232,49 @@ export const enemyData: { [k in enemy]: Enemy<k> } = {
 		attackStyle: EnemyAttackStyle.ChargingTwice,
 		animationMap: genericEnemyAnimationMap,
 	},
+	spider_king: {
+		name: 'Spider King',
+		health: 30,
+		scale: 15,
+		speed: 1,
+		drops: [],
+		boss: true,
+		behavior: 'enemy',
+		attackStyle: EnemyAttackStyle.Melee,
+		animationMap: { attacking: 'Bite Attack', dead: 'Die', hit: 'Take Damage', running: 'Crawl Forward Fast In Place', idle: 'Idle' },
+	},
+	plant_chewer: {
+		name: 'Plant Chewer',
+		health: 30,
+		scale: 15,
+		speed: 1,
+		drops: [],
+		boss: true,
+		behavior: 'enemy',
+		attackStyle: EnemyAttackStyle.Melee,
+		animationMap: { attacking: 'Bite Attack', dead: 'Die', hit: 'Take Damage', idle: 'Idle', running: 'Walk Forward In Place' },
+	},
+	werewolf: {
+		name: 'Werewolf',
+		health: 30,
+		scale: 10,
+		speed: 1,
+		drops: [],
+		boss: true,
+		behavior: 'enemy',
+		attackStyle: EnemyAttackStyle.Melee,
+		animationMap: { attacking: 'Bite Attack', dead: 'Die', hit: 'Take Damage', idle: 'Idle', running: 'Walk Forward In Place' },
+	},
+	death_mage: {
+		name: 'Death Mage',
+		health: 30,
+		scale: 10,
+		speed: 1,
+		drops: [],
+		boss: true,
+		behavior: 'enemy',
+		attackStyle: EnemyAttackStyle.Melee,
+		animationMap: { attacking: 'Kick Attack', dead: 'Die', hit: 'Take Damage', idle: 'Idle', running: 'Fly Forward In Place' },
+	},
+
 }

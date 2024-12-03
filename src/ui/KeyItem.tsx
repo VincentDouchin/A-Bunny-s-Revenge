@@ -1,4 +1,5 @@
 import type { Object3D } from 'three'
+import { keyItemEvent } from '@/global/events'
 import { thumbnailRenderer } from '@/lib/thumbnailRenderer'
 import { sleep } from '@/utils/sleep'
 import { onCleanup, Show } from 'solid-js'
@@ -7,13 +8,10 @@ import { Transition } from 'solid-transition-group'
 import atom from 'solid-use/atom'
 import { GoldContainer, OutlineText } from './components/styledComponents'
 
-const keyItem = atom<null | { model: Object3D, name: string }>(null)
 export const displayKeyItem = async (modelToDisplay: Object3D, name: string, scale = 1) => {
 	const model = modelToDisplay.clone()
 	model.scale.setScalar(scale)
-	keyItem({ model, name })
-	await sleep(5000)
-	keyItem(null)
+	keyItemEvent.emit(name, model)
 }
 
 const renderer = thumbnailRenderer(128)
@@ -92,6 +90,12 @@ export const KeyItem = () => {
 		color: #3388de;
 	}
 	`
+	const keyItem = atom<null | { model: Object3D, name: string }>(null)
+	keyItemEvent.subscribe(async (name, model) => {
+		keyItem({ model, name })
+		await sleep(5000)
+		keyItem(null)
+	})
 	return (
 		<Transition name="slide">
 			<Show when={keyItem()}>
