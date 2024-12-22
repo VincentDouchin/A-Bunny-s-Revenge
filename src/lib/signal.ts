@@ -1,5 +1,6 @@
 import type { AppStates } from './app'
 import { app } from '@/global/states'
+import { Event } from 'eventery'
 import atom from 'solid-use/atom'
 
 export const stateSignal = (state: AppStates<typeof app>) => {
@@ -11,4 +12,21 @@ export const stateSignal = (state: AppStates<typeof app>) => {
 		signal(false)
 	})
 	return signal
+}
+
+export const sharedSignal = <T>(val: T) => {
+	const event = new Event<[T]>()
+	event.subscribe((newVal) => {
+		val = newVal
+	})
+	return {
+		event,
+		signal() {
+			const signal = atom(val)
+			event.subscribe((newVal) => {
+				signal(newVal)
+			})
+			return signal
+		},
+	}
 }

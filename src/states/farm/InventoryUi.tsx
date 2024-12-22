@@ -503,8 +503,8 @@ export const InventoryUi = () => {
 																								consumeMeal(item().name)
 																							}
 																						})
-																						createEffect(() => extra(meal().amount))
-																						onCleanup(() => extra(0))
+																						createEffect(() => extra.event.emit(meal().amount))
+																						onCleanup(() => extra.event.emit(0))
 																						const modifiers = createMemo(() => meal().mods)
 																						const amount = createMemo(() => meal().amount)
 																						return (

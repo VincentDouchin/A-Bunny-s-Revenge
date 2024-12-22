@@ -1,6 +1,7 @@
 import type { Accessor } from 'solid-js'
 import { itemsData } from '@/constants/items'
 import { assets, coroutines, save, ui } from '@/global/init'
+import { sharedSignal } from '@/lib/signal'
 import { thumbnailRenderer } from '@/lib/thumbnailRenderer'
 import { OutlineText } from '@/ui/components/styledComponents'
 import { useGame } from '@/ui/store'
@@ -105,9 +106,9 @@ export const MealAmount = (props: { amount: Accessor<number>, size?: 'small' | '
 		</div>
 	)
 }
-export const extra = atom(0)
+export const extra = sharedSignal(0)
 const acornRenderer = thumbnailRenderer(64)
-export const amountEaten = createMemo(() => save.modifiers.reduce((acc, v) => acc + (itemsData[v]?.meal ?? 0), 0))
+export const amountEaten = () => save.modifiers.reduce((acc, v) => acc + (itemsData[v]?.meal ?? 0), 0)
 export const HealthUi = () => {
 	const context = useGame()
 
@@ -225,7 +226,8 @@ export const HealthUi = () => {
 				const visible = atom(false)
 				onMount(() => setTimeout(() => visible(true), 100))
 				const isVisible = createMemo(() => ovenQuery().length === 0 && cauldronQuery().length === 0 && visible())
-
+				const extraVal = extra.signal()
+				const eaten = createMemo(amountEaten)
 				return (
 					<Transition name="traverse-down">
 						<Show when={isVisible()}>
@@ -237,7 +239,7 @@ export const HealthUi = () => {
 										<OutlineText>{healthDisplay()}</OutlineText>
 									</div>
 								</div>
-								<MealAmount amount={amountEaten} extra={extra} />
+								<MealAmount amount={eaten} extra={extraVal} />
 								<div class="acorn">
 									{element}
 									<OutlineText>{acorns()}</OutlineText>
