@@ -181,7 +181,7 @@ export const loaderProgress = (manifest: Record<string, { size: number, modified
 		.map(x => x[1].size)
 		.reduce((a, b) => a + b, 0)
 	const loader = (key: string) => {
-		loaded += manifest[key]?.size
+		loaded += manifest[globalThis.decodeURIComponent(key)]?.size
 		const percent = Math.round(loaded / total * 100)
 		loadElement.style.setProperty('--loaded', `${percent}%`)
 	}
