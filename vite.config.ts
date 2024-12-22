@@ -45,7 +45,9 @@ export default defineConfig(async () => {
 					globPatterns: ['**/*.{js,html,css,wasm}'],
 					maximumFileSizeToCacheInBytes: 6000000,
 				},
-
+				workbox: {
+					maximumFileSizeToCacheInBytes: 6000000,
+				},
 				manifest: {
 					start_url: 'index.html?fullscreen=true',
 					display: 'fullscreen',
