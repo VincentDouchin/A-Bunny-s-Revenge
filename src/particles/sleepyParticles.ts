@@ -2,12 +2,15 @@ import { assets } from '@/global/init'
 import { MeshBasicMaterial, PlaneGeometry } from 'three'
 import { Bezier, ConeEmitter, ConstantValue, IntervalValue, ParticleSystem, PiecewiseBezier, RandomQuatGenerator, RenderMode, SizeOverLife } from 'three.quarks'
 
+const geo = new PlaneGeometry(3, 3)
+const mat = new MeshBasicMaterial({ depthWrite: false, map: assets.textures.sleepy.clone(), transparent: true })
+
 export const sleepyEmitter = () => {
 	const system = new ParticleSystem({
 		duration: 10,
 		looping: true,
 		prewarm: false,
-		instancingGeometry: new PlaneGeometry(3, 3),
+		instancingGeometry: geo,
 		startLife: new IntervalValue(5.0, 10.0),
 		startSpeed: new ConstantValue(2),
 		startRotation: new RandomQuatGenerator(),
@@ -17,7 +20,7 @@ export const sleepyEmitter = () => {
 		emissionOverTime: new ConstantValue(0.5),
 		emissionBursts: [],
 		shape: new ConeEmitter({ radius: 2 }),
-		material: new MeshBasicMaterial({ depthWrite: false, map: assets.textures.sleepy.clone(), transparent: true }),
+		material: mat,
 		renderMode: RenderMode.BillBoard,
 		renderOrder: 1,
 		behaviors: [

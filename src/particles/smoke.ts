@@ -1,12 +1,15 @@
 import { CircleGeometry, MeshBasicMaterial, Vector3 } from 'three'
 import { Bezier, ColorOverLife, ConeEmitter, ConstantValue, Gradient, IntervalValue, ParticleSystem, PiecewiseBezier, RandomQuatGenerator, RenderMode, SizeOverLife } from 'three.quarks'
 
+const geo = new CircleGeometry(1, 8)
+const mat = new MeshBasicMaterial({ color: 0x000000, depthWrite: false })
+
 export const smoke = () => {
 	const system = new ParticleSystem({
 		duration: 1,
 		looping: true,
 		prewarm: false,
-		instancingGeometry: new CircleGeometry(1, 8),
+		instancingGeometry: geo,
 		startLife: new IntervalValue(20.0, 10.0),
 		startSpeed: new ConstantValue(0.5),
 		startRotation: new RandomQuatGenerator(),
@@ -15,7 +18,7 @@ export const smoke = () => {
 		emissionOverTime: new ConstantValue(2),
 		emissionBursts: [],
 		shape: new ConeEmitter({ radius: 2 }),
-		material: new MeshBasicMaterial({ color: 0x000000, depthWrite: false }),
+		material: mat,
 		renderMode: RenderMode.BillBoard,
 		renderOrder: 1,
 		behaviors: [

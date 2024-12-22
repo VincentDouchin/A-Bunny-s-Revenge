@@ -1,7 +1,7 @@
 import type { app } from '@/global/states'
 import type { Collider, RigidBody } from '@dimforge/rapier3d-compat'
+import type { Plugin } from './app'
 import { ecs, world } from '@/global/init'
-import { type Plugin, runIf } from './app'
 
 const bodiesQuery = ecs.with('bodyDesc', 'position').without('body')
 const colliderQueries = ecs.with('colliderDesc', 'body').without('collider')
@@ -67,6 +67,6 @@ export const stepWorld = () => {
 }
 export const physicsPlugin: Plugin<typeof app> = (app) => {
 	app
-		.onUpdate('default', runIf(() => app.isDisabled('paused'), stepWorld))
+
 		.addSubscribers('default', removeBodies, removeColliders, removeSecondaryColliders)
 }

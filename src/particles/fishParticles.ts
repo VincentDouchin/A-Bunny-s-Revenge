@@ -2,12 +2,15 @@ import { CircleGeometry, MeshBasicMaterial } from 'three'
 import { ColorRange, ConeEmitter, ConstantValue, IntervalValue, ParticleSystem, RandomQuatGenerator, RenderMode } from 'three.quarks'
 import { colorToVec4 } from './honeySplatParticles'
 
+const geo = new CircleGeometry(1, 8)
+const mat = new MeshBasicMaterial({ color: 0x000000, depthWrite: false })
+
 export const fishParticles = () => {
 	const system = new ParticleSystem({
 		duration: 1,
 		looping: false,
 		prewarm: false,
-		instancingGeometry: new CircleGeometry(1, 8),
+		instancingGeometry: geo,
 		startLife: new IntervalValue(0.5, 1.0),
 		startSpeed: new ConstantValue(5),
 		startSize: new ConstantValue(0.4),
@@ -17,7 +20,7 @@ export const fishParticles = () => {
 		emissionOverTime: new ConstantValue(20),
 		emissionBursts: [],
 		shape: new ConeEmitter({ radius: 1 }),
-		material: new MeshBasicMaterial({ color: 0x000000, depthWrite: false }),
+		material: mat,
 		renderMode: RenderMode.BillBoard,
 
 	})

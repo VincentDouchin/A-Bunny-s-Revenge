@@ -25,6 +25,7 @@ export const EnemyHealthBarUi = () => {
 		background: hsl(0, 0%, 0%, 50%);
 		border-radius: 1rem;
 		position:relative;
+		overflow:hidden;
 	}
 	.enemy-health-bar{
 		width: 10rem;
@@ -37,7 +38,6 @@ export const EnemyHealthBarUi = () => {
 		position:absolute;
 		background: #ec273f;
 		height: 100%;
-		border-radius: 1rem;
 		transition: width 0.2s ease-in;
 		z-index: 1;
 	}

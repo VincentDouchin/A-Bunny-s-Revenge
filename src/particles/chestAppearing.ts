@@ -2,9 +2,9 @@ import { CircleGeometry, MeshBasicMaterial, Vector4 } from 'three'
 import { Bezier, ColorOverLife, ConeEmitter, ConstantColor, Gradient, IntervalValue, ParticleSystem, PiecewiseBezier, RenderMode, SizeOverLife } from 'three.quarks'
 
 const geo = new CircleGeometry(3, 8)
-
 const mat = new MeshBasicMaterial({ transparent: true })
 mat.depthWrite = false
+
 export const chestAppearing = () => {
 	const system = new ParticleSystem({
 		duration: 3,

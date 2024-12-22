@@ -5,6 +5,9 @@ import { CircleGeometry, Color, MeshPhongMaterial, Vector3 } from 'three'
 import { Bezier, ColorOverLife, ColorRange, ConstantValue, Gradient, IntervalValue, ParticleSystem, PiecewiseBezier, RenderMode, SizeOverLife, SphereEmitter } from 'three.quarks'
 import { colorToVec4 } from './honeySplatParticles'
 
+const geo = new CircleGeometry(1, 16)
+const mat = new MeshPhongMaterial({ transparent: true, shininess: 100, depthWrite: false })
+
 export const pollenBundle = (colorStart: ColorRepresentation, colorEnd: ColorRepresentation) => {
 	const system = new ParticleSystem({
 		duration: between(50, 70),
@@ -19,8 +22,8 @@ export const pollenBundle = (colorStart: ColorRepresentation, colorEnd: ColorRep
 		emissionOverTime: new ConstantValue(20),
 		shape: new SphereEmitter({ radius: 10 }),
 		renderOrder: 0,
-		instancingGeometry: new CircleGeometry(1, 16),
-		material: new MeshPhongMaterial({ transparent: true, shininess: 100, depthWrite: false }),
+		instancingGeometry: geo,
+		material: mat,
 		emissionBursts: [],
 		renderMode: RenderMode.BillBoard,
 		behaviors: [

@@ -3,9 +3,9 @@ import { CircleGeometry, MeshBasicMaterial, Vector3, Vector4 } from 'three'
 import { Bezier, ColorRange, ConstantValue, IntervalValue, ParticleSystem, PiecewiseBezier, PointEmitter, RenderMode, SizeOverLife } from 'three.quarks'
 
 const geo = new CircleGeometry(1, 8)
-
 const mat = new MeshBasicMaterial({ transparent: true })
 mat.depthWrite = false
+
 export const dash = (duration: number) => {
 	const system = new ParticleSystem({
 		duration,

@@ -268,7 +268,7 @@ export const enemyData: { [k in enemy]: Enemy<k> } = {
 	death_mage: {
 		name: 'Death Mage',
 		health: 30,
-		scale: 10,
+		scale: 5,
 		speed: 1,
 		drops: [],
 		boss: true,

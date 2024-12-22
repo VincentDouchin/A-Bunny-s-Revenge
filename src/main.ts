@@ -13,7 +13,7 @@ import { app } from './global/states'
 import { runIf } from './lib/app'
 import { despawnOfType, hierarchyPlugin, removeStateEntityPlugin } from './lib/hierarchy'
 import { particlesPlugin } from './lib/particles'
-import { physicsPlugin } from './lib/physics'
+import { physicsPlugin, stepWorld } from './lib/physics'
 import { addToScene } from './lib/registerComponents'
 import { transformsPlugin } from './lib/transforms'
 import { enableCutscene, introQuest, introQuestActors, spawnIntroPlayer, startIntro } from './quests/introQuest'
@@ -65,9 +65,10 @@ app
 	.addSubscribers('default', resize, disablePortrait, enableFullscreen, stopOnLosingFocus, completeQuestStep)
 	.onPreUpdate('default', coroutines.tick, savePlayerFromTheEmbraceOfTheVoid, updateMousePosition())
 	.onUpdate('default', runIf(() => app.isDisabled('paused'), ...updateAnimations('playerAnimator', 'basketAnimator', 'enemyAnimator', 'ovenAnimator', 'houseAnimator', 'chestAnimator', 'kayAnimator', 'cellarDoorAnimator')))
-	.onPreUpdate('default', inputManager.update, ui.update, moveCamera())
-	.onPreUpdate('default', runIf(() => app.isDisabled('paused'), time.tick, dayNight, updateTimeUniforms, tweens.tick))
+	.onRender('default', runIf(() => app.isDisabled('paused'), stepWorld, moveCamera()))
 	.onRender('default', renderGame)
+	.onPreUpdate('default', inputManager.update, ui.update)
+	.onPreUpdate('default', runIf(() => app.isDisabled('paused'), time.tick, dayNight, updateTimeUniforms, tweens.tick))
 	// !SETUP
 	.onEnter('default', setupGame)
 	// ! GAME

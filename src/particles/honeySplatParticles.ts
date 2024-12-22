@@ -8,6 +8,7 @@ export const colorToVec4 = (color: ColorRepresentation, opacity = 1) => {
 	return new Vector4(...new Color(color).toArray(), opacity)
 }
 const mat = new MeshPhongMaterial({ transparent: true, shininess: 100, depthWrite: false })
+
 export const honeySplatParticlesBundle = () => {
 	const system = new ParticleSystem({
 		duration: 3,

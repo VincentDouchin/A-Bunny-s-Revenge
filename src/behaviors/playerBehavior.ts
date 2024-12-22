@@ -229,6 +229,4 @@ export const playerBehaviorPlugin = behaviorPlugin(
 		},
 	}),
 	managed: () => ({}),
-},
-
-)
+})

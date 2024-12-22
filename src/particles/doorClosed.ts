@@ -2,12 +2,12 @@ import { CircleGeometry, MeshBasicMaterial, PlaneGeometry, Vector3 } from 'three
 import { Bezier, ColorOverLife, Gradient, IntervalValue, MeshSurfaceEmitter, ParticleSystem, PiecewiseBezier, RenderMode, SizeOverLife } from 'three.quarks'
 
 const geo = new CircleGeometry(1, 8)
-
 const mat = new MeshBasicMaterial()
+
 mat.depthWrite = false
 export const doorClosed = () => {
 	const system = new ParticleSystem({
-		duration: 20,
+		duration: 2,
 		looping: true,
 		prewarm: false,
 		instancingGeometry: geo,
@@ -15,7 +15,7 @@ export const doorClosed = () => {
 		startSpeed: new IntervalValue(0.2, 0.8),
 		startSize: new IntervalValue(0.5, 1),
 		worldSpace: false,
-		emissionOverTime: new IntervalValue(20, 50),
+		emissionOverTime: new IntervalValue(2, 5),
 		emissionBursts: [],
 		shape: new MeshSurfaceEmitter(new PlaneGeometry(50, 20)),
 		material: mat,

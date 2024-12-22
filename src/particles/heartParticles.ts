@@ -3,12 +3,15 @@ import { MeshBasicMaterial, PlaneGeometry } from 'three'
 import { Bezier, ColorRange, ConeEmitter, ConstantValue, IntervalValue, ParticleSystem, PiecewiseBezier, RandomQuatGenerator, RenderMode, SizeOverLife } from 'three.quarks'
 import { colorToVec4 } from './honeySplatParticles'
 
+const geo = new PlaneGeometry(3, 3)
+const mat = new MeshBasicMaterial({ depthWrite: false, map: assets.textures.heart.clone(), transparent: true })
+
 export const heartEmitter = () => {
 	const system = new ParticleSystem({
 		duration: 3,
 		looping: false,
 		prewarm: false,
-		instancingGeometry: new PlaneGeometry(3, 3),
+		instancingGeometry: geo,
 		startLife: new IntervalValue(5.0, 10.0),
 		startSpeed: new ConstantValue(2),
 		startRotation: new RandomQuatGenerator(),
@@ -18,7 +21,7 @@ export const heartEmitter = () => {
 		emissionOverTime: new ConstantValue(1.3),
 		emissionBursts: [],
 		shape: new ConeEmitter({ radius: 3, angle: Math.PI / 2 }),
-		material: new MeshBasicMaterial({ depthWrite: false, map: assets.textures.heart.clone(), transparent: true }),
+		material: mat,
 		renderMode: RenderMode.BillBoard,
 		renderOrder: 1,
 		behaviors: [

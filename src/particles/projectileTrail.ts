@@ -1,6 +1,8 @@
 import { Color, DoubleSide, MeshBasicMaterial, Vector4 } from 'three'
 import { ConeEmitter, ConstantColor, ConstantValue, IntervalValue, ParticleSystem, RenderMode } from 'three.quarks'
 
+const mat = new MeshBasicMaterial({ side: DoubleSide })
+
 export const projectileTrail = () => {
 	const system = new ParticleSystem({
 		duration: 5,
@@ -17,10 +19,7 @@ export const projectileTrail = () => {
 		],
 
 		shape: new ConeEmitter({ radius: 1, angle: 0 }),
-		material: new MeshBasicMaterial({
-			// blending: AdditiveBlending,
-			side: DoubleSide,
-		}),
+		material: mat,
 		renderMode: RenderMode.Trail,
 		rendererEmitterSettings: {
 			startLength: new ConstantValue(2),

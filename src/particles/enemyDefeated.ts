@@ -2,12 +2,14 @@ import { CircleGeometry, MeshBasicMaterial } from 'three'
 import { ColorOverLife, ColorRange, ConeEmitter, ConstantValue, Gradient, IntervalValue, ParticleSystem, RandomQuatGenerator, RenderMode } from 'three.quarks'
 import { colorToVec4 } from './honeySplatParticles'
 
+const mat = new MeshBasicMaterial({ color: 0x000000, depthWrite: false, transparent: true })
+const geo = new CircleGeometry(1, 8)
 export const enemyDefeated = () => {
 	const system = new ParticleSystem({
 		duration: 3,
 		looping: false,
 		prewarm: false,
-		instancingGeometry: new CircleGeometry(1, 8),
+		instancingGeometry: geo,
 		startLife: new IntervalValue(5.0, 10.0),
 		startSize: new IntervalValue(1, 2),
 		startSpeed: new IntervalValue(2, 5),
@@ -18,7 +20,7 @@ export const enemyDefeated = () => {
 		emissionOverTime: new ConstantValue(20),
 		emissionBursts: [],
 		shape: new ConeEmitter({ radius: 4 }),
-		material: new MeshBasicMaterial({ color: 0x000000, depthWrite: false, transparent: true }),
+		material: mat,
 		renderMode: RenderMode.BillBoard,
 		renderOrder: 1,
 		behaviors: [
