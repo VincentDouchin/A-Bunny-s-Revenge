@@ -244,7 +244,7 @@ export const loadAssets = async () => {
 		// ! audio
 		voices: loadVoices(loader)(
 			import.meta.glob('@assets/voices/*.webm', { eager: true, import: 'default' }),
-			import.meta.glob('@assets/voices/*.txt', { eager: true, import: 'default', as: 'raw' }),
+			import.meta.glob('@assets/voices/*.txt', { eager: true, import: 'default', query: '?raw' }),
 		),
 
 		steps: loadSounds(loader, 3)(import.meta.glob('@assets/steps/*.webm', { eager: true, import: 'default' })),
