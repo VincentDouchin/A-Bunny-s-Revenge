@@ -39,13 +39,16 @@ const cachedLoader = async <R>(storeName: string, fn: (arr: ArrayBuffer) => Prom
 		const localEntry = localManifest[originalSrc]
 		const existingEntry = files.get(originalSrc)
 		if (!existingEntry || localEntry === undefined || localEntry < assetManifest[originalSrc as keyof typeof assetManifest].modified) {
-			const arr = await (await fetch(src)).arrayBuffer().catch(() => {
-				console.error(`Error loading ${src} ${originalSrc}`)
-			})
-			await set(originalSrc, arr, store)
-			setLocalManifest(manifest => ({ ...manifest, [originalSrc]: assetManifest[originalSrc as keyof typeof assetManifest]?.modified }))
+			try {
+				const arr = await (await fetch(src)).arrayBuffer()
+				await set(originalSrc, arr, store)
+				setLocalManifest(manifest => ({ ...manifest, [originalSrc]: assetManifest[originalSrc as keyof typeof assetManifest]?.modified }))
 
-			return await fn(arr!)
+				return await fn(arr!)
+			// eslint-disable-next-line unused-imports/no-unused-vars
+			} catch (_error) {
+				console.error(`Error loading ${src} ${originalSrc}`)
+			}
 		}
 
 		if (existingEntry) {
