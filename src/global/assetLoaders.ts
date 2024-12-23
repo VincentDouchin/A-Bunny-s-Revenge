@@ -35,26 +35,27 @@ const cachedLoader = async <R>(storeName: string, fn: (arr: ArrayBuffer) => Prom
 			await del(file, store)
 		}
 	}
-	return async (src: string, originalSrc: string) => {
-		const localEntry = localManifest[originalSrc]
-		const existingEntry = files.get(originalSrc)
-		if (assetManifest[originalSrc as keyof typeof assetManifest] && (!existingEntry || localEntry === undefined || localEntry < assetManifest[originalSrc as keyof typeof assetManifest].modified)) {
+	return async (src: string, key: string) => {
+		const localEntry = localManifest[key]
+		const existingEntry = files.get(key)
+
+		if (!existingEntry || !localEntry || localEntry < assetManifest[key as keyof typeof assetManifest].modified) {
 			try {
 				const arr = await (await fetch(src)).arrayBuffer()
-				await set(originalSrc, arr, store)
-				setLocalManifest(manifest => ({ ...manifest, [originalSrc]: assetManifest[originalSrc as keyof typeof assetManifest]?.modified }))
+				await set(key, arr, store)
+				setLocalManifest(manifest => ({ ...manifest, [key]: assetManifest[key as keyof typeof assetManifest]?.modified }))
 
 				return await fn(arr!)
 			// eslint-disable-next-line unused-imports/no-unused-vars
 			} catch (_error) {
-				console.error(`Error loading ${src} ${originalSrc}`)
+				console.error(`Error loading ${src} ${key}`)
 			}
 		}
 
-		if (existingEntry) {
+		if (existingEntry && localEntry) {
 			return fn(existingEntry)
 		} else {
-			throw new Error(`cached asset ${originalSrc} not found`)
+			throw new Error(`cached asset ${key} not found`)
 		}
 	}
 }
