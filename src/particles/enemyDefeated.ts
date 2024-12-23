@@ -8,7 +8,8 @@ export const enemyDefeated = () => {
 	const system = new ParticleSystem({
 		duration: 3,
 		looping: false,
-		prewarm: false,
+		prewarm: true,
+		autoDestroy: true,
 		instancingGeometry: geo,
 		startLife: new IntervalValue(5.0, 10.0),
 		startSize: new IntervalValue(1, 2),
@@ -32,5 +33,5 @@ export const enemyDefeated = () => {
 		],
 	})
 	system.emitter.rotateX(-Math.PI / 2)
-	return system.emitter
+	return system
 }

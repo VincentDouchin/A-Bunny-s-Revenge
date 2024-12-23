@@ -3,7 +3,6 @@ import { type Entity, Faction } from '@/global/entity'
 import { ecs, tweens } from '@/global/init'
 import { app } from '@/global/states'
 import { Stat } from '@/lib/stats'
-import { enemyDefeated } from '@/particles/enemyDefeated'
 import { Material, Mesh } from 'three'
 
 export const healthBundle = (health: number, current?: number) => ({
@@ -29,11 +28,9 @@ const deadEntities = ecs.with('state', 'body', 'movementForce', 'model', 'factio
 export const killAnimation = () => deadEntities.onEntityAdded.subscribe((e) => {
 	ecs.removeComponent(e, 'body')
 	if (e.faction === Faction.Enemy) {
-		ecs.add({
-			position: e.position?.clone(),
-			emitter: enemyDefeated(),
-			autoDestroy: true,
-		})
+		if (e.enemyDefeated) {
+			e.enemyDefeated.play()
+		}
 		const mats = new Array<Material>()
 		e.model.traverse((node) => {
 			if (node instanceof Mesh) {
@@ -52,6 +49,7 @@ export const killAnimation = () => deadEntities.onEntityAdded.subscribe((e) => {
 			to: 0,
 			duration: 2000,
 			onUpdate: f => mats.forEach(m => m.opacity = f),
+			onComplete: () => ecs.remove(e),
 		})
 	} else if (e.faction === Faction.Player) {
 		app.enable('menu')

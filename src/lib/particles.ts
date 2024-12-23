@@ -1,6 +1,9 @@
+import type { ComponentsOfType } from '@/global/entity'
 import type { app } from '@/global/states'
+import type { ParticleSystem } from 'three.quarks'
 import { ecs, time } from '@/global/init'
 import { gameRenderGroupQuery } from '@/global/rendering'
+import { Vector3 } from 'three'
 import { BatchedRenderer } from 'three.quarks'
 import { type Plugin, runIf } from './app'
 
@@ -36,8 +39,23 @@ const removeEmitter = () => {
 	}
 }
 
+const addEmitters = (...components: ComponentsOfType<ParticleSystem>[]) => components.map((component) => {
+	const particleSystemQuery = ecs.with(component)
+	return () => particleSystemQuery.onEntityAdded.subscribe((e) => {
+		e[component].pause()
+		const batchRenderer = batchRendererQuery.first?.batchRenderer
+		const emitter = e[component].emitter
+
+		ecs.add({ parent: e, position: new Vector3(), emitter, autoDestroy: true })
+
+		if (batchRenderer) {
+			batchRenderer.addSystem(e[component])
+		}
+	})
+})
+
 export const particlesPlugin: Plugin<typeof app> = (app) => {
 	app
-		.addSubscribers('default', initBatchRender, addParticles)
+		.addSubscribers('default', initBatchRender, addParticles, ...addEmitters('enemyDefeated'))
 		.onPreUpdate('default', runIf(() => app.isDisabled('paused'), updateParticles), removeEmitter)
 }

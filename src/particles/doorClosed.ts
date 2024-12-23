@@ -15,7 +15,7 @@ export const doorClosed = () => {
 		startSpeed: new IntervalValue(0.2, 0.8),
 		startSize: new IntervalValue(0.5, 1),
 		worldSpace: false,
-		emissionOverTime: new IntervalValue(2, 5),
+		emissionOverTime: new IntervalValue(10, 40),
 		emissionBursts: [],
 		shape: new MeshSurfaceEmitter(new PlaneGeometry(50, 20)),
 		material: mat,

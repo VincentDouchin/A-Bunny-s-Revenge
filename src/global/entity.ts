@@ -18,7 +18,7 @@ import type { items, voices, weapons } from '@assets/assets'
 import type { Collider, ColliderDesc, KinematicCharacterController, RigidBody, RigidBodyDesc, Shape } from '@dimforge/rapier3d-compat'
 import type { Query, With } from 'miniplex'
 import type { BufferGeometry, Camera, Group, Light, Mesh, MeshPhongMaterial, Object3D, Object3DEventMap, Quaternion, Scene, ShaderMaterial, Sprite, Vector3, WebGLRenderer } from 'three'
-import type { BatchedRenderer, ParticleEmitter } from 'three.quarks'
+import type { BatchedRenderer, ParticleEmitter, ParticleSystem } from 'three.quarks'
 import type { CSS2DObject } from 'three/examples/jsm/renderers/CSS2DRenderer'
 import type { Animator } from './animator'
 import type { InstanceHandle } from './assetLoaders'
@@ -255,6 +255,7 @@ export interface Entity {
 	// ! Particles
 	emitter?: ParticleEmitter<Object3DEventMap>
 	autoDestroy?: true
+	enemyDefeated?: ParticleSystem
 	// ! Stats
 	strength?: Stat
 	critChance?: Stat

@@ -214,25 +214,25 @@ export const loadAssets = async () => {
 	const { loader, clear } = loaderProgress(assetManifest)
 	const assets = {
 		// ! models
-		characters: typeGlob<characters>(import.meta.glob('@assets/characters/*.glb', { as: 'url', eager: true }))(loadGLBAsToon(loader, () => ({ material: CharacterMaterial, shadow: true, filter: NearestFilter }))),
+		characters: typeGlob<characters>(import.meta.glob('@assets/characters/*.glb', { query: '?url', eager: true }))(loadGLBAsToon(loader, () => ({ material: CharacterMaterial, shadow: true, filter: NearestFilter }))),
 
-		models: typeGlob<models>(import.meta.glob('@assets/models/*.glb', { as: 'url', eager: true }))(loadGLBAsToon(loader, modelOptions)),
+		models: typeGlob<models>(import.meta.glob('@assets/models/*.glb', { query: '?url', eager: true }))(loadGLBAsToon(loader, modelOptions)),
 
-		trees: typeGlob<trees>(import.meta.glob('@assets/trees/*.glb', { as: 'url', eager: true }))(loadGLBAsToon(loader, () => ({ material: TreeMaterial, shadow: true, transparent: true }))),
+		trees: typeGlob<trees>(import.meta.glob('@assets/trees/*.glb', { query: '?url', eager: true }))(loadGLBAsToon(loader, () => ({ material: TreeMaterial, shadow: true, transparent: true }))),
 
-		crops: cropsLoader<crops>(loader)(import.meta.glob('@assets/crops/*.glb', { as: 'url', eager: true })),
+		crops: cropsLoader<crops>(loader)(import.meta.glob('@assets/crops/*.glb', { query: '?url', eager: true })),
 
-		gardenPlots: typeGlob<models>(import.meta.glob('@assets/gardenPlots/*.glb', { as: 'url', eager: true }))(loadGLBAsToon(loader, () => ({ material: GardenPlotMaterial }))),
+		gardenPlots: typeGlob<models>(import.meta.glob('@assets/gardenPlots/*.glb', { query: '?url', eager: true }))(loadGLBAsToon(loader, () => ({ material: GardenPlotMaterial }))),
 
-		weapons: typeGlob<weapons>(import.meta.glob('@assets/weapons/*.*', { as: 'url', eager: true }))(loadGLBAsToon(loader, () => ({ shadow: true }))),
+		weapons: typeGlob<weapons>(import.meta.glob('@assets/weapons/*.*', { query: '?url', eager: true }))(loadGLBAsToon(loader, () => ({ shadow: true }))),
 
-		vegetation: typeGlob<vegetation>(import.meta.glob('@assets/vegetation/*.glb', { as: 'url', eager: true }))(loadGLBAsToon(loader, () => ({ material: GrassMaterial, shadow: true }))),
+		vegetation: typeGlob<vegetation>(import.meta.glob('@assets/vegetation/*.glb', { query: '?url', eager: true }))(loadGLBAsToon(loader, () => ({ material: GrassMaterial, shadow: true }))),
 
-		mainMenuAssets: typeGlob<mainMenuAssets>(import.meta.glob('@assets/mainMenuAssets/*.glb', { as: 'url', eager: true }))(loadMainMenuAssets),
+		mainMenuAssets: typeGlob<mainMenuAssets>(import.meta.glob('@assets/mainMenuAssets/*.glb', { query: '?url', eager: true }))(loadMainMenuAssets),
 
-		fruitTrees: typeGlob<fruit_trees>(import.meta.glob('@assets/fruit_trees/*.glb', { as: 'url', eager: true }))(loadGLBAsToon(loader)),
+		fruitTrees: typeGlob<fruit_trees>(import.meta.glob('@assets/fruit_trees/*.glb', { query: '?url', eager: true }))(loadGLBAsToon(loader)),
 
-		items: typeGlob<items>(import.meta.glob('@assets/items/*.*', { as: 'url', eager: true }))(loadItems(loader)),
+		items: typeGlob<items>(import.meta.glob('@assets/items/*.*', { query: '?url', eager: true }))(loadItems(loader)),
 
 		// ! textures
 		particles: typeGlob<particles>(import.meta.glob('@assets/particles/*.webp', { eager: true, import: 'default' }))(texturesLoader(loader)),
@@ -256,7 +256,7 @@ export const loadAssets = async () => {
 
 		// ! others
 		fonts: fontLoader(loader)(import.meta.glob('@assets/fonts/*.*', { eager: true, import: 'default' })),
-		village: splitChildren<village>(import.meta.glob('@assets/village/*.glb', { as: 'url', eager: true }))(loadGLBAsToon(loader)),
+		village: splitChildren<village>(import.meta.glob('@assets/village/*.glb', { query: '?url', eager: true }))(loadGLBAsToon(loader)),
 
 	} as const
 	const assetsLoaded = await asyncMapValues(assets, async val => await val) as AssetsLoaded<typeof assets>

@@ -51,7 +51,7 @@ export type Settings = {
 }
 export const useSettings = async () => {
 	const existingSettings = await get<Settings>('settings')
-	const settings = createObject<Settings>(existingSettings ?? blankSettings())
+	const settings = createMutable<Settings>(existingSettings ?? blankSettings())
 	const scheduled = createScheduled(fn => debounce(fn, 5000))
 	createEffect(() => {
 		if (scheduled()) {
