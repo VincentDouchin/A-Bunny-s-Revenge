@@ -44,6 +44,6 @@ const addEmitters = (...components: ComponentsOfType<ParticleSystem>[]) => compo
 
 export const particlesPlugin: Plugin<typeof app> = (app) => {
 	app
-		.addSubscribers('default', initBatchRender, addParticles, ...addEmitters('enemyDefeated', 'enemyImpact', 'dashParticles'))
+		.addSubscribers('default', initBatchRender, addParticles, ...addEmitters('enemyDefeated', 'enemyImpact', 'dashParticles', 'smokeParticles'))
 		.onPreUpdate('default', runIf(() => app.isDisabled('paused'), updateParticles))
 }

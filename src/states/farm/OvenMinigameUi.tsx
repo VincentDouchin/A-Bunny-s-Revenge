@@ -10,7 +10,6 @@ import { playSound } from '@/global/sounds'
 import { addTag } from '@/lib/hierarchy'
 import { getWorldPosition } from '@/lib/transforms'
 import { fireParticles } from '@/particles/fireParticles'
-import { smoke } from '@/particles/smoke'
 import { OutlineText } from '@/ui/components/styledComponents'
 import { InputIcon } from '@/ui/InputIcon'
 import { useGame, useQuery } from '@/ui/store'
@@ -36,8 +35,9 @@ export const OvenMinigameUi = () => {
 				return (
 					<For each={ovenQuery()}>
 						{(oven) => {
+							const smokeTrails = ecs.with('parent', 'smokeParticles').where(e => e.parent === oven)
 							const output = ui.sync(() => oven.recipesQueued?.[0]?.output)
-							const smokeTrails: With<Entity, 'emitter'>[] = []
+							// const smokeTrails: With<Entity, 'emitter'>[] = []
 							let targetEntity: Entity | null = null
 							let lightEntity: With<Entity, 'light' | 'emitter'> | null = null
 							onMount(() => {
@@ -58,17 +58,11 @@ export const OvenMinigameUi = () => {
 									cameratarget: true,
 								})
 								ecs.removeComponent(player(), 'cameratarget')
-								oven.model?.traverse((node) => {
-									if (node.name.includes('smoke')) {
-										const smokeTrail = ecs.add({
-											parent: oven,
-											position: node.position.clone().multiply(oven.model!.scale),
-											emitter: smoke(),
-											autoDestroy: true,
-										})
-										smokeTrails.push(smokeTrail)
-									}
-								})
+
+								for (const smokeTrail of smokeTrails) {
+									smokeTrail.smokeParticles.restart()
+									smokeTrail.smokeParticles.play()
+								}
 								const light = new PointLight(new Color(0xFF0000), 10, 20)
 								light.position.setY(5)
 								lightEntity = ecs.add({ light, parent: oven, position: new Vector3(0, 0, 0), emitter: fireParticles() })
@@ -88,7 +82,7 @@ export const OvenMinigameUi = () => {
 								}
 								ecs.removeComponent(oven, 'cameratarget')
 								for (const smokeTrail of smokeTrails) {
-									smokeTrail.emitter.system.looping = false
+									smokeTrail.smokeParticles.endEmit()
 								}
 								tweens.add({
 									from: 1,
@@ -116,6 +110,7 @@ export const OvenMinigameUi = () => {
 									return
 								}
 								if (output()) {
+									const finalOutput = output()
 									if (player().playerControls.get('primary').justReleased) {
 										setBar(x => Math.min(100, x - 10))
 									}
@@ -126,9 +121,8 @@ export const OvenMinigameUi = () => {
 									} else {
 										setHeat(x => Math.max(0, x - 15 * time.delta / 1000))
 									}
-									for (const { emitter } of smokeTrails) {
-										// @ts-expect-error wrong type
-										emitter.system.emissionOverTime = new ConstantValue(heat() / 30)
+									for (const smokeTrail of smokeTrails) {
+										smokeTrail.smokeParticles.emissionOverTime = new ConstantValue(heat() / 30)
 									}
 									setTimer(x => x - time.delta / 1000)
 									if (timer() <= 0) {
@@ -157,7 +151,7 @@ export const OvenMinigameUi = () => {
 												})
 											}
 											await sleep(500)
-											cookedMealEvent.emit('oven', output().name)
+											cookedMealEvent.emit('oven', finalOutput.name)
 											playSound('zapsplat_foley_rubble_rock_drop_onto_pile_others_medium_sized_006_108147')
 											oven.ovenAnimator.playClamped('Closing')
 										})

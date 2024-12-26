@@ -11,6 +11,7 @@ import { app, type DungeonRessources, type FarmRessources } from '@/global/state
 import { Direction, isCardialDirection } from '@/lib/directions'
 import { inMap } from '@/lib/hierarchy'
 import { getSecondaryColliders } from '@/lib/models'
+import { smoke } from '@/particles/smoke'
 import { introQuest } from '@/quests/introQuest'
 import { GardenPlotMaterial, GrassMaterial } from '@/shaders/materials'
 import { RoomType } from '@/states/dungeon/generateDungeon'
@@ -277,6 +278,16 @@ export const props: Props = [
 						parent,
 						model,
 						position: new Vector3(),
+					})
+					parent.model?.traverse((node) => {
+						if (node.name.includes('smoke')) {
+							ecs.add({
+								parent,
+								position: node.position.clone().multiply(parent.model!.scale),
+								smokeParticles: smoke(),
+								group: new Group(),
+							})
+						}
 					})
 				},
 			}

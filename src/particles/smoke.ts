@@ -8,7 +8,7 @@ export const smoke = () => {
 	const system = new ParticleSystem({
 		duration: 1,
 		looping: true,
-		prewarm: false,
+		prewarm: true,
 		instancingGeometry: geo,
 		startLife: new IntervalValue(20.0, 10.0),
 		startSpeed: new ConstantValue(0.5),
@@ -30,5 +30,6 @@ export const smoke = () => {
 		],
 	})
 	system.emitter.rotateX(-Math.PI / 2)
-	return system.emitter
+	system.pause()
+	return system
 }
