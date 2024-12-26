@@ -54,14 +54,14 @@ export const updateCameraZoom = (zoom: number = params.zoom) => {
 export const addCameraShake = () => {
 	const camera = gameCameraQuery.first
 	if (camera) {
-		const dir = new Vector3().randomDirection().multiplyScalar(5)
+		const dir = new Vector3().randomDirection().multiplyScalar(40)
 		tweens.add({
 			from: 1,
 			to: 0,
 			duration: 500,
 			ease: easeOut,
 			onUpdate: (f) => {
-				camera.cameraShake.lerpVectors(new Vector3(), dir, Math.cos(f * 20) * f)
+				camera.cameraShake.lerpVectors(new Vector3(), dir, Math.cos(f * 50) * f)
 			},
 		})
 	}
