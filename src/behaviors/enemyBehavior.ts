@@ -9,7 +9,6 @@ import { inMap } from '@/lib/hierarchy'
 import { Timer } from '@/lib/timer'
 import { getWorldPosition } from '@/lib/transforms'
 import { spawnDamageNumber } from '@/particles/damageNumber'
-import { dash } from '@/particles/dashParticles'
 import { pollenBundle } from '@/particles/pollenParticles'
 import { selectNewLockedEnemey } from '@/states/dungeon/locking'
 import { getIntersections } from '@/states/game/sensor'
@@ -347,7 +346,8 @@ export const chargingEnemyBehaviorPlugin = enemyBehavior(EnemyAttackStyle.Chargi
 	dead: () => ({}),
 	attack: () => ({
 		enter: async (e, setState) => {
-			ecs.add({ parent: e, ...dash(4) })
+			e.dashParticles?.restart()
+			e.dashParticles?.play()
 			e.enemyAnimator.playAnimation('running')
 			await sleep(800)
 			return setState('attackCooldown')
@@ -384,7 +384,8 @@ export const chargingTwiceEnemyBehaviorPlugin = enemyBehavior(EnemyAttackStyle.C
 	dead: () => ({}),
 	attack: () => ({
 		enter: async (e, setState) => {
-			ecs.add({ parent: e, ...dash(4) })
+			e.dashParticles?.restart()
+			e.dashParticles?.play()
 			e.enemyAnimator.playAnimation('running')
 			await sleep(800)
 			if (e.charges === 0) {

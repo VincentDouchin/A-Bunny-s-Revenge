@@ -12,6 +12,7 @@ import { modelColliderBundle } from '@/lib/models'
 import { NavGrid } from '@/lib/navGrid'
 import { Stat } from '@/lib/stats'
 import { Timer } from '@/lib/timer'
+import { dash } from '@/particles/dashParticles'
 import { enemyDefeated } from '@/particles/enemyDefeated'
 import { impact } from '@/particles/impact'
 import { getRandom } from '@/utils/mapFunctions'
@@ -50,6 +51,7 @@ export const enemyBundle = (name: enemy, level: number) => {
 		attackStyle: enemy.attackStyle,
 		...(enemy.components ? enemy.components() : {}),
 		...([EnemyAttackStyle.ChargingTwice, EnemyAttackStyle.RangeThrice].includes(enemy.attackStyle) ? { charges: 0 } : {}),
+		...([EnemyAttackStyle.Charging, EnemyAttackStyle.ChargingTwice].includes(enemy.attackStyle) ? { dashParticles: dash(4) } : {}),
 	} as const satisfies Entity
 
 	if (enemy.boss) {

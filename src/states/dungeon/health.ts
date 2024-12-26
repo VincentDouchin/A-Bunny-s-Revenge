@@ -29,6 +29,7 @@ export const killAnimation = () => deadEntities.onEntityAdded.subscribe((e) => {
 	ecs.removeComponent(e, 'body')
 	if (e.faction === Faction.Enemy) {
 		if (e.enemyDefeated) {
+			e.enemyDefeated.restart()
 			e.enemyDefeated.play()
 		}
 		const mats = new Array<Material>()

@@ -21,7 +21,7 @@ export interface Enemy<Name extends keyof Animations> {
 	animationMap: Record<EnemyAnimations, Animations[Name]>
 	components?: () => Entity
 }
-export const enemies = ['Armabee', 'Armabee_Evolved', 'Shaga_A', 'Big_Boar_A', 'Snailo_A', 'Snailo_B', 'Porin_A', 'Forest_Butterfly_A', 'Racco_A', 'Platopo_A', 'Batty_A', 'Big_Boar_C', 'Magicbook_A', 'Devilu_A', 'Big_Boar_B', 'soot_sprite', 'spider_king', 'plant_chewer', 'werewolf', 'death_mage'] as const satisfies characters[]
+export const enemies = ['Armabee', 'Armabee_Evolved', 'Shaga_A', 'Big_Boar_A', 'Snailo_A', 'Snailo_B', 'Porin_A', 'Forest_Butterfly_A', 'Racco_A', 'Platopo_A', 'Batty_A', 'Big_Boar_C', 'Magicbook_A', 'Devilu_A', 'Big_Boar_B', 'soot_sprite', 'spider_king', 'plant_chewer', 'werewolf', 'death_mage'] as const satisfies ReadonlyArray<characters>
 export type enemy = (typeof enemies)[number]
 
 const genericEnemyAnimationMap: Record<EnemyAnimations, Animations['Big_Boar_A']> = {

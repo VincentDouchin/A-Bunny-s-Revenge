@@ -1,5 +1,4 @@
-import type { Entity } from '@/global/entity'
-import { CircleGeometry, MeshBasicMaterial, Vector3, Vector4 } from 'three'
+import { CircleGeometry, MeshBasicMaterial, Vector4 } from 'three'
 import { Bezier, ColorRange, ConstantValue, IntervalValue, ParticleSystem, PiecewiseBezier, PointEmitter, RenderMode, SizeOverLife } from 'three.quarks'
 
 const geo = new CircleGeometry(1, 8)
@@ -10,7 +9,7 @@ export const dash = (duration: number) => {
 	const system = new ParticleSystem({
 		duration,
 		looping: false,
-		prewarm: false,
+		prewarm: true,
 		instancingGeometry: geo,
 		startColor: new ColorRange(new Vector4(1, 1, 1, 0.2), new Vector4(0.7, 0.7, 0.7, 0.5)),
 		startLife: new ConstantValue(5.0),
@@ -26,6 +25,7 @@ export const dash = (duration: number) => {
 		],
 
 	})
+	system.pause()
 	system.emitter.position.y = 0.5
-	return { emitter: system.emitter, autoDestroy: true, position: new Vector3() } as const satisfies Entity
+	return system
 }

@@ -7,7 +7,6 @@ import { ecs, world } from '@/global/init'
 import { playSound } from '@/global/sounds'
 import { app } from '@/global/states'
 import { spawnDamageNumber } from '@/particles/damageNumber'
-import { dash } from '@/particles/dashParticles'
 import { poisonBubbles } from '@/states/dungeon/poisonTrail'
 import { stunBundle } from '@/states/dungeon/stun'
 import { getIntersections } from '@/states/game/sensor'
@@ -162,7 +161,8 @@ export const playerBehaviorPlugin = behaviorPlugin(
 	dash: () => ({
 		enter: async (e, setState) => {
 			playSound('zapsplat_cartoon_whoosh_swipe_fast_grab_dash_007_74748')
-			ecs.add({ parent: e, ...dash(1) })
+			e.dashParticles?.restart()
+			e.dashParticles?.play()
 			await sleep(200)
 			setState('idle')
 		},

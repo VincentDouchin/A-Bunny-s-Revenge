@@ -257,6 +257,7 @@ export interface Entity {
 	autoDestroy?: true
 	enemyDefeated?: ParticleSystem
 	enemyImpact?: ParticleSystem
+	dashParticles?: ParticleSystem
 	// ! Stats
 	strength?: Stat
 	critChance?: Stat

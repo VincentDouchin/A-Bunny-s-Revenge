@@ -14,6 +14,7 @@ import { inMap } from '@/lib/hierarchy'
 import { capsuleColliderBundle, characterControllerBundle } from '@/lib/models'
 import { Stat } from '@/lib/stats'
 import { Timer } from '@/lib/timer'
+import { dash } from '@/particles/dashParticles'
 import { ActiveEvents, Cuboid } from '@dimforge/rapier3d-compat'
 import { Euler, LinearSRGBColorSpace, Mesh, Quaternion, Vector3 } from 'three'
 import { CSS2DObject } from 'three/examples/jsm/renderers/CSS2DRenderer'
@@ -89,6 +90,7 @@ export const playerBundle = (health: number, weapon: weapons | null) => {
 		lastStep: { right: false, left: false },
 		...healthBundle(10, health),
 		...behaviorBundle('player', 'idle'),
+		dashParticles: dash(1),
 		hitTimer: new Timer(500, true),
 		dash: new Dash(1000),
 		sneeze: new Timer(2000, false),
