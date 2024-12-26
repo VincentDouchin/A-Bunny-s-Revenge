@@ -13,6 +13,7 @@ import { NavGrid } from '@/lib/navGrid'
 import { Stat } from '@/lib/stats'
 import { Timer } from '@/lib/timer'
 import { enemyDefeated } from '@/particles/enemyDefeated'
+import { impact } from '@/particles/impact'
 import { getRandom } from '@/utils/mapFunctions'
 import { ActiveEvents, Cuboid, RigidBodyType } from '@dimforge/rapier3d-compat'
 import { Quaternion, Vector3 } from 'three'
@@ -40,6 +41,7 @@ export const enemyBundle = (name: enemy, level: number) => {
 		faction: Faction.Enemy,
 		enemyName: name,
 		enemyDefeated: enemyDefeated(),
+		enemyImpact: impact(),
 		movementForce: new Vector3(),
 		speed: new Stat(50 * enemy.speed),
 		hitTimer: new Timer(500, false),

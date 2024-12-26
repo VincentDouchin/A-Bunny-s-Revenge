@@ -256,6 +256,7 @@ export interface Entity {
 	emitter?: ParticleEmitter<Object3DEventMap>
 	autoDestroy?: true
 	enemyDefeated?: ParticleSystem
+	enemyImpact?: ParticleSystem
 	// ! Stats
 	strength?: Stat
 	critChance?: Stat

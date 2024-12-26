@@ -13,7 +13,8 @@ export const impact = () => {
 	const system = new ParticleSystem({
 		duration: 3,
 		looping: false,
-		prewarm: false,
+		prewarm: true,
+		autoDestroy: false,
 		instancingGeometry: geo,
 		startLife: new IntervalValue(2.0, 4.0),
 		startSpeed: new ConstantValue(0.6),
@@ -29,6 +30,8 @@ export const impact = () => {
 			new SizeOverLife(new PiecewiseBezier([[new Bezier(1, 0.50, 0.25, 0), 0]])),
 		],
 	})
+	system.emitter.name = 'impact'
 	system.emitter.position.y = 5
-	return system.emitter
+	system.pause()
+	return system
 }

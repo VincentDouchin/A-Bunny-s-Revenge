@@ -27,18 +27,6 @@ const addParticles = () => emittersQuery.onEntityAdded.subscribe((entity) => {
 	}
 })
 
-const removeEmitter = () => {
-	for (const entity of emittersQuery) {
-		// @ts-expect-error wrong interface
-		if (entity.emitter.system.emitEnded && entity.emitter.system.particleNum === 0) {
-			ecs.removeComponent(entity, 'emitter')
-			if (entity.autoDestroy) {
-				ecs.remove(entity)
-			}
-		}
-	}
-}
-
 const addEmitters = (...components: ComponentsOfType<ParticleSystem>[]) => components.map((component) => {
 	const particleSystemQuery = ecs.with(component)
 	return () => particleSystemQuery.onEntityAdded.subscribe((e) => {
@@ -46,7 +34,7 @@ const addEmitters = (...components: ComponentsOfType<ParticleSystem>[]) => compo
 		const batchRenderer = batchRendererQuery.first?.batchRenderer
 		const emitter = e[component].emitter
 
-		ecs.add({ parent: e, position: new Vector3(), emitter, autoDestroy: true })
+		ecs.add({ parent: e, position: new Vector3(), emitter })
 
 		if (batchRenderer) {
 			batchRenderer.addSystem(e[component])
@@ -56,6 +44,6 @@ const addEmitters = (...components: ComponentsOfType<ParticleSystem>[]) => compo
 
 export const particlesPlugin: Plugin<typeof app> = (app) => {
 	app
-		.addSubscribers('default', initBatchRender, addParticles, ...addEmitters('enemyDefeated'))
-		.onPreUpdate('default', runIf(() => app.isDisabled('paused'), updateParticles), removeEmitter)
+		.addSubscribers('default', initBatchRender, addParticles, ...addEmitters('enemyDefeated', 'enemyImpact'))
+		.onPreUpdate('default', runIf(() => app.isDisabled('paused'), updateParticles))
 }

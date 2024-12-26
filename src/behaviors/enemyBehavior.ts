@@ -10,7 +10,6 @@ import { Timer } from '@/lib/timer'
 import { getWorldPosition } from '@/lib/transforms'
 import { spawnDamageNumber } from '@/particles/damageNumber'
 import { dash } from '@/particles/dashParticles'
-import { impact } from '@/particles/impact'
 import { pollenBundle } from '@/particles/pollenParticles'
 import { selectNewLockedEnemey } from '@/states/dungeon/locking'
 import { getIntersections } from '@/states/game/sensor'
@@ -163,7 +162,8 @@ const hit: EnemyState = () => ({
 			// ! damage
 			const [damage, crit] = calculateDamage(player)
 			takeDamage(e, damage)
-			ecs.update(e, { emitter: impact() })
+			e.enemyImpact?.restart()
+			e.enemyImpact?.play()
 			spawnDamageNumber(damage, e, crit)
 			// ! knockback
 			const force = player.position.clone().sub(e.position).normalize().multiplyScalar(-50000)

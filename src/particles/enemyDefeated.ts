@@ -7,7 +7,7 @@ const geo = new CircleGeometry(1, 8)
 export const enemyDefeated = () => {
 	const system = new ParticleSystem({
 		duration: 3,
-		looping: false,
+		looping: true,
 		prewarm: true,
 		autoDestroy: true,
 		instancingGeometry: geo,
@@ -32,6 +32,7 @@ export const enemyDefeated = () => {
 			)),
 		],
 	})
+	system.emitter.name = 'defeated'
 	system.emitter.rotateX(-Math.PI / 2)
 	return system
 }
