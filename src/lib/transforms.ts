@@ -88,7 +88,7 @@ const updateRotation = () => {
 export const transformsPlugin: Plugin<typeof app> = (app) => {
 	app.addSubscribers('default', addWorldPosition, swapPosition)
 		// Access bodies in pre update before clean up in physics plugin
-		.onPreUpdate('default', updateGroupPosition, updateRotation, updateWorldPosition)
+		.onRender('default', updateGroupPosition, updateRotation, updateWorldPosition)
 }
 
 export const isInIntersectionWithCollider = (collider: Collider) => {
