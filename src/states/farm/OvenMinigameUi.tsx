@@ -1,5 +1,4 @@
 import type { Entity } from '@/global/entity'
-import type { With } from 'miniplex'
 import { updateCameraZoom } from '@/global/camera'
 import { params } from '@/global/context'
 import { MenuType } from '@/global/entity'
@@ -9,7 +8,6 @@ import { cameraQuery } from '@/global/rendering'
 import { playSound } from '@/global/sounds'
 import { addTag } from '@/lib/hierarchy'
 import { getWorldPosition } from '@/lib/transforms'
-import { fireParticles } from '@/particles/fireParticles'
 import { OutlineText } from '@/ui/components/styledComponents'
 import { InputIcon } from '@/ui/InputIcon'
 import { useGame, useQuery } from '@/ui/store'
@@ -20,7 +18,7 @@ import Fire from '@assets/icons/fire-solid.svg'
 import { between } from 'randomish'
 import { createMemo, createSignal, For, onCleanup, onMount, Show } from 'solid-js'
 import { css } from 'solid-styled'
-import { Color, PointLight, Vector3 } from 'three'
+import { Vector3 } from 'three'
 import { ConstantValue } from 'three.quarks'
 import { itemBundle } from '../game/items'
 import { ItemDisplay } from './InventoryUi'
@@ -35,11 +33,11 @@ export const OvenMinigameUi = () => {
 				return (
 					<For each={ovenQuery()}>
 						{(oven) => {
-							const smokeTrails = ecs.with('parent', 'smokeParticles').where(e => e.parent === oven)
+							const smokeTrailsQuery = ecs.with('parent', 'smokeParticles').where(e => e.parent === oven)
+							const fireQuery = ecs.with('parent', 'fireParticles', 'light').where(e => e.parent === oven)
 							const output = ui.sync(() => oven.recipesQueued?.[0]?.output)
 							// const smokeTrails: With<Entity, 'emitter'>[] = []
 							let targetEntity: Entity | null = null
-							let lightEntity: With<Entity, 'light' | 'emitter'> | null = null
 							onMount(() => {
 								for (const camera of cameraQuery) {
 									ecs.removeComponent(camera, 'fixedCamera')
@@ -59,13 +57,15 @@ export const OvenMinigameUi = () => {
 								})
 								ecs.removeComponent(player(), 'cameratarget')
 
-								for (const smokeTrail of smokeTrails) {
+								for (const smokeTrail of smokeTrailsQuery) {
 									smokeTrail.smokeParticles.restart()
 									smokeTrail.smokeParticles.play()
 								}
-								const light = new PointLight(new Color(0xFF0000), 10, 20)
-								light.position.setY(5)
-								lightEntity = ecs.add({ light, parent: oven, position: new Vector3(0, 0, 0), emitter: fireParticles() })
+
+								for (const fire of fireQuery) {
+									fire.fireParticles.restart()
+									fire.fireParticles.play()
+								}
 							})
 							onCleanup(() => {
 								tweens.add({
@@ -81,7 +81,7 @@ export const OvenMinigameUi = () => {
 									addTag(camera, 'fixedCamera')
 								}
 								ecs.removeComponent(oven, 'cameratarget')
-								for (const smokeTrail of smokeTrails) {
+								for (const smokeTrail of smokeTrailsQuery) {
 									smokeTrail.smokeParticles.endEmit()
 								}
 								tweens.add({
@@ -89,10 +89,9 @@ export const OvenMinigameUi = () => {
 									to: 0,
 									duration: 4000,
 									onUpdate: (f) => {
-										if (lightEntity) {
-											lightEntity.light.intensity = f * 10
-											// @ts-expect-error wrong type
-											lightEntity.emitter.system.emissionOverTime = new ConstantValue(f * 2 / 30)
+										for (const fire of fireQuery) {
+											fire.light.intensity = f * 10
+											fire.fireParticles.emissionOverTime = new ConstantValue(f * 2 / 30)
 										}
 									},
 								})
@@ -121,7 +120,7 @@ export const OvenMinigameUi = () => {
 									} else {
 										setHeat(x => Math.max(0, x - 15 * time.delta / 1000))
 									}
-									for (const smokeTrail of smokeTrails) {
+									for (const smokeTrail of smokeTrailsQuery) {
 										smokeTrail.smokeParticles.emissionOverTime = new ConstantValue(heat() / 30)
 									}
 									setTimer(x => x - time.delta / 1000)

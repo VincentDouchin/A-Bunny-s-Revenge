@@ -9,7 +9,6 @@ import { playSound } from '@/global/sounds'
 import { addTag } from '@/lib/hierarchy'
 import { getWorldPosition } from '@/lib/transforms'
 import { cauldronSparkles } from '@/particles/cauldronSparkles'
-import { fireParticles } from '@/particles/fireParticles'
 import { useGame, useQuery } from '@/ui/store'
 import { TouchButton } from '@/ui/TouchControls'
 import Exit from '@assets/icons/arrow-left-solid.svg'
@@ -18,7 +17,7 @@ import { between } from 'randomish'
 import { createMemo, createSignal, onCleanup, onMount, Show } from 'solid-js'
 import { Portal } from 'solid-js/web'
 import { css } from 'solid-styled'
-import { Color, PointLight, Vector3 } from 'three'
+import { Vector3 } from 'three'
 import { itemBundle } from '../game/items'
 import { ItemDisplay } from './InventoryUi'
 
@@ -32,7 +31,7 @@ export const CauldronMinigameUi = () => {
 				return (
 					<Show when={cauldron()}>
 						{(cauldron) => {
-							let lightEntity: Entity | null = null
+							const lightQuery = ecs.with('parent', 'fireParticles', 'light').where(e => e.parent === cauldron)
 							onMount(() => {
 								tweens.add({
 									from: params.zoom,
@@ -40,12 +39,16 @@ export const CauldronMinigameUi = () => {
 									duration: 1000,
 									onUpdate: updateCameraZoom,
 								})
-								const light = new PointLight(new Color(0xFF0000), 10, 10)
-								light.position.setY(5)
-								lightEntity = ecs.add({ light, parent: cauldron(), position: new Vector3(0, 0, 0), emitter: fireParticles() })
+								for (const { fireParticles } of lightQuery) {
+									fireParticles.restart()
+									fireParticles.play()
+								}
 							})
 							onCleanup(() => {
-								lightEntity && ecs.remove(lightEntity)
+								for (const { fireParticles } of lightQuery) {
+									fireParticles.endEmit()
+								}
+
 								tweens.add({
 									from: 15,
 									to: params.zoom,

@@ -6,7 +6,7 @@ const mat = new MeshBasicMaterial({ color: 0x000000, depthWrite: false })
 
 export const fireParticles = () => {
 	const system = new ParticleSystem({
-		duration: 30,
+		duration: 3,
 		looping: true,
 		prewarm: false,
 		instancingGeometry: geo,
@@ -31,5 +31,6 @@ export const fireParticles = () => {
 	})
 	system.emitter.rotateX(-Math.PI / 2)
 	system.emitter.position.setZ(1)
-	return system.emitter
+	system.pause()
+	return system
 }

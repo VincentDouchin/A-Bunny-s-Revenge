@@ -11,6 +11,7 @@ import { app, type DungeonRessources, type FarmRessources } from '@/global/state
 import { Direction, isCardialDirection } from '@/lib/directions'
 import { inMap } from '@/lib/hierarchy'
 import { getSecondaryColliders } from '@/lib/models'
+import { fireParticles } from '@/particles/fireParticles'
 import { smoke } from '@/particles/smoke'
 import { introQuest } from '@/quests/introQuest'
 import { GardenPlotMaterial, GrassMaterial } from '@/shaders/materials'
@@ -274,6 +275,14 @@ export const props: Props = [
 				withChildren(parent) {
 					const model = assets.models['ume-wood'].scene.clone()
 					model.scale.setScalar(5)
+					const light = new PointLight(new Color(0xFF0000), 0, 20)
+					light.position.setY(5)
+					ecs.add({
+						parent,
+						position: new Vector3(),
+						light,
+						fireParticles: fireParticles(),
+					})
 					ecs.add({
 						parent,
 						model,
@@ -312,6 +321,15 @@ export const props: Props = [
 					model: spoonmodel,
 					position: new Vector3(),
 					rotation: new Quaternion(),
+				})
+				const light = new PointLight(new Color(0xFF0000), 10, 10)
+				light.position.setY(5)
+				ecs.add({
+					parent,
+					position: new Vector3(),
+					group: new Group(),
+					light,
+					fireParticles: fireParticles(),
 				})
 				const woodmodel = assets.models['ume-wood'].scene.clone()
 				woodmodel.scale.setScalar(5)
