@@ -1,7 +1,7 @@
-import type { Entity } from '@/global/entity'
+import type { AttackStyle, Entity, QueryEntity } from '@/global/entity'
 import type { With } from 'miniplex'
 import type { EntityState } from '../lib/behaviors'
-import { EnemyAttackStyle, Faction } from '@/global/entity'
+import { Faction } from '@/global/entity'
 import { assets, coroutines, ecs, time, tweens, world } from '@/global/init'
 import { playSound } from '@/global/sounds'
 import { collisionGroups } from '@/lib/collisionGroups'
@@ -56,7 +56,7 @@ const enemyDecisions = (e: With<Entity, EnemyComponents>) => {
 	return { ...getMovementForce(e), player, touchedByPlayer, ...playerData }
 }
 
-type EnemyState = EntityState<EnemyComponents, 'enemy', typeof enemyDecisions>
+type EnemyState = EntityState<QueryEntity<typeof enemyQuery>, 'enemy', typeof enemyDecisions>
 
 const wanderBundle = (e: With<Entity, EnemyComponents>) => {
 	const origin = getWorldPosition(e.group)
@@ -240,14 +240,14 @@ const attackCooldown = (delay: number, escape: boolean): EnemyState => () => ({
 	},
 })
 
-const enemyBehavior = (attackStyle: EnemyAttackStyle) => behaviorPlugin(
-	enemyQuery.where(e => e.attackStyle === attackStyle),
+const enemyBehavior = (attackStyle: keyof AttackStyle) => behaviorPlugin(
+	enemyQuery.with(attackStyle),
 	'enemy',
 	enemyDecisions,
 )
 
 // ! SPORE
-export const sporeBehaviorPlugin = enemyBehavior(EnemyAttackStyle.Spore)({
+export const sporeBehaviorPlugin = enemyBehavior('spore')({
 	idle,
 	wander,
 	running: running(50),
@@ -278,7 +278,7 @@ export const sporeBehaviorPlugin = enemyBehavior(EnemyAttackStyle.Spore)({
 })
 
 // ! RANGE
-export const rangeEnemyBehaviorPlugin = enemyBehavior(EnemyAttackStyle.Range)({
+export const rangeEnemyBehaviorPlugin = enemyBehavior('range')({
 	idle,
 	wander,
 	running: running(50),
@@ -303,7 +303,7 @@ export const rangeEnemyBehaviorPlugin = enemyBehavior(EnemyAttackStyle.Range)({
 })
 
 // ! RANGE THRICE
-export const rangeThriceEnemyBehaviorPlugin = enemyBehavior(EnemyAttackStyle.RangeThrice)({
+export const rangeThriceEnemyBehaviorPlugin = enemyBehavior('range')({
 	idle,
 	wander,
 	running: running(50),
@@ -313,11 +313,11 @@ export const rangeThriceEnemyBehaviorPlugin = enemyBehavior(EnemyAttackStyle.Ran
 			applyRotate(e, force)
 			projectileAttack(e.rotation.clone())(e)
 			await e.enemyAnimator.playClamped('attacking', { timeScale: 2 })
-			if (e.charges !== undefined && e.charges < 2) {
-				e.charges++
+			if (e.range.amount < e.range.max) {
+				e.range.amount++
 				return setState('waitingAttack')
 			} else {
-				e.charges = 0
+				e.range.amount = 0
 				return setState('attackCooldown')
 			}
 		},
@@ -335,7 +335,7 @@ export const rangeThriceEnemyBehaviorPlugin = enemyBehavior(EnemyAttackStyle.Ran
 
 // ! CHARGING
 const obstableQuery = ecs.with('collider', 'obstacle', 'position')
-export const chargingEnemyBehaviorPlugin = enemyBehavior(EnemyAttackStyle.Charging)({
+export const chargingEnemyBehaviorPlugin = enemyBehavior('charging')({
 	idle,
 	dying,
 	waitingAttack: waitingAttack(500),
@@ -373,7 +373,7 @@ export const chargingEnemyBehaviorPlugin = enemyBehavior(EnemyAttackStyle.Chargi
 })
 
 // ! CHARGING TWICE
-export const chargingTwiceEnemyBehaviorPlugin = enemyBehavior(EnemyAttackStyle.ChargingTwice)({
+export const chargingTwiceEnemyBehaviorPlugin = enemyBehavior('charging')({
 	idle,
 	dying,
 	waitingAttack: waitingAttack(500),
@@ -388,11 +388,11 @@ export const chargingTwiceEnemyBehaviorPlugin = enemyBehavior(EnemyAttackStyle.C
 			e.dashParticles?.play()
 			e.enemyAnimator.playAnimation('running')
 			await sleep(800)
-			if (e.charges === 0) {
-				e.charges = 1
+			if (e.charging.amount === 0) {
+				e.charging.amount = 1
 				return setState('waitingAttack')
 			} else {
-				e.charges = 0
+				e.charging.amount = 0
 				return setState('attackCooldown')
 			}
 		},
@@ -404,12 +404,12 @@ export const chargingTwiceEnemyBehaviorPlugin = enemyBehavior(EnemyAttackStyle.C
 				for (const obstacle of obstableQuery) {
 					if (obstacle.collider === c && getIntersections(e) === c) {
 						playSound('zapsplat_impacts_wood_rotten_tree_trunk_hit_break_crumple_011_102694')
-						e.charges = 0
+						e.charging.amount = 0
 						return setState('stun')
 					}
 				}
 				if (player && c === player.collider) {
-					e.charges = 0
+					e.charging.amount = 0
 					return setState('attackCooldown')
 				}
 			})
@@ -419,7 +419,7 @@ export const chargingTwiceEnemyBehaviorPlugin = enemyBehavior(EnemyAttackStyle.C
 })
 
 // ! MELEE
-export const meleeEnemyBehaviorPlugin = enemyBehavior(EnemyAttackStyle.Melee)({
+export const meleeEnemyBehaviorPlugin = enemyBehavior('melee')({
 	idle,
 	dying,
 	waitingAttack: waitingAttack(200),
@@ -445,7 +445,7 @@ export const meleeEnemyBehaviorPlugin = enemyBehavior(EnemyAttackStyle.Melee)({
 
 // ! JUMPING
 
-export const jumpingEnemyBehaviorPlugin = enemyBehavior(EnemyAttackStyle.Jumping)({
+export const jumpingEnemyBehaviorPlugin = enemyBehavior('jumping')({
 	idle,
 	dying,
 	waitingAttack: waitingAttack(200),

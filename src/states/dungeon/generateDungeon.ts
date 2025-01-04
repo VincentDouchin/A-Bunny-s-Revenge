@@ -1,5 +1,5 @@
-import type { enemy } from '@/constants/enemies'
 import type { Level } from '@/debug/LevelEditor'
+import type { Entity } from '@/global/entity'
 import { enemyGroups } from '@/constants/enemyGroups'
 import { getSellableItems, type Item } from '@/constants/items'
 import { levelsData } from '@/global/init'
@@ -20,7 +20,7 @@ export enum RoomType {
 }
 export interface Room {
 	plan: Level
-	enemies: enemy[]
+	enemies: Entity[]
 	doors: Partial<Record<Direction, Room | null>>
 	type: RoomType
 	encounter: keyof typeof encounters | null
@@ -188,15 +188,11 @@ const createRooms = (count: number): BlankRoom[] => {
 	return rooms
 }
 
-const getEnemies = (type: RoomType, level: number): enemy[] => {
+const getEnemies = (type: RoomType, level: number) => {
 	switch (type) {
 		case RoomType.Battle:
-		case RoomType.Entrance: return getRandom(enemyGroups[level].filter(group => !group.boss)).enemies
-		case RoomType.Boss: {
-			const possibleGroups = enemyGroups[level].filter(group => group.boss !== undefined)
-			const group = getRandom(possibleGroups)
-			return [group.boss, ...group.enemies].filter(Boolean)
-		}
+		case RoomType.Entrance: return getRandom(enemyGroups[level].enemies)
+		case RoomType.Boss: return getRandom(enemyGroups[level].bosses)
 		default:return []
 	}
 }
@@ -219,7 +215,7 @@ export const assignPlanAndEnemies = (rooms: BlankRoom[], level: number): Room[] 
 		if (room.type === RoomType.NPC) {
 			encounter = getRandom(Object.keys(encounters) as (keyof typeof encounters)[])
 		}
-		const enemies = [...getEnemies(room.type, level)]
+		const enemies = getEnemies(room.type, level).map(enemy => enemy(level))
 		const newRoom: Room = { ...room, plan, enemies, doors, encounter }
 		if (
 			!hasSeller

@@ -1,11 +1,10 @@
-import { enemyData } from '@/constants/enemies'
 import { ecs, ui } from '@/global/init'
 import { useQuery } from '@/ui/store'
 import { createMemo, For } from 'solid-js'
 import { Portal, Show } from 'solid-js/web'
 import { css } from 'solid-styled'
 
-const healthBarQuery = useQuery(ecs.with('healthBarContainer', 'maxHealth', 'currentHealth', 'enemyName'))
+const healthBarQuery = useQuery(ecs.with('healthBarContainer', 'maxHealth', 'currentHealth'))
 
 export const EnemyHealthBarUi = () => {
 	css/* css */`
@@ -77,7 +76,7 @@ export const EnemyHealthBarUi = () => {
 						</Show>
 						<Show when={entity.boss}>
 							<div class="boss-health-container">
-								<div class="boss-name">{enemyData[entity.enemyName].name}</div>
+								<div class="boss-name">{entity.enemyName}</div>
 								<div class="boss-health-bar">
 									<div class="health-bar-inner" style={{ width: `${healthPercent() * 100}%` }}></div>
 									<div class="health-bar-inner health-bar-back" style={{ width: `${healthPercent() * 100}%` }}></div>

@@ -2,7 +2,6 @@ import type { Entity, PlayerAnimations } from '@/global/entity'
 import type { app } from '@/global/states'
 import type { UpdateSystem } from '@/lib/app'
 import type { weapons } from '@assets/assets'
-import { Sizes } from '@/constants/sizes'
 import { Animator } from '@/global/animator'
 import { Faction } from '@/global/entity'
 import { assets, ecs, save } from '@/global/init'
@@ -58,7 +57,8 @@ export const playerBundle = (health: number, weapon: weapons | null) => {
 		}
 	})
 	model.scale.multiplyScalar(4.5)
-	const bundle = capsuleColliderBundle(model, Sizes.character)
+	const size = new Vector3(5, 6, 5)
+	const bundle = capsuleColliderBundle(model, size)
 	bundle.bodyDesc.setAdditionalMass(1)
 	bundle.bodyDesc.setLinearDamping(20)
 	const debuffsContainer = new CSS2DObject(document.createElement('div'))
@@ -75,7 +75,7 @@ export const playerBundle = (health: number, weapon: weapons | null) => {
 		...inMap(),
 		cameratarget: true,
 		faction: Faction.Player,
-		sensor: { shape: new Cuboid(3, 3, 3), distance: 1.5 + Sizes.character.x / 2 },
+		sensor: { shape: new Cuboid(3, 3, 3), distance: 1.5 + size.x / 2 },
 		player: true,
 		movementForce: new Vector3(),
 		targetMovementForce: new Vector3(),

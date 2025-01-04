@@ -114,3 +114,31 @@ export const once = (fn: (...args: any[]) => void) => {
 		}
 	}
 }
+
+type Func<T, R> = (input: T) => R
+export function pipe<A, B>(fn1: (a: A) => B): (a: A) => B
+export function pipe<A, B, C>(
+	fn1: (a: A) => B,
+	fn2: (b: B) => C
+): (a: A) => C
+export function pipe<A, B, C, D>(
+	fn1: (a: A) => B,
+	fn2: (b: B) => C,
+	fn3: (c: C) => D
+): (a: A) => D
+export function pipe<A, B, C, D, E>(
+	fn1: (a: A) => B,
+	fn2: (b: B) => C,
+	fn3: (c: C) => D,
+	fn4: (d: D) => E
+): (a: A) => E
+export function pipe<A, B, C, D, E, F>(
+	fn1: (a: A) => B,
+	fn2: (b: B) => C,
+	fn3: (c: C) => D,
+	fn4: (d: D) => E,
+	fn5: (e: E) => F
+): (a: A) => F
+export function pipe(...fns: Func<any, any>[]): (input: any) => any {
+	return input => fns.reduce((result, fn) => fn(result), input)
+}

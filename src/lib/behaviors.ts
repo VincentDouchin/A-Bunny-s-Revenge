@@ -1,37 +1,35 @@
 import type { Entity, States } from '@/global/entity'
 import type { app } from '@/global/states'
-import type { Query, With } from 'miniplex'
+import type { Query } from 'miniplex'
 import type { Plugin } from './app'
 import { ecs } from '@/global/init'
 import { entries } from '@/utils/mapFunctions'
 import { sleep } from '@/utils/sleep'
 
-export type StateParameters<C extends keyof Entity> = (e: StateEntity<C>) => any
-export type StateFn<C extends keyof Entity, B extends keyof States, F extends StateParameters<C>> = (
-	e: StateEntity<C>,
+export type StateParameters<E extends Entity> = (e: E) => any
+export type StateFn<E extends Entity, B extends keyof States, F extends StateParameters<E>> = (
+	e: E,
 	setState: (newState: States[B]) => void,
 	decisions: ReturnType<F>
 ) => void
 
-type StateEntity<C extends keyof Entity> = With<With<Entity, C>, 'behaviorController' | 'state'>
-
-export interface EntityState<C extends keyof Entity, B extends keyof States, F extends StateParameters<C>> {
+export interface EntityState<E extends Entity, B extends keyof States, F extends StateParameters<E>> {
 	(): {
-		enter?: StateFn<C, B, F>
-		update?: StateFn<C, B, F>
-		exit?: StateFn<C, B, F>
+		enter?: StateFn<E, B, F>
+		update?: StateFn<E, B, F>
+		exit?: StateFn<E, B, F>
 	}
 }
 
-export const behaviorPlugin = <C extends keyof Entity, B extends keyof States, F extends StateParameters<C>>(
-	initalQuery: Query<With<Entity, C>>,
+export const behaviorPlugin = <E extends Entity, B extends keyof States, F extends StateParameters<E>>(
+	initalQuery: Query<E>,
 	behaviorController: B,
 	fn: F,
 ) => {
 	const query = initalQuery.with('behaviorController', 'state').where(e => e.behaviorController === behaviorController)
-	return (manager: Record<States[B], EntityState<C, B, F>>): Plugin<typeof app> => (app) => {
+	return (manager: Record<States[B], EntityState<E, B, F>>): Plugin<typeof app> => (app) => {
 		for (const [entityState, stateManager] of entries(manager)) {
-			const setState = (e: StateEntity<C>, previousState: States[B]) => (state: States[B]) => {
+			const setState = (e: E, previousState: States[B]) => (state: States[B]) => {
 				if (e.state === previousState) {
 					ecs.update(e, { state })
 				}
@@ -63,4 +61,4 @@ export const behaviorPlugin = <C extends keyof Entity, B extends keyof States, F
 export const behaviorBundle = <B extends keyof States>(behaviorController: B, defaultState: States[B]) => ({
 	behaviorController,
 	state: defaultState,
-} as const satisfies Entity)
+} as const)

@@ -1,7 +1,6 @@
 import type { crops } from '@/constants/items'
 import type { With } from 'miniplex'
 import { itemsData } from '@/constants/items'
-import { Sizes } from '@/constants/sizes'
 import { type Crop, type Entity, Interactable, MenuType } from '@/global/entity'
 import { harvestCropEvent } from '@/global/events'
 import { assets, dayTime, ecs, removeItem, save, tweens } from '@/global/init'
@@ -32,7 +31,7 @@ export const cropBundle = (grow: boolean, crop: NonNullable<Entity['crop']>) => 
 	const model = assets.crops[crop.name].stages[stage].scene.clone()
 	model.scale.setScalar(10)
 	const hole = assets.models.plantedHole.scene.clone()
-	const modelBundle = modelColliderBundle(model, RigidBodyType.Fixed, true, Sizes.small)
+	const modelBundle = modelColliderBundle(model, RigidBodyType.Fixed, true, new Vector3(4, 4, 4))
 	const bundle: With<Entity, 'crop' | 'model'> = {
 		crop: {
 			name: crop.name,

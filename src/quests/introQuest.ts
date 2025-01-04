@@ -1,8 +1,8 @@
-import type { enemy } from '@/constants/enemies'
 import type { QuestStep } from '@/constants/quests'
 import type { Entity } from '@/global/entity'
 import type { Room } from '@/states/dungeon/generateDungeon'
 import type { Query, With } from 'miniplex'
+import { SootSprite } from '@/constants/enemies'
 import { Faction, Interactable } from '@/global/entity'
 import { cookedMealEvent, harvestCropEvent, showTutorialEvent } from '@/global/events'
 import { assets, ecs, inputManager, levelsData, questManager, save } from '@/global/init'
@@ -400,7 +400,7 @@ export const introQuestActors = addActors({
 				app.enable('cutscene')
 				await e.cellarDoorAnimator?.playClamped('doorOpen')
 				app.disable('cutscene')
-				const enemies: enemy[] = introQuest.hasCompletedStep('2_find_pot') ? [] : ['soot_sprite', 'soot_sprite', 'soot_sprite', 'soot_sprite']
+				const enemies = introQuest.hasCompletedStep('2_find_pot') ? [] : Array.from({ length: 4 }).map(() => SootSprite(1))
 				const cellar: Room = {
 					plan: levelsData.levels.find(l => l.type === 'cellar')!,
 					doors: {},

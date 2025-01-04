@@ -3,7 +3,7 @@ import { easeOut } from 'popmotion'
 import { OrthographicCamera, PerspectiveCamera, Vector3 } from 'three'
 import { params } from './context'
 import { RenderGroup } from './entity'
-import { ecs, levelsData, settings, tweens } from './init'
+import { ecs, levelsData, settings, time, tweens } from './init'
 import { app } from './states'
 
 export const initCamera = () => {
@@ -107,7 +107,8 @@ export const moveCamera = (init = false) => () => {
 		}
 
 		if (app.isDisabled('debug')) {
-			const lerpSpeed = 1 / 60 * 3
+			// console.log(time.delta)
+			const lerpSpeed = 1 / 60 * time.delta / 10
 			const offset = new Vector3(params.cameraOffsetX, params.cameraOffsetY, params.cameraOffsetZ)
 			const newPosition = target.clone().add({ x: cameraShake.x, y: 0, z: cameraShake.y })
 			if (cameraOffset) {

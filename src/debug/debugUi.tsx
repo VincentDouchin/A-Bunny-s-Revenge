@@ -1,4 +1,5 @@
-import { type enemy, enemyData } from '@/constants/enemies'
+import type { Boss } from '@/constants/enemies'
+import { bosses } from '@/constants/enemies'
 import { recipes } from '@/constants/recipes'
 import { params } from '@/global/context'
 import { RenderGroup } from '@/global/entity'
@@ -20,7 +21,7 @@ import { SaveEditor } from './saveEditor'
 import { SoundUi } from './SoundUi'
 import { ColorCorrection, ToonEditor } from './toonEditor'
 
-export const [selectedBoss, setSelectedBoss] = useLocalStorage<{ boss: enemy }>('selectedBoss', { boss: 'spider_king' })
+export const [selectedBoss, setSelectedBoss] = useLocalStorage<{ boss: Boss }>('selectedBoss', { boss: 'spider_king' })
 const rendererQuery = ecs.with('renderer', 'scene', 'renderGroup').where(e => e.renderGroup === RenderGroup.Game)
 
 const [localParams, setParams] = useLocalStorage('params', params)
@@ -209,8 +210,8 @@ export const DebugUi = () => {
 					Debug Boss
 					<div>
 						<input type="checkbox" checked={params.debugBoss} onChange={e => setParams(d => ({ ...d, debugBoss: e.target.checked }))}></input>
-						<select onChange={e => setSelectedBoss(_ => ({ boss: e.target.value as enemy }))}>
-							{entries(enemyData).filter(([_, { boss }]) => boss).map(([name]) => {
+						<select onChange={e => setSelectedBoss(_ => ({ boss: e.target.value as Boss }))}>
+							{Object.keys(bosses).map(([name]) => {
 								return <option selected={name === selectedBoss.boss} value={name}>{name}</option>
 							})}
 						</select>

@@ -1,10 +1,11 @@
-import type { enemy } from '@/constants/enemies'
+import type { Drop } from '@/constants/enemies'
+import type { AttackStyle, ComponentsOfType, Entity, States } from '@/global/entity'
 import type { app } from '@/global/states'
 import type { SubscriberSystem, UpdateSystem } from '@/lib/app'
-import { enemyData } from '@/constants/enemies'
-import { EnemySizes, Sizes } from '@/constants/sizes'
+import type { characters } from '@assets/assets'
 import { Animator } from '@/global/animator'
-import { EnemyAttackStyle, type Entity, Faction } from '@/global/entity'
+import { Faction } from '@/global/entity'
+
 import { assets, ecs, levelsData, save, time } from '@/global/init'
 import { collisionGroups } from '@/lib/collisionGroups'
 import { inMap } from '@/lib/hierarchy'
@@ -21,39 +22,67 @@ import { Quaternion, Vector3 } from 'three'
 import { behaviorBundle } from '../../lib/behaviors'
 import { healthBundle } from './health'
 
-export const enemyBundle = (name: enemy, level: number) => {
-	const enemy = enemyData[name]
-	const model = assets.characters[name]
-	const scale = typeof enemy.scale === 'function' ? enemy.scale() : enemy.scale
-	model.scene.scale.setScalar(scale)
-	const bundle = modelColliderBundle(model.scene, RigidBodyType.Dynamic, false, EnemySizes[name] ?? Sizes.character, 'ball')
+type SingleAttackStyle = {
+	[K in keyof AttackStyle]: { [P in K]: AttackStyle[K] };
+}[keyof AttackStyle]
+
+export interface EnemyDef<M extends keyof Animations & characters, S extends string> {
+	model: M
+	name: string
+	health: number
+	scale: number
+	speed?: number
+	boss?: boolean
+	drops?: Drop[]
+	behavior?: keyof States
+	animator: ComponentsOfType<Animator<S>>
+	animationMap: { [key in S]: Animations[M] }
+	components?: Partial<Entity>
+	size?: Vector3
+	attackStyle: SingleAttackStyle
+}
+
+export const enemyBundle = <M extends keyof Animations & characters, S extends string>(enemy: EnemyDef<M, S>, level: number) => {
+	const model = assets.characters[enemy.model]
+	enemy.speed ??= 1
+	enemy.boss ??= false
+	enemy.drops ??= []
+	enemy.behavior ??= 'enemy'
+	enemy.size ??= new Vector3(5, 6, 5)
+	enemy.components ??= {}
+	model.scene.scale.setScalar(enemy.scale)
+	const bundle = modelColliderBundle(model.scene, RigidBodyType.Dynamic, false, enemy.size, 'ball')
 	bundle.bodyDesc.setLinearDamping(20)
 	bundle.bodyDesc.setCcdEnabled(true)
 	bundle.colliderDesc.setMass(100).setCollisionGroups(collisionGroups('enemy', ['obstacle', 'player', 'floor', 'enemy'])).setActiveEvents(ActiveEvents.COLLISION_EVENTS)
 	const entity = {
 		...behaviorBundle(enemy.behavior, 'idle'),
 		...bundle,
-		enemyAnimator: new Animator(bundle.model, model.animations, enemy.animationMap),
+		...inMap(),
 		...healthBundle(enemy.health * (level + 1)),
+		[enemy.animator]: new Animator(bundle.model, model.animations, enemy.animationMap),
 		targetRotation: new Quaternion().setFromAxisAngle(new Vector3(0, 1, 0), Math.PI * 2 * Math.random()),
 		strength: new Stat(1 + level),
-		...inMap(),
 		inactive: new Timer(2000, false),
 		faction: Faction.Enemy,
-		enemyName: name,
 		enemyDefeated: enemyDefeated(),
 		enemyImpact: impact(),
+		enemyName: enemy.name,
 		movementForce: new Vector3(),
 		speed: new Stat(50 * enemy.speed),
 		hitTimer: new Timer(500, false),
 		sensor: { distance: bundle.size.z / 2 + 2, shape: new Cuboid(3, 2, 2) },
 		healthBar: true,
-		attackStyle: enemy.attackStyle,
-		...(enemy.components ? enemy.components() : {}),
-		...([EnemyAttackStyle.ChargingTwice, EnemyAttackStyle.RangeThrice].includes(enemy.attackStyle) ? { charges: 0 } : {}),
-		...([EnemyAttackStyle.Charging, EnemyAttackStyle.ChargingTwice].includes(enemy.attackStyle) ? { dashParticles: dash(4) } : {}),
+		drops: enemy.drops,
+		...enemy.attackStyle,
+		...enemy.components,
 	} as const satisfies Entity
 
+	if (enemy.components.charging) {
+		Object.assign(entity, {
+			dashParticles: dash(4),
+		})
+	}
 	if (enemy.boss) {
 		Object.assign(entity, {
 			boss: true,
@@ -62,12 +91,13 @@ export const enemyBundle = (name: enemy, level: number) => {
 	}
 	return entity
 }
-const enemyQuery = ecs.with('enemyName')
+const enemyQuery = ecs.with('faction').where(e => e.faction === Faction.Enemy)
 export const removeEnemyFromSpawn: SubscriberSystem<typeof app, 'dungeon'> = ({ dungeon }) => enemyQuery.onEntityRemoved.subscribe((entity) => {
-	dungeon.enemies.splice(dungeon.enemies.indexOf(entity.enemyName), 1)
+	dungeon.enemies.splice(dungeon.enemies.indexOf(entity), 1)
 })
 const mapQuery = ecs.with('map')
-export const spawnEnemies: UpdateSystem<typeof app, 'dungeon'> = ({ dungeon, dungeonLevel }) => {
+
+export const spawnEnemies: UpdateSystem<typeof app, 'dungeon'> = ({ dungeon }) => {
 	const map = mapQuery.first
 	const mapData = levelsData.levels.find(level => level.id === map?.map)
 	if (!mapData?.navgrid) throw new Error('map not found')
@@ -77,7 +107,7 @@ export const spawnEnemies: UpdateSystem<typeof app, 'dungeon'> = ({ dungeon, dun
 	const possiblePoints = navGrid.getSpawnPoints()
 	for (const enemy of dungeon.enemies) {
 		ecs.add({
-			...enemyBundle(enemy, dungeonLevel),
+			...enemy,
 			position: getRandom([...possiblePoints]),
 		})
 	}

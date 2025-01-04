@@ -1,7 +1,7 @@
+import type { Drop } from '@/constants/enemies'
 import type { Item } from '@/constants/items'
 import type { Entity } from '@/global/entity'
 import type { With } from 'miniplex'
-import { type Drop, enemyData } from '@/constants/enemies'
 import { ecs, save } from '@/global/init'
 import { getRandom, range, shuffle } from '@/utils/mapFunctions'
 import { between } from 'randomish'
@@ -38,14 +38,14 @@ export const dropBundle = (drop: Item) => {
 	if (drop.health) bundle.health = drop.health
 	return bundle
 }
-const enemyDropsQuery = ecs.with('enemyName', 'position')
+const enemyDropsQuery = ecs.with('position', 'drops')
 const playerQuery = ecs.with('player', 'lootChance', 'lootQuantity')
 export const spawnDrops = () => enemyDropsQuery.onEntityRemoved.subscribe((e) => {
 	const player = playerQuery.first
 	if (player) {
 		spawnAcorns(between(2, 5), e.position)
 
-		for (const drop of lootPool(enemyData[e.enemyName].drops, player)) {
+		for (const drop of lootPool(e.drops, player)) {
 			ecs.add({ ...dropBundle(drop), position: e.position.clone().add(new Vector3(0, 5, 0)) })
 		}
 	}

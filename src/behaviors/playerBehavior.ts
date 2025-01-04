@@ -2,7 +2,7 @@ import type { Entity } from '@/global/entity'
 import type { With } from 'miniplex'
 import { debugOptions } from '@/debug/debugState'
 import { addCameraShake } from '@/global/camera'
-import { EnemyAttackStyle, Faction } from '@/global/entity'
+import { Faction } from '@/global/entity'
 import { ecs, world } from '@/global/init'
 import { playSound } from '@/global/sounds'
 import { app } from '@/global/states'
@@ -28,7 +28,7 @@ const dialogQuery = ecs.with('dialog')
 const getAttackingEnemy = (player: With<Entity, PlayerComponents>) => {
 	if (player.hitTimer.running()) return null
 	for (const enemy of enemyWithoutSensor) {
-		if (enemy.attackStyle !== EnemyAttackStyle.Melee) {
+		if (enemy.melee) {
 			if (world.intersectionPair(enemy.collider, player.collider)) {
 				return enemy
 			}

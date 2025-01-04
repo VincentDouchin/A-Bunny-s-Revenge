@@ -1,3 +1,4 @@
+import { Armabee, bosses, FlowerBoar, MossBoar } from '@/constants/enemies'
 import { selectedBoss } from '@/debug/debugUi'
 import { updateCameraZoom } from '@/global/camera'
 import { params } from '@/global/context'
@@ -20,13 +21,13 @@ export const setupGame = async () => {
 	app.enable('game')
 	if (params.debugBoss) {
 		const bossRoom = assignPlanAndEnemies([{ position: { x: 0, y: 0 }, connections: { north: 1, south: null }, type: RoomType.Boss }], 0)
-		bossRoom[0].enemies = [selectedBoss.boss]
+		bossRoom[0].enemies = [bosses[selectedBoss.boss](1)]
 		app.enable('dungeon', { dungeon: bossRoom[0], direction: Direction.S, firstEntry: true, playerHealth: 5, dungeonLevel: 0, weapon: 'Hoe' })
 		updateRenderSize()
 		updateCameraZoom()
 	} else if (params.debugEnemies) {
 		const enemiesRoom = assignPlanAndEnemies([{ position: { x: 0, y: 0 }, connections: { north: 1, south: null, east: null }, type: RoomType.Battle }], 0)
-		enemiesRoom[0].enemies = ['Armabee', 'Big_Boar_A', 'Big_Boar_B']
+		enemiesRoom[0].enemies = [Armabee(1), FlowerBoar(1), MossBoar(1)]
 		enemiesRoom[0].type = RoomType.Battle
 		app.enable('dungeon', { dungeon: enemiesRoom[0], direction: Direction.S, firstEntry: true, playerHealth: 5, dungeonLevel: 0, weapon: 'SwordWeapon' })
 		updateRenderSize()

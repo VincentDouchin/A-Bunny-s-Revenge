@@ -1,4 +1,3 @@
-import { EnemyAttackStyle } from '@/global/entity'
 import { ecs, tweens } from '@/global/init'
 import { playSound } from '@/global/sounds'
 import { behaviorPlugin } from '@/lib/behaviors'
@@ -17,8 +16,8 @@ const rangedAttacks = () => pollenQuery.size > 5
 	? [honeyProjectile, projectilesCircleAttack]
 	: [pollenAttack, honeyProjectile, projectilesCircleAttack]
 const beeBossQuery = ecs
-	.with('boss', 'attackStyle', 'movementForce', 'speed', 'position', 'rotation', 'body', 'enemyAnimator', 'group', 'collider', 'currentHealth', 'maxHealth', 'model', 'strength', 'hitTimer', 'size', 'targetRotation')
-	.where(e => e.attackStyle === EnemyAttackStyle.BeeBoss)
+	.with('boss', 'movementForce', 'speed', 'position', 'rotation', 'body', 'enemyAnimator', 'group', 'collider', 'currentHealth', 'maxHealth', 'model', 'strength', 'hitTimer', 'size', 'targetRotation')
+	.with('beeBoss')
 export const beeBossBehaviorPlugin = behaviorPlugin(
 	beeBossQuery,
 	'boss',

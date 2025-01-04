@@ -1,4 +1,4 @@
-import type { enemy } from '@/constants/enemies'
+import type { Drop } from '@/constants/enemies'
 import type { crops, Item } from '@/constants/items'
 import type { NPC } from '@/constants/NPC'
 import type { Quest2 } from '@/constants/quests'
@@ -27,6 +27,7 @@ import type { app } from './states'
 
 export type PlayerAnimations = 'idle' | 'runFront' | 'runLeft' | 'runRight' | 'runBack' | 'lightAttack' | 'slashAttack' | 'heavyAttack' | 'hit' | 'dying' | 'fishing' | 'sleeping' | 'wakeUp' | 'interact' | 'pickup' | 'dashFront' | 'dashLeft' | 'dashRight' | 'dashBack'
 export type EnemyAnimations = 'idle' | 'running' | 'attacking' | 'hit' | 'dead'
+export type PumpkinBossAnimations = 'underground' | 'spawn' | 'bite' | 'idle' | 'hit' | 'dead' | 'summon' | 'running'
 export type Dialog = Generator<string | void, void, void> | AsyncGenerator<string | void, void, void>
 export enum Faction {
 	Player,
@@ -70,16 +71,7 @@ export enum RenderGroup {
 	MainMenu,
 	Game,
 }
-export enum EnemyAttackStyle {
-	Charging,
-	ChargingTwice,
-	Range,
-	RangeThrice,
-	Melee,
-	Jumping,
-	Spore,
-	BeeBoss,
-}
+
 export const actors = ['cellarDoor', 'houseDoor', 'playerIntro', 'basketIntro', 'intro', 'cellarStairs', 'oven', 'cookingPot'] as const
 export const farmDoors = ['intro', 'cellar', 'clearing', 'village', 'fromVillage'] as const
 export type Doors = typeof farmDoors[number] | Direction
@@ -90,6 +82,7 @@ export interface States {
 	player: 'idle' | 'running' | 'attack' | 'dying' | 'dead' | 'picking' | 'dash' | 'hit' | 'stun' | 'poisoned' | 'managed'
 	enemy: 'idle' | 'running' | 'attack' | 'hit' | 'dying' | 'dead' | 'waitingAttack' | 'attackCooldown' | 'stun' | 'wander'
 	boss: 'idle' | 'running' | 'rangeAttack' | 'attack' | 'dying' | 'dead' | 'waitingAttack' | 'attackCooldown' | 'hit'
+	pumpkinBoss: 'idle' | 'running' | 'summon' | 'underground'
 	fish: 'going' | 'hooked' | 'wander' | 'bounce' | 'runaway'
 }
 export interface Crop {
@@ -100,7 +93,17 @@ export interface Crop {
 	planted: number
 }
 
-export interface Entity {
+export interface AttackStyle {
+	melee: true
+	jumping: true
+	spore: true
+	beeBoss: true
+	pumpkinBoss: true
+	charging: { amount: number, max: number }
+	range: { amount: number, max: number }
+}
+
+export type Entity = Partial<AttackStyle> & {
 	// ! Rendering
 	renderGroup?: RenderGroup
 	// ! Transforms
@@ -155,6 +158,7 @@ export interface Entity {
 	playerAnimator?: Animator<PlayerAnimations>
 	basketAnimator?: Animator<Animations['Basket']>
 	enemyAnimator?: Animator<EnemyAnimations>
+	pumpkinBossAnimator?: Animator<PumpkinBossAnimations>
 	ovenAnimator?: Animator<Animations['BunnyOvenPacked']>
 	houseAnimator?: Animator<Animations['House']>
 	chestAnimator?: Animator<Animations['Chest']>
@@ -229,7 +233,6 @@ export interface Entity {
 	maxHealth?: Stat
 
 	// ! Enemies
-	enemyName?: enemy
 	inactive?: Timer<false>
 	healthBar?: true
 	healthBarContainer?: CSS2DObject
@@ -239,9 +242,8 @@ export interface Entity {
 	honeyProjectile?: true
 	honeySpot?: true
 	deathTimer?: Timer<false>
-	attackPattern?: 'melee' | 'distance'
-	attackStyle?: EnemyAttackStyle
-	charges?: number
+	drops?: Drop[]
+	enemyName?: string
 	// ! Debuff
 	sneeze?: Timer<false>
 	poisoned?: Timer<false>
@@ -336,15 +338,7 @@ export type Bundle<C extends keyof Entity> = () => With<Entity, C>
 export type KeysOfType<T, U> = {
 	[K in keyof T]: T[K] extends U ? K : never;
 }[keyof T]
-type UnionToIntersection<U> =
-	(U extends any ? (k: U) => void : never) extends ((k: infer I) => void) ? I : never
 
-type LastOf<T> =
-	UnionToIntersection<T extends any ? () => T : never> extends () => infer R ? R : never
-
-type UnionToTuple<T, L = LastOf<T>> =
-	[T] extends [never] ? [] : [...UnionToTuple<Exclude<T, L>>, L]
 export type ComponentsOfType<T> = KeysOfType<Required<Entity>, T>
-export type AllComponentsOfType<T> = UnionToTuple<ComponentsOfType<T>>
 
 export type QueryEntity<Q extends Query<any>> = Q extends Query<infer E> ? E : never
