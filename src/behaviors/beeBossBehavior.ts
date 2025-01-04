@@ -16,11 +16,11 @@ const rangedAttacks = () => pollenQuery.size > 5
 	? [honeyProjectile, projectilesCircleAttack]
 	: [pollenAttack, honeyProjectile, projectilesCircleAttack]
 const beeBossQuery = ecs
-	.with('boss', 'movementForce', 'speed', 'position', 'rotation', 'body', 'enemyAnimator', 'group', 'collider', 'currentHealth', 'maxHealth', 'model', 'strength', 'hitTimer', 'size', 'targetRotation')
-	.with('beeBoss')
+	.with('boss', 'movementForce', 'speed', 'position', 'rotation', 'body', 'enemyAnimator', 'group', 'collider', 'currentHealth', 'maxHealth', 'model', 'strength', 'hitTimer', 'size', 'targetRotation', 'beeBoss')
+
 export const beeBossBehaviorPlugin = behaviorPlugin(
 	beeBossQuery,
-	'boss',
+	'beeBoss',
 	(e) => {
 		const player = playerQuery.first
 		const direction = player ? player.position.clone().sub(e.position).normalize() : null

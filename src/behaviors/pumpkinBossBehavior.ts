@@ -8,7 +8,7 @@ const pumpkinBossBossQuery = ecs
 	.with('boss', 'movementForce', 'speed', 'position', 'rotation', 'body', 'enemyAnimator', 'group', 'collider', 'currentHealth', 'maxHealth', 'model', 'strength', 'hitTimer', 'size', 'targetRotation', 'pumpkinBoss')
 export const pumpkinBossBehaviorPlugin = behaviorPlugin(
 	pumpkinBossBossQuery,
-	'boss',
+	'pumpkinBoss',
 	(e) => {
 		const player = playerQuery.first
 		const direction = player ? player.position.clone().sub(e.position).normalize() : null
@@ -16,20 +16,8 @@ export const pumpkinBossBehaviorPlugin = behaviorPlugin(
 		return { ...getMovementForce(e), player, direction, touchedByPlayer }
 	},
 )({
-	idle: () => ({
-		enter: (e) => {
-			e.enemyAnimator.playAnimation('idle')
-		},
-		update: () => {
-			console.log('ok')
-		},
-	}),
+	idle: () => ({}),
 	running: () => ({}),
-	hit: () => ({}),
-	dead: () => ({}),
-	attack: () => ({}),
-	attackCooldown: () => ({}),
-	dying: () => ({}),
-	rangeAttack: () => ({}),
-	waitingAttack: () => ({}),
+	summon: () => ({}),
+	underground: () => ({}),
 })

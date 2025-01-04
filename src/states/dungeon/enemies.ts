@@ -83,7 +83,7 @@ export const enemyBundle = <M extends keyof Animations & characters, S extends s
 	if (enemy.boss) {
 		Object.assign(entity, {
 			boss: true,
-			sensor: { distance: bundle.size.z / 2 + 2, shape: new Cuboid(5, 2, 5) },
+			sensor: { distance: bundle.size.z / 2 + 2, shape: new Cuboid(5, 5, 5) },
 		} as const satisfies Entity)
 	}
 	return entity

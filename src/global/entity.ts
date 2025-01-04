@@ -81,7 +81,7 @@ export interface States {
 	basket: 'idle' | 'running'
 	player: 'idle' | 'running' | 'attack' | 'dying' | 'dead' | 'picking' | 'dash' | 'hit' | 'stun' | 'poisoned' | 'managed'
 	enemy: 'idle' | 'running' | 'attack' | 'hit' | 'dying' | 'dead' | 'waitingAttack' | 'attackCooldown' | 'stun' | 'wander'
-	boss: 'idle' | 'running' | 'rangeAttack' | 'attack' | 'dying' | 'dead' | 'waitingAttack' | 'attackCooldown' | 'hit'
+	beeBoss: 'idle' | 'running' | 'rangeAttack' | 'attack' | 'dying' | 'dead' | 'waitingAttack' | 'attackCooldown' | 'hit'
 	pumpkinBoss: 'idle' | 'running' | 'summon' | 'underground'
 	fish: 'going' | 'hooked' | 'wander' | 'bounce' | 'runaway'
 }

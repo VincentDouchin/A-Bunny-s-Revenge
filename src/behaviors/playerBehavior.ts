@@ -28,10 +28,8 @@ const dialogQuery = ecs.with('dialog')
 const getAttackingEnemy = (player: With<Entity, PlayerComponents>) => {
 	if (player.hitTimer.running()) return null
 	for (const enemy of enemyWithoutSensor) {
-		if (enemy.melee) {
-			if (world.intersectionPair(enemy.collider, player.collider)) {
-				return enemy
-			}
+		if (world.intersectionPair(enemy.collider, player.collider)) {
+			return enemy
 		}
 	}
 	for (const enemy of enemyWithSensor) {

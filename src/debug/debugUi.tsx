@@ -211,7 +211,7 @@ export const DebugUi = () => {
 					<div>
 						<input type="checkbox" checked={params.debugBoss} onChange={e => setParams(d => ({ ...d, debugBoss: e.target.checked }))}></input>
 						<select onChange={e => setSelectedBoss(_ => ({ boss: e.target.value as Boss }))}>
-							{Object.keys(bosses).map(([name]) => {
+							{Object.keys(bosses).map((name) => {
 								return <option selected={name === selectedBoss.boss} value={name}>{name}</option>
 							})}
 						</select>

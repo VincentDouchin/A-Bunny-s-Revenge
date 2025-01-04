@@ -56,8 +56,8 @@ export const ArmabeeEvolved = enemy(() => ({
 	scale: 10,
 	boss: true,
 	drops: [{ name: 'recipe', quantity: 1, recipe: 'hummus', rarity: Rarity.Always }],
-	behavior: 'boss',
-	attackStyle: { melee: true },
+	behavior: 'beeBoss',
+	attackStyle: { beeBoss: true },
 	animationMap: { idle: 'Flying_Idle', running: 'Fast_Flying', attacking: 'Headbutt', hit: 'HitReact', dead: 'Death' },
 	animator: 'enemyAnimator',
 	size: new Vector3(15, 20, 15),
@@ -204,7 +204,7 @@ export const PlantChewer = enemy(() => ({
 	scale: 15,
 	drops: [],
 	boss: true,
-	behavior: 'boss',
+	behavior: 'pumpkinBoss',
 	attackStyle: { pumpkinBoss: true },
 	animationMap: { underground: 'Underground', spawn: 'Spawn', idle: 'Idle', bite: 'Bite Attack', summon: 'Cast Spell', hit: 'Take Damage', dead: 'Die', running: 'Run Forward In Place' },
 	size: new Vector3(20, 20, 15),
@@ -239,6 +239,7 @@ export const enemyData = {
 export const bosses = {
 	spider_king: BroodMother,
 	plant_chewer: PlantChewer,
+	Armabee_Evolved: ArmabeeEvolved,
 } as const satisfies Partial<Record<keyof Animations & characters, (level: number) => Entity>>
 
 export type Boss = keyof typeof bosses

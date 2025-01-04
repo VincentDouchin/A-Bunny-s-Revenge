@@ -8,6 +8,7 @@ import { cookedMealEvent, harvestCropEvent, showTutorialEvent } from '@/global/e
 import { assets, ecs, inputManager, levelsData, questManager, save } from '@/global/init'
 import { app } from '@/global/states'
 import { modelColliderBundle } from '@/lib/models'
+import { NavGrid } from '@/lib/navGrid'
 import { RoomType } from '@/states/dungeon/generateDungeon'
 import { cropBundle } from '@/states/farm/farming'
 import { stopPlayer } from '@/states/game/movePlayer'
@@ -401,8 +402,10 @@ export const introQuestActors = addActors({
 				await e.cellarDoorAnimator?.playClamped('doorOpen')
 				app.disable('cutscene')
 				const enemies = introQuest.hasCompletedStep('2_find_pot') ? [] : Array.from({ length: 4 }).map(() => SootSprite(1))
+				const plan = levelsData.levels.find(l => l.type === 'cellar')!
 				const cellar: Room = {
-					plan: levelsData.levels.find(l => l.type === 'cellar')!,
+					plan,
+					navgrid: new NavGrid(plan.navgrid!, plan.size),
 					doors: {},
 					enemies,
 					type: RoomType.Entrance,
