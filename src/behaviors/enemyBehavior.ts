@@ -282,31 +282,6 @@ export const rangeEnemyBehaviorPlugin = enemyBehavior('range')({
 	idle,
 	wander,
 	running: running(50),
-	waitingAttack: waitingAttack(800),
-	attack: () => ({
-		enter: async (e, setState, { force }) => {
-			applyRotate(e, force)
-			e.enemyAnimator.playClamped('attacking')
-			projectileAttack(e.rotation.clone())(e)
-			return setState('attackCooldown')
-		},
-		update: (_e, setState, { touchedByPlayer }) => {
-			if (touchedByPlayer) return setState('hit')
-		},
-	}),
-	hit,
-	dying,
-	stun,
-	dead: () => ({}),
-	attackCooldown: attackCooldown(1000, true),
-
-})
-
-// ! RANGE THRICE
-export const rangeThriceEnemyBehaviorPlugin = enemyBehavior('range')({
-	idle,
-	wander,
-	running: running(50),
 	waitingAttack: waitingAttack(200),
 	attack: () => ({
 		enter: async (e, setState, { force }) => {
@@ -333,7 +308,7 @@ export const rangeThriceEnemyBehaviorPlugin = enemyBehavior('range')({
 
 })
 
-// ! CHARGING
+// ! CHARGING TWICE
 const obstableQuery = ecs.with('collider', 'obstacle', 'position')
 export const chargingEnemyBehaviorPlugin = enemyBehavior('charging')({
 	idle,
@@ -350,46 +325,8 @@ export const chargingEnemyBehaviorPlugin = enemyBehavior('charging')({
 			e.dashParticles?.play()
 			e.enemyAnimator.playAnimation('running')
 			await sleep(800)
-			return setState('attackCooldown')
-		},
-		update: (e, setState, { force, touchedByPlayer, player }) => {
-			applyRotate(e, force)
-			applyMove(e, force.multiplyScalar(2))
-			if (touchedByPlayer) return setState('hit')
-			world.contactPairsWith(e.collider, (c) => {
-				for (const obstacle of obstableQuery) {
-					if (obstacle.collider === c && getIntersections(e) === c) {
-						playSound('zapsplat_impacts_wood_rotten_tree_trunk_hit_break_crumple_011_102694')
-						return setState('stun')
-					}
-				}
-				if (player && c === player.collider) {
-					return setState('attackCooldown')
-				}
-			})
-		},
-	}),
-	attackCooldown: attackCooldown(2000, false),
-})
-
-// ! CHARGING TWICE
-export const chargingTwiceEnemyBehaviorPlugin = enemyBehavior('charging')({
-	idle,
-	dying,
-	waitingAttack: waitingAttack(500),
-	hit,
-	stun,
-	wander,
-	running: running(30),
-	dead: () => ({}),
-	attack: () => ({
-		enter: async (e, setState) => {
-			e.dashParticles?.restart()
-			e.dashParticles?.play()
-			e.enemyAnimator.playAnimation('running')
-			await sleep(800)
-			if (e.charging.amount === 0) {
-				e.charging.amount = 1
+			if (e.charging.amount < e.charging.max) {
+				e.charging.amount++
 				return setState('waitingAttack')
 			} else {
 				e.charging.amount = 0
