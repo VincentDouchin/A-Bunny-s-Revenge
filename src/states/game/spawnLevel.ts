@@ -299,7 +299,7 @@ export const spawnGroundAndTrees = (level: Level, dungeonLevel?: number) => {
 
 export const spawnLevel = (type: LevelType, stateEntity: AppStates<typeof app>) => () => {
 	const level = levelsData.levels.find(level => level.type === type)
-	if (!level) throw new Error(`can\'t find level ${type}`)
+	if (!level) throw new Error(`can\'t find level of type ${type}`)
 	ecs.add({ map: level.id, stateEntity })
 	spawnGroundAndTrees(level)
 }

@@ -4,6 +4,7 @@ import { enemyGroups } from '@/constants/enemyGroups'
 import { getSellableItems, type Item } from '@/constants/items'
 import { levelsData } from '@/global/init'
 import { cardinalDirections, Direction, otherDirection } from '@/lib/directions'
+import { NavGrid } from '@/lib/navGrid'
 import { getRandom, mapValues } from '@/utils/mapFunctions'
 import { encounters } from './encounters'
 
@@ -26,6 +27,7 @@ export interface Room {
 	encounter: keyof typeof encounters | null
 	items?: (Item | null)[]
 	chest?: true
+	navgrid: NavGrid
 }
 interface Position {
 	x: number
@@ -216,7 +218,9 @@ export const assignPlanAndEnemies = (rooms: BlankRoom[], level: number): Room[] 
 			encounter = getRandom(Object.keys(encounters) as (keyof typeof encounters)[])
 		}
 		const enemies = getEnemies(room.type, level).map(enemy => enemy(level))
-		const newRoom: Room = { ...room, plan, enemies, doors, encounter }
+		if (!plan.navgrid) throw new Error(`Navgrid not generated for level ${plan.name}`)
+		const navgrid = new NavGrid(plan.navgrid, plan.size)
+		const newRoom: Room = { ...room, plan, enemies, doors, encounter, navgrid }
 		if (
 			!hasSeller
 			&& Object.values(levelsData.levelData).filter(x => x && x.map === plan.id).some(x => x && x.model === 'stall')

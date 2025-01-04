@@ -42,7 +42,7 @@ export default defineConfig(async () => {
 				includeAssets: ['favicon.ico', 'apple-touch-icon.png'],
 
 				injectManifest: {
-					globPatterns: ['**/*.{js,html,css,wasm}'],
+					globPatterns: ['**/*.{js,html,css,wasm,glb,svg,png,webm,webp}'],
 					maximumFileSizeToCacheInBytes: 6000000,
 				},
 				workbox: {

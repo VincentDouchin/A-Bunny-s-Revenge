@@ -119,8 +119,8 @@ app
 	.onEnter('clearing', initTexturesItemsAndEnemies, compileShaders)
 	.onUpdate('clearing', collideWithDoorClearing)
 	// ! DUNGEON
-	.addSubscribers('dungeon', spawnDrops, removeEnemyFromSpawn, applyArchingForce, unlockDungeon)
-	.onEnter('dungeon', spawnDungeon, spawnLevelData, spawnEnemies, spawnPlayerDungeon, moveCamera(true))
+	.addSubscribers('dungeon', spawnDrops, removeEnemyFromSpawn, applyArchingForce, unlockDungeon, spawnEnemies)
+	.onEnter('dungeon', spawnDungeon, spawnLevelData, spawnPlayerDungeon, moveCamera(true))
 	.onEnter('dungeon', compileShaders, initTexturesItemsAndEnemies)
 	.onEnter('dungeon')
 	.onUpdate(

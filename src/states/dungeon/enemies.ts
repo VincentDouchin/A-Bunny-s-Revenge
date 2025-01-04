@@ -1,16 +1,14 @@
 import type { Drop } from '@/constants/enemies'
 import type { AttackStyle, ComponentsOfType, Entity, States } from '@/global/entity'
 import type { app } from '@/global/states'
-import type { SubscriberSystem, UpdateSystem } from '@/lib/app'
+import type { SubscriberSystem } from '@/lib/app'
 import type { characters } from '@assets/assets'
 import { Animator } from '@/global/animator'
 import { Faction } from '@/global/entity'
 
-import { assets, ecs, levelsData, save, time } from '@/global/init'
+import { assets, ecs, save, time } from '@/global/init'
 import { collisionGroups } from '@/lib/collisionGroups'
-import { inMap } from '@/lib/hierarchy'
 import { modelColliderBundle } from '@/lib/models'
-import { NavGrid } from '@/lib/navGrid'
 import { Stat } from '@/lib/stats'
 import { Timer } from '@/lib/timer'
 import { dash } from '@/particles/dashParticles'
@@ -58,7 +56,6 @@ export const enemyBundle = <M extends keyof Animations & characters, S extends s
 	const entity = {
 		...behaviorBundle(enemy.behavior, 'idle'),
 		...bundle,
-		...inMap(),
 		...healthBundle(enemy.health * (level + 1)),
 		[enemy.animator]: new Animator(bundle.model, model.animations, enemy.animationMap),
 		targetRotation: new Quaternion().setFromAxisAngle(new Vector3(0, 1, 0), Math.PI * 2 * Math.random()),
@@ -95,23 +92,19 @@ const enemyQuery = ecs.with('faction').where(e => e.faction === Faction.Enemy)
 export const removeEnemyFromSpawn: SubscriberSystem<typeof app, 'dungeon'> = ({ dungeon }) => enemyQuery.onEntityRemoved.subscribe((entity) => {
 	dungeon.enemies.splice(dungeon.enemies.indexOf(entity), 1)
 })
-const mapQuery = ecs.with('map')
 
-export const spawnEnemies: UpdateSystem<typeof app, 'dungeon'> = ({ dungeon }) => {
-	const map = mapQuery.first
-	const mapData = levelsData.levels.find(level => level.id === map?.map)
-	if (!mapData?.navgrid) throw new Error('map not found')
-	const navGrid = new NavGrid(mapData.navgrid, mapData.size)
-	ecs.add({ navGrid, ...inMap() })
-	if (!navGrid) throw new Error('navGrid not generated')
-	const possiblePoints = navGrid.getSpawnPoints()
-	for (const enemy of dungeon.enemies) {
+const dungeonQuery = ecs.with('dungeon')
+export const spawnEnemies = () => dungeonQuery.onEntityAdded.subscribe((e) => {
+	const possiblePoints = e.dungeon.navgrid.getSpawnPoints()
+	for (const enemy of e.dungeon.enemies) {
 		ecs.add({
 			...enemy,
 			position: getRandom([...possiblePoints]),
+			parent: e,
 		})
 	}
-}
+})
+
 const inactiveQuery = ecs.with('inactive')
 export const tickInactiveTimer = () => {
 	for (const entity of inactiveQuery) {
