@@ -144,7 +144,7 @@ export const attackNode = (sounds: soundEffects[] = []): EnemyNode<['attack', 'a
 	),
 	sequence(
 		enteringState('attack'),
-		action(() => playSound(sounds)),
+		action(() => sounds.length > 0 && playSound(sounds)),
 		action((_e, _c, a) => a.playOnce('attacking')),
 	),
 	sequence(
