@@ -12,7 +12,7 @@ import { createMemo, onMount, Show } from 'solid-js'
 import { css } from 'solid-styled'
 import atom from 'solid-use/atom'
 
-const playerUi = useQuery(ecs.with('player', 'state').where(e => e.state !== 'dead'))
+const playerUi = useQuery(ecs.with('player', 'state').where(e => e.state.current !== 'dead'))
 export const LoseUi = () => {
 	const noPlayer = createMemo(() => playerUi().length === 0)
 	const retry = () => {

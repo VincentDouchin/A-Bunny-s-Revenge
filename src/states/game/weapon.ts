@@ -16,7 +16,7 @@ const weaponArcQuery = ecs.with('weapon', 'group', 'state')
 export const updateWeaponArc = () => {
 	for (const entity of weaponArcQuery) {
 		const weapon = entity.weapon
-		if (entity.state === 'attack') {
+		if (entity.state.current.startsWith('attack')) {
 			const parentPosition = getWorldPosition(weapon.model)
 			const tipPosition = getWorldPosition(weapon.model.getObjectByName('tip')!)
 			if (parentPosition) {

@@ -98,7 +98,7 @@ const introQuestDialogs = {
 		if (inputManager.controls() !== 'touch') {
 			showTutorialEvent.emit(TutorialWindow.Movement)
 		}
-		player.state = 'idle'
+		player.state.next = 'idle'
 		ecs.reindex(player)
 		app.disable('cutscene')
 		introQuest.unlock()
@@ -356,7 +356,7 @@ export const spawnIntroPlayer = addActors({
 	playerIntro: () => {
 		const player = { ...playerBundle(PLAYER_DEFAULT_HEALTH, null) }
 		player.playerAnimator.playAnimation('sleeping')
-		player.state = 'managed'
+		player.state.next = 'managed'
 		return player
 	},
 })

@@ -3,12 +3,12 @@ import type { app } from '@/global/states'
 import type { UpdateSystem } from '@/lib/app'
 import type { weapons } from '@assets/assets'
 import { Animator } from '@/global/animator'
-import { Faction } from '@/global/entity'
+import { Faction, stateBundle, States } from '@/global/entity'
 import { assets, ecs, save } from '@/global/init'
 import { menuInputMap, playerInputMap } from '@/global/inputMaps'
 import { ModifierContainer } from '@/global/modifiers'
 import { collisionGroups } from '@/lib/collisionGroups'
-import { isCardialDirection } from '@/lib/directions'
+import { isCardinalDirection } from '@/lib/directions'
 import { inMap } from '@/lib/hierarchy'
 import { capsuleColliderBundle, characterControllerBundle } from '@/lib/models'
 import { Stat } from '@/lib/stats'
@@ -18,7 +18,6 @@ import { ActiveEvents, Cuboid } from '@dimforge/rapier3d-compat'
 import { Euler, LinearSRGBColorSpace, Mesh, Quaternion, Vector3 } from 'three'
 import { CSS2DObject } from 'three/examples/jsm/renderers/CSS2DRenderer'
 import { clone } from 'three/examples/jsm/utils/SkeletonUtils'
-import { behaviorBundle } from '../../lib/behaviors'
 import { RoomType } from '../dungeon/generateDungeon'
 import { healthBundle } from '../dungeon/health'
 import { Dash } from './dash'
@@ -35,7 +34,6 @@ const playerAnimationMap: Record<PlayerAnimations, Animations['BunnyClothed']> =
 	slashAttack: '1H_Melee_Attack_Chop',
 	heavyAttack: '1H_Melee_Attack_Stab',
 	hit: 'Hit_A',
-	dying: 'Death_A',
 	fishing: '1H_Melee_Attack_Slice_Diagonal',
 	sleeping: 'Lie_Idle',
 	wakeUp: 'Lie_StandUp',
@@ -45,6 +43,7 @@ const playerAnimationMap: Record<PlayerAnimations, Animations['BunnyClothed']> =
 	dashLeft: 'Dodge_Left',
 	dashRight: 'Dodge_Right',
 	dashBack: 'Dodge_Backward',
+	dead: 'Death_A',
 }
 
 export const PLAYER_DEFAULT_HEALTH = 10
@@ -64,6 +63,7 @@ export const playerBundle = (health: number, weapon: weapons | null) => {
 	const debuffsContainer = new CSS2DObject(document.createElement('div'))
 	debuffsContainer.position.setY(15)
 	bundle.colliderDesc.setCollisionGroups(collisionGroups('player', ['obstacle', 'enemy', 'floor'])).setActiveEvents(ActiveEvents.COLLISION_EVENTS)
+	bundle.bodyDesc.setUserData('player')
 	const player = {
 		debuffsContainer,
 		...menuInputMap(),
@@ -73,13 +73,14 @@ export const playerBundle = (health: number, weapon: weapons | null) => {
 		...characterControllerBundle(),
 		playerAnimator: new Animator(bundle.model, assets.characters.BunnyClothed.animations, playerAnimationMap),
 		...inMap(),
-		cameratarget: true,
+		cameraTarget: true,
 		faction: Faction.Player,
 		sensor: { shape: new Cuboid(3, 3, 3), distance: 1.5 + size.x / 2 },
 		player: true,
+		playerAttackStyle: { justEntered: true, lastAttack: 0, heavyAttack: 0 },
 		movementForce: new Vector3(),
 		targetMovementForce: new Vector3(),
-		speed: new Stat(50),
+		speed: new Stat(40),
 		lootQuantity: new Stat(0),
 		lootChance: new Stat(0),
 		strength: new Stat(1),
@@ -89,18 +90,14 @@ export const playerBundle = (health: number, weapon: weapons | null) => {
 		npcName: 'Player',
 		lastStep: { right: false, left: false },
 		...healthBundle(10, health),
-		...behaviorBundle('player', 'idle'),
+		...stateBundle(States.player, 'idle'),
 		dashParticles: dash(1),
-		hitTimer: new Timer(500, true),
+		hitTimer: new Timer(1000, true),
 		dash: new Dash(1000),
 		sneeze: new Timer(2000, false),
 		poisoned: new Timer(500, false),
 		sleepy: new Timer(2000, false),
 		modifiers: new ModifierContainer(),
-		combo: {
-			lastAttack: 0,
-			heavyAttack: 0,
-		},
 		...(weapon !== null ? { weapon: weaponBundle(weapon) } : {}),
 	} as const satisfies Entity
 
@@ -111,11 +108,11 @@ export const playerBundle = (health: number, weapon: weapons | null) => {
 	return player
 }
 const doorQuery = ecs.with('door', 'position', 'rotation')
-export const spawnCharacter: UpdateSystem<typeof app, 'farm' | 'village'> = (ressources) => {
+export const spawnCharacter: UpdateSystem<typeof app, 'farm' | 'village'> = (resources) => {
 	const position = new Vector3()
 	const rotation = new Quaternion()
-	if (ressources.door) {
-		const door = doorQuery.entities.find(e => e.door === ressources.door)
+	if (resources.door) {
+		const door = doorQuery.entities.find(e => e.door === resources.door)
 		if (door) {
 			const rawRotation = new Euler().setFromQuaternion(door.rotation).y
 			position.copy(door.position)
@@ -132,13 +129,13 @@ export const spawnCharacter: UpdateSystem<typeof app, 'farm' | 'village'> = (res
 	ecs.add(player)
 }
 
-export const spawnPlayerDungeon: UpdateSystem<typeof app, 'dungeon'> = (ressources) => {
-	const isStart = ressources.dungeon.type === RoomType.Entrance && ressources.firstEntry
+export const spawnPlayerDungeon: UpdateSystem<typeof app, 'dungeon'> = (resources) => {
+	const isStart = resources.dungeon.type === RoomType.Entrance && resources.firstEntry
 	for (const door of doorQuery) {
-		if ((isStart && isCardialDirection(door.door)) ? ressources.dungeon.doors[door.door] === null : door.door === ressources.direction) {
+		if ((isStart && isCardinalDirection(door.door)) ? resources.dungeon.doors[door.door] === null : door.door === resources.direction) {
 			const rotation = door.rotation.clone().multiply(new Quaternion().setFromAxisAngle(new Vector3(0, 1, 0), Math.PI))
 			ecs.add({
-				...playerBundle(ressources.playerHealth, ressources.weapon),
+				...playerBundle(resources.playerHealth, resources.weapon),
 				position: door.position.clone(),
 				rotation,
 				targetRotation: rotation.clone(),

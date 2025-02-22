@@ -4,7 +4,7 @@ import type { Level, LevelImage } from './LevelEditor'
 import { loadImage } from '@/global/assetLoaders'
 import { ecs } from '@/global/init'
 import { cameraQuery } from '@/global/rendering'
-import { getdisplacementMap, setDisplacement, spawnGrass, spawnGroundAndTrees, spawnTrees } from '@/states/game/spawnLevel'
+import { getDisplacementMap, setDisplacement, spawnGrass, spawnGroundAndTrees, spawnTrees } from '@/states/game/spawnLevel'
 import { getScreenBuffer } from '@/utils/buffer'
 import { debounce, throttle } from '@solid-primitives/scheduled'
 import { createEffect, createMemo, createSignal, For, onCleanup, onMount, Show } from 'solid-js'
@@ -165,7 +165,7 @@ export const MapEditor = ({
 			spawnGrass(activeLevel(), ground())
 		}
 		if (canvases[selectedColor()] === 'heightMap') {
-			const displacementMap = getdisplacementMap(activeLevel())
+			const displacementMap = getDisplacementMap(activeLevel())
 			const displacementTexture = new CanvasTexture(displacementMap)
 			displacementTexture.flipY = false
 			setDisplacement(fakeGround.geometry, displacementMap);

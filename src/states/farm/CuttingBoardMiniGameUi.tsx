@@ -13,9 +13,9 @@ import { css } from 'solid-styled'
 import atom from 'solid-use/atom'
 import { Vector3 } from 'three'
 
-const boardQuery = useQuery(ecs.with('menuType', 'recipesQueued', 'position', 'rotation', 'group', 'minigameContainer').where(({ menuType }) => menuType === MenuType.BenchGame))
+const boardQuery = useQuery(ecs.with('menuType', 'recipesQueued', 'position', 'rotation', 'group', 'miniGameContainer').where(({ menuType }) => menuType === MenuType.BenchGame))
 
-export const CuttingBoardMinigameUi = () => {
+export const CuttingBoardMiniGameUi = () => {
 	const context = useGame()
 	return (
 		<Show when={context?.player()}>
@@ -39,9 +39,9 @@ export const CuttingBoardMinigameUi = () => {
 								const position = getWorldPosition(board.group)
 								targetEntity = ecs.add({
 									worldPosition: position.add(new Vector3(0, 0, 0)),
-									cameratarget: true,
+									cameraTarget: true,
 								})
-								ecs.removeComponent(player(), 'cameratarget')
+								ecs.removeComponent(player(), 'cameraTarget')
 							})
 							onCleanup(() => {
 								tweens.add({
@@ -51,7 +51,7 @@ export const CuttingBoardMinigameUi = () => {
 									onUpdate: updateCameraZoom,
 								})
 								targetEntity && ecs.remove(targetEntity)
-								addTag(player(), 'cameratarget')
+								addTag(player(), 'cameraTarget')
 								for (const camera of cameraQuery) {
 									ecs.removeComponent(camera, 'cameraOffset')
 									ecs.addComponent(camera, 'fixedCamera', true)
@@ -112,7 +112,7 @@ export const CuttingBoardMinigameUi = () => {
 				`
 							const dots = atom([true, false, true, false, true])
 							return (
-								<Portal mount={board.minigameContainer.element}>
+								<Portal mount={board.miniGameContainer.element}>
 									<div class="container">
 										<div class="dot-container">
 											<For each={dots()}>

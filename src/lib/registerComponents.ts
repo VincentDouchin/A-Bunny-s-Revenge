@@ -12,9 +12,7 @@ export const addToScene = (...components: Array<Exclude<ComponentsOfType<Object3
 		const withoutGroup = query.without('group')
 		app.addSubscribers('default', () => withoutGroup.onEntityAdded.subscribe((entity) => {
 			const group = new Group()
-			group.position.x = entity.position.x
-			group.position.y = entity.position.y
-			group.position.z = entity.position.z
+			group.position.copy(entity.position)
 			group.add(entity[component])
 			ecs.addComponent(entity, 'group', group)
 			const children = entity.children

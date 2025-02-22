@@ -10,7 +10,6 @@ export const enemyDefeated = () => {
 		duration: 3,
 		looping: false,
 		prewarm: true,
-		autoDestroy: true,
 		instancingGeometry: geo,
 		startLife: new IntervalValue(5.0, 10.0),
 		startSize: new IntervalValue(1, 2),

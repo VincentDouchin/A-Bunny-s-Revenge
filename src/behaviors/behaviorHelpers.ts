@@ -3,6 +3,7 @@ import type { With } from 'miniplex'
 import { params } from '@/global/context'
 import { ecs, inputManager, settings, time } from '@/global/init'
 import { app } from '@/global/states'
+import { action } from '@/lib/behaviors'
 import { QueryFilterFlags } from '@dimforge/rapier3d-compat'
 import { Vector3 } from 'three'
 
@@ -56,9 +57,10 @@ export const getPlayerRotation = (e: With<Entity, 'position' | 'playerControls'>
 	}
 	return force
 }
-export const applyMove = (entity: With<Entity, 'body'>, force: Vector3) => {
+export const applyMove = <E extends With<Entity, 'body'>, C >(fn: (e: E, c: C) => Vector3) => action((entity: E, c: C) => {
 	if (app.isEnabled('paused')) return
 	const { body, controller, collider } = entity
+	const force = fn(entity, c)
 	if (controller && collider && body.isKinematic()) {
 		if (!controller.computedGrounded()) {
 			force.add(new Vector3(0, -0.2, 0))
@@ -71,13 +73,23 @@ export const applyMove = (entity: With<Entity, 'body'>, force: Vector3) => {
 	} else {
 		body.applyImpulse(force.multiplyScalar(1000), true)
 	}
-}
-export const applyRotate = (entity: With<Entity, 'rotation' | 'targetRotation'>, force: Vector3) => {
+})
+
+export const applyRotate = <E extends With<Entity, 'rotation' | 'targetRotation'>, C>(fn: (e: E, c: C) => Vector3) => action((e: E, c: C) => {
 	if (app.isEnabled('paused') || app.isEnabled('menu')) return
-	if (force.length() > 0) {
-		entity.targetRotation.setFromAxisAngle(new Vector3(0, 1, 0), Math.atan2(force.x, force.z))
+	const rot = fn(e, c)
+	if (rot.length() > 0) {
+		e.targetRotation.setFromAxisAngle(new Vector3(0, 1, 0), Math.atan2(rot.x, rot.z))
 	}
-}
+})
+
+export const moveToDirection = <E extends With<Entity, 'movementForce'>, C extends { direction?: Vector3 | null }>() => action((e: E, c: C) => {
+	if (c.direction) {
+		e.movementForce.x = c.direction.x
+		e.movementForce.z = c.direction.z
+	}
+})
+
 export const takeDamage = (entity: With<Entity, 'currentHealth'>, damage: number) => {
 	if (settings.difficulty === 'easy') {
 		if (entity.player) {

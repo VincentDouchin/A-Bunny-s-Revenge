@@ -142,3 +142,5 @@ export function pipe<A, B, C, D, E, F>(
 export function pipe(...fns: Func<any, any>[]): (input: any) => any {
 	return input => fns.reduce((result, fn) => fn(result), input)
 }
+
+export const opt = <O extends object>(condition: boolean, obj: O) => condition ? obj : {}

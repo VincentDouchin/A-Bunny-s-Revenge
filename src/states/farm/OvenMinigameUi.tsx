@@ -23,7 +23,7 @@ import { ConstantValue } from 'three.quarks'
 import { itemBundle } from '../game/items'
 import { ItemDisplay } from './InventoryUi'
 
-export const ovenQuery = useQuery(ecs.with('menuType', 'recipesQueued', 'ovenAnimator', 'position').where(({ menuType }) => menuType === MenuType.OvenMinigame))
+export const ovenQuery = useQuery(ecs.with('menuType', 'recipesQueued', 'ovenAnimator', 'position').where(({ menuType }) => menuType === MenuType.OvenMiniGame))
 
 export const OvenMinigameUi = () => {
 	const context = useGame()
@@ -53,9 +53,9 @@ export const OvenMinigameUi = () => {
 								const position = getWorldPosition(oven.group!)
 								targetEntity = ecs.add({
 									worldPosition: position.add(new Vector3(0, 10, 0)),
-									cameratarget: true,
+									cameraTarget: true,
 								})
-								ecs.removeComponent(player(), 'cameratarget')
+								ecs.removeComponent(player(), 'cameraTarget')
 
 								for (const smokeTrail of smokeTrailsQuery) {
 									smokeTrail.smokeParticles.restart()
@@ -75,12 +75,12 @@ export const OvenMinigameUi = () => {
 									onUpdate: updateCameraZoom,
 								})
 								targetEntity && ecs.remove(targetEntity)
-								addTag(player(), 'cameratarget')
+								addTag(player(), 'cameraTarget')
 								for (const camera of cameraQuery) {
 									ecs.removeComponent(camera, 'cameraOffset')
 									addTag(camera, 'fixedCamera')
 								}
-								ecs.removeComponent(oven, 'cameratarget')
+								ecs.removeComponent(oven, 'cameraTarget')
 								for (const smokeTrail of smokeTrailsQuery) {
 									smokeTrail.smokeParticles.endEmit()
 								}

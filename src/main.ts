@@ -1,7 +1,7 @@
-import { beeBossBehaviorPlugin } from './behaviors/beeBossBehavior'
-import { chargingEnemyBehaviorPlugin, jumpingEnemyBehaviorPlugin, meleeEnemyBehaviorPlugin, rangeEnemyBehaviorPlugin, sporeBehaviorPlugin } from './behaviors/enemyBehavior'
-import { playerBehaviorPlugin } from './behaviors/playerBehavior'
-import { pumpkinBossBehaviorPlugin } from './behaviors/pumpkinBossBehavior'
+import { beeBossBehavior } from './behaviors/beeBossBehavior'
+import { chargingBehavior, jumpingBehavior, meleeBehavior, rangeBehavior, seedlingBehavior, sporeBehavior } from './behaviors/enemyBehavior'
+import { playerBehavior } from './behaviors/playerBehavior'
+import { pumpkinBossBehavior } from './behaviors/pumpkinBossBehavior'
 import { debugPlugin } from './debug/debugPlugin'
 import { updateAnimations } from './global/animations'
 import { initCamera, initializeCameraPosition, moveCamera } from './global/camera'
@@ -12,21 +12,21 @@ import { compileShaders, initTexturesItemsAndEnemies, initThree, renderGame } fr
 import { initHowler, playAmbience } from './global/sounds'
 import { app } from './global/states'
 import { runIf } from './lib/app'
-import { despawnOfType, hierarchyPlugin, removeStateEntityPlugin } from './lib/hierarchy'
+import { deSpawnOfType, hierarchyPlugin, removeStateEntityPlugin } from './lib/hierarchy'
 import { particlesPlugin } from './lib/particles'
 import { physicsPlugin, stepWorld } from './lib/physics'
 import { addToScene } from './lib/registerComponents'
 import { transformsPlugin } from './lib/transforms'
-import { enableCutscene, introQuest, introQuestActors, spawnIntroPlayer, startIntro } from './quests/introQuest'
+import { enableCutscene, introQuestActors, spawnIntroPlayer, startIntro } from './quests/introQuest'
 import { addQuestMarkers, completeQuestStep, displayUnlockQuestToast } from './quests/questHelpers'
 import { spawnGodRay } from './shaders/godrays'
-import { applyArchingForce, detroyProjectiles, honeySplat, sleepyEffects, stepInHoney, tickPoison, tickSleepy, tickSneeze } from './states/dungeon/attacks'
+import { applyArchingForce, destroyProjectiles, honeySplat, sleepyEffects, stepInHoney, tickPoison, tickSleepy, tickSneeze } from './states/dungeon/attacks'
 import { applyDeathTimer, tickHitCooldown } from './states/dungeon/battle'
 import { dropBerriesOnHit } from './states/dungeon/bushes'
 import { buyItems } from './states/dungeon/buyItems'
 import { spawnWeaponsChoice } from './states/dungeon/chooseWeapon'
 import { removeEnemyFromSpawn, spawnEnemies, tickInactiveTimer, unlockDungeon } from './states/dungeon/enemies'
-import { killAnimation, killEntities, setInitialHealth } from './states/dungeon/health'
+import { setInitialHealth } from './states/dungeon/health'
 import { addHealthBarContainer } from './states/dungeon/healthBar'
 import { lockOnEnemy } from './states/dungeon/locking'
 import { spawnDrops } from './states/dungeon/lootPool'
@@ -53,19 +53,17 @@ import { clickOnMenuButton, initMainMenuCamPos, renderMainMenu, selectMainMenu, 
 import { disablePortrait, enableFullscreen, resize, setupGame, stopOnLosingFocus } from './states/setup/setupGame'
 import { UI } from './ui/UI'
 
-introQuest
-
 app
 	.onInit(async () => {
 		await app.enable('default')
 	})
 	// ! DEFAULT
-	.addPlugins(debugPlugin, hierarchyPlugin, transformsPlugin, physicsPlugin, addToScene('camera', 'light', 'model', 'dialogContainer', 'emitter', 'interactionContainer', 'minigameContainer', 'healthBarContainer', 'dashDisplay', 'stun', 'debuffsContainer', 'weaponArc', 'questMarkerContainer', 'lockedOn'), particlesPlugin, removeStateEntityPlugin)
+	.addPlugins(debugPlugin, hierarchyPlugin, transformsPlugin, physicsPlugin, addToScene('camera', 'light', 'model', 'dialogContainer', 'emitter', 'interactionContainer', 'miniGameContainer', 'healthBarContainer', 'dashDisplay', 'stun', 'debuffsContainer', 'weaponArc', 'questMarkerContainer', 'lockedOn'), particlesPlugin, removeStateEntityPlugin)
 	.onEnter('default', initThree, initCamera)
-	.onEnter('default', () => ui.render(UI), initHowler, initTexturesItemsAndEnemies)
-	.addSubscribers('default', resize, disablePortrait, enableFullscreen, stopOnLosingFocus, completeQuestStep)
+	.onEnter('default', initHowler, initTexturesItemsAndEnemies)
+	.addSubscribers('default', () => ui.render(UI), resize, disablePortrait, enableFullscreen, stopOnLosingFocus, completeQuestStep)
 	.onPreUpdate('default', coroutines.tick, savePlayerFromTheEmbraceOfTheVoid, updateMousePosition())
-	.onUpdate('default', runIf(() => app.isDisabled('paused'), ...updateAnimations('playerAnimator', 'basketAnimator', 'enemyAnimator', 'ovenAnimator', 'houseAnimator', 'chestAnimator', 'kayAnimator', 'cellarDoorAnimator')))
+	.onUpdate('default', runIf(() => app.isDisabled('paused'), ...updateAnimations('playerAnimator', 'basketAnimator', 'enemyAnimator', 'ovenAnimator', 'houseAnimator', 'chestAnimator', 'kayAnimator', 'cellarDoorAnimator', 'pumpkinBossAnimator', 'explodeAnimator', 'pumpkinSeedAnimator')))
 	.onRender('default', runIf(() => app.isDisabled('paused'), stepWorld, moveCamera()))
 	.onRender('default', renderGame)
 	.onPreUpdate('default', inputManager.update, ui.update)
@@ -73,9 +71,9 @@ app
 	// !SETUP
 	.onEnter('default', setupGame)
 	// ! GAME
-	.addPlugins(playerBehaviorPlugin, rangeEnemyBehaviorPlugin, chargingEnemyBehaviorPlugin, meleeEnemyBehaviorPlugin, beeBossBehaviorPlugin, jumpingEnemyBehaviorPlugin, sporeBehaviorPlugin, pumpkinBossBehaviorPlugin)
 	.addPlugins(fishingPlugin, interactionPlugin, tickModifiersPlugin('speed', 'maxHealth', 'strength', 'critChance', 'critDamage', 'attackSpeed', 'lootQuantity', 'lootChance'))
-	.addSubscribers('game', initializeCameraPosition, bobItems, enableInventoryState, killAnimation, popItems, addHealthBarContainer, ...equip('wateringCan', 'weapon', 'fishingPole'), ...doorLocking, addDashDisplay, addQuestMarkers, displayUnlockQuestToast)
+	.addPlugins(playerBehavior, seedlingBehavior, meleeBehavior, chargingBehavior, jumpingBehavior, sporeBehavior, rangeBehavior, beeBossBehavior, pumpkinBossBehavior)
+	.addSubscribers('game', initializeCameraPosition, bobItems, enableInventoryState, popItems, addHealthBarContainer, ...equip('wateringCan', 'weapon', 'fishingPole'), ...doorLocking, addDashDisplay, addQuestMarkers, displayUnlockQuestToast)
 	.onEnter('game', questManager.enableQuests)
 	.onPreUpdate(
 		'game',
@@ -125,11 +123,11 @@ app
 	.onEnter('dungeon')
 	.onUpdate(
 		'dungeon',
-		runIf(canPlayerMove, allowDoorCollision, collideWithDoorDungeon, harvestCrop, killEntities, unlockDoorDungeon),
+		runIf(canPlayerMove, allowDoorCollision, collideWithDoorDungeon, harvestCrop, unlockDoorDungeon),
 		runIf(() => app.isDisabled('paused'), tickHitCooldown, tickSneeze, tickPoison, tickInactiveTimer, tickSleepy),
 	)
-	.onUpdate('dungeon', detroyProjectiles, honeySplat, stepInHoney, endBattleSpawnChest, spawnPoisonTrail, lockOnEnemy, buyItems)
-	.onExit('dungeon', despawnOfType('map'))
+	.onUpdate('dungeon', destroyProjectiles, honeySplat, stepInHoney, endBattleSpawnChest, spawnPoisonTrail, lockOnEnemy, buyItems)
+	.onExit('dungeon', deSpawnOfType('map'))
 	// ! PAUSED
 	.onEnter('paused', () => time.stop(), musicManager.pause)
 	.onExit('paused', () => time.start(), musicManager.play)
@@ -137,6 +135,5 @@ app
 	.onEnter('village', spawnLevel('village', 'village'), spawnLevelData, spawnCharacter, moveCamera(true))
 	.onEnter('village', compileShaders, initTexturesItemsAndEnemies)
 	.onUpdate('village', collideWithDoorVillage)
-
 	.addPlugins(introQuestActors('game'))
 	.start()

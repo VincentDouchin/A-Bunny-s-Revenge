@@ -1,10 +1,10 @@
 import type { QueryEntity } from '@/global/entity'
-import type { AppStates, Ressources, UpdateSystem } from '@/lib/app'
+import type { AppStates, Resources, UpdateSystem } from '@/lib/app'
 import { Faction, farmDoors } from '@/global/entity'
 import { ecs, save, tweens, world } from '@/global/init'
 import { playSound } from '@/global/sounds'
 import { app } from '@/global/states'
-import { Direction, isCardialDirection, otherDirection } from '@/lib/directions'
+import { Direction, isCardinalDirection, otherDirection } from '@/lib/directions'
 import { doorClosed } from '@/particles/doorClosed'
 import vertexShader from '@/shaders/glsl/main.vert?raw'
 import { VineGateMaterial } from '@/shaders/materials'
@@ -55,9 +55,9 @@ const onCollideWithDoor = <S extends AppStates<typeof app>>(
 	fn: (
 		door: QueryEntity<typeof doorQuery>,
 		player: QueryEntity<typeof playerQuery>,
-		ressources: Ressources<typeof app, S>
+		ressources: Resources<typeof app, S>
 	) => void,
-) => (ressources: Ressources<typeof app, S>) => {
+) => (ressources: Resources<typeof app, S>) => {
 	{
 		for (const door of doorQuery) {
 			for (const player of playerQuery) {
@@ -78,7 +78,7 @@ export const unlockDoorDungeon = () => {
 }
 
 export const collideWithDoorDungeon = onCollideWithDoor<'dungeon'>((door, player, { dungeon, dungeonLevel, weapon }) => {
-	if (isCardialDirection(door.door)) {
+	if (isCardinalDirection(door.door)) {
 		const nextRoom = dungeon.doors[door.door]
 		if (nextRoom) {
 			app.disable('dungeon')

@@ -28,7 +28,7 @@ const projectileBundle = (rotation: Quaternion, origin: Vector3, strength: Stat)
 		rotation,
 		strength,
 		faction: Faction.Enemy,
-		state: 'attack',
+		state: { current: 'attack', previous: null, next: null },
 		emitter: projectileTrail(),
 		movementForce: new Vector3(0, 0, 1).applyQuaternion(rotation),
 		position: origin.clone().add(new Vector3(0, 5, 10).applyQuaternion(rotation)),
@@ -37,7 +37,7 @@ const projectileBundle = (rotation: Quaternion, origin: Vector3, strength: Stat)
 	} as const satisfies Entity
 }
 
-export const projectileAttack = (rotation: Quaternion) => ({ group, strength }: With<Entity, 'group' | 'strength'>) => {
+export const projectileAttack = ({ group, strength }: With<Entity, 'group' | 'strength'>, rotation: Quaternion) => {
 	const origin = getWorldPosition(group)
 	ecs.add(projectileBundle(rotation, origin, strength))
 }
@@ -61,10 +61,11 @@ export const honeyProjectile = ({ group, rotation }: With<Entity, 'group' | 'rot
 		new MeshBasicMaterial({ color: 0xF7F3B7, transparent: true, opacity: 0.6, depthWrite: false }),
 	)
 	const bundle = modelColliderBundle(model, RigidBodyType.Dynamic, true, new Vector3(1, 1, 1))
-	bundle.bodyDesc.setLinearDamping(3)
-	bundle.bodyDesc.gravityScale = 0.7
-	bundle.bodyDesc.setLinvel(0, -8, 0)
-	bundle.colliderDesc.setMass(1)
+	bundle.bodyDesc.gravityScale = 0.2
+	const force = between(20, 30)
+	const dir = new Vector3(0, force, force).applyQuaternion(rotation)
+	bundle.bodyDesc.setLinvel(...dir.toArray())
+	bundle.colliderDesc.setMass(0.1)
 	ecs.add({
 		...bundle,
 		...inMap(),
@@ -154,7 +155,7 @@ export const tickSleepy = tickDebuff('sleepy', 'sleepingPowder', 10, ['sleepingP
 
 const projectilesQuery = ecs.with('projectile', 'collider')
 const obstaclesQuery = ecs.with('obstacle', 'collider')
-export const detroyProjectiles = () => {
+export const destroyProjectiles = () => {
 	for (const projectile of projectilesQuery) {
 		for (const obstacle of obstaclesQuery) {
 			if (world.intersectionPair(projectile.collider, obstacle.collider)) {

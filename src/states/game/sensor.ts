@@ -1,11 +1,15 @@
 import type { Entity } from '@/global/entity'
-import type { Collider } from '@dimforge/rapier3d-compat'
 import type { With } from 'miniplex'
 import { world } from '@/global/init'
+import { type Collider, Cuboid } from '@dimforge/rapier3d-compat'
 import { Vector3 } from 'three'
 
 export const getIntersections = (e: With<Entity, 'position' | 'rotation' | 'sensor'>, group?: number, callback?: (collider: Collider) => boolean) => {
-	const position = new Vector3(0, 0, e.sensor.distance).applyQuaternion(e.rotation).add(e.position)
+	const h = e.sensor.shape instanceof Cuboid
+		? e.sensor.shape.halfExtents.y
+		: 0
+	const position = new Vector3(0, h, e.sensor.distance).applyQuaternion(e.rotation).add(e.position)
+
 	if (callback) {
 		const colliders = new Array<Collider>()
 		world.intersectionsWithShape(position, e.rotation, e.sensor.shape, (c) => {

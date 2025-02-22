@@ -7,8 +7,8 @@ import solidPlugin from 'vite-plugin-solid'
 import solidStyledPlugin from 'vite-plugin-solid-styled'
 import solidSvg from 'vite-plugin-solid-svg'
 import { assetPipeline } from './scripts/assetPipeline'
-import { ConverAudioFiles } from './scripts/convertAudioFiles'
-import { ConverFBXToGLB } from './scripts/convertFbx2GLB'
+import { ConvertAudioFiles } from './scripts/convertAudioFiles'
+import { ConvertFBXToGLB } from './scripts/convertFbx2GLB'
 import { ExtractAnimations } from './scripts/extractAnimations'
 import { GenerateAssetManifest } from './scripts/generateAssetManifest'
 import { GenerateAssetNames } from './scripts/generateAssetNames'
@@ -25,8 +25,8 @@ export default defineConfig(async () => {
 				new GenerateAssetManifest(),
 				new OptimizeAssets(),
 				new ExtractAnimations(),
-				new ConverAudioFiles(),
-				new ConverFBXToGLB(),
+				new ConvertAudioFiles(),
+				new ConvertFBXToGLB(),
 			]),
 			solidPlugin(),
 			solidSvg({ defaultAsComponent: true }),

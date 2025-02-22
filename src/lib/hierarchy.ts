@@ -13,7 +13,8 @@ export const inMap = () => {
 		throw new Error('map not found')
 	}
 }
-export const addChildren = () => ecs.onEntityAdded.subscribe((entity) => {
+const parentQuery = ecs.with('parent')
+export const addChildren = () => parentQuery.onEntityAdded.subscribe((entity) => {
 	const parent = entity.parent
 	if (parent) {
 		if (parent.children) {
@@ -24,16 +25,16 @@ export const addChildren = () => ecs.onEntityAdded.subscribe((entity) => {
 		}
 	}
 })
+export const removeChildren = () => parentQuery.onEntityRemoved.subscribe((entity) => {
+	entity.parent.children?.delete(entity)
+})
 
-export const despanwChildren = () => ecs.with('children').onEntityRemoved.subscribe((entity) => {
+export const deSpawnChildren = () => ecs.with('children').onEntityRemoved.subscribe((entity) => {
 	for (const children of entity.children) {
 		ecs.remove(children)
 	}
 })
 
-export const removeChildren = () => ecs.with('parent').onEntityRemoved.subscribe((entity) => {
-	entity.parent.children?.delete(entity)
-})
 export const removeParent = (entity: Entity) => {
 	if (entity.parent) {
 		entity.parent.children?.delete(entity)
@@ -43,7 +44,7 @@ export const removeParent = (entity: Entity) => {
 		}
 	}
 }
-export const despawnOfType = (...components: (keyof Entity)[]) => {
+export const deSpawnOfType = (...components: (keyof Entity)[]) => {
 	return set(components.map((component) => {
 		const query = ecs.with(component)
 		return () => {
@@ -67,7 +68,7 @@ const onDestroyCallBack = () => onDestroyQuery.onEntityRemoved.subscribe((e) => 
 })
 
 export const hierarchyPlugin: Plugin<typeof app> = (app) => {
-	app.addSubscribers('default', onDestroyCallBack, addChildren, removeChildren, despanwChildren)
+	app.addSubscribers('default', onDestroyCallBack, addChildren, removeChildren, deSpawnChildren)
 	app.onPostUpdate('default', addChildrenCallBack)
 }
 export const addTag = (entity: Entity, tag: ComponentsOfType<true>) => {

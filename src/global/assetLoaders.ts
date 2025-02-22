@@ -26,7 +26,10 @@ export const getPathPart = (part: number) => (path: string) => {
 
 export const textureLoader = new TextureLoader()
 
-const cachedLoader = async <R>(storeName: string, fn: (arr: ArrayBuffer) => Promise<R>) => {
+const cachedLoader = async <R>(storeName: string, fn: (arr: ArrayBuffer) => Promise<R>, fnDev?: (src: string) => Promise<R>) => {
+	if (import.meta.env.DEV && fnDev) {
+		return fnDev
+	}
 	const store = createStore('fabled-recipes', storeName)
 	const [localManifest, setLocalManifest] = useLocalStorage<Partial<Record<string, number>>>('assetManifest', {})
 	const files = new Map<string, ArrayBuffer>(await entries(store))
@@ -72,13 +75,21 @@ const getDracoLoader = () => {
 }
 export const draco = getDracoLoader()
 
-export const loadGLB = await cachedLoader('glb', (arrayBuffer: ArrayBuffer) => new GLTFLoader().setDRACOLoader(draco).parseAsync(arrayBuffer, ''))
+export const loadGLB = await cachedLoader(
+	'glb',
+	(arrayBuffer: ArrayBuffer) => new GLTFLoader().setDRACOLoader(draco).parseAsync(arrayBuffer, ''),
+	src => new GLTFLoader().setDRACOLoader(draco).loadAsync(src),
+)
 
-export const loadAudio = await cachedLoader('glb', async (arrayBuffer: ArrayBuffer) => {
-	const audioBlob = await new Blob([arrayBuffer], { type: 'audio/webm' })
-	const url = URL.createObjectURL(audioBlob)
-	return url
-})
+export const loadAudio = await cachedLoader(
+	'glb',
+	async (arrayBuffer: ArrayBuffer) => {
+		const audioBlob = await new Blob([arrayBuffer], { type: 'audio/webm' })
+		const url = URL.createObjectURL(audioBlob)
+		return url
+	},
+	src => Promise.resolve(src),
+)
 export const loadImage = (path: string) => new Promise<HTMLImageElement>((resolve) => {
 	const img = new Image()
 	img.src = path
@@ -91,7 +102,7 @@ export interface InstanceHandle {
 }
 
 export const instanceMesh = <T extends Material>(obj: Object3D<Object3DEventMap>, castShadow = true) => {
-	const intanceParams: Matrix4[] = []
+	const instanceParams: Matrix4[] = []
 	const meshes: InstancedUniformsMesh<T>[] = []
 	const group = new Group()
 
@@ -100,8 +111,8 @@ export const instanceMesh = <T extends Material>(obj: Object3D<Object3DEventMap>
 		matrix.makeRotationFromEuler(rotation)
 		matrix.setPosition(position)
 		matrix.scale(new Vector3().setScalar(scale))
-		const i = intanceParams.length
-		intanceParams.push(matrix)
+		const i = instanceParams.length
+		instanceParams.push(matrix)
 		const uniformCache: Record<string, any> = {}
 		return {
 			setMatrix: (fn: (m: Matrix4) => void) => {
@@ -122,7 +133,7 @@ export const instanceMesh = <T extends Material>(obj: Object3D<Object3DEventMap>
 	const process = () => {
 		obj.traverse((node) => {
 			if (node instanceof Mesh) {
-				const mesh = new InstancedUniformsMesh(node.geometry.clone(), node.material.clone(), intanceParams.length)
+				const mesh = new InstancedUniformsMesh(node.geometry.clone(), node.material.clone(), instanceParams.length)
 				mesh.instanceMatrix.setUsage(DynamicDrawUsage)
 				meshes.push(mesh)
 			}
@@ -130,8 +141,8 @@ export const instanceMesh = <T extends Material>(obj: Object3D<Object3DEventMap>
 		for (const mesh of meshes) {
 			mesh.castShadow = castShadow
 			group.add(mesh)
-			for (let i = 0; i < intanceParams.length; i++) {
-				const matrix = intanceParams[i]
+			for (let i = 0; i < instanceParams.length; i++) {
+				const matrix = instanceParams[i]
 				mesh.setMatrixAt(i, matrix)
 			}
 		}

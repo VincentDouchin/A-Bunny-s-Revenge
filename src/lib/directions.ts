@@ -6,7 +6,7 @@ export enum Direction {
 }
 export const cardinalDirections: Direction[] = [Direction.N, Direction.S, Direction.W, Direction.E]
 
-export const isCardialDirection = (direction: string): direction is Direction => cardinalDirections.includes(direction)
+export const isCardinalDirection = (direction: string): direction is Direction => cardinalDirections.includes(direction)
 
 export const otherDirection: Record<Direction, Direction> = {
 	[Direction.N]: Direction.S,

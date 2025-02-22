@@ -10,11 +10,11 @@ import { assets, ecs, levelsData, time, ui } from '@/global/init'
 import { loadLevelData } from '@/global/levelData'
 import { updateRenderSize } from '@/global/rendering'
 import { app } from '@/global/states'
-import { despawnOfType, inMap } from '@/lib/hierarchy'
+import { deSpawnOfType, inMap } from '@/lib/hierarchy'
 import { NavGrid } from '@/lib/navGrid'
 import { thumbnailRenderer } from '@/lib/thumbnailRenderer'
 import { ToonMaterial } from '@/shaders/materials'
-import { getdisplacementMap, HEIGHT, setDisplacement, spawnGroundAndTrees, spawnLevelData } from '@/states/game/spawnLevel'
+import { getDisplacementMap, HEIGHT, setDisplacement, spawnGroundAndTrees, spawnLevelData } from '@/states/game/spawnLevel'
 import { useQuery } from '@/ui/store'
 import { getScreenBuffer } from '@/utils/buffer'
 import { entries, getRandom } from '@/utils/mapFunctions'
@@ -222,11 +222,11 @@ export const LevelEditor = () => {
 						fakeGround = new Mesh(new PlaneGeometry(level.size.x, level.size.y, level.size.x, level.size.y), new MeshBasicMaterial({ opacity: 0, transparent: true }))
 						fakeGround.rotation.setFromQuaternion(new Quaternion().setFromAxisAngle(new Vector3(1, 0, 0), -Math.PI / 2))
 						fakeGround.position.y = -HEIGHT / 4
-						setDisplacement(fakeGround.geometry, getdisplacementMap(level, true))
+						setDisplacement(fakeGround.geometry, getDisplacementMap(level, true))
 						scene.add(fakeGround)
 					}
 					const switchLevel = (level: Level) => {
-						despawnOfType('map')
+						deSpawnOfType('map')
 						navgridDisplayed(false)
 						if (navgrid) {
 							navgrid.mesh?.removeFromParent()

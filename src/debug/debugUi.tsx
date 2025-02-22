@@ -21,7 +21,7 @@ import { SaveEditor } from './saveEditor'
 import { SoundUi } from './SoundUi'
 import { ColorCorrection, ToonEditor } from './toonEditor'
 
-export const [selectedBoss, setSelectedBoss] = useLocalStorage<{ boss: Boss }>('selectedBoss', { boss: 'spider_king' })
+export const [selectedBoss, setSelectedBoss] = useLocalStorage<{ boss: Boss }>('selectedBoss', { boss: 'Armabee_Evolved' })
 const rendererQuery = ecs.with('renderer', 'scene', 'renderGroup').where(e => e.renderGroup === RenderGroup.Game)
 
 const [localParams, setParams] = useLocalStorage('params', params)
@@ -162,10 +162,10 @@ export const DebugUi = () => {
 	ui.updateSync(() => {
 		debugRenderer && debugRenderer.update()
 	})
-	const navgridQuery = ecs.with('navGrid')
-	const isNavGridRenderered = ui.sync(() => !!navgridQuery.first?.navGrid?.mesh?.parent)
+	const navgridQuery = ecs.with('dungeon')
+	const isNavGridRendered = ui.sync(() => !!navgridQuery.first?.dungeon?.navgrid?.mesh?.parent)
 	const toggleNavGrid = () => {
-		const navgrid = navgridQuery.first?.navGrid
+		const navgrid = navgridQuery.first?.dungeon.navgrid
 		if (navgrid) {
 			navgrid.render()
 		}
@@ -223,7 +223,7 @@ export const DebugUi = () => {
 					Debug Renderer
 					<input type="checkbox" onChange={e => toggleDebugRenderer(e.target.checked)}></input>
 					nav grid
-					<input type="checkbox" checked={isNavGridRenderered()} onChange={() => toggleNavGrid()}></input>
+					<input type="checkbox" checked={isNavGridRendered()} onChange={() => toggleNavGrid()}></input>
 					Time of day
 					<input
 						type="range"

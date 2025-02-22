@@ -7,7 +7,7 @@ import { LockIndicator } from '@/states/dungeon/lockIndicator'
 import { LoseUi } from '@/states/dungeon/LoseUi'
 import { SneezeUi } from '@/states/dungeon/SneezeUi'
 import { CauldronMinigameUi } from '@/states/farm/CauldronMinigameUi'
-import { CuttingBoardMinigameUi } from '@/states/farm/CuttingBoardMiniGameUi'
+import { CuttingBoardMiniGameUi } from '@/states/farm/CuttingBoardMiniGameUi'
 import { FishingMinigameUi } from '@/states/farm/FishingMinigameUi'
 import { InventoryUi } from '@/states/farm/InventoryUi'
 import { OvenMinigameUi } from '@/states/farm/OvenMinigameUi'
@@ -40,7 +40,7 @@ export const UI = () => {
 					<RecipesUi />
 					<OvenMinigameUi />
 					<CauldronMinigameUi />
-					<CuttingBoardMinigameUi />
+					<CuttingBoardMiniGameUi />
 					<InventoryUi />
 					<SeedUi />
 					<QuestUi />

@@ -41,7 +41,7 @@ export const modifiers: Record<Modifiers, ModifierDef> = {
 		duration: 5000,
 		stackable: false,
 		mods: [
-			{ stat: 'speed', type: ModType.Percent, stage: ModStage.Total, value: -50 },
+			{ stat: 'speed', type: ModType.Percent, stage: ModStage.Total, value: -80 },
 		],
 	},
 	cookie: {

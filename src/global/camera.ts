@@ -14,8 +14,8 @@ export const initCamera = () => {
 		w / 2 / params.zoom,
 		h / 2 / params.zoom,
 		-h / 2 / params.zoom,
-		0.0001,
-		1000,
+		0.000000001,
+		2000,
 	)
 	camera.updateProjectionMatrix()
 	ecs.add({
@@ -24,14 +24,14 @@ export const initCamera = () => {
 		fixedCamera: true,
 		position: new Vector3(),
 		mainCamera: true,
-		cameraLookat: new Vector3(),
+		cameraLookAt: new Vector3(),
 		cameraShake: new Vector3(),
 		cameraOffset: new Vector3(),
 	})
 }
 const cameraQuery = ecs.with('camera')
-const gameCameraQuery = ecs.with('camera', 'position', 'mainCamera', 'cameraLookat', 'cameraShake')
-export const cameraTargetQuery = ecs.with('cameratarget', 'worldPosition')
+const gameCameraQuery = ecs.with('camera', 'position', 'mainCamera', 'cameraLookAt', 'cameraShake')
+export const cameraTargetQuery = ecs.with('cameraTarget', 'worldPosition')
 const doorsQuery = ecs.with('boundary', 'position').where(e => e.doorType === 'fog')
 export const updateCameraZoom = (zoom: number = params.zoom) => {
 	for (const { camera } of cameraQuery) {
@@ -66,8 +66,8 @@ export const addCameraShake = () => {
 		})
 	}
 }
-const OFFSETZ = 30
-const OFFSETX = 50
+const OFFSET_Z = 30
+const OFFSET_X = 50
 const MAP_OFFSET = 10
 const levelQuery = ecs.with('map')
 export const moveCamera = (init = false) => () => {
@@ -82,16 +82,16 @@ export const moveCamera = (init = false) => () => {
 					if (level && level.containCamera) {
 						for (const door of doorsQuery) {
 							if (door.boundary === Direction.N) {
-								target.z = Math.min(target.z, door.position.z - OFFSETZ)
+								target.z = Math.min(target.z, door.position.z - OFFSET_Z)
 							}
 							if (door.boundary === Direction.S) {
-								target.z = Math.max(target.z, door.position.z + OFFSETZ)
+								target.z = Math.max(target.z, door.position.z + OFFSET_Z)
 							}
 							if (door.boundary === Direction.W) {
-								target.x = Math.min(target.x, door.position.x - OFFSETX)
+								target.x = Math.min(target.x, door.position.x - OFFSET_X)
 							}
 							if (door.boundary === Direction.E) {
-								target.x = Math.max(target.x, door.position.x + OFFSETX)
+								target.x = Math.max(target.x, door.position.x + OFFSET_X)
 							}
 						}
 						const levelSize = level?.size
@@ -131,9 +131,9 @@ export const moveCamera = (init = false) => () => {
 	}
 }
 
-export const initializeCameraPosition = () => ecs.with('initialCameratarget', 'position').onEntityAdded.subscribe((e) => {
+export const initializeCameraPosition = () => ecs.with('initialCameraTarget', 'position').onEntityAdded.subscribe((e) => {
 	for (const camera of gameCameraQuery) {
-		camera.cameraLookat.copy(e.position)
-		ecs.removeComponent(e, 'initialCameratarget')
+		camera.cameraLookAt.copy(e.position)
+		ecs.removeComponent(e, 'initialCameraTarget')
 	}
 })

@@ -21,8 +21,8 @@ export const setupGame = async () => {
 	app.enable('game')
 	if (params.debugBoss) {
 		const bossRoom = assignPlanAndEnemies([{ position: { x: 0, y: 0 }, connections: { north: 1, south: null }, type: RoomType.Boss }], 0)
-		bossRoom[0].enemies = [bosses[selectedBoss.boss](1)]
-		app.enable('dungeon', { dungeon: bossRoom[0], direction: Direction.S, firstEntry: true, playerHealth: 5, dungeonLevel: 0, weapon: 'Hoe' })
+		bossRoom[0].enemies = [bosses[selectedBoss.boss](0)]
+		app.enable('dungeon', { dungeon: bossRoom[0], direction: Direction.S, firstEntry: true, playerHealth: 10, dungeonLevel: 0, weapon: 'Hoe' })
 		updateRenderSize()
 		updateCameraZoom()
 	} else if (params.debugEnemies) {
@@ -47,7 +47,7 @@ export const setupGame = async () => {
 export const stopOnLosingFocus = () => {
 	const listener = () => {
 		if (document.hidden) {
-			app.stop()
+			app.pause()
 			time.stop()
 		} else {
 			time.start()
@@ -55,7 +55,7 @@ export const stopOnLosingFocus = () => {
 		}
 	}
 	const blurListener = () => {
-		app.stop()
+		app.pause()
 		time.stop()
 		Howler.mute(true)
 	}
@@ -88,7 +88,7 @@ export const disablePortrait = () => {
 		const portrait = e.matches
 
 		if (portrait) {
-			app.stop()
+			app.pause()
 			addLandscapeElement()
 		} else {
 			app.start()
@@ -97,7 +97,7 @@ export const disablePortrait = () => {
 	}
 	const mediaMatch = window.matchMedia('(orientation: portrait)')
 	if (mediaMatch.matches) {
-		app.stop()
+		app.pause()
 		addLandscapeElement()
 	}
 	mediaMatch.addEventListener('change', listener)

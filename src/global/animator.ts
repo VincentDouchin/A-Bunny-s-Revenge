@@ -2,8 +2,15 @@ import type { AnimationAction, AnimationBlendMode, AnimationClip, Object3D, Obje
 import { entries } from '@/utils/mapFunctions'
 import { AnimationMixer, LoopOnce } from 'three'
 
-interface playOptions { timeScale?: number, weight?: number, clamped?: boolean, loopOnce?: boolean, blending?: AnimationBlendMode }
-export class Animator<K extends string> extends AnimationMixer {
+interface playOptions {
+	timeScale?: number
+	weight?: number
+	clamped?: boolean
+	loopOnce?: boolean
+	blending?: AnimationBlendMode
+	overwrite?: boolean
+}
+export class Animator<K extends string = any> extends AnimationMixer {
 	current?: K
 	action?: AnimationAction
 	animationClips: Record<K, AnimationClip>
@@ -26,6 +33,10 @@ export class Animator<K extends string> extends AnimationMixer {
 		this.animationClips = clips
 	}
 
+	isPlaying(animation: K) {
+		return this.current === animation
+	}
+
 	#getClip(animation: K) {
 		const clip = this.animationClips[animation]
 		if (!clip) {
@@ -36,11 +47,9 @@ export class Animator<K extends string> extends AnimationMixer {
 
 	#getAction(animation: K) {
 		const clip = this.#getClip(animation)
-		if (clip) {
-			const action = this.clipAction(clip)
-			action.reset()
-			return action
-		}
+		const action = this.clipAction(clip)
+		action.reset()
+		return action
 	}
 
 	getTimeRatio() {
@@ -54,7 +63,7 @@ export class Animator<K extends string> extends AnimationMixer {
 	play(animation: K, options?: playOptions) {
 		const action = this.#getAction(animation)!
 
-		if (this.action) {
+		if (this.action && options?.overwrite !== false) {
 			this.action?.crossFadeTo(action, 0.1, true)
 		}
 		if (options) {
@@ -84,12 +93,22 @@ export class Animator<K extends string> extends AnimationMixer {
 		})
 	}
 
+	init(animation: K) {
+		const action = this.#getAction(animation)
+		action.play()
+		action.paused = true
+		action.time = 0
+		this.update(0)
+	}
+
 	playOnce(animation: K, options?: playOptions, delay = 0) {
+		if (animation === this.current) return
 		const clip = this.#getClip(animation)
 		this.delay = delay
 		this.play(animation, { ...options, loopOnce: true })
 		return new Promise<void>((resolve) => {
 			setTimeout(() => {
+				this.current = undefined
 				this.delay = 0
 				resolve()
 			}, (clip.duration / (options?.timeScale ?? 1) - delay) * 1000)

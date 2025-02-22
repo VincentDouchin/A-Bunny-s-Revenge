@@ -1,5 +1,5 @@
 import type { Entity } from '@/global/entity'
-import { Armabee, ArmabeeEvolved, Batty, BroodMother, Butterfly, Devil, FlowerBoar, Magicbook, Platopo, PoisonSnail, Raccoon, ShagaA, Slime, Snail } from './enemies'
+import { Armabee, ArmabeeEvolved, Batty, Butterfly, Devil, FlowerBoar, Magicbook, Platopo, PoisonSnail, Raccoon, ShagaA, Slime, Snail } from './enemies'
 
 export type EnemyGroup = Array<(level: number) => Entity>
 export const enemyGroups: Record<number, {
@@ -23,7 +23,7 @@ export const enemyGroups: Record<number, {
 			[Batty, Magicbook, Devil],
 		],
 		bosses: [
-			[BroodMother],
+			// [BroodMother],
 		],
 	},
 }

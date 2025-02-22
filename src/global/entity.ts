@@ -7,7 +7,6 @@ import type { MenuInputMap, PlayerInputMap } from '@/global/inputMaps'
 import type { AppStates } from '@/lib/app'
 import type { Direction } from '@/lib/directions'
 import type { MeshLine, MeshLineMaterial } from '@/lib/MeshLine'
-import type { NavGrid } from '@/lib/navGrid'
 import type { Stat } from '@/lib/stats'
 import type { Timer } from '@/lib/timer'
 import type { WeaponArc } from '@/shaders/weaponArc'
@@ -20,14 +19,16 @@ import type { Query, With } from 'miniplex'
 import type { BufferGeometry, Camera, Group, Light, Mesh, MeshPhongMaterial, Object3D, Object3DEventMap, Quaternion, Scene, ShaderMaterial, Sprite, Vector3, WebGLRenderer } from 'three'
 import type { BatchedRenderer, ParticleEmitter, ParticleSystem } from 'three.quarks'
 import type { CSS2DObject } from 'three/examples/jsm/renderers/CSS2DRenderer'
+import type { RequiredKeysOf } from 'type-fest'
 import type { Animator } from './animator'
 import type { InstanceHandle } from './assetLoaders'
 import type { ModifierContainer } from './modifiers'
 import type { app } from './states'
 
-export type PlayerAnimations = 'idle' | 'runFront' | 'runLeft' | 'runRight' | 'runBack' | 'lightAttack' | 'slashAttack' | 'heavyAttack' | 'hit' | 'dying' | 'fishing' | 'sleeping' | 'wakeUp' | 'interact' | 'pickup' | 'dashFront' | 'dashLeft' | 'dashRight' | 'dashBack'
+export type PlayerAnimations = 'idle' | 'runFront' | 'runLeft' | 'runRight' | 'runBack' | 'lightAttack' | 'slashAttack' | 'heavyAttack' | 'hit' | 'fishing' | 'sleeping' | 'wakeUp' | 'interact' | 'pickup' | 'dashFront' | 'dashLeft' | 'dashRight' | 'dashBack' | 'dead'
 export type EnemyAnimations = 'idle' | 'running' | 'attacking' | 'hit' | 'dead'
-export type PumpkinBossAnimations = 'underground' | 'spawn' | 'bite' | 'idle' | 'hit' | 'dead' | 'summon' | 'running'
+export type PumpkinSeedAnimations = EnemyAnimations | 'spawn'
+export type PumpkinBossAnimations = EnemyAnimations | 'spawn' | 'summon'
 export type Dialog = Generator<string | void, void, void> | AsyncGenerator<string | void, void, void>
 export enum Faction {
 	Player,
@@ -61,7 +62,7 @@ export enum MenuType {
 	Chest,
 	Player,
 	Quest,
-	OvenMinigame,
+	OvenMiniGame,
 	CauldronGame,
 	SelectSeed,
 	Basket,
@@ -77,14 +78,38 @@ export const farmDoors = ['intro', 'cellar', 'clearing', 'village', 'fromVillage
 export type Doors = typeof farmDoors[number] | Direction
 export type Actor = (typeof actors)[number]
 
-export interface States {
-	basket: 'idle' | 'running'
-	player: 'idle' | 'running' | 'attack' | 'dying' | 'dead' | 'picking' | 'dash' | 'hit' | 'stun' | 'poisoned' | 'managed'
-	enemy: 'idle' | 'running' | 'attack' | 'hit' | 'dying' | 'dead' | 'waitingAttack' | 'attackCooldown' | 'stun' | 'wander'
-	beeBoss: 'idle' | 'running' | 'rangeAttack' | 'attack' | 'dying' | 'dead' | 'waitingAttack' | 'attackCooldown' | 'hit'
-	pumpkinBoss: 'idle' | 'running' | 'summon' | 'underground'
-	fish: 'going' | 'hooked' | 'wander' | 'bounce' | 'runaway'
+export const assertEntity = <C extends keyof Entity>(e: Entity, ...components: C[]) => {
+	for (const component of components) {
+		if (!(component in e)) {
+			throw new Error(`component ${component} not found on entity`)
+		}
+	}
+	return e as With<Entity, C>
 }
+
+const baseEnemyStates = ['idle', 'running', 'attack', 'hit', 'dying', 'dead', 'waitingAttack', 'attackCooldown'] as const
+
+export const States = {
+	basket: ['idle', 'running'],
+	player: ['idle', 'running', 'attack0', 'attack1', 'attack2', 'dying', 'dead', 'picking', 'dash', 'hit', 'stun', 'poisoned', 'managed'],
+	enemy: [...baseEnemyStates, 'stun'],
+	beeBoos: [...baseEnemyStates, 'rangeAttack'],
+	pumpkinSeed: [...baseEnemyStates, 'spawn'],
+	pumpkinBoss: [...baseEnemyStates, 'summon', 'underground', 'rangeAttack'],
+	fish: ['going', 'hooked', 'wander', 'bounce', 'runaway'],
+} as const
+
+export const states = <S extends ReadonlyArray<AllStates>>(states: S): (`${S[number]}State` & keyof Entity)[] => states.map(s => `${s}State` as const)
+export type AllStates = typeof States[keyof typeof States][number]
+export type StateComponents = { [K in AllStates as `${K}State`]?: true }
+export const stateBundle = <A extends AllStates>(states: ReadonlyArray<A>, defaultState: NoInfer<A>): With<Entity, 'state'> => {
+	const components = states.reduce<StateComponents>((acc, v) => ({ ...acc, [`${v}State`]: true }), {})
+	return {
+		state: { current: defaultState, previous: null, next: null },
+		...components,
+	}
+}
+
 export interface Crop {
 	stage: number
 	name: crops
@@ -94,16 +119,37 @@ export interface Crop {
 }
 
 export interface AttackStyle {
+	playerAttackStyle: { justEntered: boolean, lastAttack: number, heavyAttack: number }
 	melee: true
 	jumping: true
 	spore: true
 	beeBoss: true
-	pumpkinBoss: true
+	pumpkinBoss: { summonTimer: Timer<false> }
 	charging: { amount: number, max: number }
 	range: { amount: number, max: number }
+	pumpkinSeed: true
 }
 
-export type Entity = Partial<AttackStyle> & {
+export type AllAnimators = { [K in keyof Required<Entity>]: Required<Entity>[K] extends Animator ? K : never }[keyof Entity]
+
+export type AllAnimations = { [K in keyof Entity]: Required<Entity>[K] extends Animator<infer A> ? A : never }[keyof Entity] & string
+export type AnimatorsWith<A extends AllAnimations> = { [K in keyof Required<Entity>]: Required<Entity>[K] extends Animator<infer B> ? A extends B ? Required<Entity>[K] : Animator<any> : Animator<any> }[keyof Entity]
+
+export class State<K extends string> {
+	current: K
+	previous: K | null = null
+	next: K | null = null
+	constructor(defaultState: K) {
+		this.current = defaultState
+	}
+}
+
+export type Entity = StateComponents & Partial<AttackStyle> & {
+	state?: { current: AllStates, previous: AllStates | null, next: AllStates | null }
+	wait?: { state: AllStates, duration: number }
+	playerAnimator?: Animator<PlayerAnimations>
+	// ! BehaviorTree
+	// state?: { current: AllStates, previous: AllStates | null, next: AllStates | null }
 	// ! Rendering
 	renderGroup?: RenderGroup
 	// ! Transforms
@@ -116,13 +162,13 @@ export type Entity = Partial<AttackStyle> & {
 	rotation?: Quaternion
 	targetRotation?: Quaternion
 	// ! Camera
-	cameratarget?: true
+	cameraTarget?: true
 	cameraShake?: Vector3
-	initialCameratarget?: true
+	initialCameraTarget?: true
 	followCamera?: true
 	fixedCamera?: true
 	mainCamera?: true
-	cameraLookat?: Vector3
+	cameraLookAt?: Vector3
 	cameraOffset?: Vector3
 	lockX?: boolean
 	// ! ThreeJS
@@ -153,9 +199,10 @@ export type Entity = Partial<AttackStyle> & {
 	size?: Vector3
 	controller?: KinematicCharacterController
 	// ! Behaviors
-	behaviorController?: keyof States
+	// behaviorController?: keyof States
 	// ! Animations
-	playerAnimator?: Animator<PlayerAnimations>
+	animator?: Animator<Animations['explode']>
+	explodeAnimator?: Animator<Animations['explode']>
 	basketAnimator?: Animator<Animations['Basket']>
 	enemyAnimator?: Animator<EnemyAnimations>
 	pumpkinBossAnimator?: Animator<PumpkinBossAnimations>
@@ -164,6 +211,7 @@ export type Entity = Partial<AttackStyle> & {
 	chestAnimator?: Animator<Animations['Chest']>
 	kayAnimator?: Animator<Animations['ALICE_animated']>
 	cellarDoorAnimator?: Animator<Animations['cellar_entrance']>
+	pumpkinSeedAnimator?: Animator<PumpkinSeedAnimations>
 	// ! Farming
 	sensor?: { shape: Shape, distance: number }
 	crop?: Crop
@@ -212,10 +260,6 @@ export type Entity = Partial<AttackStyle> & {
 	displayedItem?: Entity
 	// ! Player
 	player?: true
-	combo?: {
-		lastAttack: number
-		heavyAttack: number
-	}
 	// ! NPC
 	npc?: true
 	voice?: voices
@@ -252,8 +296,6 @@ export type Entity = Partial<AttackStyle> & {
 	pollen?: true
 	sleepingPowder?: true
 	modifiers?: ModifierContainer
-	// ! AI
-	navGrid?: NavGrid
 	// ! Particles
 	emitter?: ParticleEmitter<Object3DEventMap>
 	autoDestroy?: true
@@ -271,11 +313,9 @@ export type Entity = Partial<AttackStyle> & {
 	lootChance?: Stat
 	// ! Level Editor
 	entityId?: string
-	// ! FSM
-	state?: States[keyof States]
-	// ! Minigame
+	// ! MiniGame
 	recipesQueued?: Recipe[]
-	minigameContainer?: CSS2DObject
+	miniGameContainer?: CSS2DObject
 	spoon?: Entity
 	// ! Sounds
 	lastStep?: { left: boolean, right: boolean }
@@ -324,15 +364,19 @@ export type Entity = Partial<AttackStyle> & {
 	fishingSpot?: true
 	bobber?: With<Entity, 'position'>
 	fish?: Timer<false>
-	fishingProgress?: { attempts: number, sucess: number, done: boolean }
+	fishingProgress?: { attempts: number, success: number, done: boolean }
 	bobbing?: true
 	fishSpawner?: true
 	// ! Lock on
 	lockedOn?: CSS2DObject
 	// ! Cellar
 	crate?: true
-
+	// ! Explode
+	explode?: (amount: number) => void
+	exploder?: With<Entity, 'explode'>
 }
+
+export type BehaviorNode<E extends Array<any>> = (...e: E) => 'success' | 'failure' | 'running'
 export type Bundle<C extends keyof Entity> = () => With<Entity, C>
 
 export type KeysOfType<T, U> = {
@@ -341,4 +385,6 @@ export type KeysOfType<T, U> = {
 
 export type ComponentsOfType<T> = KeysOfType<Required<Entity>, T>
 
-export type QueryEntity<Q extends Query<any>> = Q extends Query<infer E> ? E : never
+export type QueryEntity<Q extends Query<any>, O extends keyof Entity | void = void> = O extends string ? With<Entity, QueryKeys<Q> | O> : With<Entity, QueryKeys<Q>>
+
+export type QueryKeys<Q extends Query<any>> = Q extends Query<infer E> ? E extends object ? RequiredKeysOf<E> : never : never

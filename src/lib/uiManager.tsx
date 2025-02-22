@@ -21,8 +21,7 @@ export class UIManager {
 	listeners = new Set<() => void>()
 
 	render(ui: () => JSXElement) {
-		render(() =>
-			<Dynamic component={ui}></Dynamic>, this.root)
+		return render(() => <Dynamic component={ui}></Dynamic>, this.root)
 	}
 
 	setFontSize(uiScale: number) {

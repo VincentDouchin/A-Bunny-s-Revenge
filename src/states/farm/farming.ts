@@ -130,7 +130,7 @@ export const harvestCrop = async () => {
 		if (playerControls.get('primary').justPressed && playerAnimator.current !== 'pickup') {
 			for (const spot of plantedSpotQuery) {
 				if (spot.planted.interactionContainer && maxStage(spot.planted.crop.name) === spot.planted.crop.stage) {
-					playerAnimator.playOnce('pickup').then(async () => {
+					playerAnimator.playOnce('pickup')?.then(async () => {
 						playerAnimator.playAnimation('idle')
 						const extraDrops = Math.floor(spot.planted.crop.luck)
 						const extraChance = Math.random() < (spot.planted.crop.luck % 1) ? 1 : 0
@@ -140,6 +140,7 @@ export const harvestCrop = async () => {
 							const position = getWorldPosition(spot.group)
 							ecs.add({
 								...bundle,
+
 								position: position.add(new Vector3(0, bundle.size.y + randFloat(4, 6), 0)),
 							})
 							await sleep(100)

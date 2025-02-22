@@ -83,7 +83,7 @@ export const spawnTrees = (level: Level, parent: Entity, dungeonLevel?: number, 
 					? { bodyDesc: RigidBodyDesc.fixed().lockRotations().setSleeping(true), colliderDesc: ColliderDesc.cylinder(treeSize.y / 2, treeSize.x / 2).setTranslation(0, treeSize.y / 2, 0).setCollisionGroups(collisionGroups('obstacle', ['obstacle', 'enemy', 'player'])).setActiveEvents(ActiveEvents.COLLISION_EVENTS) }
 					: {}),
 				tree: true,
-				obstable: true,
+				obstacle: true,
 				withTimeUniform: true,
 				parent,
 			})
@@ -140,7 +140,7 @@ export const spawnGrass = (level: Level, parent: Entity, dungeonLevel?: number) 
 		const grassGenerator = isFlower
 			? flowers[Math.floor(flowers.length * Math.abs(nF2))]
 			: grass[Math.floor(grass.length * Math.abs(nF2))]
-		const instanceHandle = grassGenerator.addAt(position, 1, new Euler(0, noise(x, y), 0))
+		const instanceHandle = grassGenerator.addAt(position, 1, new Euler(0, nF2, 0))
 		instances.set(instanceHandle, position)
 		ecs.add({
 			...inMap(),
@@ -165,9 +165,9 @@ export const spawnGrass = (level: Level, parent: Entity, dungeonLevel?: number) 
 	}
 }
 
-export const getdisplacementMap = (level: Level, invert = true) => {
+export const getDisplacementMap = (level: Level, invert = true) => {
 	const ctx = getScreenBuffer(level.heightMap.width, level.heightMap.height)
-	// ! heightmap
+	// ! heightMap
 	const filledHeightMap = getScreenBuffer(level.heightMap.width, level.heightMap.height)
 	filledHeightMap.fillStyle = 'black'
 	filledHeightMap.fillRect(0, 0, level.heightMap.width, level.heightMap.height)
@@ -231,7 +231,7 @@ const getWoodFlooring = ({ x, y }: { x: number, y: number }) => {
 
 export const spawnGroundAndTrees = (level: Level, dungeonLevel?: number) => {
 	const canvasScale = 0.5
-	const displacementMap = scaleCanvas(getdisplacementMap(level), canvasScale)
+	const displacementMap = scaleCanvas(getDisplacementMap(level), canvasScale)
 	const displacementTexture = new CanvasTexture(displacementMap)
 	displacementTexture.flipY = false
 	// ! Ground
@@ -259,7 +259,7 @@ export const spawnGroundAndTrees = (level: Level, dungeonLevel?: number) => {
 	groundMesh.rotation.x = -Math.PI / 2
 	groundMesh.position.y = -HEIGHT / 4
 	groundMesh.receiveShadow = true
-	const heightfieldMap = scaleCanvas(getdisplacementMap(level, false), 0.2)
+	const heightfieldMap = scaleCanvas(getDisplacementMap(level, false), 0.2)
 	const heights = canvasToArray(heightfieldMap).map(pixel => pixel.y / 255)
 	const heightfield = new Float32Array(heights.length)
 	heightfield.set(heights)
@@ -314,7 +314,7 @@ export const spawnDungeon: UpdateSystem<typeof app, 'dungeon'> = ({ dungeon, dun
 }
 
 const mapQuery = ecs.with('map')
-export const spawnLevelData: UpdateSystem<typeof app, 'dungeon' | 'farm' | void> = (ressources) => {
+export const spawnLevelData: UpdateSystem<typeof app, 'dungeon' | 'farm' | void> = (resources) => {
 	for (const { map } of mapQuery) {
 		const { levelData, colliderData } = levelsData
 		for (const [entityId, entityData] of Object.entries(levelData ?? {})) {
@@ -336,7 +336,7 @@ export const spawnLevelData: UpdateSystem<typeof app, 'dungeon' | 'farm' | void>
 				} as const satisfies Entity
 
 				if (bundleFn) {
-					ecs.add(bundleFn(entity, entityData as EntityData<never>, ressources))
+					ecs.add(bundleFn(entity, entityData as EntityData<never>, resources))
 				} else {
 					ecs.add(entity)
 				}

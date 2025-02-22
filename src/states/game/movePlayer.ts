@@ -1,26 +1,29 @@
 import { ecs, inputManager } from '@/global/init'
-import { playStep } from '@/global/sounds'
 import { app } from '@/global/states'
 import { spawnFootstep } from '@/particles/footsteps'
+import { Vector3 } from 'three'
 
 const movementQuery = ecs.with('body', 'rotation', 'movementForce', 'speed')
 const playerQuery = movementQuery.with('playerControls', 'position', 'state', 'lastStep', 'playerAnimator', 'modifiers')
 
 export const playerSteps = () => {
 	for (const player of playerQuery) {
-		if (player.state === 'running' && player.playerAnimator.action) {
-			for (const [time, foot] of [[12 / 20, 'right'], [3 / 20, 'left']] as const) {
-				if (player.playerAnimator.getTimeRatio() >= time) {
-					if (player.lastStep[foot] === false) {
-						playStep('random')
-						player.lastStep[foot] = true
-						const honey = player.modifiers.hasModifier('honeySpot')
-						spawnFootstep(foot, player.position, honey)
+		if (player.state.current === 'running' && player.playerAnimator.action) {
+			player.model?.traverse((n) => {
+				if (n.name.startsWith('toes')) {
+					const pos = new Vector3()
+					n.getWorldPosition(pos)
+					const foot = n.name.endsWith('r') ? 'right' : 'left'
+					if (pos.y <= 0.5) {
+						if (player.lastStep[foot] === false) {
+							const honey = player.modifiers.hasModifier('honeySpot')
+							spawnFootstep(foot, player.position, honey)
+							player.lastStep[foot] = true
+						}
+					} else {
+						player.lastStep[foot] = false
 					}
-				} else {
-					player.lastStep[foot] = false
-				}
-			}
+				} })
 		} else {
 			player.lastStep.left = false
 			player.lastStep.right = false

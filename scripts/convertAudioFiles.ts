@@ -5,7 +5,7 @@ import { path as ffmpegPath } from '@ffmpeg-installer/ffmpeg'
 import ffmpeg from 'fluent-ffmpeg'
 import { AssetTransformer } from './assetPipeline'
 
-export class ConverAudioFiles extends AssetTransformer {
+export class ConvertAudioFiles extends AssetTransformer {
 	extensions = ['mp3', 'wav', 'ogg']
 	async add(path: PathInfo) {
 		if (!path.extension) return
@@ -21,14 +21,6 @@ export class ConverAudioFiles extends AssetTransformer {
 				.toFormat('webm')
 				.on('error', (error) => {
 					console.log(`Encoding Error: ${error.message}`)
-					resolve()
-				})
-				.on('exit', () => {
-					console.log('Audio recorder exited')
-					resolve()
-				})
-				.on('close', () => {
-					console.log('Audio recorder closed')
 					resolve()
 				})
 				.on('end', () => {

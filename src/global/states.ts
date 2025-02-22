@@ -13,14 +13,14 @@ export const app = new AppBuilder()
 	.addState('mainMenu', 'game')
 	.addState('menu')
 	.addState('introQuest')
-	.bindRessource<'farm', FarmRessources>()
-	.bindRessource<'village', { door: 'village' }>()
-	.bindRessource<'dungeon', DungeonRessources>()
+	.bindResource<'farm', FarmResources>()
+	.bindResource<'village', { door: 'village' }>()
+	.bindResource<'dungeon', DungeonResources>()
 	.build()
-export interface FarmRessources {
+export interface FarmResources {
 	door: (typeof farmDoors)[number] | null
 }
-export interface DungeonRessources {
+export interface DungeonResources {
 	dungeon: Room
 	direction: Direction | (typeof farmDoors)[number]
 	playerHealth: number

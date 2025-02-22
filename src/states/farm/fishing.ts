@@ -1,11 +1,12 @@
 import type { app } from '@/global/states'
 import type { Plugin } from '@/lib/app'
-import { fishBehaviorPlugin } from '@/behaviors/fishBehavior'
+import { fishBehavior } from '@/behaviors/fishBehavior'
+// import { fishBehaviorPlugin } from '@/behaviors/fishBehavior'
 import { MenuType } from '@/global/entity'
 import { assets, ecs, tweens } from '@/global/init'
 import { scene } from '@/global/rendering'
 import { playSound } from '@/global/sounds'
-import { behaviorBundle } from '@/lib/behaviors'
+// import { behaviorBundle } from '@/lib/behaviors'
 import { inMap } from '@/lib/hierarchy'
 import { MeshLine, MeshLineMaterial } from '@/lib/MeshLine'
 import { Timer } from '@/lib/timer'
@@ -33,7 +34,7 @@ const fishingPoleBundle = () => {
 
 const playerFishingQuery = ecs.with('fishingPole', 'model', 'position', 'rotation', 'menuInputs', 'playerAnimator')
 const fishingQuery = ecs.with('menuType', 'group').where(e => e.menuType === MenuType.Fishing)
-export const stopFishing = (force: boolean = false) => () => {
+export const stopFishing = (force: boolean = false) => {
 	for (const player of playerFishingQuery) {
 		if ((player.menuInputs.get('cancel').justReleased || force) && player.fishingPole.bobber) {
 			player.playerAnimator.playClamped('lightAttack', { timeScale: 0.5 })
@@ -149,7 +150,7 @@ const fishBundle = (parentPos: Vector3) => {
 		position: parentPos.add(new Vector3(between(-dist, dist), 0, between(-dist, dist))).setY(-2),
 		model,
 		fish: new Timer(between(3000, 5000), true),
-		...behaviorBundle('fish', 'wander'),
+		// ...behaviorBundle('fish', 'wander'),
 
 	}
 }
@@ -162,7 +163,7 @@ const addFish = () => fishSpawnerQuery.onEntityAdded.subscribe((e) => {
 	}, 100)
 })
 const fishQuery = ecs.with('fish', 'position', 'model')
-const despawnFish = () => {
+const deSpawnFish = () => {
 	for (const spawner of fishSpawnerQuery) {
 		for (const fish of fishQuery) {
 			if (getWorldPosition(spawner.group).distanceTo(fish.position) > 50) {
@@ -187,6 +188,6 @@ const despawnFish = () => {
 
 export const fishingPlugin: Plugin<typeof app> = (app) => {
 	app.addSubscribers('game', addFish)
-		.onUpdate('game', useFishingPole, updateFishingLine, stopFishing(), despawnFish)
-		.addPlugins(fishBehaviorPlugin)
+		.onUpdate('game', useFishingPole, updateFishingLine, () => stopFishing(false), deSpawnFish)
+		.addPlugins(fishBehavior)
 }

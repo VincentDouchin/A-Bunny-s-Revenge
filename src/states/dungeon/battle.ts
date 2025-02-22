@@ -2,6 +2,7 @@ import type { Entity } from '@/global/entity'
 import type { With } from 'miniplex'
 import { ecs, time, tweens } from '@/global/init'
 import { CharacterMaterial } from '@/shaders/materials'
+import { circIn } from 'popmotion'
 import { Color, Mesh, Vector3 } from 'three'
 
 export const flash = (entity: With<Entity, 'model'>, duration: number, type: 'preparing' | 'damage' | 'poisoned' = 'preparing') => {
@@ -29,13 +30,25 @@ export const flash = (entity: With<Entity, 'model'>, duration: number, type: 'pr
 		},
 	})
 }
+export const squish = (entity: With<Entity, 'group'>) => {
+	const originalScale = entity.group.scale.clone()
+	tweens.add({
+		from: originalScale,
+		to: new Vector3(0.8, 1.5, 0.8),
+		duration: 300,
+		ease: circIn,
+		repeat: 1,
+		repeatType: 'reverse',
+		onUpdate: f => entity.group.scale.copy(f),
+	})
+}
 
-export const calculateDamage = (entity: With<Entity, 'strength' | 'critChance' | 'critDamage' | 'combo'>) => {
+export const calculateDamage = (entity: With<Entity, 'strength' | 'critChance' | 'critDamage' | 'playerAttackStyle'>) => {
 	let damage = entity.strength.value
-	if (entity.combo.lastAttack === 1) {
+	if (entity.playerAttackStyle.lastAttack === 1) {
 		damage *= 1.2
 	}
-	if (entity.combo.lastAttack === 2) {
+	if (entity.playerAttackStyle.lastAttack === 2) {
 		damage *= 1.5
 	}
 	const isCrit = Math.random() < entity.critChance.value

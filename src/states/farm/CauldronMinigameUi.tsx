@@ -69,7 +69,7 @@ export const CauldronMinigameUi = () => {
 							const cauldronPosition = getWorldPosition(cauldron().group).add(new Vector3(0, 0, 0))
 							onMount(() => {
 								targetEntity = ecs.add({
-									cameratarget: true,
+									cameraTarget: true,
 									worldPosition: new Vector3(0, 0, 1).add(cauldronPosition),
 								})
 								for (const camera of cameraQuery) {
@@ -78,7 +78,7 @@ export const CauldronMinigameUi = () => {
 									ecs.addComponent(camera, 'cameraOffset', new Vector3(0, 40, -1).applyQuaternion(cauldron().rotation))
 								}
 
-								ecs.removeComponent(player(), 'cameratarget')
+								ecs.removeComponent(player(), 'cameraTarget')
 							})
 							onCleanup(() => {
 								for (const camera of cameraQuery) {
@@ -86,7 +86,7 @@ export const CauldronMinigameUi = () => {
 									addTag(camera, 'fixedCamera')
 								}
 								targetEntity && ecs.remove(targetEntity)
-								addTag(player(), 'cameratarget')
+								addTag(player(), 'cameraTarget')
 							})
 							const percentSynced = createMemo(() => {
 								const precision = 0.08

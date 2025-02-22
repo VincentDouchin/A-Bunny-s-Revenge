@@ -43,6 +43,8 @@ interface Animations {
 
 'Devilu_C' : 'Attack' | 'Attack_root' | 'Attack_root.001' | 'Damage' | 'Damage_root' | 'Damage_root.001' | 'Die' | 'Die_root' | 'Die_root.001' | 'Idle' | 'Idle_root' | 'Idle_root.001' | 'Move' | 'Move_root' | 'Move_root.001'
 
+'explode' : 'Roundcube.001_cell.002Action' | 'Roundcube.001_cell.003Action' | 'Roundcube.001_cell.004Action' | 'Roundcube.001_cell.006Action' | 'Roundcube.001_cell.007Action' | 'Roundcube.001_cell.008Action' | 'Roundcube.001_cell.010Action' | 'Roundcube.001_cell.012Action' | 'Roundcube.001_cell.013Action' | 'Roundcube.001_cell.014Action' | 'Roundcube.001_cell.015Action' | 'Roundcube.001_cell.016Action' | 'Roundcube.001_cell.018Action' | 'Roundcube.001_cellAction'
+
 'Forest_Butterfly_A' : 'Attack' | 'Damage' | 'Die' | 'Idle' | 'Move'
 
 'Forest_Butterfly_B' : 'Attack' | 'Damage' | 'Die' | 'Idle' | 'Move'
@@ -74,6 +76,8 @@ interface Animations {
 'Platopo_B' : 'Attack' | 'Damage' | 'Die' | 'Idle' | 'Walk'
 
 'Platopo_C' : 'Attack' | 'Damage' | 'Die' | 'Idle' | 'Walk'
+
+'Pollen' : 'Cast Spell' | 'Die' | 'Fly Forward Fast In Place' | 'Fly Forward Fast W Root' | 'Fly Forward In Place' | 'Fly Forward W Root' | 'Idle' | 'Idle' | 'Idle' | 'Idle' | 'Idle' | 'Idle' | 'Idle' | 'Idle' | 'Slash Attack' | 'Spawn' | 'Spin Slash Attack' | 'Take Damage' | 'Turn Left' | 'Turn Right' | 'Underground'
 
 'Porin_A' : 'Attack' | 'Damage' | 'Die' | 'Idle' | 'Move'
 

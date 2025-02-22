@@ -1,5 +1,5 @@
 import type { Drop } from '@/constants/enemies'
-import type { AttackStyle, ComponentsOfType, Entity, States } from '@/global/entity'
+import type { AttackStyle, ComponentsOfType, Entity, stateBundle } from '@/global/entity'
 import type { app } from '@/global/states'
 import type { SubscriberSystem } from '@/lib/app'
 import type { characters } from '@assets/assets'
@@ -14,10 +14,10 @@ import { Timer } from '@/lib/timer'
 import { dash } from '@/particles/dashParticles'
 import { enemyDefeated } from '@/particles/enemyDefeated'
 import { impact } from '@/particles/impact'
-import { getRandom } from '@/utils/mapFunctions'
+import { getRandom, opt } from '@/utils/mapFunctions'
 import { ActiveEvents, Cuboid, RigidBodyType } from '@dimforge/rapier3d-compat'
-import { Quaternion, Vector3 } from 'three'
-import { behaviorBundle } from '../../lib/behaviors'
+import { BoxGeometry, Mesh, Quaternion, Vector3 } from 'three'
+// import { behaviorBundle } from '../../lib/behaviors'
 import { healthBundle } from './health'
 
 type SingleAttackStyle = {
@@ -32,11 +32,12 @@ export interface EnemyDef<M extends keyof Animations & characters, S extends str
 	speed?: number
 	boss?: boolean
 	drops?: Drop[]
-	behavior?: keyof States
+	state: ReturnType<typeof stateBundle>
 	animator: ComponentsOfType<Animator<S>>
 	animationMap: { [key in S]: Animations[M] }
 	components?: Partial<Entity>
 	size?: Vector3
+	defaultAnimation?: NoInfer<S>
 	attackStyle: SingleAttackStyle
 }
 
@@ -45,7 +46,6 @@ export const enemyBundle = <M extends keyof Animations & characters, S extends s
 	enemy.speed ??= 1
 	enemy.boss ??= false
 	enemy.drops ??= []
-	enemy.behavior ??= 'enemy'
 	enemy.size ??= new Vector3(5, 6, 5)
 	enemy.components ??= {}
 	model.scene.scale.setScalar(enemy.scale)
@@ -53,11 +53,14 @@ export const enemyBundle = <M extends keyof Animations & characters, S extends s
 	bundle.bodyDesc.setLinearDamping(20)
 	bundle.bodyDesc.setCcdEnabled(true)
 	bundle.colliderDesc.setMass(100).setCollisionGroups(collisionGroups('enemy', ['obstacle', 'player', 'floor', 'enemy'])).setActiveEvents(ActiveEvents.COLLISION_EVENTS)
+	bundle.model.frustumCulled = false
+	bundle.model.traverse(o => o.frustumCulled = false)
+	const animator = new Animator<S>(bundle.model, model.animations, enemy.animationMap)
 	const entity = {
-		...behaviorBundle(enemy.behavior, 'idle'),
+		...enemy.state,
 		...bundle,
 		...healthBundle(enemy.health * (level + 1)),
-		[enemy.animator]: new Animator(bundle.model, model.animations, enemy.animationMap),
+		[enemy.animator]: animator,
 		targetRotation: new Quaternion().setFromAxisAngle(new Vector3(0, 1, 0), Math.PI * 2 * Math.random()),
 		strength: new Stat(1 + level),
 		inactive: new Timer(2000, false),
@@ -73,27 +76,41 @@ export const enemyBundle = <M extends keyof Animations & characters, S extends s
 		drops: enemy.drops,
 		...enemy.attackStyle,
 		...enemy.components,
+		...opt('charging' in enemy.attackStyle, { dashParticles: dash(8) }),
+		...opt(enemy.boss, { boss: true, sensor: { distance: bundle.size.z / 2 + 2, shape: new Cuboid(5, 5, 5) } }),
 	} as const satisfies Entity
+	if (enemy.defaultAnimation) {
+		animator.init(enemy.defaultAnimation)
+	}
+	// if (enemy.components.charging) {
+	// 	Object.assign(entity, {
+	// 		dashParticles: dash(4),
+	// 	})
+	// }
+	// if (enemy.boss) {
+	// 	Object.assign(entity, {
+	// 		boss: true,
+	// 		sensor: { distance: bundle.size.z / 2 + 2, shape: new Cuboid(5, 5, 5) },
+	// 	} as const satisfies Entity)
+	// }
 
-	if (enemy.components.charging) {
-		Object.assign(entity, {
-			dashParticles: dash(4),
-		})
-	}
-	if (enemy.boss) {
-		Object.assign(entity, {
-			boss: true,
-			sensor: { distance: bundle.size.z / 2 + 2, shape: new Cuboid(5, 5, 5) },
-		} as const satisfies Entity)
-	}
 	return entity
 }
 const enemyQuery = ecs.with('faction').where(e => e.faction === Faction.Enemy)
-export const removeEnemyFromSpawn: SubscriberSystem<typeof app, 'dungeon'> = ({ dungeon }) => enemyQuery.onEntityRemoved.subscribe((entity) => {
-	dungeon.enemies.splice(dungeon.enemies.indexOf(entity), 1)
+export const removeEnemyFromSpawn: SubscriberSystem<typeof app, 'dungeon'> = ({ dungeon }) => enemyQuery.onEntityRemoved.subscribe(entity => dungeon.enemies.splice(dungeon.enemies.indexOf(entity), 1))
+
+// debug
+export const displaySensors = () => ecs.with('sensor', 'group', 'rotation').onEntityAdded.subscribe((e) => {
+	if (e.sensor.shape instanceof Cuboid) {
+		const { x, y, z } = e.sensor.shape.halfExtents
+		const box = new Mesh(new BoxGeometry(x * 2, y * 2, z * 2))
+		box.position.add(new Vector3(0, y, e.sensor.distance).applyQuaternion(e.rotation))
+		e.group.add(box)
+	}
 })
 
 const dungeonQuery = ecs.with('dungeon')
+
 export const spawnEnemies = () => dungeonQuery.onEntityAdded.subscribe((e) => {
 	const possiblePoints = e.dungeon.navgrid.getSpawnPoints()
 	for (const enemy of e.dungeon.enemies) {
@@ -116,6 +133,6 @@ export const tickInactiveTimer = () => {
 }
 
 const bossQuery = ecs.with('boss')
-export const unlockDungeon: SubscriberSystem<typeof app, 'dungeon'> = ressources => bossQuery.onEntityRemoved.subscribe(() => {
-	save.unlockedPaths = Math.max(save.unlockedPaths, ressources.dungeonLevel + 1)
+export const unlockDungeon: SubscriberSystem<typeof app, 'dungeon'> = resources => bossQuery.onEntityRemoved.subscribe(() => {
+	save.unlockedPaths = Math.max(save.unlockedPaths, resources.dungeonLevel + 1)
 })
