@@ -4,17 +4,18 @@ import { spawnFootstep } from '@/particles/footsteps'
 import { Vector3 } from 'three'
 
 const movementQuery = ecs.with('body', 'rotation', 'movementForce', 'speed')
-const playerQuery = movementQuery.with('playerControls', 'position', 'state', 'lastStep', 'playerAnimator', 'modifiers')
+const playerQuery = movementQuery.with('playerControls', 'position', 'state', 'lastStep', 'playerAnimator', 'modifiers', 'model', 'worldPosition')
 
 export const playerSteps = () => {
 	for (const player of playerQuery) {
 		if (player.state.current === 'running' && player.playerAnimator.action) {
+			const ground = player.worldPosition.y
 			player.model?.traverse((n) => {
 				if (n.name.startsWith('toes')) {
 					const pos = new Vector3()
 					n.getWorldPosition(pos)
 					const foot = n.name.endsWith('r') ? 'right' : 'left'
-					if (pos.y <= 0.5) {
+					if (pos.y - ground <= 0.3) {
 						if (player.lastStep[foot] === false) {
 							const honey = player.modifiers.hasModifier('honeySpot')
 							spawnFootstep(foot, player.position, honey)

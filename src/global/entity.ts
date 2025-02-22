@@ -170,6 +170,7 @@ export type Entity = StateComponents & Partial<AttackStyle> & {
 	mainCamera?: true
 	cameraLookAt?: Vector3
 	cameraOffset?: Vector3
+	cameraLerp?: Vector3
 	lockX?: boolean
 	// ! ThreeJS
 	scene?: Scene

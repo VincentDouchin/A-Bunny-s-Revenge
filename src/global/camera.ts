@@ -3,7 +3,7 @@ import { easeOut } from 'popmotion'
 import { OrthographicCamera, PerspectiveCamera, Vector3 } from 'three'
 import { params } from './context'
 import { RenderGroup } from './entity'
-import { ecs, levelsData, settings, time, tweens } from './init'
+import { ecs, levelsData, settings, tweens } from './init'
 import { app } from './states'
 
 export const initCamera = () => {
@@ -27,10 +27,11 @@ export const initCamera = () => {
 		cameraLookAt: new Vector3(),
 		cameraShake: new Vector3(),
 		cameraOffset: new Vector3(),
+		cameraLerp: new Vector3(),
 	})
 }
 const cameraQuery = ecs.with('camera')
-const gameCameraQuery = ecs.with('camera', 'position', 'mainCamera', 'cameraLookAt', 'cameraShake')
+const gameCameraQuery = ecs.with('camera', 'position', 'mainCamera', 'cameraLookAt', 'cameraShake', 'cameraLerp')
 export const cameraTargetQuery = ecs.with('cameraTarget', 'worldPosition')
 const doorsQuery = ecs.with('boundary', 'position').where(e => e.doorType === 'fog')
 export const updateCameraZoom = (zoom: number = params.zoom) => {
@@ -71,27 +72,32 @@ const OFFSET_X = 50
 const MAP_OFFSET = 10
 const levelQuery = ecs.with('map')
 export const moveCamera = (init = false) => () => {
-	for (const { position, camera, cameraOffset, cameraShake, fixedCamera } of gameCameraQuery) {
+	for (const { position, camera, cameraOffset, cameraShake, fixedCamera, cameraLerp } of gameCameraQuery) {
 		const target = new Vector3()
+		const lerpSpeed = 3 / 60
 		if (app.isDisabled('mainMenu')) {
-			for (const { worldPosition } of cameraTargetQuery) {
+			for (const { worldPosition, targetRotation, state } of cameraTargetQuery) {
 				target.copy(worldPosition)
+				if (state?.current === 'running' && targetRotation) {
+					cameraLerp.lerp(new Vector3(0, 0, 20).applyQuaternion(targetRotation), 1 / 60)
+				} else {
+					cameraLerp.lerp(new Vector3(), 3 / 60)
+				}
+				target.add(cameraLerp)
 				const mapId = levelQuery.first?.map
 				if (mapId) {
 					const level = levelsData.levels.find(level => level.id === mapId)
 					if (level && level.containCamera) {
 						for (const door of doorsQuery) {
-							if (door.boundary === Direction.N) {
-								target.z = Math.min(target.z, door.position.z - OFFSET_Z)
-							}
-							if (door.boundary === Direction.S) {
-								target.z = Math.max(target.z, door.position.z + OFFSET_Z)
-							}
-							if (door.boundary === Direction.W) {
-								target.x = Math.min(target.x, door.position.x - OFFSET_X)
-							}
-							if (door.boundary === Direction.E) {
-								target.x = Math.max(target.x, door.position.x + OFFSET_X)
+							switch (door.boundary) {
+								case Direction.N : target.z = Math.min(target.z, door.position.z - OFFSET_Z)
+									break
+								case Direction.S : target.z = Math.max(target.z, door.position.z + OFFSET_Z)
+									break
+								case Direction.E : target.x = Math.max(target.x, door.position.x + OFFSET_X)
+									break
+								case Direction.W : target.x = Math.min(target.x, door.position.x - OFFSET_X)
+									break
 							}
 						}
 						const levelSize = level?.size
@@ -106,27 +112,25 @@ export const moveCamera = (init = false) => () => {
 			}
 		}
 
-		if (app.isDisabled('debug')) {
-			// console.log(time.delta)
-			const lerpSpeed = 1 / 60 * time.delta / 10
-			const offset = new Vector3(params.cameraOffsetX, params.cameraOffsetY, params.cameraOffsetZ)
-			const newPosition = target.clone().add({ x: cameraShake.x, y: 0, z: cameraShake.y })
-			if (cameraOffset) {
-				newPosition.add(cameraOffset)
-			}
-			if (fixedCamera) {
-				newPosition.add(offset)
-			}
-			if (init || settings.lockCamera) {
-				position.copy(newPosition)
-			} else {
-				position.lerp(newPosition, lerpSpeed)
-			}
-			if (fixedCamera) {
-				camera.lookAt(position.clone().sub(offset))
-			} else {
-				camera.lookAt(target)
-			}
+		if (app.isEnabled('debug')) return
+
+		const offset = new Vector3(params.cameraOffsetX, params.cameraOffsetY, params.cameraOffsetZ)
+		const newPosition = target.clone().add({ x: cameraShake.x, y: 0, z: cameraShake.y })
+		if (cameraOffset) {
+			newPosition.add(cameraOffset)
+		}
+		if (fixedCamera) {
+			newPosition.add(offset)
+		}
+		if (init || settings.lockCamera) {
+			position.copy(newPosition)
+		} else {
+			position.lerp(newPosition, lerpSpeed)
+		}
+		if (fixedCamera) {
+			camera.lookAt(position.clone().sub(offset))
+		} else {
+			camera.lookAt(target)
 		}
 	}
 }
