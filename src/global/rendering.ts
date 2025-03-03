@@ -42,6 +42,7 @@ export const updateRenderSize = (newSize?: Vector2) => {
 	target.setSize(newSize.x, newSize.y)
 	outlineTarget.setSize(newSize.x, newSize.y)
 	outlineTarget2.setSize(newSize.x, newSize.y)
+	finalTarget.setSize(newSize.x, newSize.y)
 	renderer.setSize(newSize.x, newSize.y)
 	const cssRendererSize = cssRenderer.getSize()
 	if (cssRendererSize.width !== window.innerWidth || cssRendererSize.height !== window.innerHeight) {

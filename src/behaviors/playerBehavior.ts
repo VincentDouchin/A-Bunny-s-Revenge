@@ -2,6 +2,7 @@ import type { Entity, QueryEntity } from '@/global/entity'
 import type { With } from 'miniplex'
 import { addCameraShake } from '@/global/camera'
 import { Faction, States, states } from '@/global/entity'
+import { gameOverEvent } from '@/global/events'
 import { ecs, world } from '@/global/init'
 import { playSound } from '@/global/sounds'
 import { spawnDamageNumber } from '@/particles/damageNumber'
@@ -70,6 +71,11 @@ export const playerBehavior = createBehaviorTree(
 	withContext(
 		playerContext,
 		selector(
+			sequence(
+				inState('dead'),
+				wait('dead', 2000),
+				action(() => gameOverEvent.emit(true)),
+			),
 			// ! Hit
 			sequence(
 				enteringState('hit'),

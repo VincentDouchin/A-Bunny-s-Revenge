@@ -1,23 +1,20 @@
 import { DebugUi } from '@/debug/debugUi'
-import { ui } from '@/global/init'
-import { app } from '@/global/states'
 import { EnemyHealthBarUi } from '@/states/dungeon/EnemyHealthBarUi'
 import { HealthUi } from '@/states/dungeon/HealthUi'
 import { LockIndicator } from '@/states/dungeon/lockIndicator'
 import { LoseUi } from '@/states/dungeon/LoseUi'
 import { SneezeUi } from '@/states/dungeon/SneezeUi'
-import { CauldronMinigameUi } from '@/states/farm/CauldronMinigameUi'
+import { CauldronMiniGameUi } from '@/states/farm/CauldronMinigameUi'
 import { CuttingBoardMiniGameUi } from '@/states/farm/CuttingBoardMiniGameUi'
-import { FishingMinigameUi } from '@/states/farm/FishingMinigameUi'
+import { FishingMiniGameUi } from '@/states/farm/FishingMinigameUi'
 import { InventoryUi } from '@/states/farm/InventoryUi'
-import { OvenMinigameUi } from '@/states/farm/OvenMinigameUi'
+import { OvenMiniGameUi } from '@/states/farm/OvenMinigameUi'
 import { QuestUi } from '@/states/farm/QuestUi'
 import { RecipesUi } from '@/states/farm/RecipesUi'
 import { SeedUi } from '@/states/farm/SeedUi'
 import { FullscreenUi } from '@/states/game/FullscreenUi'
 import { OverlayUi } from '@/states/game/overlayUi'
 import { MainMenuUi } from '@/states/mainMenu/MainMenuUi'
-import { Show } from 'solid-js'
 import { StateUi } from './components/StateUi'
 import { DialogUi } from './DialogUi'
 import { Errors } from './Errors'
@@ -31,15 +28,14 @@ import { TouchControls } from './TouchControls'
 import { TutorialUi } from './Tutorial'
 
 export const UI = () => {
-	const debug = ui.sync(() => app.isEnabled('debug'))
 	return (
 		<GameProvider>
 			<DebugUi />
-			<Show when={!debug()}>
+			<StateUi state="debug" disabled>
 				<StateUi state="farm">
 					<RecipesUi />
-					<OvenMinigameUi />
-					<CauldronMinigameUi />
+					<OvenMiniGameUi />
+					<CauldronMiniGameUi />
 					<CuttingBoardMiniGameUi />
 					<InventoryUi />
 					<SeedUi />
@@ -66,15 +62,14 @@ export const UI = () => {
 				<FullscreenUi />
 				<LoseUi />
 				<DialogUi />
-				<FishingMinigameUi />
+				<FishingMiniGameUi />
 				<TouchControls />
 				<InteractionUi />
 				<TopRight />
 				<OverlayUi />
 				<KeyItem />
 				<TutorialUi />
-			</Show>
-
+			</StateUi>
 		</GameProvider>
 	)
 }

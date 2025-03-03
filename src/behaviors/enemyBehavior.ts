@@ -7,7 +7,7 @@ import { projectileAttack } from '@/states/dungeon/attacks'
 import { getIntersections } from '@/states/game/sensor'
 import { ColliderDesc, RigidBodyDesc } from '@dimforge/rapier3d-compat'
 import { AdditiveBlending, Mesh, MeshBasicMaterial, PlaneGeometry, Vector3 } from 'three'
-import { action, condition, createBehaviorTree, enteringState, inState, runNodes, selector, sequence, setState, wait, waitFor, withContext } from '../lib/behaviors'
+import { action, condition, createBehaviorTree, enteringState, inState, inverter, runNodes, selector, sequence, setState, wait, waitFor, withContext } from '../lib/behaviors'
 import { applyMove, applyRotate, moveToDirection } from './behaviorHelpers'
 import { attackCooldownNode, attackNode, damagedByPlayer, deadNode, enemyContext, hitNode, idleNode, runningNode, stunNode, waitingAttackNode } from './commonBehaviors'
 
@@ -52,11 +52,12 @@ export const rangeBehavior = createBehaviorTree(
 			selector(
 				damagedByPlayer(),
 				hitNode(),
-				idleNode(),
-				runningNode(),
-				waitingAttackNode(300)(),
-				attackCooldownNode(4000)(),
 				deadNode(),
+				sequence(
+					inverter(inState('attack', 'waitingAttack', 'attackCooldown')),
+					condition((_e, c) => c.canShootPlayer && c.canSeePlayer),
+					setState('waitingAttack'),
+				),
 				sequence(
 					enteringState('attack'),
 					applyRotate((_e, c) => c.force),
@@ -76,6 +77,10 @@ export const rangeBehavior = createBehaviorTree(
 						setState('waitingAttack'),
 					),
 				),
+				idleNode(),
+				runningNode(),
+				waitingAttackNode(1000)(),
+				attackCooldownNode(4000)(),
 			),
 		),
 	),
@@ -91,12 +96,12 @@ export const meleeBehavior = createBehaviorTree(
 			selector(
 				damagedByPlayer(),
 				hitNode(),
+				attackNode()(),
 				idleNode(),
 				runningNode(),
 				waitingAttackNode(300)(),
 				attackCooldownNode(2000)(),
 				deadNode(),
-				attackNode()(),
 			),
 		),
 	),
@@ -111,11 +116,11 @@ export const sporeBehavior = createBehaviorTree(
 			selector(
 				damagedByPlayer(),
 				hitNode(),
-				idleNode(),
-				runningNode(),
-				waitingAttackNode(300)(),
-				attackCooldownNode(2000)(),
-				deadNode(),
+				sequence(
+					inverter(inState('attack', 'waitingAttack', 'attackCooldown')),
+					condition((e, c) => c.player && e.position.distanceTo(c.player.position) < 20),
+					setState('waitingAttack'),
+				),
 				sequence(
 					enteringState('attack'),
 					action((e) => {
@@ -135,6 +140,11 @@ export const sporeBehavior = createBehaviorTree(
 					waitFor(e => !e.enemyAnimator.isPlaying('attacking')),
 					setState('attackCooldown'),
 				),
+				idleNode(),
+				runningNode(),
+				waitingAttackNode(300)(),
+				attackCooldownNode(2000)(),
+				deadNode(),
 			),
 		),
 	),
@@ -215,11 +225,12 @@ export const jumpingBehavior = createBehaviorTree(
 			selector(
 				damagedByPlayer(),
 				hitNode(),
-				idleNode(),
-				runningNode(),
-				waitingAttackNode(300)(),
-				attackCooldownNode(2000)(),
 				deadNode(),
+				sequence(
+					inverter(inState('attack', 'waitingAttack', 'attackCooldown')),
+					condition((e, c) => c.player && e.position.distanceTo(c.player.position) < 20),
+					setState('waitingAttack'),
+				),
 				sequence(
 					enteringState('attack'),
 					action((e, _c, a) => {
@@ -270,6 +281,11 @@ export const jumpingBehavior = createBehaviorTree(
 					applyRotate((_e, c) => c.force),
 					applyMove((_e, c) => c.force),
 				),
+				waitingAttackNode(300)(),
+				attackCooldownNode(2000)(),
+				idleNode(),
+				runningNode(),
+
 			),
 		),
 	),

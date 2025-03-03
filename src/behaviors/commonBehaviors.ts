@@ -144,8 +144,8 @@ export const attackNode = (sounds: soundEffects[] = []): EnemyNode<['attack', 'a
 	),
 	sequence(
 		enteringState('attack'),
-		action(() => sounds.length > 0 && playSound(sounds)),
 		action((_e, _c, a) => a.playOnce('attacking')),
+		action(() => sounds.length > 0 && playSound(sounds)),
 	),
 	sequence(
 		inState('attack'),
@@ -171,40 +171,44 @@ export const attackCooldownNode = (delay: number, slowdown = 0.5): EnemyNode<['a
 	),
 )
 // ! Dead
-export const deadNode: EnemyNode<['dead'], ['dead']> = () => sequence(
-	enteringState('dead'),
-	action((e) => {
-		ecs.removeComponent(e, 'lockedOn')
-		ecs.removeComponent(e, 'outline')
-		selectNewLockedEnemy()
-	}),
-	action((_e, _c, a) => a.playClamped('dead')),
-	action((e) => {
-		if (e.enemyDefeated) {
-			e.enemyDefeated.restart()
-			e.enemyDefeated.play()
-		}
-		const mats = new Array<Material>()
-		e.model.traverse((node) => {
-			if (node instanceof Mesh) {
-				node.castShadow = false
-				const mat = node.material as InstanceType<typeof ToonMaterial>
-				if (mat instanceof Material) {
-					mat.transparent = true
-					mat.depthWrite = false
-					mats.push(mat)
-				}
+export const deadNode: EnemyNode<['dead'], ['dead']> = () => selector(
+	sequence(
+		enteringState('dead'),
+		action((e) => {
+			ecs.removeComponent(e, 'lockedOn')
+			ecs.removeComponent(e, 'outline')
+			selectNewLockedEnemy()
+		}),
+		action((_e, _c, a) => a.playClamped('dead')),
+		action((e) => {
+			if (e.enemyDefeated) {
+				e.enemyDefeated.restart()
+				e.enemyDefeated.play()
 			}
-		})
-		tweens.add({
-			destroy: e,
-			from: 1,
-			to: 0,
-			duration: 2000,
-			onUpdate: f => mats.forEach(m => m.opacity = f),
-			onComplete: () => ecs.remove(e),
-		})
-	}),
+			const mats = new Array<Material>()
+			e.model.traverse((node) => {
+				if (node instanceof Mesh) {
+					node.castShadow = false
+					const mat = node.material as InstanceType<typeof ToonMaterial>
+					if (mat instanceof Material) {
+						mat.transparent = true
+						mat.depthWrite = false
+						mats.push(mat)
+					}
+				}
+			})
+			tweens.add({
+				destroy: e,
+				from: 1,
+				to: 0,
+				duration: 2000,
+				onUpdate: f => mats.forEach(m => m.opacity = f),
+				onComplete: () => ecs.remove(e),
+			})
+		}),
+	)
+	,
+	inState('dead'),
 )
 // ! STUN
 export const stunNode: EnemyNode<['stun', 'attackCooldown'], ['hit']> = () => selector(

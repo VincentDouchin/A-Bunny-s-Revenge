@@ -1,12 +1,10 @@
 import type { app } from '@/global/states'
 import type { Plugin } from '@/lib/app'
 import { fishBehavior } from '@/behaviors/fishBehavior'
-// import { fishBehaviorPlugin } from '@/behaviors/fishBehavior'
-import { MenuType } from '@/global/entity'
+import { MenuType, stateBundle, States } from '@/global/entity'
 import { assets, ecs, tweens } from '@/global/init'
 import { scene } from '@/global/rendering'
 import { playSound } from '@/global/sounds'
-// import { behaviorBundle } from '@/lib/behaviors'
 import { inMap } from '@/lib/hierarchy'
 import { MeshLine, MeshLineMaterial } from '@/lib/MeshLine'
 import { Timer } from '@/lib/timer'
@@ -150,8 +148,7 @@ const fishBundle = (parentPos: Vector3) => {
 		position: parentPos.add(new Vector3(between(-dist, dist), 0, between(-dist, dist))).setY(-2),
 		model,
 		fish: new Timer(between(3000, 5000), true),
-		// ...behaviorBundle('fish', 'wander'),
-
+		...stateBundle(States.fish, 'wander'),
 	}
 }
 const fishSpawnerQuery = ecs.with('fishSpawner', 'group')

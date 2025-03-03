@@ -273,7 +273,8 @@ export const spawnGroundAndTrees = (level: Level, dungeonLevel?: number) => {
 
 		...inMap(),
 		position: new Vector3(0, 0, 0),
-		bodyDesc: new RigidBodyDesc(RigidBodyType.Fixed),
+		bodyDesc: new RigidBodyDesc(RigidBodyType.Fixed)
+			.setCcdEnabled(true),
 		colliderDesc: ColliderDesc
 			.heightfield(
 				level.size.x / 5 - 1,

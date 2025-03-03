@@ -1,23 +1,26 @@
 import type { Entity } from '@/global/entity'
 import type { With } from 'miniplex'
+import { gameOverEvent } from '@/global/events'
 import { ecs, ui } from '@/global/init'
 import { menuInputMap } from '@/global/inputMaps'
 import { playSound } from '@/global/sounds'
 import { app } from '@/global/states'
 import { inMap } from '@/lib/hierarchy'
-import { StateUi } from '@/ui/components/StateUi'
 import { InputIcon } from '@/ui/InputIcon'
-import { useGame, useQuery } from '@/ui/store'
-import { createMemo, onMount, Show } from 'solid-js'
+import { useGame } from '@/ui/store'
+import { onMount, Show } from 'solid-js'
 import { css } from 'solid-styled'
 import atom from 'solid-use/atom'
 
-const playerUi = useQuery(ecs.with('player', 'state').where(e => e.state.current !== 'dead'))
 export const LoseUi = () => {
-	const noPlayer = createMemo(() => playerUi().length === 0)
+	const gameOver = atom(false)
+	onMount(() => {
+		gameOverEvent.subscribe(gameOver)
+	})
 	const retry = () => {
 		app.disable('menu')
 		app.enable('farm', { door: 'clearing' })
+		gameOver(false)
 	}
 
 	css/* css */`
@@ -43,41 +46,39 @@ export const LoseUi = () => {
 }
 	`
 	return (
-		<StateUi state="menu">
-			<Show when={noPlayer()}>
-				{(_) =>	{
-					const context = useGame()
-					const controls = atom<null | With<Entity, 'menuInputs'>>(null)
-					onMount(() => {
-						playSound('losing_musical')
-						controls(ecs.add({
-							...menuInputMap(),
-							...inMap(),
-						}))
-					})
-					ui.updateSync(() => {
-						if (controls()?.menuInputs.get('validate').justPressed) {
-							retry()
-						}
-					})
-					return (
-						<div
-							class="fade-in losing"
+		<Show when={gameOver()}>
+			{(_) =>	{
+				const context = useGame()
+				const controls = atom<null | With<Entity, 'menuInputs'>>(null)
+				onMount(() => {
+					playSound('losing_musical')
+					controls(ecs.add({
+						...menuInputMap(),
+						...inMap(),
+					}))
+				})
+				ui.updateSync(() => {
+					if (controls()?.menuInputs.get('validate').justPressed) {
+						retry()
+					}
+				})
+				return (
+					<div
+						class="fade-in losing"
+					>
+						YOU DIED
+						<button
+							class="button losing-button"
+							onClick={retry}
 						>
-							YOU DIED
-							<button
-								class="button losing-button"
-								onClick={retry}
-							>
-								<Show when={!context?.usingTouch() && controls()}>
-									{controls => <InputIcon input={controls().menuInputs.get('validate')} />}
-								</Show>
-								{' '}
-								Retry
-							</button>
-						</div>
-					) }}
-			</Show>
-		</StateUi>
+							<Show when={!context?.usingTouch() && controls()}>
+								{controls => <InputIcon input={controls().menuInputs.get('validate')} />}
+							</Show>
+							{' '}
+							Retry
+						</button>
+					</div>
+				) }}
+		</Show>
 	)
 }

@@ -67,7 +67,8 @@ app
 	.onRender('default', runIf(() => app.isDisabled('paused'), stepWorld, moveCamera()))
 	.onRender('default', renderGame)
 	.onPreUpdate('default', inputManager.update, ui.update)
-	.onPreUpdate('default', runIf(() => app.isDisabled('paused'), time.tick, dayNight, updateTimeUniforms, tweens.tick))
+	.onRender('default', runIf(() => app.isDisabled('paused'), updateTimeUniforms))
+	.onPreUpdate('default', runIf(() => app.isDisabled('paused'), time.tick, dayNight, tweens.tick))
 	// !SETUP
 	.onEnter('default', setupGame)
 	// ! GAME

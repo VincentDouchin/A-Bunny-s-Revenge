@@ -7,7 +7,7 @@ import Fish from '@assets/icons/fish-solid.svg'
 import { For, Show } from 'solid-js'
 
 const fishingQuery = useQuery(ecs.with('menuType').where(e => e.menuType === MenuType.Fishing))
-export const FishingMinigameUi = () => {
+export const FishingMiniGameUi = () => {
 	const context = useGame()
 	return (
 		<Show when={context?.usingTouch() && context.player()}>

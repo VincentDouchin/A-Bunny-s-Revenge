@@ -49,8 +49,8 @@ export const Toaster = () => {
 		}
 	}
 	onMount(() => {
-		const unsub = toastEvent.subscribe(addToast)
-		onCleanup(unsub)
+		const unSub = toastEvent.subscribe(addToast)
+		onCleanup(unSub)
 	})
 
 	ui.updateSync(() => {

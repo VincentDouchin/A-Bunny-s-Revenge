@@ -33,6 +33,7 @@ export const initCamera = () => {
 const cameraQuery = ecs.with('camera')
 const gameCameraQuery = ecs.with('camera', 'position', 'mainCamera', 'cameraLookAt', 'cameraShake', 'cameraLerp')
 export const cameraTargetQuery = ecs.with('cameraTarget', 'worldPosition')
+const lockedOnQuery = ecs.with('lockedOn', 'position')
 const doorsQuery = ecs.with('boundary', 'position').where(e => e.doorType === 'fog')
 export const updateCameraZoom = (zoom: number = params.zoom) => {
 	for (const { camera } of cameraQuery) {
@@ -78,12 +79,23 @@ export const moveCamera = (init = false) => () => {
 		if (app.isDisabled('mainMenu')) {
 			for (const { worldPosition, targetRotation, state } of cameraTargetQuery) {
 				target.copy(worldPosition)
-				if (state?.current === 'running' && targetRotation) {
-					cameraLerp.lerp(new Vector3(0, 0, 20).applyQuaternion(targetRotation), 1 / 60)
+
+				const lockedOn = lockedOnQuery.entities.reduce<null | number>((acc, v) => {
+					const dist = v.position.distanceTo(worldPosition) / 2
+					if (acc === null || dist < acc) {
+						return dist
+					}
+					return acc
+				}, null)
+
+				if ((state?.current === 'running' || lockedOn) && targetRotation) {
+					const dist = Math.min(lockedOn ?? 0, 20)
+					cameraLerp.lerp(new Vector3(0, 0, dist).applyQuaternion(targetRotation), 1 / 60)
 				} else {
 					cameraLerp.lerp(new Vector3(), 3 / 60)
 				}
 				target.add(cameraLerp)
+
 				const mapId = levelQuery.first?.map
 				if (mapId) {
 					const level = levelsData.levels.find(level => level.id === mapId)

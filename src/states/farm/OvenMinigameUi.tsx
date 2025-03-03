@@ -25,7 +25,7 @@ import { ItemDisplay } from './InventoryUi'
 
 export const ovenQuery = useQuery(ecs.with('menuType', 'recipesQueued', 'ovenAnimator', 'position').where(({ menuType }) => menuType === MenuType.OvenMiniGame))
 
-export const OvenMinigameUi = () => {
+export const OvenMiniGameUi = () => {
 	const context = useGame()
 	return (
 		<Show when={context?.player()}>

@@ -22,7 +22,7 @@ import { itemBundle } from '../game/items'
 import { ItemDisplay } from './InventoryUi'
 
 export const cauldronQuery = useQuery(ecs.with('menuType', 'interactionContainer', 'group', 'rotation', 'recipesQueued', 'spoon').where(({ menuType }) => menuType === MenuType.CauldronGame))
-export const CauldronMinigameUi = () => {
+export const CauldronMiniGameUi = () => {
 	const context = useGame()
 	return (
 		<Show when={context?.player()}>
