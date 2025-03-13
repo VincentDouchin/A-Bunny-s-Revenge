@@ -1,4 +1,4 @@
-import { Armabee, bosses, Butterfly, FlowerBoar, MossBoar, Platopo, Slime } from '@/constants/enemies'
+import { Armabee, bosses, FlowerBoar, MossBoar } from '@/constants/enemies'
 import { selectedBoss } from '@/debug/debugUi'
 import { updateCameraZoom } from '@/global/camera'
 import { params } from '@/global/context'
@@ -21,8 +21,7 @@ export const setupGame = async () => {
 	app.enable('game')
 	if (params.debugBoss) {
 		const bossRoom = assignPlanAndEnemies([{ position: { x: 0, y: 0 }, connections: { north: 1, south: null }, type: RoomType.Boss }], 0)
-		// bossRoom[0].enemies = [bosses[selectedBoss.boss](0)]
-		bossRoom[0].enemies = [Platopo(0), Platopo(0), Platopo(0), Platopo(0)]
+		bossRoom[0].enemies = [bosses[selectedBoss.boss](0)]
 		app.enable('dungeon', { dungeon: bossRoom[0], direction: Direction.S, firstEntry: true, playerHealth: 10, dungeonLevel: 0, weapon: 'Hoe' })
 		updateRenderSize()
 		updateCameraZoom()

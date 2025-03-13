@@ -4,7 +4,6 @@ import { params } from '@/global/context'
 import { ecs, inputManager, settings, time } from '@/global/init'
 import { app } from '@/global/states'
 import { action } from '@/lib/behaviors'
-import { QueryFilterFlags } from '@dimforge/rapier3d-compat'
 import { Vector3 } from 'three'
 
 export const getMovementForce = ({ movementForce, speed, targetMovementForce }: With<Entity, 'movementForce' | 'speed'>) => {
@@ -65,7 +64,7 @@ export const applyMove = <E extends With<Entity, 'body'>, C >(fn: (e: E, c: C) =
 		if (!controller.computedGrounded()) {
 			force.add(new Vector3(0, -0.2, 0))
 		}
-		controller.computeColliderMovement(collider, force, QueryFilterFlags.EXCLUDE_SENSORS | QueryFilterFlags.EXCLUDE_SOLIDS, undefined)
+		controller.computeColliderMovement(collider, force, undefined, undefined)
 		const movement = controller.computedMovement()
 		const bodyPos = body.translation()
 		const dest = new Vector3(bodyPos.x, bodyPos.y, bodyPos.z).add(movement)

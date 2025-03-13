@@ -31,7 +31,6 @@ import { addHealthBarContainer } from './states/dungeon/healthBar'
 import { lockOnEnemy } from './states/dungeon/locking'
 import { spawnDrops } from './states/dungeon/lootPool'
 import { spawnPoisonTrail } from './states/dungeon/poisonTrail'
-import { endBattleSpawnChest } from './states/dungeon/spawnChest'
 import { rotateStun } from './states/dungeon/stun'
 import { growCrops, harvestCrop, initPlantableSpotsInteractions, interactablePlantableSpot, plantSeed } from './states/farm/farming'
 import { fishingPlugin } from './states/farm/fishing'
@@ -73,7 +72,7 @@ app
 	.onEnter('default', setupGame)
 	// ! GAME
 	.addPlugins(fishingPlugin, interactionPlugin, tickModifiersPlugin('speed', 'maxHealth', 'strength', 'critChance', 'critDamage', 'attackSpeed', 'lootQuantity', 'lootChance'))
-	.addPlugins(playerBehavior, seedlingBehavior, meleeBehavior, chargingBehavior, jumpingBehavior, sporeBehavior, rangeBehavior, beeBossBehavior, pumpkinBossBehavior)
+	.addPlugins(playerBehavior)
 	.addSubscribers('game', initializeCameraPosition, bobItems, enableInventoryState, popItems, addHealthBarContainer, ...equip('wateringCan', 'weapon', 'fishingPole'), ...doorLocking, addDashDisplay, addQuestMarkers, displayUnlockQuestToast)
 	.onEnter('game', questManager.enableQuests)
 	.onPreUpdate(
@@ -118,16 +117,16 @@ app
 	.onEnter('clearing', initTexturesItemsAndEnemies, compileShaders)
 	.onUpdate('clearing', collideWithDoorClearing)
 	// ! DUNGEON
-	.addSubscribers('dungeon', spawnDrops, removeEnemyFromSpawn, applyArchingForce, unlockDungeon, spawnEnemies)
-	.onEnter('dungeon', spawnDungeon, spawnLevelData, spawnPlayerDungeon, moveCamera(true))
+	.addSubscribers('dungeon', spawnDrops, removeEnemyFromSpawn, applyArchingForce, unlockDungeon)
+	.onEnter('dungeon', spawnDungeon, spawnLevelData, spawnPlayerDungeon, moveCamera(true), spawnEnemies)
+	.addPlugins(seedlingBehavior, meleeBehavior, chargingBehavior, jumpingBehavior, sporeBehavior, rangeBehavior, beeBossBehavior, pumpkinBossBehavior)
 	.onEnter('dungeon', compileShaders, initTexturesItemsAndEnemies)
-	.onEnter('dungeon')
 	.onUpdate(
 		'dungeon',
 		runIf(canPlayerMove, allowDoorCollision, collideWithDoorDungeon, harvestCrop, unlockDoorDungeon),
 		runIf(() => app.isDisabled('paused'), tickHitCooldown, tickSneeze, tickPoison, tickInactiveTimer, tickSleepy),
 	)
-	.onUpdate('dungeon', destroyProjectiles, honeySplat, stepInHoney, endBattleSpawnChest, spawnPoisonTrail, lockOnEnemy, buyItems)
+	.onUpdate('dungeon', destroyProjectiles, honeySplat, stepInHoney, spawnPoisonTrail, lockOnEnemy, buyItems)
 	.onExit('dungeon', deSpawnOfType('map'))
 	// ! PAUSED
 	.onEnter('paused', () => time.stop(), musicManager.pause)

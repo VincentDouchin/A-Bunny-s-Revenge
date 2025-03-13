@@ -106,7 +106,7 @@ export const capsuleColliderBundle = (model: Object3D<Object3DEventMap>, size: V
 
 export const characterControllerBundle = () => {
 	const controller = world.createCharacterController(0.1)
-	controller.setApplyImpulsesToDynamicBodies(true)
+	controller.setApplyImpulsesToDynamicBodies(false)
 	controller.setCharacterMass(0.1)
 	controller.enableAutostep(4, 0, false)
 	controller.setMaxSlopeClimbAngle(Math.PI / 2 * 1.5)

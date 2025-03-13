@@ -17,8 +17,11 @@ import { impact } from '@/particles/impact'
 import { getRandom, opt } from '@/utils/mapFunctions'
 import { ActiveEvents, Cuboid, RigidBodyType } from '@dimforge/rapier3d-compat'
 import { BoxGeometry, Mesh, Quaternion, Vector3 } from 'three'
+import { generateUUID } from 'three/src/math/MathUtils'
+import { collectItems } from '../game/items'
 // import { behaviorBundle } from '../../lib/behaviors'
 import { healthBundle } from './health'
+import { spawnChest } from './spawnChest'
 
 type SingleAttackStyle = {
 	[K in keyof AttackStyle]: { [P in K]: AttackStyle[K] };
@@ -50,13 +53,19 @@ export const enemyBundle = <M extends keyof Animations & characters, S extends s
 	enemy.components ??= {}
 	model.scene.scale.setScalar(enemy.scale)
 	const bundle = modelColliderBundle(model.scene, RigidBodyType.Dynamic, false, enemy.size, 'ball')
-	bundle.bodyDesc.setLinearDamping(20)
-	bundle.bodyDesc.setCcdEnabled(true)
-	bundle.colliderDesc.setMass(100).setCollisionGroups(collisionGroups('enemy', ['obstacle', 'player', 'floor', 'enemy'])).setActiveEvents(ActiveEvents.COLLISION_EVENTS)
-	bundle.model.frustumCulled = false
-	bundle.model.traverse(o => o.frustumCulled = false)
+	bundle.bodyDesc
+		.setLinearDamping(20)
+		.setCcdEnabled(true)
+		.setDominanceGroup(1)
+	bundle.colliderDesc
+		.setMass(100)
+		.setCollisionGroups(collisionGroups('enemy', ['obstacle', 'player', 'floor', 'enemy']))
+		.setActiveEvents(ActiveEvents.COLLISION_EVENTS)
+	// bundle.model.frustumCulled = false
+	// bundle.model.traverse(o => o.frustumCulled = false)
 	const animator = new Animator<S>(bundle.model, model.animations, enemy.animationMap)
 	const entity = {
+		enemyId: generateUUID(),
 		...enemy.state,
 		...bundle,
 		...healthBundle(enemy.health * (level + 1)),
@@ -79,25 +88,24 @@ export const enemyBundle = <M extends keyof Animations & characters, S extends s
 		...opt('charging' in enemy.attackStyle, { dashParticles: dash(8) }),
 		...opt(enemy.boss, { boss: true, sensor: { distance: bundle.size.z / 2 + 2, shape: new Cuboid(5, 5, 5) } }),
 	} as const satisfies Entity
+
 	if (enemy.defaultAnimation) {
 		animator.init(enemy.defaultAnimation)
 	}
-	// if (enemy.components.charging) {
-	// 	Object.assign(entity, {
-	// 		dashParticles: dash(4),
-	// 	})
-	// }
-	// if (enemy.boss) {
-	// 	Object.assign(entity, {
-	// 		boss: true,
-	// 		sensor: { distance: bundle.size.z / 2 + 2, shape: new Cuboid(5, 5, 5) },
-	// 	} as const satisfies Entity)
-	// }
 
 	return entity
 }
-const enemyQuery = ecs.with('faction').where(e => e.faction === Faction.Enemy)
-export const removeEnemyFromSpawn: SubscriberSystem<typeof app, 'dungeon'> = ({ dungeon }) => enemyQuery.onEntityRemoved.subscribe(entity => dungeon.enemies.splice(dungeon.enemies.indexOf(entity), 1))
+const enemyQuery = ecs.with('faction', 'enemyId').where(e => e.faction === Faction.Enemy)
+export const removeEnemyFromSpawn: SubscriberSystem<typeof app, 'dungeon'> = ({ dungeon, dungeonLevel }) => enemyQuery.onEntityRemoved.subscribe((entity) => {
+	dungeon.enemies = dungeon.enemies.filter(e => e.enemyId !== entity.enemyId)
+	if (dungeon.enemies.length === 0) {
+		if (!dungeon.chest) {
+			spawnChest(dungeonLevel)
+			dungeon.chest = true
+		}
+		setTimeout(() => collectItems(true)(), 2000)
+	}
+})
 
 // debug
 export const displaySensors = () => ecs.with('sensor', 'group', 'rotation').onEntityAdded.subscribe((e) => {
@@ -111,16 +119,18 @@ export const displaySensors = () => ecs.with('sensor', 'group', 'rotation').onEn
 
 const dungeonQuery = ecs.with('dungeon')
 
-export const spawnEnemies = () => dungeonQuery.onEntityAdded.subscribe((e) => {
-	const possiblePoints = e.dungeon.navgrid.getSpawnPoints()
-	for (const enemy of e.dungeon.enemies) {
-		ecs.add({
-			...enemy,
-			position: getRandom([...possiblePoints]),
-			parent: e,
-		})
+export const spawnEnemies = () => {
+	for (const e of dungeonQuery) {
+		const possiblePoints = e.dungeon.navgrid.getSpawnPoints()
+		for (const enemy of e.dungeon.enemies) {
+			ecs.add({
+				...enemy,
+				position: getRandom([...possiblePoints]),
+				parent: e,
+			})
+		}
 	}
-})
+}
 
 const inactiveQuery = ecs.with('inactive')
 export const tickInactiveTimer = () => {

@@ -112,13 +112,13 @@ export const interactablePlantableSpot = [
 	}),
 ]
 
-const touchedPlantablespotQuery = plantableSpotsQuery.with('interactionContainer')
+const touchedPlantableSpotQuery = plantableSpotsQuery.with('interactionContainer')
 
 export const harvestCrop = async () => {
 	for (const player of playerQuery) {
 		const { playerControls, playerAnimator } = player
 		if (playerControls.get('secondary').justPressed) {
-			for (const spot of touchedPlantablespotQuery) {
+			for (const spot of touchedPlantableSpotQuery) {
 				if (save.inventories.player.some((item) => {
 					const itemData = itemsData[item.name]
 					return 'seed' in itemData

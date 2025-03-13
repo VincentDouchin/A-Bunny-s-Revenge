@@ -2,8 +2,9 @@ import type { Entity } from '@/global/entity'
 import type { With } from 'miniplex'
 import { States, states } from '@/global/entity'
 import { ecs } from '@/global/init'
-import { action, condition, createBehaviorTree, enteringState, inState, selector, sequence, setState, waitFor, withContext } from '@/lib/behaviors'
+import { action, condition, createBehaviorTree, enteringState, inState, inverter, selector, sequence, setState, waitFor, withContext } from '@/lib/behaviors'
 import { honeyProjectile, pollenAttack, projectilesCircleAttack } from '@/states/dungeon/attacks'
+import { getIntersections } from '@/states/game/sensor'
 import { getRandom } from '@/utils/mapFunctions'
 import { between } from 'randomish'
 import { applyMove, applyRotate } from './behaviorHelpers'
@@ -24,6 +25,15 @@ export const beeBossBehavior = createBehaviorTree(
 			(...[e]) => e.enemyAnimator,
 			selector(
 				damagedByPlayer(),
+				hitNode(),
+				deadNode(),
+				sequence(
+					inverter(inState('attack', 'waitingAttack', 'attackCooldown')),
+					condition((...[e, { player }]) => {
+						return player && getIntersections(e, undefined, c => c.handle === player.collider.handle)
+					}),
+					setState('waitingAttack'),
+				),
 				sequence(
 					enteringState('rangeAttack'),
 					action(rangedAttacks),
@@ -46,12 +56,11 @@ export const beeBossBehavior = createBehaviorTree(
 					waitFor((_e, _c, a) => !a.isPlaying('attacking')),
 					setState('attackCooldown'),
 				),
-				hitNode(),
+
 				idleNode(),
 				runningNode(),
 				waitingAttackNode(300)(),
 				attackCooldownNode(between(1_000, 3_000), 0.8)(),
-				deadNode(),
 
 			),
 		),

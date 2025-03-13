@@ -24,6 +24,7 @@ const spawnSpore = () => {
 		const spawnPoint = getRandom(map.dungeon.navgrid.getSpawnPoints())
 		ecs.add({
 			...Seedling(1),
+			parent: map,
 			position: spawnPoint,
 		})
 	}
@@ -73,7 +74,8 @@ export const pumpkinBossBehavior: Plugin<typeof app> = (app) => {
 			),
 		),
 	)
-	app.addSubscribers('dungeon', () => pumpkinBossBossQuery.onEntityAdded.subscribe((boss) => {
+	// app.onUpdate('dungeon', () => console.log(pumpkinBossBossQuery.size))
+	app.addSubscribers('game', () => pumpkinBossBossQuery.onEntityAdded.subscribe((boss) => {
 		const model = assets.crops.pumpkin.stages.at(-1)!.scene.clone()
 		model.scale.setScalar(30)
 		boss.model.visible = false
@@ -101,4 +103,34 @@ export const pumpkinBossBehavior: Plugin<typeof app> = (app) => {
 		})
 		addExploder(pumpkin, mat, 5)
 	}))
+	app.onEnter('dungeon', () => {
+		for (const boss of pumpkinBossBossQuery) {
+			const model = assets.crops.pumpkin.stages.at(-1)!.scene.clone()
+			model.scale.setScalar(30)
+			boss.model.visible = false
+			const mat = traverseFind<typeof Mesh>(model, node => node instanceof Mesh && 'material' in node && node.material.name === 'Orange')!.material as Material
+			let hit = 0
+			const pumpkin = ecs.add({
+				model,
+				position: boss.position.clone(),
+				interactable: Interactable.Harvest,
+				bodyDesc: RigidBodyDesc.fixed(),
+				colliderDesc: ColliderDesc.cylinder(10, 15),
+				async onPrimary(e) {
+					const entity = assertEntity(e, 'group', 'exploder')
+					squish(entity)
+					addCameraShake()
+					entity.exploder.explode(3)
+					hit++
+					if (hit === 3) {
+						ecs.remove(e)
+						boss.model.visible = true
+						await boss.pumpkinBossAnimator.playOnce('spawn')
+						boss.state.next = 'idle'
+					}
+				},
+			})
+			addExploder(pumpkin, mat, 5)
+		}
+	})
 }

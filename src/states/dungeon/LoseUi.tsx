@@ -1,7 +1,7 @@
 import type { Entity } from '@/global/entity'
 import type { With } from 'miniplex'
 import { gameOverEvent } from '@/global/events'
-import { ecs, ui } from '@/global/init'
+import { ecs, save, ui } from '@/global/init'
 import { menuInputMap } from '@/global/inputMaps'
 import { playSound } from '@/global/sounds'
 import { app } from '@/global/states'
@@ -20,6 +20,7 @@ export const LoseUi = () => {
 	const retry = () => {
 		app.disable('menu')
 		app.enable('farm', { door: 'clearing' })
+		save.modifiers = []
 		gameOver(false)
 	}
 

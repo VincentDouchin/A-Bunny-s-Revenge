@@ -1,6 +1,6 @@
 import type { QueryEntity } from '@/global/entity'
 import type { AppStates, Resources, UpdateSystem } from '@/lib/app'
-import { Faction, farmDoors } from '@/global/entity'
+import { farmDoors } from '@/global/entity'
 import { ecs, save, tweens, world } from '@/global/init'
 import { playSound } from '@/global/sounds'
 import { app } from '@/global/states'
@@ -45,31 +45,30 @@ export const doorSide = () => {
 
 const doorQuery = ecs.with('collider', 'door', 'rotation')
 const playerQuery = ecs.with('collider', 'playerControls', 'currentHealth', 'position').without('ignoreDoor')
-const enemyQuery = ecs.with('faction').where(({ faction }) => faction === Faction.Enemy)
 const doorToLockQuery = doorQuery.with('doorLocked')
 const doorToUnlockQuery = doorQuery.without('doorLocked', 'unlocked')
-const unlockeVineDoorsQuery = doorQuery.with('unlocked', 'doorType').where(e => e.doorType === 'vine')
+const unlockVineDoorsQuery = doorQuery.with('unlocked', 'doorType').where(e => e.doorType === 'vine')
 
 const onCollideWithDoor = <S extends AppStates<typeof app>>(
 
 	fn: (
 		door: QueryEntity<typeof doorQuery>,
 		player: QueryEntity<typeof playerQuery>,
-		ressources: Resources<typeof app, S>
+		resources: Resources<typeof app, S>
 	) => void,
-) => (ressources: Resources<typeof app, S>) => {
+) => (resources: Resources<typeof app, S>) => {
 	{
 		for (const door of doorQuery) {
 			for (const player of playerQuery) {
 				if (world.intersectionPair(door.collider, player.collider)) {
-					fn(door, player, ressources)
+					fn(door, player, resources)
 				}
 			}
 		}
 	}
 }
-export const unlockDoorDungeon = () => {
-	if (doorToLockQuery.size > 0 && enemyQuery.size === 0) {
+export const unlockDoorDungeon: UpdateSystem<typeof app, 'dungeon'> = (resources) => {
+	if (doorToLockQuery.size > 0 && resources.dungeon.enemies.length === 0) {
 		for (const door of doorToLockQuery) {
 			ecs.removeComponent(door, 'doorLocked')
 		}
@@ -176,7 +175,7 @@ export const unlockDoors = () => doorToUnlockQuery.onEntityAdded.subscribe((e) =
 	}
 })
 
-const hideVinesDoors = () => unlockeVineDoorsQuery.onEntityAdded.subscribe((e) => {
+const hideVinesDoors = () => unlockVineDoorsQuery.onEntityAdded.subscribe((e) => {
 	e.collider.setSensor(true)
 	const vinesBottom = e.model?.getObjectByName('GATE')
 	if (vinesBottom) {

@@ -289,6 +289,7 @@ export type Entity = StateComponents & Partial<AttackStyle> & {
 	deathTimer?: Timer<false>
 	drops?: Drop[]
 	enemyName?: string
+	enemyId?: string
 	// ! Debuff
 	sneeze?: Timer<false>
 	poisoned?: Timer<false>

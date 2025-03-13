@@ -1,8 +1,5 @@
-import type { app } from '@/global/states'
-import type { UpdateSystem } from '@/lib/app'
 import { chestLoot } from '@/constants/chestLoot'
 import { Animator } from '@/global/animator'
-import { Faction } from '@/global/entity'
 import { assets, ecs, tweens } from '@/global/init'
 import { playSound } from '@/global/sounds'
 import { inMap } from '@/lib/hierarchy'
@@ -12,8 +9,6 @@ import { ColliderDesc, RigidBodyDesc } from '@dimforge/rapier3d-compat'
 import { createBackIn, reverseEasing } from 'popmotion'
 import { Vector3 } from 'three'
 import { clone } from 'three/examples/jsm/utils/SkeletonUtils'
-import { collectItems } from '../game/items'
-import { RoomType } from './generateDungeon'
 import { dropBundle, lootPool } from './lootPool'
 
 export const lootPlayerQuery = ecs.with('player', 'lootQuantity', 'lootChance')
@@ -21,7 +16,7 @@ export const lootPlayerQuery = ecs.with('player', 'lootQuantity', 'lootChance')
 export const spawnChest = (dungeonLevel: number) => {
 	for (const player of lootPlayerQuery) {
 		const pool = chestLoot.find(lootPool => lootPool.level === dungeonLevel)
-		if (!pool) throw new Error(`lootpool not found for level ${dungeonLevel}`)
+		if (!pool) throw new Error(`lootPool not found for level ${dungeonLevel}`)
 		const items = lootPool(pool.items, player, pool.quantity)
 		if (items.length === 0) return
 		const chest = clone(assets.models.Chest.scene)
@@ -58,18 +53,5 @@ export const spawnChest = (dungeonLevel: number) => {
 				}
 			},
 		})
-	}
-}
-
-const enemiesQuery = ecs.with('faction').where(({ faction }) => faction === Faction.Enemy)
-
-const chestQuery = ecs.with('chestAnimator')
-export const endBattleSpawnChest: UpdateSystem<typeof app, 'dungeon'> = (ressources) => {
-	if (enemiesQuery.size === 0 && chestQuery.size === 0 && [RoomType.Battle, RoomType.Boss, RoomType.Entrance].includes(ressources.dungeon.type)) {
-		if (!ressources.dungeon.chest) {
-			spawnChest(ressources.dungeonLevel)
-			ressources.dungeon.chest = true
-		}
-		setTimeout(() => collectItems(true)(), 2000)
 	}
 }

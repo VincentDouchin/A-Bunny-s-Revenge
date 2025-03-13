@@ -107,13 +107,13 @@ export class App<States extends string[], Resources extends Record<string, any> 
 						}
 					}
 				}
+				for (const system of systems) {
+					await system(resources as Resources[S])
+				}
 				const subscriberSets = this.#systems[state]?.subscribers ?? []
 				for (const sub of subscriberSets) {
 					const unSub = sub(resources as Resources[S])
 					this.#systems[state]?.cleanUp.add(unSub)
-				}
-				for (const system of systems) {
-					await system(resources as Resources[S])
 				}
 
 				resolve()

@@ -74,7 +74,7 @@ export const createBehaviorTree = <E extends With<Entity, 'state'>>(
 	query: Query<E>,
 	tree: BehaviorNode<[E]>,
 ): Plugin<typeof app> => (app) => {
-	app.onUpdate('game', runIf(() => app.isDisabled('paused'), () => {
+	app.onUpdate('game', runIf(() => app.isDisabled('paused') && app.isDisabled('menu'), () => {
 		for (const e of query) {
 			tree(e)
 			updateState(e)

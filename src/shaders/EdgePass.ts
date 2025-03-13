@@ -1,5 +1,4 @@
 import type { Texture, WebGLRenderTarget } from 'three'
-import { target } from '@/global/rendering'
 import kuwahara from '@/shaders/glsl/lib/kuwahara.glsl?raw'
 import sobel from '@/shaders/glsl/lib/sobel.glsl?raw'
 import { Color, Uniform, Vector2 } from 'three'
@@ -41,7 +40,7 @@ export const getSobelShader = (x: number, y: number, diffuseTarget: WebGLRenderT
 	uniforms: {
 
 		tDiffuse: new Uniform<Texture>(diffuseTarget.texture),
-		tDepth: new Uniform<Texture>(target.depthTexture),
+		tDepth: new Uniform<Texture>(diffuseTarget.depthTexture),
 		outline: new Uniform<Texture>(outlineTarget.texture),
 		resolution: new Uniform(new Vector2(x, y)),
 		edgeColor: new Uniform(new Color(0x4D3533)),

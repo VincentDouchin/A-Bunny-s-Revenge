@@ -58,12 +58,16 @@ export const playerBundle = (health: number, weapon: weapons | null) => {
 	model.scale.multiplyScalar(4.5)
 	const size = new Vector3(5, 6, 5)
 	const bundle = capsuleColliderBundle(model, size)
-	bundle.bodyDesc.setAdditionalMass(1)
-	bundle.bodyDesc.setLinearDamping(20)
+	bundle.bodyDesc
+		.setAdditionalMass(1)
+		.setLinearDamping(20)
+		.setUserData('player')
+	bundle.colliderDesc
+		.setCollisionGroups(collisionGroups('player', ['obstacle', 'enemy', 'floor']))
+
+		.setActiveEvents(ActiveEvents.COLLISION_EVENTS)
 	const debuffsContainer = new CSS2DObject(document.createElement('div'))
 	debuffsContainer.position.setY(15)
-	bundle.colliderDesc.setCollisionGroups(collisionGroups('player', ['obstacle', 'enemy', 'floor'])).setActiveEvents(ActiveEvents.COLLISION_EVENTS)
-	bundle.bodyDesc.setUserData('player')
 	const player = {
 		debuffsContainer,
 		...menuInputMap(),
