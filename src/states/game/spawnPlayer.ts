@@ -64,10 +64,11 @@ export const playerBundle = (health: number, weapon: weapons | null) => {
 		.setUserData('player')
 	bundle.colliderDesc
 		.setCollisionGroups(collisionGroups('player', ['obstacle', 'enemy', 'floor']))
-
 		.setActiveEvents(ActiveEvents.COLLISION_EVENTS)
+
 	const debuffsContainer = new CSS2DObject(document.createElement('div'))
 	debuffsContainer.position.setY(15)
+
 	const player = {
 		debuffsContainer,
 		...menuInputMap(),

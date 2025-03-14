@@ -93,6 +93,10 @@ export class App<States extends string[], Resources extends Record<string, any> 
 		return this.#states.flatMap(states => [...states]) as AppStates<this>[]
 	}
 
+	getResources<S extends States[number]>(state: S) {
+		return this.#enabledStates[state]
+	}
+
 	async enable<S extends States[number]>(...args: S extends keyof Resources ? [state: S, resources: Resources[S]] : [state: S]) {
 		return new Promise<void>((resolve) => {
 			this.#queue.add(async () => {

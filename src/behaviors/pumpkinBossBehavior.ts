@@ -1,10 +1,11 @@
-import type { app } from '@/global/states'
+import type { Entity } from '@/global/entity'
 import type { Plugin } from '@/lib/app'
 import type { Material } from 'three'
 import { Seedling } from '@/constants/enemies'
 import { addCameraShake } from '@/global/camera'
 import { assertEntity, Interactable, States, states } from '@/global/entity'
 import { assets, ecs, time } from '@/global/init'
+import { app } from '@/global/states'
 import { action, condition, createBehaviorTree, enteringState, inState, inverter, runNodes, selector, sequence, setState, waitFor, withContext } from '@/lib/behaviors'
 import { traverseFind } from '@/lib/models'
 import { addExploder } from '@/particles/exploder'
@@ -18,15 +19,24 @@ import { baseEnemyQuery } from './enemyBehavior'
 const sporeQuery = ecs.with('enemyName').where(e => e.enemyName === 'pollen')
 
 const mapQuery = ecs.with('dungeon')
-const spawnSpore = () => {
+const spawnSpore = (boss: Entity) => {
 	const map = mapQuery.first
 	if (map) {
 		const spawnPoint = getRandom(map.dungeon.navgrid.getSpawnPoints())
-		ecs.add({
-			...Seedling(1),
-			parent: map,
-			position: spawnPoint,
-		})
+		const resources = app.getResources('dungeon')
+		if (resources?.dungeonLevel) {
+			const seedling = ecs.add({
+				...Seedling(resources.dungeonLevel),
+				parent: map,
+				position: spawnPoint,
+			})
+			const { onDestroy } = boss
+			ecs.removeComponent(boss, 'onDestroy')
+			ecs.update(boss, { onDestroy() {
+				onDestroy && onDestroy()
+				seedling.state.next = 'dying'
+			} })
+		}
 	}
 }
 
@@ -50,7 +60,7 @@ export const pumpkinBossBehavior: Plugin<typeof app> = (app) => {
 							sequence(
 								enteringState('summon'),
 								action(e => e.pumpkinBossAnimator.playOnce('summon')),
-								action(spawnSpore),
+								action(e => spawnSpore(e)),
 							),
 							sequence(
 								inState('summon'),
@@ -74,7 +84,6 @@ export const pumpkinBossBehavior: Plugin<typeof app> = (app) => {
 			),
 		),
 	)
-	// app.onUpdate('dungeon', () => console.log(pumpkinBossBossQuery.size))
 	app.addSubscribers('game', () => pumpkinBossBossQuery.onEntityAdded.subscribe((boss) => {
 		const model = assets.crops.pumpkin.stages.at(-1)!.scene.clone()
 		model.scale.setScalar(30)
