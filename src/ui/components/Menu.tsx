@@ -87,7 +87,7 @@ export const menuItem: MenuItem = (el, init) => {
 	}
 	el.addEventListener('pointerdown', clickListener)
 	onCleanup(() => {
-		el.removeEventListener('click', clickListener)
+		el.removeEventListener('pointerdown', clickListener)
 		menu.refs.delete(id)
 		menu.inverseRefs.delete(el)
 	})
