@@ -65,7 +65,7 @@ export const applyMove = <E extends With<Entity, 'body'>, C >(fn: (e: E, c: C) =
 		if (!controller.computedGrounded()) {
 			force.add(new Vector3(0, -0.2, 0))
 		}
-		controller.computeColliderMovement(collider, force, QueryFilterFlags.EXCLUDE_SOLIDS, undefined)
+		controller.computeColliderMovement(collider, force, QueryFilterFlags.EXCLUDE_SENSORS, undefined)
 		const movement = controller.computedMovement()
 		const bodyPos = body.translation()
 		const dest = new Vector3(bodyPos.x, bodyPos.y, bodyPos.z).add(movement)

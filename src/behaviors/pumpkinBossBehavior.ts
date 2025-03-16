@@ -24,7 +24,7 @@ const spawnSpore = (boss: Entity) => {
 	if (map) {
 		const spawnPoint = getRandom(map.dungeon.navgrid.getSpawnPoints())
 		const resources = app.getResources('dungeon')
-		if (resources?.dungeonLevel) {
+		if (resources && 'dungeonLevel' in resources) {
 			const seedling = ecs.add({
 				...Seedling(resources.dungeonLevel),
 				parent: map,
