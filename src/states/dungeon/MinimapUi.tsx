@@ -66,6 +66,18 @@ const RoomUi = ({ room, direction, previous, current }: { room: Room, direction?
 		box-sizing: content-box;
 		border: var(--border);
 	}
+	.east-fade{
+		mask-image: linear-gradient(to right, rgba(0, 0, 0, 0), rgba(0, 0, 0, 1));
+	}
+	.west-fade{
+		mask-image: linear-gradient(to left, rgba(0, 0, 0, 0), rgba(0, 0, 0, 1));
+	}
+	.north-fade{
+		mask-image: linear-gradient(to bottom, rgba(0, 0, 0, 0), rgba(0, 0, 0, 1));
+	}
+	.south-fade{
+		mask-image: linear-gradient(to top, rgba(0, 0, 0, 0), rgba(0, 0, 0, 1));
+	}
 	`
 	return (
 		<div class="minimap-wrapper">
@@ -93,24 +105,30 @@ const RoomUi = ({ room, direction, previous, current }: { room: Room, direction?
 
 					</Switch>
 				</div>
-				<For each={entries(room.doors).filter(x => x[1] && x[1] !== previous)}>
+				<For each={entries(room.doors).filter(x => x[1] !== previous)}>
 					{([direction, nextRoom]) => {
 						return (
-							<Show when={nextRoom}>
-								{nextRoom => (
+							<>
+								<Show when={nextRoom}>
+									{nextRoom => (
 
-									<>
-										<div class="connector" style={connectorSize[direction]}></div>
-										<div class="corridor" style={connectorSize[direction]}></div>
-										<RoomUi
-											current={false}
-											room={nextRoom()}
-											direction={direction}
-											previous={room}
-										/>
-									</>
-								)}
-							</Show>
+										<>
+											<div class="connector" style={connectorSize[direction]}></div>
+											<div class="corridor" style={connectorSize[direction]}></div>
+											<RoomUi
+												current={false}
+												room={nextRoom()}
+												direction={direction}
+												previous={room}
+											/>
+										</>
+									)}
+								</Show>
+								<Show when={!nextRoom}>
+									<div class="connector" classList={{ [`${direction}-fade`]: true }} style={connectorSize[direction]}></div>
+									<div class="corridor" classList={{ [`${direction}-fade`]: true }} style={connectorSize[direction]}></div>
+								</Show>
+							</>
 						)
 					}}
 				</For>
