@@ -87,7 +87,7 @@ export const transitionToGame = once(async () => {
 					mainMenuCam.camera.zoom = 10 * f + 1
 					mainMenuCam.camera.updateProjectionMatrix()
 					const newSize = finalResolution.clone().add(new Vector2(window.innerWidth, window.innerHeight).sub(finalResolution).multiplyScalar(1 - f))
-					updateRenderSize(newSize)
+					updateRenderSize(newSize, f === 1)
 					book.windowShader.uniforms.parchmentMix.value = 0.3 * f + 0.7
 					book.windowShader.uniforms.windowSize.value = f * 0.5
 					book.windowShader.uniforms.resolution.value = newSize

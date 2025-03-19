@@ -36,17 +36,19 @@ export const getTargetSize = (height = params.renderHeight) => {
 	const width = height * ratio
 	return new Vector2(width, height)
 }
-export const updateRenderSize = (newSize?: Vector2) => {
+export const updateRenderSize = (newSize?: Vector2, force = true) => {
 	newSize ??= getTargetSize()
 	sobelMat.uniforms.resolution.value = newSize
-	target.setSize(newSize.x, newSize.y)
-	outlineTarget.setSize(newSize.x, newSize.y)
-	outlineTarget2.setSize(newSize.x, newSize.y)
 	finalTarget.setSize(newSize.x, newSize.y)
-	renderer.setSize(newSize.x, newSize.y)
-	const cssRendererSize = cssRenderer.getSize()
-	if (cssRendererSize.width !== window.innerWidth || cssRendererSize.height !== window.innerHeight) {
-		cssRenderer.setSize(window.innerWidth, window.innerHeight)
+	if (force) {
+		target.setSize(newSize.x, newSize.y)
+		outlineTarget.setSize(newSize.x, newSize.y)
+		outlineTarget2.setSize(newSize.x, newSize.y)
+		renderer.setSize(newSize.x, newSize.y)
+		const cssRendererSize = cssRenderer.getSize()
+		if (cssRendererSize.width !== window.innerWidth || cssRendererSize.height !== window.innerHeight) {
+			cssRenderer.setSize(window.innerWidth, window.innerHeight)
+		}
 	}
 }
 export const initThree = () => {
