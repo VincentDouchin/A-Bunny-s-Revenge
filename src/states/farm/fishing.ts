@@ -1,14 +1,15 @@
 import type { app } from '@/global/states'
-import type { Plugin } from '@/lib/app'
 import { fishBehavior } from '@/behaviors/fishBehavior'
 import { MenuType, stateBundle, States } from '@/global/entity'
 import { assets, ecs, tweens } from '@/global/init'
 import { scene } from '@/global/rendering'
 import { playSound } from '@/global/sounds'
+import { type Plugin, runIf } from '@/lib/app'
 import { inMap } from '@/lib/hierarchy'
 import { MeshLine, MeshLineMaterial } from '@/lib/MeshLine'
 import { Timer } from '@/lib/timer'
 import { getWorldPosition } from '@/lib/transforms'
+import { fishParticles } from '@/particles/fishParticles'
 import { addItemToPlayer } from '@/utils/dialogHelpers'
 import { range } from '@/utils/mapFunctions'
 import { ColliderDesc, RigidBodyDesc, RigidBodyType } from '@dimforge/rapier3d-compat'
@@ -54,11 +55,13 @@ export const stopFishing = (force: boolean = false) => {
 					ecs.removeComponent(player.fishingPole, 'bobber')
 					player.fishingPole.fishingLine?.removeFromParent()
 					ecs.removeComponent(player.fishingPole, 'fishingLine')
-					addItemToPlayer({ name: 'redSnapper', quantity: 1 })
+					if (force) {
+						addItemToPlayer({ name: 'redSnapper', quantity: 1 })
+					}
 					for (const fishing of fishingQuery) {
 						ecs.removeComponent(fishing, 'menuType')
 					}
-				}, 300)
+				}, 600)
 			}
 		}
 	}
@@ -73,13 +76,14 @@ const updateFishingLine = () => {
 			bobber.body.setBodyType(RigidBodyType.Fixed, false)
 			ecs.reindex(bobber)
 			bobber.position.y = -3
+			ecs.add({ emitter: fishParticles(), position: bobber.position.clone(), autoDestroy: true })
 			playSound(['zapsplat_sport_fishing_sinker_tackle_hit_water_plop_001_13669', 'zapsplat_sport_fishing_sinker_tackle_hit_water_plop_002_13670'])
 		}
 
 		if (tip && bobber) {
 			const pos1 = getWorldPosition(tip)
 			const pos2 = new Vector3()
-			const pos3 = bobber.position
+			const pos3 = bobber.position.clone()
 			pos2.lerpVectors(pos1, pos3, 0.5)
 			const y = pos1.y - pos3.y
 			pos2.y = pos3.y + y / 3
@@ -96,11 +100,13 @@ const updateFishingLine = () => {
 }
 
 const fishingSpotQuery = ecs.with('collider', 'fishingSpot', 'interactionContainer', 'rotation')
-const playerQuery = ecs.with('player', 'playerControls', 'playerAnimator', 'rotation')
+const playerQuery = ecs.with('player', 'playerControls', 'playerAnimator', 'rotation', 'state')
 const useFishingPole = () => {
 	for (const spot of fishingSpotQuery) {
 		for (const player of playerQuery) {
 			if (player.playerControls.get('primary').justReleased && fishingQuery.size === 0) {
+				player.movementForce?.setScalar(0)
+				player.targetMovementForce?.setScalar(0)
 				ecs.removeComponent(player, 'fishingPole')
 				const fishingPole = fishingPoleBundle()
 				ecs.update(player, { fishingPole })
@@ -117,10 +123,11 @@ const useFishingPole = () => {
 						colliderDesc: ColliderDesc.ball(1).setSensor(true),
 					})
 					ecs.update(fishingPole, { bobber })
+
 					playSound('zapsplat_leisure_fishing_road_swipe_cast_air_whoosh_24610')
 				}, 500)
 				player.playerAnimator.playClamped('lightAttack', { timeScale: 0.5 }).then(() => {
-					player.playerAnimator.playAnimation('idle', { timeScale: 0.2 })
+					player.state.next = 'idle'
 				})
 			}
 		}
@@ -185,6 +192,7 @@ const deSpawnFish = () => {
 
 export const fishingPlugin: Plugin<typeof app> = (app) => {
 	app.addSubscribers('game', addFish)
-		.onUpdate('game', useFishingPole, updateFishingLine, () => stopFishing(false), deSpawnFish)
-		.addPlugins(fishBehavior)
+		.onPreUpdate('game', updateFishingLine)
+		.onUpdate('game', useFishingPole, () => stopFishing(false), deSpawnFish)
+		.onUpdate('game', runIf(() => app.isDisabled('paused'), fishBehavior))
 }

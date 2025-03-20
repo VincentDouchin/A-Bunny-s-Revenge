@@ -1,7 +1,7 @@
 import { type QueryEntity, States, states } from '@/global/entity'
 import { ecs, time, tweens } from '@/global/init'
 import { playSound } from '@/global/sounds'
-import { action, condition, createBehaviorTree, enteringState, inState, parallel, runNodes, selector, sequence, setState, wait, withContext } from '@/lib/behaviors'
+import { action, condition, createBehaviorTree, enteringState, inState, inverter, parallel, runNodes, selector, sequence, setState, wait, withContext } from '@/lib/behaviors'
 import { fishParticles } from '@/particles/fishParticles'
 import { stopFishing } from '@/states/farm/fishing'
 import { circOut } from 'popmotion'
@@ -14,7 +14,6 @@ const bobberQueryQuery = ecs.with('bobber')
 const fishParameters = (e: QueryEntity<typeof fishQuery>) => {
 	const bobber = bobberQueryQuery.first?.bobber ?? null
 	const bobberPosition = bobber?.bobbing ? bobber.position : null
-
 	const distance = bobberPosition ? e.position.distanceTo(bobberPosition) : null
 	return { bobberPosition, distance, bobber }
 }
@@ -25,16 +24,9 @@ export const fishBehavior = createBehaviorTree(
 		fishParameters,
 		selector(
 			sequence(
+				inverter(inState('wander')),
 				condition((_e, c) => !c.bobber),
 				setState('wander'),
-			),
-			sequence(
-				inState('going'),
-				action((e) => {
-					e.position.add(new Vector3(0, 0, 5).multiplyScalar(time.delta / 1000).applyQuaternion(e.rotation))
-				}),
-				condition((_e, c) => c.distance && c.distance < 4),
-				setState('hooked'),
 			),
 			sequence(
 				enteringState('going'),
@@ -44,6 +36,14 @@ export const fishBehavior = createBehaviorTree(
 						e.targetRotation.setFromEuler(e.group.rotation)
 					}
 				}),
+			),
+			sequence(
+				inState('going'),
+				action((e) => {
+					e.position.add(new Vector3(0, 0, 5).multiplyScalar(time.delta / 1000).applyQuaternion(e.rotation))
+				}),
+				condition((_e, c) => c.distance && c.distance < 4),
+				setState('hooked'),
 			),
 			sequence(
 				enteringState('hooked'),
@@ -57,7 +57,7 @@ export const fishBehavior = createBehaviorTree(
 						duration: between(300, 600),
 						ease: circOut,
 						repeatType: 'mirror',
-						onComplete: () => setState('bounce'),
+						onComplete: () => setState('bounce')(e),
 						onUpdate: f => e.position.lerpVectors(from, dest, f),
 					})
 				}),
@@ -77,10 +77,10 @@ export const fishBehavior = createBehaviorTree(
 							e.targetRotation = new Quaternion().setFromAxisAngle(new Vector3(0, 1, 0), Math.PI * 2 * Math.random())
 							e.fish.reset()
 						}),
-						sequence(
-							condition((_e, c) => c.distance !== null && c.distance < 30 && !fishQuery.entities.some(e => e.state.current !== 'wander')),
-							setState('going'),
-						),
+					),
+					sequence(
+						condition((_e, c) => c.distance !== null && c.distance < 30 && fishQuery.entities.every(e => e.state.current === 'wander')),
+						setState('going'),
 					),
 				),
 			),
@@ -155,71 +155,3 @@ export const fishBehavior = createBehaviorTree(
 		),
 	),
 )
-// export const fishBehaviorPlugin = behaviorPlugin(fishQuery, 'fish', fishParameters)({
-
-// 	bounce: {
-// 		async enter(e, setState, { bobber, bobberPosition }) {
-// 			if (e.fishingProgress) {
-// 				e.fishingProgress.attempts += 1
-// 				e.fishingProgress.done = false
-// 			}
-// 			playSound(['zapsplat_sport_fishing_sinker_tackle_hit_water_plop_001_13669', 'zapsplat_sport_fishing_sinker_tackle_hit_water_plop_002_13670'])
-// 			ecs.add({ parent: e, emitter: fishParticles(), position: new Vector3(0, 0, 3), autoDestroy: true })
-// 			if (bobberPosition) {
-// 				const originalPosition = bobberPosition.clone()
-// 				const targetPosition = new Vector3(0, -2, 0).add(originalPosition)
-// 				tweens.add({
-// 					from: 0,
-// 					to: 1,
-// 					duration: 250,
-// 					repeat: 1,
-// 					repeatType: 'mirror',
-// 					ease: circOut,
-// 					onUpdate: f => bobberPosition.lerpVectors(originalPosition, targetPosition, f),
-
-// 				})
-// 			}
-// 			await sleep(500)
-// 			if (bobber) {
-// 				setState('hooked')
-// 			}
-// 		},
-// 		update(e, setState, { bobber }) {
-// 			if (!bobber) setState('wander')
-// 			for (const player of playerQuery) {
-// 				if (e.fishingProgress && e.fishingProgress.done === false) {
-// 					if (player.playerControls.get('primary').justReleased) {
-// 						e.fishingProgress.success += 1
-// 						e.fishingProgress.done = true
-// 						if (e.fishingProgress.attempts <= 5 && e.fishingProgress.success === 3) {
-// 							ecs.remove(e)
-// 							stopFishing(true)()
-// 							return
-// 						}
-// 					}
-// 					if (e.fishingProgress.attempts >= 5) {
-// 						setState('runaway')
-// 					}
-// 				}
-// 			}
-// 		},
-// 	},
-// 	runaway: {
-// 		enter(e) {
-// 			e.targetRotation.setFromAxisAngle(new Vector3(0, 1, 0), Math.PI * 2 * Math.random())
-// 			if (e.model instanceof Mesh && e.model.material) {
-// 				const mat = e.model.material
-// 				tweens.add({
-// 					destroy: e,
-// 					from: mat.opacity,
-// 					to: 0,
-// 					duration: 2000,
-// 					onUpdate: f => mat.opacity = f,
-// 				})
-// 			}
-// 		},
-// 		update(e) {
-// 			e.position.add(new Vector3(0, 0, 6).multiplyScalar(time.delta / 1000).applyQuaternion(e.rotation))
-// 		},
-// 	},
-// })

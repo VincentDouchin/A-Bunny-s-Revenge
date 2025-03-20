@@ -3,7 +3,7 @@ import { app } from '@/global/states'
 import { spawnFootstep } from '@/particles/footsteps'
 import { Vector3 } from 'three'
 
-const movementQuery = ecs.with('body', 'rotation', 'movementForce', 'speed')
+const movementQuery = ecs.with('body', 'rotation', 'movementForce', 'speed', 'targetMovementForce')
 const playerQuery = movementQuery.with('playerControls', 'position', 'state', 'lastStep', 'playerAnimator', 'modifiers', 'model', 'worldPosition')
 
 export const playerSteps = () => {
@@ -58,5 +58,7 @@ export const stopPlayer = () => {
 	const player = playerQuery.first
 	if (player) {
 		player.movementForce.setScalar(0)
+		player.targetMovementForce.setScalar(0)
+		player.state.next = 'managed'
 	}
 }

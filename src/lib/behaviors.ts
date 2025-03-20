@@ -1,8 +1,6 @@
 import type { AllStates, BehaviorNode, Entity } from '@/global/entity'
-import type { app } from '@/global/states'
 import type { Query, With } from 'miniplex'
 import { ecs, time } from '@/global/init'
-import { type Plugin, runIf } from './app'
 
 export const sequence = <E extends Array<any>>(...nodes: BehaviorNode<E>[]): BehaviorNode<E> => (...e) => {
 	for (const node of nodes) {
@@ -73,13 +71,11 @@ export const updateState = (e: With<Entity, 'state'>) => {
 export const createBehaviorTree = <E extends With<Entity, 'state'>>(
 	query: Query<E>,
 	tree: BehaviorNode<[E]>,
-): Plugin<typeof app> => (app) => {
-	app.onUpdate('game', runIf(() => app.isDisabled('paused') && app.isDisabled('menu'), () => {
-		for (const e of query) {
-			tree(e)
-			updateState(e)
-		}
-	}))
+) => () => {
+	for (const e of query) {
+		tree(e)
+		updateState(e)
+	}
 }
 
 type StateFunction = <S extends AllStates, E extends With<Entity, 'state'> & With<Entity, `${S}State`>, C extends Array<any>>(state: S) => BehaviorNode<[E, ...C]>
