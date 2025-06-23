@@ -2,7 +2,7 @@ import { CircleGeometry, MeshBasicMaterial, Vector4 } from 'three'
 import { Bezier, ColorOverLife, ConeEmitter, ConstantColor, Gradient, IntervalValue, ParticleSystem, PiecewiseBezier, RenderMode, SizeOverLife } from 'three.quarks'
 
 const geo = new CircleGeometry(3, 8)
-const mat = new MeshBasicMaterial({ transparent: true })
+const mat = new MeshBasicMaterial({ })
 mat.depthWrite = false
 
 export const chestAppearing = () => {
@@ -11,8 +11,8 @@ export const chestAppearing = () => {
 		looping: false,
 		prewarm: false,
 		instancingGeometry: geo,
-		startLife: new IntervalValue(5, 4),
-		startSpeed: new IntervalValue(4, 5),
+		startLife: new IntervalValue(7, 8),
+		startSpeed: new IntervalValue(2, 3),
 		startSize: new IntervalValue(0.5, 1),
 		startColor: new ConstantColor(new Vector4(1, 1, 1, 1)),
 		worldSpace: false,

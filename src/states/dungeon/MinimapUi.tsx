@@ -67,17 +67,22 @@ const RoomUi = ({ room, direction, previous, current }: { room: Room, direction?
 		border: var(--border);
 	}
 	.east-fade{
-		mask-image: linear-gradient(to right, rgba(0, 0, 0, 0), rgba(0, 0, 0, 1));
+		mask-image: linear-gradient(to left, transparent, rgba(0, 0, 0, 1));
+		border-right: none;
 	}
 	.west-fade{
-		mask-image: linear-gradient(to left, rgba(0, 0, 0, 0), rgba(0, 0, 0, 1));
+		mask-image: linear-gradient(to right, transparent, rgba(0, 0, 0, 1));
+		border-left: none;
 	}
 	.north-fade{
-		mask-image: linear-gradient(to bottom, rgba(0, 0, 0, 0), rgba(0, 0, 0, 1));
+		mask-image: linear-gradient(to bottom, transparent, rgba(0, 0, 0, 1));
+		border-top: none;
 	}
 	.south-fade{
-		mask-image: linear-gradient(to top, rgba(0, 0, 0, 0), rgba(0, 0, 0, 1));
+		mask-image: linear-gradient(to top, transparent, rgba(0, 0, 0, 1));
+		border-bottom: none;
 	}
+	
 	`
 	return (
 		<div class="minimap-wrapper">

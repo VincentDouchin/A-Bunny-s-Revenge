@@ -10,11 +10,11 @@ import { assets, ecs, save } from '@/global/init'
 import { app, type DungeonResources, type FarmResources } from '@/global/states'
 import { Direction, isCardinalDirection } from '@/lib/directions'
 import { inMap } from '@/lib/hierarchy'
-import { getSecondaryColliders } from '@/lib/models'
+import { getSecondaryColliders, traverseFind } from '@/lib/models'
 import { fireParticles } from '@/particles/fireParticles'
 import { smoke } from '@/particles/smoke'
 import { introQuest } from '@/quests/introQuest'
-import { GardenPlotMaterial, GrassMaterial } from '@/shaders/materials'
+import { GardenPlotMaterial, GrassMaterial, ToonMaterial } from '@/shaders/materials'
 import { RoomType } from '@/states/dungeon/generateDungeon'
 import { cropBundle } from '@/states/farm/farming'
 import { openMenu } from '@/states/farm/openInventory'
@@ -24,7 +24,7 @@ import { lockPlayer, unlockPlayer } from '@/utils/dialogHelpers'
 import { sleep } from '@/utils/sleep'
 import { ActiveCollisionTypes, ColliderDesc, RigidBodyDesc } from '@dimforge/rapier3d-compat'
 import FastNoiseLite from 'fastnoise-lite'
-import { Color, ConeGeometry, DoubleSide, Euler, Group, Material, Mesh, MeshBasicMaterial, MeshPhongMaterial, Object3D, PointLight, Quaternion, SphereGeometry, Vector2, Vector3 } from 'three'
+import { Color, ConeGeometry, DoubleSide, Euler, Group, Material, Mesh, MeshBasicMaterial, MeshPhongMaterial, Object3D, PlaneGeometry, PointLight, Quaternion, SphereGeometry, Vector2, Vector3 } from 'three'
 import { CSS2DObject } from 'three/examples/jsm/renderers/CSS2DRenderer'
 import { clone } from 'three/examples/jsm/utils/SkeletonUtils'
 
@@ -37,11 +37,25 @@ const markerModel = () => {
 	return mesh
 }
 
+const blanketModel = () => {
+	const size = new Vector2(30, 24)
+	const map = assets.textures.blanket.clone()
+	map.repeat = size.clone().divideScalar(3)
+	const model = new Mesh(
+		new PlaneGeometry(...size.toArray()),
+		new ToonMaterial({ map }),
+	)
+	model.position.y = 1
+	model.rotateX(-Math.PI / 2)
+	return model
+}
+
 export const customModels = {
 
 	door: doorSide,
 	doorMarker: markerModel,
 	marker: markerModel,
+	blanket: blanketModel,
 } as const satisfies Record<string, () => Object3D<Object3DEventMap>>
 export type customModel = keyof typeof customModels
 export const getModel = (key: ModelName): Object3D => {
@@ -85,7 +99,7 @@ export interface PlacableProp<N extends string> {
 	data?: N extends keyof ExtraData ? ExtraData[N] : undefined
 	bundle?: BundleFn<EntityData<N extends keyof ExtraData ? NonNullable<ExtraData[N]> : never>>
 }
-export type propNames = 'log' | 'door' | 'rock' | 'board' | 'oven' | 'CookingPot' | 'stove' | 'Flower/plants' | 'sign' | 'plots' | 'bush' | 'fence' | 'house' | 'mushrooms' | 'lamp' | 'Kitchen' | 'berry bushes' | 'bench' | 'well' | 'fruit trees' | 'stall' | 'Vine gate' | 'fishing deck' | 'pillar' | 'marker' | 'cellar' | 'cellar_door' | 'scaffolds' | 'cellar_props' | 'cellar_wall' | 'village'
+export type propNames = 'log' | 'door' | 'rock' | 'board' | 'oven' | 'CookingPot' | 'stove' | 'Flower/plants' | 'sign' | 'plots' | 'bush' | 'fence' | 'house' | 'mushrooms' | 'lamp' | 'Kitchen' | 'berry bushes' | 'bench' | 'well' | 'fruit trees' | 'stall' | 'Vine gate' | 'fishing deck' | 'pillar' | 'marker' | 'cellar' | 'cellar_door' | 'scaffolds' | 'cellar_props' | 'cellar_wall' | 'village' | 'blanket' | 'sittingBench'
 
 type Props = ({ [k in propNames]: PlacableProp<k> }[propNames])[]
 export const props: Props = [
@@ -93,6 +107,10 @@ export const props: Props = [
 		name: 'cellar',
 		models: ['stairs'],
 		bundle: e => ({ ...e, actor: 'cellarStairs' }),
+	},
+	{
+		name: 'blanket',
+		models: ['blanket'],
 	},
 	{
 		name: 'cellar_props',
@@ -123,6 +141,32 @@ export const props: Props = [
 		name: 'log',
 		models: ['WoodLog', 'WoodLog_Moss', 'TreeStump', 'TreeStump_Moss'],
 		bundle: entity => ({ ...entity, obstacle: true }),
+	},
+	{
+		name: 'sittingBench',
+		models: ['bench'],
+		bundle: (entity) => {
+			return {
+				...entity,
+				withChildren: (parent) => {
+					const model = clone(assets.characters.grandma.scene)
+					model.scale.multiplyScalar(5)
+					const position = traverseFind(parent.model!, e => e.name === 'position1')!
+						.position
+						.clone()
+						.multiply(parent.model!.scale)
+					const grandma = ecs.add({
+						model,
+						kayAnimator: new Animator(model, assets.characters.grandma.animations),
+						parent,
+						position,
+						group: new Group(),
+						rotation: new Quaternion().setFromAxisAngle(new Vector3(0, 1, 0), Math.PI),
+					})
+					grandma.kayAnimator.playAnimation('Sit_Chair_Idle')
+				},
+			}
+		},
 	},
 	{
 		name: 'marker',
@@ -643,7 +687,7 @@ export const props: Props = [
 							const item = items[i]
 							if (!item) continue
 							const model = assets.items[item.name].model.clone()
-							model.scale.multiplyScalar(5)
+							model.scale.setScalar(5)
 							const itemData = itemsData[item.name]
 							const itemEntity: Entity = {
 								parent,

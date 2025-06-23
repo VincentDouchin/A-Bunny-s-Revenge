@@ -59,6 +59,6 @@ export const stopPlayer = () => {
 	if (player) {
 		player.movementForce.setScalar(0)
 		player.targetMovementForce.setScalar(0)
-		player.state.next = 'managed'
+		player.state.next = 'idle'
 	}
 }

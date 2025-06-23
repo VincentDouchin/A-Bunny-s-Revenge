@@ -2,7 +2,7 @@ import { CircleGeometry, MeshBasicMaterial } from 'three'
 import { Bezier, ColorOverLife, ColorRange, ConeEmitter, ConstantValue, Gradient, IntervalValue, ParticleSystem, PiecewiseBezier, RandomQuatGenerator, RenderMode, SizeOverLife, SpeedOverLife } from 'three.quarks'
 import { colorToVec4 } from './honeySplatParticles'
 
-const mat = new MeshBasicMaterial({ color: 0x000000, depthWrite: false, transparent: true })
+const mat = new MeshBasicMaterial({ depthWrite: false })
 const geo = new CircleGeometry(1, 8)
 
 export const enemyDefeated = () => {
@@ -35,5 +35,6 @@ export const enemyDefeated = () => {
 	})
 	system.emitter.name = 'defeated'
 	system.emitter.rotateX(-Math.PI / 2)
+
 	return system
 }

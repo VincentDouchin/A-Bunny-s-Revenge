@@ -109,7 +109,7 @@ export const playerBundle = (health: number, weapon: weapons | null) => {
 	for (const item of save.modifiers) {
 		player.modifiers.addModifier(item)
 	}
-
+	player.playerAnimator.init('idle')
 	return player
 }
 const doorQuery = ecs.with('door', 'position', 'rotation')

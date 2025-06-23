@@ -72,7 +72,7 @@ app
 	.onEnter('default', setupGame)
 	// ! GAME
 	.addPlugins(fishingPlugin, interactionPlugin, tickModifiersPlugin('speed', 'maxHealth', 'strength', 'critChance', 'critDamage', 'attackSpeed', 'lootQuantity', 'lootChance'))
-	.onUpdate('game', runIf(() => app.isDisabled('paused') && app.isDisabled('menu'), playerBehavior))
+	.onUpdate('game', runIf(() => app.isDisabled('paused'), playerBehavior))
 	.addSubscribers('game', initializeCameraPosition, bobItems, enableInventoryState, popItems, addHealthBarContainer, ...equip('wateringCan', 'weapon', 'fishingPole'), ...doorLocking, addDashDisplay, addQuestMarkers, displayUnlockQuestToast)
 	.onEnter('game', questManager.enableQuests)
 	.onPreUpdate(
