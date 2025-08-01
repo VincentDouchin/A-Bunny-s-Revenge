@@ -89,7 +89,6 @@ export const playerBehavior = createBehaviorTree(
 					e.playerAnimator.playOnce('hit', { timeScale: 1.3 }, 0.2)
 					e.hitTimer.reset()
 				}),
-
 				parallel(
 					condition(e => e.currentHealth === 0),
 					action(e => e.playerAnimator.playClamped('dead')),

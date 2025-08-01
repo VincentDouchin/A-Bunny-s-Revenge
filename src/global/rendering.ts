@@ -60,7 +60,7 @@ export const initThree = () => {
 	renderer.outputColorSpace = LinearSRGBColorSpace
 	renderer.setSize(width, height)
 	cssRenderer.setSize(window.innerWidth, window.innerHeight)
-	cssRenderer.domElement.classList.add('main', 'css-renderer', 'no-events')
+	cssRenderer.domElement.classList.add('main', 'css-renderer')
 	document.body.appendChild(cssRenderer.domElement)
 	const overlay = document.createElement('div')
 	document.body.appendChild(overlay)

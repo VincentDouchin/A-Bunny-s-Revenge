@@ -1,9 +1,8 @@
 import { CircleGeometry, MeshBasicMaterial, Vector4 } from 'three'
-import { Bezier, ColorOverLife, ConeEmitter, ConstantColor, Gradient, IntervalValue, ParticleSystem, PiecewiseBezier, RenderMode, SizeOverLife } from 'three.quarks'
+import { Bezier, ConeEmitter, ConstantColor, IntervalValue, ParticleSystem, PiecewiseBezier, RenderMode, SizeOverLife, SpeedOverLife } from 'three.quarks'
 
 const geo = new CircleGeometry(3, 8)
-const mat = new MeshBasicMaterial({ })
-mat.depthWrite = false
+const mat = new MeshBasicMaterial({ depthWrite: false })
 
 export const chestAppearing = () => {
 	const system = new ParticleSystem({
@@ -12,22 +11,19 @@ export const chestAppearing = () => {
 		prewarm: false,
 		instancingGeometry: geo,
 		startLife: new IntervalValue(7, 8),
-		startSpeed: new IntervalValue(2, 3),
+		startSpeed: new IntervalValue(5, 7),
 		startSize: new IntervalValue(0.5, 1),
 		startColor: new ConstantColor(new Vector4(1, 1, 1, 1)),
 		worldSpace: false,
-		emissionOverTime: new IntervalValue(40, 50),
+		emissionOverTime: new IntervalValue(15, 20),
 		emissionBursts: [],
 		shape: new ConeEmitter({ radius: 5 }),
 		material: mat,
 		renderMode: RenderMode.BillBoard,
 		renderOrder: 2,
 		behaviors: [
-			new SizeOverLife(new PiecewiseBezier([[new Bezier(1, 0.75, 0.50, 0.25), 0]])),
-			new ColorOverLife(new Gradient(
-				undefined,
-				[[1, 0], [0, 1]],
-			)),
+			new SizeOverLife(new PiecewiseBezier([[new Bezier(1, 0.75, 0.20, 0), 0]])),
+			new SpeedOverLife(new PiecewiseBezier([[new Bezier(1, 0.8, 0.2, 0.1), 0]])),
 		],
 	})
 	system.emitter.rotateX(-Math.PI / 2)

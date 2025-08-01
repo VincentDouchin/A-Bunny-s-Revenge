@@ -1,5 +1,5 @@
 import { CircleGeometry, MeshBasicMaterial, Vector4 } from 'three'
-import { Bezier, ColorRange, ConstantValue, IntervalValue, ParticleSystem, PiecewiseBezier, PointEmitter, RenderMode, SizeOverLife } from 'three.quarks'
+import { Bezier, ConstantValue, IntervalValue, ParticleSystem, PiecewiseBezier, PointEmitter, RandomColor, RenderMode, SizeOverLife } from 'three.quarks'
 
 const geo = new CircleGeometry(1, 8)
 const mat = new MeshBasicMaterial({ depthWrite: false })
@@ -10,17 +10,17 @@ export const dash = (duration: number) => {
 		looping: false,
 		prewarm: true,
 		instancingGeometry: geo,
-		startColor: new ColorRange(new Vector4(1, 1, 1, 0.2), new Vector4(0.7, 0.7, 0.7, 0.5)),
-		startLife: new ConstantValue(5.0),
+		startColor: new RandomColor(new Vector4(1, 1, 1, 0.2), new Vector4(0.7, 0.7, 0.7, 0.5)),
+		startLife: new ConstantValue(3.0),
 		startSpeed: new ConstantValue(-1),
-		startSize: new IntervalValue(1, 3),
+		startSize: new IntervalValue(0.5, 1.5),
 		worldSpace: true,
-		emissionOverTime: new ConstantValue(20),
+		emissionOverTime: new ConstantValue(8),
 		shape: new PointEmitter(),
 		material: mat,
 		renderMode: RenderMode.BillBoard,
 		behaviors: [
-			new SizeOverLife(new PiecewiseBezier([[new Bezier(1, 0.75, 0.50, 0.25), 0]])),
+			new SizeOverLife(new PiecewiseBezier([[new Bezier(1, 0.90, 0.80, 0.10), 0]])),
 		],
 
 	})

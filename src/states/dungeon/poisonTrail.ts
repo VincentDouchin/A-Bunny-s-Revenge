@@ -15,7 +15,7 @@ export const poisonBubbles = (looping = true, emission = 3) => {
 		instancingGeometry: new CircleGeometry(1, 8),
 		startLife: new IntervalValue(5.0, 2.0),
 		startSpeed: new ConstantValue(0.5),
-		startColor: new ColorRange(colorToVec4(0x5AB552, 0.5), colorToVec4(0x9DE64E, 1)),
+		startColor: new ColorRange(colorToVec4(0x5AB552, 1), colorToVec4(0x9DE64E, 1)),
 		startRotation: new RandomQuatGenerator(),
 		worldSpace: true,
 		emissionOverDistance: new ConstantValue(0),
@@ -48,7 +48,7 @@ export const spawnPoisonTrail = () => {
 			const radius = between(3, 5)
 			ecs.add({
 				trail: { origin: trailMaker, timer: new Timer(4000, false) },
-				model: new Mesh(new CylinderGeometry(radius, radius, 2, 16, 1), new MeshBasicMaterial({ color: 0x9DE64E, transparent: true, opacity: 0.5, depthWrite: false })),
+				model: new Mesh(new CylinderGeometry(radius, radius, 2, 16, 1), new MeshBasicMaterial({ color: 0x9DE64E, depthWrite: false })),
 				position: trailMaker.position.clone(),
 				...inMap(),
 				emitter: poisonBubbles(),

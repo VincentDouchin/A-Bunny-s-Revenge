@@ -13,6 +13,7 @@ import { inMap } from '@/lib/hierarchy'
 import { capsuleColliderBundle, characterControllerBundle } from '@/lib/models'
 import { Stat } from '@/lib/stats'
 import { Timer } from '@/lib/timer'
+import { chestAppearing } from '@/particles/chestAppearing'
 import { dash } from '@/particles/dashParticles'
 import { ActiveEvents, Cuboid } from '@dimforge/rapier3d-compat'
 import { Euler, LinearSRGBColorSpace, Mesh, Quaternion, Vector3 } from 'three'
@@ -20,6 +21,7 @@ import { CSS2DObject } from 'three/examples/jsm/renderers/CSS2DRenderer'
 import { clone } from 'three/examples/jsm/utils/SkeletonUtils'
 import { RoomType } from '../dungeon/generateDungeon'
 import { healthBundle } from '../dungeon/health'
+import { spawnChest } from '../dungeon/spawnChest'
 import { Dash } from './dash'
 import { inventoryBundle } from './inventory'
 import { weaponBundle } from './weapon'
@@ -96,7 +98,7 @@ export const playerBundle = (health: number, weapon: weapons | null) => {
 		lastStep: { right: false, left: false },
 		...healthBundle(10, health),
 		...stateBundle(States.player, 'idle'),
-		dashParticles: dash(1),
+		dashParticles: dash(2),
 		hitTimer: new Timer(1000, true),
 		dash: new Dash(1000),
 		sneeze: new Timer(2000, false),
@@ -130,6 +132,8 @@ export const spawnCharacter: UpdateSystem<typeof app, 'farm' | 'village'> = (res
 		rotation,
 		targetRotation: rotation.clone(),
 	}
+	console.log('ok')
+	ecs.add({ emitter: chestAppearing(), position: new Vector3() })
 
 	ecs.add(player)
 }

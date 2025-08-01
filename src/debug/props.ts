@@ -25,7 +25,6 @@ import { sleep } from '@/utils/sleep'
 import { ActiveCollisionTypes, ColliderDesc, RigidBodyDesc } from '@dimforge/rapier3d-compat'
 import FastNoiseLite from 'fastnoise-lite'
 import { Color, ConeGeometry, DoubleSide, Euler, Group, Material, Mesh, MeshBasicMaterial, MeshPhongMaterial, Object3D, PlaneGeometry, PointLight, Quaternion, SphereGeometry, Vector2, Vector3 } from 'three'
-import { CSS2DObject } from 'three/examples/jsm/renderers/CSS2DRenderer'
 import { clone } from 'three/examples/jsm/utils/SkeletonUtils'
 
 const markerModel = () => {
@@ -388,22 +387,6 @@ export const props: Props = [
 			recipesQueued: [],
 
 		}),
-	},
-	{
-		name: 'bench',
-		models: ['bench'],
-		bundle: (entity) => {
-			const miniGameContainer = new CSS2DObject(document.createElement('div'))
-			miniGameContainer.position.set(0, 5, 0)
-			return {
-				...entity,
-				miniGameContainer,
-				interactable: Interactable.Chop,
-				onPrimary: e => ecs.addComponent(e, 'menuType', MenuType.Bench),
-				onSecondary: e => ecs.addComponent(e, 'menuType', MenuType.BenchGame),
-				recipesQueued: [],
-			}
-		},
 	},
 	{
 		name: 'stove',

@@ -199,17 +199,6 @@ export const MossBoar = enemy(() => ({
 	...genericEnemyAnimationMap,
 }))
 
-// export const BroodMother = enemy(() => ({
-// 	model: 'spider_king',
-// 	name: 'Spider King',
-// 	health: 30,
-// 	scale: 15,
-// 	boss: true,
-// 	attackStyle: { melee: true },
-// 	animationMap: { attacking: 'Bite Attack', dead: 'Die', hit: 'Take Damage', running: 'Crawl Forward Fast In Place', idle: 'Idle' },
-// 	animator: 'enemyAnimator',
-// }))
-
 export const Seedling = enemy(() => ({
 	model: 'Pollen',
 	name: 'Seedling',
@@ -238,31 +227,7 @@ export const PlantChewer = enemy(() => ({
 	defaultAnimation: 'spawn',
 }))
 
-export const enemyData = {
-	werewolf: {
-		name: 'Werewolf',
-		health: 30,
-		scale: 10,
-		speed: 1,
-		drops: [],
-		boss: true,
-		attackStyle: { melee: true },
-		animationMap: { attacking: 'Bite Attack', dead: 'Die', hit: 'Take Damage', idle: 'Idle', running: 'Walk Forward In Place' },
-	},
-	death_mage: {
-		name: 'Death Mage',
-		health: 30,
-		scale: 5,
-		speed: 1,
-		drops: [],
-		boss: true,
-		attackStyle: { melee: true },
-		animationMap: { attacking: 'Kick Attack', dead: 'Die', hit: 'Take Damage', idle: 'Idle', running: 'Fly Forward In Place' },
-	},
-}
-
 export const bosses = {
-	// spider_king: BroodMother,
 	plant_chewer: PlantChewer,
 	Armabee_Evolved: ArmabeeEvolved,
 } as const satisfies Partial<Record<keyof Animations & characters, (level: number) => Entity>>

@@ -25,7 +25,6 @@ export const smoke = () => {
 			new SizeOverLife(new PiecewiseBezier([[new Bezier(1, 0.75, 0.50, 0.25), 0]])),
 			new ColorOverLife(new Gradient(
 				[[new Vector3(0, 0, 0), 0], [new Vector3(0.3, 0.3, 0.3), 1]],
-				[[1, 0], [0, 1]],
 			)),
 		],
 	})
