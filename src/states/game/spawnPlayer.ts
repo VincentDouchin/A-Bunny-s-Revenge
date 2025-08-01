@@ -132,8 +132,6 @@ export const spawnCharacter: UpdateSystem<typeof app, 'farm' | 'village'> = (res
 		rotation,
 		targetRotation: rotation.clone(),
 	}
-	console.log('ok')
-	ecs.add({ emitter: chestAppearing(), position: new Vector3() })
 
 	ecs.add(player)
 }
