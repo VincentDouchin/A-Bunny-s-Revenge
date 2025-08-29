@@ -13,7 +13,6 @@
 		"tauri": "tauri",
 		"desktop build": "npm run tauri build",
 		"android dev": "npm run tauri android dev --open",
-		"postinstall": "patch-package",
 		"android build": "npm run tauri android build"
 	},
 	"dependencies": {
