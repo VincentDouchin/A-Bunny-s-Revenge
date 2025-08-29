@@ -1,14 +1,3 @@
-import type { items, voices, weapons } from '@assets/assets'
-import type { Collider, ColliderDesc, KinematicCharacterController, RigidBody, RigidBodyDesc, Shape } from '@dimforge/rapier3d-compat'
-import type { Query, With } from 'miniplex'
-import type { BufferGeometry, Camera, Group, Light, Mesh, MeshPhongMaterial, Object3D, Object3DEventMap, Quaternion, Scene, ShaderMaterial, Sprite, Vector3, WebGLRenderer } from 'three'
-import type { BatchedRenderer, ParticleEmitter, ParticleSystem } from 'three.quarks'
-import type { CSS2DObject } from 'three/examples/jsm/renderers/CSS2DRenderer'
-import type { RequiredKeysOf } from 'type-fest'
-import type { Animator } from './animator'
-import type { InstanceHandle } from './assetLoaders'
-import type { ModifierContainer } from './modifiers'
-import type { app } from './states'
 import type { Drop } from '@/constants/enemies'
 import type { crops, Item } from '@/constants/items'
 import type { NPC } from '@/constants/NPC'
@@ -24,6 +13,19 @@ import type { WeaponArc } from '@/shaders/weaponArc'
 import type { Room } from '@/states/dungeon/generateDungeon'
 import type { Dash } from '@/states/game/dash'
 import type { MainMenuBook } from '@/states/mainMenu/book'
+import type { Collider, ColliderDesc, KinematicCharacterController, RigidBody, RigidBodyDesc, Shape } from '@dimforge/rapier3d-compat'
+import type { Query, With } from 'miniplex'
+import type { BufferGeometry, Camera, Group, Light, Mesh, MeshPhongMaterial, Object3D, Object3DEventMap, Quaternion, Scene, ShaderMaterial, Sprite, Vector3, WebGLRenderer } from 'three'
+import type { BatchedRenderer, ParticleEmitter, ParticleSystem } from 'three.quarks'
+import type { CSS2DObject } from 'three/examples/jsm/renderers/CSS2DRenderer'
+import type { RequiredKeysOf } from 'type-fest'
+import type { Animator } from './animator'
+import type { InstanceHandle } from './assetLoaders'
+import { assets } from './init'
+import type { ModifierContainer } from './modifiers'
+import type { app } from './states'
+
+export type AssetNames = {[K in keyof typeof assets]:keyof typeof assets[K]}
 
 export type PlayerAnimations = 'idle' | 'runFront' | 'runLeft' | 'runRight' | 'runBack' | 'lightAttack' | 'slashAttack' | 'heavyAttack' | 'hit' | 'fishing' | 'sleeping' | 'wakeUp' | 'interact' | 'pickup' | 'dashFront' | 'dashLeft' | 'dashRight' | 'dashBack' | 'dead'
 export type EnemyAnimations = 'idle' | 'running' | 'attacking' | 'hit' | 'dead'
@@ -245,9 +247,9 @@ export type Entity = StateComponents & Partial<AttackStyle> & {
 	ignoreDoor?: Direction
 	// ! Items
 	item?: true
-	itemLabel?: items
+	itemLabel?: AssetNames['items']
 	collecting?: true
-	recipe?: items
+	recipe?: AssetNames['items']
 	health?: number
 	popDirection?: Vector3
 	groundLevel?: number
@@ -263,7 +265,7 @@ export type Entity = StateComponents & Partial<AttackStyle> & {
 	player?: true
 	// ! NPC
 	npc?: true
-	voice?: voices
+	voice?: AssetNames['voices']
 	npcName?: (typeof NPC)[number]
 	questMarker?: { quest: Quest2<any, any, any>, step: string }[]
 	questMarkerContainer?: Group
@@ -329,8 +331,8 @@ export type Entity = StateComponents & Partial<AttackStyle> & {
 	// ! Weapon
 	weapon?: With<Entity, 'model' | 'weaponName' | 'weaponArc'>
 	weaponArc?: WeaponArc
-	weaponName?: weapons
-	weaponStand?: weapons
+	weaponName?: AssetNames['weapons']
+	weaponStand?: AssetNames['weapons']
 	// ! Main menu
 	stateEntity?: AppStates<typeof app>
 	menuBook?: MainMenuBook

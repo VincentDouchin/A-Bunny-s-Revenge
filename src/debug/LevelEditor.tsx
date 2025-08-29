@@ -1,6 +1,5 @@
-import type { Entity } from '@/global/entity'
+import type { AssetNames, Entity } from '@/global/entity'
 import type { NavCell } from '@/lib/navGrid'
-import type { fruit_trees, gardenPlots, models, vegetation, village } from '@assets/assets'
 import type { RigidBodyType } from '@dimforge/rapier3d-compat'
 import type { With } from 'miniplex'
 import type { customModel, PlacableProp } from './props'
@@ -32,8 +31,9 @@ import { EntitiesSelector } from './EntitiesSelector'
 import { EntityEditor } from './EntityEditor'
 import { MapEditor } from './MapEditor'
 import { getModel, props } from './props'
+import { village } from '@assets/assets'
 
-export type ModelName = models | customModel | vegetation | gardenPlots | fruit_trees | village
+export type ModelName = AssetNames['models'] | customModel | AssetNames['vegetation'] |AssetNames['gardenPlots'] | AssetNames['fruitTrees'] | village
 export interface EntityData<T extends Record<string, any> | undefined> {
 	model: ModelName
 	scale: number
@@ -255,7 +255,7 @@ export const LevelEditor = () => {
 							const loader = new GLTFLoader().setDRACOLoader(draco)
 							if (file) {
 								const arrayBuffer = await file?.arrayBuffer()
-								const name = getFileName(file.name) as models
+								const name = getFileName(file.name) as AssetNames['models']
 								const glb = await loader.parseAsync(arrayBuffer, '')
 								glb.scene.traverse((x) => {
 									if (x instanceof Mesh && x.material instanceof MeshStandardMaterial) {

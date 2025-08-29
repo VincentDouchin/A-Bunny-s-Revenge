@@ -1,4 +1,3 @@
-import type { items } from '@assets/assets'
 import { itemsData } from '@/constants/items'
 import { toastEvent } from '@/global/events'
 import { assets, time, ui } from '@/global/init'
@@ -9,24 +8,25 @@ import { createArray, createObject, createSet } from 'solid-proxies'
 import { css } from 'solid-styled'
 import { TransitionGroup } from 'solid-transition-group'
 import { OutlineText } from './components/styledComponents'
+import { AssetNames } from '@/global/entity'
 
 export type Toast = {
 	type: 'quest'
 	quest: string
 } | {
 	type: 'removedItem'
-	item: items
+	item: AssetNames['items']
 	quantity: number
 } | {
 	type: 'addedItem'
-	item: items
+	item: AssetNames['items']
 	quantity: number
 } | {
 	type: 'questStep'
 	description: string
 } | {
 	type: 'recipe'
-	recipe: items
+	recipe: AssetNames['items']
 }
 
 export const Toaster = () => {

@@ -1,4 +1,4 @@
-import type { items } from '@assets/assets'
+import { AssetNames } from '@/global/entity'
 import { assets, save } from '@/global/init'
 import { modifiers } from '@/global/modifiers'
 import { entries, shuffle } from '@/utils/mapFunctions'
@@ -8,9 +8,9 @@ export const fruitNames = ['apple'] as const
 export type crops = (typeof cropNames)[number]
 export type fruits = (typeof fruitNames)[number]
 export interface Item {
-	name: items
+	name: AssetNames['items']
 	quantity: number
-	recipe?: items
+	recipe?: AssetNames['items']
 	health?: number
 }
 
@@ -244,12 +244,12 @@ export const itemsData = {
 		name: 'Hummus',
 		meal: 3,
 	},
-} as const satisfies Record<items, ItemData>
+} as const satisfies Record<AssetNames['items'], ItemData>
 
 export type Meals = { [k in keyof typeof itemsData]: (typeof itemsData)[k] extends { meal: any } ? k : never }[keyof typeof itemsData]
 
-export const isMeal = (item: items): item is Meals => item in modifiers
-export const getSeed = (item: items) => {
+export const isMeal = (item: AssetNames['items']): item is Meals => item in modifiers
+export const getSeed = (item: AssetNames['items']) => {
 	const itemData = itemsData[item]
 	if ('seed' in itemData) {
 		return itemData.seed

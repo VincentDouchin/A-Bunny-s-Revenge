@@ -1,7 +1,7 @@
-import type { weapons } from '@assets/assets'
 import { weaponsData } from '@/constants/weapons'
+import { AssetNames } from '@/global/entity'
 
-export const WeaponStatsUi = ({ name }: { name: weapons }) => {
+export const WeaponStatsUi = ({ name }: { name: AssetNames['weapons'] }) => {
 	const data = weaponsData[name]
 	return (
 		<div style={{ 'display': 'grid', 'place-items': 'center' }}>

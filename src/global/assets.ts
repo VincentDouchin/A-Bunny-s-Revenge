@@ -218,6 +218,7 @@ export const loadAssets = async (thumbnail: typeof thumbnailRenderer) => {
 			loader,
 			() => ({ material: CharacterMaterial, shadow: true, filter: NearestFilter }),
 		),
+		icons:getAssetPaths({prefix:'icons', 'extension':'svg'}),
 
 		models: loadGLBAsToon(
 			getAssetPaths({ prefix: 'models', extension: 'glb', suffix: '-optimized' }),

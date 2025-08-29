@@ -1,11 +1,11 @@
-import type { ambiance, music } from '@assets/assets'
+import { AssetNames } from '@/global/entity'
 import { assets, settings } from '@/global/init'
 import { localSoundData } from '@/global/sounds'
 
 export class MusicManager {
 	ambience: Howl | null = null
 	theme: Howl | null = null
-	playTheme(theme: music) {
+	playTheme(theme: AssetNames['music']) {
 		if (assets.music[theme].playing()) return
 		if (!this.theme) {
 			const player = assets.music[theme]
@@ -20,7 +20,7 @@ export class MusicManager {
 		}
 	}
 
-	playAmbience(ambience: ambiance) {
+	playAmbience(ambience: AssetNames['ambiance']) {
 		if (assets.ambiance[ambience] === this.ambience) return
 		this.ambience?.fade(0.05, 0, 10)
 		const player = assets.ambiance[ambience]

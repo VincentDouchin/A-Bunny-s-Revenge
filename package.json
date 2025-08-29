@@ -13,6 +13,7 @@
 		"tauri": "tauri",
 		"desktop build": "npm run tauri build",
 		"android dev": "npm run tauri android dev --open",
+		"postinstall": "patch-package",
 		"android build": "npm run tauri android build"
 	},
 	"dependencies": {
@@ -56,12 +57,15 @@
 		"@types/node": "^20.8.7",
 		"@types/three": "^0.161.2",
 		"@vite-pwa/assets-generator": "^1.0.0",
+		"chalk": "^5.6.0",
+		"chokidar": "^4.0.3",
 		"draco3dgltf": "^1.5.6",
 		"eslint": "^9.12.0",
 		"eslint-plugin-format": "^0.1.2",
 		"fluent-ffmpeg": "^2.1.2",
 		"glob": "^10.3.10",
 		"jsdom": "^24.0.0",
+		"minimatch": "^10.0.3",
 		"new-javascript": "^0.4.1",
 		"patch-package": "^8.0.0",
 		"ts-json-schema-generator": "^1.5.0",
@@ -72,7 +76,6 @@
 		"vite-plugin-solid": "^2.11.0",
 		"vite-plugin-solid-styled": "^0.12.0",
 		"vite-plugin-solid-svg": "^0.8.1",
-		"vite-static-assets-plugin": "^1.2.2",
 		"vitest": "^1.6.0"
 	}
 }

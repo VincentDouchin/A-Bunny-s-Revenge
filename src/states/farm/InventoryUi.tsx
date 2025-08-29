@@ -1,11 +1,10 @@
 import type { Item } from '@/constants/items'
 import type { Recipe } from '@/constants/recipes'
 import type { MenuDir } from '@/ui/components/Menu'
-import type { items } from '@assets/assets'
 import type { Accessor, JSX, JSXElement, Setter } from 'solid-js'
 import { isMeal, itemsData } from '@/constants/items'
 import { recipes } from '@/constants/recipes'
-import { MenuType } from '@/global/entity'
+import { AssetNames, MenuType } from '@/global/entity'
 import { assets, ecs, save, ui } from '@/global/init'
 import { modifiers } from '@/global/modifiers'
 import { thumbnailRenderer } from '@/lib/thumbnailRenderer'
@@ -490,7 +489,7 @@ export const InventoryUi = () => {
 																				<Show when={meal()}>
 																					{(meal) => {
 																						const disabled = ui.sync(() => (amountEaten() + meal().amount) > 5)
-																						const consumeMeal = (itemName: items) => {
+																						const consumeMeal = (itemName: AssetNames['items']) => {
 																							if (!disabled() && isMeal(itemName)) {
 																								removeItemFromPlayer({ name: itemName, quantity: 1 })
 																								save.modifiers.push(itemName)

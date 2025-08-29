@@ -20,9 +20,7 @@ export class GenerateAssetNames extends AssetTransformer {
 				for (const child of scene?.listChildren() ?? []) {
 					this.folders[path.folder].add(child.getName())
 				}
-			} else {
-				this.folders[path.folder].add(fileName)
-			}
+			} 
 		}
 	}
 

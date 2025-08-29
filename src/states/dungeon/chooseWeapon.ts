@@ -1,5 +1,4 @@
-import type { Entity } from '@/global/entity'
-import type { weapons } from '@assets/assets'
+import type { AssetNames, Entity } from '@/global/entity'
 import { weaponsData } from '@/constants/weapons'
 import { Interactable } from '@/global/entity'
 import { assets, coroutines, ecs } from '@/global/init'
@@ -8,9 +7,10 @@ import { inMap } from '@/lib/hierarchy'
 import { ActiveCollisionTypes, ColliderDesc, RigidBodyDesc } from '@dimforge/rapier3d-compat'
 import { Quaternion, Vector3 } from 'three'
 import { weaponBundle } from '../game/weapon'
+import { objectKeys } from '@/utils/mapFunctions'
 
-const weaponNames = ['Hoe', 'Ladle', 'ScissorWeapon', 'SwordWeapon'] as const satisfies readonly weapons[]
-const displayWeapon = (weaponName: weapons, parent: Entity) => {
+const weaponNames = objectKeys(assets.weapons)
+const displayWeapon = (weaponName: AssetNames['weapons'], parent: Entity) => {
 	const weaponModel = assets.weapons[weaponName].scene.clone()
 	weaponModel.scale.setScalar(weaponsData[weaponName].scale * 1.2)
 	const weapon = ecs.add({
@@ -31,7 +31,7 @@ const displayWeapon = (weaponName: weapons, parent: Entity) => {
 }
 const stumpQuery = ecs.with('weaponStand')
 const weaponDisplayedQuery = ecs.with('weaponName', 'parent')
-const chooseWeapon = (weaponName: weapons) => {
+const chooseWeapon = (weaponName: AssetNames['weapons']) => {
 	for (const stump of stumpQuery) {
 		let foundWeapon = false
 		for (const weaponDisplayed of weaponDisplayedQuery) {

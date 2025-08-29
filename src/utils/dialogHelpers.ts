@@ -1,6 +1,5 @@
 import type { Item } from '@/constants/items'
-import type { Entity } from '@/global/entity'
-import type { items } from '@assets/assets'
+import type { AssetNames, Entity } from '@/global/entity'
 import type { Query, With } from 'miniplex'
 import { applyMove, applyRotate } from '@/behaviors/behaviorHelpers'
 import { toastEvent } from '@/global/events'
@@ -72,7 +71,7 @@ export const sleepPlayer = async () => {
 	}
 }
 export const playerInventoryQuery = ecs.with('inventoryId', 'inventory', 'inventorySize', 'player', 'currentHealth', 'maxHealth')
-export const unlockRecipe = (item: items) => {
+export const unlockRecipe = (item: AssetNames['items']) => {
 	save.unlockedRecipes.push(item)
 	toastEvent.emit({ type: 'recipe', recipe: item })
 }
@@ -103,7 +102,7 @@ export const removeItemFromPlayer = (item: Item) => {
 	}
 }
 
-export const hasItem = (itemName: items | ((item: Item) => boolean)) => {
+export const hasItem = (itemName: AssetNames['items'] | ((item: Item) => boolean)) => {
 	if (!save.inventories.player) return
 	for (const item of save.inventories.player.filter(Boolean)) {
 		if (typeof itemName === 'string') {

@@ -1,6 +1,5 @@
-import type { items } from '@assets/assets'
 import type { With } from 'miniplex'
-import type { Crop, Entity } from './entity'
+import type { AssetNames, Crop, Entity } from './entity'
 import type { crops, Item, Meals } from '@/constants/items'
 import type { QuestManager } from '@/constants/quests'
 import { trackStore } from '@solid-primitives/deep'
@@ -69,7 +68,7 @@ export type SaveData = {
 	selectedSeed: null | crops
 	inventories: Record<string, Item[]>
 	modifiers: Meals[]
-	unlockedRecipes: items[]
+	unlockedRecipes: AssetNames['items'][]
 	unlockedPaths: number
 	acorns: number
 	started: boolean

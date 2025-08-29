@@ -1,5 +1,4 @@
 import type { Actor, Doors, Entity } from '@/global/entity'
-import type { fruit_trees, gardenPlots, models, vegetation, village } from '@assets/assets'
 import type { With } from 'miniplex'
 import type { BufferGeometry, Object3DEventMap } from 'three'
 import type { EntityData, ModelName } from './LevelEditor'
@@ -94,7 +93,7 @@ type BundleFn<E extends EntityData<any>> = (entity: With<Entity, 'entityId' | 'm
 
 export interface PlacableProp<N extends string> {
 	name: N
-	models: (models | customModel | vegetation | gardenPlots | fruit_trees | village)[]
+	models: (ModelName)[]
 	data?: N extends keyof ExtraData ? ExtraData[N] : undefined
 	bundle?: BundleFn<EntityData<N extends keyof ExtraData ? NonNullable<ExtraData[N]> : never>>
 }

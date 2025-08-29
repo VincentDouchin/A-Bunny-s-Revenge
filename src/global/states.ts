@@ -1,7 +1,6 @@
 import type { Direction } from '@/lib/directions'
 import type { Room } from '@/states/dungeon/generateDungeon'
-import type { weapons } from '@assets/assets'
-import type { farmDoors } from './entity'
+import type { AssetNames, farmDoors } from './entity'
 import { AppBuilder } from '@/lib/app'
 
 export const app = new AppBuilder()
@@ -26,5 +25,5 @@ export interface DungeonResources {
 	playerHealth: number
 	firstEntry: boolean
 	dungeonLevel: number
-	weapon: weapons
+	weapon: AssetNames['weapons']
 }

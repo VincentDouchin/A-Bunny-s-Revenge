@@ -1,10 +1,11 @@
-import type { weapons } from '@assets/assets'
 import { weaponsData } from '@/constants/weapons'
+import { AssetNames } from '@/global/entity'
 import { assets, ecs, scene } from '@/global/init'
 import { getWorldPosition } from '@/lib/transforms'
 import { WeaponArc } from '@/shaders/weaponArc'
 
-export const weaponBundle = (weaponName: weapons) => {
+
+export const weaponBundle = (weaponName: AssetNames['weapons']) => {
 	const data = weaponsData[weaponName]
 	const model = assets.weapons[weaponName].scene.clone()
 	model.rotateZ(Math.PI / 2)

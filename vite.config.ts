@@ -6,7 +6,6 @@ import { VitePWA } from 'vite-plugin-pwa'
 import solidPlugin from 'vite-plugin-solid'
 import solidStyledPlugin from 'vite-plugin-solid-styled'
 import solidSvg from 'vite-plugin-solid-svg'
-import staticAssetsPlugin from 'vite-static-assets-plugin'
 import { assetPipeline } from './scripts/assetPipeline'
 import { ConvertAudioFiles } from './scripts/convertAudioFiles'
 import { ConvertFBXToGLB } from './scripts/convertFbx2GLB'
@@ -14,6 +13,7 @@ import { ExtractAnimations } from './scripts/extractAnimations'
 import { GenerateAssetManifest } from './scripts/generateAssetManifest'
 import { GenerateAssetNames } from './scripts/generateAssetNames'
 import { OptimizeAssets } from './scripts/optimizeAssets'
+import staticAssetsPlugin from './scripts/static-assets'
 
 export default defineConfig(async () => {
 	const config: UserConfig = {

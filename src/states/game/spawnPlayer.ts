@@ -1,5 +1,4 @@
-import type { weapons } from '@assets/assets'
-import type { Entity, PlayerAnimations } from '@/global/entity'
+import type { AssetNames, Entity, PlayerAnimations } from '@/global/entity'
 import type { UpdateSystem } from '@/lib/app'
 import { ActiveEvents, Cuboid } from '@dimforge/rapier3d-compat'
 import { Euler, LinearSRGBColorSpace, Mesh, Quaternion, Vector3 } from 'three'
@@ -49,7 +48,7 @@ const playerAnimationMap: Record<PlayerAnimations, Animations['BunnyClothed']> =
 
 export const PLAYER_DEFAULT_HEALTH = 10
 
-export const playerBundle = (health: number, weapon: weapons | null) => {
+export const playerBundle = (health: number, weapon: AssetNames['weapons'] | null) => {
 	const model = clone(assets.characters.BunnyClothed.scene)
 	model.traverse((node) => {
 		if (node instanceof Mesh && node.material.map) {

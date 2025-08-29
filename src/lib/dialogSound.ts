@@ -1,7 +1,7 @@
-import type { voices } from '@assets/assets'
+import { AssetNames } from '@/global/entity'
 import { playVoice } from '@/global/sounds'
 
-export const soundDialog = (voice: voices, dialog: string = '') => {
+export const soundDialog = (voice: AssetNames['voices'], dialog: string = '') => {
 	let isCanceled = false
 	const filteredDialog = dialog.replace(/[^a-z\s]/gi, '').toLocaleLowerCase().replace(/[^aeiou\W\d]/gi, '')
 	return {

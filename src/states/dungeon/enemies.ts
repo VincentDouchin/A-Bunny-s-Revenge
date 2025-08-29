@@ -1,6 +1,5 @@
-import type { characters } from '@assets/assets'
 import type { Drop } from '@/constants/enemies'
-import type { AttackStyle, ComponentsOfType, Entity, stateBundle } from '@/global/entity'
+import type { AssetNames, AttackStyle, ComponentsOfType, Entity, stateBundle } from '@/global/entity'
 import type { app } from '@/global/states'
 import type { SubscriberSystem } from '@/lib/app'
 import { ActiveEvents, Cuboid, RigidBodyType } from '@dimforge/rapier3d-compat'
@@ -27,7 +26,7 @@ type SingleAttackStyle = {
 	[K in keyof AttackStyle]: { [P in K]: AttackStyle[K] };
 }[keyof AttackStyle]
 
-export interface EnemyDef<M extends keyof Animations & characters, S extends string> {
+export interface EnemyDef<M extends keyof Animations & AssetNames['characters'], S extends string> {
 	model: M
 	name: string
 	health: number
@@ -44,7 +43,7 @@ export interface EnemyDef<M extends keyof Animations & characters, S extends str
 	attackStyle: SingleAttackStyle
 }
 
-export const enemyBundle = <M extends keyof Animations & characters, S extends string>(enemy: EnemyDef<M, S>, level: number) => {
+export const enemyBundle = <M extends keyof Animations & AssetNames['characters'], S extends string>(enemy: EnemyDef<M, S>, level: number) => {
 	const model = assets.characters[enemy.model]
 	enemy.speed ??= 1
 	enemy.boss ??= false

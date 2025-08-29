@@ -1,5 +1,4 @@
-import type { items } from '@assets/assets'
-import type { Entity } from '@/global/entity'
+import type { AssetNames, Entity } from '@/global/entity'
 import { RigidBodyType } from '@dimforge/rapier3d-compat'
 import { createBackIn, easeInOut, linear } from 'popmotion'
 import { AdditiveBlending, Mesh, MeshBasicMaterial, SphereGeometry, Vector3 } from 'three'
@@ -12,7 +11,7 @@ import { sleep } from '@/utils/sleep'
 
 export const itemsQuery = ecs.with('item', 'position', 'model').without('collecting')
 
-export const itemBundle = (item: items) => {
+export const itemBundle = (item: AssetNames['items']) => {
 	const model = assets.items[item].model.clone()
 	model.scale.setScalar(5)
 	const bundle = modelColliderBundle(model, RigidBodyType.Dynamic, true, new Vector3(1, 1, 1))

@@ -1,4 +1,4 @@
-import type { icons } from '@assets/assets'
+import { AssetNames } from '@/global/entity'
 import type { Item } from './items'
 import type { SaveData } from '@/global/save'
 import type { App, AppStates, SubscriberSystem, TransitionSystem, UpdateSystem } from '@/lib/app'
@@ -7,7 +7,7 @@ import { Event } from 'eventery'
 export type QuestStep = Readonly<{
 	readonly description: string
 	readonly items?: ReadonlyArray<Item>
-	readonly icon?: icons
+	readonly icon?: AssetNames['icons']
 	readonly key: string
 }>
 

@@ -1,7 +1,6 @@
 import type { EnemyDef } from '@/states/dungeon/enemies'
-import type { characters, items } from '@assets/assets'
 import type { Item } from './items'
-import { type Entity, stateBundle, States } from '@/global/entity'
+import {  AssetNames, Entity,  stateBundle, States } from '@/global/entity'
 import { Timer } from '@/lib/timer'
 import { enemyBundle } from '@/states/dungeon/enemies'
 import { between } from '@/utils/mapFunctions'
@@ -10,7 +9,7 @@ import { Rarity } from './items'
 
 export interface Drop extends Item {
 	rarity: Rarity
-	recipe?: items
+	recipe?: AssetNames['items']
 }
 
 const genericEnemyAnimationMap = {
@@ -24,7 +23,7 @@ const genericEnemyAnimationMap = {
 	},
 } as const
 
-export const enemy = <M extends keyof Animations & characters, S extends string> (fn: () => EnemyDef<M, S>) => {
+export const enemy = <M extends keyof Animations & AssetNames['characters'], S extends string> (fn: () => EnemyDef<M, S>) => {
 	return (level: number) => enemyBundle(fn(), level)
 }
 
@@ -230,6 +229,6 @@ export const PlantChewer = enemy(() => ({
 export const bosses = {
 	plant_chewer: PlantChewer,
 	Armabee_Evolved: ArmabeeEvolved,
-} as const satisfies Partial<Record<keyof Animations & characters, (level: number) => Entity>>
+} as const satisfies Partial<Record<keyof Animations & AssetNames['characters'], (level: number) => Entity>>
 
 export type Boss = keyof typeof bosses

@@ -1,21 +1,20 @@
-import type { AllAnimations, AllStates, AnimatorsWith, BehaviorNode, Entity, QueryEntity, QueryKeys } from '@/global/entity'
-import type { ToonMaterial } from '@/shaders/materials'
-import type { soundEffects } from '@assets/assets'
-import type { With } from 'miniplex'
-import type { baseEnemyQuery } from './enemyBehavior'
+import type { AllAnimations, AllStates, AnimatorsWith, AssetNames, BehaviorNode, Entity, QueryEntity, QueryKeys } from '@/global/entity'
 import { Faction } from '@/global/entity'
 import { ecs, tweens, world } from '@/global/init'
 import { playSound } from '@/global/sounds'
 import { action, condition, enteringState, inState, selector, sequence, setState, wait, waitFor } from '@/lib/behaviors'
 import { collisionGroups } from '@/lib/collisionGroups'
 import { spawnDamageNumber } from '@/particles/damageNumber'
+import type { ToonMaterial } from '@/shaders/materials'
 import { calculateDamage, flash, squish } from '@/states/dungeon/battle'
 import { selectNewLockedEnemy } from '@/states/dungeon/locking'
 import { stunBundle } from '@/states/dungeon/stun'
 import { getIntersections } from '@/states/game/sensor'
+import type { With } from 'miniplex'
 import { Material, Mesh } from 'three'
 import { inverter } from '../lib/behaviors'
 import { applyMove, applyRotate, getMovementForce, moveToDirection, takeDamage } from './behaviorHelpers'
+import type { baseEnemyQuery } from './enemyBehavior'
 
 export const playerQuery = ecs.with('position', 'strength', 'body', 'critChance', 'critDamage', 'playerAnimator', 'weapon', 'player', 'collider', 'sensor', 'rotation', 'state', 'playerAttackStyle').where(({ faction }) => faction === Faction.Player)
 const navGridQuery = ecs.with('dungeon')
@@ -134,7 +133,7 @@ export const runningNode: EnemyNode<['running', 'waitingAttack'], ['running']> =
 )
 
 // ! Attack
-export const attackNode = (sounds: soundEffects[] = []): EnemyNode<['attack', 'attackCooldown', 'waitingAttack'], ['attacking']> => () => selector(
+export const attackNode = (sounds: AssetNames['soundEffects'][] = []): EnemyNode<['attack', 'attackCooldown', 'waitingAttack'], ['attacking']> => () => selector(
 	sequence(
 		inverter(inState('attack', 'waitingAttack', 'attackCooldown')),
 		condition((...[e, { player }]) => {

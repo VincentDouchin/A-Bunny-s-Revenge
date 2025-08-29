@@ -1,4 +1,4 @@
-import type { weapons } from '@assets/assets'
+import { AssetNames } from "@/global/entity"
 
 interface Weapon {
 	scale: number
@@ -8,7 +8,7 @@ interface Weapon {
 	name: string
 }
 
-export const weaponsData: Record<weapons, Weapon> = {
+export const weaponsData: Record<AssetNames['weapons'], Weapon> = {
 	Hoe: {
 		scale: 1,
 		attack: 1,
