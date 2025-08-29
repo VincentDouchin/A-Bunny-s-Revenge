@@ -1,27 +1,26 @@
-import type { Entity, PlayerAnimations } from '@/global/entity'
-import type { app } from '@/global/states'
-import type { UpdateSystem } from '@/lib/app'
 import type { weapons } from '@assets/assets'
+import type { Entity, PlayerAnimations } from '@/global/entity'
+import type { UpdateSystem } from '@/lib/app'
+import { ActiveEvents, Cuboid } from '@dimforge/rapier3d-compat'
+import { Euler, LinearSRGBColorSpace, Mesh, Quaternion, Vector3 } from 'three'
+import { CSS2DObject } from 'three/examples/jsm/renderers/CSS2DRenderer'
+import { clone } from 'three/examples/jsm/utils/SkeletonUtils'
 import { Animator } from '@/global/animator'
 import { Faction, stateBundle, States } from '@/global/entity'
 import { assets, ecs, save } from '@/global/init'
 import { menuInputMap, playerInputMap } from '@/global/inputMaps'
 import { ModifierContainer } from '@/global/modifiers'
+import { app } from '@/global/states'
 import { collisionGroups } from '@/lib/collisionGroups'
 import { isCardinalDirection } from '@/lib/directions'
 import { inMap } from '@/lib/hierarchy'
 import { capsuleColliderBundle, characterControllerBundle } from '@/lib/models'
 import { Stat } from '@/lib/stats'
 import { Timer } from '@/lib/timer'
-import { chestAppearing } from '@/particles/chestAppearing'
 import { dash } from '@/particles/dashParticles'
-import { ActiveEvents, Cuboid } from '@dimforge/rapier3d-compat'
-import { Euler, LinearSRGBColorSpace, Mesh, Quaternion, Vector3 } from 'three'
-import { CSS2DObject } from 'three/examples/jsm/renderers/CSS2DRenderer'
-import { clone } from 'three/examples/jsm/utils/SkeletonUtils'
+import { leaveHouse, setSensor } from '@/utils/dialogHelpers'
 import { RoomType } from '../dungeon/generateDungeon'
 import { healthBundle } from '../dungeon/health'
-import { spawnChest } from '../dungeon/spawnChest'
 import { Dash } from './dash'
 import { inventoryBundle } from './inventory'
 import { weaponBundle } from './weapon'
@@ -115,6 +114,7 @@ export const playerBundle = (health: number, weapon: weapons | null) => {
 	return player
 }
 const doorQuery = ecs.with('door', 'position', 'rotation')
+const doorQueryCollider = doorQuery.with('collider')
 export const spawnCharacter: UpdateSystem<typeof app, 'farm' | 'village'> = (resources) => {
 	const position = new Vector3()
 	const rotation = new Quaternion()
@@ -162,4 +162,21 @@ export const spawnPlayerClearing = () => {
 			})
 		}
 	}
+}
+const houseQuery = ecs.with('npcName', 'worldPosition', 'houseAnimator', 'rotation', 'collider').where(e => e.npcName === 'Grandma')
+
+export const spawnPlayerContinueGame = async () => {
+	app.enable('cutscene')
+	for (const house of houseQuery) {
+		setSensor(houseQuery, true)
+		setSensor(doorQueryCollider, true)
+		ecs.add({
+			...playerBundle(PLAYER_DEFAULT_HEALTH, null),
+			position: house.worldPosition.clone(),
+			rotation: house.rotation.clone(),
+			targetRotation: house.rotation.clone(),
+		})
+		await leaveHouse()
+	}
+	app.disable('cutscene')
 }

@@ -1,7 +1,7 @@
-import type { App, AppStates, SubscriberSystem, TransitionSystem, UpdateSystem } from '@/lib/app'
 import type { icons } from '@assets/assets'
 import type { Item } from './items'
-import { save } from '@/global/init'
+import type { SaveData } from '@/global/save'
+import type { App, AppStates, SubscriberSystem, TransitionSystem, UpdateSystem } from '@/lib/app'
 import { Event } from 'eventery'
 
 export type QuestStep = Readonly<{
@@ -12,7 +12,7 @@ export type QuestStep = Readonly<{
 }>
 
 export class QuestManager<A extends App<any, any>> {
-	constructor(private app: A) { }
+	constructor(private app: A, private save: SaveData) { }
 
 	#quests = new Set<Quest2<A, any, any>>()
 	completeStepEvent = new Event<[QuestStep]>()
@@ -23,7 +23,7 @@ export class QuestManager<A extends App<any, any>> {
 		data: D
 		name: string
 	}>) {
-		const quest = new Quest2(questData, this.app, this)
+		const quest = new Quest2(questData, this.app, this.save, this)
 		this.#quests.add(quest)
 		return quest
 	}
@@ -31,7 +31,7 @@ export class QuestManager<A extends App<any, any>> {
 	enableQuests = () => {
 		for (const quest of this.#quests) {
 			quest.register()
-			if (save.quests[quest.name].unlocked) {
+			if (this.save.quests[quest.name].unlocked) {
 				quest.unlock()
 			}
 		}
@@ -47,12 +47,17 @@ export class Quest2<A extends App<any, Record<string, never>>, S extends Readonl
 	#manager: QuestManager<A>
 	state: AppStates<A>
 	unlocked = false
-	constructor(quest: Readonly<{
-		state: AppStates<A>
-		steps: S
-		data: D
-		name: string
-	}>, app: A, questManager: QuestManager<A>) {
+	constructor(
+		quest: Readonly<{
+			state: AppStates<A>
+			steps: S
+			data: D
+			name: string
+		}>,
+		app: A,
+		private save: SaveData,
+		questManager: QuestManager<A>,
+	) {
 		this.#app = app
 		this.#manager = questManager
 		this.#steps = quest.steps
@@ -66,19 +71,19 @@ export class Quest2<A extends App<any, Record<string, never>>, S extends Readonl
 	}
 
 	register() {
-		if (!(this.name in save.quests)) {
-			save.quests[this.name] = {
+		if (!(this.name in this.save.quests)) {
+			this.save.quests[this.name] = {
 				unlocked: false,
 				data: this.data,
 				steps: this.#steps.reduce((acc, v) => ({ ...acc, [v.key]: false }), {}),
 			}
 		}
-		this.data = save.quests[this.name].data
+		this.data = this.save.quests[this.name].data
 	}
 
 	unlock() {
 		if (this.#steps.some(s => !this.hasCompletedStep(s.key))) {
-			save.quests[this.name].unlocked = true
+			this.save.quests[this.name].unlocked = true
 			this.unlocked = true
 			// @ts-expect-error fix this later
 			this.#app.enable(this.state)
@@ -91,7 +96,7 @@ export class Quest2<A extends App<any, Record<string, never>>, S extends Readonl
 	}
 
 	complete(step: S[number]['key']) {
-		save.quests[this.name].steps[step] = true
+		this.save.quests[this.name].steps[step] = true
 		for (const subscribers of this.#subscribers[step]) {
 			subscribers()
 		}
@@ -124,7 +129,7 @@ export class Quest2<A extends App<any, Record<string, never>>, S extends Readonl
 	}
 
 	hasCompletedStep(step: S[number]['key']) {
-		return save.quests[this.name].steps[step]
+		return this.save.quests[this.name].steps[step]
 	}
 
 	untilIsComplete(step: S[number]['key'], fn: () => (() => void) | void) {

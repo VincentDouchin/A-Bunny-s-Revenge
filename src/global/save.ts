@@ -1,7 +1,8 @@
-import type { crops, Item, Meals } from '@/constants/items'
 import type { items } from '@assets/assets'
 import type { With } from 'miniplex'
 import type { Crop, Entity } from './entity'
+import type { crops, Item, Meals } from '@/constants/items'
+import type { QuestManager } from '@/constants/quests'
 import { trackStore } from '@solid-primitives/deep'
 import { createScheduled, debounce } from '@solid-primitives/scheduled'
 import { get, set } from 'idb-keyval'
@@ -9,7 +10,6 @@ import { createEffect } from 'solid-js'
 import { createMutable, unwrap } from 'solid-js/store'
 import { Quaternion, Vector3 } from 'three'
 import { context } from './context'
-import { questManager } from './init'
 
 const blankSettings = (): Settings => ({
 	volume: 100,
@@ -100,7 +100,7 @@ export const useSave = async () => {
 			set(context.save, unwrap(save))
 		}
 	})
-	const resetSave = (newSave: SaveData = blankSave()) => {
+	const resetSave = (questManager: QuestManager<any>, newSave: SaveData = blankSave()) => {
 		Object.assign(save, newSave)
 
 		questManager.enableQuests()

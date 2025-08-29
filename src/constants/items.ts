@@ -1,9 +1,9 @@
 import type { items } from '@assets/assets'
-import { save } from '@/global/init'
+import { assets, save } from '@/global/init'
 import { modifiers } from '@/global/modifiers'
 import { entries, shuffle } from '@/utils/mapFunctions'
 
-export const cropNames = ['carrot', 'beet', 'tomato', 'lettuce', 'pumpkin', 'wheat', 'haricot', 'magic_bean', 'potato'] as const satisfies readonly items[]
+export const cropNames = Object.keys(assets.crops) as (keyof typeof assets['crops'])[]
 export const fruitNames = ['apple'] as const
 export type crops = (typeof cropNames)[number]
 export type fruits = (typeof fruitNames)[number]

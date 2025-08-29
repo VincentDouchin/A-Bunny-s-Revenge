@@ -21,5 +21,13 @@ export default antfu({
 		html: true,
 	},
 }, {
-	ignores: ['dev-dist', 'assets', 'node-modules', 'dist', 'public', 'src-tauri'],
+	ignores: [
+		'dev-dist',
+		'assets',
+		'node-modules', 
+		'dist', 
+		'public', 
+		'src-tauri',
+		'src/static-assets.ts'
+	],
 })

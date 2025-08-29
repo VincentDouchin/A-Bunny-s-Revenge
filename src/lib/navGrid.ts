@@ -1,8 +1,7 @@
-import { ecs, world } from '@/global/init'
-import { scene } from '@/global/rendering'
 import { Cuboid } from '@dimforge/rapier3d-compat'
 import { AStarFinder } from 'astar-typescript'
 import { Color, InstancedMesh, Matrix4, MeshBasicMaterial, Quaternion, SphereGeometry, type Vec2, Vector2, Vector3 } from 'three'
+import { ecs, scene, world } from '@/global/init'
 import { Direction } from './directions'
 
 const RESOLUTION = 5
@@ -13,18 +12,6 @@ export enum NavCell {
 }
 const doorsQuery = ecs.with('door', 'position')
 
-// this.matrix.forEach((l, y) => {
-// 	l.forEach((c, x) => {
-// 		const isInPath = path?.some(p => p[0] === x && p[1] === y)
-// 		const isStartOrEnd = [start, end].some(p => p.x === x && p.y === y)
-// 		b.fillStyle = isInPath ? 'blue' : isStartOrEnd ? 'white' : c === Cell.Walkable ? 'green' : c === Cell.Wall ? 'yellow' : 'red'
-// 		b.fillRect(x * RESOLUTION, y * RESOLUTION, RESOLUTION, RESOLUTION)
-// 	})
-// })
-
-// const b = getScreenBuffer(500, 500)
-// document.body.appendChild(b.canvas)
-// b.canvas.style.position = 'fixed'
 export class NavGrid {
 	astar: AStarFinder
 	closestNodes: Vec2[][] = []

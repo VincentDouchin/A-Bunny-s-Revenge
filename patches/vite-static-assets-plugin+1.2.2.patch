@@ -1,0 +1,40 @@
+diff --git a/node_modules/vite-static-assets-plugin/dist/index.js b/node_modules/vite-static-assets-plugin/dist/index.js
+index 0145f7d..058c12b 100644
+--- a/node_modules/vite-static-assets-plugin/dist/index.js
++++ b/node_modules/vite-static-assets-plugin/dist/index.js
+@@ -90,11 +90,11 @@ function extractDirectories(files, maxDepth = 5) {
+  * Based on user's original function structure + generic addition.
+  */
+ function generateTypeScriptCode(files, sourceDirAbsolutePath, // For error messages
+-basePath = '/', // From Vite config
+-options = {}) {
++    basePath = '/', // From Vite config
++    options = {}) {
+     const { enableDirectoryTypes = true, // Keep this enabled for FilesInFolder
+-    maxDirectoryDepth = 5, addLeadingSlash = true, // From original options
+-     } = options;
++        maxDirectoryDepth = 5, addLeadingSlash = true, // From original options
++    } = options;
+     const sortedFiles = [...files].sort(); // Sort for consistency
+     const fileList = sortedFiles.length > 0
+         ? sortedFiles.map(file => `  '${file}'`).join(' |\n')
+@@ -149,7 +149,7 @@ ${fileList};
+ ${directoryTypesCode /* Includes StaticAssetDirectory */}
+ ${filesInFolderGenericCode /* Includes FilesInFolder */}
+ 
+-const assets = new Set<string>([
++export const assets = new Set<string>([
+ ${sortedFiles.map(file => `  '${file}'`).join(',\n')}
+ ]);
+ 
+@@ -291,8 +291,8 @@ export default function staticAssetsPlugin(options = {}) {
+                             .on('addDir', () => updateTypeScriptFile('add')) // Regenerate on dir changes too
+                             .on('unlinkDir', () => updateTypeScriptFile('unlink'))
+                             .on('error', (error) => {
+-                            console.error(`${chalk.red('✗')} Watcher error: ${error}`);
+-                        });
++                                console.error(`${chalk.red('✗')} Watcher error: ${error}`);
++                            });
+                         console.log(`${chalk.cyan('ℹ')} [vite-plugin-static-assets] Watching for changes in ${chalk.blue(normalizePath(path.relative(process.cwd(), directory)))}`);
+                     }
+                     catch (err) {

@@ -1,14 +1,16 @@
 import type { Euler, Material, Object3D, Object3DEventMap, Vec2, Vector4Like } from 'three'
-import { getScreenBuffer } from '@/utils/buffer'
-import { useLocalStorage } from '@/utils/useLocalStorage'
+import type { Simplify } from 'type-fest'
 import assetManifest from '@assets/assetManifest.json'
 import { createStore, del, entries, set } from 'idb-keyval'
 import { DynamicDrawUsage, Group, LoadingManager, Matrix4, Mesh, TextureLoader, Vector3 } from 'three'
+import { InstancedUniformsMesh } from 'three-instanced-uniforms-mesh'
 import draco_decoder from 'three/examples/jsm/libs/draco/draco_decoder.wasm?url'
 import draco_wasm_wrapper from 'three/examples/jsm/libs/draco/draco_wasm_wrapper.js?url'
 import { DRACOLoader } from 'three/examples/jsm/loaders/DRACOLoader'
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader'
-import { InstancedUniformsMesh } from 'three-instanced-uniforms-mesh'
+import { assets } from '@/static-assets'
+import { getScreenBuffer } from '@/utils/buffer'
+import { useLocalStorage } from '@/utils/useLocalStorage'
 
 export type stringCaster<K extends string> = (s: string) => K
 export const getFileName = <K extends string>(path: string) => {
@@ -207,4 +209,37 @@ export const loaderProgress = (manifest: Record<string, { size: number, modified
 		loader,
 		clear,
 	}
+}
+
+type ExtractFromPath<
+	T extends string,
+	P extends string,
+	S extends string,
+	E extends string,
+> = {
+	[Path in T]: Path extends `${P}/${infer R}${S}.${E}` ? R : never
+}[T]
+const escapeRegex = (str?: string) => (str ?? '').replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
+
+export const getAssetPathsLoader = <Paths extends string>(assetPaths: Record<string, string>) => <
+	P extends string = '',
+	S extends string = '',
+	E extends string = '',
+	L extends boolean = false,
+>({ prefix, suffix, extension, lowercase }: { prefix?: P, suffix?: S, extension?: E, lowercase?: L }) => {
+	const escapedPrefix = escapeRegex(prefix)
+	const escapedSuffix = escapeRegex(suffix)
+	const escapedExtension = escapeRegex(extension)
+
+	const regex = new RegExp(`${escapedPrefix}/(.*?)${escapedSuffix}.${escapedExtension}`)
+	return [...assets]
+		.filter(assets => assets.match(regex)?.[0])
+		.reduce((acc, v) => {
+			const realPath = Object.entries(assetPaths).find(([rawPath, _realPath]) => rawPath.endsWith(v))![1]
+			let fileName = regex.exec(v)![1]
+			if (lowercase) {
+				fileName = fileName.toLocaleLowerCase()
+			}
+			return ({ ...acc, [fileName]: realPath })
+		}, {}) as Simplify<Record<L extends true ? Lowercase<ExtractFromPath<Paths, P, S, E>> : ExtractFromPath<Paths, P, S, E>, string>>
 }

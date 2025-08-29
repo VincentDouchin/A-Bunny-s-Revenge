@@ -1,17 +1,15 @@
 import type { Object3D } from 'three'
-import { getGameRenderGroup } from '@/debug/debugUi'
-import { getSobelShader, outlineShader } from '@/shaders/EdgePass'
-import { gameCameraQuery } from '@/states/mainMenu/mainMenuRendering'
-import { entries, objectValues } from '@/utils/mapFunctions'
-import { BasicShadowMap, DepthTexture, LinearSRGBColorSpace, Material, MeshBasicMaterial, Scene, ShaderMaterial, Texture, Vector2, WebGLRenderer, WebGLRenderTarget } from 'three'
+import { BasicShadowMap, DepthTexture, LinearSRGBColorSpace, Material, MeshBasicMaterial, ShaderMaterial, Texture, Vector2, WebGLRenderer, WebGLRenderTarget } from 'three'
 import { FullScreenQuad } from 'three/examples/jsm/postprocessing/Pass'
 import { CSS2DRenderer } from 'three/examples/jsm/renderers/CSS2DRenderer'
+import { getGameRenderGroup } from '@/debug/debugUi'
+import { getSobelShader, outlineShader } from '@/shaders/EdgePass'
+import { entries, objectValues } from '@/utils/mapFunctions'
 import { params } from './context'
 import { RenderGroup } from './entity'
-import { assets, ecs, settings } from './init'
+import { assets, ecs, scene, settings } from './init'
 import { app } from './states'
 
-export const scene = new Scene()
 export const renderer = new WebGLRenderer({ alpha: false })
 renderer.debug.checkShaderErrors = false
 renderer.setPixelRatio(1)
@@ -67,7 +65,8 @@ export const initThree = () => {
 	ecs.add({ scene, renderer, renderGroup: RenderGroup.Game })
 }
 export const gameRenderGroupQuery = ecs.with('renderer', 'renderGroup', 'scene').where(e => e.renderGroup === RenderGroup.Game)
-export const cameraQuery = ecs.with('camera', 'renderGroup').where(e => e.renderGroup === RenderGroup.Game)
+export const cameraQuery = ecs.with('camera', 'renderGroup', 'cameraOffset').where(e => e.renderGroup === RenderGroup.Game)
+export const gameCameraQuery = cameraQuery.with('cameraOffset').where(e => e.renderGroup === RenderGroup.Game)
 const outlineQuery = ecs.with('outline')
 export const renderGame = () => {
 	const camera = cameraQuery.first?.camera

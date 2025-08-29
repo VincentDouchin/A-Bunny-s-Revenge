@@ -1,15 +1,13 @@
-import type { soundAssets } from '@/global/sounds'
 import { assets } from '@/global/init'
-import { app } from '@/global/states'
-import { windowEvent } from '@/lib/uiManager'
-import { entries } from '@/utils/mapFunctions'
-import { useLocalStorage } from '@/utils/useLocalStorage'
+import type { soundAssets, sounds } from '@/global/sounds'
 import soundsData from '@assets/soundsData.json'
 import { createEffect, createMemo, createSignal, For, onCleanup, onMount, Show } from 'solid-js'
 import { css } from 'solid-styled'
 
-type sounds = Record<soundAssets, Record<string, { volume: number }>>
-const [localSoundData, setLocalSoundData] = useLocalStorage<sounds>('soundsData', soundsData)
+import { localSoundData, setLocalSoundData } from '@/global/sounds'
+import { app } from '@/global/states'
+import { windowEvent } from '@/lib/uiManager'
+import { entries } from '@/utils/mapFunctions'
 
 export const SoundUi = () => {
 	const [showSoundUi, setShowUi] = createSignal(false)
@@ -23,7 +21,7 @@ export const SoundUi = () => {
 			listener()
 		})
 	})
-	const [reactiveSoundData, setReactiveSoundData] = createSignal<sounds>(localSoundData)
+	const [reactiveSoundData, setReactiveSoundData] = createSignal(localSoundData)
 	createEffect(() => {
 		setLocalSoundData(() => reactiveSoundData())
 	})
@@ -37,10 +35,10 @@ export const SoundUi = () => {
 		document.body.removeChild(a)
 	}
 	const reset = () => {
-		setLocalSoundData(() => soundsData)
+		setLocalSoundData(() => soundsData as sounds)
 		setReactiveSoundData(localSoundData)
 	}
-	const soundAssets = ['music', 'ambiance', 'soundEffects'] as const satisfies readonly soundAssets[]
+	const soundAssets = ['music', 'ambiance', 'soundEffects'] as const satisfies readonly (keyof soundAssets)[]
 	css/* css */`
 	.sound-container{
 		position: fixed;
@@ -105,7 +103,7 @@ export const SoundUi = () => {
 							{(soundAsset) => {
 								const [showPart, setShowPart] = createSignal(false)
 								const [filter, setFilter] = createSignal('')
-								const sounds = createMemo(() => entries(assets[soundAsset]).filter(([k]) => !filter() || k.toLowerCase().includes(filter().toLowerCase())))
+								const sounds = createMemo(() => (entries(assets[soundAsset]) as [string, Howl][]).filter(([k]) => !filter() || k.toLowerCase().includes(filter().toLowerCase())))
 								return (
 									<div class="part-container">
 										<div class="part-title" onClick={() => setShowPart(x => !x)}>{soundAsset}</div>
@@ -116,10 +114,10 @@ export const SoundUi = () => {
 												<For each={sounds()}>
 													{([key, howl]) => {
 														const updateVolume = (volume: number) => setReactiveSoundData((x) => {
-															return { ...x, [soundAsset]: { ...x[soundAsset], [key]: { ...x[soundAsset][key], volume } } }
+															return { ...x, [soundAsset]: { ...x[soundAsset], [key]: { ...(x?.[soundAsset]?.[key] ?? {}), volume } } }
 														})
 														onMount(() => {
-															if (!(key in reactiveSoundData()[soundAsset])) {
+															if (!(key in (reactiveSoundData()[soundAsset] ?? []))) {
 																updateVolume(50)
 															}
 														})
@@ -128,7 +126,7 @@ export const SoundUi = () => {
 															if (isPlaying()) {
 																howl.pause()
 															} else {
-																howl.volume(reactiveSoundData()[soundAsset]?.[key]?.volume ?? 1)
+																howl.volume(reactiveSoundData()?.[soundAsset]?.[key]?.volume ?? 1)
 																howl.play()
 																howl.once('end', () => {
 																	setIsPlaying(false)
@@ -142,7 +140,7 @@ export const SoundUi = () => {
 																{key}
 																<button onClick={play}>{isPlaying() ? 'pause' : 'play'}</button>
 																<input
-																	value={reactiveSoundData()[soundAsset]?.[key]?.volume ?? 1}
+																	value={reactiveSoundData()?.[soundAsset]?.[key]?.volume ?? 1}
 																	onChange={e => updateVolume(e.target.valueAsNumber)}
 																	type="number"
 																	min="0"
@@ -189,7 +187,7 @@ export const SoundUi = () => {
 									<div class="part-container">
 										<div class="part-title">{soundAsset}</div>
 										<input
-											value={reactiveSoundData()[soundAsset][keys[0]]?.volume ?? 1}
+											value={reactiveSoundData()?.[soundAsset]?.[keys[0]]?.volume ?? 1}
 											onChange={updateVolume}
 											type="number"
 											min="0"
@@ -198,7 +196,7 @@ export const SoundUi = () => {
 										>
 										</input>
 										<input
-											value={reactiveSoundData()[soundAsset][keys[0]]?.volume ?? 1}
+											value={reactiveSoundData()?.[soundAsset]?.[keys[0]]?.volume ?? 1}
 											type="range"
 											min="0"
 											max="2"

@@ -6,6 +6,7 @@ import { VitePWA } from 'vite-plugin-pwa'
 import solidPlugin from 'vite-plugin-solid'
 import solidStyledPlugin from 'vite-plugin-solid-styled'
 import solidSvg from 'vite-plugin-solid-svg'
+import staticAssetsPlugin from 'vite-static-assets-plugin'
 import { assetPipeline } from './scripts/assetPipeline'
 import { ConvertAudioFiles } from './scripts/convertAudioFiles'
 import { ConvertFBXToGLB } from './scripts/convertFbx2GLB'
@@ -35,6 +36,10 @@ export default defineConfig(async () => {
 					include: 'src/**/*.{tsx,jsx}',
 					exclude: 'node_modules/**/*.{ts,js,tsx,jsx}',
 				},
+			}),
+			staticAssetsPlugin({
+				outputFile: 'src/static-assets.ts',
+				directory: 'assets',
 			}),
 			VitePWA({
 				registerType: 'autoUpdate',

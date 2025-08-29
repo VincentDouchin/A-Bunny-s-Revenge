@@ -1,5 +1,5 @@
 import { CircleGeometry, MeshBasicMaterial, PlaneGeometry, Vector3 } from 'three'
-import { Bezier, ColorOverLife, Gradient, IntervalValue, MeshSurfaceEmitter, ParticleSystem, PiecewiseBezier, RenderMode, SizeOverLife } from 'three.quarks'
+import { Bezier, ColorOverLife, Gradient, IntervalValue, MeshSurfaceEmitter, ParticleSystem, PiecewiseBezier, RenderMode, SizeOverLife, SpeedOverLife } from 'three.quarks'
 
 const geo = new CircleGeometry(1, 8)
 const mat = new MeshBasicMaterial()
@@ -13,20 +13,18 @@ export const doorClosed = () => {
 		instancingGeometry: geo,
 		startLife: new IntervalValue(20.0, 10.0),
 		startSpeed: new IntervalValue(0.2, 0.8),
-		startSize: new IntervalValue(0.5, 1),
+		startSize: new IntervalValue(1, 3),
 		worldSpace: false,
-		emissionOverTime: new IntervalValue(10, 40),
+		emissionOverTime: new IntervalValue(5, 20),
 		emissionBursts: [],
 		shape: new MeshSurfaceEmitter(new PlaneGeometry(50, 20)),
 		material: mat,
 		renderMode: RenderMode.BillBoard,
 		renderOrder: 2,
 		behaviors: [
-			new SizeOverLife(new PiecewiseBezier([[new Bezier(1, 0.75, 0.50, 0.25), 0]])),
-			new ColorOverLife(new Gradient(
-				[[new Vector3(0, 0, 0), 0], [new Vector3(0.3, 0.3, 0.3), 1]],
-				[[1, 0], [0, 1]],
-			)),
+			new SizeOverLife(new PiecewiseBezier([[new Bezier(1, 0.75, 0.75, 0.25), 0]])),
+			new ColorOverLife(new Gradient([[new Vector3(0, 0, 0), 0], [new Vector3(0.3, 0.3, 0.3), 1]])),
+			new SpeedOverLife(new PiecewiseBezier([[new Bezier(1, 0.8, 0.5, 0), 0]])),
 		],
 	})
 	system.emitter.rotateX(-Math.PI)

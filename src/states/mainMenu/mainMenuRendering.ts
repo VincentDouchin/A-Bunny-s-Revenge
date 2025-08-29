@@ -1,14 +1,12 @@
+import { easeInOut } from 'popmotion'
+import { PerspectiveCamera, Raycaster, Vector2, Vector3 } from 'three'
 import { moveCamera, updateCameraZoom } from '@/global/camera'
 import { params } from '@/global/context'
 import { RenderGroup } from '@/global/entity'
 import { ecs, inputManager, save, tweens } from '@/global/init'
 import { getTargetSize, updateRenderSize } from '@/global/rendering'
 import { app } from '@/global/states'
-import { doorQuery, leaveHouse, setSensor } from '@/utils/dialogHelpers'
 import { once } from '@/utils/mapFunctions'
-import { easeInOut } from 'popmotion'
-import { PerspectiveCamera, Raycaster, Vector2, Vector3 } from 'three'
-import { PLAYER_DEFAULT_HEALTH, playerBundle } from '../game/spawnPlayer'
 
 export type MenuOptions = 'Continue' | 'New Game' | 'Settings' | 'Credits'
 
@@ -135,19 +133,4 @@ export const clickOnMenuButton = () => {
 			}
 		}
 	}
-}
-export const spawnPlayerContinueGame = async () => {
-	app.enable('cutscene')
-	for (const house of houseQuery) {
-		setSensor(houseQuery, true)
-		setSensor(doorQuery, true)
-		ecs.add({
-			...playerBundle(PLAYER_DEFAULT_HEALTH, null),
-			position: house.worldPosition.clone(),
-			rotation: house.rotation.clone(),
-			targetRotation: house.rotation.clone(),
-		})
-		await leaveHouse()
-	}
-	app.disable('cutscene')
 }

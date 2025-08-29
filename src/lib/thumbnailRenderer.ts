@@ -1,10 +1,10 @@
 import type { Object3D, Object3DEventMap } from 'three'
-import { coroutines, time } from '@/global/init'
-import { outlinePass } from '@/shaders/PixelOutlineMaterial'
-import { getScreenBuffer } from '@/utils/buffer'
 import { AmbientLight, LinearSRGBColorSpace, OrthographicCamera, Scene, Vector2, Vector3, WebGLRenderer, WebGLRenderTarget } from 'three'
 import { FullScreenQuad } from 'three/examples/jsm/postprocessing/Pass'
-import { getSize } from './models'
+import { coroutines, time } from '@/global/init'
+import { getSize } from '@/lib/models'
+import { outlinePass } from '@/shaders/PixelOutlineMaterial'
+import { getScreenBuffer } from '@/utils/buffer'
 
 export const thumbnailRenderer = (size = 24) => {
 	const renderer = new WebGLRenderer({ alpha: true })

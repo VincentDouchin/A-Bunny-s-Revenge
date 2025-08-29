@@ -44,11 +44,11 @@ import { bobItems, collectItems, popItems, stopItems } from './states/game/items
 import { canPlayerMove, movePlayer, playerSteps, savePlayerFromTheEmbraceOfTheVoid, stopPlayer } from './states/game/movePlayer'
 import { allowDoorCollision, collideWithDoorCamp, collideWithDoorClearing, collideWithDoorDungeon, collideWithDoorIntro, collideWithDoorVillage, doorLocking, unlockDoorClearing, unlockDoorDungeon } from './states/game/spawnDoor'
 import { spawnDungeon, spawnLevel, spawnLevelData, updateTimeUniforms } from './states/game/spawnLevel'
-import { spawnCharacter, spawnPlayerClearing, spawnPlayerDungeon } from './states/game/spawnPlayer'
+import { spawnCharacter, spawnPlayerClearing, spawnPlayerContinueGame, spawnPlayerDungeon } from './states/game/spawnPlayer'
 import { interactionPlugin } from './states/game/touchItem'
 import { updateWeaponArc } from './states/game/weapon'
 import { intiMainMenuRendering } from './states/mainMenu/initMainMenu'
-import { clickOnMenuButton, initMainMenuCamPos, renderMainMenu, selectMainMenu, setupWindow, spawnPlayerContinueGame } from './states/mainMenu/mainMenuRendering'
+import { clickOnMenuButton, initMainMenuCamPos, renderMainMenu, selectMainMenu, setupWindow } from './states/mainMenu/mainMenuRendering'
 import { disablePortrait, enableFullscreen, resize, setupGame, stopOnLosingFocus } from './states/setup/setupGame'
 import { UI } from './ui/UI'
 
@@ -101,7 +101,7 @@ app
 	.addSubscribers('mainMenu', ...initMainMenuCamPos)
 	.onExit(
 		'mainMenu',
-		runIf(() => app.isEnabled('intro'), () => resetSave(), startIntro),
+		runIf(() => app.isEnabled('intro'), () => resetSave(questManager), startIntro),
 		runIf(() => app.isEnabled('farm'), spawnPlayerContinueGame),
 	)
 	// ! INTRO

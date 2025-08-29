@@ -1,12 +1,12 @@
-import type { SaveData } from '@/global/save'
 import type { JSONEditorOptions } from 'jsoneditor'
-import saveDataSchema from '@/debug/saveDataSchema.json'
-import { resetSave, save } from '@/global/init'
-import { app } from '@/global/states'
-import { sleep } from '@/utils/sleep'
+import type { SaveData } from '@/global/save'
 import JSONEditor from 'jsoneditor'
 import { createSignal, onCleanup, onMount, Show } from 'solid-js'
 import { unwrap } from 'solid-js/store'
+import saveDataSchema from '@/debug/saveDataSchema.json'
+import { questManager, resetSave, save } from '@/global/init'
+import { app } from '@/global/states'
+import { sleep } from '@/utils/sleep'
 
 const theme = `<link href="https://cdnjs.cloudflare.com/ajax/libs/jsoneditor/10.0.0/jsoneditor.min.css" rel="stylesheet" type="text/css">`
 export const SaveEditor = () => {
@@ -29,7 +29,7 @@ export const SaveEditor = () => {
 						schema: saveDataSchema,
 						mode: 'tree',
 						limitDragging: true,
-						onChangeText: (text: string) => resetSave(JSON.parse(text) as SaveData),
+						onChangeText: (text: string) => resetSave(questManager, JSON.parse(text) as SaveData),
 						allowSchemaSuggestions: true,
 						modes: ['code', 'tree'],
 					}

@@ -1,7 +1,6 @@
 import type { weapons } from '@assets/assets'
 import { weaponsData } from '@/constants/weapons'
-import { assets, ecs } from '@/global/init'
-import { scene } from '@/global/rendering'
+import { assets, ecs, scene } from '@/global/init'
 import { getWorldPosition } from '@/lib/transforms'
 import { WeaponArc } from '@/shaders/weaponArc'
 

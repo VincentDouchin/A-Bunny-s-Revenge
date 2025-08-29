@@ -1,5 +1,7 @@
-import type { Entity } from '@/global/entity'
 import type { Material } from 'three'
+import type { Entity } from '@/global/entity'
+import { ColliderDesc, RigidBodyDesc } from '@dimforge/rapier3d-compat'
+import { Mesh } from 'three'
 import { Seedling } from '@/constants/enemies'
 import { addCameraShake } from '@/global/camera'
 import { assertEntity, Interactable, States, states } from '@/global/entity'
@@ -11,8 +13,6 @@ import { traverseFind } from '@/lib/models'
 import { addExploder } from '@/particles/exploder'
 import { squish } from '@/states/dungeon/battle'
 import { getRandom } from '@/utils/mapFunctions'
-import { ColliderDesc, RigidBodyDesc } from '@dimforge/rapier3d-compat'
-import { Mesh } from 'three'
 import { attackCooldownNode, attackNode, damagedByPlayer, deadNode, enemyContext, hitNode, idleNode, runningNode, waitingAttackNode } from './commonBehaviors'
 import { baseEnemyQuery } from './enemyBehavior'
 
@@ -82,7 +82,7 @@ const behavior = createBehaviorTree(
 	),
 )
 const spawnPumpkinBoss = () => pumpkinBossBossQuery.onEntityAdded.subscribe((boss) => {
-	const model = assets.crops.pumpkin.stages.at(-1)!.scene.clone()
+	const model = assets.crops.pumpkin.at(-1)!.scene.clone()
 	model.scale.setScalar(30)
 	boss.model.visible = false
 	const mat = traverseFind<typeof Mesh>(model, node => node instanceof Mesh && 'material' in node && node.material.name === 'Orange')!.material as Material
@@ -111,7 +111,7 @@ const spawnPumpkinBoss = () => pumpkinBossBossQuery.onEntityAdded.subscribe((bos
 })
 const hitPumpkin = () => {
 	for (const boss of pumpkinBossBossQuery) {
-		const model = assets.crops.pumpkin.stages.at(-1)!.scene.clone()
+		const model = assets.crops.pumpkin.at(-1)!.scene.clone()
 		model.scale.setScalar(30)
 		boss.model.visible = false
 		const mat = traverseFind<typeof Mesh>(model, node => node instanceof Mesh && 'material' in node && node.material.name === 'Orange')!.material as Material
