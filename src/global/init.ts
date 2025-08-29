@@ -32,4 +32,3 @@ export const dayTime = new DayTime(600_000)
 export const musicManager = new MusicManager()
 export const tweens = tweensManager(time, ecs)
 export const questManager = new QuestManager(app, save)
-assets.buttons

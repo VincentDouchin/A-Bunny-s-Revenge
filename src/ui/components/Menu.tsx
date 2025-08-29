@@ -1,4 +1,3 @@
-import type { MenuInputMap } from '@/global/inputMaps'
 import type { Accessor, Component, JSX } from 'solid-js'
 import type { Atom } from 'solid-use/atom'
 import { ui } from '@/global/init'

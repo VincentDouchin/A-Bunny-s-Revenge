@@ -8,7 +8,7 @@ import type { StaticAssetPath } from '@/static-assets'
 import assetManifest from '@assets/assetManifest.json'
 import { Howl } from 'howler'
 import { DoubleSide, FrontSide, Mesh, MeshBasicMaterial, MeshPhysicalMaterial, MeshStandardMaterial, NearestFilter, RepeatWrapping, SRGBColorSpace, Texture } from 'three'
-import { getAssetPathsLoader, getFileName, loadAudio, loaderProgress, loadGLB, loadImage, textureLoader } from '@/global/assetLoaders'
+import { getAssetPathsLoader, loadAudio, loaderProgress, loadGLB, loadImage, textureLoader } from '@/global/assetLoaders'
 import { CharacterMaterial, GardenPlotMaterial, GrassMaterial, ToonMaterial, TreeMaterial, VineGateMaterial } from '@/shaders/materials'
 import { getScreenBuffer } from '@/utils/buffer'
 import { asyncMap, asyncMapValues, entries, mapKeys, mapValues, objectKeys, objectValues } from '@/utils/mapFunctions'
@@ -173,7 +173,7 @@ const loadItems = async <K extends string>(paths: Record<K, string>, loader: (ke
 }
 
 const loadMainMenuAssets = async (glob: GlobEager) => {
-	return mapKeys(await asyncMapValues(glob, async (src, key) => {
+	return await asyncMapValues(glob, async (src, key) => {
 		const glb = await loadGLB(src, key)
 		glb.scene.traverse((node) => {
 			if (node instanceof Mesh) {
@@ -181,7 +181,7 @@ const loadMainMenuAssets = async (glob: GlobEager) => {
 			}
 		})
 		return glb
-	}), k => getFileName(k.replace('-optimized', '')))
+	})
 }
 const modelOptions: getToonOptions = (key: string, materialName: string, _name: string, node: Mesh) => {
 	const isGate = node.parent?.name === 'GATE'
@@ -218,7 +218,7 @@ export const loadAssets = async (thumbnail: typeof thumbnailRenderer) => {
 			loader,
 			() => ({ material: CharacterMaterial, shadow: true, filter: NearestFilter }),
 		),
-		icons:getAssetPaths({prefix:'icons', 'extension':'svg'}),
+		icons: getAssetPaths({ prefix: 'icons', extension: 'svg' }),
 
 		models: loadGLBAsToon(
 			getAssetPaths({ prefix: 'models', extension: 'glb', suffix: '-optimized' }),
@@ -299,7 +299,10 @@ export const loadAssets = async (thumbnail: typeof thumbnailRenderer) => {
 		ambiance: loadSounds(getAssetPaths({ prefix: 'ambiance', extension: 'webm' }), loader, 1),
 
 		// ! others
-		fonts: fontLoader(getAssetPaths({ prefix: 'fonts' }), loader),
+		fonts: fontLoader(
+			{ ...getAssetPaths({ prefix: 'fonts', extension: 'ttf' }), ...getAssetPaths({ prefix: 'fonts', extension: 'otf' }) },
+			loader,
+		),
 		village: splitChildren<village>(loadGLBAsToon(
 			getAssetPaths({ prefix: 'village', extension: 'glb' }),
 			loader,
