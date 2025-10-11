@@ -1,5 +1,6 @@
 import type { QueryEntity } from '@/global/entity'
 import type { AppStates, Resources, UpdateSystem } from '@/lib/app'
+import { DoubleSide, Group, Mesh, MeshBasicMaterial, PlaneGeometry, ShaderMaterial } from 'three'
 import { farmDoors } from '@/global/entity'
 import { ecs, save, tweens, world } from '@/global/init'
 import { playSound } from '@/global/sounds'
@@ -8,7 +9,6 @@ import { Direction, isCardinalDirection, otherDirection } from '@/lib/directions
 import { doorClosed } from '@/particles/doorClosed'
 import vertexShader from '@/shaders/glsl/main.vert?raw'
 import { VineGateMaterial } from '@/shaders/materials'
-import { DoubleSide, Group, Mesh, MeshBasicMaterial, PlaneGeometry, ShaderMaterial } from 'three'
 import { genDungeon, RoomType } from '../dungeon/generateDungeon'
 
 export const doorSide = () => {

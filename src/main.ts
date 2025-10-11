@@ -5,7 +5,7 @@ import { pumpkinBossPlugin } from './behaviors/pumpkinBossBehavior'
 import { debugPlugin } from './debug/debugPlugin'
 import { updateAnimations } from './global/animations'
 import { initCamera, initializeCameraPosition, moveCamera } from './global/camera'
-import { coroutines, inputManager, musicManager, questManager, resetSave, time, tweens, ui } from './global/init'
+import { coroutines, inputManager, musicManager, questManager, resetSave, thumbnailRenderer, time, tweens, ui } from './global/init'
 import { tickModifiersPlugin } from './global/modifiers'
 import { updateMousePosition } from './global/mousePosition'
 import { compileShaders, initTexturesItemsAndEnemies, initThree, renderGame } from './global/rendering'
@@ -67,6 +67,7 @@ app
 	.onRender('default', renderGame)
 	.onPreUpdate('default', inputManager.update, ui.update)
 	.onRender('default', runIf(() => app.isDisabled('paused'), updateTimeUniforms))
+	.onUpdate('default', () => thumbnailRenderer.update(time.delta))
 	.onPreUpdate('default', runIf(() => app.isDisabled('paused'), time.tick, dayNight, tweens.tick))
 	// !SETUP
 	.onEnter('default', setupGame)

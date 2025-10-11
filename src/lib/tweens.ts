@@ -1,7 +1,7 @@
-import type { Entity } from '@/global/entity'
 import type { World } from 'miniplex'
 import type { AnimationOptions, Driver } from 'popmotion'
 import type { Time } from './time'
+import type { Entity } from '@/global/entity'
 import { animate } from 'popmotion'
 
 type TweenOptions<V> = AnimationOptions<V> & { parent?: Entity, destroy?: Entity }

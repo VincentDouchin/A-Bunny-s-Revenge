@@ -1,8 +1,8 @@
-import { assets } from '@/global/init'
 import type { soundAssets, sounds } from '@/global/sounds'
 import soundsData from '@assets/soundsData.json'
 import { createEffect, createMemo, createSignal, For, onCleanup, onMount, Show } from 'solid-js'
 import { css } from 'solid-styled'
+import { assets } from '@/global/init'
 
 import { localSoundData, setLocalSoundData } from '@/global/sounds'
 import { app } from '@/global/states'

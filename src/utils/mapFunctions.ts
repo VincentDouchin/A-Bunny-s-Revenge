@@ -4,14 +4,14 @@ export const objectKeys = <T extends Record<string, any>>(obj: T) => Object.keys
 
 export const objectValues = <T extends Record<string, any>>(obj: T) => Object.values(obj) as (T[keyof T])[]
 
-export const asyncMapValues = async< T extends Record<string, any>, F extends (arg: T[keyof T], key: keyof T) => any>(obj: T, fn: F) => {
+export const asyncMapValues = async<T extends Record<string, any>, F extends (arg: T[keyof T], key: keyof T) => any>(obj: T, fn: F) => {
 	const res = {} as Record<keyof T, Awaited<ReturnType<F>>>
 	await Promise.all(entries(obj).map(async ([key, val]) => {
 		res[key] = await fn(val, key)
 	}))
 	return res
 }
-export const mapValues = < T extends Record<string, any>, F extends (arg: T[keyof T], key: keyof T) => any>(obj: T, fn: F) => {
+export const mapValues = <T extends Record<string, any>, F extends (arg: T[keyof T], key: keyof T) => any>(obj: T, fn: F) => {
 	const res = {} as Record<keyof T, ReturnType<F>>
 	for (const [key, val] of entries(obj)) {
 		res[key] = fn(val, key)
@@ -20,7 +20,7 @@ export const mapValues = < T extends Record<string, any>, F extends (arg: T[keyo
 }
 
 export const groupByObject = <T extends Record<string, any>, F extends (key: keyof T) => string>(obj: T, fn: F) => {
-	const res = {} as Record<string, Record<keyof T, T[keyof T]> >
+	const res = {} as Record<string, Record<keyof T, T[keyof T]>>
 	for (const [key, val] of entries(obj)) {
 		const newKey = fn(key)
 		res[newKey] ??= {} as Record<keyof T, T [keyof T]>
@@ -43,7 +43,7 @@ export const reduce = <T extends Record<string, any>, F extends (key: keyof T, v
 	}, {}) as ReturnType<F>
 }
 
-export const range = <R >(start: number, end: number, fn: (i: number) => R = (i: number) => i as R) => {
+export const range = <R>(start: number, end: number, fn: (i: number) => R = (i: number) => i as R) => {
 	const res: R[] = []
 	for (let i = start; i < end; i++) {
 		res.push(fn(i))

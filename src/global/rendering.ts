@@ -42,7 +42,7 @@ export const updateRenderSize = (newSize?: Vector2, force = true) => {
 		target.setSize(newSize.x, newSize.y)
 		outlineTarget.setSize(newSize.x, newSize.y)
 		outlineTarget2.setSize(newSize.x, newSize.y)
-		renderer.setSize(newSize.x, newSize.y)
+		renderer.setSize(newSize.x, newSize.y, false)
 		const cssRendererSize = cssRenderer.getSize()
 		if (cssRendererSize.width !== window.innerWidth || cssRendererSize.height !== window.innerHeight) {
 			cssRenderer.setSize(window.innerWidth, window.innerHeight)
@@ -56,7 +56,7 @@ export const initThree = () => {
 	renderer.domElement.classList.add('main')
 	document.body.appendChild(renderer.domElement)
 	renderer.outputColorSpace = LinearSRGBColorSpace
-	renderer.setSize(width, height)
+	renderer.setSize(width, height, false)
 	cssRenderer.setSize(window.innerWidth, window.innerHeight)
 	cssRenderer.domElement.classList.add('main', 'css-renderer')
 	document.body.appendChild(cssRenderer.domElement)

@@ -1,13 +1,13 @@
 import type { AssetNames, Entity } from '@/global/entity'
+import { ActiveCollisionTypes, ColliderDesc, RigidBodyDesc } from '@dimforge/rapier3d-compat'
+import { Quaternion, Vector3 } from 'three'
 import { weaponsData } from '@/constants/weapons'
 import { Interactable } from '@/global/entity'
 import { assets, coroutines, ecs } from '@/global/init'
 import { app } from '@/global/states'
 import { inMap } from '@/lib/hierarchy'
-import { ActiveCollisionTypes, ColliderDesc, RigidBodyDesc } from '@dimforge/rapier3d-compat'
-import { Quaternion, Vector3 } from 'three'
-import { weaponBundle } from '../game/weapon'
 import { objectKeys } from '@/utils/mapFunctions'
+import { weaponBundle } from '../game/weapon'
 
 const weaponNames = objectKeys(assets.weapons)
 const displayWeapon = (weaponName: AssetNames['weapons'], parent: Entity) => {

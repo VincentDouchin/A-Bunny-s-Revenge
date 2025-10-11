@@ -1,8 +1,8 @@
+import { ShaderMaterial, Uniform, Vector2 } from 'three'
 import { assets } from '@/global/init'
 import { finalTarget } from '@/global/rendering'
 import noise from '@/shaders/glsl/lib/cnoise.glsl?raw'
 import kuwahara from '@/shaders/glsl/lib/kuwahara.glsl?raw'
-import { ShaderMaterial, Uniform, Vector2 } from 'three'
 
 export const drawnHouseShader = () => new ShaderMaterial({
 	uniforms: {

@@ -1,9 +1,9 @@
-import { sobelMat } from '@/global/rendering'
-import { entries } from '@/utils/mapFunctions'
 import { createEffect, For } from 'solid-js'
 import { css } from 'solid-styled'
 import atom from 'solid-use/atom'
 import { Color } from 'three'
+import { sobelMat } from '@/global/rendering'
+import { entries } from '@/utils/mapFunctions'
 
 interface ToonValues {
 	colors: [number, number, number, number]

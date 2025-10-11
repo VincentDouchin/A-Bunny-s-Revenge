@@ -1,7 +1,7 @@
-import type { Entity } from '@/global/entity'
 import type { Vec2 } from 'three'
-import { ecs } from '@/global/init'
+import type { Entity } from '@/global/entity'
 import { AmbientLight, DirectionalLight, Vector3 } from 'three'
+import { ecs } from '@/global/init'
 
 export const spawnLight = ({ x, y }: Vec2, parent: Entity) => {
 	const light = new DirectionalLight(0xFFFFFF, 0.6)

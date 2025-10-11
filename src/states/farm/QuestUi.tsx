@@ -1,3 +1,6 @@
+import { For, onMount, Show } from 'solid-js'
+import { css } from 'solid-styled'
+import atom from 'solid-use/atom'
 import { MenuType } from '@/global/entity'
 import { ecs, ui } from '@/global/init'
 import { menuItem } from '@/ui/components/Menu'
@@ -5,9 +8,6 @@ import { Modal } from '@/ui/components/Modal'
 import { GoldContainer, InventoryTitle, OutlineText } from '@/ui/components/styledComponents'
 import { InputIcon } from '@/ui/InputIcon'
 import { useGame, useQuery } from '@/ui/store'
-import { For, onMount, Show } from 'solid-js'
-import { css } from 'solid-styled'
-import atom from 'solid-use/atom'
 
 menuItem
 const openBulletinBoardQuery = useQuery(ecs.with('menuType').where(e => e.menuType === MenuType.Quest))

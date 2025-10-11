@@ -1,6 +1,6 @@
-import type { ComponentsOfType, Entity } from '@/global/entity'
 import type { With } from 'miniplex'
 import type { Object3D } from 'three'
+import type { ComponentsOfType, Entity } from '@/global/entity'
 import { ecs } from '@/global/init'
 
 export const addToHand = (entity: With<Entity, 'model'>, model: Object3D) => {

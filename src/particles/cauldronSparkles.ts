@@ -1,6 +1,6 @@
-import { assets } from '@/global/init'
 import { Color, DoubleSide, MeshStandardMaterial, PlaneGeometry, Vector4 } from 'three'
 import { Bezier, ColorRange, ConeEmitter, ConstantValue, IntervalValue, ParticleSystem, PiecewiseBezier, RenderMode, SizeOverLife } from 'three.quarks'
+import { assets } from '@/global/init'
 
 const geo = new PlaneGeometry(2, 2)
 const mat = new MeshStandardMaterial({

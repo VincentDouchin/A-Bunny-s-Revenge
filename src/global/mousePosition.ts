@@ -1,6 +1,6 @@
-import { gameCameraQuery } from '@/states/mainMenu/mainMenuRendering'
 import { throttle } from '@solid-primitives/scheduled'
 import { Plane, Raycaster, Vector2, Vector3 } from 'three'
+import { gameCameraQuery } from '@/states/mainMenu/mainMenuRendering'
 import { inputManager } from './init'
 
 export const updateMousePosition = () => {

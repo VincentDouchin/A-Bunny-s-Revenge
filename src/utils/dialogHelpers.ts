@@ -1,14 +1,14 @@
+import type { Query, With } from 'miniplex'
 import type { Item } from '@/constants/items'
 import type { AssetNames, Entity } from '@/global/entity'
-import type { Query, With } from 'miniplex'
+import { Vector3 } from 'three'
+import { CSS2DObject } from 'three/examples/jsm/renderers/CSS2DRenderer'
 import { applyMove, applyRotate } from '@/behaviors/behaviorHelpers'
 import { toastEvent } from '@/global/events'
 import { addItem, coroutines, ecs, removeItem, save } from '@/global/init'
 import { playSound } from '@/global/sounds'
 import { app } from '@/global/states'
 import { heartEmitter } from '@/particles/heartParticles'
-import { Vector3 } from 'three'
-import { CSS2DObject } from 'three/examples/jsm/renderers/CSS2DRenderer'
 import { sleep } from './sleep'
 
 const npcNameQuery = ecs.with('npcName')

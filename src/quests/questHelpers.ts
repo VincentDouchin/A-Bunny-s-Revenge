@@ -2,11 +2,11 @@ import type { Quest2 } from '@/constants/quests'
 import type { Actor, Entity, QueryEntity } from '@/global/entity'
 import type { app } from '@/global/states'
 import type { AppStates, Plugin } from '@/lib/app'
+import { bounceOut, circIn } from 'popmotion'
+import { CylinderGeometry, Group, Mesh, MeshBasicMaterial, SphereGeometry, Vector3 } from 'three'
 import { toastEvent } from '@/global/events'
 import { ecs, levelsData, questManager, tweens } from '@/global/init'
 import { entries } from '@/utils/mapFunctions'
-import { bounceOut, circIn } from 'popmotion'
-import { CylinderGeometry, Group, Mesh, MeshBasicMaterial, SphereGeometry, Vector3 } from 'three'
 
 const actorsQuery = ecs.with('actor', 'position', 'rotation')
 

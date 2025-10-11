@@ -1,19 +1,7 @@
 {
+	"extends": "./tsconfig.base.json",
 	"compilerOptions": {
-		"target": "ESNext",
-		"jsx": "react-jsx",
-		"jsxImportSource": "solid-js",
-		"lib": ["ESNext", "DOM", "DOM.Iterable"],
-		"useDefineForClassFields": true,
-		"experimentalDecorators": true,
-		"module": "ESNext",
-		/* Bundler mode */
-		"moduleResolution": "Node",
-		"paths": {
-			"@/*": ["./src/*"],
-			"@assets/*": ["./assets/*"]
-		},
-		"resolveJsonModule": true,
+
 		"types": [
 			"vite-plugin-solid-svg/types-component-solid",
 			"vite/client",
@@ -22,18 +10,7 @@
 			"@total-typescript/ts-reset",
 			"./src/types/three.meshline.d.ts"
 
-		],
-		"allowImportingTsExtensions": true,
-		/* Linting */
-		"strict": true,
-		"noFallthroughCasesInSwitch": true,
-		"noUnusedLocals": true,
-		"noUnusedParameters": true,
-		"noEmit": true,
-		"esModuleInterop": true,
-		"isolatedModules": true,
-		"skipLibCheck": true
+		]
 	},
-
 	"include": ["src", "assets", "vite"]
 }

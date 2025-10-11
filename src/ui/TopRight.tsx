@@ -1,5 +1,5 @@
-import { MiniMapUi } from '@/states/dungeon/MinimapUi'
 import { css } from 'solid-styled'
+import { MiniMapUi } from '@/states/dungeon/MinimapUi'
 import { StateUi } from './components/StateUi'
 import { Toaster } from './Toaster'
 

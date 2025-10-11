@@ -1,13 +1,14 @@
 import type { JSXElement } from 'solid-js'
 import type { Atom } from 'solid-use/atom'
-import { ui } from '@/global/init'
+import type { MenuDir } from './Menu'
 import { createEffect, createMemo, For, Show } from 'solid-js'
 import { createArray } from 'solid-proxies'
 import { css } from 'solid-styled'
 import atom from 'solid-use/atom'
+import { ui } from '@/global/init'
 import { InputIcon } from '../InputIcon'
 import { useGame } from '../store'
-import { type MenuDir, menuItem } from './Menu'
+import { menuItem } from './Menu'
 
 menuItem
 interface TabsProps<T extends string> {

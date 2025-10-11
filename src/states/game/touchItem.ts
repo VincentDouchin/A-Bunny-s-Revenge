@@ -1,9 +1,10 @@
 import type { Entity } from '@/global/entity'
 import type { app } from '@/global/states'
-import { ecs } from '@/global/init'
-import { type Plugin, runIf } from '@/lib/app'
+import type { Plugin } from '@/lib/app'
 import { Vector3 } from 'three'
 import { CSS2DObject } from 'three/examples/jsm/renderers/CSS2DRenderer'
+import { ecs } from '@/global/init'
+import { runIf } from '@/lib/app'
 import { getIntersections } from './sensor'
 
 const interactableQuery = ecs.with('interactable')

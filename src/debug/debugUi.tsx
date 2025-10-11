@@ -16,7 +16,6 @@ import { weaponBundle } from '@/states/game/weapon'
 import { entries, objectKeys } from '@/utils/mapFunctions'
 import { useLocalStorage } from '@/utils/useLocalStorage'
 import { debugOptions } from './debugState'
-import { LevelEditor } from './LevelEditor'
 import { SaveEditor } from './saveEditor'
 import { SoundUi } from './SoundUi'
 import { ColorCorrection, ToonEditor } from './toonEditor'
@@ -311,7 +310,6 @@ export const DebugUi = () => {
 					</div>
 				</div>
 			</Show>
-			<LevelEditor />
 			<SaveEditor />
 			<SoundUi />
 		</div>

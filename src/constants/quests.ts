@@ -1,5 +1,5 @@
-import { AssetNames } from '@/global/entity'
 import type { Item } from './items'
+import type { AssetNames } from '@/global/entity'
 import type { SaveData } from '@/global/save'
 import type { App, AppStates, SubscriberSystem, TransitionSystem, UpdateSystem } from '@/lib/app'
 import { Event } from 'eventery'

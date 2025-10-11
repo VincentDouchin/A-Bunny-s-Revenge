@@ -1,9 +1,10 @@
-import type { Entity } from '@/global/entity'
+import type { Animations } from '@assets/animations'
 import type { Material } from 'three'
+import type { Entity } from '@/global/entity'
+import { Mesh, Vector3 } from 'three'
 import { Animator } from '@/global/animator'
 import { assets, ecs, tweens } from '@/global/init'
 import { getRandom, objectKeys } from '@/utils/mapFunctions'
-import { Mesh, Vector3 } from 'three'
 
 export const addExploder = (parent: Entity, mat: Material, scale: number) => {
 	const model = assets.models.explode.scene.clone()

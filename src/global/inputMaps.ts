@@ -1,5 +1,5 @@
-import type { InputMap } from '@/lib/inputs'
 import type { Entity } from './entity'
+import type { InputMap } from '@/lib/inputs'
 import { GAMEPAD_AXIS, GAMEPAD_BUTTON, MOUSE_BUTTONS, MOUSE_WHEEL } from '@/lib/inputs'
 import { inputManager } from './init'
 

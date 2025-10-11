@@ -1,11 +1,11 @@
 import type { JSX } from 'solid-js'
 import type { Atom } from 'solid-use/atom'
-import { settings } from '@/global/init'
 import Cross from '@assets/icons/xmark-solid.svg'
 import { createMemo, onCleanup, Show } from 'solid-js'
 import { css } from 'solid-styled'
 import { Transition } from 'solid-transition-group'
 import atom from 'solid-use/atom'
+import { settings } from '@/global/init'
 import { useGame } from '../store'
 import { GoldContainer } from './styledComponents'
 

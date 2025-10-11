@@ -240,26 +240,43 @@ input[type='range']::-webkit-slider-thumb {
 	width: 150px;
 }
 
+@keyframes spin{
+	0% {
+    transform: rotate(0deg);
+	}
+	100% {
+		transform: rotate(1turn);
+	}
+}
 /* ! LOADER */
 .loader {
-	width: 30vw;
-	height: 10vh;
-	background: white;
-	z-index: 100;
+	background: black;
 	position: absolute;
-	outline: solid 1rem black;
-	--loaded: 0;
-	border-radius: 2vh;
-	padding: 0.5rem;
+	width: 100vw;
+	height: 100vh;
+	display: grid;
+	place-items: center;
+	margin: 0 10vh;
 }
 .loader::before {
-	content: '';
-	width: var(--loaded);
-	transition: width ease 0.2s;
-	height: 100%;
-	background: repeating-linear-gradient(90deg, black 0rem, black 2rem, white 2rem, white 3rem);
-	display: block;
-	z-index: 101;
+	content: "";
+	margin: auto;
+	width: 20vw;
+	aspect-ratio: 1;
+	background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" fill="white" viewBox="0 0 512 512"><!--!Font Awesome Free v7.0.1 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free Copyright 2025 Fonticons, Inc.--><path d="M208 48a48 48 0 1 1 96 0 48 48 0 1 1 -96 0zm0 416a48 48 0 1 1 96 0 48 48 0 1 1 -96 0zM48 208a48 48 0 1 1 0 96 48 48 0 1 1 0-96zm368 48a48 48 0 1 1 96 0 48 48 0 1 1 -96 0zM75 369.1A48 48 0 1 1 142.9 437 48 48 0 1 1 75 369.1zM75 75A48 48 0 1 1 142.9 142.9 48 48 0 1 1 75 75zM437 369.1A48 48 0 1 1 369.1 437 48 48 0 1 1 437 369.1z"/></svg>');
+    animation-name: spin;
+    animation-direction: normal;
+    animation-duration:  2s;
+    animation-iteration-count: infinite;
+    animation-timing-function: steps(8);
+	z-index: 100;
+}
+.loader::after {
+	background: black;
+	content: 'We are loading the assets, please wait a minute...';
+	color: white;
+	font-size: 10vh;
+
 }
 
 .landscape-warning {

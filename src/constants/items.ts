@@ -1,4 +1,4 @@
-import { AssetNames } from '@/global/entity'
+import type { AssetNames } from '@/global/entity'
 import { assets, save } from '@/global/init'
 import { modifiers } from '@/global/modifiers'
 import { entries, shuffle } from '@/utils/mapFunctions'

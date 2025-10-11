@@ -1,10 +1,12 @@
-import type { EnemyDef } from '@/states/dungeon/enemies'
+import type { Animations } from '@assets/animations'
 import type { Item } from './items'
-import {  AssetNames, Entity,  stateBundle, States } from '@/global/entity'
+import type { AssetNames, Entity } from '@/global/entity'
+import type { EnemyDef } from '@/states/dungeon/enemies'
+import { Vector3 } from 'three'
+import { stateBundle, States } from '@/global/entity'
 import { Timer } from '@/lib/timer'
 import { enemyBundle } from '@/states/dungeon/enemies'
 import { between } from '@/utils/mapFunctions'
-import { Vector3 } from 'three'
 import { Rarity } from './items'
 
 export interface Drop extends Item {

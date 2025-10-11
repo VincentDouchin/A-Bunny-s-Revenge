@@ -1,6 +1,6 @@
-import { assets } from '@/global/init'
 import { MeshBasicMaterial, PlaneGeometry } from 'three'
 import { Bezier, ColorRange, ConeEmitter, ConstantValue, IntervalValue, ParticleSystem, PiecewiseBezier, RandomQuatGenerator, RenderMode, SizeOverLife } from 'three.quarks'
+import { assets } from '@/global/init'
 import { colorToVec4 } from './honeySplatParticles'
 
 const geo = new PlaneGeometry(3, 3)

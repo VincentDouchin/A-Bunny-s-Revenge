@@ -1,7 +1,7 @@
 import type { AppStates } from './app'
-import { app } from '@/global/states'
 import { Event } from 'eventery'
 import atom from 'solid-use/atom'
+import { app } from '@/global/states'
 
 export const stateSignal = (state: AppStates<typeof app>) => {
 	const signal = atom(app.isEnabled(state))

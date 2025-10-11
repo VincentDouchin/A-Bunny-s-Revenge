@@ -1,13 +1,15 @@
+import type { Query, With } from 'miniplex'
 import type { QuestStep } from '@/constants/quests'
 import type { Entity } from '@/global/entity'
 import type { Room } from '@/states/dungeon/generateDungeon'
-import type { Query, With } from 'miniplex'
+import { RigidBodyType } from '@dimforge/rapier3d-compat'
+import { Vector3 } from 'three'
 import { SootSprite } from '@/constants/enemies'
 import { Faction, Interactable } from '@/global/entity'
 import { cookedMealEvent, harvestCropEvent, showTutorialEvent } from '@/global/events'
 import { assets, ecs, inputManager, levelsData, questManager, save } from '@/global/init'
 import { app } from '@/global/states'
-import { modelColliderBundle } from '@/lib/models'
+import { modelColliderBundle } from '@/lib/colliders'
 import { NavGrid } from '@/lib/navGrid'
 import { RoomType } from '@/states/dungeon/generateDungeon'
 import { cropBundle } from '@/states/farm/farming'
@@ -17,8 +19,6 @@ import { displayKeyItem } from '@/ui/KeyItem'
 import { TutorialWindow } from '@/ui/Tutorial'
 import { addItemToPlayer, enterHouse, leaveHouse, movePlayerTo, sleepPlayer, speaker, unlockRecipe } from '@/utils/dialogHelpers'
 import { sleep } from '@/utils/sleep'
-import { RigidBodyType } from '@dimforge/rapier3d-compat'
-import { Vector3 } from 'three'
 import { addActors, isInMap } from './questHelpers'
 
 const enemiesQuery = ecs.with('faction').where(e => e.faction === Faction.Enemy)
@@ -84,7 +84,7 @@ introQuest.untilIsComplete('2_find_pot', () => {
 })
 
 const introQuestDialogs = {
-	async *PlayerIntro1(player: With<Entity, 'state'>) {
+	async* PlayerIntro1(player: With<Entity, 'state'>) {
 		speaker('Player')
 		app.enable('cutscene')
 		await sleepPlayer()
@@ -104,7 +104,7 @@ const introQuestDialogs = {
 		introQuest.unlock()
 	},
 
-	async *pickupBasket(basket: Entity) {
+	async* pickupBasket(basket: Entity) {
 		speaker('Player')
 		app.enable('cutscene')
 		yield 'So that\'s where I left my #BLUE#basket#BLUE!'
@@ -114,7 +114,7 @@ const introQuestDialogs = {
 		yield 'Now I can go back #GREEN#Home#GREEN# and get started on dinner with Grandma!'
 		app.disable('cutscene')
 	},
-	async *PlayerIntro2() {
+	async* PlayerIntro2() {
 		speaker('Player')
 		app.enable('cutscene')
 		yield 'Finally home!'
@@ -122,7 +122,7 @@ const introQuestDialogs = {
 		app.disable('cutscene')
 		save.started = true
 	},
-	async *findCauldron(cratesToOpenQuery: Query<any>) {
+	async* findCauldron(cratesToOpenQuery: Query<any>) {
 		speaker('Player')
 		app.enable('cutscene')
 		yield 'Here it is! The Cooking Pot!'
@@ -139,7 +139,7 @@ const introQuestDialogs = {
 
 		app.disable('cutscene')
 	},
-	*openCrate(index: number) {
+	* openCrate(index: number) {
 		speaker('Player')
 		app.enable('cutscene')
 		yield [
@@ -152,7 +152,7 @@ const introQuestDialogs = {
 		][index]
 		app.disable('cutscene')
 	},
-	async *GrandmaIntro() {
+	async* GrandmaIntro() {
 		yield await enterHouse()
 		speaker('Player')
 		yield 'Grandma, I`m home!'
@@ -172,7 +172,7 @@ const introQuestDialogs = {
 		leaveHouse()
 		introQuest.complete('1_see_grandma')
 	},
-	*GrandmaIntro2() {
+	* GrandmaIntro2() {
 		speaker('Player')
 		yield 'I got it, Grandma!'
 		yield 'I also found #BLUE#this#BLUE# !'
@@ -205,11 +205,11 @@ const introQuestDialogs = {
 		introQuest.complete('3_bring_pot_to_grandma')
 		leaveHouse()
 	},
-	*ItsTimeToCook() {
+	* ItsTimeToCook() {
 		speaker('Player')
 		yield 'Now that I harvested the carrots I can cook something for the festival!'
 	},
-	*turnAwayFromDoor(player: With<Entity, 'position' | 'state'>, callback: () => void) {
+	* turnAwayFromDoor(player: With<Entity, 'position' | 'state'>, callback: () => void) {
 		app.enable('cutscene')
 		stopPlayer()
 		speaker('Player')
@@ -219,7 +219,7 @@ const introQuestDialogs = {
 			callback()
 		})
 	},
-	*dontEnterCellar() {
+	* dontEnterCellar() {
 		speaker('Player')
 		yield 'I shouldn\'t enter the cellar without a weapon, #GOLD#Grandma#GOLD# told me it was infested with Dust Motes'
 	},

@@ -1,25 +1,26 @@
+import type { Vec2, Vector4Like } from 'three'
 import type { EntityData, Level, LevelType } from '@/debug/LevelEditor'
 import type { InstanceHandle } from '@/global/assetLoaders'
 import type { Entity } from '@/global/entity'
 import type { app } from '@/global/states'
 import type { AppStates, UpdateSystem } from '@/lib/app'
-import type { Vec2, Vector4Like } from 'three'
-import { getModel, props } from '@/debug/props'
-import { canvasToArray, canvasToGrid, instanceMesh } from '@/global/assetLoaders'
-import { assets, ecs, levelsData, time } from '@/global/init'
-import { collisionGroups } from '@/lib/collisionGroups'
-import { inMap } from '@/lib/hierarchy'
-import { getBoundingBox, getSecondaryColliders, getSize } from '@/lib/models'
-import { GroundMaterial, WaterMaterial } from '@/shaders/materials'
-import { getScreenBuffer, scaleCanvas } from '@/utils/buffer'
 import { ActiveEvents, ColliderDesc, RigidBodyDesc, RigidBodyType } from '@dimforge/rapier3d-compat'
 import FastNoiseLite from 'fastnoise-lite'
 import { CanvasTexture, Euler, Group, Mesh, MeshToonMaterial, PlaneGeometry, Quaternion, Vector2, Vector3 } from 'three'
+import { getModel, props } from '@/debug/props'
+import { canvasToArray, canvasToGrid, instanceMesh } from '@/global/assetLoaders'
+import { assets, ecs, levelsData, time } from '@/global/init'
+import { getBoundingBox, getSecondaryColliders } from '@/lib/colliders'
+import { collisionGroups } from '@/lib/collisionGroups'
+import { inMap } from '@/lib/hierarchy'
+import { getSize } from '@/lib/models'
+import { GroundMaterial, WaterMaterial } from '@/shaders/materials'
+import { getScreenBuffer, scaleCanvas } from '@/utils/buffer'
 import { encounters } from '../dungeon/encounters'
 import { RoomType } from '../dungeon/generateDungeon'
 import { spawnLight } from './spawnLights'
 
-const SCALE = 10
+export const SCALE = 10
 export const HEIGHT = 240
 
 const spawnFromCanvas = (level: Level, image: HTMLCanvasElement, scale: number, fn: (val: Vector4Like, x: number, y: number, z: number) => void) => {
@@ -243,12 +244,12 @@ export const spawnGroundAndTrees = (level: Level, dungeonLevel?: number) => {
 	const mat = cellar
 		? getWoodFlooring(level.size)
 		: new GroundMaterial({}).setUniforms({
-			level: levelTexture,
-			rock: rockTexture,
-			size: new Vector2(level.size.x, level.size.y),
-			ground: assets.textures.Dirt4_Dark,
-			rock_texture: assets.textures.Rocks1_Light,
-		})
+				level: levelTexture,
+				rock: rockTexture,
+				size: new Vector2(level.size.x, level.size.y),
+				ground: assets.textures.Dirt4_Dark,
+				rock_texture: assets.textures.Rocks1_Light,
+			})
 	const groundMesh = new Mesh(
 		new PlaneGeometry(level.size.x, level.size.y, Math.floor(level.size.x * canvasScale) - 1, Math.floor(level.size.y * canvasScale) - 1),
 		mat,

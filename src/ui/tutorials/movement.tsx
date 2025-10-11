@@ -1,8 +1,8 @@
 import type { useGame } from '../store'
-import { settings } from '@/global/init'
-import { playerInputMap } from '@/global/inputMaps'
 import { For, Show } from 'solid-js'
 import { css } from 'solid-styled'
+import { settings } from '@/global/init'
+import { playerInputMap } from '@/global/inputMaps'
 import { OutlineText, SwitchButtons } from '../components/styledComponents'
 import { InputIcon } from '../InputIcon'
 

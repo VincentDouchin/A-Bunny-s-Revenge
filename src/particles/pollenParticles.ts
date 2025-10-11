@@ -1,5 +1,5 @@
-import type { Entity } from '@/global/entity'
 import type { ColorRepresentation } from 'three'
+import type { Entity } from '@/global/entity'
 import { between } from 'randomish'
 import { CircleGeometry, Color, MeshPhongMaterial, Vector3 } from 'three'
 import { Bezier, ColorOverLife, ColorRange, ConstantValue, Gradient, IntervalValue, ParticleSystem, PiecewiseBezier, RenderMode, SizeOverLife, SphereEmitter } from 'three.quarks'

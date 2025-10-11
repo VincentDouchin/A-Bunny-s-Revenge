@@ -1,6 +1,7 @@
-import { type Entity, Faction } from '@/global/entity'
-import { ecs } from '@/global/init'
+import type { Entity } from '@/global/entity'
 import { CSS2DObject } from 'three/examples/jsm/renderers/CSS2DRenderer'
+import { Faction } from '@/global/entity'
+import { ecs } from '@/global/init'
 
 const playerQuery = ecs.with('player', 'position', 'playerControls')
 const lockedOnQuery = ecs.with('lockedOn')

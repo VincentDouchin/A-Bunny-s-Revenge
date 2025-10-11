@@ -1,4 +1,4 @@
-import { AssetNames } from '@/global/entity'
+import type { AssetNames } from '@/global/entity'
 import { playVoice } from '@/global/sounds'
 
 export const soundDialog = (voice: AssetNames['voices'], dialog: string = '') => {

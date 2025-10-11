@@ -1,16 +1,16 @@
 import type { Accessor } from 'solid-js'
-import { itemsData } from '@/constants/items'
-import { assets, coroutines, save, ui } from '@/global/init'
-import { sharedSignal } from '@/lib/signal'
-import { thumbnailRenderer } from '@/lib/thumbnailRenderer'
-import { OutlineText } from '@/ui/components/styledComponents'
-import { useGame } from '@/ui/store'
-import { range } from '@/utils/mapFunctions'
 import Drop from '@assets/icons/droplet-solid.svg'
 import { createEffect, createMemo, For, onCleanup, onMount, Show } from 'solid-js'
 import { css } from 'solid-styled'
 import { Transition } from 'solid-transition-group'
 import atom from 'solid-use/atom'
+import { itemsData } from '@/constants/items'
+import { assets, save, ui } from '@/global/init'
+import { sharedSignal } from '@/lib/signal'
+import { getThumbnailRenderer } from '@/lib/thumbnailRenderer'
+import { OutlineText } from '@/ui/components/styledComponents'
+import { useGame } from '@/ui/store'
+import { range } from '@/utils/mapFunctions'
 import { cauldronQuery } from '../farm/CauldronMinigameUi'
 import { ovenQuery } from '../farm/OvenMinigameUi'
 
@@ -107,7 +107,7 @@ export const MealAmount = (props: { amount: Accessor<number>, size?: 'small' | '
 	)
 }
 export const extra = sharedSignal(0)
-const acornRenderer = thumbnailRenderer(64)
+const acornRenderer = getThumbnailRenderer(64)
 export const amountEaten = () => save.modifiers.reduce((acc, v) => acc + (itemsData[v]?.meal ?? 0), 0)
 export const HealthUi = () => {
 	const context = useGame()
@@ -209,20 +209,10 @@ export const HealthUi = () => {
 				const healthDisplay = createMemo(() => `${current()} / ${max()}`)
 				const model = assets.items.acorn.model.clone()
 				model.rotateY(Math.PI / 2)
-				const { element, setSpinAmount } = acornRenderer.spin(model)
+				const clear = acornRenderer.spin(model)
 				const acorns = ui.sync(() => save.acorns)
-				const clear = coroutines.add(function* () {
-					let oldAmount = save.acorns
-					while (true) {
-						yield
-						setSpinAmount((spin) => {
-							return Math.max(0, spin + 0.03 * (save.acorns - oldAmount) - 0.0005)
-						})
-						oldAmount = save.acorns
-					}
-				})
-				const wateringCan = ui.sync(() => player().wateringCan)
 				onCleanup(clear)
+				const wateringCan = ui.sync(() => player().wateringCan)
 				const visible = atom(false)
 				onMount(() => setTimeout(() => visible(true), 100))
 				const isVisible = createMemo(() => ovenQuery().length === 0 && cauldronQuery().length === 0 && visible())
@@ -241,7 +231,7 @@ export const HealthUi = () => {
 								</div>
 								<MealAmount amount={eaten} extra={extraVal} />
 								<div class="acorn">
-									{element}
+									<img src={assets.items.acorn.img} alt="" />
 									<OutlineText>{acorns()}</OutlineText>
 								</div>
 								<Show when={wateringCan()}>

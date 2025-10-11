@@ -1,6 +1,6 @@
-import { Direction } from '@/lib/directions'
 import { easeOut } from 'popmotion'
 import { OrthographicCamera, PerspectiveCamera, Vector3 } from 'three'
+import { Direction } from '@/lib/directions'
 import { params } from './context'
 import { RenderGroup } from './entity'
 import { ecs, levelsData, settings, tweens } from './init'

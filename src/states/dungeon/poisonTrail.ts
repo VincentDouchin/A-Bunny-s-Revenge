@@ -1,11 +1,11 @@
-import { ecs, time } from '@/global/init'
-import { inMap } from '@/lib/hierarchy'
-import { Timer } from '@/lib/timer'
-import { colorToVec4 } from '@/particles/honeySplatParticles'
 import { easeOut } from 'popmotion'
 import { between } from 'randomish'
 import { CircleGeometry, CylinderGeometry, Mesh, MeshBasicMaterial } from 'three'
 import { Bezier, CircleEmitter, ColorRange, ConstantValue, IntervalValue, ParticleSystem, PiecewiseBezier, RandomQuatGenerator, RenderMode, SizeOverLife } from 'three.quarks'
+import { ecs, time } from '@/global/init'
+import { inMap } from '@/lib/hierarchy'
+import { Timer } from '@/lib/timer'
+import { colorToVec4 } from '@/particles/honeySplatParticles'
 
 export const poisonBubbles = (looping = true, emission = 3) => {
 	const system = new ParticleSystem({

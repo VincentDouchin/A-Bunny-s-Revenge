@@ -1,9 +1,9 @@
 import type { ComponentsOfType } from '@/global/entity'
 import type { Timer } from '@/lib/timer'
-import { ui } from '@/global/init'
-import { useGame } from '@/ui/store'
 import { For, Portal, Show } from 'solid-js/web'
 import { css } from 'solid-styled'
+import { ui } from '@/global/init'
+import { useGame } from '@/ui/store'
 
 export const SneezeUi = () => {
 	const context = useGame()!

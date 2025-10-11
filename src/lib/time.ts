@@ -1,7 +1,7 @@
-import { save } from '@/global/init'
 import { easeInOut } from 'popmotion'
 import { Clock } from 'three'
 import { clamp } from 'three/src/math/MathUtils'
+import { save } from '@/global/init'
 
 export class Time extends Clock {
 	delta = 0

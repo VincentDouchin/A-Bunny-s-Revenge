@@ -1,6 +1,6 @@
+import type { AssetNames, farmDoors } from './entity'
 import type { Direction } from '@/lib/directions'
 import type { Room } from '@/states/dungeon/generateDungeon'
-import type { AssetNames, farmDoors } from './entity'
 import { AppBuilder } from '@/lib/app'
 
 export const app = new AppBuilder()

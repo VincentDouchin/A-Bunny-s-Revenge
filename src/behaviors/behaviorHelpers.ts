@@ -1,11 +1,11 @@
-import type { Entity } from '@/global/entity'
 import type { With } from 'miniplex'
+import type { Entity } from '@/global/entity'
+import { QueryFilterFlags } from '@dimforge/rapier3d-compat'
+import { Vector3 } from 'three'
 import { params } from '@/global/context'
 import { ecs, inputManager, settings, time } from '@/global/init'
 import { app } from '@/global/states'
 import { action } from '@/lib/behaviors'
-import { QueryFilterFlags } from '@dimforge/rapier3d-compat'
-import { Vector3 } from 'three'
 
 export const getMovementForce = ({ movementForce, speed, targetMovementForce }: With<Entity, 'movementForce' | 'speed'>) => {
 	const targetForce = movementForce.clone().multiplyScalar(speed.value * params.speedUp * time.delta / 1000)
@@ -57,7 +57,7 @@ export const getPlayerRotation = (e: With<Entity, 'position' | 'playerControls'>
 	}
 	return force
 }
-export const applyMove = <E extends With<Entity, 'body'>, C >(fn: (e: E, c: C) => Vector3) => action((entity: E, c: C) => {
+export const applyMove = <E extends With<Entity, 'body'>, C>(fn: (e: E, c: C) => Vector3) => action((entity: E, c: C) => {
 	if (app.isEnabled('paused')) return
 	const { body, controller, collider } = entity
 	const force = fn(entity, c)

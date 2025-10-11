@@ -1,7 +1,7 @@
 import type { BufferGeometry, Mesh, MeshPhongMaterial } from 'three'
+import { Vector3 } from 'three'
 import { ecs, tweens } from '@/global/init'
 import { shakenLeaves } from '@/particles/bushShaken'
-import { Vector3 } from 'three'
 import { itemBundle } from '../game/items'
 import { getIntersections } from '../game/sensor'
 

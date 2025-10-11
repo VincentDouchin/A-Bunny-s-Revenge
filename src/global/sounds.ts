@@ -3,7 +3,7 @@ import { getRandom, objectKeys } from '@/utils/mapFunctions'
 import { useLocalStorage } from '@/utils/useLocalStorage'
 import { assets, dayTime, musicManager, settings } from './init'
 
-export type sounds = Partial<Record<string, Partial<Record<string,{volume:number}>>>>
+export type sounds = Partial<Record<string, Partial<Record<string, { volume: number }>>>>
 export type soundAssets = { [K in { [k in keyof typeof assets]: (typeof assets)[k] extends Record<string, Howl> ? k : never }[keyof typeof assets]]: (typeof assets)[K] }
 export const [localSoundData, setLocalSoundData] = useLocalStorage<sounds>('soundsData', soundsData as sounds)
 

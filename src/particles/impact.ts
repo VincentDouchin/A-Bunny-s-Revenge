@@ -1,6 +1,6 @@
-import { assets } from '@/global/init'
 import { DoubleSide, MeshStandardMaterial, PlaneGeometry } from 'three'
 import { Bezier, ConstantValue, IntervalValue, ParticleSystem, PiecewiseBezier, RandomQuatGenerator, RenderMode, SizeOverLife, SphereEmitter } from 'three.quarks'
+import { assets } from '@/global/init'
 
 const geo = new PlaneGeometry(10, 10)
 const mat = new MeshStandardMaterial({

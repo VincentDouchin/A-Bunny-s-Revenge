@@ -1,7 +1,7 @@
 import type { Texture, WebGLRenderTarget } from 'three'
+import { Color, Uniform, Vector2 } from 'three'
 import kuwahara from '@/shaders/glsl/lib/kuwahara.glsl?raw'
 import sobel from '@/shaders/glsl/lib/sobel.glsl?raw'
-import { Color, Uniform, Vector2 } from 'three'
 
 export const outlineShader = (target: WebGLRenderTarget, outlineTarget: WebGLRenderTarget) => ({
 	name: 'outlineShader',

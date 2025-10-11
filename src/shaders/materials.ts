@@ -1,9 +1,9 @@
+import { Color, MeshPhongMaterial, Vector2, Vector3 } from 'three'
 import { addUniform, addVarying, extendMaterial, importLib, insertAfter, insertBefore, MaterialExtension, override, remove, replace, replaceInclude, unpack } from '@/lib/materialExtension'
 import noise from '@/shaders/glsl/lib/cnoise.glsl?raw'
 import { gradient } from '@/shaders/glsl/lib/generateGradient'
 import water from '@/shaders/glsl/water.glsl?raw'
 import { useLocalStorage } from '@/utils/useLocalStorage'
-import { Color, MeshPhongMaterial, Vector2, Vector3 } from 'three'
 
 const toonExtension = new MaterialExtension({}).frag(
 	override('vec4 diffuseColor ', 'vec4(1.,1.,1.,opacity)'),
@@ -120,7 +120,7 @@ export const treeExtension = new MaterialExtension({ playerZ: 0 })
 	`),
 	)
 
-export const vegetationExtension = new MaterialExtension({ pos: new Vector2(), time: 0, height: 1, shake: 0 })
+export const vegetationExtension = new MaterialExtension({ pos: new Vector2(), time: 0, height: 15, shake: 0 })
 
 	.vert(
 		addUniform('time', 'float'),
@@ -166,7 +166,7 @@ export const waterExtension = new MaterialExtension({
 		addUniform('foam_color', 'vec3'),
 		addUniform('size', 'vec2'),
 		replace('gl_FragColor = vec4(outgoingLight2,color.a);', /* glsl */`
-			if (sampledDiffuseColor.r == 0.){
+			if (sampledDiffuseColor.b == 0.){
 				discard;
 			}
 			vec3 water_color = water(vUv*size/8., vec3(0,1,0),time,water_color,water_color - vec3(0.1) ,foam_color) * outgoingLight;

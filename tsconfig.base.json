@@ -1,0 +1,33 @@
+{
+	"compilerOptions": {
+		"target": "ESNext",
+		"jsx": "react-jsx",
+		"jsxImportSource": "solid-js",
+		"lib": ["ESNext", "DOM", "DOM.Iterable"],
+		"useDefineForClassFields": true,
+		"experimentalDecorators": true,
+		"baseUrl": "./",
+		"module": "ESNext",
+		/* Bundler mode */
+		"moduleResolution": "Node",
+		"paths": {
+			"@/*": ["./src/*"],
+			"@assets/*": ["./assets/*"]
+		},
+		"resolveJsonModule": true,
+		"types": [
+			"new-javascript"
+		],
+		"allowImportingTsExtensions": true,
+		/* Linting */
+		"strict": true,
+		"noFallthroughCasesInSwitch": true,
+		"noUnusedLocals": true,
+		"noUnusedParameters": true,
+		"noEmit": true,
+		"esModuleInterop": true,
+		"isolatedModules": true,
+		"skipLibCheck": true
+	}
+
+}

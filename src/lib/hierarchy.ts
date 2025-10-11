@@ -1,8 +1,9 @@
-import type { app } from '@/global/states'
 import type { With } from 'miniplex'
 import type { ComponentsOfType, Entity } from '../global/entity'
+import type { Plugin } from './app'
+import type { app } from '@/global/states'
 import { ecs } from '../global/init'
-import { type Plugin, set } from './app'
+import { set } from './app'
 
 const mapQuery = ecs.with('map')
 export const inMap = () => {

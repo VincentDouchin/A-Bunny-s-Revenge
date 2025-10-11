@@ -1,12 +1,13 @@
-import { type QueryEntity, States, states } from '@/global/entity'
+import type { QueryEntity } from '@/global/entity'
+import { circOut } from 'popmotion'
+import { between } from 'randomish'
+import { Mesh, Quaternion, Vector3 } from 'three'
+import { States, states } from '@/global/entity'
 import { ecs, time, tweens } from '@/global/init'
 import { playSound } from '@/global/sounds'
 import { action, condition, createBehaviorTree, enteringState, inState, inverter, parallel, runNodes, selector, sequence, setState, wait, withContext } from '@/lib/behaviors'
 import { fishParticles } from '@/particles/fishParticles'
 import { stopFishing } from '@/states/farm/fishing'
-import { circOut } from 'popmotion'
-import { between } from 'randomish'
-import { Mesh, Quaternion, Vector3 } from 'three'
 
 const fishQuery = ecs.with('fish', 'group', 'rotation', 'position', 'targetRotation', ...states(States.fish), 'state')
 const playerQuery = ecs.with('playerControls', 'player')

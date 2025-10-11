@@ -1,7 +1,7 @@
+import { Vector3 } from 'three'
 import { ecs, inputManager } from '@/global/init'
 import { app } from '@/global/states'
 import { spawnFootstep } from '@/particles/footsteps'
-import { Vector3 } from 'three'
 
 const movementQuery = ecs.with('body', 'rotation', 'movementForce', 'speed', 'targetMovementForce')
 const playerQuery = movementQuery.with('playerControls', 'position', 'state', 'lastStep', 'playerAnimator', 'modifiers', 'model', 'worldPosition')

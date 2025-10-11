@@ -1,6 +1,6 @@
-import { settings } from '@/global/init'
 import { createSignal, Show } from 'solid-js'
 import { Transition } from 'solid-transition-group'
+import { settings } from '@/global/init'
 
 const requestFullScreen = () => {
 	document.documentElement.requestFullscreen()

@@ -1,3 +1,7 @@
+import { ColliderDesc, RigidBodyDesc } from '@dimforge/rapier3d-compat'
+import { createBackIn, reverseEasing } from 'popmotion'
+import { Vector3 } from 'three'
+import { clone } from 'three/examples/jsm/utils/SkeletonUtils'
 import { chestLoot } from '@/constants/chestLoot'
 import { Animator } from '@/global/animator'
 import { assets, ecs, tweens } from '@/global/init'
@@ -5,10 +9,6 @@ import { playSound } from '@/global/sounds'
 import { inMap } from '@/lib/hierarchy'
 import { chestAppearing } from '@/particles/chestAppearing'
 import { sleep } from '@/utils/sleep'
-import { ColliderDesc, RigidBodyDesc } from '@dimforge/rapier3d-compat'
-import { createBackIn, reverseEasing } from 'popmotion'
-import { Vector3 } from 'three'
-import { clone } from 'three/examples/jsm/utils/SkeletonUtils'
 import { dropBundle, lootPool } from './lootPool'
 
 export const lootPlayerQuery = ecs.with('player', 'lootQuantity', 'lootChance')

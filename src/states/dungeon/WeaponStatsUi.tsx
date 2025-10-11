@@ -1,5 +1,5 @@
+import type { AssetNames } from '@/global/entity'
 import { weaponsData } from '@/constants/weapons'
-import { AssetNames } from '@/global/entity'
 
 export const WeaponStatsUi = ({ name }: { name: AssetNames['weapons'] }) => {
 	const data = weaponsData[name]

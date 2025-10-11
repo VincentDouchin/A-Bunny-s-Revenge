@@ -5,7 +5,7 @@ import draco3d from 'draco3dgltf'
 import { AssetTransformer } from './assetPipeline'
 
 export class ExtractAnimations extends AssetTransformer {
-	path = ['assets', 'animations.d.ts']
+	path = ['assets', 'animations.ts']
 	extensions = ['glb']
 	animations = new Map<string, string[]>()
 	io: NodeIO | null = null
@@ -48,7 +48,7 @@ export class ExtractAnimations extends AssetTransformer {
 	generate() {
 		const sortedAnimations = Array.from(this.animations.entries()).sort(([a], [b]) => a.localeCompare(b))
 		let result = `
-interface Animations {`
+export interface Animations {`
 		for (const [name, animations] of sortedAnimations) {
 			if (animations.length > 0) {
 				result += `\n

@@ -1,6 +1,6 @@
 import type { AnimationAction, AnimationBlendMode, AnimationClip, Object3D, Object3DEventMap } from 'three'
-import { entries } from '@/utils/mapFunctions'
 import { AnimationMixer, LoopOnce } from 'three'
+import { entries } from '@/utils/mapFunctions'
 
 interface playOptions {
 	timeScale?: number

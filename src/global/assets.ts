@@ -3,12 +3,11 @@ import type { ColorRepresentation, Material, Object3D, Side, TextureFilter } fro
 
 import type { GLTF } from 'three/examples/jsm/loaders/GLTFLoader'
 import type { Constructor } from 'type-fest'
-import type { thumbnailRenderer } from '@/lib/thumbnailRenderer'
+import type { ThumbnailRenderer } from '@/lib/thumbnailRenderer'
 import type { StaticAssetPath } from '@/static-assets'
-import assetManifest from '@assets/assetManifest.json'
 import { Howl } from 'howler'
 import { DoubleSide, FrontSide, Mesh, MeshBasicMaterial, MeshPhysicalMaterial, MeshStandardMaterial, NearestFilter, RepeatWrapping, SRGBColorSpace, Texture } from 'three'
-import { getAssetPathsLoader, loadAudio, loaderProgress, loadGLB, loadImage, textureLoader } from '@/global/assetLoaders'
+import { getAssetPathsLoader, loadAudio, loadGLB, loadImage, textureLoader } from '@/global/assetLoaders'
 import { CharacterMaterial, GardenPlotMaterial, GrassMaterial, ToonMaterial, TreeMaterial, VineGateMaterial } from '@/shaders/materials'
 import { getScreenBuffer } from '@/utils/buffer'
 import { asyncMap, asyncMapValues, entries, mapKeys, mapValues, objectKeys, objectValues } from '@/utils/mapFunctions'
@@ -29,14 +28,9 @@ export const materials = new Map<string, Material>()
 
 const loadGLBAsToon = async <K extends string>(
 	paths: Record<K, string>,
-	loader: (key: string) => void,
 	getOptions?: getToonOptions,
 ) => {
-	const loaded = await asyncMapValues(paths, async (path, key) => {
-		const glb = await loadGLB(path, key)
-		loader(key)
-		return glb
-	})
+	const loaded = await asyncMapValues(paths, async (path, key) => loadGLB(path, key))
 
 	const toons = mapValues(loaded, (glb, key) => {
 		glb.scene.traverse((node) => {
@@ -75,8 +69,8 @@ const loadGLBAsToon = async <K extends string>(
 	return toons
 }
 
-const cropsLoader = async <K extends string>(stagesPaths: Record<K, string>[], loader: (key: string) => void) => {
-	const models = await asyncMap(stagesPaths, paths => loadGLBAsToon(paths, loader, () => ({ shadow: true })))
+const cropsLoader = async <K extends string>(stagesPaths: Record<K, string>[]) => {
+	const models = await asyncMap(stagesPaths, paths => loadGLBAsToon(paths, () => ({ shadow: true })))
 	return models.reduce<Record<K, GLTF[]>>((acc, v) => {
 		for (const [key, val] of entries(v)) {
 			acc[key as K] ??= []
@@ -86,20 +80,18 @@ const cropsLoader = async <K extends string>(stagesPaths: Record<K, string>[], l
 	}, {} as Record<K, GLTF[]>)
 }
 
-const fontLoader = async<K extends string>(paths: Record<K, string>, loader: (key: string) => void) => {
+const fontLoader = async<K extends string>(paths: Record<K, string>) => {
 	for (const [key, m] of entries(paths)) {
 		const [name, weight] = key.split('-')
 		const font = new FontFace(name, `url(${m})`, { weight: weight ?? 'normal' })
 		await font.load()
-		loader(m)
 		document.fonts.add(font)
 	}
 }
 
-const texturesLoader = async <K extends string>(paths: Record<K, string>, loader: (key: string) => void) => {
+const texturesLoader = async <K extends string>(paths: Record<K, string>) => {
 	return await asyncMapValues(paths, async (src) => {
 		const texture = await textureLoader.loadAsync(src)
-		loader(src)
 		texture.magFilter = NearestFilter
 		texture.minFilter = NearestFilter
 		texture.wrapS = RepeatWrapping
@@ -112,13 +104,10 @@ interface PackedJSON {
 	frames: Record<string, { frame: { x: number, y: number, w: number, h: number } }>
 }
 
-const buttonsLoader = async <K extends string>(json: Record<K, string>, png: Record<K, string>, loader: (key: string) => void) => {
+const buttonsLoader = async <K extends string>(json: Record<K, string>, png: Record<K, string>) => {
 	return asyncMap(objectKeys(json), async (key) => {
 		const jsonData = await (await fetch(json[key])).json() as PackedJSON
-		// const { json, png } = mapKeys(paths, getExtension)
-		// const packed = json as PackedJSON
 		const img = await loadImage(png[key])
-		loader(png[key])
 		const getImg = (frame: { x: number, y: number, w: number, h: number }) => {
 			const buffer = getScreenBuffer(frame.w, frame.h)
 			buffer.drawImage(img, frame.x, frame.y, frame.w, frame.h, 0, 0, frame.w, frame.h)
@@ -136,7 +125,7 @@ const buttonsLoader = async <K extends string>(json: Record<K, string>, png: Rec
 	})
 }
 
-const loadVoices = async <K extends string>(audioPaths: Record<K, string>, globText: Record<K, string>, loader: (key: string) => void) => {
+const loadVoices = async <K extends string>(audioPaths: Record<K, string>, globText: Record<K, string>) => {
 	const spriteMap = await asyncMapValues(globText, async src => (await fetch(src)).text())
 	return asyncMapValues(audioPaths, async (src, key) => {
 		const sprite = spriteMap[key]
@@ -147,28 +136,25 @@ const loadVoices = async <K extends string>(audioPaths: Record<K, string>, globT
 				...acc,
 				[name]: [Number(start) * 1000, Number(end) * 1000 - Number(start) * 1000],
 			}), {})
-		loader(src)
 		const audio = await loadAudio(src, key)
 		return new Howl({ src: audio, pool: 10, format: 'webm', sprite })
 	})
 }
-const loadSounds = async <K extends string>(paths: Record<K, string>, loader: (key: string) => void, pool: number) => {
+const loadSounds = async <K extends string>(paths: Record<K, string>, pool: number) => {
 	return await asyncMapValues(paths, async (src, key) => {
 		const audio = await loadAudio(src, key)
 		const player = new Howl({ src: audio, pool, format: 'webm' })
-		loader(src)
 		return player
 	})
 }
 
-const loadItems = async <K extends string>(paths: Record<K, string>, loader: (key: string) => void, thumbnail: typeof thumbnailRenderer) => {
-	const models = await loadGLBAsToon(paths, loader, () => ({ side: DoubleSide }))
-	const getThumbnail = thumbnail()
+const loadItems = async <K extends string>(paths: Record<K, string>, thumbnail: ThumbnailRenderer) => {
+	const models = await loadGLBAsToon(paths, () => ({ side: DoubleSide }))
 	const modelsAndthumbnails = mapValues(models, model => ({
 		model: model.scene,
-		img: getThumbnail.getCanvas(model.scene).toDataURL(),
+		img: thumbnail.getCanvas(model.scene).toDataURL(),
 	}))
-	getThumbnail.dispose()
+	thumbnail.dispose()
 	return modelsAndthumbnails
 }
 
@@ -195,7 +181,7 @@ const modelOptions: getToonOptions = (key: string, materialName: string, _name: 
 	}
 }
 
-const splitChildren = async <K extends string>(glb: Promise< Record<string, GLTF>>) => {
+const splitChildren = async <K extends string>(glb: Promise<Record<string, GLTF>>) => {
 	const res = await glb
 	return objectValues(res).reduce((acc, glb) => {
 		return {
@@ -208,45 +194,38 @@ const splitChildren = async <K extends string>(glb: Promise< Record<string, GLTF
 }
 
 type AssetsLoaded<T extends Record<string, Promise<any> | any>> = { [K in keyof T]: Awaited<T[K]> }
-export const loadAssets = async (thumbnail: typeof thumbnailRenderer) => {
-	const { loader, clear } = loaderProgress(assetManifest)
+export const loadAssets = async (thumbnailRenderer: ThumbnailRenderer, loader?: () => () => void) => {
+	const clear = loader && loader()
 	const getAssetPaths = getAssetPathsLoader<StaticAssetPath>(import.meta.glob('@assets/*/**.*', { eager: true, query: '?url', import: 'default' }))
 	const assets = {
 		// ! models
 		characters: loadGLBAsToon(
 			getAssetPaths({ prefix: 'characters', extension: 'glb', suffix: '-optimized' }),
-			loader,
 			() => ({ material: CharacterMaterial, shadow: true, filter: NearestFilter }),
 		),
 		icons: getAssetPaths({ prefix: 'icons', extension: 'svg' }),
 
 		models: loadGLBAsToon(
 			getAssetPaths({ prefix: 'models', extension: 'glb', suffix: '-optimized' }),
-			loader,
 			modelOptions,
 		),
 		trees: loadGLBAsToon(
 			getAssetPaths({ prefix: 'trees', extension: 'glb', suffix: '-optimized' }),
-			loader,
 			() => ({ material: TreeMaterial, shadow: true, transparent: true }),
 		),
 		crops: cropsLoader(
 			[1, 2, 3, 4].map(nb => getAssetPaths({ prefix: 'crops', extension: 'glb', suffix: `_${nb}-optimized`, lowercase: true })),
-			loader,
 		),
 		gardenPlots: loadGLBAsToon(
 			getAssetPaths({ prefix: 'gardenPlots', extension: 'glb', suffix: '-optimized' }),
-			loader,
 			() => ({ material: GardenPlotMaterial }),
 		),
 		weapons: loadGLBAsToon(
 			getAssetPaths({ prefix: 'weapons', extension: 'glb', suffix: '-optimized' }),
-			loader,
 			() => ({ shadow: true }),
 		),
 		vegetation: loadGLBAsToon(
 			getAssetPaths({ prefix: 'vegetation', extension: 'glb', suffix: '-optimized' }),
-			loader,
 			() => ({ material: GrassMaterial, shadow: true }),
 		),
 		mainMenuAssets: loadMainMenuAssets(
@@ -255,62 +234,51 @@ export const loadAssets = async (thumbnail: typeof thumbnailRenderer) => {
 
 		fruitTrees: loadGLBAsToon(
 			getAssetPaths({ prefix: 'fruit_trees', extension: 'glb', suffix: '-optimized' }),
-			loader,
 		),
 		items: loadItems(
 			getAssetPaths({ prefix: 'items', extension: 'glb', suffix: '-optimized' }),
-			loader,
-			thumbnail,
+			thumbnailRenderer,
 		),
 
 		// ! textures
 		particles: texturesLoader(
 			getAssetPaths({ prefix: 'particles', extension: 'webp' }),
-			loader,
 		),
 
 		textures: texturesLoader(
 			getAssetPaths({ prefix: 'textures', extension: 'webp' }),
-			loader,
 		),
 
 		buttons: buttonsLoader(
 			getAssetPaths({ prefix: 'buttons', extension: 'json' }),
 			getAssetPaths({ prefix: 'buttons', extension: 'png' }),
-			loader,
 		),
 
 		// ! audio
 		voices: loadVoices(
 			getAssetPaths({ prefix: 'voices', extension: 'webm' }),
 			getAssetPaths({ prefix: 'voices', extension: 'txt' }),
-			loader,
 		),
 
 		steps: loadSounds(
 			getAssetPaths({ prefix: 'steps', extension: 'webm' }),
-			loader,
 			3,
 		),
 
-		soundEffects: loadSounds(getAssetPaths({ prefix: 'soundEffects', extension: 'webm' }), loader, 5),
+		soundEffects: loadSounds(getAssetPaths({ prefix: 'soundEffects', extension: 'webm' }), 5),
 
-		music: loadSounds(getAssetPaths({ prefix: 'music', extension: 'webm' }), loader, 1),
-		ambiance: loadSounds(getAssetPaths({ prefix: 'ambiance', extension: 'webm' }), loader, 1),
+		music: loadSounds(getAssetPaths({ prefix: 'music', extension: 'webm' }), 1),
+		ambiance: loadSounds(getAssetPaths({ prefix: 'ambiance', extension: 'webm' }), 1),
 
 		// ! others
 		fonts: fontLoader(
 			{ ...getAssetPaths({ prefix: 'fonts', extension: 'ttf' }), ...getAssetPaths({ prefix: 'fonts', extension: 'otf' }) },
-			loader,
 		),
-		village: splitChildren<village>(loadGLBAsToon(
-			getAssetPaths({ prefix: 'village', extension: 'glb' }),
-			loader,
-		)),
+		village: splitChildren<village>(loadGLBAsToon(getAssetPaths({ prefix: 'village', extension: 'glb' }))),
 
 	} as const
 
 	const assetsLoaded = await asyncMapValues(assets, async val => await val) as AssetsLoaded<typeof assets>
-	clear()
+	clear && clear()
 	return assetsLoaded
 }

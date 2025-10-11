@@ -1,7 +1,7 @@
-import { keys, metaKeys, mouse } from '@/constants/keys'
 import { createMap } from 'solid-proxies'
 import atom from 'solid-use/atom'
 import { Vector2, Vector3 } from 'three'
+import { keys, metaKeys, mouse } from '@/constants/keys'
 
 export const GAMEPAD_AXIS = {
 	LEFT_X: 0,

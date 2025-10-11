@@ -4,9 +4,10 @@
 export type StaticAssetPath =
   'ambiance/ambience_day.webm' |
   'ambiance/ambience_night.webm' |
-  'animations.d.ts' |
+  'animations.ts' |
   'assetManifest.json' |
   'assets.ts' |
+  'boundingBox.json' |
   'buttons/texture.json' |
   'buttons/texture.png' |
   'characters/ALICE_animated-optimized.glb' |
@@ -196,6 +197,8 @@ export type StaticAssetPath =
   'items/wheat-optimized.glb' |
   'items/wheat_seeds-optimized.glb' |
   'levels/data.json' |
+  'levels/farm.json' |
+  'levels/test.json' |
   'mainMenuAssets/book-optimized.glb' |
   'models/Beanstalk-optimized.glb' |
   'models/Berry_Bush-optimized.glb' |
@@ -453,9 +456,10 @@ export type FilesInFolder<Dir extends '.' | StaticAssetDirectory> =
 export const assets = new Set<string>([
   'ambiance/ambience_day.webm',
   'ambiance/ambience_night.webm',
-  'animations.d.ts',
+  'animations.ts',
   'assetManifest.json',
   'assets.ts',
+  'boundingBox.json',
   'buttons/texture.json',
   'buttons/texture.png',
   'characters/ALICE_animated-optimized.glb',
@@ -645,6 +649,8 @@ export const assets = new Set<string>([
   'items/wheat-optimized.glb',
   'items/wheat_seeds-optimized.glb',
   'levels/data.json',
+  'levels/farm.json',
+  'levels/test.json',
   'mainMenuAssets/book-optimized.glb',
   'models/Beanstalk-optimized.glb',
   'models/Berry_Bush-optimized.glb',

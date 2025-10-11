@@ -1,11 +1,11 @@
 import type { Object3D } from 'three'
-import { keyItemEvent } from '@/global/events'
-import { thumbnailRenderer } from '@/lib/thumbnailRenderer'
-import { sleep } from '@/utils/sleep'
 import { onCleanup, Show } from 'solid-js'
 import { css } from 'solid-styled'
 import { Transition } from 'solid-transition-group'
 import atom from 'solid-use/atom'
+import { keyItemEvent } from '@/global/events'
+import { getThumbnailRenderer } from '@/lib/thumbnailRenderer'
+import { sleep } from '@/utils/sleep'
 import { GoldContainer, OutlineText } from './components/styledComponents'
 
 export const displayKeyItem = async (modelToDisplay: Object3D, name: string, scale = 1) => {
@@ -14,7 +14,7 @@ export const displayKeyItem = async (modelToDisplay: Object3D, name: string, sca
 	keyItemEvent.emit(name, model)
 }
 
-const renderer = thumbnailRenderer(128)
+const renderer = getThumbnailRenderer(128)
 
 export const KeyItem = () => {
 	css/* css */`
@@ -100,13 +100,13 @@ export const KeyItem = () => {
 		<Transition name="slide">
 			<Show when={keyItem()}>
 				{(item) => {
-					const { element, clear } = renderer.spin(item().model)
+					const clear = renderer.spin(item().model)
 					onCleanup(clear)
 					return (
 						<div class="key-item-container">
 							<GoldContainer>
 								<div class="key-item-gradient">
-									<div class="key-item-model">{element}</div>
+									<div class="key-item-model">{renderer.element}</div>
 									<div class="key-item-text">
 										<OutlineText>
 											You found a&nbsp;

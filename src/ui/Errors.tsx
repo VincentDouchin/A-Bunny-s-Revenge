@@ -1,7 +1,7 @@
-import { errorEvent } from '@/global/events'
 import { For, Show } from 'solid-js'
 import { createSet } from 'solid-proxies'
 import { css } from 'solid-styled'
+import { errorEvent } from '@/global/events'
 
 export const Errors = () => {
 	const errors = createSet<string>([])

@@ -3,6 +3,7 @@ import antfu from '@antfu/eslint-config'
 export default antfu({
 	stylistic: {
 		indent: 'tab',
+
 	},
 	rules: {
 		'curly': 'off',
@@ -24,10 +25,10 @@ export default antfu({
 	ignores: [
 		'dev-dist',
 		'assets',
-		'node-modules', 
-		'dist', 
-		'public', 
+		'node-modules',
+		'dist',
+		'public',
 		'src-tauri',
-		'src/static-assets.ts'
+		'src/static-assets.ts',
 	],
 })

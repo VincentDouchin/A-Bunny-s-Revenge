@@ -1,8 +1,8 @@
-import { ecs, ui } from '@/global/init'
-import { useQuery } from '@/ui/store'
 import { createMemo, For } from 'solid-js'
 import { Portal, Show } from 'solid-js/web'
 import { css } from 'solid-styled'
+import { ecs, ui } from '@/global/init'
+import { useQuery } from '@/ui/store'
 
 const healthBarQuery = useQuery(ecs.with('healthBarContainer', 'maxHealth', 'currentHealth'))
 

@@ -1,8 +1,8 @@
-import type { Euler, Material, Object3D, Object3DEventMap, Vec2, Vector4Like } from 'three'
+import type { BufferGeometry, Euler, Material, Mesh, Object3D, Object3DEventMap, Vec2, Vector4Like } from 'three'
 import type { Simplify } from 'type-fest'
 import assetManifest from '@assets/assetManifest.json'
 import { createStore, del, entries, set } from 'idb-keyval'
-import { DynamicDrawUsage, Group, LoadingManager, Matrix4, Mesh, TextureLoader, Vector3 } from 'three'
+import { DynamicDrawUsage, Group, LoadingManager, Matrix4, TextureLoader, Vector3 } from 'three'
 import { InstancedUniformsMesh } from 'three-instanced-uniforms-mesh'
 import draco_decoder from 'three/examples/jsm/libs/draco/draco_decoder.wasm?url'
 import draco_wasm_wrapper from 'three/examples/jsm/libs/draco/draco_wasm_wrapper.js?url'
@@ -103,6 +103,14 @@ export interface InstanceHandle {
 	setUniform: (name: string, value: any) => void
 }
 
+export interface InstanceGenerator {
+	addAt: (position: Vector3, scale: number, rotation: Euler) => InstanceHandle
+	process: () => Group
+	obj: Object3D
+}
+
+const isMesh = <M extends Material = Material>(node: Object3D): node is Mesh<BufferGeometry, M> => node.type === 'Mesh'
+
 export const instanceMesh = <T extends Material>(obj: Object3D<Object3DEventMap>, castShadow = true) => {
 	const instanceParams: Matrix4[] = []
 	const meshes: InstancedUniformsMesh<T>[] = []
@@ -134,7 +142,7 @@ export const instanceMesh = <T extends Material>(obj: Object3D<Object3DEventMap>
 	}
 	const process = () => {
 		obj.traverse((node) => {
-			if (node instanceof Mesh) {
+			if (isMesh<T>(node)) {
 				const mesh = new InstancedUniformsMesh(node.geometry.clone(), node.material.clone(), instanceParams.length)
 				mesh.instanceMatrix.setUsage(DynamicDrawUsage)
 				meshes.push(mesh)
@@ -146,6 +154,7 @@ export const instanceMesh = <T extends Material>(obj: Object3D<Object3DEventMap>
 			for (let i = 0; i < instanceParams.length; i++) {
 				const matrix = instanceParams[i]
 				mesh.setMatrixAt(i, matrix)
+				mesh.material.needsUpdate = true
 			}
 		}
 
@@ -190,25 +199,13 @@ export const canvasToGrid = (canvas: HTMLCanvasElement): Vector4Like[][] => {
 	return arrayOfArrays
 }
 
-export const loaderProgress = (manifest: Record<string, { size: number, modified: number }>) => {
-	let loaded = 0
+export const loaderProgress = () => {
 	const loadElement = document.createElement('div')
 	loadElement.classList.add('loader')
 	document.body.appendChild(loadElement)
-	const total = Object.entries(manifest)
-		.filter(([x]) => getExtension(x) !== 'json')
-		.map(x => x[1].size)
-		.reduce((a, b) => a + b, 0)
-	const loader = (key: string) => {
-		loaded += manifest[globalThis.decodeURIComponent(key)]?.size
-		const percent = Math.round(loaded / total * 100)
-		loadElement.style.setProperty('--loaded', `${percent}%`)
-	}
+
 	const clear = () => loadElement.remove()
-	return {
-		loader,
-		clear,
-	}
+	return clear
 }
 
 type ExtractFromPath<

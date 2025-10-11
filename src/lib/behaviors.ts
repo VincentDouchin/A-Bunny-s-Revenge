@@ -1,5 +1,5 @@
-import type { AllStates, BehaviorNode, Entity } from '@/global/entity'
 import type { Query, With } from 'miniplex'
+import type { AllStates, BehaviorNode, Entity } from '@/global/entity'
 import { ecs, time } from '@/global/init'
 
 export const sequence = <E extends Array<any>>(...nodes: BehaviorNode<E>[]): BehaviorNode<E> => (...e) => {

@@ -1,7 +1,7 @@
 import type { Dialog, Entity } from '@/global/entity'
+import { Quaternion, Vector3 } from 'three'
 import { Interactable } from '@/global/entity'
 import { ecs, time } from '@/global/init'
-import { Quaternion, Vector3 } from 'three'
 
 export const dialogBundle = (dialog: Dialog) => {
 	return {

@@ -1,4 +1,4 @@
-import { AssetNames } from '@/global/entity'
+import type { AssetNames } from '@/global/entity'
 import { assets, settings } from '@/global/init'
 import { localSoundData } from '@/global/sounds'
 

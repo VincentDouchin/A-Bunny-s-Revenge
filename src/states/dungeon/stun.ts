@@ -1,7 +1,7 @@
 import type { Entity } from '@/global/entity'
+import { Euler, Group, Sprite, SpriteMaterial } from 'three'
 import { assets, ecs } from '@/global/init'
 import { range } from '@/utils/mapFunctions'
-import { Euler, Group, Sprite, SpriteMaterial } from 'three'
 
 export const stunBundle = (offset: number) => {
 	const group = new Group()

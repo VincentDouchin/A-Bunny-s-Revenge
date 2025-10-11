@@ -1,6 +1,6 @@
+import { Sprite, Vector3 } from 'three'
 import { ecs, time } from '@/global/init'
 import { DashMaterial } from '@/shaders/dashShader'
-import { Sprite, Vector3 } from 'three'
 
 export class Dash {
 	current = 1

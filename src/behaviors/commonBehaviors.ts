@@ -1,20 +1,20 @@
+import type { With } from 'miniplex'
+import type { baseEnemyQuery } from './enemyBehavior'
 import type { AllAnimations, AllStates, AnimatorsWith, AssetNames, BehaviorNode, Entity, QueryEntity, QueryKeys } from '@/global/entity'
+import type { ToonMaterial } from '@/shaders/materials'
+import { Material, Mesh } from 'three'
 import { Faction } from '@/global/entity'
 import { ecs, tweens, world } from '@/global/init'
 import { playSound } from '@/global/sounds'
 import { action, condition, enteringState, inState, selector, sequence, setState, wait, waitFor } from '@/lib/behaviors'
 import { collisionGroups } from '@/lib/collisionGroups'
 import { spawnDamageNumber } from '@/particles/damageNumber'
-import type { ToonMaterial } from '@/shaders/materials'
 import { calculateDamage, flash, squish } from '@/states/dungeon/battle'
 import { selectNewLockedEnemy } from '@/states/dungeon/locking'
 import { stunBundle } from '@/states/dungeon/stun'
 import { getIntersections } from '@/states/game/sensor'
-import type { With } from 'miniplex'
-import { Material, Mesh } from 'three'
 import { inverter } from '../lib/behaviors'
 import { applyMove, applyRotate, getMovementForce, moveToDirection, takeDamage } from './behaviorHelpers'
-import type { baseEnemyQuery } from './enemyBehavior'
 
 export const playerQuery = ecs.with('position', 'strength', 'body', 'critChance', 'critDamage', 'playerAnimator', 'weapon', 'player', 'collider', 'sensor', 'rotation', 'state', 'playerAttackStyle').where(({ faction }) => faction === Faction.Player)
 const navGridQuery = ecs.with('dungeon')
@@ -205,8 +205,7 @@ export const deadNode: EnemyNode<['dead'], ['dead']> = () => selector(
 				onComplete: () => ecs.remove(e),
 			})
 		}),
-	)
-	,
+	),
 	inState('dead'),
 )
 // ! STUN

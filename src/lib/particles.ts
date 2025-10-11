@@ -1,11 +1,12 @@
+import type { ParticleSystem } from 'three.quarks'
+import type { Plugin } from './app'
 import type { ComponentsOfType } from '@/global/entity'
 import type { app } from '@/global/states'
-import type { ParticleSystem } from 'three.quarks'
-import { ecs, time } from '@/global/init'
-import { gameRenderGroupQuery } from '@/global/rendering'
 import { Vector3 } from 'three'
 import { BatchedRenderer } from 'three.quarks'
-import { type Plugin, runIf } from './app'
+import { ecs, time } from '@/global/init'
+import { gameRenderGroupQuery } from '@/global/rendering'
+import { runIf } from './app'
 
 const initBatchRender = () => {
 	let initiated = false

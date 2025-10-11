@@ -1,4 +1,4 @@
-import { AssetNames } from "@/global/entity"
+import type { AssetNames } from '@/global/entity'
 
 interface Weapon {
 	scale: number

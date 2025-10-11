@@ -1,13 +1,20 @@
+import type { Accessor, JSX, JSXElement, Setter } from 'solid-js'
 import type { Item } from '@/constants/items'
 import type { Recipe } from '@/constants/recipes'
+import type { AssetNames } from '@/global/entity'
 import type { MenuDir } from '@/ui/components/Menu'
-import type { Accessor, JSX, JSXElement, Setter } from 'solid-js'
+import Check from '@assets/icons/circle-check-solid.svg'
+import Cross from '@assets/icons/circle-xmark-solid.svg'
+import { autoUpdate } from '@floating-ui/dom'
+import { useFloating } from 'solid-floating-ui'
+import { createEffect, createMemo, createSignal, For, onCleanup, onMount, Show } from 'solid-js'
+import { css } from 'solid-styled'
+import atom from 'solid-use/atom'
 import { isMeal, itemsData } from '@/constants/items'
 import { recipes } from '@/constants/recipes'
-import { AssetNames, MenuType } from '@/global/entity'
-import { assets, ecs, save, ui } from '@/global/init'
+import { MenuType } from '@/global/entity'
+import { assets, ecs, save, thumbnailRenderer, ui } from '@/global/init'
 import { modifiers } from '@/global/modifiers'
-import { thumbnailRenderer } from '@/lib/thumbnailRenderer'
 import { Menu, menuItem } from '@/ui/components/Menu'
 import { Modal } from '@/ui/components/Modal'
 import { GoldContainer, InventoryTitle, OutlineText } from '@/ui/components/styledComponents'
@@ -16,20 +23,12 @@ import { InputIcon } from '@/ui/InputIcon'
 import { useGame } from '@/ui/store'
 import { removeItemFromPlayer } from '@/utils/dialogHelpers'
 import { range } from '@/utils/mapFunctions'
-import Check from '@assets/icons/circle-check-solid.svg'
-import Cross from '@assets/icons/circle-xmark-solid.svg'
-import { autoUpdate } from '@floating-ui/dom'
-import { useFloating } from 'solid-floating-ui'
-import { createEffect, createMemo, createSignal, For, onCleanup, onMount, Show } from 'solid-js'
-import { css } from 'solid-styled'
-import atom from 'solid-use/atom'
 import { setInitialHealth } from '../dungeon/health'
 import { amountEaten, extra, MealAmount } from '../dungeon/HealthUi'
 import { MealBuffs, RecipeDescription } from './RecipesUi'
 
 menuItem
 
-const thumbnail = thumbnailRenderer()
 export const ItemBox = (props: { children: JSX.Element, selected?: boolean, completed?: boolean }) => {
 	css/* css */`
 	.item-display{
@@ -158,63 +157,61 @@ export const ItemDisplay = (props: {
 			completed={props.completed}
 		>
 			<Show when={Boolean(quantity()) && props.item?.name && itemsData[props.item.name]}>
-				{(item) => {
-					return (
-						<>
-							<Show when={delay() && isSelected()}>
-								{(_) => {
-									const { element, clear } = thumbnail.spin(assets.items[props.item!.name].model)
+				{item => (
+					<>
+						<Show when={delay() && isSelected()}>
+							{(_) => {
+								const clear = thumbnailRenderer.spin(assets.items[props.item!.name].model)
 
-									onCleanup(() => {
-										setDelay(false)
-										clear()
-									})
-									const [reference, setReference] = createSignal<HTMLElement | null>(null)
-									const [floating, setFloating] = createSignal<HTMLElement | null>(null)
-									const position = useFloating(reference, floating, {
-										whileElementsMounted: autoUpdate,
-										placement: 'bottom',
-										strategy: 'fixed',
-									})
-									return (
-										<>
-											<div ref={setReference} class="item" classList={{ hidden: props.hidden }}>{element}</div>
-											<Show when={!props.hidden && showName()}>
-												<div
-													ref={setFloating}
-													style={{
-														position: position.strategy,
-														top: `${position.y}px`,
-														left: `${position.x}px`,
-													}}
-													class="name"
-												>
-													<OutlineText>{item().name}</OutlineText>
-												</div>
-											</Show>
-										</>
-									)
-								}}
+								onCleanup(() => {
+									setDelay(false)
+									clear()
+								})
+								const [reference, setReference] = createSignal<HTMLElement | null>(null)
+								const [floating, setFloating] = createSignal<HTMLElement | null>(null)
+								const position = useFloating(reference, floating, {
+									whileElementsMounted: autoUpdate,
+									placement: 'bottom',
+									strategy: 'fixed',
+								})
+								return (
+									<>
+										<div ref={setReference} class="item" classList={{ hidden: props.hidden }}>{thumbnailRenderer.element}</div>
+										<Show when={!props.hidden && showName()}>
+											<div
+												ref={setFloating}
+												style={{
+													position: position.strategy,
+													top: `${position.y}px`,
+													left: `${position.x}px`,
+												}}
+												class="name"
+											>
+												<OutlineText>{item().name}</OutlineText>
+											</div>
+										</Show>
+									</>
+								)
+							}}
 
-							</Show>
-							<Show when={!(isSelected() && delay())}>
-								<img
-									src={assets.items[props.item!.name].img}
-									style={disabledStyles()}
-									class="item"
-									classList={{ 'item-selected': isSelected(), 'hidden': props.hidden }}
-								>
-								</img>
-							</Show>
-							<Show when={!props.hidden}>
-								<div class="quantity">
-									<OutlineText>{quantity()}</OutlineText>
-								</div>
-							</Show>
+						</Show>
+						<Show when={!(isSelected() && delay())}>
+							<img
+								src={assets.items[props.item!.name].img}
+								style={disabledStyles()}
+								class="item"
+								classList={{ 'item-selected': isSelected(), 'hidden': props.hidden }}
+							>
+							</img>
+						</Show>
+						<Show when={!props.hidden}>
+							<div class="quantity">
+								<OutlineText>{quantity()}</OutlineText>
+							</div>
+						</Show>
 
-						</>
-					)
-				}}
+					</>
+				)}
 			</Show>
 
 		</ItemBox>

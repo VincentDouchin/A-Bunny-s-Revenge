@@ -1,6 +1,6 @@
-import type { app } from '@/global/states'
 import type { Collider, RigidBody } from '@dimforge/rapier3d-compat'
 import type { Plugin } from './app'
+import type { app } from '@/global/states'
 import { ecs, world } from '@/global/init'
 
 const bodiesQuery = ecs.with('bodyDesc', 'position').without('body')

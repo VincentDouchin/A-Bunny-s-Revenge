@@ -1,3 +1,4 @@
+import type { Animations } from '@assets/animations'
 import type { AssetNames, Entity, PlayerAnimations } from '@/global/entity'
 import type { UpdateSystem } from '@/lib/app'
 import { ActiveEvents, Cuboid } from '@dimforge/rapier3d-compat'
@@ -6,14 +7,14 @@ import { CSS2DObject } from 'three/examples/jsm/renderers/CSS2DRenderer'
 import { clone } from 'three/examples/jsm/utils/SkeletonUtils'
 import { Animator } from '@/global/animator'
 import { Faction, stateBundle, States } from '@/global/entity'
-import { assets, ecs, save } from '@/global/init'
+import { assets, ecs, save, world } from '@/global/init'
 import { menuInputMap, playerInputMap } from '@/global/inputMaps'
 import { ModifierContainer } from '@/global/modifiers'
 import { app } from '@/global/states'
+import { capsuleColliderBundle } from '@/lib/colliders'
 import { collisionGroups } from '@/lib/collisionGroups'
 import { isCardinalDirection } from '@/lib/directions'
 import { inMap } from '@/lib/hierarchy'
-import { capsuleColliderBundle, characterControllerBundle } from '@/lib/models'
 import { Stat } from '@/lib/stats'
 import { Timer } from '@/lib/timer'
 import { dash } from '@/particles/dashParticles'
@@ -23,6 +24,15 @@ import { healthBundle } from '../dungeon/health'
 import { Dash } from './dash'
 import { inventoryBundle } from './inventory'
 import { weaponBundle } from './weapon'
+
+export const characterControllerBundle = () => {
+	const controller = world.createCharacterController(0.1)
+	controller.setApplyImpulsesToDynamicBodies(false)
+	controller.setCharacterMass(0.1)
+	controller.enableAutostep(4, 0, false)
+	controller.setMaxSlopeClimbAngle(Math.PI / 2 * 1.5)
+	return { controller } as const satisfies Entity
+}
 
 const playerAnimationMap: Record<PlayerAnimations, Animations['BunnyClothed']> = {
 	idle: 'Idle',

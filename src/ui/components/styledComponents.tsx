@@ -1,6 +1,7 @@
+import type { JSX, JSXElement } from 'solid-js'
 import CheckSquare from '@assets/icons/square-check-solid.svg'
 import Square from '@assets/icons/square-regular.svg'
-import { For, type JSX, type JSXElement, Match, Switch } from 'solid-js'
+import { For, Match, Switch } from 'solid-js'
 import { css } from 'solid-styled'
 
 interface OutlineTextProps {

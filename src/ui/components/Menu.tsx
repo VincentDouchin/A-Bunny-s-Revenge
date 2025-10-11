@@ -1,9 +1,10 @@
 import type { Accessor, Component, JSX } from 'solid-js'
 import type { Atom } from 'solid-use/atom'
-import { ui } from '@/global/init'
-import { playSound } from '@/global/sounds'
+import type { MenuInputMap } from '@/global/inputMaps'
 import { createEffect, createMemo, createRoot, createSignal, onCleanup } from 'solid-js'
 import { generateUUID } from 'three/src/math/MathUtils'
+import { ui } from '@/global/init'
+import { playSound } from '@/global/sounds'
 
 const findClosest = (selected: HTMLElement, neighbors: IterableIterator<HTMLElement>) => (direction: 'up' | 'down' | 'left' | 'right') => {
 	let distance = Number.POSITIVE_INFINITY

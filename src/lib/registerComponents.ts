@@ -1,8 +1,9 @@
-import type { app } from '@/global/states'
 import type { Object3D } from 'three'
+import type { ComponentsOfType } from '../global/entity'
 import type { Plugin } from './app'
+import type { app } from '@/global/states'
 import { Group } from 'three'
-import { type ComponentsOfType, RenderGroup } from '../global/entity'
+import { RenderGroup } from '../global/entity'
 import { ecs } from '../global/init'
 
 const gameSceneQuery = ecs.with('scene', 'renderGroup').where(e => e.renderGroup === RenderGroup.Game)

@@ -6,7 +6,7 @@ import { QuestManager } from '@/constants/quests'
 import { CoroutinesManager } from '@/lib/coroutines'
 import { InputManager } from '@/lib/inputs'
 import { MusicManager } from '@/lib/musicManager'
-import { thumbnailRenderer } from '@/lib/thumbnailRenderer'
+import { getThumbnailRenderer } from '@/lib/thumbnailRenderer'
 import { DayTime, Time } from '@/lib/time'
 import { tweensManager } from '@/lib/tweens'
 import { UIManager } from '@/lib/uiManager'
@@ -27,6 +27,7 @@ export const ui = new UIManager(settings)
 export const coroutines = new CoroutinesManager()
 export const inputManager = new InputManager()
 export const levelsData = await loadLevelData()
+export const thumbnailRenderer = getThumbnailRenderer()
 export const assets = await loadAssets(thumbnailRenderer)
 export const dayTime = new DayTime(600_000)
 export const musicManager = new MusicManager()

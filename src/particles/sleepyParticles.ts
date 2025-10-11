@@ -1,6 +1,6 @@
-import { assets } from '@/global/init'
 import { MeshBasicMaterial, PlaneGeometry } from 'three'
 import { Bezier, ConeEmitter, ConstantValue, IntervalValue, ParticleSystem, PiecewiseBezier, RandomQuatGenerator, RenderMode, SizeOverLife } from 'three.quarks'
+import { assets } from '@/global/init'
 
 const geo = new PlaneGeometry(3, 3)
 const mat = new MeshBasicMaterial({ depthWrite: false, map: assets.textures.sleepy.clone(), transparent: true })

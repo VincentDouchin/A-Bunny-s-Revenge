@@ -1,4 +1,4 @@
-declare module 'fastnoise-lite'{
+declare module 'fastnoise-lite' {
 	/**
 	 * FastNoise Lite is an extremely portable open source noise generation library with a large selection of noise algorithms
 	 * @example

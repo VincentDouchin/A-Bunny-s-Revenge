@@ -1,6 +1,7 @@
+import type { Vec2 } from 'three'
 import { Cuboid } from '@dimforge/rapier3d-compat'
 import { AStarFinder } from 'astar-typescript'
-import { Color, InstancedMesh, Matrix4, MeshBasicMaterial, Quaternion, SphereGeometry, type Vec2, Vector2, Vector3 } from 'three'
+import { Color, InstancedMesh, Matrix4, MeshBasicMaterial, Quaternion, SphereGeometry, Vector2, Vector3 } from 'three'
 import { ecs, scene, world } from '@/global/init'
 import { Direction } from './directions'
 

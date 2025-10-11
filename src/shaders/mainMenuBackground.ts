@@ -1,5 +1,5 @@
-import noise from '@/shaders/glsl/lib/cnoise.glsl?raw'
 import { Color, ShaderMaterial, Uniform, Vector2 } from 'three'
+import noise from '@/shaders/glsl/lib/cnoise.glsl?raw'
 
 export const mainMenuBackgound = new ShaderMaterial({
 	uniforms: {

@@ -1,5 +1,5 @@
-import { addUniform, extendMaterial, MaterialExtension, replace, unpack } from '@/lib/materialExtension'
 import { Color, Mesh, MeshPhongMaterial, PlaneGeometry } from 'three'
+import { addUniform, extendMaterial, MaterialExtension, replace, unpack } from '@/lib/materialExtension'
 
 const godRayExtension = new MaterialExtension({ color: new Color(0xF7F3B7) })
 	.defines('USE_UV')

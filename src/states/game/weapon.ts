@@ -1,9 +1,8 @@
+import type { AssetNames } from '@/global/entity'
 import { weaponsData } from '@/constants/weapons'
-import { AssetNames } from '@/global/entity'
 import { assets, ecs, scene } from '@/global/init'
 import { getWorldPosition } from '@/lib/transforms'
 import { WeaponArc } from '@/shaders/weaponArc'
-
 
 export const weaponBundle = (weaponName: AssetNames['weapons']) => {
 	const data = weaponsData[weaponName]
