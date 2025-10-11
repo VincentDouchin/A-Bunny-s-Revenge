@@ -1,0 +1,38 @@
+{
+	"name": "editor",
+	"type": "module",
+	"version": "0.0.0",
+	"private": true,
+	"scripts": {
+		"dev": "vite",
+		"build": "tsc -b && vite build",
+		"preview": "vite preview",
+		"tauri": "tauri",
+		"desktop build": "npm run tauri build"
+	},
+	"dependencies": {
+		"@fabianlars/tauri-plugin-oauth": "^2.0.0",
+		"@fortawesome/free-brands-svg-icons": "^7.1.0",
+		"@fortawesome/free-solid-svg-icons": "^7.1.0",
+		"@solid-primitives/storage": "^4.3.3",
+		"@tauri-apps/api": "^2.8.0",
+		"@tauri-apps/cli": "^2.8.4",
+		"@tauri-apps/plugin-fs": "^2.4.2",
+		"@tauri-apps/plugin-opener": "^2.5.0",
+		"eslint": "^9.35.0",
+		"eslint-plugin-format": "^1.0.1",
+		"solid-fa": "^0.2.0",
+		"solid-js": "^1.9.8",
+		"solid-proxies": "^2.0.0",
+		"solid-styled": "^0.12.0",
+		"solid-use": "^0.9.1",
+		"tauri-plugin-keyring-api": "^0.1.1"
+	},
+	"devDependencies": {
+		"postcss": "^8.5.6",
+		"typescript": "~5.8.3",
+		"vite": "^7.1.2",
+		"vite-plugin-solid": "^2.11.8",
+		"vite-plugin-solid-styled": "^0.12.0"
+	}
+}

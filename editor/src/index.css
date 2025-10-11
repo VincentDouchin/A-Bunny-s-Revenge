@@ -1,0 +1,91 @@
+:root {
+  font-family: system-ui, Avenir, Helvetica, Arial, sans-serif;
+  line-height: 1.5;
+  font-weight: 400;
+
+  color-scheme: dark;
+  color: rgba(255, 255, 255, 0.87);
+  background-color: #242424;
+
+  font-synthesis: none;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  --color-1: #070F2B;
+  --color-2: #1B1A55;
+  --color-3: #535C91;
+  --color-4: #9290C3;
+}
+
+#root, html, body{
+  height: 100dvh;
+}
+
+body {
+  margin: 0;
+  background: var(--color-1);
+}
+button{
+  background: var(--color-2);
+  text-color: white;
+  padding: 0.5rem;
+  cursor: pointer;
+  border: solid 1px var(--color-4);
+  border-radius: 0.2rem;
+  transition: all 0.2s;
+}
+button:hover:not([disabled]){
+  background: var(--color-3);
+}
+button[disabled]{
+  cursor: not-allowed;
+  color: grey;
+  cursor: not-allowed;
+  background: var(--color-1);
+}
+button.selected{
+  color: var(--color-1);
+  font-weight: bold;
+  background: var(--color-3);
+}
+
+input{
+  background-color: var(--color-2);
+}
+
+select{
+  background-color: var(--color-2);
+  padding: 0.25rem;
+  width: 100%;
+}
+option[selected]{
+  background-color: var(--color-3);
+
+}
+
+
+.title{
+  padding:0.5rem;
+  text-align: center;
+  background: var(--color-1);
+  text-decoration: underline;
+  font-weight: bold;
+}
+
+section{
+  border: solid 2px var(--color-4);
+  position: relative;
+  border-radius: 5px;
+  overflow: hidden
+}
+section::after{
+  border: solid 1px var(--color-4);
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: 5px;
+  pointer-events: none;
+}
+section + section {
+  margin-top: 1rem;
+}
