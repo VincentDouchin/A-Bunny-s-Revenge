@@ -8,7 +8,7 @@ export const fireParticles = () => {
 	const system = new ParticleSystem({
 		duration: 3,
 		looping: true,
-		prewarm: true,
+		prewarm: false,
 		instancingGeometry: geo,
 		startLife: new IntervalValue(2.0, 5.0),
 		startSpeed: new ConstantValue(1),
