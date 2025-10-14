@@ -80,14 +80,13 @@ export function EntitySelector({ selectedCategory, entities, selectedAsset, mode
 		}
 	})
 	createEffect(on(selectedRef, (ref) => {
-		setTimeout(() => ref?.scrollIntoView(), 10)
+		setTimeout(() => ref?.scrollIntoView({ inline: 'center' }), 10)
 	}))
 
 	css/* css */`
 	.entity-selector{
 		display: grid;
 		grid-template-rows: auto 1fr;
-		height: 20%;
 	}
 	.assets{
 		display: flex;
