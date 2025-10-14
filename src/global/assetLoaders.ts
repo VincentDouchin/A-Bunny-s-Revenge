@@ -210,25 +210,28 @@ export const loaderProgress = () => {
 
 type ExtractFromPath<
 	T extends string,
+	F extends string,
 	P extends string,
 	S extends string,
 	E extends string,
 > = {
-	[Path in T]: Path extends `${P}/${infer R}${S}.${E}` ? R : never
+	[Path in T]: Path extends `${F}/${P}${infer R}${S}.${E}` ? R : never
 }[T]
 const escapeRegex = (str?: string) => (str ?? '').replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
 
 export const getAssetPathsLoader = <Paths extends string>(assetPaths: Record<string, string>) => <
+	F extends string = '',
 	P extends string = '',
 	S extends string = '',
 	E extends string = '',
 	L extends boolean = false,
->({ prefix, suffix, extension, lowercase }: { prefix?: P, suffix?: S, extension: E, lowercase?: L }) => {
+>({ folder, suffix, extension, lowercase, prefix }: { folder?: F, suffix?: S, extension: E, lowercase?: L, prefix?: P }) => {
 	const escapedPrefix = escapeRegex(prefix)
+	const escapedFolder = escapeRegex(folder)
 	const escapedSuffix = escapeRegex(suffix)
 	const escapedExtension = escapeRegex(extension)
 
-	const regex = new RegExp(`${escapedPrefix}/(.*?)${escapedSuffix}.${escapedExtension}`)
+	const regex = new RegExp(`${escapedFolder}/${escapedPrefix}(.*?)${escapedSuffix}.${escapedExtension}`)
 	return [...assets]
 		.filter(assets => assets.match(regex)?.[0])
 		.reduce((acc, v) => {
@@ -238,5 +241,7 @@ export const getAssetPathsLoader = <Paths extends string>(assetPaths: Record<str
 				fileName = fileName.toLocaleLowerCase()
 			}
 			return ({ ...acc, [fileName]: realPath })
-		}, {}) as Simplify<Record<L extends true ? Lowercase<ExtractFromPath<Paths, P, S, E>> : ExtractFromPath<Paths, P, S, E>, string>>
+		}, {}) as L extends true
+		? Simplify<Record<Lowercase<ExtractFromPath<Paths, F, P, S, E>>, string>>
+		: Simplify<Record<ExtractFromPath<Paths, F, P, S, E>, string>>
 }

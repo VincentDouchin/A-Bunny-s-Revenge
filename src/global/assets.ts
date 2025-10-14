@@ -197,85 +197,89 @@ type AssetsLoaded<T extends Record<string, Promise<any> | any>> = { [K in keyof 
 export const loadAssets = async (thumbnailRenderer: ThumbnailRenderer, loader?: () => () => void) => {
 	const clear = loader && loader()
 	const getAssetPaths = getAssetPathsLoader<StaticAssetPath>(import.meta.glob('@assets/*/**.*', { eager: true, query: '?url', import: 'default' }))
+
 	const assets = {
 		// ! models
 		characters: loadGLBAsToon(
-			getAssetPaths({ prefix: 'characters', extension: 'glb', suffix: '-optimized' }),
+			getAssetPaths({ folder: 'characters', extension: 'glb', suffix: '-optimized' }),
 			() => ({ material: CharacterMaterial, shadow: true, filter: NearestFilter }),
 		),
-		icons: getAssetPaths({ prefix: 'icons', extension: 'svg' }),
+		icons: getAssetPaths({ folder: 'icons', extension: 'svg' }),
 
 		models: loadGLBAsToon(
-			getAssetPaths({ prefix: 'models', extension: 'glb', suffix: '-optimized' }),
+			getAssetPaths({ folder: 'models', extension: 'glb', suffix: '-optimized' }),
 			modelOptions,
 		),
 		trees: loadGLBAsToon(
-			getAssetPaths({ prefix: 'trees', extension: 'glb', suffix: '-optimized' }),
+			getAssetPaths({ folder: 'trees', extension: 'glb', suffix: '-optimized' }),
 			() => ({ material: TreeMaterial, shadow: true, transparent: true }),
 		),
 		crops: cropsLoader(
-			[1, 2, 3, 4].map(nb => getAssetPaths({ prefix: 'crops', extension: 'glb', suffix: `_${nb}-optimized`, lowercase: true })),
+			[1, 2, 3, 4].map(nb => getAssetPaths({ folder: 'crops', extension: 'glb', suffix: `_${nb}-optimized`, lowercase: true })),
 		),
 		gardenPlots: loadGLBAsToon(
-			getAssetPaths({ prefix: 'gardenPlots', extension: 'glb', suffix: '-optimized' }),
+			getAssetPaths({ folder: 'gardenPlots', extension: 'glb', suffix: '-optimized' }),
 			() => ({ material: GardenPlotMaterial }),
 		),
 		weapons: loadGLBAsToon(
-			getAssetPaths({ prefix: 'weapons', extension: 'glb', suffix: '-optimized' }),
+			getAssetPaths({ folder: 'weapons', extension: 'glb', suffix: '-optimized' }),
 			() => ({ shadow: true }),
 		),
 		vegetation: loadGLBAsToon(
-			getAssetPaths({ prefix: 'vegetation', extension: 'glb', suffix: '-optimized' }),
+			getAssetPaths({ folder: 'vegetation', extension: 'glb', suffix: '-optimized' }),
 			() => ({ material: GrassMaterial, shadow: true }),
 		),
 		mainMenuAssets: loadMainMenuAssets(
-			getAssetPaths({ prefix: 'mainMenuAssets', extension: 'glb', suffix: '-optimized' }),
+			getAssetPaths({ folder: 'mainMenuAssets', extension: 'glb', suffix: '-optimized' }),
 		),
 
 		fruitTrees: loadGLBAsToon(
-			getAssetPaths({ prefix: 'fruit_trees', extension: 'glb', suffix: '-optimized' }),
+			getAssetPaths({ folder: 'fruit_trees', extension: 'glb', suffix: '-optimized' }),
 		),
 		items: loadItems(
-			getAssetPaths({ prefix: 'items', extension: 'glb', suffix: '-optimized' }),
+			getAssetPaths({ folder: 'items', extension: 'glb', suffix: '-optimized' }),
 			thumbnailRenderer,
 		),
 
 		// ! textures
 		particles: texturesLoader(
-			getAssetPaths({ prefix: 'particles', extension: 'webp' }),
+			getAssetPaths({ folder: 'particles', extension: 'webp' }),
 		),
 
 		textures: texturesLoader(
-			getAssetPaths({ prefix: 'textures', extension: 'webp' }),
+			getAssetPaths({ folder: 'textures', extension: 'webp' }),
 		),
 
 		buttons: buttonsLoader(
-			getAssetPaths({ prefix: 'buttons', extension: 'json' }),
-			getAssetPaths({ prefix: 'buttons', extension: 'png' }),
+			getAssetPaths({ folder: 'buttons', extension: 'json' }),
+			getAssetPaths({ folder: 'buttons', extension: 'png' }),
 		),
 
 		// ! audio
 		voices: loadVoices(
-			getAssetPaths({ prefix: 'voices', extension: 'webm' }),
-			getAssetPaths({ prefix: 'voices', extension: 'txt' }),
+			getAssetPaths({ folder: 'voices', extension: 'webm' }),
+			getAssetPaths({ folder: 'voices', extension: 'txt' }),
 		),
 
 		steps: loadSounds(
-			getAssetPaths({ prefix: 'steps', extension: 'webm' }),
+			getAssetPaths({ folder: 'steps', extension: 'webm' }),
 			3,
 		),
 
-		soundEffects: loadSounds(getAssetPaths({ prefix: 'soundEffects', extension: 'webm' }), 5),
+		soundEffects: loadSounds(getAssetPaths({ folder: 'soundEffects', extension: 'webm' }), 5),
 
-		music: loadSounds(getAssetPaths({ prefix: 'music', extension: 'webm' }), 1),
-		ambiance: loadSounds(getAssetPaths({ prefix: 'ambiance', extension: 'webm' }), 1),
+		music: loadSounds(getAssetPaths({ folder: 'music', extension: 'webm' }), 1),
+		ambiance: loadSounds(getAssetPaths({ folder: 'ambiance', extension: 'webm' }), 1),
 
 		// ! others
 		fonts: fontLoader(
-			{ ...getAssetPaths({ prefix: 'fonts', extension: 'ttf' }), ...getAssetPaths({ prefix: 'fonts', extension: 'otf' }) },
+			{ ...getAssetPaths({ folder: 'fonts', extension: 'ttf' }), ...getAssetPaths({ folder: 'fonts', extension: 'otf' }) },
 		),
-		village: splitChildren<village>(loadGLBAsToon(getAssetPaths({ prefix: 'village', extension: 'glb' }))),
-
+		village: splitChildren<village>(loadGLBAsToon(getAssetPaths({ folder: 'village', extension: 'glb' }))),
+		emotes: {
+			containers: getAssetPaths({ folder: 'emotes', prefix: 'container_', extension: 'png' }),
+			emotes: getAssetPaths({ folder: 'emotes', prefix: 'emote_', extension: 'png' }),
+		},
 	} as const
 
 	const assetsLoaded = await asyncMapValues(assets, async val => await val) as AssetsLoaded<typeof assets>
