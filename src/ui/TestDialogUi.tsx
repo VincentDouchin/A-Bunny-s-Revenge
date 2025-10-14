@@ -1,5 +1,4 @@
-import { Portal } from 'solid-js/web'
-import { css, useSolidStyled } from 'solid-styled'
+import { css } from 'solid-styled'
 import { assets } from '@/global/init'
 import { GoldContainer, OutlineText } from './components/styledComponents'
 
