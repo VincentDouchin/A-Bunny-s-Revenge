@@ -53,10 +53,9 @@ export const LoseUi = () => {
 				const controls = atom<null | With<Entity, 'menuInputs'>>(null)
 				onMount(() => {
 					playSound('losing_musical')
-					controls(ecs.add({
+					controls(ecs.add(inMap({
 						...menuInputMap(),
-						...inMap(),
-					}))
+					})))
 				})
 				ui.updateSync(() => {
 					if (controls()?.menuInputs.get('validate').justPressed) {

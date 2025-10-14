@@ -24,15 +24,14 @@ export const spawnChest = (dungeonLevel: number) => {
 		chest.rotateY(Math.PI)
 		playSound('085_save_game_02', { playbackRate: 1.5 })
 		playSound('202092__spookymodem__chest-opening')
-		const chestEntity = ecs.add({
-			...inMap(),
+		const chestEntity = ecs.add(inMap({
 			model: chest,
 			bodyDesc: RigidBodyDesc.fixed().lockRotations(),
 			colliderDesc: ColliderDesc.cuboid(6, 4, 6).setTranslation(0, 2, 0),
 			position: new Vector3(),
 			chestAnimator: new Animator(chest, assets.models.Chest.animations),
 			emitter: chestAppearing(),
-		})
+		}))
 		tweens.add({
 			from: 0,
 			to: 8,

@@ -46,15 +46,14 @@ export const spawnPoisonTrail = () => {
 		}
 		if (dist === Number.POSITIVE_INFINITY || dist > 5) {
 			const radius = between(3, 5)
-			ecs.add({
+			ecs.add(inMap({
 				trail: { origin: trailMaker, timer: new Timer(4000, false) },
 				model: new Mesh(new CylinderGeometry(radius, radius, 2, 16, 1), new MeshBasicMaterial({ color: 0x9DE64E, depthWrite: false })),
 				position: trailMaker.position.clone(),
-				...inMap(),
 				emitter: poisonBubbles(),
 				autoDestroy: true,
 				poison: true,
-			})
+			}))
 		}
 	}
 	for (const trail of trailQuery) {

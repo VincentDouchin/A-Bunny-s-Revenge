@@ -11,14 +11,13 @@ export const setupDialogs = () => {
 	const dist = 10
 	const minion1Model = clone(assets.characters.Gloom.scene)
 	minion1Model.scale.setScalar(10)
-	ecs.add({
+	ecs.add(inMap({
 		model: minion1Model,
 		position: new Vector3(dist, 0, 0),
 		worldPosition: new Vector3(dist, 0, 0),
-		...inMap(),
 		rotation: new Quaternion().setFromAxisAngle(new Vector3(0, 1, 0), degToRad(-90)),
 		npcName: 'Gloom',
-	})
+	}))
 	const minion2Model = clone(assets.characters.JACK_animated.scene)
 	minion2Model.scale.setScalar(10)
 	minion2Model.traverse(obj => obj.name === 'Weapon' && (obj.visible = false))
@@ -26,14 +25,13 @@ export const setupDialogs = () => {
 		cameraTarget: true,
 		worldPosition: new Vector3(),
 	})
-	const jack = ecs.add({
+	const jack = ecs.add(inMap({
 		model: minion2Model,
 		kayAnimator: new Animator<Animations['JACK_animated']>(minion2Model, assets.characters.JACK_animated.animations),
 		position: new Vector3(-dist, 0, 0),
 		worldPosition: new Vector3(-dist, 0, 0),
-		...inMap(),
 		rotation: new Quaternion().setFromAxisAngle(new Vector3(0, 1, 0), degToRad(90)),
-	})
+	}))
 	jack.kayAnimator.playAnimation('Idle')
 	// const dialog = function* () {
 	// 	speaker('Gloom')

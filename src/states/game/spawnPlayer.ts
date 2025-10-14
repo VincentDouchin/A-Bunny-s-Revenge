@@ -79,7 +79,7 @@ export const playerBundle = (health: number, weapon: AssetNames['weapons'] | nul
 	const debuffsContainer = new CSS2DObject(document.createElement('div'))
 	debuffsContainer.position.setY(15)
 
-	const player = {
+	const player = inMap({
 		debuffsContainer,
 		...menuInputMap(),
 		...playerInputMap(),
@@ -87,7 +87,6 @@ export const playerBundle = (health: number, weapon: AssetNames['weapons'] | nul
 		...bundle,
 		...characterControllerBundle(),
 		playerAnimator: new Animator(bundle.model, assets.characters.BunnyClothed.animations, playerAnimationMap),
-		...inMap(),
 		cameraTarget: true,
 		faction: Faction.Player,
 		sensor: { shape: new Cuboid(3, 3, 3), distance: 1.5 + size.x / 2 },
@@ -114,7 +113,7 @@ export const playerBundle = (health: number, weapon: AssetNames['weapons'] | nul
 		sleepy: new Timer(2000, false),
 		modifiers: new ModifierContainer(),
 		...(weapon !== null ? { weapon: weaponBundle(weapon) } : {}),
-	} as const satisfies Entity
+	})
 
 	for (const item of save.modifiers) {
 		player.modifiers.addModifier(item)

@@ -1,5 +1,5 @@
 import type { Object3D } from 'three'
-import { BasicShadowMap, DepthTexture, LinearSRGBColorSpace, Material, MeshBasicMaterial, ShaderMaterial, Texture, Vector2, WebGLRenderer, WebGLRenderTarget } from 'three'
+import { BasicShadowMap, DepthTexture, Group, LinearSRGBColorSpace, Material, MeshBasicMaterial, ShaderMaterial, Texture, Vector2, WebGLRenderer, WebGLRenderTarget } from 'three'
 import { FullScreenQuad } from 'three/examples/jsm/postprocessing/Pass'
 import { CSS2DRenderer } from 'three/examples/jsm/renderers/CSS2DRenderer'
 import { getGameRenderGroup } from '@/debug/debugUi'
@@ -62,7 +62,7 @@ export const initThree = () => {
 	document.body.appendChild(cssRenderer.domElement)
 	const overlay = document.createElement('div')
 	document.body.appendChild(overlay)
-	ecs.add({ scene, renderer, renderGroup: RenderGroup.Game })
+	ecs.add({ scene, renderer, renderGroup: RenderGroup.Game, group: new Group() })
 }
 export const gameRenderGroupQuery = ecs.with('renderer', 'renderGroup', 'scene').where(e => e.renderGroup === RenderGroup.Game)
 export const cameraQuery = ecs.with('camera', 'renderGroup', 'cameraOffset').where(e => e.renderGroup === RenderGroup.Game)

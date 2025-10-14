@@ -1,4 +1,4 @@
-import type { AssetNames, Entity } from '@/global/entity'
+import type { AssetNames } from '@/global/entity'
 import { RigidBodyType } from '@dimforge/rapier3d-compat'
 import { createBackIn, easeInOut, linear } from 'popmotion'
 import { AdditiveBlending, Mesh, MeshBasicMaterial, SphereGeometry, Vector3 } from 'three'
@@ -24,12 +24,11 @@ export const itemBundle = (item: AssetNames['items']) => {
 	shadow.position.y = 0.3
 	shadow.castShadow = true
 	bundle.model.add(shadow)
-	return {
+	return inMap({
 		...bundle,
 		item: true,
-		...inMap(),
 		itemLabel: item,
-	} as const satisfies Entity
+	})
 }
 export const bobItems = () => itemsQuery.onEntityAdded.subscribe((entity) => {
 	tweens.add({

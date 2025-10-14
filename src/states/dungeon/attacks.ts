@@ -20,8 +20,7 @@ import { sleep } from '@/utils/sleep'
 const projectileBundle = (rotation: Quaternion, origin: Vector3, strength: Stat) => {
 	const model = new Mesh(new ConeGeometry(1, 4, 7), new MeshToonMaterial({ color: 0x2C1E31 }))
 	model.rotateX(Math.PI / 2)
-	return {
-		...inMap(),
+	return inMap({
 		projectile: true,
 		deathTimer: new Timer(3000, false),
 		model,
@@ -34,7 +33,7 @@ const projectileBundle = (rotation: Quaternion, origin: Vector3, strength: Stat)
 		position: origin.clone().add(new Vector3(0, 5, 10).applyQuaternion(rotation)),
 		bodyDesc: RigidBodyDesc.kinematicVelocityBased().lockRotations().setLinvel(...new Vector3(0, 0, 50).applyQuaternion(rotation).toArray()),
 		colliderDesc: ColliderDesc.cone(2, 1).setActiveCollisionTypes(ActiveCollisionTypes.ALL).setSensor(true).setRotation(new Quaternion().setFromAxisAngle(new Vector3(1, 0, 0), Math.PI / 2)),
-	} as const satisfies Entity
+	})
 }
 
 export const projectileAttack = ({ group, strength }: With<Entity, 'group' | 'strength'>, rotation: Quaternion) => {
@@ -66,16 +65,15 @@ export const honeyProjectile = ({ group, rotation }: With<Entity, 'group' | 'rot
 	const dir = new Vector3(0, force, force).applyQuaternion(rotation)
 	bundle.bodyDesc.setLinvel(...dir.toArray())
 	bundle.colliderDesc.setMass(0.1)
-	ecs.add({
+	ecs.add(inMap({
 		...bundle,
-		...inMap(),
 		rotation: rotation.clone(),
 		position: new Vector3(0, 5, 0).add(origin),
 		honeyProjectile: true,
 		emitter: honeyDrippingParticles(),
 		deathTimer: new Timer(2000, false),
 		archingProjectile: new Vector3(0, 150, 100),
-	})
+	}))
 }
 const archingQuery = ecs.with('archingProjectile', 'body', 'rotation').without('bodyDesc')
 export const applyArchingForce = () => archingQuery.onEntityAdded.subscribe(async (e) => {
@@ -87,12 +85,11 @@ export const honeySplat = () => {
 	for (const honey of honeyProjectilesQuery) {
 		if (honey.position.y <= 1) {
 			ecs.remove(honey)
-			ecs.add({
-				...inMap(),
+			ecs.add(inMap({
 				...honeySplatParticlesBundle(),
 				position: honey.position.clone().setY(1),
 				honeySpot: true,
-			})
+			}))
 		}
 	}
 }
@@ -115,12 +112,11 @@ export const pollenAttack = async ({ group }: With<Entity, 'group'>) => {
 	for (let i = 0; i < max; i++) {
 		const angle = i / max * Math.PI * 2 + (Math.random() - 0.5)
 		const distance = between(20, 70)
-		ecs.add({
-			...inMap(),
+		ecs.add(inMap({
 			position: new Vector3(Math.cos(angle) * distance, 0, Math.sin(angle) * distance).add(origin),
 			...pollenBundle(0xE8D282, 0xF7F3B7),
 			pollen: true,
-		})
+		}))
 		await sleep(between(200, 600))
 	}
 }

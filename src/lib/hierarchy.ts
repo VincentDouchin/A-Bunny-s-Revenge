@@ -1,15 +1,35 @@
 import type { With } from 'miniplex'
+import type { Object3D } from 'three'
 import type { ComponentsOfType, Entity } from '../global/entity'
+
 import type { Plugin } from './app'
+
 import type { app } from '@/global/states'
+
+import { Group } from 'three'
+import { RenderGroup } from '../global/entity'
 import { ecs } from '../global/init'
+
 import { set } from './app'
 
+const gameSceneQuery = ecs.with('scene', 'renderGroup').where(e => e.renderGroup === RenderGroup.Game)
+
+export const inGameScene = <T extends Entity>(e: T) => {
+	const sceneEntity = gameSceneQuery.first
+	if (sceneEntity) {
+		e.parent = sceneEntity
+		return e
+	} else {
+		throw new Error('map not found')
+	}
+}
+
 const mapQuery = ecs.with('map')
-export const inMap = () => {
+export const inMap = <T extends Entity>(e: T) => {
 	const map = mapQuery.first
 	if (map) {
-		return { parent: map }
+		e.parent = map
+		return e
 	} else {
 		throw new Error('map not found')
 	}
@@ -92,4 +112,51 @@ export const removeStateEntityPlugin: Plugin<typeof app> = (app) => {
 			}
 		})
 	}
+}
+
+const sceneQuery = ecs.with('scene', 'group')
+
+export const addToScene = (...components: Array<Exclude<ComponentsOfType<Object3D>, 'group'>>): Plugin<typeof app> => (app) => {
+	for (const component of components) {
+		const query = ecs.with(component, 'position')
+		const withoutGroup = query.without('group')
+		app.addSubscribers('default', () => sceneQuery.onEntityAdded.subscribe((e) => {
+			e.scene.add(e.group)
+		}))
+		app.addSubscribers('default', () => withoutGroup.onEntityAdded.subscribe((entity) => {
+			const group = new Group()
+			group.position.copy(entity.position)
+			group.add(entity[component])
+			ecs.addComponent(entity, 'group', group)
+			const children = entity.children
+			if (children) {
+				for (const child of children) {
+					if (child.group && !child.group.parent) {
+						group.add(child.group)
+					}
+				}
+			}
+		}))
+		const withGroup = query.with('group')
+		app.addSubscribers('default', () => withGroup.onEntityAdded.subscribe((entity) => {
+			if (entity[component]) entity.group?.add(entity[component])
+		}))
+		app.addSubscribers('default', () => withGroup.onEntityRemoved.subscribe((entity) => {
+			if (entity[component]) entity[component].removeFromParent()
+		}))
+	}
+	const withGroup = ecs.with('group')
+	app.addSubscribers('default', () => withGroup.onEntityAdded.subscribe((entity) => {
+		if (entity.parent?.group) {
+			entity.parent.group.add(entity.group)
+		}
+		if (entity.position) {
+			entity.group.position.x = entity.position.x
+			entity.group.position.y = entity.position.y
+			entity.group.position.z = entity.position.z
+		}
+	}))
+	app.addSubscribers('default', () => withGroup.onEntityRemoved.subscribe((entity) => {
+		entity.group.removeFromParent()
+	}))
 }

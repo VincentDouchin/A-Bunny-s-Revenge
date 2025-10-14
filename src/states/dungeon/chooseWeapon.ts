@@ -59,13 +59,12 @@ export const spawnWeaponsChoice = () => {
 		const offsetX = i * 20 - (weaponNames.length - 1) / 2 - 50
 
 		const weaponName = weaponNames[i]
-		const stump = ecs.add({
+		const stump = ecs.add(inMap({
 			model: stumpModel,
 			position: new Vector3(offsetX, 0, 10),
 			bodyDesc: RigidBodyDesc.fixed().lockRotations(),
 			colliderDesc: ColliderDesc.cylinder(4, 3).setActiveCollisionTypes(ActiveCollisionTypes.ALL),
 			rotation: new Quaternion().setFromAxisAngle(new Vector3(0, 1, 0), Math.random() * Math.PI * 2),
-			...inMap(),
 			weaponStand: weaponName,
 			interactable: Interactable.WeaponStand,
 			onPrimary(_stump, player) {
@@ -74,7 +73,7 @@ export const spawnWeaponsChoice = () => {
 				chooseWeapon(weaponName)
 				ecs.update(player, { weapon: weaponBundle(weaponName) })
 			},
-		})
+		}))
 		displayWeapon(weaponName, stump)
 	}
 }

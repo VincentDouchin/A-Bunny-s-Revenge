@@ -1,8 +1,8 @@
 import type { With } from 'miniplex'
 import type { BufferGeometry, Object3DEventMap } from 'three'
-import type { EntityData, ModelName } from './LevelEditor'
 import type { Actor, Doors, Entity } from '@/global/entity'
 import type { DungeonResources, FarmResources } from '@/global/states'
+import type { EntityData, ModelName } from '@/types/legecyLevel'
 import { ActiveCollisionTypes, ColliderDesc, RigidBodyDesc } from '@dimforge/rapier3d-compat'
 import FastNoiseLite from 'fastnoise-lite'
 import { Color, ConeGeometry, DoubleSide, Euler, Group, Material, Mesh, MeshBasicMaterial, MeshPhongMaterial, Object3D, PlaneGeometry, PointLight, Quaternion, SphereGeometry, Vector2, Vector3 } from 'three'
@@ -174,13 +174,12 @@ export const props: Props = [
 		data: { name: null },
 		bundle(e, data) {
 			if (app.isEnabled('debug') || !data.data.name) return e
-			return {
+			return inMap({
 				actor: data.data.name,
 				position: e.position,
 				rotation: e.rotation,
 				targetRotation: e.rotation.clone(),
-				...inMap(),
-			}
+			})
 		},
 	},
 	{
@@ -699,10 +698,8 @@ export const props: Props = [
 						const rot = new Euler().setFromQuaternion(entity.rotation)
 						rot.y += Math.PI
 						const targetRotation = new Quaternion().setFromEuler(rot)
-						const owl = ecs.add({
-							...inMap(),
+						const owl = ecs.add(inMap({
 							model: owlModel,
-							// ...dialogBundle('Seller'),
 							kayAnimator: new Animator(owlModel, assets.characters.OWL_animated.animations),
 							rotation: new Quaternion(),
 							targetRotation,
@@ -711,7 +708,7 @@ export const props: Props = [
 							colliderDesc: ColliderDesc.cylinder(5, 3),
 							npcName: 'Owl',
 							npc: true,
-						})
+						}))
 						owl.kayAnimator.playAnimation('Idle')
 					},
 				}

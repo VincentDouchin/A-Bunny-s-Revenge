@@ -148,15 +148,14 @@ const fishBundle = (parentPos: Vector3) => {
 	})
 	const rot = new Quaternion().setFromAxisAngle(new Vector3(0, 1, 0), Math.PI * 2 * Math.random())
 	const dist = 20
-	return {
-		...inMap(),
+	return inMap({
 		targetRotation: rot.clone(),
 		rotation: rot,
 		position: parentPos.add(new Vector3(between(-dist, dist), 0, between(-dist, dist))).setY(-2),
 		model,
 		fish: new Timer(between(3000, 5000), true),
 		...stateBundle(States.fish, 'wander'),
-	}
+	})
 }
 const fishSpawnerQuery = ecs.with('fishSpawner', 'group')
 const addFish = () => fishSpawnerQuery.onEntityAdded.subscribe((e) => {

@@ -125,12 +125,11 @@ export const sporeBehavior = createBehaviorTree(
 					enteringState('attack'),
 					action((e) => {
 						e.enemyAnimator.playOnce('attacking')
-						ecs.add({
-							...inMap(),
+						ecs.add(inMap({
 							position: e.position.clone().add(new Vector3(0, 0, 15).applyQuaternion(e.rotation)),
 							...pollenBundle(0xCFE0ED, 0xCFD1ED),
 							sleepingPowder: true,
-						})
+						}))
 					}),
 				),
 				sequence(

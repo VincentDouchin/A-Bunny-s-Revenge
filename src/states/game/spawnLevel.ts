@@ -1,9 +1,9 @@
 import type { Vec2, Vector4Like } from 'three'
-import type { EntityData, Level, LevelType } from '@/debug/LevelEditor'
 import type { InstanceHandle } from '@/global/assetLoaders'
 import type { Entity } from '@/global/entity'
 import type { app } from '@/global/states'
 import type { AppStates, UpdateSystem } from '@/lib/app'
+import type { EntityData, Level, LevelType } from '@/types/legecyLevel'
 import { ActiveEvents, ColliderDesc, RigidBodyDesc, RigidBodyType } from '@dimforge/rapier3d-compat'
 import FastNoiseLite from 'fastnoise-lite'
 import { CanvasTexture, Euler, Group, Mesh, MeshToonMaterial, PlaneGeometry, Quaternion, Vector2, Vector3 } from 'three'
@@ -12,7 +12,7 @@ import { canvasToArray, canvasToGrid, instanceMesh } from '@/global/assetLoaders
 import { assets, ecs, levelsData, time } from '@/global/init'
 import { getBoundingBox, getSecondaryColliders } from '@/lib/colliders'
 import { collisionGroups } from '@/lib/collisionGroups'
-import { inMap } from '@/lib/hierarchy'
+import { inGameScene, inMap } from '@/lib/hierarchy'
 import { getSize } from '@/lib/models'
 import { GroundMaterial, WaterMaterial } from '@/shaders/materials'
 import { getScreenBuffer, scaleCanvas } from '@/utils/buffer'
@@ -74,8 +74,7 @@ export const spawnTrees = (level: Level, parent: Entity, dungeonLevel?: number, 
 			if (val.x === 255) treesInstances.push(instanceHandle)
 			treeMap.set(position, instanceHandle)
 			const treeSize = getSize(treeGenerator.obj).multiplyScalar(size)
-			ecs.add({
-				...inMap(),
+			ecs.add(inMap({
 				position,
 				instanceHandle,
 				group: new Group(),
@@ -87,12 +86,12 @@ export const spawnTrees = (level: Level, parent: Entity, dungeonLevel?: number, 
 				obstacle: true,
 				withTimeUniform: true,
 				parent,
-			})
+			}))
 		}
 	})
 	for (const tree of trees) {
 		const group = tree.process()
-		ecs.add({ group, ...inMap(), tree: true, parent })
+		ecs.add(inMap({ group, tree: true, parent }))
 	}
 	for (const treesInstance of treesInstances) {
 		treesInstance.setUniform('playerZ', 1)
@@ -143,22 +142,21 @@ export const spawnGrass = (level: Level, parent: Entity, dungeonLevel?: number) 
 			: grass[Math.floor(grass.length * Math.abs(nF2))]
 		const instanceHandle = grassGenerator.addAt(position, 1, new Euler(0, nF2, 0))
 		instances.set(instanceHandle, position)
-		ecs.add({
-			...inMap(),
+		ecs.add(inMap({
 			position,
 			instanceHandle,
 			grass: true,
 			parent,
 			withTimeUniform: true,
-		})
+		}))
 	})
 	grass.forEach((t) => {
 		const group = t.process()
-		ecs.add({ group, ...inMap(), grass: true, parent })
+		ecs.add(inMap({ group, grass: true, parent }))
 	})
 	flowers.forEach((t) => {
 		const group = t.process()
-		ecs.add({ group, ...inMap(), grass: true, parent })
+		ecs.add(inMap({ group, grass: true, parent }))
 	})
 	for (const [handle, pos] of instances.entries()) {
 		handle.setUniform('pos', pos)
@@ -269,10 +267,8 @@ export const spawnGroundAndTrees = (level: Level, dungeonLevel?: number) => {
 	const colliderEast = ColliderDesc.cuboid(1, 50, level.size.y / 2).setTranslation(level.size.x / 2 + 0.5, 0, 0)
 	const colliderWest = ColliderDesc.cuboid(1, 50, level.size.y / 2).setTranslation(-(level.size.x / 2 + 0.5), 0, 0)
 	const secondaryCollidersDesc = [colliderNorth, colliderSouth, colliderEast, colliderWest]
-	const ground = ecs.add({
+	const ground = ecs.add(inMap({
 		model: groundMesh,
-
-		...inMap(),
 		position: new Vector3(0, 0, 0),
 		bodyDesc: new RigidBodyDesc(RigidBodyType.Fixed)
 			.setCcdEnabled(true),
@@ -289,7 +285,7 @@ export const spawnGroundAndTrees = (level: Level, dungeonLevel?: number) => {
 			.setActiveEvents(ActiveEvents.COLLISION_EVENTS),
 		ground: true,
 		secondaryCollidersDesc,
-	})
+	}))
 	ecs.add({
 		parent: ground,
 		...waterBundle(level),
@@ -302,12 +298,12 @@ export const spawnGroundAndTrees = (level: Level, dungeonLevel?: number) => {
 export const spawnLevel = (type: LevelType, stateEntity: AppStates<typeof app>) => () => {
 	const level = levelsData.levels.find(level => level.type === type)
 	if (!level) throw new Error(`can\'t find level of type ${type}`)
-	ecs.add({ map: level.id, stateEntity })
+	ecs.add(inGameScene({ map: level.id, stateEntity, group: new Group() }))
 	spawnGroundAndTrees(level)
 }
 
 export const spawnDungeon: UpdateSystem<typeof app, 'dungeon'> = ({ dungeon, dungeonLevel }) => {
-	ecs.add({ map: dungeon.plan.id, dungeon, stateEntity: 'dungeon' })
+	ecs.add(inGameScene({ map: dungeon.plan.id, dungeon, stateEntity: 'dungeon', group: new Group() }))
 	spawnGroundAndTrees(dungeon.plan, dungeonLevel)
 
 	if (dungeon.type === RoomType.NPC && dungeon.encounter) {
@@ -327,15 +323,14 @@ export const spawnLevelData: UpdateSystem<typeof app, 'dungeon' | 'farm' | void>
 				const rotation = new Quaternion().fromArray(entityData.rotation)
 				const bundleFn = props.find(p => p.models.includes(entityData.model))?.bundle
 
-				const entity = {
+				const entity = inMap({
 					rotation,
 					position,
 					...getBoundingBox(entityData.model, model, colliderData, entityData.scale ?? 1),
 					...getSecondaryColliders(model),
 					entityId,
 					model,
-					...inMap(),
-				} as const satisfies Entity
+				})
 
 				if (bundleFn) {
 					ecs.add(bundleFn(entity, entityData as EntityData<never>, resources))
