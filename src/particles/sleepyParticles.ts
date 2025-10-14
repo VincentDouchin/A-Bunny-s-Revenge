@@ -21,7 +21,6 @@ export const sleepyEmitter = () => {
 		emissionBursts: [],
 		shape: new ConeEmitter({ radius: 2 }),
 		material: mat,
-		renderMode: RenderMode.BillBoard,
 		renderOrder: 1,
 		behaviors: [
 			new SizeOverLife(new PiecewiseBezier([[new Bezier(1, 0.75, 0.50, 0.25), 0]])),

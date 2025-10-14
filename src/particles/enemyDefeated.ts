@@ -1,5 +1,5 @@
 import { CircleGeometry, MeshBasicMaterial } from 'three'
-import { Bezier, ConeEmitter, ConstantValue, IntervalValue, ParticleSystem, PiecewiseBezier, RandomColor, RandomQuatGenerator, RenderMode, SizeOverLife, SpeedOverLife } from 'three.quarks'
+import { Bezier, ConeEmitter, ConstantValue, IntervalValue, ParticleSystem, PiecewiseBezier, RandomColor, RandomQuatGenerator, SizeOverLife, SpeedOverLife } from 'three.quarks'
 import { colorToVec4 } from './honeySplatParticles'
 
 const mat = new MeshBasicMaterial({ depthWrite: false })
@@ -22,7 +22,6 @@ export const enemyDefeated = () => {
 		emissionBursts: [],
 		shape: new ConeEmitter({ radius: 4 }),
 		material: mat,
-		renderMode: RenderMode.BillBoard,
 		renderOrder: 1,
 		behaviors: [
 			new SizeOverLife(new PiecewiseBezier([[new Bezier(1, 0.75, 0.50, 0.25), 0]])),

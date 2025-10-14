@@ -25,7 +25,6 @@ export const pollenBundle = (colorStart: ColorRepresentation, colorEnd: ColorRep
 		instancingGeometry: geo,
 		material: mat,
 		emissionBursts: [],
-		renderMode: RenderMode.BillBoard,
 		behaviors: [
 			new ColorOverLife(new Gradient(
 				[[new Vector3(...new Color(colorStart).toArray()), 1], [new Vector3(...new Color(colorEnd).toArray()), 1]],

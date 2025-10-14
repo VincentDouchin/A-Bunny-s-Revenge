@@ -18,7 +18,6 @@ export const dash = (duration: number) => {
 		emissionOverTime: new ConstantValue(8),
 		shape: new PointEmitter(),
 		material: mat,
-		renderMode: RenderMode.BillBoard,
 		behaviors: [
 			new SizeOverLife(new PiecewiseBezier([[new Bezier(1, 0.90, 0.80, 0.10), 0]])),
 		],

@@ -19,7 +19,6 @@ export const chestAppearing = () => {
 		emissionBursts: [],
 		shape: new ConeEmitter({ radius: 5 }),
 		material: mat,
-		renderMode: RenderMode.BillBoard,
 		renderOrder: 2,
 		behaviors: [
 			new SizeOverLife(new PiecewiseBezier([[new Bezier(1, 0.75, 0.20, 0), 0]])),

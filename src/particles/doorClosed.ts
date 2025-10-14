@@ -19,7 +19,6 @@ export const doorClosed = () => {
 		emissionBursts: [],
 		shape: new MeshSurfaceEmitter(new PlaneGeometry(50, 20)),
 		material: mat,
-		renderMode: RenderMode.BillBoard,
 		renderOrder: 2,
 		behaviors: [
 			new SizeOverLife(new PiecewiseBezier([[new Bezier(1, 0.75, 0.75, 0.25), 0]])),
