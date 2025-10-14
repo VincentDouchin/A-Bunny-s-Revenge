@@ -1,14 +1,11 @@
 import type { Animations } from '@assets/animations'
-import { AmbientLight, Euler, Group, Mesh, MeshBasicMaterial, OrthographicCamera, PerspectiveCamera, Quaternion, Scene, SphereGeometry, Vector3, WebGLRenderer } from 'three'
-import { CSS2DObject } from 'three/examples/jsm/renderers/CSS2DRenderer'
+import { AmbientLight, OrthographicCamera, Quaternion, Scene, Vector3, WebGLRenderer } from 'three'
 import { clone } from 'three/examples/jsm/utils/SkeletonUtils'
 import { degToRad } from 'three/src/math/MathUtils'
 import { Animator } from '@/global/animator'
 import { RenderGroup } from '@/global/entity'
 import { assets, ecs } from '@/global/init'
 import { inMap } from '@/lib/hierarchy'
-import { traverseFind } from '@/lib/models'
-import { speaker } from '@/utils/dialogHelpers'
 
 export const setupDialogs = () => {
 	const dist = 10

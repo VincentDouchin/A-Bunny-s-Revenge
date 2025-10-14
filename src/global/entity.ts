@@ -74,7 +74,7 @@ export enum MenuType {
 export enum RenderGroup {
 	MainMenu,
 	Game,
-	Dialog
+	Dialog,
 }
 
 export const actors = ['cellarDoor', 'houseDoor', 'playerIntro', 'basketIntro', 'intro', 'cellarStairs', 'oven', 'cookingPot', 'blanket'] as const
