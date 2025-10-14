@@ -1,5 +1,5 @@
 import { MeshBasicMaterial, PlaneGeometry } from 'three'
-import { Bezier, ConeEmitter, ConstantValue, IntervalValue, ParticleSystem, PiecewiseBezier, RandomQuatGenerator, RenderMode, SizeOverLife } from 'three.quarks'
+import { Bezier, ConeEmitter, ConstantValue, IntervalValue, ParticleSystem, PiecewiseBezier, RandomQuatGenerator, SizeOverLife } from 'three.quarks'
 import { assets } from '@/global/init'
 
 const geo = new PlaneGeometry(3, 3)

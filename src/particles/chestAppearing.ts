@@ -1,5 +1,5 @@
 import { CircleGeometry, MeshBasicMaterial, Vector4 } from 'three'
-import { Bezier, ConeEmitter, ConstantColor, IntervalValue, ParticleSystem, PiecewiseBezier, RenderMode, SizeOverLife, SpeedOverLife } from 'three.quarks'
+import { Bezier, ConeEmitter, ConstantColor, IntervalValue, ParticleSystem, PiecewiseBezier, SizeOverLife, SpeedOverLife } from 'three.quarks'
 
 const geo = new CircleGeometry(3, 8)
 const mat = new MeshBasicMaterial({ depthWrite: false })
