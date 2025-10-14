@@ -741,17 +741,19 @@ export function Editor() {
 	.editor{
 		height: calc(100dvh - 1rem);
 		padding: 0.5rem;	
+		display: grid;
+		grid-template-rows: 4fr 1fr
 	}
 	.top{
 		display: grid;
 		grid-template-columns: 1fr 5fr 1fr;
-		height: 80%;
 		overflow-y: hidden;
 		gap:0.5rem;
 		margin-bottom: 0.5rem;
 	}
 	.map-editors{
 		height: 100%;
+		overflow-y: auto;
 	}
 	.left{
 		height: 100%;

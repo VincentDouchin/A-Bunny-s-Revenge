@@ -53,6 +53,7 @@ export type StaticAssetPath =
   'characters/Racco_A-optimized.glb' |
   'characters/Racco_B-optimized.glb' |
   'characters/Racco_C-optimized.glb' |
+  'characters/Reaper-optimized.glb' |
   'characters/Shaga_A-optimized.glb' |
   'characters/Shaga_B-optimized.glb' |
   'characters/Shaga_C-optimized.glb' |
@@ -104,6 +105,38 @@ export type StaticAssetPath =
   'crops/Wheat_2-optimized.glb' |
   'crops/Wheat_3-optimized.glb' |
   'crops/Wheat_4-optimized.glb' |
+  'emotes/container_bubbles.png' |
+  'emotes/container_spikey.png' |
+  'emotes/container_square.png' |
+  'emotes/emote_alert.png' |
+  'emotes/emote_anger.png' |
+  'emotes/emote_bars.png' |
+  'emotes/emote_cash.png' |
+  'emotes/emote_circle.png' |
+  'emotes/emote_cloud.png' |
+  'emotes/emote_cross.png' |
+  'emotes/emote_dots1.png' |
+  'emotes/emote_dots2.png' |
+  'emotes/emote_dots3.png' |
+  'emotes/emote_drop.png' |
+  'emotes/emote_drops.png' |
+  'emotes/emote_exclamation.png' |
+  'emotes/emote_exclamations.png' |
+  'emotes/emote_faceAngry.png' |
+  'emotes/emote_faceHappy.png' |
+  'emotes/emote_faceSad.png' |
+  'emotes/emote_heart.png' |
+  'emotes/emote_heartBroken.png' |
+  'emotes/emote_hearts.png' |
+  'emotes/emote_idea.png' |
+  'emotes/emote_laugh.png' |
+  'emotes/emote_music.png' |
+  'emotes/emote_question.png' |
+  'emotes/emote_sleep.png' |
+  'emotes/emote_sleeps.png' |
+  'emotes/emote_star.png' |
+  'emotes/emote_stars.png' |
+  'emotes/emote_swirl.png' |
   'fonts/EnchantedLand.otf' |
   'fonts/GrapeSoda.ttf' |
   'fonts/NanoPlus.ttf' |
@@ -416,6 +449,7 @@ export type StaticAssetDirectory =
   'characters/' |
   'clouds/' |
   'crops/' |
+  'emotes/' |
   'fonts/' |
   'fruit_trees/' |
   'gardenPlots/' |
@@ -505,6 +539,7 @@ export const assets = new Set<string>([
   'characters/Racco_A-optimized.glb',
   'characters/Racco_B-optimized.glb',
   'characters/Racco_C-optimized.glb',
+  'characters/Reaper-optimized.glb',
   'characters/Shaga_A-optimized.glb',
   'characters/Shaga_B-optimized.glb',
   'characters/Shaga_C-optimized.glb',
@@ -556,6 +591,38 @@ export const assets = new Set<string>([
   'crops/Wheat_2-optimized.glb',
   'crops/Wheat_3-optimized.glb',
   'crops/Wheat_4-optimized.glb',
+  'emotes/container_bubbles.png',
+  'emotes/container_spikey.png',
+  'emotes/container_square.png',
+  'emotes/emote_alert.png',
+  'emotes/emote_anger.png',
+  'emotes/emote_bars.png',
+  'emotes/emote_cash.png',
+  'emotes/emote_circle.png',
+  'emotes/emote_cloud.png',
+  'emotes/emote_cross.png',
+  'emotes/emote_dots1.png',
+  'emotes/emote_dots2.png',
+  'emotes/emote_dots3.png',
+  'emotes/emote_drop.png',
+  'emotes/emote_drops.png',
+  'emotes/emote_exclamation.png',
+  'emotes/emote_exclamations.png',
+  'emotes/emote_faceAngry.png',
+  'emotes/emote_faceHappy.png',
+  'emotes/emote_faceSad.png',
+  'emotes/emote_heart.png',
+  'emotes/emote_heartBroken.png',
+  'emotes/emote_hearts.png',
+  'emotes/emote_idea.png',
+  'emotes/emote_laugh.png',
+  'emotes/emote_music.png',
+  'emotes/emote_question.png',
+  'emotes/emote_sleep.png',
+  'emotes/emote_sleeps.png',
+  'emotes/emote_star.png',
+  'emotes/emote_stars.png',
+  'emotes/emote_swirl.png',
   'fonts/EnchantedLand.otf',
   'fonts/GrapeSoda.ttf',
   'fonts/NanoPlus.ttf',

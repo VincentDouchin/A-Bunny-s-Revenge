@@ -33,8 +33,9 @@ export const OutlineText = (props: OutlineTextProps) => {
 	`
 	return <div class="outline-text" use:solid-styled>{props.children}</div>
 }
+export const GoldContainer = (props: JSX.HTMLAttributes<HTMLDivElement> & { children: JSXElement | JSXElement [], padding?: string }) => {
+	const { children, padding, class: givenClass, ...rest } = props
 
-export const GoldContainer = (props: { children: JSXElement | JSXElement [], padding?: string }) => {
 	css/* css */`
 	.styled-container {
 		box-shadow: inset 0px 0px 1rem 0px black;
@@ -42,10 +43,10 @@ export const GoldContainer = (props: { children: JSXElement | JSXElement [], pad
 		padding: ${props.padding ?? '2rem'};
 		border-radius: 1rem;
 		background: var(--brown-dark);
-		transition: all 0.5s
+		transition: all 0.5s;
 	}
 	`
-	return <div class="styled-container">{props.children}</div>
+	return <div class={['styled-container', givenClass ?? ''].join(' ')} {...rest} use:solid-styled>{props.children}</div>
 }
 
 export const InventoryTitle = (props: { children: JSXElement, color?: string }) => {

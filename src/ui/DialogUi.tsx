@@ -123,7 +123,7 @@ export const DialogUi = () => {
 	css/* css */`
 	.dialog-container {
 		color: white;
-		transform:translateY(-50%);
+		transform:translateY(-100%);
 		font-family: NanoPlus;
 		font-size: 2rem;
 		background: hsl(0, 0%, 0%, 50%);
@@ -140,7 +140,7 @@ export const DialogUi = () => {
 		translate: 1rem -50%;
 		font-family: NanoPlus;
 		font-size: 1.5rem;
-		top: -50%;
+		top: -100%;
 		z-index: 1;
 	}`
 	return (

@@ -5,7 +5,7 @@
 	"private": true,
 	"scripts": {
 		"dev": "vite",
-		"editor": "cd editor && npm run dev",
+		"editor": "cd editor && npm run tauri dev",
 		"build": "tsc && vite build",
 		"preview": "vite preview",
 		"test": "vitest",

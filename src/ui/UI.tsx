@@ -22,6 +22,7 @@ import { KeyboardControls } from './KeyboardControl'
 import { KeyItem } from './KeyItem'
 import { PauseUi } from './PauseUI'
 import { GameProvider } from './store'
+import { TestDialogUi } from './TestDialogUi'
 import { TopRight } from './TopRight'
 import { TouchControls } from './TouchControls'
 import { TutorialUi } from './Tutorial'
@@ -54,6 +55,9 @@ export const UI = () => {
 				</StateUi>
 				<StateUi state="mainMenu">
 					<MainMenuUi />
+				</StateUi>
+				<StateUi state="testDialog">
+					<TestDialogUi />
 				</StateUi>
 				<Errors />
 				<PauseUi />

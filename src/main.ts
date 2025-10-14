@@ -3,6 +3,7 @@ import { chargingBehavior, jumpingBehavior, meleeBehavior, rangeBehavior, seedli
 import { playerBehavior } from './behaviors/playerBehavior'
 import { pumpkinBossPlugin } from './behaviors/pumpkinBossBehavior'
 import { debugPlugin } from './debug/debugPlugin'
+import { setupDialogs } from './dialogs/setupDialogs'
 import { updateAnimations } from './global/animations'
 import { initCamera, initializeCameraPosition, moveCamera } from './global/camera'
 import { coroutines, inputManager, musicManager, questManager, resetSave, thumbnailRenderer, time, tweens, ui } from './global/init'
@@ -138,4 +139,6 @@ app
 	.onEnter('village', compileShaders, initTexturesItemsAndEnemies)
 	.onUpdate('village', collideWithDoorVillage)
 	.addPlugins(introQuestActors('game'))
+	// ! Test Dialog
+	.onEnter('testDialog', spawnLevel('village', 'village'), moveCamera(true), setupDialogs)
 	.start()

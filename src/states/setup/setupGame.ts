@@ -19,7 +19,11 @@ export const setupGame = async () => {
 		return
 	}
 	app.enable('game')
-	if (params.debugBoss) {
+	if (window.location.search.includes('testDialog')) {
+		app.enable('testDialog')
+		updateRenderSize()
+		updateCameraZoom()
+	} else	if (params.debugBoss) {
 		const bossRoom = assignPlanAndEnemies([{ position: { x: 0, y: 0 }, connections: { north: 1, south: null }, type: RoomType.Boss }], 0)
 		bossRoom[0].enemies = [bosses[selectedBoss.boss](0)]
 		app.enable('dungeon', { dungeon: bossRoom[0], direction: Direction.S, firstEntry: true, playerHealth: 10, dungeonLevel: 0, weapon: 'Hoe' })

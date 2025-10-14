@@ -66,6 +66,10 @@ export const initThree = () => {
 }
 export const gameRenderGroupQuery = ecs.with('renderer', 'renderGroup', 'scene').where(e => e.renderGroup === RenderGroup.Game)
 export const cameraQuery = ecs.with('camera', 'renderGroup', 'cameraOffset').where(e => e.renderGroup === RenderGroup.Game)
+
+export const dialogRenderGroupQuery = ecs.with('renderer', 'renderGroup', 'scene').where(e => e.renderGroup === RenderGroup.Dialog)
+export const dialogCameraQuery = ecs.with('camera', 'renderGroup', 'cameraOffset').where(e => e.renderGroup === RenderGroup.Dialog)
+
 export const gameCameraQuery = cameraQuery.with('cameraOffset').where(e => e.renderGroup === RenderGroup.Game)
 const outlineQuery = ecs.with('outline')
 export const renderGame = () => {
@@ -96,7 +100,15 @@ export const renderGame = () => {
 		renderer.setRenderTarget(null)
 	}
 	sobelQuad.render(renderer)
+	const dialogCamera = dialogCameraQuery.first
+	const dialogRenderGroup = dialogRenderGroupQuery.first
 
+	if (dialogCamera && dialogRenderGroup) {
+		renderer.autoClear = false
+		renderer.clearDepth()
+		renderer.render(dialogRenderGroup.scene, dialogCamera.camera)
+		renderer.autoClear = true
+	}
 	cssRenderer.render(scene, camera)
 }
 
