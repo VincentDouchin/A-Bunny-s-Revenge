@@ -10,7 +10,8 @@
 			"@total-typescript/ts-reset",
 			"./src/types/three.meshline.d.ts"
 
-		]
+		],
+		"plugins": [{ "name": "typescript-plugin-toml" }]
 	},
 	"include": ["src", "assets", "vite"]
 }

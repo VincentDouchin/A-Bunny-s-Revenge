@@ -6,6 +6,7 @@ import { VitePWA } from 'vite-plugin-pwa'
 import solidPlugin from 'vite-plugin-solid'
 import solidStyledPlugin from 'vite-plugin-solid-styled'
 import solidSvg from 'vite-plugin-solid-svg'
+import { ViteToml } from 'vite-plugin-toml'
 import { assetPipeline } from './scripts/assetPipeline'
 import { ConvertAudioFiles } from './scripts/convertAudioFiles'
 import { ConvertFBXToGLB } from './scripts/convertFbx2GLB'
@@ -87,6 +88,7 @@ export default defineConfig(async () => {
 					],
 				},
 			}),
+			ViteToml(),
 		],
 		assetsInclude: ['**/*.glb'],
 		base: '',

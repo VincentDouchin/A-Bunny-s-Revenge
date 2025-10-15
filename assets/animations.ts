@@ -101,6 +101,8 @@ export interface Animations {
 
 'Racco_C' : 'Attack' | 'Damage' | 'Die' | 'Idle' | 'Move'
 
+'Reaper' : 'Cast Spell' | 'Dash Forward In Place' | 'Dash Forward W Root' | 'Die' | 'Fly Forward In Place' | 'Fly Forward W Root' | 'Idle' | 'Idle' | 'Idle' | 'Idle' | 'Idle' | 'Idle' | 'Idle' | 'Idle' | 'Idle' | 'Idle' | 'Idle To Spin Attack' | 'Projectile Attack' | 'Slash Attack 01' | 'Slash Attack 02' | 'Spawn' | 'Spin Attack' | 'Spin Attack To Idle' | 'Take Damage' | 'Turn Left' | 'Turn Right' | 'Underground'
+
 'Shaga_A' : 'Attack' | 'Damage' | 'Die' | 'Idle' | 'Move'
 
 'Shaga_B' : 'Attack' | 'Damage' | 'Die' | 'Idle' | 'Move'
