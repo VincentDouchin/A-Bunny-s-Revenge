@@ -1,6 +1,6 @@
 import type { Object3D, Object3DEventMap } from 'three'
-import type { CollidersData, ModelName } from '@/debug/LevelEditor'
 import type { Entity } from '@/global/entity'
+import type { CollidersData, ModelName } from '@/types/legecyLevel'
 import { ActiveCollisionTypes, ColliderDesc, RigidBodyDesc, RigidBodyType } from '@dimforge/rapier3d-compat'
 import { Box3, BufferGeometry, Mesh, Quaternion, Vector3 } from 'three'
 import { clone } from 'three/examples/jsm/utils/SkeletonUtils.js'

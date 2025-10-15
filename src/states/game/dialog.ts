@@ -9,7 +9,7 @@ export const dialogBundle = (dialog: Dialog) => {
 		interactable: Interactable.Talk,
 	} as const satisfies Entity
 }
-const playerQuery = ecs.with('player', 'playerControls', 'position', 'rotation')
+const playerQuery = ecs.with('player', 'position', 'rotation')
 
 const npcQuery = ecs.with('npc', 'model', 'position', 'rotation', 'group')
 export const turnNPCHead = () => {

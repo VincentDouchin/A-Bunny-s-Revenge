@@ -1,22 +1,19 @@
 import type { MenuDir } from './components/Menu'
 import VolumeOn from '@assets/icons/volume-high-solid.svg'
 import VolumeOff from '@assets/icons/volume-xmark-solid.svg'
-import { createEffect, createMemo, For, Show } from 'solid-js'
+import { createEffect, For, Show } from 'solid-js'
 import { css } from 'solid-styled'
 import atom from 'solid-use/atom'
-import { settings, ui } from '@/global/init'
+import { menuInputs, settings, ui } from '@/global/init'
 import { renderer } from '@/global/rendering'
 import { setAllMuted } from '@/global/sounds'
 import { isStandalone } from '@/states/game/FullscreenUi'
 import { menuItem } from './components/Menu'
 import { CheckBox, InventoryTitle, OutlineText, SwitchButtons } from './components/styledComponents'
-import { useGame } from './store'
 
 menuItem
 
 export const Settings = (props: { menu: MenuDir }) => {
-	const context = useGame()
-	const inputs = createMemo(() => context?.player().menuInputs)
 	// ! FULLSCREEN
 	const fullscreenSelected = atom(false)
 	// ! CONTROLS
@@ -38,10 +35,10 @@ export const Settings = (props: { menu: MenuDir }) => {
 	})
 	ui.updateSync(() => {
 		if (uiScaleSelected()) {
-			if (inputs()?.get('left').justPressed) {
+			if (menuInputs?.get('left').justPressed) {
 				settings.uiScale = Math.max(settings.uiScale - 1, 2)
 			}
-			if (inputs()?.get('right').justPressed) {
+			if (menuInputs?.get('right').justPressed) {
 				settings.uiScale = Math.min(settings.uiScale + 1, 15)
 			}
 		}
@@ -53,10 +50,10 @@ export const Settings = (props: { menu: MenuDir }) => {
 	})
 	ui.updateSync(() => {
 		if (uiOpacitySelected()) {
-			if (inputs()?.get('left').justPressed) {
+			if (menuInputs?.get('left').justPressed) {
 				settings.uiOpacity = Math.max(settings.uiOpacity - 10, 0)
 			}
-			if (inputs()?.get('right').justPressed) {
+			if (menuInputs?.get('right').justPressed) {
 				settings.uiOpacity = Math.min(settings.uiOpacity + 10, 100)
 			}
 		}
@@ -129,10 +126,10 @@ export const Settings = (props: { menu: MenuDir }) => {
 						}
 						ui.updateSync(() => {
 							if (selected()) {
-								if (inputs()?.get('left').justPressed) {
+								if (menuInputs?.get('left').justPressed) {
 									settings[volumeName] = Math.max(settings[volumeName] - 5, 0)
 								}
-								if (inputs()?.get('right').justPressed) {
+								if (menuInputs?.get('right').justPressed) {
 									settings[volumeName] = Math.min(settings[volumeName] + 5, 100)
 								}
 							}

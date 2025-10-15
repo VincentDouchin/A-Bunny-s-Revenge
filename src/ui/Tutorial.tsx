@@ -3,7 +3,7 @@ import { css } from 'solid-styled'
 import { Transition } from 'solid-transition-group'
 import atom from 'solid-use/atom'
 import { showTutorialEvent } from '@/global/events'
-import { ui } from '@/global/init'
+import { menuInputs, ui } from '@/global/init'
 import { app } from '@/global/states'
 import { GoldContainer, OutlineText } from './components/styledComponents'
 import { InputIcon } from './InputIcon'
@@ -37,39 +37,33 @@ export const TutorialUi = () => {
 		<Transition name="slide">
 			<Show when={showTurorial()}>
 				{(tutorial) => {
-					return (
-						<Show when={context?.player()}>
-							{(player) => {
-								const close = () => {
-									showTurorial(null)
-								}
+					const close = () => {
+						showTurorial(null)
+					}
 
-								ui.updateSync(() => {
-									if (player().menuInputs.get('validate').justPressed) {
-										close()
-									}
-								})
-								onCleanup(() => {
-									app.disable('cutscene')
-								})
-								return (
-									<div class="tutorial-container">
-										<GoldContainer>
-											<Show when={tutorial() === TutorialWindow.Movement}>
-												<MovementTutorial context={context} player={player} />
-											</Show>
-											<Show when={tutorial() === TutorialWindow.Farming}>
-												<FarmingTutorial />
-											</Show>
-											<button class="styled" onClick={close}>
-												<InputIcon input={player().menuInputs.get('validate')} />
-												<OutlineText>Continue</OutlineText>
-											</button>
-										</GoldContainer>
-									</div>
-								)
-							}}
-						</Show>
+					ui.updateSync(() => {
+						if (menuInputs.get('validate').justPressed) {
+							close()
+						}
+					})
+					onCleanup(() => {
+						app.disable('cutscene')
+					})
+					return (
+						<div class="tutorial-container">
+							<GoldContainer>
+								<Show when={tutorial() === TutorialWindow.Movement}>
+									<MovementTutorial context={context} />
+								</Show>
+								<Show when={tutorial() === TutorialWindow.Farming}>
+									<FarmingTutorial />
+								</Show>
+								<button class="styled" onClick={close}>
+									<InputIcon input={menuInputs.get('validate')} />
+									<OutlineText>Continue</OutlineText>
+								</button>
+							</GoldContainer>
+						</div>
 					)
 				}}
 			</Show>

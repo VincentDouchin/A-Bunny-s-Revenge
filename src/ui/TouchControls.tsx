@@ -8,7 +8,7 @@ import { createMemo, onCleanup, Show } from 'solid-js'
 import { css } from 'solid-styled'
 import { Transition } from 'solid-transition-group'
 import { Vector2 } from 'three'
-import { ecs } from '@/global/init'
+import { ecs, gameInputs } from '@/global/init'
 import { atom } from '@/lib/uiManager'
 import { StateUi } from './components/StateUi'
 import { OutlineText } from './components/styledComponents'
@@ -118,7 +118,6 @@ export const TouchControls = () => {
 	return (
 		<Show when={context?.showTouch() && context?.player()}>
 			{(player) => {
-				const playerInputs = player().playerControls.touchController
 				const pixelOffset = atom(new Vector2(0, 0))
 				const centerPostion = createMemo(() => `translate(calc(-50% + ${pixelOffset().x}px),calc(-50% + ${pixelOffset().y}px) )`)
 				const container = atom<null | HTMLDivElement>(null)
@@ -142,13 +141,10 @@ export const TouchControls = () => {
 							}
 							pixelOffset(newPos)
 							const input = newPos.clone().normalize().multiplyScalar(newPos.length() / max)
-							const touchController = playerInputs
-							if (touchController) {
-								touchController.set('left', input.x < 0 ? -input.x : 0)
-								touchController.set('right', input.x > 0 ? input.x : 0)
-								touchController.set('forward', input.x > 0 ? -input.y : 0)
-								touchController.set('backward', input.x < 0 ? input.y : 0)
-							}
+							gameInputs.touchController?.set('left', input.x < 0 ? -input.x : 0)
+							gameInputs.touchController?.set('right', input.x > 0 ? input.x : 0)
+							gameInputs.touchController?.set('forward', input.x > 0 ? -input.y : 0)
+							gameInputs.touchController?.set('backward', input.x < 0 ? input.y : 0)
 						}
 					}
 				}
@@ -157,16 +153,16 @@ export const TouchControls = () => {
 					isJoystickPressed(false)
 					initialPos(null)
 					pixelOffset(new Vector2(0, 0))
-					playerInputs?.set('backward', 0)
-					playerInputs?.set('forward', 0)
-					playerInputs?.set('right', 0)
-					playerInputs?.set('left', 0)
+					gameInputs.touchController?.set('backward', 0)
+					gameInputs.touchController?.set('forward', 0)
+					gameInputs.touchController?.set('right', 0)
+					gameInputs.touchController?.set('left', 0)
 				}
 				onCleanup(() => {
-					playerInputs?.set('backward', 0)
-					playerInputs?.set('forward', 0)
-					playerInputs?.set('left', 0)
-					playerInputs?.set('right', 0)
+					gameInputs.touchController?.set('backward', 0)
+					gameInputs.touchController?.set('forward', 0)
+					gameInputs.touchController?.set('left', 0)
+					gameInputs.touchController?.set('right', 0)
 				})
 
 				const interactableEntity = createMemo(() => interactableQuery()[0])
@@ -260,7 +256,7 @@ export const TouchControls = () => {
 				`
 				const primaryInteractable = createMemo(() => interactables()[0])
 				const secondaryInteractable = createMemo(() => interactables()[1])
-				const pause = (interact: number) => playerInputs?.set('pause', interact)
+				const pause = (interact: number) => gameInputs.touchController?.set('pause', interact)
 				return (
 					<div>
 						<div
@@ -295,17 +291,17 @@ export const TouchControls = () => {
 							</div>
 						</div>
 						<StateUi state="farm">
-							<TouchButton input="inventory" controller={playerInputs!} size="7rem" angle="45deg" distance="15rem" text="Open inventory">
+							<TouchButton input="inventory" controller={gameInputs.touchController!} size="7rem" angle="45deg" distance="15rem" text="Open inventory">
 								<Inventory />
 							</TouchButton>
 						</StateUi>
 						<StateUi state="dungeon">
-							<TouchButton input="lock" controller={playerInputs!} size="7rem" angle="45deg" distance="15rem" text="Lock">
+							<TouchButton input="lock" controller={gameInputs.touchController!} size="7rem" angle="45deg" distance="15rem" text="Lock">
 								<Lock />
 							</TouchButton>
 						</StateUi>
-						<TouchButton input="primary" controller={playerInputs!} interactable={primaryInteractable} size="10rem" />
-						<TouchButton input="secondary" controller={playerInputs!} interactable={secondaryInteractable} size="7rem" angle="100deg" distance="15rem" />
+						<TouchButton input="primary" controller={gameInputs.touchController!} interactable={primaryInteractable} size="10rem" />
+						<TouchButton input="secondary" controller={gameInputs.touchController!} interactable={secondaryInteractable} size="7rem" angle="100deg" distance="15rem" />
 					</div>
 				)
 			}}

@@ -3,7 +3,7 @@ import { PerspectiveCamera, Raycaster, Vector2, Vector3 } from 'three'
 import { moveCamera, updateCameraZoom } from '@/global/camera'
 import { params } from '@/global/context'
 import { RenderGroup } from '@/global/entity'
-import { ecs, inputManager, save, tweens } from '@/global/init'
+import { ecs, inputManager, menuInputs, save, tweens } from '@/global/init'
 import { getTargetSize, updateRenderSize } from '@/global/rendering'
 import { app } from '@/global/states'
 import { once } from '@/utils/mapFunctions'
@@ -11,7 +11,7 @@ import { once } from '@/utils/mapFunctions'
 export type MenuOptions = 'Continue' | 'New Game' | 'Settings' | 'Credits'
 
 export const mainMenuRenderGroupQuery = ecs.with('renderer', 'scene', 'renderGroup').where(e => e.renderGroup === RenderGroup.MainMenu)
-const menuBookQuery = ecs.with('menuBook', 'menuInputs')
+const menuBookQuery = ecs.with('menuBook')
 export const cameraQuery = ecs.with('camera', 'renderGroup', 'position')
 const mainMenuCameraQuery = cameraQuery.where(e => e.renderGroup === RenderGroup.MainMenu)
 export const gameCameraQuery = cameraQuery.with('cameraOffset').where(e => e.renderGroup === RenderGroup.Game)
@@ -104,7 +104,7 @@ export const transitionToGame = once(async () => {
 })
 
 export const selectMainMenu = () => {
-	for (const { menuBook, menuInputs } of menuBookQuery) {
+	for (const { menuBook } of menuBookQuery) {
 		if (menuInputs.get('up').justPressed) {
 			menuBook.navigate(-1)
 		}
@@ -119,7 +119,7 @@ export const selectMainMenu = () => {
 
 export const clickOnMenuButton = () => {
 	for (const camera of mainMenuCameraQuery) {
-		for (const { menuBook, menuInputs } of menuBookQuery) {
+		for (const { menuBook } of menuBookQuery) {
 			const ray = new Raycaster()
 			ray.setFromCamera(inputManager.mousePositionNormalized, camera.camera)
 			for (const [button, model] of menuBook.buttons.entries()) {

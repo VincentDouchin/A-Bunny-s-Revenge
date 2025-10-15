@@ -18,7 +18,7 @@ import { css } from 'solid-styled'
 import { Transition } from 'solid-transition-group'
 import { getSeed } from '@/constants/items'
 import { Interactable } from '@/global/entity'
-import { ecs, save, ui } from '@/global/init'
+import { ecs, gameInputs, save, ui } from '@/global/init'
 import { app } from '@/global/states'
 import { WeaponStatsUi } from '@/states/dungeon/WeaponStatsUi'
 import { OutlineText } from './components/styledComponents'
@@ -113,13 +113,13 @@ export const InteractionUi = () => {
 												<Show when={!context?.usingTouch()}>
 													<Show when={interactables()[1]}>
 														<div class="interaction-text">
-															<InputIcon input={player().playerControls.get('secondary')} />
+															<InputIcon input={gameInputs.get('secondary')} />
 															<OutlineText>{interactables()[1]?.text}</OutlineText>
 														</div>
 													</Show>
 													<Show when={interactables()[0]}>
 														<div class="interaction-text">
-															<InputIcon input={player().playerControls.get('primary')}></InputIcon>
+															<InputIcon input={gameInputs.get('primary')}></InputIcon>
 															<OutlineText>{interactables()[0]?.text}</OutlineText>
 														</div>
 													</Show>

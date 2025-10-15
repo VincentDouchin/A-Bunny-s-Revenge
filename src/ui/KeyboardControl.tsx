@@ -2,7 +2,7 @@ import { onMount, Show } from 'solid-js'
 import { css } from 'solid-styled'
 import { Transition } from 'solid-transition-group'
 import atom from 'solid-use/atom'
-import { settings, ui } from '@/global/init'
+import { gameInputs, settings, ui } from '@/global/init'
 import { app } from '@/global/states'
 import { StateUi } from './components/StateUi'
 import { OutlineText } from './components/styledComponents'
@@ -50,25 +50,25 @@ export const KeyboardControls = () => {
 							<div class="controls-container">
 								<div class="keyboard-controls">
 									<div class="controls-icons">
-										<InputIcon input={player().playerControls.get('forward')}></InputIcon>
+										<InputIcon input={gameInputs.get('forward')}></InputIcon>
 										<Show when={context?.usingKeyboard()}>
-											<InputIcon input={player().playerControls.get('left')}></InputIcon>
-											<InputIcon input={player().playerControls.get('backward')}></InputIcon>
-											<InputIcon input={player().playerControls.get('right')}></InputIcon>
+											<InputIcon input={gameInputs.get('left')}></InputIcon>
+											<InputIcon input={gameInputs.get('backward')}></InputIcon>
+											<InputIcon input={gameInputs.get('right')}></InputIcon>
 										</Show>
 									</div>
 									<OutlineText>Move</OutlineText>
 								</div>
 								<div class="keyboard-controls">
 									<div class="controls-icons">
-										<InputIcon input={player().playerControls.get('pause')}></InputIcon>
+										<InputIcon input={gameInputs.get('pause')}></InputIcon>
 									</div>
 									<OutlineText>Pause</OutlineText>
 								</div>
 								<Show when={farm()}>
 									<div class="keyboard-controls">
 										<div class="controls-icons">
-											<InputIcon input={player().playerControls.get('inventory')}></InputIcon>
+											<InputIcon input={gameInputs.get('inventory')}></InputIcon>
 										</div>
 										<OutlineText>Inventory</OutlineText>
 									</div>
@@ -76,7 +76,7 @@ export const KeyboardControls = () => {
 								<StateUi state="dungeon">
 									<div class="keyboard-controls">
 										<div class="controls-icons">
-											<InputIcon input={player().playerControls.get('lock')}></InputIcon>
+											<InputIcon input={gameInputs.get('lock')}></InputIcon>
 										</div>
 										<OutlineText>Lock on</OutlineText>
 									</div>
@@ -85,7 +85,7 @@ export const KeyboardControls = () => {
 									{(interactable) => {
 										return (
 											<div class="keyboard-controls">
-												<InputIcon input={player().playerControls.get('primary')}></InputIcon>
+												<InputIcon input={gameInputs.get('primary')}></InputIcon>
 												<OutlineText>{interactable().text}</OutlineText>
 
 											</div>
@@ -96,7 +96,7 @@ export const KeyboardControls = () => {
 									{(interactable) => {
 										return (
 											<div class="keyboard-controls">
-												<InputIcon input={player().playerControls.get('secondary')}></InputIcon>
+												<InputIcon input={gameInputs.get('secondary')}></InputIcon>
 												<OutlineText>{interactable().text}</OutlineText>
 
 											</div>

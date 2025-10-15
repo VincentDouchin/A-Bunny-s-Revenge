@@ -15,7 +15,6 @@ import type { crops, Item } from '@/constants/items'
 import type { NPC } from '@/constants/NPC'
 import type { Quest2 } from '@/constants/quests'
 import type { Recipe } from '@/constants/recipes'
-import type { MenuInputMap, PlayerInputMap } from '@/global/inputMaps'
 import type { AppStates } from '@/lib/app'
 import type { Direction } from '@/lib/directions'
 import type { MeshLine, MeshLineMaterial } from '@/lib/MeshLine'
@@ -190,9 +189,6 @@ export type Entity = StateComponents & Partial<AttackStyle> & {
 	children?: Set<Entity>
 	withChildren?: (parent: Entity) => void
 	onDestroy?: () => void
-	// ! InputMaps
-	playerControls?: PlayerInputMap
-	menuInputs?: MenuInputMap
 	// ! Physics
 	bodyDesc?: RigidBodyDesc
 	body?: RigidBody

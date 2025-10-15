@@ -1,4 +1,3 @@
-import type { Entity } from './entity'
 import type { InputMap } from '@/lib/inputs'
 import { GAMEPAD_AXIS, GAMEPAD_BUTTON, MOUSE_BUTTONS, MOUSE_WHEEL } from '@/lib/inputs'
 import { inputManager } from './init'
@@ -20,7 +19,7 @@ export const playerInputMap = () => {
 	map.get('secondary').setKeys('ShiftLeft').setButtons(GAMEPAD_BUTTON.X).setMouse(MOUSE_BUTTONS.RIGHT)
 	map.get('pause').setKeys('Tab', 'Escape').setButtons(GAMEPAD_BUTTON.START)
 	map.get('lock').setKeys('ControlLeft').setMouse(MOUSE_BUTTONS.MIDDLE).setButtons(GAMEPAD_BUTTON.R3)
-	return { playerControls: map } as const satisfies Entity
+	return map
 }
 
 const menuInputs = ['up', 'down', 'left', 'right', 'validate', 'cancel', 'tab', 'tabLeft', 'tabRight', 'click'] as const
@@ -37,5 +36,5 @@ export const menuInputMap = () => {
 	map.get('tabLeft').setButtons(GAMEPAD_BUTTON.L)
 	map.get('tabRight').setButtons(GAMEPAD_BUTTON.R)
 	map.get('click').setMouse(MOUSE_BUTTONS.LEFT).setTouch()
-	return { menuInputs: map } as const satisfies Entity
+	return map
 }

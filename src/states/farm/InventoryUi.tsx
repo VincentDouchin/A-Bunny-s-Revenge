@@ -13,7 +13,7 @@ import atom from 'solid-use/atom'
 import { isMeal, itemsData } from '@/constants/items'
 import { recipes } from '@/constants/recipes'
 import { MenuType } from '@/global/entity'
-import { assets, ecs, save, thumbnailRenderer, ui } from '@/global/init'
+import { assets, ecs, menuInputs, save, thumbnailRenderer, ui } from '@/global/init'
 import { modifiers } from '@/global/modifiers'
 import { Menu, menuItem } from '@/ui/components/Menu'
 import { Modal } from '@/ui/components/Modal'
@@ -419,7 +419,7 @@ export const InventoryUi = () => {
 		<Show when={context?.player()}>
 			{(player) => {
 				ui.updateSync(() => {
-					if (player()?.menuInputs?.get('cancel').justReleased) {
+					if (menuInputs?.get('cancel').justReleased) {
 						ecs.removeComponent(player(), 'menuType')
 					}
 				})
@@ -447,7 +447,7 @@ export const InventoryUi = () => {
 					<Modal open={open()}>
 						<Show when={open()}>
 							<Menu
-								inputs={player().menuInputs}
+								inputs={menuInputs}
 							>
 								{({ menu }) => {
 									return (
@@ -495,7 +495,7 @@ export const InventoryUi = () => {
 																							}
 																						}
 																						ui.updateSync(() => {
-																							if (player().playerControls.get('secondary').justPressed) {
+																							if (menuInputs.get('validate').justPressed) {
 																								consumeMeal(item().name)
 																							}
 																						})
@@ -512,7 +512,7 @@ export const InventoryUi = () => {
 																										class="styled"
 																										classList={{ disabled: disabled() }}
 																									>
-																										<InputIcon input={player().playerControls.get('secondary')}></InputIcon>
+																										<InputIcon input={menuInputs.get('validate')}></InputIcon>
 																										Eat
 																									</button>
 																									<MealBuffs meals={modifiers} />

@@ -8,7 +8,7 @@ import { randFloat } from 'three/src/math/MathUtils'
 import { itemsData } from '@/constants/items'
 import { Interactable, MenuType } from '@/global/entity'
 import { harvestCropEvent } from '@/global/events'
-import { assets, dayTime, ecs, removeItem, save, tweens } from '@/global/init'
+import { assets, dayTime, ecs, gameInputs, removeItem, save, tweens } from '@/global/init'
 import { playSound } from '@/global/sounds'
 import { modelColliderBundle } from '@/lib/colliders'
 import { removeEntityRef } from '@/lib/hierarchy'
@@ -17,7 +17,7 @@ import { sleep } from '@/utils/sleep'
 import { itemBundle } from '../game/items'
 import { updateSpotWatered } from './wateringCan'
 
-const playerQuery = ecs.with('playerControls', 'movementForce', 'inventory', 'inventoryId', 'inventorySize', 'playerAnimator')
+const playerQuery = ecs.with('movementForce', 'inventory', 'inventoryId', 'inventorySize', 'playerAnimator')
 const plantedSpotQuery = ecs.with('plantableSpot', 'planted', 'group', 'model', 'entityId')
 
 export const updateCropsSave = () => {
@@ -75,8 +75,8 @@ const plantableSpotsQuery = ecs.with('plantableSpot').without('planted')
 
 export const plantSeed = () => {
 	for (const player of playerQuery) {
-		const { playerControls, inventory } = player
-		if (playerControls.get('primary').justPressed) {
+		const { inventory } = player
+		if (gameInputs.get('primary').justPressed) {
 			for (const spot of plantableSpotsQuery) {
 				const seed = inventory.filter(Boolean).find((item) => {
 					const itemData = itemsData[item.name]
@@ -118,8 +118,8 @@ const touchedPlantableSpotQuery = plantableSpotsQuery.with('interactionContainer
 
 export const harvestCrop = async () => {
 	for (const player of playerQuery) {
-		const { playerControls, playerAnimator } = player
-		if (playerControls.get('secondary').justPressed) {
+		const { playerAnimator } = player
+		if (gameInputs.get('secondary').justPressed) {
 			for (const spot of touchedPlantableSpotQuery) {
 				if (save.inventories.player.some((item) => {
 					const itemData = itemsData[item.name]
@@ -129,7 +129,7 @@ export const harvestCrop = async () => {
 				}
 			}
 		}
-		if (playerControls.get('primary').justPressed && playerAnimator.current !== 'pickup') {
+		if (gameInputs.get('primary').justPressed && playerAnimator.current !== 'pickup') {
 			for (const spot of plantedSpotQuery) {
 				if (spot.planted.interactionContainer && maxStage(spot.planted.crop.name) === spot.planted.crop.stage) {
 					playerAnimator.playOnce('pickup')?.then(async () => {

@@ -1,9 +1,9 @@
 import type { Entity } from '@/global/entity'
 import { CSS2DObject } from 'three/examples/jsm/renderers/CSS2DRenderer'
 import { Faction } from '@/global/entity'
-import { ecs } from '@/global/init'
+import { ecs, gameInputs } from '@/global/init'
 
-const playerQuery = ecs.with('player', 'position', 'playerControls')
+const playerQuery = ecs.with('player', 'position')
 const lockedOnQuery = ecs.with('lockedOn')
 const enemiesQuery = ecs.with('faction', 'position', 'currentHealth').where(e => e.currentHealth > 0 && e.faction === Faction.Enemy)
 const unlock = (e: Entity) => {
@@ -41,21 +41,19 @@ const switchLockOn = (diff = 1 | -1) => {
 }
 
 export const lockOnEnemy = () => {
-	for (const player of playerQuery) {
-		if (player.playerControls.get('lock').justPressed) {
-			const alreadyLocked = enemiesQuery.entities.find(e => e.lockedOn)
+	if (gameInputs.get('lock').justPressed) {
+		const alreadyLocked = enemiesQuery.entities.find(e => e.lockedOn)
 
-			if (alreadyLocked) {
-				unlock(alreadyLocked)
-			} else {
-				selectNewLockedEnemy()
-			}
+		if (alreadyLocked) {
+			unlock(alreadyLocked)
+		} else {
+			selectNewLockedEnemy()
 		}
-		if (player.playerControls.get('lookLeft').justPressed) {
-			switchLockOn(-1)
-		}
-		if (player.playerControls.get('lookRight').justPressed) {
-			switchLockOn(1)
-		}
+	}
+	if (gameInputs.get('lookLeft').justPressed) {
+		switchLockOn(-1)
+	}
+	if (gameInputs.get('lookRight').justPressed) {
+		switchLockOn(1)
 	}
 }

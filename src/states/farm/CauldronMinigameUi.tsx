@@ -10,7 +10,7 @@ import { updateCameraZoom } from '@/global/camera'
 import { params } from '@/global/context'
 import { MenuType } from '@/global/entity'
 import { cookedMealEvent } from '@/global/events'
-import { ecs, inputManager, time, tweens, ui } from '@/global/init'
+import { ecs, inputManager, menuInputs, time, tweens, ui } from '@/global/init'
 import { cameraQuery } from '@/global/rendering'
 import { playSound } from '@/global/sounds'
 import { addTag } from '@/lib/hierarchy'
@@ -103,14 +103,14 @@ export const CauldronMiniGameUi = () => {
 							const isSynced = createMemo(() => percentSynced() > 0)
 
 							ui.updateSync(() => {
-								if (player().menuInputs.get('cancel').justReleased) {
+								if (menuInputs.get('cancel').justReleased) {
 									ecs.removeComponent(cauldron(), 'menuType')
 									return
 								}
 								if (output()) {
 									setSpoon(x => x + time.delta / 500 * (1 + progress() / 50))
 									cauldron().spoon.rotation?.setFromAxisAngle(new Vector3(0, 1, 0), Math.PI - spoon())
-									if (player().playerControls.get('primary').justReleased) {
+									if (menuInputs.get('validate').justReleased) {
 										if (isSynced()) {
 											setProgress(x => x + 5 + (30 * percentSynced()))
 											setSpot(x => x + Math.PI / 4 + Math.random() * Math.PI)
@@ -216,10 +216,10 @@ export const CauldronMiniGameUi = () => {
 							return (
 								<>
 									<Show when={isTouch()}>
-										<TouchButton size="10rem" input="primary" controller={player().playerControls.touchController!}>
+										<TouchButton size="10rem" input="primary" controller={menuInputs.touchController!}>
 											<Spoon />
 										</TouchButton>
-										<TouchButton size="7rem" distance="15rem" angle="90deg" input="cancel" controller={player().menuInputs.touchController!}>
+										<TouchButton size="7rem" distance="15rem" angle="90deg" input="cancel" controller={menuInputs.touchController!}>
 											<Exit />
 										</TouchButton>
 									</Show>

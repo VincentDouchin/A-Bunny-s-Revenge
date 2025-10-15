@@ -1,22 +1,22 @@
 import type { Entity } from '@/global/entity'
 import { MenuType } from '@/global/entity'
-import { ecs } from '@/global/init'
+import { ecs, gameInputs } from '@/global/init'
 import { app } from '@/global/states'
 
 export const openMenu = (menu: MenuType) => (e: Entity) => ecs.addComponent(e, 'menuType', menu)
 
-const playerInventoryClosedQuery = ecs.with('playerControls').without('menuType')
-const playerInventoryOpenQuery = ecs.with('playerControls').with('menuType')
+const playerInventoryClosedQuery = ecs.with('player').without('menuType')
+const playerInventoryOpenQuery = ecs.with('player').with('menuType')
 export const openPlayerInventory = () => {
 	for (const player of playerInventoryClosedQuery) {
-		if (player.playerControls.get('inventory').justPressed) {
+		if (gameInputs.get('inventory').justPressed) {
 			ecs.addComponent(player, 'menuType', MenuType.Player)
 		}
 	}
 }
 export const closePlayerInventory = () => {
 	for (const player of playerInventoryOpenQuery) {
-		if (player.playerControls.get('inventory').justPressed) {
+		if (gameInputs.get('inventory').justPressed) {
 			ecs.removeComponent(player, 'menuType')
 		}
 	}
@@ -39,14 +39,14 @@ export const interact = () => {
 	if (dialogQuery.size === 0 && app.isDisabled('paused')) {
 		for (const entity of primaryQuery) {
 			for (const player of playerInventoryClosedQuery) {
-				if (player.playerControls.get('primary').justPressed) {
+				if (gameInputs.get('primary').justPressed) {
 					entity.onPrimary(entity, player)
 				}
 			}
 		}
 		for (const entity of secondaryQuery) {
 			for (const player of playerInventoryClosedQuery) {
-				if (player.playerControls.get('secondary').justPressed) {
+				if (gameInputs.get('secondary').justPressed) {
 					entity.onSecondary(entity, player)
 				}
 			}

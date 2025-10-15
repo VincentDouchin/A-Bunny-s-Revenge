@@ -1,22 +1,21 @@
 import type { JSX } from 'solid-js'
 import type { Atom } from 'solid-use/atom'
 import Cross from '@assets/icons/xmark-solid.svg'
-import { createMemo, onCleanup, Show } from 'solid-js'
+import { onCleanup, Show } from 'solid-js'
 import { css } from 'solid-styled'
 import { Transition } from 'solid-transition-group'
 import atom from 'solid-use/atom'
-import { settings } from '@/global/init'
+import { menuInputs, settings } from '@/global/init'
 import { useGame } from '../store'
 import { GoldContainer } from './styledComponents'
 
 const CloseButton = () => {
 	const context = useGame()
-	const menuTouchController = createMemo(() => context?.player().menuInputs.touchController)
 	const closeInventory = () => {
-		menuTouchController()?.set('cancel', 1)
+		menuInputs.touchController?.set('cancel', 1)
 	}
 	const reset = () => {
-		menuTouchController()?.set('cancel', 0)
+		menuInputs.touchController?.set('cancel', 0)
 	}
 	onCleanup(reset)
 	css/* CSS */`

@@ -3,14 +3,13 @@ import { circOut } from 'popmotion'
 import { between } from 'randomish'
 import { Mesh, Quaternion, Vector3 } from 'three'
 import { States, states } from '@/global/entity'
-import { ecs, time, tweens } from '@/global/init'
+import { ecs, gameInputs, time, tweens } from '@/global/init'
 import { playSound } from '@/global/sounds'
 import { action, condition, createBehaviorTree, enteringState, inState, inverter, parallel, runNodes, selector, sequence, setState, wait, withContext } from '@/lib/behaviors'
 import { fishParticles } from '@/particles/fishParticles'
 import { stopFishing } from '@/states/farm/fishing'
 
 const fishQuery = ecs.with('fish', 'group', 'rotation', 'position', 'targetRotation', ...states(States.fish), 'state')
-const playerQuery = ecs.with('playerControls', 'player')
 const bobberQueryQuery = ecs.with('bobber')
 const fishParameters = (e: QueryEntity<typeof fishQuery>) => {
 	const bobber = bobberQueryQuery.first?.bobber ?? null
@@ -112,12 +111,10 @@ export const fishBehavior = createBehaviorTree(
 			sequence(
 				inState('bounce'),
 				action((e) => {
-					for (const player of playerQuery) {
-						if (e.fishingProgress && e.fishingProgress.done === false) {
-							if (player.playerControls.get('primary').justReleased) {
-								e.fishingProgress.success += 1
-								e.fishingProgress.done = true
-							}
+					if (e.fishingProgress && e.fishingProgress.done === false) {
+						if (gameInputs.get('primary').justReleased) {
+							e.fishingProgress.success += 1
+							e.fishingProgress.done = true
 						}
 					}
 				}),

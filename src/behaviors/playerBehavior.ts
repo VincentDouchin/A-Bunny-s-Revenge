@@ -4,7 +4,7 @@ import { Vector3 } from 'three'
 import { addCameraShake } from '@/global/camera'
 import { Faction, States, states } from '@/global/entity'
 import { gameOverEvent } from '@/global/events'
-import { ecs, world } from '@/global/init'
+import { ecs, gameInputs, world } from '@/global/init'
 import { playSound } from '@/global/sounds'
 import { spawnDamageNumber } from '@/particles/damageNumber'
 import { poisonBubbles } from '@/states/dungeon/poisonTrail'
@@ -15,7 +15,7 @@ import { flash } from '../states/dungeon/battle'
 import { applyMove, applyRotate, getMovementForce, getPlayerRotation, getRelativeDirection, takeDamage } from './behaviorHelpers'
 
 const ANIMATION_SPEED = 1.3
-const playerQuery = ecs.with('playerAnimator', 'movementForce', 'speed', 'body', 'rotation', 'playerControls', 'attackSpeed', 'dash', 'collider', 'currentHealth', 'model', 'hitTimer', 'size', 'sneeze', 'targetRotation', 'poisoned', 'size', 'position', 'targetMovementForce', 'sleepy', 'modifiers', 'playerAttackStyle', 'state', ...states(States.player))
+const playerQuery = ecs.with('playerAnimator', 'movementForce', 'speed', 'body', 'rotation', 'attackSpeed', 'dash', 'collider', 'currentHealth', 'model', 'hitTimer', 'size', 'sneeze', 'targetRotation', 'poisoned', 'size', 'position', 'targetMovementForce', 'sleepy', 'modifiers', 'playerAttackStyle', 'state', ...states(States.player))
 const enemyQuery = ecs.with('faction', 'state', 'strength', 'collider', 'position', 'rotation')
 const enemyWithSensor = enemyQuery.with('sensor').where(e => e.faction === Faction.Enemy && e.state.current === 'attack')
 const enemyWithoutSensor = enemyQuery.without('sensor').where(e => e.faction === Faction.Enemy && e.state.current === 'attack')
@@ -148,7 +148,7 @@ export const playerBehavior = createBehaviorTree(
 			sequence(
 				inState('attack0'),
 				parallel(
-					condition(e => e.playerControls.get('primary').justPressed),
+					condition(_e => gameInputs.get('primary').justPressed),
 					action(e => e.playerAttackStyle.lastAttack = 1),
 				),
 				waitFor(e => !e.playerAnimator.isPlaying(attacks[0])),
@@ -169,7 +169,7 @@ export const playerBehavior = createBehaviorTree(
 			sequence(
 				inState('attack1'),
 				parallel(
-					condition(e => e.playerControls.get('primary').justPressed),
+					condition(_e => gameInputs.get('primary').justPressed),
 					action(e => e.playerAttackStyle.lastAttack = 2),
 				),
 				waitFor(e => !e.playerAnimator.isPlaying(attacks[1])),
@@ -197,7 +197,7 @@ export const playerBehavior = createBehaviorTree(
 			// ! Dash
 			sequence(
 				inState('idle', 'running'),
-				condition(e => e.playerControls.get('secondary').justPressed && e.dash.finished()),
+				condition(e => gameInputs.get('secondary').justPressed && e.dash.finished()),
 				condition(() => interactionQuery.size === 0),
 				setState('dash'),
 			),
@@ -223,7 +223,7 @@ export const playerBehavior = createBehaviorTree(
 			),
 			sequence(
 				inState('idle', 'running'),
-				condition(e => e.playerControls.get('primary').justPressed),
+				condition(() => gameInputs.get('primary').justPressed),
 				condition(e => e.weapon),
 				condition(() => interactionQuery.size === 0),
 				setState('attack0'),

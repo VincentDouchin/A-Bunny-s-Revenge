@@ -11,6 +11,7 @@ import { DayTime, Time } from '@/lib/time'
 import { tweensManager } from '@/lib/tweens'
 import { UIManager } from '@/lib/uiManager'
 import { loadAssets } from './assets'
+import { menuInputMap, playerInputMap } from './inputMaps'
 import { loadLevelData } from './levelData'
 import { useSave, useSettings } from './save'
 import { app } from './states'
@@ -33,3 +34,5 @@ export const dayTime = new DayTime(600_000)
 export const musicManager = new MusicManager()
 export const tweens = tweensManager(time, ecs)
 export const questManager = new QuestManager(app, save)
+export const gameInputs = playerInputMap()
+export const menuInputs = menuInputMap()

@@ -5,7 +5,7 @@ import { between } from 'randomish'
 import { BufferGeometry, CatmullRomCurve3, Mesh, MeshBasicMaterial, PlaneGeometry, Quaternion, SphereGeometry, Vector3 } from 'three'
 import { fishBehavior } from '@/behaviors/fishBehavior'
 import { MenuType, stateBundle, States } from '@/global/entity'
-import { assets, ecs, scene, tweens } from '@/global/init'
+import { assets, ecs, menuInputs, scene, tweens } from '@/global/init'
 import { playSound } from '@/global/sounds'
 import { runIf } from '@/lib/app'
 import { inMap } from '@/lib/hierarchy'
@@ -31,11 +31,11 @@ const fishingPoleBundle = () => {
 	return fishingPole
 }
 
-const playerFishingQuery = ecs.with('fishingPole', 'model', 'position', 'rotation', 'menuInputs', 'playerAnimator')
+const playerFishingQuery = ecs.with('fishingPole', 'model', 'position', 'rotation', 'playerAnimator')
 const fishingQuery = ecs.with('menuType', 'group').where(e => e.menuType === MenuType.Fishing)
 export const stopFishing = (force: boolean = false) => {
 	for (const player of playerFishingQuery) {
-		if ((player.menuInputs.get('cancel').justReleased || force) && player.fishingPole.bobber) {
+		if ((menuInputs.get('cancel').justReleased || force) && player.fishingPole.bobber) {
 			player.playerAnimator.playClamped('lightAttack', { timeScale: 0.5 })
 			const { bobber } = player.fishingPole
 			if (bobber) {
@@ -100,11 +100,11 @@ const updateFishingLine = () => {
 }
 
 const fishingSpotQuery = ecs.with('collider', 'fishingSpot', 'interactionContainer', 'rotation')
-const playerQuery = ecs.with('player', 'playerControls', 'playerAnimator', 'rotation', 'state')
+const playerQuery = ecs.with('player', 'playerAnimator', 'rotation', 'state')
 const useFishingPole = () => {
 	for (const spot of fishingSpotQuery) {
 		for (const player of playerQuery) {
-			if (player.playerControls.get('primary').justReleased && fishingQuery.size === 0) {
+			if (menuInputs.get('validate').justReleased && fishingQuery.size === 0) {
 				player.movementForce?.setScalar(0)
 				player.targetMovementForce?.setScalar(0)
 				ecs.removeComponent(player, 'fishingPole')

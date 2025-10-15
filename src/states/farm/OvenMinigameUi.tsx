@@ -10,7 +10,7 @@ import { updateCameraZoom } from '@/global/camera'
 import { params } from '@/global/context'
 import { MenuType } from '@/global/entity'
 import { cookedMealEvent } from '@/global/events'
-import { ecs, time, tweens, ui } from '@/global/init'
+import { ecs, gameInputs, menuInputs, time, tweens, ui } from '@/global/init'
 import { cameraQuery } from '@/global/rendering'
 import { playSound } from '@/global/sounds'
 import { addTag } from '@/lib/hierarchy'
@@ -104,13 +104,13 @@ export const OvenMiniGameUi = () => {
 							const [direction, setDirection] = createSignal(Math.random() > 0.5 ? 1 : -1)
 							const [timer, setTimer] = createSignal(between(3, 5))
 							ui.updateSync(() => {
-								if (player().menuInputs.get('cancel').justReleased) {
+								if (menuInputs.get('cancel').justReleased) {
 									ecs.removeComponent(oven, 'menuType')
 									return
 								}
 								if (output()) {
 									const finalOutput = output()
-									if (player().playerControls.get('primary').justReleased) {
+									if (gameInputs.get('primary').justReleased) {
 										setBar(x => Math.min(100, x - 10))
 									}
 									setBar(x => x + 25 * time.delta / 1000)
@@ -261,10 +261,10 @@ export const OvenMiniGameUi = () => {
 							return (
 								<>
 									<Show when={context?.usingTouch()}>
-										<TouchButton size="10rem" input="primary" controller={player().playerControls.touchController!}>
+										<TouchButton size="10rem" input="primary" controller={gameInputs.touchController!}>
 											<Fire />
 										</TouchButton>
-										<TouchButton size="7rem" distance="15rem" angle="100deg" input="cancel" controller={player().menuInputs.touchController!}>
+										<TouchButton size="7rem" distance="15rem" angle="100deg" input="cancel" controller={menuInputs.touchController!}>
 											<Exit />
 										</TouchButton>
 									</Show>
@@ -296,11 +296,11 @@ export const OvenMiniGameUi = () => {
 											<Show when={!context?.usingTouch()}>
 												<div class="input-container">
 													<div class="input-icon">
-														<InputIcon input={player().playerControls.get('primary')} />
+														<InputIcon input={gameInputs.get('primary')} />
 														<OutlineText>Stoke fire</OutlineText>
 													</div>
 													<div class="input-icon">
-														<InputIcon input={player().menuInputs.get('cancel')} />
+														<InputIcon input={menuInputs.get('cancel')} />
 														<OutlineText>Close</OutlineText>
 													</div>
 												</div>

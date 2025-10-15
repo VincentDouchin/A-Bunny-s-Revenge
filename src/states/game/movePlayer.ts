@@ -1,10 +1,10 @@
 import { Vector3 } from 'three'
-import { ecs, inputManager } from '@/global/init'
+import { ecs, gameInputs, inputManager } from '@/global/init'
 import { app } from '@/global/states'
 import { spawnFootstep } from '@/particles/footsteps'
 
 const movementQuery = ecs.with('body', 'rotation', 'movementForce', 'speed', 'targetMovementForce')
-const playerQuery = movementQuery.with('playerControls', 'position', 'state', 'lastStep', 'playerAnimator', 'modifiers', 'model', 'worldPosition')
+const playerQuery = movementQuery.with('position', 'state', 'lastStep', 'playerAnimator', 'modifiers', 'model', 'worldPosition')
 
 export const playerSteps = () => {
 	for (const player of playerQuery) {
@@ -34,12 +34,12 @@ export const playerSteps = () => {
 
 export const movePlayer = () => {
 	for (const e of playerQuery) {
-		const { playerControls, movementForce } = e
+		const { movementForce } = e
 		movementForce.setScalar(0)
-		movementForce.x += playerControls.get('left').pressed
-		movementForce.x -= playerControls.get('right').pressed
-		movementForce.z -= playerControls.get('backward').pressed
-		movementForce.z += playerControls.get('forward').pressed
+		movementForce.x += gameInputs.get('left').pressed
+		movementForce.x -= gameInputs.get('right').pressed
+		movementForce.z -= gameInputs.get('backward').pressed
+		movementForce.z += gameInputs.get('forward').pressed
 		if (inputManager.controls() === 'keyboard') {
 			movementForce.normalize()
 		}

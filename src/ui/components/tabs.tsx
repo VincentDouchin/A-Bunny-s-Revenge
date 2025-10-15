@@ -5,7 +5,7 @@ import { createEffect, createMemo, For, Show } from 'solid-js'
 import { createArray } from 'solid-proxies'
 import { css } from 'solid-styled'
 import atom from 'solid-use/atom'
-import { ui } from '@/global/init'
+import { menuInputs, ui } from '@/global/init'
 import { InputIcon } from '../InputIcon'
 import { useGame } from '../store'
 import { menuItem } from './Menu'
@@ -21,11 +21,11 @@ export const Tabs = <T extends string,>(props: TabsProps<T>) => {
 	const context = useGame()
 	const tabsRefs = createArray<HTMLElement>([])
 	ui.updateSync(() => {
-		if (context?.player().menuInputs.get('tab').justPressed || context?.player().menuInputs.get('tabRight').justPressed) {
+		if (menuInputs.get('tab').justPressed || menuInputs.get('tabRight').justPressed) {
 			const nextTab = (props.tabs.indexOf(props.selectedTab()) + 1) % props.tabs.length
 			props.menu.setSelectedRef(tabsRefs[nextTab])
 		}
-		if (context?.player().menuInputs.get('tabLeft').justPressed) {
+		if (menuInputs.get('tabLeft').justPressed) {
 			const nextTab = (props.tabs.indexOf(props.selectedTab()) - 1)
 			props.menu.setSelectedRef(tabsRefs.at(nextTab)!)
 		}
@@ -46,45 +46,39 @@ export const Tabs = <T extends string,>(props: TabsProps<T>) => {
 	}
 	`
 	return (
-		<Show when={context?.player()}>
-			{(player) => {
-				return (
-					<>
-						<div class="tab tab-left">
-							<Show when={context?.usingKeyboard()}>
-								<InputIcon input={player().menuInputs.get('tab')} size={3} />
-							</Show>
-							<Show when={context?.usingGamepad()}>
-								<InputIcon input={player().menuInputs.get('tabLeft')} size={3} />
-							</Show>
+		<>
+			<div class="tab tab-left">
+				<Show when={context?.usingKeyboard()}>
+					<InputIcon input={menuInputs.get('tab')} size={3} />
+				</Show>
+				<Show when={context?.usingGamepad()}>
+					<InputIcon input={menuInputs.get('tabLeft')} size={3} />
+				</Show>
+			</div>
+			<For each={props.tabs}>
+				{(tab, i) => {
+					const isSelected = createMemo(() => props.selectedTab() === tab)
+					const selected = atom(i() === 0)
+					createEffect(() => {
+						if (selected()) {
+							props.selectedTab(tab)
+						}
+					})
+					return (
+						<div
+							use:menuItem={[props.menu, isSelected(), selected, () => isSelected() ? [] : ['down', 'up'], false]}
+							ref={el => tabsRefs[i()] = el}
+						>
+							{props.children(tab, selected())}
 						</div>
-						<For each={props.tabs}>
-							{(tab, i) => {
-								const isSelected = createMemo(() => props.selectedTab() === tab)
-								const selected = atom(i() === 0)
-								createEffect(() => {
-									if (selected()) {
-										props.selectedTab(tab)
-									}
-								})
-								return (
-									<div
-										use:menuItem={[props.menu, isSelected(), selected, () => isSelected() ? [] : ['down', 'up'], false]}
-										ref={el => tabsRefs[i()] = el}
-									>
-										{props.children(tab, selected())}
-									</div>
-								)
-							}}
-						</For>
-						<div class="tab tab-right">
-							<Show when={context?.usingGamepad()}>
-								<InputIcon input={player().menuInputs.get('tabRight')} size={3} />
-							</Show>
-						</div>
-					</>
-				)
-			}}
-		</Show>
+					)
+				}}
+			</For>
+			<div class="tab tab-right">
+				<Show when={context?.usingGamepad()}>
+					<InputIcon input={menuInputs.get('tabRight')} size={3} />
+				</Show>
+			</div>
+		</>
 	)
 }

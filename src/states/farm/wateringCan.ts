@@ -4,7 +4,7 @@ import type { Entity } from '@/global/entity'
 import { CircleGeometry, Mesh, MeshBasicMaterial, Vector3 } from 'three'
 import { ApplyForce, ColorRange, ConeEmitter, ConstantValue, IntervalValue, ParticleSystem, RandomQuatGenerator, RenderMode } from 'three.quarks'
 import { Interactable } from '@/global/entity'
-import { assets, ecs, tweens } from '@/global/init'
+import { assets, ecs, gameInputs, tweens } from '@/global/init'
 import { batchRendererQuery } from '@/lib/particles'
 import { getWorldRotation } from '@/lib/transforms'
 import { colorToVec4 } from '@/particles/honeySplatParticles'
@@ -48,7 +48,7 @@ export const wateringCanBundle = () => {
 	})
 }
 
-const wateringCanQuery = ecs.with('wateringCan', 'model', 'sensor', 'playerControls', 'position', 'rotation', 'playerAnimator')
+const wateringCanQuery = ecs.with('wateringCan', 'model', 'sensor', 'position', 'rotation', 'playerAnimator')
 
 export const updateSpotWatered = (plot: With<Entity, 'model' | 'planted'>, watered: boolean, instant: boolean) => {
 	const [start, end] = watered ? [0, 1] : [1, 0]
@@ -76,7 +76,7 @@ export const waterCrops = () => {
 	for (const player of wateringCanQuery) {
 		for (const plant of plantsToWaterQuery) {
 			if (
-				player.playerControls.get('primary').justPressed
+				gameInputs.get('primary').justPressed
 				&& player.wateringCan.waterAmount > 0
 				&& !plant.crop?.watered
 				&& getIntersections(player, undefined, c => c === plant.collider)

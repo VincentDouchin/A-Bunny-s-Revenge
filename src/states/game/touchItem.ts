@@ -8,7 +8,7 @@ import { runIf } from '@/lib/app'
 import { getIntersections } from './sensor'
 
 const interactableQuery = ecs.with('interactable')
-const playerQuery = ecs.with('playerControls', 'sensor', 'position', 'rotation')
+const playerQuery = ecs.with('sensor', 'position', 'rotation')
 const interactingQuery = interactableQuery.with('collider', 'position')
 const losingInteractionQuery = interactingQuery.with('interactionContainer')
 const outlineQuery = ecs.with('outline')

@@ -7,7 +7,7 @@ import atom from 'solid-use/atom'
 import { isMeal, itemsData } from '@/constants/items'
 import { recipes } from '@/constants/recipes'
 import { MenuType } from '@/global/entity'
-import { assets, ecs, save, ui } from '@/global/init'
+import { assets, ecs, gameInputs, menuInputs, save, ui } from '@/global/init'
 import { modifiers } from '@/global/modifiers'
 import { ModType } from '@/lib/stats'
 import { Menu, menuItem } from '@/ui/components/Menu'
@@ -139,7 +139,7 @@ export const RecipeDescription = ({ recipe, onClick }: {
 
 			<Show when={onClick}>
 				<button onClick={onClick} style={{ 'font-size': '1.2rem', 'display': 'flex', 'gap': '0.5rem', 'justify-self': 'center' }} class="button">
-					<InputIcon input={context!.player().playerControls.get('secondary')} />
+					<InputIcon input={gameInputs.get('secondary')} />
 					Cook
 				</button>
 			</Show>
@@ -187,7 +187,7 @@ export const RecipesUi = () => {
 			<Show when={recipeEntity()}>
 				{(entity) => {
 					ui.updateSync(() => {
-						if (context?.player().menuInputs.get('cancel').justReleased) {
+						if (menuInputs.get('cancel').justReleased) {
 							ecs.removeComponent(entity(), 'menuType')
 						}
 					})
@@ -213,7 +213,7 @@ export const RecipesUi = () => {
 						}
 					}
 					ui.updateSync(() => {
-						if (context?.player().playerControls.get('secondary').justReleased) {
+						if (gameInputs.get('secondary').justReleased) {
 							cook()
 						}
 					})
@@ -229,7 +229,7 @@ export const RecipesUi = () => {
 							<div class="recipes-container">
 
 								<div>
-									<Menu inputs={context?.player().menuInputs}>
+									<Menu inputs={menuInputs}>
 										{({ menu }) => {
 											return (
 												<div style={{ display: 'grid', gap: '1rem' }}>
@@ -306,15 +306,11 @@ export const RecipesUi = () => {
 
 								</div>
 							</div>
-							<Show when={!context?.usingTouch() && context?.player()}>
-								{(player) => {
-									return (
-										<div class="input-icon">
-											<InputIcon input={player().menuInputs.get('cancel')} />
-											<OutlineText>Close</OutlineText>
-										</div>
-									)
-								}}
+							<Show when={!context?.usingTouch()}>
+								<div class="input-icon">
+									<InputIcon input={menuInputs.get('cancel')} />
+									<OutlineText>Close</OutlineText>
+								</div>
 							</Show>
 						</GoldContainer>
 					)

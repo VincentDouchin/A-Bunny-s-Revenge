@@ -4,10 +4,10 @@ import { Portal } from 'solid-js/web'
 import { css } from 'solid-styled'
 import atom from 'solid-use/atom'
 import { params } from '@/global/context'
-import { ecs, ui } from '@/global/init'
+import { ecs, gameInputs, ui } from '@/global/init'
 import { soundDialog } from '@/lib/dialogSound'
 import { OutlineText } from './components/styledComponents'
-import { useGame, useQuery } from './store'
+import { useQuery } from './store'
 
 interface Letter {
 	letter: string
@@ -118,8 +118,6 @@ const dialogQuery = useQuery(ecs.with('dialog'))
 const dialogContainerQuery = ecs.with('dialogContainer')
 const talkingQuery = useQuery(dialogContainerQuery)
 export const DialogUi = () => {
-	const context = useGame()!
-
 	css/* css */`
 	.dialog-container {
 		color: white;
@@ -182,7 +180,7 @@ export const DialogUi = () => {
 				let cancelCurrentDialog: (() => void) | null = null
 
 				ui.updateSync(async () => {
-					if (context.player().playerControls.get('primary').justReleased) {
+					if (gameInputs.get('primary').justReleased) {
 						cancelCurrentDialog && cancelCurrentDialog()
 						stepDialog()
 					}

@@ -2,7 +2,7 @@ import { For, onMount, Show } from 'solid-js'
 import { css } from 'solid-styled'
 import atom from 'solid-use/atom'
 import { MenuType } from '@/global/entity'
-import { ecs, ui } from '@/global/init'
+import { ecs, menuInputs, ui } from '@/global/init'
 import { menuItem } from '@/ui/components/Menu'
 import { Modal } from '@/ui/components/Modal'
 import { GoldContainer, InventoryTitle, OutlineText } from '@/ui/components/styledComponents'
@@ -15,22 +15,19 @@ const openBulletinBoardQuery = useQuery(ecs.with('menuType').where(e => e.menuTy
 export const QuestUi = () => {
 	const context = useGame()
 	return (
-		<Show when={context?.player()}>
-			{(player) => {
-				return (
-					<For each={openBulletinBoardQuery()}>
-						{(board) => {
-							const visible = atom(false)
-							onMount(() => setTimeout(() => visible(true), 100))
-							// const questsToComplete = entries(quests).map(([name, { steps }]) => {
-							// return [name, steps.map(step => save.quests[name]?.steps[step.key] ?? false)]
-							// }) as [QuestName, boolean[]][]
-							ui.updateSync(() => {
-								if (player().menuInputs.get('cancel').justReleased) {
-									ecs.removeComponent(board, 'menuType')
-								}
-							})
-							css/* css */`
+		<For each={openBulletinBoardQuery()}>
+			{(board) => {
+				const visible = atom(false)
+				onMount(() => setTimeout(() => visible(true), 100))
+				// const questsToComplete = entries(quests).map(([name, { steps }]) => {
+				// return [name, steps.map(step => save.quests[name]?.steps[step.key] ?? false)]
+				// }) as [QuestName, boolean[]][]
+				ui.updateSync(() => {
+					if (menuInputs.get('cancel').justReleased) {
+						ecs.removeComponent(board, 'menuType')
+					}
+				})
+				css/* css */`
 							.quest-container{
 								max-height: 30rem;
 								overflow: hidden;
@@ -73,28 +70,25 @@ export const QuestUi = () => {
 								font-size: 1.5rem;
 							}
 							`
-							return (
-								<Modal open={visible()}>
-									<Show when={visible()}>
-										<GoldContainer>
-											<InventoryTitle>Quests</InventoryTitle>
+				return (
+					<Modal open={visible()}>
+						<Show when={visible()}>
+							<GoldContainer>
+								<InventoryTitle>Quests</InventoryTitle>
 
-											<Show when={!context?.usingTouch()}>
-												<div class="input-icon">
-													<InputIcon input={player().menuInputs.get('cancel')} />
-													<OutlineText>Close</OutlineText>
-												</div>
-											</Show>
-										</GoldContainer>
+								<Show when={!context?.usingTouch()}>
+									<div class="input-icon">
+										<InputIcon input={menuInputs.get('cancel')} />
+										<OutlineText>Close</OutlineText>
+									</div>
+								</Show>
+							</GoldContainer>
 
-									</Show>
-								</Modal>
-							)
-						}}
-					</For>
+						</Show>
+					</Modal>
 				)
 			}}
-		</Show>
+		</For>
 	)
 }
 // export const QuestUi = () => {
@@ -111,7 +105,7 @@ export const QuestUi = () => {
 // 							// return [name, steps.map(step => save.quests[name]?.steps[step.key] ?? false)]
 // 							// }) as [QuestName, boolean[]][]
 // 							ui.updateSync(() => {
-// 								if (player().menuInputs.get('cancel').justReleased) {
+// 								if (menuInputs.get('cancel').justReleased) {
 // 									ecs.removeComponent(board, 'menuType')
 // 								}
 // 							})
@@ -169,7 +163,7 @@ export const QuestUi = () => {
 // 														<OutlineText>No quests</OutlineText>
 // 													</div>
 // 												</Show>
-// 												<Menu inputs={player().menuInputs}>
+// 												<Menu inputs={menuInputs}>
 // 													{({ menu }) => {
 // 														return (
 // 															<For each={questsToComplete}>
@@ -251,7 +245,7 @@ export const QuestUi = () => {
 // 											</div>
 // 											<Show when={!context?.usingTouch()}>
 // 												<div class="input-icon">
-// 													<InputIcon input={player().menuInputs.get('cancel')} />
+// 													<InputIcon input={menuInputs.get('cancel')} />
 // 													<OutlineText>Close</OutlineText>
 // 												</div>
 // 											</Show>

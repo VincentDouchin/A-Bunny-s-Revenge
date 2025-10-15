@@ -1,16 +1,13 @@
 import type { useGame } from '../store'
 import { For, Show } from 'solid-js'
 import { css } from 'solid-styled'
-import { settings } from '@/global/init'
-import { playerInputMap } from '@/global/inputMaps'
+import { gameInputs, settings } from '@/global/init'
 import { OutlineText, SwitchButtons } from '../components/styledComponents'
 import { InputIcon } from '../InputIcon'
 
-export const MovementTutorial = ({ context, player }: {
+export const MovementTutorial = ({ context }: {
 	context: ReturnType<typeof useGame>
-	player: NonNullable<ReturnType<typeof useGame>>['player']
 }) => {
-	const inputMap = playerInputMap()
 	css/* css */`
 		.tuto-input-icon{
 		font-size:5rem
@@ -45,7 +42,7 @@ export const MovementTutorial = ({ context, player }: {
 			<Show when={context?.usingGamepad()}>
 				<div class="gamepad-controls">
 					<div class="tuto-input-icon">
-						<InputIcon input={inputMap.playerControls.get('forward')} />
+						<InputIcon input={gameInputs.get('forward')} />
 					</div>
 					<OutlineText textSize="2rem">Use the left joystick to move around</OutlineText>
 				</div>
@@ -62,7 +59,7 @@ export const MovementTutorial = ({ context, player }: {
 
 						<div class="dpad">
 							<For each={['right', 'left', 'forward', 'backward'] as const}>
-								{dir => <div style={{ 'grid-area': dir }}><InputIcon size={3} input={player().playerControls.get(dir)} /></div>}
+								{dir => <div style={{ 'grid-area': dir }}><InputIcon size={3} input={gameInputs.get(dir)} /></div>}
 							</For>
 						</div>
 						<OutlineText textSize="2rem">Use the keys to move the player.</OutlineText>

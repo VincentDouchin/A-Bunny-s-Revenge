@@ -44,7 +44,7 @@ export const doorSide = () => {
 }
 
 const doorQuery = ecs.with('collider', 'door', 'rotation')
-const playerQuery = ecs.with('collider', 'playerControls', 'currentHealth', 'position').without('ignoreDoor')
+const playerQuery = ecs.with('collider', 'currentHealth', 'position').without('ignoreDoor')
 const doorToLockQuery = doorQuery.with('doorLocked')
 const doorToUnlockQuery = doorQuery.without('doorLocked', 'unlocked')
 const unlockVineDoorsQuery = doorQuery.with('unlocked', 'doorType').where(e => e.doorType === 'vine')
@@ -129,7 +129,7 @@ export const unlockDoorClearing = () => playerWithWeaponQuery.onEntityAdded.subs
 	}
 })
 
-const playerInDoor = ecs.with('playerControls', 'ignoreDoor', 'collider')
+const playerInDoor = ecs.with('ignoreDoor', 'collider')
 export const allowDoorCollision: UpdateSystem<typeof app, 'dungeon'> = () => {
 	for (const player of playerInDoor) {
 		for (const door of doorQuery) {

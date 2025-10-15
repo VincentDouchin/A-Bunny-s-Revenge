@@ -1,6 +1,6 @@
 import type { Item } from '@/constants/items'
-import type { Level } from '@/debug/LevelEditor'
 import type { Entity } from '@/global/entity'
+import type { Level } from '@/types/legecyLevel'
 import { enemyGroups } from '@/constants/enemyGroups'
 import { getSellableItems } from '@/constants/items'
 import { levelsData } from '@/global/init'

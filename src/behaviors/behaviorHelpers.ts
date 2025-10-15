@@ -3,7 +3,7 @@ import type { Entity } from '@/global/entity'
 import { QueryFilterFlags } from '@dimforge/rapier3d-compat'
 import { Vector3 } from 'three'
 import { params } from '@/global/context'
-import { ecs, inputManager, settings, time } from '@/global/init'
+import { ecs, gameInputs, inputManager, settings, time } from '@/global/init'
 import { app } from '@/global/states'
 import { action } from '@/lib/behaviors'
 
@@ -38,7 +38,7 @@ export const getRelativeDirection = (facingDir: Vector3, movementDir: Vector3) =
 	}
 }
 
-export const getPlayerRotation = (e: With<Entity, 'position' | 'playerControls'>, force: Vector3) => {
+export const getPlayerRotation = (e: With<Entity, 'position'>, force: Vector3) => {
 	const lockOn = lockedOnQuery.first
 	if (lockOn) {
 		return lockOn.position.clone().sub(e.position).normalize()
@@ -46,9 +46,9 @@ export const getPlayerRotation = (e: With<Entity, 'position' | 'playerControls'>
 	if (app.isDisabled('menu') && settings.controls === 'mouse') {
 		if (inputManager.controls() === 'gamepad') {
 			return new Vector3(
-				e.playerControls.get('lookLeft').pressed - e.playerControls.get('lookRight').pressed,
+				gameInputs.get('lookLeft').pressed - gameInputs.get('lookRight').pressed,
 				0,
-				e.playerControls.get('lookForward').pressed - e.playerControls.get('lookBackward').pressed,
+				gameInputs.get('lookForward').pressed - gameInputs.get('lookBackward').pressed,
 			).normalize()
 		}
 		if (inputManager.controls() === 'keyboard') {
