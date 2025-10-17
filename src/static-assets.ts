@@ -11,6 +11,7 @@ export type StaticAssetPath =
   'buttons/texture.json' |
   'buttons/texture.png' |
   'characters/ALICE_animated-optimized.glb' |
+  'characters/Archibald_animated-optimized.glb' |
   'characters/Armabee-optimized.glb' |
   'characters/Armabee_Evolved-optimized.glb' |
   'characters/Basket-optimized.glb' |
@@ -497,6 +498,7 @@ export const assets = new Set<string>([
   'buttons/texture.json',
   'buttons/texture.png',
   'characters/ALICE_animated-optimized.glb',
+  'characters/Archibald_animated-optimized.glb',
   'characters/Armabee-optimized.glb',
   'characters/Armabee_Evolved-optimized.glb',
   'characters/Basket-optimized.glb',
