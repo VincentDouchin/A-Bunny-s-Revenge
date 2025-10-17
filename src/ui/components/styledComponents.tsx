@@ -1,7 +1,7 @@
 import type { JSX, JSXElement } from 'solid-js'
 import CheckSquare from '@assets/icons/square-check-solid.svg'
 import Square from '@assets/icons/square-regular.svg'
-import { For, Match, Switch } from 'solid-js'
+import { For, Match, splitProps, Switch } from 'solid-js'
 import { css } from 'solid-styled'
 
 interface OutlineTextProps {
@@ -34,19 +34,19 @@ export const OutlineText = (props: OutlineTextProps) => {
 	return <div class="outline-text" use:solid-styled>{props.children}</div>
 }
 export const GoldContainer = (props: JSX.HTMLAttributes<HTMLDivElement> & { children: JSXElement | JSXElement [], padding?: string }) => {
-	const { children, padding, class: givenClass, ...rest } = props
+	const [local, rest] = splitProps(props, ['children', 'padding', 'class'])
 
 	css/* css */`
 	.styled-container {
 		box-shadow: inset 0px 0px 1rem 0px black;
 		border: solid 0.3rem var(--gold);
-		padding: ${props.padding ?? '2rem'};
+		padding: ${local.padding ?? '2rem'};
 		border-radius: 1rem;
 		background: var(--brown-dark);
 		transition: all 0.5s;
 	}
 	`
-	return <div class={['styled-container', givenClass ?? ''].join(' ')} {...rest} use:solid-styled>{props.children}</div>
+	return <div class={['styled-container', local.class ?? ''].join(' ')} {...rest}>{local.children}</div>
 }
 
 export const InventoryTitle = (props: { children: JSXElement, color?: string }) => {

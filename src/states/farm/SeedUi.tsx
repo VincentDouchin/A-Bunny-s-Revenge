@@ -4,16 +4,14 @@ import { createSignal, onMount } from 'solid-js'
 import { For, Portal, Show } from 'solid-js/web'
 import { css } from 'solid-styled'
 import { Transition } from 'solid-transition-group'
-import atom from 'solid-use/atom'
 import { getSeed } from '@/constants/items'
 import { ecs, gameInputs, menuInputs, save, ui } from '@/global/init'
-import { Menu, menuItem } from '@/ui/components/Menu'
+import { Menu } from '@/ui/components/Menu'
 import { GoldContainer, OutlineText } from '@/ui/components/styledComponents'
 import { InputIcon } from '@/ui/InputIcon'
 import { useGame, useQuery } from '@/ui/store'
 import { ItemDisplay } from './InventoryUi'
 
-menuItem
 const seedQuery = useQuery(ecs.with('menuType', 'interactionContainer', 'plantableSpot'))
 export const SeedUi = () => {
 	const context = useGame()
@@ -51,8 +49,8 @@ export const SeedUi = () => {
 				}
 				return (
 
-					<Menu inputs={menuInputs}>
-						{({ menu }) => {
+					<Menu>
+						{(MenuItem) => {
 							return (
 								<For each={seedQuery()}>
 									{(entity) => {
@@ -77,11 +75,17 @@ export const SeedUi = () => {
 																</Show>
 																<For each={seeds()}>
 																	{(seed, i) => {
-																		const selected = atom(false)
 																		return (
-																			<div use:menuItem={[menu, i() === 0, selected]} onClick={() => chooseSeed(seed, entity)} class="seed">
-																				<ItemDisplay item={seed} selected={selected}></ItemDisplay>
-																			</div>
+																			<MenuItem
+																				defaultSelected={i() === 0}
+																				onClick={() => chooseSeed(seed, entity)}
+																			>
+																				{({ selected }) => (
+																					<div class="seed">
+																						<ItemDisplay item={seed} selected={selected}></ItemDisplay>
+																					</div>
+																				)}
+																			</MenuItem>
 																		)
 																	}}
 																</For>

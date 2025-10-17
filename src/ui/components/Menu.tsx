@@ -1,12 +1,13 @@
-import type { Accessor, Component, JSX } from 'solid-js'
-import type { Atom } from 'solid-use/atom'
-import type { MenuInputMap } from '@/global/inputMaps'
-import { createEffect, createMemo, createRoot, createSignal, on, onCleanup } from 'solid-js'
-import { generateUUID } from 'three/src/math/MathUtils'
-import { ui } from '@/global/init'
-import { playSound } from '@/global/sounds'
+import type { Accessor, JSX } from 'solid-js'
+import CaretRight from '@assets/icons/caret-right-solid.svg'
+import { createEffect, createMemo, onCleanup, onMount, Show } from 'solid-js'
+import { Portal } from 'solid-js/web'
+import { css } from 'solid-styled'
+import atom from 'solid-use/atom'
 
-const findClosest = (selected: HTMLElement, neighbors: IterableIterator<HTMLElement>) => (direction: 'up' | 'down' | 'left' | 'right') => {
+import { menuInputs, ui } from '@/global/init'
+
+const findClosest = (selected: HTMLElement, neighbors: Set<HTMLElement>) => (direction: 'up' | 'down' | 'left' | 'right') => {
 	let distance = Number.POSITIVE_INFINITY
 	let closest: HTMLElement | null = null
 	const selectedRect = selected.getBoundingClientRect()
@@ -47,109 +48,144 @@ const findClosest = (selected: HTMLElement, neighbors: IterableIterator<HTMLElem
 	}
 	return closest
 }
-export interface MenuItemProps extends JSX.HTMLAttributes<HTMLDivElement> {
-	menu: MenuDir
+
+interface MenuProps {
+	children: (fn: (itemProps: MenuItemProps2) => JSX.Element) => JSX.Element
+	showArrow?: boolean
 }
 
-export type MenuItem = (el: HTMLElement, selected: () => [MenuDir, boolean, Atom<boolean>, Accessor<('up' | 'down' | 'left' | 'right')[]>, boolean ] | [MenuDir, boolean, Atom<boolean>]) => void
-declare module 'solid-js' {
-	// eslint-disable-next-line ts/no-namespace
-	namespace JSX {
-		interface DirectiveFunctions { // use:model
-			menuItem: MenuItem
-		}
-	}
+export type MenuItemComponent = (props: MenuItemProps2) => JSX.Element
+
+export interface MenuItemProps2 {
+	children: (props: MenuItemChildrenProps) => JSX.Element
+	defaultSelected?: boolean
+	onClick?: () => void
+	onLeft?: () => void
+	onRight?: () => void
+	onUp?: () => void
+	onDown?: () => void
+	onSelected?: () => void
+}
+export interface MenuItemChildrenProps {
+	selected: Accessor<boolean>
+	trigger: () => void
 }
 
-export interface MenuDir {
-	refs: Map<string, HTMLElement>
-	inverseRefs: Map<HTMLElement, string>
-	selectedRef: Accessor<HTMLElement | undefined>
-	setSelected: (id: string) => void
-	setSelectedRef: (el: HTMLElement) => void
-	selected: Accessor<string>
-	disabledDirections: Map<string, Accessor<('up' | 'down' | 'left' | 'right')[]>>
-}
-export const menuItem: MenuItem = (el, init) => {
-	const id = generateUUID()
-	const [menu, first, isSelected, disabledDirections, autofocus] = init()
-	if (first) {
-		menu.setSelected(id)
+export function Menu({ children, showArrow = false }: MenuProps) {
+	const selected = atom<HTMLElement | null>(null)
+	const items = new Set<HTMLElement>()
+	const callbacks = {
+		right: new Map<HTMLElement, () => void>(),
+		left: new Map<HTMLElement, () => void>(),
+		up: new Map<HTMLElement, () => void>(),
+		down: new Map<HTMLElement, () => void>(),
+		selected: new Map<HTMLElement, () => void>(),
 	}
-	if (disabledDirections) {
-		menu.disabledDirections.set(id, disabledDirections)
-	}
-	menu.refs.set(id, el)
-	menu.inverseRefs.set(el, id)
-
-	const clickListener = () => {
-		menu.setSelected(id)
-	}
-	el.addEventListener('pointerdown', clickListener)
 	onCleanup(() => {
-		el.removeEventListener('pointerdown', clickListener)
-		menu.refs.delete(id)
-		menu.inverseRefs.delete(el)
+		items.clear()
+		selected(null)
+		Object.values(callbacks).forEach(callback => callback.clear())
 	})
-	createEffect(on(menu.selected, () => {
-		isSelected(id === menu.selected())
-	}))
-	if (autofocus) {
-		createEffect(() => {
-			if (isSelected()) {
-				el.scrollIntoView({ behavior: 'smooth' })
-			}
-		})
-	}
-}
+	createEffect(() => {
+		const el = selected()
+		if (el) {
+			const callback = callbacks.selected.get(el)
+			callback && callback()
+		}
+	})
 
-export function Menu(props: { children: Component<MenuItemProps>, inputs?: MenuInputMap }) {
-	const [selected, setSelected] = createSignal('')
-
-	const refs = new Map<string, HTMLElement>()
-	const inverseRefs = new Map<HTMLElement, string>()
-	const disabledDirections = new Map<string, Accessor<('up' | 'down' | 'left' | 'right')[]>>()
-	const update = () => {
+	ui.updateSync(() => {
+		const el = selected()
+		if (!el) return
+		const finder = findClosest(el, items)
 		for (const direction of ['up', 'down', 'left', 'right'] as const) {
-			if (props.inputs?.get(direction).justPressed) {
-				const selectedId = createRoot(selected)
-				const forbiddenDir = disabledDirections.get(selectedId)
-				if (forbiddenDir && forbiddenDir().includes(direction)) continue
-				const selectedElement = refs.get(selectedId)
-				if (selectedElement) {
-					const finder = findClosest(selectedElement, refs.values())
-					const newSelectedElement = finder(direction)
-					if (newSelectedElement) {
-						const newSelected = inverseRefs.get(newSelectedElement)
-						if (newSelected !== undefined) {
-							setSelected(newSelected)
-							playSound('004_Hover_04')
-						}
+			if (menuInputs?.get(direction).justPressed) {
+				const callback = callbacks[direction].get(el)
+				if (callback) {
+					callback()
+				} else {
+					const closest = finder(direction)
+					if (closest) {
+						selected(closest)
 					}
 				}
 			}
 		}
-		if (props.inputs?.get('validate').justPressed) {
-			const selectedElement = refs.get(selected())
-			if (selectedElement) {
-				selectedElement.click()
+		if (menuInputs.get('validate').justPressed) {
+			selected()?.click()
+		}
+	})
+
+	const MenuItem = ({ children, defaultSelected, onClick, onLeft, onRight, onDown, onUp, onSelected }: MenuItemProps2) => {
+		const self = atom<HTMLElement | null>(null)
+		const isSelected = createMemo(() => selected() === self())
+		onMount(() => {
+			const selfValue = self()
+			if (!selfValue) return
+			items.add(selfValue)
+			if (defaultSelected) {
+				selected(selfValue)
+			}
+			if (onLeft) callbacks.left.set(selfValue, onLeft)
+			if (onRight) callbacks.right.set(selfValue, onRight)
+			if (onUp) callbacks.up.set(selfValue, onUp)
+			if (onDown) callbacks.down.set(selfValue, onDown)
+			if (onSelected) callbacks.down.set(selfValue, onSelected)
+			onCleanup(() => {
+				const selfValue = self()
+				if (!selfValue) return
+				items.delete(selfValue)
+				callbacks.left.delete(selfValue)
+				callbacks.right.delete(selfValue)
+				callbacks.up.delete(selfValue)
+				callbacks.down.delete(selfValue)
+			})
+		})
+		const click = () => {
+			const selfValue = self()
+			if (!selfValue) return
+			if (isSelected()) {
+				onClick && onClick()
+			} else {
+				selected(selfValue)
 			}
 		}
+		const trigger = () => selected(self())
+		return (
+			<div style="position: relative" ref={el => self(el)} onClick={click} onMouseEnter={() => selected(self())}>
+				{children({ selected: isSelected, trigger })}
+			</div>
+		)
 	}
-	const setSelectedRef = (el: HTMLElement) => {
-		const id = inverseRefs.get(el)
-		if (id) {
-			setSelected(id)
-		}
+	css/* css */`
+	.arrow-container{
+		position: fixed;
+		inset: 0;
+		pointer-events: none;
 	}
-	const selectedRef = createMemo(() => refs.get(selected()))
-	ui.updateSync(update)
-	const menu: MenuDir = { refs, inverseRefs, setSelected, selected, selectedRef, setSelectedRef, disabledDirections }
-
+	.arrow{
+		position: absolute;
+		left: 0px;
+		top: 50%;
+		translate: -1.2em -50%;
+		font-size: 2em;
+		fill: white;
+	}
+	:global(.arrow svg){
+		stroke: black;
+		stroke-width: 15%;
+	}
+	`
 	return (
-
-		<props.children
-			menu={menu}
-		/>
+		<>
+			<Show when={showArrow && selected()}>
+				{selected => (
+					<Portal mount={selected()}>
+						<div class="arrow"><CaretRight /></div>
+					</Portal>
+				)}
+			</Show>
+			{children(MenuItem)}
+		</>
 	)
 }

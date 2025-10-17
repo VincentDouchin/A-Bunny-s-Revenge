@@ -1,7 +1,7 @@
 import type { JSXElement } from 'solid-js'
 import type { Settings } from '@/global/save'
 import { createSignal, onCleanup } from 'solid-js'
-import { Dynamic, render } from 'solid-js/web'
+import { render } from 'solid-js/web'
 
 export class UIManager {
 	root: HTMLElement
@@ -21,7 +21,7 @@ export class UIManager {
 	listeners = new Set<() => void>()
 
 	render(ui: () => JSXElement) {
-		return render(() => <Dynamic component={ui}></Dynamic>, this.root)
+		return render(ui, this.root)
 	}
 
 	setFontSize(uiScale: number) {

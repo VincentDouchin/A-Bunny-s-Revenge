@@ -1,16 +1,15 @@
 import type { Accessor } from 'solid-js'
 import type { Recipe } from '@/constants/recipes'
 import type { Modifier } from '@/global/modifiers'
-import { createEffect, createMemo, createSignal, For, Show } from 'solid-js'
+import { createMemo, createSignal, For, Show } from 'solid-js'
 import { css } from 'solid-styled'
-import atom from 'solid-use/atom'
 import { isMeal, itemsData } from '@/constants/items'
 import { recipes } from '@/constants/recipes'
 import { MenuType } from '@/global/entity'
 import { assets, ecs, gameInputs, menuInputs, save, ui } from '@/global/init'
 import { modifiers } from '@/global/modifiers'
 import { ModType } from '@/lib/stats'
-import { Menu, menuItem } from '@/ui/components/Menu'
+import { Menu } from '@/ui/components/Menu'
 import { Modal } from '@/ui/components/Modal'
 import { GoldContainer, InventoryTitle, OutlineText } from '@/ui/components/styledComponents'
 import { InputIcon } from '@/ui/InputIcon'
@@ -20,7 +19,6 @@ import { range } from '@/utils/mapFunctions'
 import { MealAmount } from '../dungeon/HealthUi'
 import { isRecipeHidden, ItemDisplay } from './InventoryUi'
 
-menuItem
 export const recipeQuery = useQuery(ecs.with('menuType', 'recipesQueued').where(({ menuType }) => [MenuType.Oven, MenuType.Cauldron, MenuType.Bench].includes(menuType)))
 const getMenuName = (menuType: MenuType) => {
 	switch (menuType) {
@@ -229,23 +227,26 @@ export const RecipesUi = () => {
 							<div class="recipes-container">
 
 								<div>
-									<Menu inputs={menuInputs}>
-										{({ menu }) => {
+									<Menu>
+										{(MenuItem) => {
 											return (
 												<div style={{ display: 'grid', gap: '1rem' }}>
 													<div class="output">
 														<For each={range(0, 4, i => i)}>
 															{(i) => {
-																const selected = atom(false)
 																return (
-																	<div style={{ color: 'white' }}>
-																		<div use:menuItem={[menu, false, selected]} style={{ 'display': 'grid', 'align-items': 'center' }}>
-																			<ItemDisplay
-																				selected={selected}
-																				item={recipeQueued()[i]?.output}
-																			/>
-																		</div>
-																	</div>
+																	<MenuItem>
+																		{({ selected }) => (
+																			<div style={{ color: 'white' }}>
+																				<div style={{ 'display': 'grid', 'align-items': 'center' }}>
+																					<ItemDisplay
+																						selected={selected}
+																						item={recipeQueued()[i]?.output}
+																					/>
+																				</div>
+																			</div>
+																		)}
+																	</MenuItem>
 																)
 															}}
 														</For>
@@ -253,12 +254,6 @@ export const RecipesUi = () => {
 													<div class="recipes">
 														<For each={recipesFiltered()}>
 															{(recipe, i) => {
-																const selected = atom(false)
-																createEffect(() => {
-																	if (selected()) {
-																		setSelectedRecipe(recipe)
-																	}
-																})
 																const hidden = !save.unlockedRecipes.includes(recipe.output.name)
 																const canCraft = createMemo(() => {
 																	if (recipe.input.some((item) => {
@@ -273,16 +268,21 @@ export const RecipesUi = () => {
 																})
 
 																return (
-																	<div style={{ color: 'white' }}>
-																		<div use:menuItem={[menu, i() === 0, selected]} style={{ 'display': 'grid', 'align-items': 'center' }}>
-																			<ItemDisplay
-																				selected={selected}
-																				item={recipe.output}
-																				{...canCraft()}
-																				hidden={hidden}
-																			/>
-																		</div>
-																	</div>
+																	<MenuItem
+																		onSelected={() => setSelectedRecipe(recipe)}
+																		defaultSelected={i() === 0}
+																	>
+																		{({ selected }) => (
+																			<div style={{ 'color': 'white', 'display': 'grid', 'align-items': 'center' }}>
+																				<ItemDisplay
+																					selected={selected}
+																					item={recipe.output}
+																					{...canCraft()}
+																					hidden={hidden}
+																				/>
+																			</div>
+																		)}
+																	</MenuItem>
 																)
 															}}
 														</For>

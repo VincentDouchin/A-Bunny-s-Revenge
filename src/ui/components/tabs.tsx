@@ -1,33 +1,30 @@
 import type { JSXElement } from 'solid-js'
 import type { Atom } from 'solid-use/atom'
-import type { MenuDir } from './Menu'
-import { createEffect, createMemo, For, Show } from 'solid-js'
+import type { MenuItemComponent } from './Menu'
+import { For, Show } from 'solid-js'
 import { createArray } from 'solid-proxies'
 import { css } from 'solid-styled'
-import atom from 'solid-use/atom'
 import { menuInputs, ui } from '@/global/init'
 import { InputIcon } from '../InputIcon'
 import { useGame } from '../store'
-import { menuItem } from './Menu'
 
-menuItem
 interface TabsProps<T extends string> {
 	tabs: T[]
 	selectedTab: Atom<T>
 	children: (tab: T, selected: boolean) => JSXElement
-	menu: MenuDir
+	MenuItem: MenuItemComponent
 }
 export const Tabs = <T extends string,>(props: TabsProps<T>) => {
 	const context = useGame()
 	const tabsRefs = createArray<HTMLElement>([])
 	ui.updateSync(() => {
 		if (menuInputs.get('tab').justPressed || menuInputs.get('tabRight').justPressed) {
-			const nextTab = (props.tabs.indexOf(props.selectedTab()) + 1) % props.tabs.length
-			props.menu.setSelectedRef(tabsRefs[nextTab])
+			const nextTab = props.tabs[(props.tabs.indexOf(props.selectedTab()) + 1) % props.tabs.length]
+			props.selectedTab(nextTab)
 		}
 		if (menuInputs.get('tabLeft').justPressed) {
-			const nextTab = (props.tabs.indexOf(props.selectedTab()) - 1)
-			props.menu.setSelectedRef(tabsRefs.at(nextTab)!)
+			const nextTab = props.tabs[(props.tabs.indexOf(props.selectedTab()) - 1)]
+			props.selectedTab(nextTab)
 		}
 	})
 
@@ -57,20 +54,16 @@ export const Tabs = <T extends string,>(props: TabsProps<T>) => {
 			</div>
 			<For each={props.tabs}>
 				{(tab, i) => {
-					const isSelected = createMemo(() => props.selectedTab() === tab)
-					const selected = atom(i() === 0)
-					createEffect(() => {
-						if (selected()) {
-							props.selectedTab(tab)
-						}
-					})
 					return (
-						<div
-							use:menuItem={[props.menu, isSelected(), selected, () => isSelected() ? [] : ['down', 'up'], false]}
-							ref={el => tabsRefs[i()] = el}
-						>
-							{props.children(tab, selected())}
-						</div>
+						<props.MenuItem onClick={() => props.selectedTab(tab)}>
+							{({ selected }) => (
+								<div
+									ref={el => tabsRefs[i()] = el}
+								>
+									{props.children(tab, selected())}
+								</div>
+							)}
+						</props.MenuItem>
 					)
 				}}
 			</For>

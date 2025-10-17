@@ -2,7 +2,7 @@ import type { Accessor, JSX, JSXElement, Setter } from 'solid-js'
 import type { Item } from '@/constants/items'
 import type { Recipe } from '@/constants/recipes'
 import type { AssetNames } from '@/global/entity'
-import type { MenuDir } from '@/ui/components/Menu'
+import type { MenuItemComponent } from '@/ui/components/Menu'
 import Check from '@assets/icons/circle-check-solid.svg'
 import Cross from '@assets/icons/circle-xmark-solid.svg'
 import { autoUpdate } from '@floating-ui/dom'
@@ -15,7 +15,7 @@ import { recipes } from '@/constants/recipes'
 import { MenuType } from '@/global/entity'
 import { assets, ecs, menuInputs, save, thumbnailRenderer, ui } from '@/global/init'
 import { modifiers } from '@/global/modifiers'
-import { Menu, menuItem } from '@/ui/components/Menu'
+import { Menu } from '@/ui/components/Menu'
 import { Modal } from '@/ui/components/Modal'
 import { GoldContainer, InventoryTitle, OutlineText } from '@/ui/components/styledComponents'
 import { Tabs } from '@/ui/components/tabs'
@@ -26,8 +26,6 @@ import { range } from '@/utils/mapFunctions'
 import { setInitialHealth } from '../dungeon/health'
 import { amountEaten, extra, MealAmount } from '../dungeon/HealthUi'
 import { MealBuffs, RecipeDescription } from './RecipesUi'
-
-menuItem
 
 export const ItemBox = (props: { children: JSX.Element, selected?: boolean, completed?: boolean }) => {
 	css/* css */`
@@ -217,8 +215,7 @@ export const ItemDisplay = (props: {
 		</ItemBox>
 	)
 }
-export const InventorySlots = ({ first, disabled, click, setSelectedItem, menu, onSelected, inventorySize, inventory, hidden }: {
-	menu: MenuDir
+export const InventorySlots = ({ first, disabled, click, setSelectedItem, onSelected, inventorySize, inventory, hidden, MenuItem }: {
 	setSelectedItem?: Setter<Item | null>
 	click?: (item: Item | null, index: number) => void
 	disabled?: (item: Item | null) => boolean | undefined
@@ -227,6 +224,7 @@ export const InventorySlots = ({ first, disabled, click, setSelectedItem, menu, 
 	inventorySize?: number
 	inventory: Accessor <(Item | null)[]>
 	hidden?: (item: Item | null) => boolean
+	MenuItem: MenuItemComponent
 }) => {
 	const size = createMemo(() => inventorySize ?? inventory().length)
 	return (
@@ -235,29 +233,34 @@ export const InventorySlots = ({ first, disabled, click, setSelectedItem, menu, 
 				const itemSynced = ui.sync(() => inventory()[i()])
 
 				const isDisabled = disabled && disabled(itemSynced())
-				const selected = atom(false)
 				const isFirst = first ? first(inventory()[i()]) : i() === 0
-				createEffect(() => {
-					if (setSelectedItem && selected()) {
-						const item = itemSynced()
-						setSelectedItem(item)
-					}
-				})
+
 				const isHidden = hidden ? hidden(itemSynced()) : false
 				return (
-					<div
-						use:menuItem={[menu, isFirst, selected]}
-						class="item-drag"
+					<MenuItem
+						defaultSelected={isFirst}
 						onClick={() => click && !isDisabled && click(itemSynced(), i())}
 					>
-						<ItemDisplay
-							hidden={isHidden}
-							disabled={isDisabled}
-							item={itemSynced()}
-							onSelected={onSelected}
-							selected={selected}
-						/>
-					</div>
+						{({ selected }) => {
+							createEffect(() => {
+								if (setSelectedItem && selected()) {
+									const item = itemSynced()
+									setSelectedItem(item)
+								}
+							})
+							return (
+								<div class="item-drag">
+									<ItemDisplay
+										hidden={isHidden}
+										disabled={isDisabled}
+										item={itemSynced()}
+										onSelected={onSelected}
+										selected={selected}
+									/>
+								</div>
+							)
+						}}
+					</MenuItem>
 				)
 			}}
 
@@ -265,14 +268,14 @@ export const InventorySlots = ({ first, disabled, click, setSelectedItem, menu, 
 	)
 }
 
-const ItemCategories = <T,>({ items, setSelectedItem, menu, categories, filter, categoryName, hidden }: {
+const ItemCategories = <T,>({ items, setSelectedItem, categories, filter, categoryName, hidden, MenuItem }: {
 	items: Accessor<Item[]>
-	menu: MenuDir
 	setSelectedItem: Setter<Item | null>
 	categories: Accessor<T[]>
 	filter: (category: T, item: Item) => boolean
 	categoryName?: (category: T) => string
 	hidden?: (item: Item | null) => boolean
+	MenuItem: MenuItemComponent
 }) => {
 	const getName = categoryName ?? ((key: T) => `${key}s`)
 	css/* css */`
@@ -314,7 +317,7 @@ const ItemCategories = <T,>({ items, setSelectedItem, menu, categories, filter, 
 							</div>
 							<div class="inventory-category">
 								<InventorySlots
-									menu={menu}
+									MenuItem={MenuItem}
 									hidden={hidden}
 									first={(item: Item | null) => category === categories()[0] && item === categoryItems()[0]}
 									inventory={categoryItems}
@@ -446,14 +449,12 @@ export const InventoryUi = () => {
 				return (
 					<Modal open={open()}>
 						<Show when={open()}>
-							<Menu
-								inputs={menuInputs}
-							>
-								{({ menu }) => {
+							<Menu>
+								{(MenuItem) => {
 									return (
 										<>
 											<div class="tabs-container">
-												<Tabs tabs={tabs} menu={menu} selectedTab={selectedTab}>
+												<Tabs tabs={tabs} MenuItem={MenuItem} selectedTab={selectedTab}>
 													{(tab, selected) => (
 														<div class="tab" classList={{ active: selectedTab() === tab }}>
 															<OutlineText>
@@ -473,7 +474,7 @@ export const InventoryUi = () => {
 																items={playerInventory}
 																setSelectedItem={setSelectedItem}
 																categories={categories}
-																menu={menu}
+																MenuItem={MenuItem}
 																filter={(c, i) => c in itemsData[i.name]}
 															/>
 															<div class="description">
@@ -534,7 +535,7 @@ export const InventoryUi = () => {
 																items={recipesOutput}
 																setSelectedItem={i => selectedRecipe(recipes.find(r => r.output === i) ?? null)}
 																categories={() => [MenuType.Oven, MenuType.Cauldron]}
-																menu={menu}
+																MenuItem={MenuItem}
 																filter={(c, i) => recipes.find(r => r.output === i)?.processor === c}
 																categoryName={(c) => {
 																	switch (c) {
