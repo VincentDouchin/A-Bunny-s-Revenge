@@ -1,6 +1,6 @@
 import { css } from 'solid-styled'
 import { assets } from '@/global/init'
-import { GoldContainer, OutlineText } from './components/styledComponents'
+import { GoldContainer, OutlineText } from '../ui/components/styledComponents'
 
 // assets.emotes.emotes.
 
