@@ -1,12 +1,15 @@
 import type { Boss } from '@/constants/enemies'
+import type { Conversation } from '@/conversation/setupConversation'
+import { load } from 'js-toml'
 import { createSignal, For, onCleanup, onMount, Show } from 'solid-js'
 import atom from 'solid-use/atom'
 import { Color, Mesh, OrthographicCamera, PerspectiveCamera, Quaternion, Vector3 } from 'three'
 import { bosses } from '@/constants/enemies'
 import { recipes } from '@/constants/recipes'
+import { validateConversation } from '@/conversation/setupConversation'
 import { params } from '@/global/context'
 import { RenderGroup } from '@/global/entity'
-import { dayTime, ecs, save, scene, ui, world } from '@/global/init'
+import { assets, dayTime, ecs, save, scene, ui, world } from '@/global/init'
 import { cameraQuery, getTargetSize, height, updateRenderSize, width } from '@/global/rendering'
 import { app } from '@/global/states'
 import { RapierDebugRenderer } from '@/lib/debugRenderer'
@@ -172,10 +175,53 @@ export const DebugUi = () => {
 	const showToonEditor = atom(false)
 	const showGroundEditor = atom(false)
 	const showColorCorrection = atom(false)
+
+	const conversationError = atom<string | null>(null)
+	const displayCharacterList = atom(false)
+	const testConversation = (e: Event) => {
+		conversationError(null)
+		const file = (e.target as HTMLInputElement).files?.[0]
+		if (!file) return
+		const reader = new FileReader()
+		reader.onload = async (e: ProgressEvent<FileReader>) => {
+			const result = e.target?.result
+			if (typeof result == 'string') {
+				const conversation = load(result) as Conversation
+				try {
+					validateConversation(conversation)
+				}
+				catch (e) {
+					conversationError(String(e))
+				}
+				ecs.add({ conversation })
+			}
+		}
+		reader.readAsText(file)
+	}
 	return (
 		<div style={{ 'position': 'absolute', 'color': 'white', 'z-index': 1000 }}>
 			<Show when={showUi()}>
 				<div style={{ 'background': 'darkgray', 'display': 'grid', 'grid-template-columns': 'auto auto', 'color': 'black', 'font-size': '20px', 'padding': '10px', 'margin': '10px', 'gap': '10px', 'max-height': '80vh', 'overflow-y': 'auto' }}>
+					<div>test dialog</div>
+					<input type="file" accept=".toml" onChange={testConversation}></input>
+					<Show when={conversationError()}>
+						{error => <div style={{ 'color': 'red', 'grid-column': 'span 2' }}>{error()}</div>}
+					</Show>
+					<button onClick={() => displayCharacterList(!displayCharacterList())}>Display character list</button>
+					<div></div>
+					<Show when={displayCharacterList()}>
+						<div style="position: fixed; inset:2rem; left: 400px; right: 400px;padding: 2rem;background: white;height: 80dvh;overflow-y: scroll;">
+							{entries(assets.characters).map(([name, model]) => {
+								const showAnimations = atom(false)
+								return (
+									<>
+										<button onClick={() => showAnimations(!showAnimations())}>{name}</button>
+										<div>{showAnimations() && model.animations?.map(animation => animation.name).join(' / ')}</div>
+									</>
+								)
+							})}
+						</div>
+					</Show>
 					<div>Perspective</div>
 					<div>
 						<button onClick={changeCameraNormal}>Normal</button>

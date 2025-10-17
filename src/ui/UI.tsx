@@ -14,7 +14,7 @@ import { SeedUi } from '@/states/farm/SeedUi'
 import { FullscreenUi } from '@/states/game/FullscreenUi'
 import { OverlayUi } from '@/states/game/overlayUi'
 import { MainMenuUi } from '@/states/mainMenu/MainMenuUi'
-import { TestDialogUi } from '../dialogs/TestDialogUi'
+import { ConversationUi } from '../conversation/ConversationUi'
 import { StateUi } from './components/StateUi'
 import { DialogUi } from './DialogUi'
 import { Errors } from './Errors'
@@ -57,8 +57,9 @@ export const UI = () => {
 					<MainMenuUi />
 				</StateUi>
 				<StateUi state="testDialog">
-					<TestDialogUi />
+					<ConversationUi />
 				</StateUi>
+				<ConversationUi />
 				<Errors />
 				<PauseUi />
 				<FullscreenUi />

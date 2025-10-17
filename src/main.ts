@@ -2,8 +2,8 @@ import { beeBossBehavior } from './behaviors/beeBossBehavior'
 import { chargingBehavior, jumpingBehavior, meleeBehavior, rangeBehavior, seedlingBehavior, sporeBehavior } from './behaviors/enemyBehavior'
 import { playerBehavior } from './behaviors/playerBehavior'
 import { pumpkinBossPlugin } from './behaviors/pumpkinBossBehavior'
+import { setupConversation } from './conversation/setupConversation'
 import { debugPlugin } from './debug/debugPlugin'
-import { setupDialogs } from './dialogs/setupDialogs'
 import { updateAnimations } from './global/animations'
 import { initCamera, initializeCameraPosition, moveCamera } from './global/camera'
 import { coroutines, inputManager, musicManager, questManager, resetSave, thumbnailRenderer, time, tweens, ui } from './global/init'
@@ -62,7 +62,7 @@ app
 	.onEnter('default', initHowler, initTexturesItemsAndEnemies)
 	.addSubscribers('default', () => ui.render(UI), resize, disablePortrait, enableFullscreen, stopOnLosingFocus, completeQuestStep)
 	.onPreUpdate('default', coroutines.tick, savePlayerFromTheEmbraceOfTheVoid, updateMousePosition())
-	.onUpdate('default', runIf(() => app.isDisabled('paused'), ...updateAnimations('playerAnimator', 'basketAnimator', 'enemyAnimator', 'ovenAnimator', 'houseAnimator', 'chestAnimator', 'kayAnimator', 'cellarDoorAnimator', 'pumpkinBossAnimator', 'explodeAnimator', 'pumpkinSeedAnimator')))
+	.onUpdate('default', runIf(() => app.isDisabled('paused'), ...updateAnimations('playerAnimator', 'basketAnimator', 'enemyAnimator', 'ovenAnimator', 'houseAnimator', 'chestAnimator', 'kayAnimator', 'cellarDoorAnimator', 'pumpkinBossAnimator', 'explodeAnimator', 'pumpkinSeedAnimator', 'animator')))
 	.onRender('default', runIf(() => app.isDisabled('paused'), stepWorld, moveCamera()))
 	.onRender('default', renderGame)
 	.onPreUpdate('default', inputManager.update, ui.update)
@@ -74,7 +74,7 @@ app
 	// ! GAME
 	.addPlugins(fishingPlugin, interactionPlugin, tickModifiersPlugin('speed', 'maxHealth', 'strength', 'critChance', 'critDamage', 'attackSpeed', 'lootQuantity', 'lootChance'))
 	.onUpdate('game', runIf(() => app.isDisabled('paused'), playerBehavior))
-	.addSubscribers('game', initializeCameraPosition, bobItems, enableInventoryState, popItems, addHealthBarContainer, ...equip('wateringCan', 'weapon', 'fishingPole'), ...doorLocking, addDashDisplay, addQuestMarkers, displayUnlockQuestToast)
+	.addSubscribers('game', initializeCameraPosition, bobItems, enableInventoryState, popItems, addHealthBarContainer, ...equip('wateringCan', 'weapon', 'fishingPole'), ...doorLocking, addDashDisplay, addQuestMarkers, displayUnlockQuestToast, setupConversation)
 	.onEnter('game', questManager.enableQuests)
 	.onPreUpdate(
 		'game',
@@ -138,6 +138,4 @@ app
 	.onEnter('village', compileShaders, initTexturesItemsAndEnemies)
 	.onUpdate('village', collideWithDoorVillage)
 	.addPlugins(introQuestActors('game'))
-	// ! Test Dialog
-	.onEnter('testDialog', spawnLevel('village', 'village'), moveCamera(true), setupDialogs)
 	.start()

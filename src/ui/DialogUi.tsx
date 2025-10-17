@@ -71,7 +71,7 @@ export const DialogText = (props: { text: string, finished: Atom<boolean> }) => 
 		width: 0.5rem;
 	}
 	.word{
-		display: flex
+		display: inline-flex;
 	}
 	`
 	const letterVisible = atom(0)

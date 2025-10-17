@@ -2,6 +2,7 @@ import type { Object3D } from 'three'
 import { BasicShadowMap, DepthTexture, Group, LinearSRGBColorSpace, Material, MeshBasicMaterial, ShaderMaterial, Texture, Vector2, WebGLRenderer, WebGLRenderTarget } from 'three'
 import { FullScreenQuad } from 'three/examples/jsm/postprocessing/Pass'
 import { CSS2DRenderer } from 'three/examples/jsm/renderers/CSS2DRenderer'
+import { conversationQuery } from '@/conversation/setupConversation'
 import { getGameRenderGroup } from '@/debug/debugUi'
 import { getSobelShader, outlineShader } from '@/shaders/EdgePass'
 import { entries, objectValues } from '@/utils/mapFunctions'
@@ -62,7 +63,7 @@ export const initThree = () => {
 export const gameRenderGroupQuery = ecs.with('renderer', 'renderGroup', 'scene').where(e => e.renderGroup === RenderGroup.Game)
 export const cameraQuery = ecs.with('camera', 'renderGroup', 'cameraOffset').where(e => e.renderGroup === RenderGroup.Game)
 
-export const dialogRenderGroupQuery = ecs.with('renderer', 'renderGroup', 'scene').where(e => e.renderGroup === RenderGroup.Dialog)
+export const dialogRenderGroupQuery = ecs.with('renderGroup', 'scene').where(e => e.renderGroup === RenderGroup.Dialog)
 export const dialogCameraQuery = ecs.with('camera', 'renderGroup', 'cameraOffset').where(e => e.renderGroup === RenderGroup.Dialog)
 
 export const gameCameraQuery = cameraQuery.with('cameraOffset').where(e => e.renderGroup === RenderGroup.Game)
@@ -98,7 +99,7 @@ export const renderGame = () => {
 	const dialogCamera = dialogCameraQuery.first
 	const dialogRenderGroup = dialogRenderGroupQuery.first
 
-	if (dialogCamera && dialogRenderGroup) {
+	if (dialogCamera && dialogRenderGroup && conversationQuery.size !== 0) {
 		renderer.autoClear = false
 		renderer.clearDepth()
 		renderer.render(dialogRenderGroup.scene, dialogCamera.camera)

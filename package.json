@@ -30,6 +30,7 @@
 		"fastnoise-lite": "^1.1.1",
 		"howler": "^2.2.4",
 		"idb-keyval": "^6.2.1",
+		"js-toml": "^1.0.2",
 		"jsoneditor": "^10.0.0",
 		"miniplex": "^2.0.0",
 		"popmotion": "^11.0.5",

@@ -15,6 +15,7 @@ import type { crops, Item } from '@/constants/items'
 import type { NPC } from '@/constants/NPC'
 import type { Quest2 } from '@/constants/quests'
 import type { Recipe } from '@/constants/recipes'
+import type { Conversation } from '@/conversation/setupConversation'
 import type { AppStates } from '@/lib/app'
 import type { Direction } from '@/lib/directions'
 import type { MeshLine, MeshLineMaterial } from '@/lib/MeshLine'
@@ -273,6 +274,7 @@ export type Entity = StateComponents & Partial<AttackStyle> & {
 	dialogHeight?: number
 	dialog?: Dialog
 	dialogContainer?: CSS2DObject
+	conversation?: Conversation
 	// ! Health
 	currentHealth?: number
 	maxHealth?: Stat
