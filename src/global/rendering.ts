@@ -37,12 +37,7 @@ export const getTargetSize = (height = params.renderHeight) => {
 export const updateRenderSize = (newSize?: Vector2, force = true) => {
 	newSize ??= getTargetSize()
 	sobelMat.uniforms.resolution.value = newSize
-	finalTarget.setSize(newSize.x, newSize.y)
 	if (force) {
-		target.setSize(newSize.x, newSize.y)
-		outlineTarget.setSize(newSize.x, newSize.y)
-		outlineTarget2.setSize(newSize.x, newSize.y)
-		renderer.setSize(newSize.x, newSize.y, false)
 		const cssRendererSize = cssRenderer.getSize()
 		if (cssRendererSize.width !== window.innerWidth || cssRendererSize.height !== window.innerHeight) {
 			cssRenderer.setSize(window.innerWidth, window.innerHeight)

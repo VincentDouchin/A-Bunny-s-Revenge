@@ -82,7 +82,8 @@ export const getSobelShader = (x: number, y: number, diffuseTarget: WebGLRenderT
 		#include <packing>
 	
 		void main() {
-			vec2 uv = vUv;
+			vec2 pixel_size = vec2(1.0,1.0) / resolution;
+			vec2 uv = floor(vUv / pixel_size) * pixel_size;
 			float G = sobel2(tDepth,uv,resolution);	
 			float Gfactor = clamp(step(G * 5.0,0.01)+0.8,0.0,1.0);
 			vec3 tex_color = texture2D(tDiffuse,uv).rgb;
