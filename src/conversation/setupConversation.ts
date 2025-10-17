@@ -48,7 +48,11 @@ export const setupDialogRenderGroup = once(() => {
 		renderGroup: RenderGroup.Dialog,
 	})
 	camera.lookAt(new Vector3(0, 0, 0))
-	scene.add(new AmbientLight())
+	ecs.add({
+		parent: dialogRenderGroup,
+		light: new AmbientLight(0xFFFFFF, 2),
+		position: new Vector3(),
+	})
 })
 
 export const validateConversation = (conversation: Conversation) => {

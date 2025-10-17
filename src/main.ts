@@ -63,7 +63,7 @@ app
 	.addSubscribers('default', () => ui.render(UI), resize, disablePortrait, enableFullscreen, stopOnLosingFocus, completeQuestStep)
 	.onPreUpdate('default', coroutines.tick, savePlayerFromTheEmbraceOfTheVoid, updateMousePosition())
 	.onUpdate('default', runIf(() => app.isDisabled('paused'), ...updateAnimations('playerAnimator', 'basketAnimator', 'enemyAnimator', 'ovenAnimator', 'houseAnimator', 'chestAnimator', 'kayAnimator', 'cellarDoorAnimator', 'pumpkinBossAnimator', 'explodeAnimator', 'pumpkinSeedAnimator', 'animator')))
-	.onRender('default', runIf(() => app.isDisabled('paused'), stepWorld, moveCamera()))
+	.onPreUpdate('default', runIf(() => app.isDisabled('paused'), stepWorld, moveCamera()))
 	.onRender('default', renderGame)
 	.onPreUpdate('default', inputManager.update, ui.update)
 	.onRender('default', runIf(() => app.isDisabled('paused'), updateTimeUniforms))

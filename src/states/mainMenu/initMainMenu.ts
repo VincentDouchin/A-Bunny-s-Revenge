@@ -1,4 +1,4 @@
-import { Mesh, PerspectiveCamera, PlaneGeometry, Scene, Vector2, Vector3 } from 'three'
+import { Group, Mesh, PerspectiveCamera, PlaneGeometry, Scene, Vector2, Vector3 } from 'three'
 import { updateCameraZoom } from '@/global/camera'
 import { params } from '@/global/context'
 import { RenderGroup } from '@/global/entity'
@@ -34,6 +34,7 @@ export const intiMainMenuRendering = () => {
 		scene,
 		renderGroup: RenderGroup.MainMenu,
 		stateEntity: 'mainMenu',
+		group: new Group(),
 	})
 	const camera = new PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.0001, 1000)
 	camera.name = 'mainMenu'
