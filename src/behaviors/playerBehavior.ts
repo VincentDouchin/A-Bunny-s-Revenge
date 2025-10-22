@@ -19,8 +19,6 @@ const playerQuery = ecs.with('playerAnimator', 'movementForce', 'speed', 'body',
 const enemyQuery = ecs.with('faction', 'state', 'strength', 'collider', 'position', 'rotation')
 const enemyWithSensor = enemyQuery.with('sensor').where(e => e.faction === Faction.Enemy && e.state.current === 'attack')
 const enemyWithoutSensor = enemyQuery.without('sensor').where(e => e.faction === Faction.Enemy && e.state.current === 'attack')
-// const interactionQuery = ecs.with('interactionContainer')
-// const dialogQuery = ecs.with('dialog')
 const getAttackingEnemy = (player: QueryEntity<typeof playerQuery>) => {
 	if (player.hitTimer.running()) return null
 	for (const enemy of enemyWithoutSensor) {
