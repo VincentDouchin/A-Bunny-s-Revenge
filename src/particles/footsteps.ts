@@ -1,6 +1,7 @@
 import { CircleGeometry, Mesh, MeshBasicMaterial, Quaternion, Vector3 } from 'three'
 import { ecs, tweens } from '@/global/init'
 import { playStep } from '@/global/sounds'
+import { inMap } from '@/lib/hierarchy'
 
 const geo = new CircleGeometry(1, 8)
 
@@ -11,11 +12,11 @@ export const spawnFootstep = (direction: 'left' | 'right', position: Vector3, ho
 	const mat = honey
 		? footstepHoney()
 		: footstepMat()
-	const footstep = ecs.add({
+	const footstep = ecs.add(inMap({
 		model: new Mesh(geo, mat),
 		position: position.clone().add(new Vector3((direction === 'left' ? -1 : 1) * 1.3, 1, 0)),
 		rotation: new Quaternion().setFromAxisAngle(new Vector3(1, 0, 0), -Math.PI / 2),
-	})
+	}))
 	tweens.add({
 		from: mat.opacity,
 		to: 0,
