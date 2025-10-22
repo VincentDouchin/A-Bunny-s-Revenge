@@ -1,12 +1,13 @@
 import type { Atom } from 'solid-use/atom'
 import type { LevelData } from '../types'
-import { faTrash } from '@fortawesome/free-solid-svg-icons'
-import Fa from 'solid-fa'
+import { faArrowRotateBack, faTrash } from '@fortawesome/free-solid-svg-icons'
+import { del } from 'idb-keyval'
 
+import Fa from 'solid-fa'
 import { For, Show } from 'solid-js'
 import { css } from 'solid-styled'
 import atom from 'solid-use/atom'
-import { removeLevel, saveLevel } from '../lib/fileOperations'
+import { removeLevel, saveLevelFile } from '../lib/fileOperations'
 
 export function LevelSelector({ loadLevel, selectedLevel, folder, fetchLevels, levels }: {
 	loadLevel: (levelName: string) => void
@@ -25,7 +26,12 @@ export function LevelSelector({ loadLevel, selectedLevel, folder, fetchLevels, l
 		place-content: center;
 		padding: 1rem;
 	}
-	.add-level, .level{
+	.level{
+		display: grid;
+		grid-template-columns: 1fr auto auto;
+
+	}
+	.add-level{
 		display: grid;
 		grid-template-columns: 1fr auto;
 	}
@@ -33,6 +39,10 @@ export function LevelSelector({ loadLevel, selectedLevel, folder, fetchLevels, l
 
 	const addLevel = atom(false)
 	const levelName = atom('')
+	const reset = async (level: string) => {
+		await del(level)
+		loadLevel(level)
+	}
 	const createLevel = async () => {
 		const emptyMap = document.createElement('canvas')
 		emptyMap.width = 100
@@ -53,7 +63,7 @@ export function LevelSelector({ loadLevel, selectedLevel, folder, fetchLevels, l
 			sizeX: 100,
 			sizeY: 100,
 		}
-		await saveLevel(folder, levelName(), levelTemplate)
+		await saveLevelFile(folder, levelName(), levelTemplate)
 		loadLevel(levelName())
 		addLevel(false)
 		fetchLevels(folder)
@@ -74,6 +84,7 @@ export function LevelSelector({ loadLevel, selectedLevel, folder, fetchLevels, l
 						<div class="level">
 							<button classList={{ selected: selectedLevel() === level }} onClick={() => loadLevel(level)}>{level}</button>
 							<button onClick={() => deleteLevel(level)}><Fa icon={faTrash} /></button>
+							<button onClick={() => reset(level)}><Fa icon={faArrowRotateBack} /></button>
 						</div>
 					)
 				}}

@@ -6,10 +6,11 @@ import { init, World } from '@dimforge/rapier3d-compat'
 import { faArrowRotateBack, faArrowsRotate, faArrowsUpDownLeftRight, faEarth, faLock, faLockOpen, faMaximize } from '@fortawesome/free-solid-svg-icons'
 import { trackDeep } from '@solid-primitives/deep'
 import { createScheduled, debounce } from '@solid-primitives/scheduled'
+import { get, set } from 'idb-keyval'
 import Fa from 'solid-fa'
 import { createEffect, createMemo, on, onCleanup, onMount, Show } from 'solid-js'
-import { createMutable, modifyMutable, reconcile } from 'solid-js/store'
 
+import { createMutable, modifyMutable, reconcile, unwrap } from 'solid-js/store'
 import { css } from 'solid-styled'
 import atom from 'solid-use/atom'
 import { AmbientLight, BoxGeometry, CanvasTexture, ConeGeometry, CylinderGeometry, GridHelper, Group, Mesh, MeshBasicMaterial, MeshStandardMaterial, Object3D, PerspectiveCamera, PlaneGeometry, Quaternion, Raycaster, Scene, SphereGeometry, Vector2, Vector3, WebGLRenderer } from 'three'
@@ -36,7 +37,7 @@ import { MapEditor } from './components/MapEditor'
 import { RangeInput } from './components/RangeInput'
 import { Renderer } from './components/Renderer'
 import { SelectedEntityProps } from './components/SelectedEntityProps'
-import { createFolder, isRepoCloned, loadBoundingBox, loadLevel, loadLevels, saveBoundingBox, saveLevel } from './lib/fileOperations'
+import { createFolder, isRepoCloned, loadBoundingBox, loadLevel, loadLevels, saveBoundingBox, saveLevelFile } from './lib/fileOperations'
 
 function createArrowMesh() {
 	const arrow = new Group()
@@ -106,15 +107,14 @@ export function Editor() {
 	const grassMap = atom<string>('')
 	let treeGroup: Object3D | null = null
 	let grassGroup: Object3D | null = null
-	onCleanup(() => renderer.dispose())
+	onCleanup(() => {
+		renderer.dispose()
+		thumbnailRenderer.dispose()
+	})
 
 	const debugRenderer = new RapierDebugRenderer(world)
 	scene.add(debugRenderer.mesh)
-	renderer.setAnimationLoop(() => {
-		world.step()
-		debugRenderer?.update()
-		renderer.render(scene, camera)
-	})
+
 	let assets: Awaited<ReturnType<typeof loadAssets>> | null = null
 
 	const entities: Record<string, Record<string, Object3D>> = createMutable({})
@@ -134,7 +134,6 @@ export function Editor() {
 	const levelSize = atom<Vector2 | null>(null)
 
 	const tempModel = atom<Object3D | null>(null)
-	const mousePosition = atom<Vec2 | null>(null)
 
 	const repetitions: Record<string, Record<string, Object3D>> = {}
 
@@ -158,7 +157,7 @@ export function Editor() {
 	let prevModel: Object3D | null = null
 
 	const openEditor = atom<null | string>(null)
-	const drawing = atom<string | null>(null)
+	const drawing = atom<boolean>(false)
 	createEffect<'level' | 'entity'>((prev) => {
 		if (mode() === 'entity' && prev !== 'entity') {
 			tempModel(null)
@@ -188,17 +187,21 @@ export function Editor() {
 		const scale = displacementScale()
 		if (id && levelEntities[id] && levelEntitiesData[id].grounded && scale) {
 			const pos = levelEntities[id].position
-			const maxY = groundMesh.position.y * scale + 10
-			const ray = new Raycaster(pos.clone().add(new Vector3(0, maxY, 0)), new Vector3(0, -1, 0), 1, scale * 3)
+			const ray = new Raycaster(pos.clone().add(new Vector3(0, 1000, 0)), new Vector3(0, -1, 0), 1, 2000)
 			const intersection = ray.intersectObject(groundMesh)?.[0]
 			if (intersection) {
 				levelEntities[id].position.setY(intersection.point.y)
 			}
 			for (const repetition of Object.values(repetitions?.[id] ?? {})) {
-				const ray = new Raycaster(new Vector3(0, maxY, 0).add(levelEntities[id].position).add(repetition.position), new Vector3(0, -1, 0), 0.1, scale * 3)
+				const origin = new Vector3()
+
+				repetition.getWorldPosition(origin)
+				origin.setY(1000)
+				const ray = new Raycaster(origin, new Vector3(0, -1, 0), 0.1, 2000)
 				const int = ray.intersectObject(groundMesh)?.[0]
 				if (int) {
-					repetition.position.setY(int.point.y - levelEntities[id].position.y)
+					repetition.worldToLocal(int.point)
+					repetition.position.setY(int.point.y)
 				}
 			}
 		}
@@ -215,24 +218,6 @@ export function Editor() {
 		}
 	})
 
-	onMount(async () => {
-		assets = await loadAssets(thumbnailRenderer)
-		for (const key in assets) {
-			const category = assets[key as keyof typeof assets]
-			const cat = category as unknown as Record<string, any>
-			for (const asset in cat) {
-				const obj = cat[asset] as unknown as any
-				if (typeof obj == 'object' && 'scene' in obj) {
-					entities[key] ??= {}
-					entities[key][asset] = obj.scene
-				}
-				if (obj instanceof Object3D) {
-					entities[key] ??= {}
-					entities[key][asset] ??= obj
-				}
-			}
-		}
-	})
 	const addTransformControls = (): [Mesh, TransformControls] => {
 		const dummyMesh = new Mesh(new BoxGeometry(1, 1, 1), new MeshBasicMaterial({ transparent: true, opacity: 0, color: 0xFFFFFF }))
 		const transformControls = new TransformControls(camera, renderer.domElement)
@@ -344,38 +329,50 @@ export function Editor() {
 
 	transformControls.addEventListener('axis-changed', ({ value }) => {
 		mapControls.enabled = value === null
-	})
-
-	const onMouseUp = () => {
-		groundEntity(selectedId())
 		const id = selectedId()
-		if (id) {
+		if (value === null && id) {
 			levelEntitiesData[id].position = levelEntities[id].position.toArray()
 			levelEntitiesData[id].scale = levelEntities[id].scale.clone().divide(getGlobalScale(id)).toArray()
 			levelEntitiesData[id].rotation = new Quaternion().setFromEuler(levelEntities[id].rotation).toArray()
+			groundEntity(id)
 		}
-	}
+	})
 
 	const groundUV = atom<Vector2 | null>(null)
 
 	const mouseRay = new Raycaster()
-	createEffect(on(mousePosition, (mousePosition) => {
+	const getMousePosition = (e: PointerEvent) => {
+		const box = renderer.domElement.getBoundingClientRect()
+		if (e.clientX >= box.left && e.clientX <= box.right && e.clientY >= box.top && e.clientY <= box.bottom) {
+			return {
+				x: ((e.clientX - box.left) / (box.right - box.left)) * 2 - 1,
+				y: -((e.clientY - box.top) / (box.bottom - box.top)) * 2 + 1,
+			}
+		}
+		return null
+	}
+	let mousePosition: null | Vec2 = null
+	window.addEventListener('pointermove', (e) => {
+		mousePosition = getMousePosition(e)
+		drawing(e.ctrlKey)
+	})
+	const updateTempModelPosition = () => {
 		const model = tempModel()
 		if (mousePosition) {
 			if (model || drawing()) {
 				mouseRay.setFromCamera(new Vector2(mousePosition.x, mousePosition.y), camera)
 				const intersection = mouseRay.intersectObject(groundMesh)
 				if (intersection[0]) {
-					groundUV(new Vector2(intersection[0].uv!.x, 1 - intersection[0].uv!.y))
-
 					if (model) {
 						model.visible = true
 						model.position.copy(intersection[0].point)
+					} else {
+						groundUV(new Vector2(intersection[0].uv!.x, 1 - intersection[0].uv!.y))
 					}
 				}
 			}
 		}
-	}))
+	}
 
 	createEffect(on(model, (obj) => {
 		if (obj && mode() === 'level') {
@@ -399,7 +396,7 @@ export function Editor() {
 		if (mode() === 'level' && !drawing()) {
 			if (e.buttons === 1) {
 				const model = tempModel()
-				const pos = mousePosition()
+				const pos = getMousePosition(e)
 				const category = selectedCategory()
 				const asset = selectedAsset()
 				if (model && category && asset) {
@@ -481,6 +478,7 @@ export function Editor() {
 		const water = waterMap()
 		const grass = grassMap()
 		const scale = displacementScale()
+		trackDeep(levelEntitiesData)
 		if (size && scale) {
 			return {
 				sizeX: size.x,
@@ -540,7 +538,19 @@ export function Editor() {
 		}
 	}
 
+	const removeEntity = (id: string) => {
+		arrow.removeFromParent()
+		selectedId(null)
+		levelEntities[id].removeFromParent()
+		delete levelEntitiesData[id]
+		delete levelEntities[id]
+	}
+
 	const fetchLevel = async (levelName: string) => {
+		scene.clear()
+		for (const id in levelEntities) {
+			removeEntity(id)
+		}
 		const levelData = await loadLevel(folder, levelName)
 		displacementScale(levelData.displacementScale)
 		heightMap(levelData.heightMap)
@@ -572,6 +582,7 @@ export function Editor() {
 		scene.add(group)
 		groundMesh.geometry = setDisplacement(size, heightCanvas()!, waterCanvas()!, levelData.displacementScale)
 		pointerMesh.geometry = setDisplacement(size, heightCanvas()!, waterCanvas()!, levelData.displacementScale)
+
 		modifyMutable(levelEntitiesData, reconcile(levelData.entities))
 		mode('level')
 		setTimeout(() => {
@@ -581,17 +592,14 @@ export function Editor() {
 		}, 10)
 	}
 
-	const removeEntity = (id: string) => {
-		arrow.removeFromParent()
-		selectedId(null)
-		levelEntities[id].removeFromParent()
-		delete levelEntitiesData[id]
-		delete levelEntities[id]
-	}
-
 	createEffect(() => {
 		if (!openEditor()) {
-			drawing(null)
+			drawing(false)
+		}
+	})
+	createEffect(() => {
+		if (!drawing()) {
+			pointerMesh.material.opacity = 0
 		}
 	})
 	const mouse = (canvas: HTMLCanvasElement | null) => {
@@ -695,11 +703,19 @@ export function Editor() {
 	createEffect(() => {
 		const levelName = selectedLevel()
 		const data = levelData()
-		trackDeep(levelData)
+
 		if (levelName && data && sheduled() && loaded()) {
-			saveLevel(folder, levelName, data)
+			set(levelName, unwrap(data))
 		}
 	})
+	const saveLevel = async () => {
+		const levelName = selectedLevel()
+		if (levelName) {
+			const data = await get(levelName)
+			return saveLevelFile(folder, levelName, data)
+		}
+	}
+
 	const saveBoundingBoxDebounced = createScheduled(fn => debounce(fn, 100))
 	createEffect(() => {
 		trackDeep(boundingBox)
@@ -712,7 +728,7 @@ export function Editor() {
 		const dirs = await loadLevels(folder)
 		levels(dirs.filter(x => x.name !== 'data.json').map(x => x.name.replace('.json', '')))
 		if (levels().length !== 0) {
-			loadLevel(folder, levels()[0])
+			await fetchLevel(levels()[0])
 		}
 	}
 	const fetchBoundingBox = async (folder: string) => {
@@ -722,6 +738,11 @@ export function Editor() {
 
 	const repoCloned = atom(false)
 	const reload = async (folder: string) => {
+		selectedLevel(null)
+		for (const id in levelEntities) {
+			removeEntity(id)
+		}
+		scene.clear()
 		await createFolder(folder)
 		const repo = await isRepoCloned(folder)
 		repoCloned(repo)
@@ -732,7 +753,33 @@ export function Editor() {
 		}
 	}
 
-	onMount(() => reload(folder))
+	onMount(async () => {
+		assets = await loadAssets(thumbnailRenderer)
+		for (const key in assets) {
+			const category = assets[key as keyof typeof assets]
+			const cat = category as unknown as Record<string, any>
+			for (const asset in cat) {
+				const obj = cat[asset] as unknown as any
+				if (typeof obj == 'object' && 'scene' in obj) {
+					entities[key] ??= {}
+					entities[key][asset] = obj.scene
+				}
+				if (obj instanceof Object3D) {
+					entities[key] ??= {}
+					entities[key][asset] ??= obj
+				}
+			}
+		}
+		reload(folder)
+	})
+	renderer.setAnimationLoop(() => {
+		if (mode() === 'entity') {
+			world.step()
+			debugRenderer?.update()
+		}
+		updateTempModelPosition()
+		renderer.render(scene, camera)
+	})
 
 	css/* css */`
 	.hidden{
@@ -790,6 +837,7 @@ export function Editor() {
 							folder={folder}
 							reload={reload}
 							repoCloned={repoCloned}
+							saveLevel={saveLevel}
 						/>
 						<LevelSelector
 							fetchLevels={fetchLevels}
@@ -833,11 +881,10 @@ export function Editor() {
 						onPointerUp={() => {
 							groundUV(null)
 							globalMode(null)
-							onMouseUp()
 						}}
 						onContextMenu={e => e.preventDefault()}
 					>
-						<Renderer renderer={renderer} camera={camera} mousePosition={mousePosition} onPointerDown={onPointerDown} />
+						<Renderer renderer={renderer} camera={camera} onPointerDown={onPointerDown} />
 						<Show when={selectedId()}>
 							<div class="mode-buttons">
 								<div class="scale-buttons">
@@ -884,13 +931,18 @@ export function Editor() {
 
 					<div class="map-editors">
 						<Show when={selectedId()}>
-							{id => (
-								<SelectedEntityProps
-									destroy={() => removeEntity(id())}
-									entity={levelEntitiesData[id()]}
-									update={() => updateEntity(id())}
-								/>
-							)}
+							{(id) => {
+								const entity = levelEntitiesData[id()]
+								const globalScale = boundingBox?.[entity.category]?.[entity.model]?.scale
+								return (
+									<SelectedEntityProps
+										globalScale={globalScale}
+										destroy={() => removeEntity(id())}
+										entity={levelEntitiesData[id()]}
+										update={() => updateEntity(id())}
+									/>
+								)
+							}}
 						</Show>
 						<Show when={mode() === 'level' && levelSize()}>
 							{size => (

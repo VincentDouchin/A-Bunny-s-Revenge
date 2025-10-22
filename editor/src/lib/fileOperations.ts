@@ -1,6 +1,7 @@
 import type { AssetData, LevelData } from '../types'
 import { path } from '@tauri-apps/api'
 import { BaseDirectory, exists, mkdir, readDir, readTextFile, remove, writeTextFile } from '@tauri-apps/plugin-fs'
+import { get } from 'idb-keyval'
 
 // Bounding box
 export const createFolder = async (folder: string) => {
@@ -39,7 +40,7 @@ const getLevelsDirPath = (folder: string) => path.join(folder, 'assets', 'levels
 export const loadLevels = async (folder: string) => {
 	return readDir(await getLevelsDirPath(folder), { baseDir: BaseDirectory.AppData })
 }
-export const saveLevel = async (folder: string, levelName: string, level: LevelData) => {
+export const saveLevelFile = async (folder: string, levelName: string, level: LevelData) => {
 	return writeTextFile(
 		await path.join(await getLevelsDirPath(folder), `${levelName}.json`),
 		JSON.stringify(level),
@@ -53,6 +54,8 @@ export const removeLevel = async (folder: string, levelName: string) => {
 	)
 }
 export const loadLevel = async (folder: string, level: string) => {
+	const data = await get(level)
+	if (data) return data as LevelData
 	const fileContent = await readTextFile(
 		await path.join(await getLevelsDirPath(folder), `${level}.json`),
 		{ baseDir: BaseDirectory.AppData },

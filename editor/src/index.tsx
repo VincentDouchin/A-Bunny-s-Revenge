@@ -4,4 +4,6 @@ import './index.css'
 
 const root = document.getElementById('root')
 
-render(() => <Editor />, root!)
+render(() => {
+	return <Editor />
+}, root!)

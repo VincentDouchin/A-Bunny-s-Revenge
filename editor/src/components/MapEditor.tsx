@@ -3,7 +3,6 @@ import type { Atom } from 'solid-use/atom'
 
 import type { Vec2 } from 'three'
 import { faEraser, faPen, faRotateLeft, faRotateRight } from '@fortawesome/free-solid-svg-icons'
-import { createScheduled, debounce } from '@solid-primitives/scheduled'
 import Fa from 'solid-fa'
 import { createEffect, createMemo, on, onCleanup, onMount, Show } from 'solid-js'
 import { createMutable } from 'solid-js/store'
@@ -44,7 +43,7 @@ export function MapEditor({
 	open: Atom<string | null>
 	mouseCanvas: (canvas: HTMLCanvasElement | null) => void
 	eraseColor?: string | null
-	drawing: Atom<string | null>
+	drawing: Atom<boolean>
 	realTimeUpdate?: boolean
 	globalMode: Atom<'eraser' | 'brush' | null>
 	globalPosition: Atom<Vector2 | null>
@@ -103,7 +102,7 @@ export function MapEditor({
 	})
 
 	createEffect(() => {
-		if (drawing() === name) {
+		if (drawing() && open() === name) {
 			position(globalPosition())
 		}
 	})
@@ -153,10 +152,9 @@ export function MapEditor({
 		}
 	}
 
-	const scheduled = createScheduled(fn => debounce(fn, 1))
-
 	createEffect(on(relativeMousePosition, (pos, lastPos) => {
-		if (drawing() === name) {
+		if (open() !== name) return
+		if (drawing()) {
 			mode(globalMode())
 		}
 		if (pos && !lastPos) {
@@ -169,7 +167,7 @@ export function MapEditor({
 
 			if (mode() && ctx && finalCtx) {
 				drawLine(ctx, lastPos, pos)
-				if (scheduled() && realTimeUpdate) {
+				if (realTimeUpdate) {
 					tempCanvas().clearRect(0, 0, levelSize().x, levelSize().y)
 					tempCanvas().globalCompositeOperation = 'source-over'
 					tempCanvas().drawImage(finalCtx.canvas, 0, 0, levelSize().x, levelSize().y)
@@ -305,7 +303,7 @@ export function MapEditor({
 
 			<div classList={{ hidden: open() !== name }}>
 				<div class="map-editor-buttons">
-					<button onClick={() => drawing(drawing() === name ? null : name)} classList={{ selected: drawing() === name }}><Fa icon={faPen}></Fa></button>
+					<button onClick={() => drawing(!drawing())} classList={{ selected: drawing() }}><Fa icon={faPen}></Fa></button>
 					<button onClick={eraseCanvas}><Fa icon={faEraser}></Fa></button>
 					<button onClick={goBack} disabled={history.length === 0}><Fa icon={faRotateLeft}></Fa></button>
 					<button onClick={goForward} disabled={future.length === 0}><Fa icon={faRotateRight}></Fa></button>
