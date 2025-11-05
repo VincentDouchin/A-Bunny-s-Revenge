@@ -1,6 +1,6 @@
 import { throttle } from '@solid-primitives/scheduled'
 import { Vector2 } from 'three'
-import { Armabee, bosses, FlowerBoar, MossBoar } from '@/constants/enemies'
+import { bosses, Mushroom } from '@/constants/enemies'
 import { selectedBoss } from '@/debug/debugUi'
 import { updateCameraZoom } from '@/global/camera'
 import { params } from '@/global/context'
@@ -31,9 +31,9 @@ export const setupGame = async () => {
 		updateCameraZoom()
 	} else if (params.debugEnemies) {
 		const enemiesRoom = assignPlanAndEnemies([{ position: { x: 0, y: 0 }, connections: { north: 1, south: null, east: null }, type: RoomType.Battle }], 0)
-		enemiesRoom[0].enemies = [Armabee(1), FlowerBoar(1), MossBoar(1)]
+		enemiesRoom[0].enemies = [Mushroom(1)]
 		enemiesRoom[0].type = RoomType.Battle
-		app.enable('dungeon', { dungeon: enemiesRoom[0], direction: Direction.S, firstEntry: true, playerHealth: 5, dungeonLevel: 0, weapon: 'SwordWeapon' })
+		app.enable('dungeon', { dungeon: enemiesRoom[0], direction: Direction.S, firstEntry: true, playerHealth: 10, dungeonLevel: 0, weapon: 'SwordWeapon' })
 		updateRenderSize()
 		updateCameraZoom()
 	} else if (params.debugIntro) {

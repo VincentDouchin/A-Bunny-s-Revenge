@@ -7,7 +7,7 @@ export const healthBundle = (health: number, current?: number) => ({
 	maxHealth: new Stat(health),
 } as const satisfies Entity)
 
-const healthQuery = ecs.with('currentHealth', 'maxHealth', 'state')
+const healthQuery = ecs.with('currentHealth', 'maxHealth')
 
 export const setInitialHealth = () => {
 	for (const entity of healthQuery) {

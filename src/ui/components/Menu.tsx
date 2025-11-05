@@ -130,7 +130,7 @@ export function Menu({ children, showArrow = false }: MenuProps) {
 			if (onRight) callbacks.right.set(selfValue, onRight)
 			if (onUp) callbacks.up.set(selfValue, onUp)
 			if (onDown) callbacks.down.set(selfValue, onDown)
-			if (onSelected) callbacks.down.set(selfValue, onSelected)
+			if (onSelected) callbacks.selected.set(selfValue, onSelected)
 			onCleanup(() => {
 				const selfValue = self()
 				if (!selfValue) return

@@ -56,8 +56,6 @@ export const initThree = () => {
 	cssRenderer.setSize(window.innerWidth, window.innerHeight)
 	cssRenderer.domElement.classList.add('main', 'css-renderer')
 	document.body.appendChild(cssRenderer.domElement)
-	const overlay = document.createElement('div')
-	document.body.appendChild(overlay)
 	ecs.add({ scene, renderer, renderGroup: RenderGroup.Game, group: new Group() })
 }
 export const gameRenderGroupQuery = ecs.with('renderer', 'renderGroup', 'scene').where(e => e.renderGroup === RenderGroup.Game)

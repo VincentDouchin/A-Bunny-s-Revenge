@@ -11,11 +11,11 @@ export const weaponBundle = (weaponName: AssetNames['weapons']) => {
 	model.scale.setScalar(data.scale / 4.5)
 	return ecs.add({ model, weaponName, weaponArc: new WeaponArc() })
 }
-const weaponArcQuery = ecs.with('weapon', 'group', 'state')
+const weaponArcQuery = ecs.with('weapon', 'group', 'playerState')
 export const updateWeaponArc = () => {
 	for (const entity of weaponArcQuery) {
 		const weapon = entity.weapon
-		if (entity.state.current.startsWith('attack')) {
+		if (entity.playerState.current.startsWith('attack')) {
 			const parentPosition = getWorldPosition(weapon.model)
 			const tipPosition = getWorldPosition(weapon.model.getObjectByName('tip')!)
 			if (parentPosition) {

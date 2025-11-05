@@ -1,12 +1,13 @@
 import type { Animations } from '@assets/animations'
-import type { AssetNames, Entity, PlayerAnimations } from '@/global/entity'
+import type { AssetNames, Entity, PlayerAnimations, PlayerStates } from '@/global/entity'
 import type { UpdateSystem } from '@/lib/app'
 import { ActiveEvents, Cuboid } from '@dimforge/rapier3d-compat'
 import { Euler, LinearSRGBColorSpace, Mesh, Quaternion, Vector3 } from 'three'
 import { CSS2DObject } from 'three/examples/jsm/renderers/CSS2DRenderer'
 import { clone } from 'three/examples/jsm/utils/SkeletonUtils'
+import { State } from '@/behaviors/state'
 import { Animator } from '@/global/animator'
-import { Faction, stateBundle, States } from '@/global/entity'
+import { Faction } from '@/global/entity'
 import { assets, ecs, save, world } from '@/global/init'
 import { menuInputMap, playerInputMap } from '@/global/inputMaps'
 import { ModifierContainer } from '@/global/modifiers'
@@ -104,7 +105,7 @@ export const playerBundle = (health: number, weapon: AssetNames['weapons'] | nul
 		npcName: 'Player',
 		lastStep: { right: false, left: false },
 		...healthBundle(10, health),
-		...stateBundle(States.player, 'idle'),
+		playerState: new State<PlayerStates>('idle'),
 		dashParticles: dash(2),
 		hitTimer: new Timer(1000, true),
 		dash: new Dash(1000),

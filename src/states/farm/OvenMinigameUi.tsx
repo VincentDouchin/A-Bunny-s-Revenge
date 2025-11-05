@@ -36,14 +36,16 @@ export const OvenMiniGameUi = () => {
 							const smokeTrailsQuery = ecs.with('parent', 'smokeParticles').where(e => e.parent === oven)
 							const fireQuery = ecs.with('parent', 'fireParticles', 'light').where(e => e.parent === oven)
 							const output = ui.sync(() => oven.recipesQueued?.[0]?.output)
-							// const smokeTrails: With<Entity, 'emitter'>[] = []
 							let targetEntity: Entity | null = null
+							let offset: Vector3
 							onMount(() => {
 								for (const camera of cameraQuery) {
 									ecs.removeComponent(camera, 'fixedCamera')
+									offset = camera.cameraOffset
 									ecs.removeComponent(camera, 'cameraOffset')
 									ecs.addComponent(camera, 'cameraOffset', new Vector3(0, 30, 80).applyQuaternion(oven.rotation!))
 								}
+								ecs.removeComponent(player(), 'cameraTarget')
 								tweens.add({
 									from: params.zoom,
 									to: 15,
@@ -55,7 +57,6 @@ export const OvenMiniGameUi = () => {
 									worldPosition: position.add(new Vector3(0, 10, 0)),
 									cameraTarget: true,
 								})
-								ecs.removeComponent(player(), 'cameraTarget')
 
 								for (const smokeTrail of smokeTrailsQuery) {
 									smokeTrail.smokeParticles.restart()
@@ -78,6 +79,7 @@ export const OvenMiniGameUi = () => {
 								addTag(player(), 'cameraTarget')
 								for (const camera of cameraQuery) {
 									ecs.removeComponent(camera, 'cameraOffset')
+									ecs.addComponent(camera, 'cameraOffset', offset)
 									addTag(camera, 'fixedCamera')
 								}
 								ecs.removeComponent(oven, 'cameraTarget')

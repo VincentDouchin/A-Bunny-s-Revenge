@@ -168,6 +168,10 @@ export const itemsData = {
 		ingredient: true,
 		price: 10,
 	},
+	// ! Mushroom
+	bolet: {
+		name: 'bolet',
+	},
 	// ! Meals
 	cookie: {
 		name: 'Cookie',

@@ -26,7 +26,7 @@ export const speaker = (name?: Entity['npcName']) => {
 	}
 }
 
-const playerQuery = ecs.with('player', 'position', 'collider', 'state')
+const playerQuery = ecs.with('player', 'position', 'collider', 'playerState')
 const movingPlayerQuery = playerQuery.with('body', 'targetRotation', 'rotation')
 export const houseQuery = ecs.with('npcName', 'position', 'collider', 'rotation', 'houseAnimator').where(({ npcName }) => npcName === 'Grandma')
 export const doorQuery = ecs.with('npcName', 'collider').where(({ npcName }) => npcName === 'door')
@@ -51,8 +51,8 @@ export const movePlayerTo = (dest: Vector3) => {
 			player.movementForce = dest.clone().sub(player.position).normalize()
 			coroutines.add(function* () {
 				while (player.position.distanceTo(dest) > 2) {
-					applyMove(() => dest.clone().sub(player.position).normalize())(player, null)
-					applyRotate(() => dest.clone().sub(player.position).normalize())(player, null)
+					applyMove(() => dest.clone().sub(player.position).normalize())({ entity: player })
+					applyRotate(() => dest.clone().sub(player.position).normalize())({ entity: player })
 					yield
 				}
 				player.movementForce?.setScalar(0)
@@ -67,7 +67,7 @@ export const sleepPlayer = async () => {
 		player.modifiers?.addModifier('sleepingPowder')
 		await sleep(5000)
 		await player.playerAnimator?.playClamped('wakeUp')
-		player.state.next = 'idle'
+		player.playerState.next = 'idle'
 	}
 }
 export const playerInventoryQuery = ecs.with('inventoryId', 'inventory', 'inventorySize', 'player', 'currentHealth', 'maxHealth')

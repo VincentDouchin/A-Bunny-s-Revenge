@@ -1,4 +1,4 @@
-import { AmbientLight, Group, OrthographicCamera, Quaternion, Scene, Vector3 } from 'three'
+import { AmbientLight, DirectionalLight, Group, OrthographicCamera, Quaternion, Scene, Vector3 } from 'three'
 import { clone } from 'three/examples/jsm/utils/SkeletonUtils'
 import { degToRad } from 'three/src/math/MathUtils'
 import { Animator } from '@/global/animator'
@@ -52,6 +52,16 @@ export const setupDialogRenderGroup = once(() => {
 		parent: dialogRenderGroup,
 		light: new AmbientLight(0xFFFFFF, 2),
 		position: new Vector3(),
+	})
+	const light = new DirectionalLight(0xFFFFFF, 0.6)
+	light.position.setZ(-2)
+	light.lookAt(new Vector3(0, 0, 0))
+	light.castShadow = true
+
+	ecs.add({
+		parent: dialogRenderGroup,
+		light,
+		position: new Vector3(0, 50, 0),
 	})
 })
 

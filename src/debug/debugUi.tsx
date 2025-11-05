@@ -203,7 +203,7 @@ export const DebugUi = () => {
 			<Show when={showUi()}>
 				<div style={{ 'background': 'darkgray', 'display': 'grid', 'grid-template-columns': 'auto auto', 'color': 'black', 'font-size': '20px', 'padding': '10px', 'margin': '10px', 'gap': '10px', 'max-height': '80vh', 'overflow-y': 'auto' }}>
 					<div>test dialog</div>
-					<input type="file" accept=".toml" onChange={testConversation}></input>
+					<input type="file" accept=".toml" onInput={testConversation}></input>
 					<Show when={conversationError()}>
 						{error => <div style={{ 'color': 'red', 'grid-column': 'span 2' }}>{error()}</div>}
 					</Show>

@@ -25,7 +25,7 @@ const enemiesQuery = ecs.with('faction').where(e => e.faction === Faction.Enemy)
 const cratesQuery = ecs.with('crate').without('interactable')
 const cratesToOpenQuery = ecs.with('crate').with('interactable', 'onPrimary')
 const dungeonQuery = ecs.with('dungeon')
-const playerQuery = ecs.with('player', 'position', 'rotation', 'targetRotation', 'state')
+const playerQuery = ecs.with('player', 'position', 'rotation', 'targetRotation', 'playerState')
 const spotsQuery = ecs.with('plantableSpot', 'position', 'entityId', 'group')
 const plantableSpotsQuery = spotsQuery.without('planted')
 const plantedQuery = spotsQuery.with('planted')
@@ -84,7 +84,7 @@ introQuest.untilIsComplete('2_find_pot', () => {
 })
 
 const introQuestDialogs = {
-	async* PlayerIntro1(player: With<Entity, 'state'>) {
+	async* PlayerIntro1(player: With<Entity, 'playerState'>) {
 		speaker('Player')
 		app.enable('cutscene')
 		await sleepPlayer()
@@ -98,7 +98,7 @@ const introQuestDialogs = {
 		if (inputManager.controls() !== 'touch') {
 			showTutorialEvent.emit(TutorialWindow.Movement)
 		}
-		player.state.next = 'idle'
+		player.playerState.next = 'idle'
 		ecs.reindex(player)
 		app.disable('cutscene')
 		introQuest.unlock()
@@ -209,7 +209,7 @@ const introQuestDialogs = {
 		speaker('Player')
 		yield 'Now that I harvested the carrots I can cook something for the festival!'
 	},
-	* turnAwayFromDoor(player: With<Entity, 'position' | 'state'>, callback: () => void) {
+	* turnAwayFromDoor(player: With<Entity, 'position' | 'playerState'>, callback: () => void) {
 		app.enable('cutscene')
 		stopPlayer()
 		speaker('Player')
@@ -356,7 +356,7 @@ export const spawnIntroPlayer = addActors({
 	playerIntro: () => {
 		const player = { ...playerBundle(PLAYER_DEFAULT_HEALTH, null) }
 		player.playerAnimator.playAnimation('sleeping')
-		player.state.next = 'managed'
+		player.playerState.next = 'managed'
 		return player
 	},
 })

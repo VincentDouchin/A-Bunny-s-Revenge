@@ -1,11 +1,12 @@
 import type { Animations } from '@assets/animations'
 import type { Drop } from '@/constants/enemies'
-import type { AssetNames, AttackStyle, ComponentsOfType, Entity, stateBundle } from '@/global/entity'
+import type { AssetNames, AttackStyle, ComponentsOfType, Entity } from '@/global/entity'
 import type { app } from '@/global/states'
 import type { SubscriberSystem } from '@/lib/app'
 import { ActiveEvents, Cuboid, RigidBodyType } from '@dimforge/rapier3d-compat'
 import { BoxGeometry, Mesh, Quaternion, Vector3 } from 'three'
 import { generateUUID } from 'three/src/math/MathUtils'
+import { State } from '@/behaviors/state'
 import { Animator } from '@/global/animator'
 import { Faction } from '@/global/entity'
 import { assets, ecs, save, time } from '@/global/init'
@@ -25,7 +26,7 @@ type SingleAttackStyle = {
 	[K in keyof AttackStyle]: { [P in K]: AttackStyle[K] };
 }[keyof AttackStyle]
 
-export interface EnemyDef<M extends keyof Animations & AssetNames['characters'], S extends string> {
+export interface EnemyDef<M extends keyof Animations & AssetNames['characters'], A extends string, S extends ComponentsOfType<State<any>>> {
 	model: M
 	name: string
 	health: number
@@ -33,16 +34,17 @@ export interface EnemyDef<M extends keyof Animations & AssetNames['characters'],
 	speed?: number
 	boss?: boolean
 	drops?: Drop[]
-	state: ReturnType<typeof stateBundle>
-	animator: ComponentsOfType<Animator<S>>
-	animationMap: { [key in S]: Animations[M] }
+	state: S
+	defaultState: Required<Entity>[S] extends State<infer U> ? U : never
+	animator: ComponentsOfType<Animator<A>>
+	animationMap: { [key in A]: Animations[M] }
 	components?: Partial<Entity>
 	size?: Vector3
-	defaultAnimation?: NoInfer<S>
+	defaultAnimation?: NoInfer<A>
 	attackStyle: SingleAttackStyle
 }
 
-export const enemyBundle = <M extends keyof Animations & AssetNames['characters'], S extends string>(enemy: EnemyDef<M, S>, level: number) => {
+export const enemyBundle = <M extends keyof Animations & AssetNames['characters'], A extends string, S extends ComponentsOfType<State<any>>>(enemy: EnemyDef<M, A, S>, level: number) => {
 	const model = assets.characters[enemy.model]
 	enemy.speed ??= 1
 	enemy.boss ??= false
@@ -59,15 +61,13 @@ export const enemyBundle = <M extends keyof Animations & AssetNames['characters'
 		.setMass(100)
 		.setCollisionGroups(collisionGroups('enemy', ['obstacle', 'player', 'floor', 'enemy']))
 		.setActiveEvents(ActiveEvents.COLLISION_EVENTS)
-	// bundle.model.frustumCulled = false
-	// bundle.model.traverse(o => o.frustumCulled = false)
-	const animator = new Animator<S>(bundle.model, model.animations, enemy.animationMap)
+	const animator = new Animator<A>(bundle.model, model.animations, enemy.animationMap)
 	const entity = {
 		enemyId: generateUUID(),
-		...enemy.state,
+		[enemy.state]: new State(enemy.defaultState),
+		[enemy.animator]: animator,
 		...bundle,
 		...healthBundle(enemy.health * (level + 1)),
-		[enemy.animator]: animator,
 		targetRotation: new Quaternion().setFromAxisAngle(new Vector3(0, 1, 0), Math.PI * 2 * Math.random()),
 		strength: new Stat(1 + level),
 		inactive: new Timer(2000, false),

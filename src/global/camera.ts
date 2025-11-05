@@ -77,7 +77,8 @@ export const moveCamera = (init = false) => () => {
 		const target = new Vector3()
 		const lerpSpeed = 3 / 60
 		if (app.isDisabled('mainMenu')) {
-			for (const { worldPosition, targetRotation, state } of cameraTargetQuery) {
+			for (const entity of cameraTargetQuery) {
+				const { worldPosition, targetRotation } = entity
 				target.copy(worldPosition)
 
 				const lockedOn = lockedOnQuery.entities.reduce<null | number>((acc, v) => {
@@ -88,7 +89,7 @@ export const moveCamera = (init = false) => () => {
 					return acc
 				}, null)
 
-				if ((state?.current === 'running' || lockedOn) && targetRotation) {
+				if (((entity.movementForce && entity.movementForce.length() >= 0.6) || lockedOn) && targetRotation) {
 					const dist = Math.min(lockedOn ?? 0, 20)
 					cameraLerp.lerp(new Vector3(0, 0, dist).applyQuaternion(targetRotation), 1 / 60)
 				} else {

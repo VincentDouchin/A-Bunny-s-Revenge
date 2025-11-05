@@ -10,6 +10,7 @@ import type { InstanceHandle } from './assetLoaders'
 import type { assets } from './init'
 import type { ModifierContainer } from './modifiers'
 import type { app } from './states'
+import type { State } from '@/behaviors/state'
 import type { Drop } from '@/constants/enemies'
 import type { crops, Item } from '@/constants/items'
 import type { NPC } from '@/constants/NPC'
@@ -91,29 +92,6 @@ export const assertEntity = <C extends keyof Entity>(e: Entity, ...components: C
 	return e as With<Entity, C>
 }
 
-const baseEnemyStates = ['idle', 'running', 'attack', 'hit', 'dying', 'dead', 'waitingAttack', 'attackCooldown'] as const
-
-export const States = {
-	basket: ['idle', 'running'],
-	player: ['idle', 'running', 'attack0', 'attack1', 'attack2', 'dying', 'dead', 'picking', 'dash', 'hit', 'stun', 'poisoned', 'managed'],
-	enemy: [...baseEnemyStates, 'stun'],
-	beeBoos: [...baseEnemyStates, 'rangeAttack'],
-	pumpkinSeed: [...baseEnemyStates, 'spawn'],
-	pumpkinBoss: [...baseEnemyStates, 'summon', 'underground', 'rangeAttack'],
-	fish: ['going', 'hooked', 'wander', 'bounce', 'runaway'],
-} as const
-
-export const states = <S extends ReadonlyArray<AllStates>>(states: S): (`${S[number]}State` & keyof Entity)[] => states.map(s => `${s}State` as const)
-export type AllStates = typeof States[keyof typeof States][number]
-export type StateComponents = { [K in AllStates as `${K}State`]?: true }
-export const stateBundle = <A extends AllStates>(states: ReadonlyArray<A>, defaultState: NoInfer<A>): With<Entity, 'state'> => {
-	const components = states.reduce<StateComponents>((acc, v) => ({ ...acc, [`${v}State`]: true }), {})
-	return {
-		state: { current: defaultState, previous: null, next: null },
-		...components,
-	}
-}
-
 export interface Crop {
 	stage: number
 	name: crops
@@ -132,28 +110,34 @@ export interface AttackStyle {
 	charging: { amount: number, max: number }
 	range: { amount: number, max: number }
 	pumpkinSeed: true
+	mushroom: true
 }
 
 export type AllAnimators = { [K in keyof Required<Entity>]: Required<Entity>[K] extends Animator ? K : never }[keyof Entity]
 
 export type AllAnimations = { [K in keyof Entity]: Required<Entity>[K] extends Animator<infer A> ? A : never }[keyof Entity] & string
-export type AnimatorsWith<A extends AllAnimations> = { [K in keyof Required<Entity>]: Required<Entity>[K] extends Animator<infer B> ? A extends B ? Required<Entity>[K] : Animator<any> : Animator<any> }[keyof Entity]
+export type AnimatorsWith<A extends AllAnimations[]> = { [K in keyof Required<Entity>]: Required<Entity>[K] extends Animator<infer B> ? A[number] extends B ? Required<Entity>[K] : Animator<any> : Animator<any> }[keyof Entity]
 
-export class State<K extends string> {
-	current: K
-	previous: K | null = null
-	next: K | null = null
-	constructor(defaultState: K) {
-		this.current = defaultState
-	}
-}
+export type BaseEnemyStates = 'idle' | 'running' | 'attack' | 'hit' | 'dying' | 'dead' | 'waitingAttack' | 'cooldown'
+export type PlayerStates = 'idle' | 'running' | 'attack0' | 'attack1' | 'attack2' | 'dying' | 'dead' | 'picking' | 'dash' | 'hit' | 'stun' | 'poisoned' | 'managed'
 
-export type Entity = StateComponents & Partial<AttackStyle> & {
-	state?: { current: AllStates, previous: AllStates | null, next: AllStates | null }
-	wait?: { state: AllStates, duration: number }
+export type AllStates = { [K in keyof Entity]: Required<Entity>[K] extends State<infer A> ? A : never }[keyof Entity] & string
+
+export type WithState<S extends AllStates[]> = { [K in keyof Required<Entity>]: Required<Entity>[K] extends State<infer S2> ? S[number] extends S2 ? K : never : never }[keyof Required<Entity>]
+
+export type StatesWith<S extends AllStates[]> = Required<Entity>[WithState<S>]
+
+export type Entity = Partial<AttackStyle> & {
 	playerAnimator?: Animator<PlayerAnimations>
 	// ! BehaviorTree
-	// state?: { current: AllStates, previous: AllStates | null, next: AllStates | null }
+	enemyState?: State<BaseEnemyStates | 'stun'>
+	mushroomState?: State<BaseEnemyStates | 'runaway' | 'escape'>
+	beeBossState?: State<BaseEnemyStates | 'rangeAttack'>
+	pumpkinSeedState?: State<BaseEnemyStates | 'spawn'>
+	pumpkinBossState?: State<BaseEnemyStates | 'summon' | 'underground' | 'rangeAttack'>
+	playerState?: State<PlayerStates>
+	fishState?: State<'going' | 'hooked' | 'wander' | 'bounce' | 'runaway'>
+	attacking?: true
 	// ! Rendering
 	renderGroup?: RenderGroup
 	// ! Transforms
@@ -380,7 +364,7 @@ export type Entity = StateComponents & Partial<AttackStyle> & {
 	exploder?: With<Entity, 'explode'>
 }
 
-export type BehaviorNode<E extends Array<any>> = (...e: E) => 'success' | 'failure' | 'running'
+export type BehaviorNode<E> = (e: E) => 'success' | 'failure' | 'running'
 export type Bundle<C extends keyof Entity> = () => With<Entity, C>
 
 export type KeysOfType<T, U> = {
