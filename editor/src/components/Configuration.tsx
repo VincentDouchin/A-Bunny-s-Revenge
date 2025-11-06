@@ -160,10 +160,12 @@ export function Configuration({ folder, reload, repoCloned, saveLevel }: {
 		await pullLatest(folder)
 		await saveLevel()
 		try {
-			await invoke('commit_and_push', {
+			await invoke('create_pr_command', {
 				repoPath: await path.join(await appDataDir(), folder),
-				branch: 'main',
+				baseBranch: 'main',
 				commitMessage: 'Update level',
+				prTitle: 'Update level',
+				prBody: 'Update level',
 			})
 			// alert('Changes pushed successfully!')
 		} catch (err) {
