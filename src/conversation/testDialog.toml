@@ -1,6 +1,6 @@
 [[actor]]
 name = "Jack"
-model = "werewolf"
+model = "Archibald_animated"
 position = "right"
 scale = 0.8
 animation = "Idle"
@@ -12,20 +12,30 @@ position = "left"
 animation = "Idle"
 
 
-[[dialog]]
+[[dialog.main]]
 speaker = "Minion"
 emote = "drops"
 fr = "J'avais envie de faire une sieste. Je me demande pourquoi il nous a choisis pour cette mission."
 en = "I wanted to take a nap. I wonder why he chose us for this mission."
-[[dialog]]
+[[dialog.main]]
 speaker = "Jack"
 fr = "Ouais, le Sorcier est vraiment strict. Mais on doit protéger les cristaux."
 en = "Yeah, the Wizard is really strict. But we must protect the crystals."
-[[dialog]]
+[[dialog.main]]
 speaker = "Minion"
 fr = "Le Sorcier n'avait pas dit qu'il allait créer des monstres pour garder ces trucs ? C'est quoi, au juste, un cristal ?"
 en = "Didn't the Wizard say he would create some monsters to guard those things? What's a crystal anyway?"
-[[dialog]]
+[[dialog.main]]
 speaker = "Jack"
+fr = "Je sais pas, peut-être un truc qu'il a ramené du monde des humains ?"
+en = "I don't know, maybe something he got from the human world?"
+choice.ok = { fr = "Je ne sais pas, ça me semble farfelu", en = "I don't think to it seems farfetched" }
+choice.nok = { fr = "nok", en = "nok" }
+[[dialog.ok]]
+speaker = "Minion"
+fr = "Je sais pas, peut-être un truc qu'il a ramené du monde des humains ?"
+en = "I don't know, maybe something he got from the human world?"
+[[dialog.nok]]
+speaker = "Minion"
 fr = "Je sais pas, peut-être un truc qu'il a ramené du monde des humains ?"
 en = "I don't know, maybe something he got from the human world?"

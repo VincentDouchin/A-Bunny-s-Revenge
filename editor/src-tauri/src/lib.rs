@@ -25,6 +25,7 @@ pub fn run() {
             git_operations::clone_repo_command,
             git_operations::pull_latest_command,
             git_operations::commit_and_push,
+            git_operations::create_pr_command,
             auth::start_github_device_flow,
             auth::validate_github_token_command
         ])

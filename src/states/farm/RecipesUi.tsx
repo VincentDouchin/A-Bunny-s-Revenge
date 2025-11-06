@@ -1,8 +1,9 @@
 import type { Accessor } from 'solid-js'
 import type { Recipe } from '@/constants/recipes'
 import type { Modifier } from '@/global/modifiers'
-import { createMemo, createSignal, For, Show } from 'solid-js'
+import { createMemo, For, Show } from 'solid-js'
 import { css } from 'solid-styled'
+import atom from 'solid-use/atom'
 import { isMeal, itemsData } from '@/constants/items'
 import { recipes } from '@/constants/recipes'
 import { MenuType } from '@/global/entity'
@@ -191,7 +192,7 @@ export const RecipesUi = () => {
 					})
 					const recipeQueued = ui.sync(() => recipeEntity()?.recipesQueued ?? [])
 					const recipesFiltered = createMemo(() => recipes.filter(recipe => recipe.processor === entity().menuType))
-					const [selectedRecipe, setSelectedRecipe] = createSignal<null | Recipe>(null)
+					const selectedRecipe = atom<null | Recipe>(null)
 					const cook = () => {
 						const recipe = selectedRecipe()
 
@@ -269,7 +270,7 @@ export const RecipesUi = () => {
 
 																return (
 																	<MenuItem
-																		onSelected={() => setSelectedRecipe(recipe)}
+																		onSelected={() => selectedRecipe(recipe)}
 																		defaultSelected={i() === 0}
 																	>
 																		{({ selected }) => (

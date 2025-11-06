@@ -109,7 +109,7 @@ export interface InstanceGenerator {
 	obj: Object3D
 }
 
-const isMesh = <M extends Material = Material>(node: Object3D): node is Mesh<BufferGeometry, M> => node.type === 'Mesh'
+export const isMesh = <M extends Material = Material>(node: Object3D): node is Mesh<BufferGeometry, M> => node.type === 'Mesh'
 
 export const instanceMesh = <T extends Material>(obj: Object3D<Object3DEventMap>, castShadow = true) => {
 	const instanceParams: Matrix4[] = []

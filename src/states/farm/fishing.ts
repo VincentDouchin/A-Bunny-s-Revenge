@@ -4,7 +4,8 @@ import { ColliderDesc, RigidBodyDesc, RigidBodyType } from '@dimforge/rapier3d-c
 import { between } from 'randomish'
 import { BufferGeometry, CatmullRomCurve3, Mesh, MeshBasicMaterial, PlaneGeometry, Quaternion, SphereGeometry, Vector3 } from 'three'
 import { fishBehavior } from '@/behaviors/fishBehavior'
-import { MenuType, stateBundle, States } from '@/global/entity'
+import { State } from '@/behaviors/state'
+import { MenuType } from '@/global/entity'
 import { assets, ecs, menuInputs, scene, tweens } from '@/global/init'
 import { playSound } from '@/global/sounds'
 import { runIf } from '@/lib/app'
@@ -100,7 +101,7 @@ const updateFishingLine = () => {
 }
 
 const fishingSpotQuery = ecs.with('collider', 'fishingSpot', 'interactionContainer', 'rotation')
-const playerQuery = ecs.with('player', 'playerAnimator', 'rotation', 'state')
+const playerQuery = ecs.with('player', 'playerAnimator', 'rotation', 'playerState')
 const useFishingPole = () => {
 	for (const spot of fishingSpotQuery) {
 		for (const player of playerQuery) {
@@ -127,7 +128,7 @@ const useFishingPole = () => {
 					playSound('zapsplat_leisure_fishing_road_swipe_cast_air_whoosh_24610')
 				}, 500)
 				player.playerAnimator.playClamped('lightAttack', { timeScale: 0.5 }).then(() => {
-					player.state.next = 'idle'
+					player.playerState.next = 'idle'
 				})
 			}
 		}
@@ -154,7 +155,7 @@ const fishBundle = (parentPos: Vector3) => {
 		position: parentPos.add(new Vector3(between(-dist, dist), 0, between(-dist, dist))).setY(-2),
 		model,
 		fish: new Timer(between(3000, 5000), true),
-		...stateBundle(States.fish, 'wander'),
+		fishState: new State('wander'),
 	})
 }
 const fishSpawnerQuery = ecs.with('fishSpawner', 'group')

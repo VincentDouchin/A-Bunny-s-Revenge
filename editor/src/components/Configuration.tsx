@@ -82,10 +82,11 @@ export default function GithubDeviceLogin({ onLoggedIn }: { onLoggedIn: () => vo
 	)
 }
 
-export function Configuration({ folder, reload, repoCloned }: {
+export function Configuration({ folder, reload, repoCloned, saveLevel }: {
 	folder: string
 	reload: (folder: string) => void
 	repoCloned: Atom<boolean>
+	saveLevel: () => Promise<void>
 }) {
 	const authModalOpen = atom(false)
 
@@ -157,11 +158,14 @@ export function Configuration({ folder, reload, repoCloned }: {
 	}
 	const pushChanges = async () => {
 		await pullLatest(folder)
+		await saveLevel()
 		try {
-			await invoke('commit_and_push', {
+			await invoke('create_pr_command', {
 				repoPath: await path.join(await appDataDir(), folder),
-				branch: 'main',
+				baseBranch: 'main',
 				commitMessage: 'Update level',
+				prTitle: 'Update level',
+				prBody: 'Update level',
 			})
 			// alert('Changes pushed successfully!')
 		} catch (err) {
@@ -311,51 +315,7 @@ export function Configuration({ folder, reload, repoCloned }: {
 					</Show>
 				</Modal>
 			</section>
-			{/* <Show when={configuration()}>
-				<Portal mount={document.body}>
-					<div class="modal-container">
-						<section class="modal">
-							<div class="close-button" onClick={() => configuration(false)}>
-								<Fa icon={faXmark}></Fa>
-							</div>
-							<div class="title">
-								Configuration
-							</div>
-							<div class="modal-content">
 
-								<div>{loggedIn() ? 'logged in' : 'not logged in'}</div>
-								<button onClick={() => cloneRepo(folder)} class="download-button" disabled={status() !== null}>
-									<div class="icon-container">
-										<Fa icon={faDownload}></Fa>
-										Download repo
-									</div>
-								</button>
-								<div>
-									<Show when={error()}>
-										<div class="error">
-											<div class="icon-container">
-												<Fa icon={faExclamationTriangle}></Fa>
-												Error
-											</div>
-											{error()}
-										</div>
-									</Show>
-									<Show when={status() && !error()}>
-										<div class="progress">
-											<Fa icon={faSpinner} spin></Fa>
-											<div>
-												{progress().toFixed(0)}
-												%
-											</div>
-											<div>{status()}</div>
-										</div>
-									</Show>
-								</div>
-							</div>
-						</section>
-					</div>
-				</Portal>
-			</Show> */}
 		</>
 	)
 }

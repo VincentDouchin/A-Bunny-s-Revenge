@@ -1,6 +1,7 @@
 import type { Item } from '@/constants/items'
 import type { Entity } from '@/global/entity'
 import type { Level } from '@/types/legecyLevel'
+import { Mushroom } from '@/constants/enemies'
 import { enemyGroups } from '@/constants/enemyGroups'
 import { getSellableItems } from '@/constants/items'
 import { levelsData } from '@/global/init'
@@ -194,7 +195,13 @@ const createRooms = (count: number): BlankRoom[] => {
 const getEnemies = (type: RoomType, level: number) => {
 	switch (type) {
 		case RoomType.Battle:
-		case RoomType.Entrance: return getRandom(enemyGroups[level].enemies)
+		case RoomType.Entrance: {
+			const enemies = getRandom(enemyGroups[level].enemies)
+			if (Math.random() < 0.10) {
+				enemies.push(Mushroom)
+			}
+			return enemies
+		}
 		case RoomType.Boss: return getRandom(enemyGroups[level].bosses)
 		default:return []
 	}

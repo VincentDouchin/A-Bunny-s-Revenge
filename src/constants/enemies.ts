@@ -1,9 +1,9 @@
 import type { Animations } from '@assets/animations'
 import type { Item } from './items'
-import type { AssetNames, Entity } from '@/global/entity'
+import type { State } from '@/behaviors/state'
+import type { AssetNames, ComponentsOfType, Entity } from '@/global/entity'
 import type { EnemyDef } from '@/states/dungeon/enemies'
 import { Vector3 } from 'three'
-import { stateBundle, States } from '@/global/entity'
 import { Timer } from '@/lib/timer'
 import { enemyBundle } from '@/states/dungeon/enemies'
 import { between } from '@/utils/mapFunctions'
@@ -25,9 +25,22 @@ const genericEnemyAnimationMap = {
 	},
 } as const
 
-export const enemy = <M extends keyof Animations & AssetNames['characters'], S extends string> (fn: () => EnemyDef<M, S>) => {
+export const enemy = <M extends keyof Animations & AssetNames['characters'], A extends string, S extends ComponentsOfType<State<any>>> (fn: () => EnemyDef<M, A, S>) => {
 	return (level: number) => enemyBundle(fn(), level)
 }
+
+export const Mushroom = enemy(() => ({
+	model: 'MushroomAngryPA',
+	name: 'Shroom',
+	health: 1,
+	scale: 4,
+	drops: [{ name: 'bolet', quantity: 1, rarity: Rarity.Always }],
+	state: 'mushroomState',
+	defaultState: 'escape',
+	attackStyle: { mushroom: true },
+	animationMap: { idle: 'Mushroom_IdlePlant', running: 'Mushroom_runFWDAngry', attacking: 'Mushroom_Attack01Angry', hit: 'Mushroom_GetHitAngry', dead: 'Mushroom_DieAngry' },
+	animator: 'enemyAnimator',
+}))
 
 export const Armabee = enemy(() => ({
 	model: 'Armabee',
@@ -35,7 +48,8 @@ export const Armabee = enemy(() => ({
 	health: 3,
 	scale: 4,
 	drops: [{ name: 'honey', quantity: 1, rarity: Rarity.Common }],
-	state: stateBundle(States.enemy, 'idle'),
+	state: 'enemyState',
+	defaultState: 'idle',
 	attackStyle: { melee: true },
 	animationMap: { idle: 'Flying_Idle', running: 'Fast_Flying', attacking: 'Headbutt', hit: 'HitReact', dead: 'Death' },
 	animator: 'enemyAnimator',
@@ -46,7 +60,8 @@ export const SootSprite = enemy(() => ({
 	name: 'Soot sprite',
 	health: 1,
 	scale: between(4, 6),
-	state: stateBundle(States.enemy, 'idle'),
+	state: 'enemyState',
+	defaultState: 'idle',
 	attackStyle: { melee: true },
 	animationMap: { idle: 'idle', running: 'running', attacking: 'attack', dead: 'death', hit: 'hit' },
 	animator: 'enemyAnimator',
@@ -61,7 +76,8 @@ export const ArmabeeEvolved = enemy(() => ({
 	speed: 1.4,
 	drops: [{ name: 'recipe', quantity: 1, recipe: 'hummus', rarity: Rarity.Always }],
 	attackStyle: { beeBoss: true },
-	state: stateBundle(States.beeBoos, 'idle'),
+	state: 'beeBossState',
+	defaultState: 'idle',
 	animationMap: { idle: 'Flying_Idle', running: 'Fast_Flying', attacking: 'Headbutt', hit: 'HitReact', dead: 'Death' },
 	animator: 'enemyAnimator',
 	size: new Vector3(15, 20, 15),
@@ -72,7 +88,8 @@ export const ShagaA = enemy(() => ({
 	name: 'Shaga',
 	health: 4,
 	scale: 2,
-	state: stateBundle(States.enemy, 'idle'),
+	state: 'enemyState',
+	defaultState: 'idle',
 	drops: [{ name: 'parsley', quantity: 1, rarity: Rarity.Common }],
 	attackStyle: { melee: true },
 	...genericEnemyAnimationMap,
@@ -85,7 +102,8 @@ export const FlowerBoar = enemy(() => ({
 	scale: 1.5,
 	drops: [{ name: 'ham', quantity: 1, rarity: Rarity.Common }],
 	attackStyle: { charging: { amount: 0, max: 1 } },
-	state: stateBundle(States.enemy, 'idle'),
+	state: 'enemyState',
+	defaultState: 'idle',
 	...genericEnemyAnimationMap,
 }))
 
@@ -97,7 +115,8 @@ export const Snail = enemy(() => ({
 	speed: 1,
 	drops: [{ name: 'steak', quantity: 1, rarity: Rarity.Common }],
 	attackStyle: { charging: { amount: 0, max: 1 } },
-	state: stateBundle(States.enemy, 'idle'),
+	state: 'enemyState',
+	defaultState: 'idle',
 	...genericEnemyAnimationMap,
 }))
 
@@ -108,7 +127,8 @@ export const PoisonSnail = enemy(() => ({
 	scale: 1.4,
 	drops: [{ name: 'steak', quantity: 1, rarity: Rarity.Common }],
 	attackStyle: { charging: { amount: 0, max: 1 } },
-	state: stateBundle(States.enemy, 'idle'),
+	state: 'enemyState',
+	defaultState: 'idle',
 	...genericEnemyAnimationMap,
 	components: {
 		trailMaker: true,
@@ -122,7 +142,8 @@ export const Slime = enemy(() => ({
 	scale: 2,
 	drops: [{ name: 'slime_dough', quantity: 2, rarity: Rarity.Common }],
 	attackStyle: { jumping: true },
-	state: stateBundle(States.enemy, 'idle'),
+	state: 'enemyState',
+	defaultState: 'idle',
 	...genericEnemyAnimationMap,
 }))
 
@@ -132,7 +153,8 @@ export const Raccoon = enemy(() => ({
 	health: 3,
 	scale: 2,
 	attackStyle: { melee: true },
-	state: stateBundle(States.enemy, 'idle'),
+	state: 'enemyState',
+	defaultState: 'idle',
 	...genericEnemyAnimationMap,
 }))
 
@@ -142,7 +164,8 @@ export const Butterfly = enemy(() => ({
 	health: 3,
 	scale: 2,
 	attackStyle: { spore: true },
-	state: stateBundle(States.enemy, 'idle'),
+	state: 'enemyState',
+	defaultState: 'idle',
 	...genericEnemyAnimationMap,
 }))
 
@@ -154,7 +177,8 @@ export const Platopo = enemy(() => ({
 	speed: 0.7,
 	drops: [{ name: 'milk', quantity: 1, rarity: Rarity.Common }],
 	attackStyle: { range: { amount: 0, max: 1 } },
-	state: stateBundle(States.enemy, 'idle'),
+	state: 'enemyState',
+	defaultState: 'idle',
 	...genericEnemyAnimationMap,
 }))
 
@@ -164,7 +188,8 @@ export const Batty = enemy(() => ({
 	health: 5,
 	scale: 25,
 	attackStyle: { melee: true },
-	state: stateBundle(States.enemy, 'idle'),
+	state: 'enemyState',
+	defaultState: 'idle',
 	...genericEnemyAnimationMap,
 }))
 
@@ -174,7 +199,8 @@ export const Magicbook = enemy(() => ({
 	health: 8,
 	scale: 25,
 	attackStyle: { melee: true },
-	state: stateBundle(States.enemy, 'idle'),
+	state: 'enemyState',
+	defaultState: 'idle',
 	...genericEnemyAnimationMap,
 }))
 
@@ -184,7 +210,8 @@ export const Devil = enemy(() => ({
 	health: 5,
 	scale: 25,
 	attackStyle: { range: { amount: 0, max: 3 } },
-	state: stateBundle(States.enemy, 'idle'),
+	state: 'enemyState',
+	defaultState: 'idle',
 	...genericEnemyAnimationMap,
 }))
 
@@ -196,7 +223,8 @@ export const MossBoar = enemy(() => ({
 	speed: 1.5,
 	drops: [{ name: 'ham', quantity: 2, rarity: Rarity.Common }],
 	attackStyle: { charging: { amount: 0, max: 2 } },
-	state: stateBundle(States.enemy, 'idle'),
+	state: 'enemyState',
+	defaultState: 'idle',
 	...genericEnemyAnimationMap,
 }))
 
@@ -206,7 +234,8 @@ export const Seedling = enemy(() => ({
 	health: 2,
 	scale: 15,
 	speed: 1.5,
-	state: stateBundle(States.pumpkinSeed, 'spawn'),
+	state: 'pumpkinSeedState',
+	defaultState: 'idle',
 	attackStyle: { melee: true },
 	animationMap: { attacking: 'Slash Attack', dead: 'Die', hit: 'Take Damage', running: 'Fly Forward In Place', idle: 'Idle', spawn: 'Spawn' },
 	animator: 'pumpkinSeedAnimator',
@@ -223,7 +252,8 @@ export const PlantChewer = enemy(() => ({
 	attackStyle: { pumpkinBoss: { summonTimer: new Timer(10_000, false) } },
 	animationMap: { spawn: 'Spawn', idle: 'Idle', attacking: 'Bite Attack', summon: 'Cast Spell', hit: 'Take Damage', dead: 'Die', running: 'Run Forward In Place' },
 	size: new Vector3(20, 20, 15),
-	state: stateBundle(States.pumpkinBoss, 'underground'),
+	state: 'pumpkinBossState',
+	defaultState: 'underground',
 	animator: 'pumpkinBossAnimator',
 	defaultAnimation: 'spawn',
 }))

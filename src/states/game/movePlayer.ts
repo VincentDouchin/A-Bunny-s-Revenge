@@ -4,11 +4,11 @@ import { app } from '@/global/states'
 import { spawnFootstep } from '@/particles/footsteps'
 
 const movementQuery = ecs.with('body', 'rotation', 'movementForce', 'speed', 'targetMovementForce')
-const playerQuery = movementQuery.with('position', 'state', 'lastStep', 'playerAnimator', 'modifiers', 'model', 'worldPosition')
+const playerQuery = movementQuery.with('position', 'playerState', 'lastStep', 'playerAnimator', 'modifiers', 'model', 'worldPosition')
 
 export const playerSteps = () => {
 	for (const player of playerQuery) {
-		if (player.state.current === 'running' && player.playerAnimator.action) {
+		if (player.playerState.current === 'running' && player.playerAnimator.action) {
 			const ground = player.worldPosition.y
 			player.model?.traverse((n) => {
 				if (n.name.startsWith('toes')) {
@@ -59,6 +59,6 @@ export const stopPlayer = () => {
 	if (player) {
 		player.movementForce.setScalar(0)
 		player.targetMovementForce.setScalar(0)
-		player.state.next = 'idle'
+		player.playerState.next = 'idle'
 	}
 }

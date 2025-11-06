@@ -57,10 +57,9 @@ export const getPlayerRotation = (e: With<Entity, 'position'>, force: Vector3) =
 	}
 	return force
 }
-export const applyMove = <E extends With<Entity, 'body'>, C>(fn: (e: E, c: C) => Vector3) => action((entity: E, c: C) => {
-	if (app.isEnabled('paused')) return
-	const { body, controller, collider } = entity
-	const force = fn(entity, c)
+export const applyMove = <E extends With<Entity, 'body'>, C>(fn: ({ entity }: { entity: E } & C) => Vector3) => action<{ entity: E } & C>((args) => {
+	const { body, controller, collider } = args.entity
+	const force = fn(args)
 	if (controller && collider && body.isKinematic()) {
 		if (!controller.computedGrounded()) {
 			force.add(new Vector3(0, -0.2, 0))
@@ -75,18 +74,18 @@ export const applyMove = <E extends With<Entity, 'body'>, C>(fn: (e: E, c: C) =>
 	}
 })
 
-export const applyRotate = <E extends With<Entity, 'rotation' | 'targetRotation'>, C>(fn: (e: E, c: C) => Vector3) => action((e: E, c: C) => {
+export const applyRotate = <E extends With<Entity, 'rotation' | 'targetRotation'>, C>(fn: ({ entity }: { entity: E } & C) => Vector3) => action<{ entity: E } & C>((args) => {
 	if (app.isEnabled('paused') || app.isEnabled('menu')) return
-	const rot = fn(e, c)
+	const rot = fn(args)
 	if (rot.length() > 0) {
-		e.targetRotation.setFromAxisAngle(new Vector3(0, 1, 0), Math.atan2(rot.x, rot.z))
+		args.entity.targetRotation.setFromAxisAngle(new Vector3(0, 1, 0), Math.atan2(rot.x, rot.z))
 	}
 })
 
-export const moveToDirection = <E extends With<Entity, 'movementForce'>, C extends { direction?: Vector3 | null }>() => action((e: E, c: C) => {
-	if (c.direction) {
-		e.movementForce.x = c.direction.x
-		e.movementForce.z = c.direction.z
+export const moveToDirection = <E extends With<Entity, 'movementForce'>, C extends { direction?: Vector3 | null }, R>() => action((args: { entity: E, ctx: C } & R) => {
+	if (args.ctx.direction) {
+		args.entity.movementForce.x = args.ctx.direction.x
+		args.entity.movementForce.z = args.ctx.direction.z
 	}
 })
 

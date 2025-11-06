@@ -27,7 +27,7 @@ const projectileBundle = (rotation: Quaternion, origin: Vector3, strength: Stat)
 		rotation,
 		strength,
 		faction: Faction.Enemy,
-		state: { current: 'attack', previous: null, next: null },
+		attacking: true,
 		emitter: projectileTrail(),
 		movementForce: new Vector3(0, 0, 1).applyQuaternion(rotation),
 		position: origin.clone().add(new Vector3(0, 5, 10).applyQuaternion(rotation)),

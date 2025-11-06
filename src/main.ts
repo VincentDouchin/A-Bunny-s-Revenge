@@ -1,7 +1,8 @@
 import { beeBossBehavior } from './behaviors/beeBossBehavior'
-import { chargingBehavior, jumpingBehavior, meleeBehavior, rangeBehavior, seedlingBehavior, sporeBehavior } from './behaviors/enemyBehavior'
+import { chargingBehavior, jumpingBehavior, meleeBehavior, mushroomBehavior, rangeBehavior, seedlingBehavior, sporeBehavior } from './behaviors/enemyBehavior'
 import { playerBehavior } from './behaviors/playerBehavior'
 import { pumpkinBossPlugin } from './behaviors/pumpkinBossBehavior'
+import { updateStates } from './behaviors/state'
 import { setupConversation } from './conversation/setupConversation'
 import { debugPlugin } from './debug/debugPlugin'
 import { updateAnimations } from './global/animations'
@@ -73,7 +74,6 @@ app
 	.onEnter('default', setupGame)
 	// ! GAME
 	.addPlugins(fishingPlugin, interactionPlugin, tickModifiersPlugin('speed', 'maxHealth', 'strength', 'critChance', 'critDamage', 'attackSpeed', 'lootQuantity', 'lootChance'))
-	.onUpdate('game', runIf(() => app.isDisabled('paused'), playerBehavior))
 	.addSubscribers('game', initializeCameraPosition, bobItems, enableInventoryState, popItems, addHealthBarContainer, ...equip('wateringCan', 'weapon', 'fishingPole'), ...doorLocking, addDashDisplay, addQuestMarkers, displayUnlockQuestToast, setupConversation)
 	.onEnter('game', questManager.enableQuests)
 	.onPreUpdate(
@@ -120,7 +120,19 @@ app
 	// ! DUNGEON
 	.addSubscribers('dungeon', spawnDrops, removeEnemyFromSpawn, applyArchingForce, unlockDungeon)
 	.onEnter('dungeon', spawnDungeon, spawnLevelData, spawnPlayerDungeon, moveCamera(true), spawnEnemies)
-	.onUpdate('game', runIf(() => app.isDisabled('paused') && app.isDisabled('menu'), seedlingBehavior, meleeBehavior, chargingBehavior, jumpingBehavior, sporeBehavior, rangeBehavior, beeBossBehavior))
+	.onUpdate('game', runIf(
+		() => app.isDisabled('paused') && app.isDisabled('menu'),
+		seedlingBehavior,
+		meleeBehavior,
+		chargingBehavior,
+		jumpingBehavior,
+		sporeBehavior,
+		rangeBehavior,
+		beeBossBehavior,
+		playerBehavior,
+		mushroomBehavior,
+		...updateStates('playerState', 'enemyState', 'beeBossState', 'pumpkinBossState', 'pumpkinSeedState', 'fishState', 'mushroomState'),
+	))
 	.addPlugins(pumpkinBossPlugin)
 	.onEnter('dungeon', compileShaders, initTexturesItemsAndEnemies)
 	.onUpdate(

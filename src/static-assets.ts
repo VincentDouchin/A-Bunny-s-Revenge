@@ -186,6 +186,7 @@ export type StaticAssetPath =
   'items/beet-optimized.glb' |
   'items/beet_seeds-optimized.glb' |
   'items/beetroot_salad-optimized.glb' |
+  'items/bolet-optimized.glb' |
   'items/butter-optimized.glb' |
   'items/carrot-optimized.glb' |
   'items/carrot_cake-optimized.glb' |
@@ -672,6 +673,7 @@ export const assets = new Set<string>([
   'items/beet-optimized.glb',
   'items/beet_seeds-optimized.glb',
   'items/beetroot_salad-optimized.glb',
+  'items/bolet-optimized.glb',
   'items/butter-optimized.glb',
   'items/carrot-optimized.glb',
   'items/carrot_cake-optimized.glb',
