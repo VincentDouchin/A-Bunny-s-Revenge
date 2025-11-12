@@ -6,6 +6,8 @@ use reqwest::blocking::Client;
 use serde::Deserialize;
 use serde_json::json;
 use std::path::Path;
+use std::thread::sleep;
+use std::time::Duration;
 use std::time::SystemTime;
 use std::time::UNIX_EPOCH;
 use tauri::{AppHandle, Emitter};
@@ -163,6 +165,10 @@ struct CreatePrResponse {
     html_url: String,
     number: u64,
 }
+#[derive(Deserialize)]
+struct PrInfo {
+    mergeable: Option<bool>,
+}
 
 /// Generate a unique branch name like "app/user-1730900123"
 fn generate_branch_name(user: &str) -> String {
@@ -173,8 +179,8 @@ fn generate_branch_name(user: &str) -> String {
     format!("app/{user}-{ts}")
 }
 
-/// Internal helper: create commit, push branch, and open PR
-fn commit_push_and_create_pr(
+/// Internal helper: commit changes, push branch, create PR, and merge if possible
+fn commit_push_create_and_merge_pr(
     app: AppHandle,
     repo_path: &str,
     commit_message: &str,
@@ -199,7 +205,7 @@ fn commit_push_and_create_pr(
         .map_err(|e| e.to_string())?;
     index.write().map_err(|e| e.to_string())?;
 
-    // 4️⃣ Write tree and create commit
+    // 4️⃣ Create commit
     let tree_id = index.write_tree().map_err(|e| e.to_string())?;
     let tree = repo.find_tree(tree_id).map_err(|e| e.to_string())?;
     let head = repo.head().map_err(|e| e.to_string())?;
@@ -207,17 +213,17 @@ fn commit_push_and_create_pr(
     let sig = repo.signature().map_err(|e| e.to_string())?;
 
     repo.commit(
-        Some("HEAD"),      // write to HEAD
+        Some("HEAD"),      // update HEAD ref
         &sig,              // author
         &sig,              // committer
-        commit_message,    // message
-        &tree,             // tree (snapshot)
-        &[&parent_commit], // parent commit
+        commit_message,    // commit message
+        &tree,             // current snapshot
+        &[&parent_commit], // parent
     )
     .map_err(|e| e.to_string())?;
 
-    // 5️⃣ Create new branch
-    let branch_name = generate_branch_name("user"); // optionally use username
+    // 5️⃣ Create a new branch for this change
+    let branch_name = generate_branch_name("user");
     let commit = repo
         .head()
         .unwrap()
@@ -234,18 +240,19 @@ fn commit_push_and_create_pr(
     });
     let mut push_opts = PushOptions::new();
     push_opts.remote_callbacks(callbacks);
+
     let mut remote = repo.find_remote("origin").map_err(|e| e.to_string())?;
     let refspec = format!("refs/heads/{0}:refs/heads/{0}", branch_name);
     remote
         .push(&[&refspec], Some(&mut push_opts))
         .map_err(|e| e.to_string())?;
 
-    // 7️⃣ Create PR via GitHub REST API
+    // 7️⃣ Create PR on GitHub
     let client = Client::new();
-    let url = format!("{GITHUB_API}/repos/{REPO_OWNER}/{REPO_NAME}/pulls");
+    let pr_url = format!("{GITHUB_API}/repos/{REPO_OWNER}/{REPO_NAME}/pulls");
 
-    let resp = client
-        .post(&url)
+    let create_resp = client
+        .post(&pr_url)
         .header("Accept", "application/vnd.github+json")
         .header("User-Agent", "tauri-app")
         .bearer_auth(&token)
@@ -258,16 +265,73 @@ fn commit_push_and_create_pr(
         .send()
         .map_err(|e| e.to_string())?;
 
-    if !resp.status().is_success() {
-        let txt = resp.text().unwrap_or_default();
-        return Err(format!("Failed to create PR: {}", txt));
+    if !create_resp.status().is_success() {
+        let txt = create_resp.text().unwrap_or_default();
+        return Err(format!("❌ Failed to create PR: {}", txt));
     }
 
-    let pr: CreatePrResponse = resp.json().map_err(|e| e.to_string())?;
+    let pr: CreatePrResponse = create_resp.json().map_err(|e| e.to_string())?;
+    let pr_number = pr.number;
 
+    // 8️⃣ Poll for mergeability
+    let pr_info_url = format!("{GITHUB_API}/repos/{REPO_OWNER}/{REPO_NAME}/pulls/{pr_number}");
+    let mut attempts = 0;
+    let mut mergeable = None;
+
+    while attempts < 10 {
+        let resp = client
+            .get(&pr_info_url)
+            .header("Accept", "application/vnd.github+json")
+            .header("User-Agent", "tauri-app")
+            .bearer_auth(&token)
+            .send()
+            .map_err(|e| e.to_string())?;
+
+        if resp.status().is_success() {
+            let info: PrInfo = resp.json().map_err(|e| e.to_string())?;
+            if let Some(value) = info.mergeable {
+                mergeable = Some(value);
+                break;
+            }
+        }
+        attempts += 1;
+        sleep(Duration::from_secs(1));
+    }
+
+    // 9️⃣ If mergeable, auto-merge the PR
+    if mergeable == Some(true) {
+        let merge_url =
+            format!("{GITHUB_API}/repos/{REPO_OWNER}/{REPO_NAME}/pulls/{pr_number}/merge");
+        let merge_resp = client
+            .put(&merge_url)
+            .header("Accept", "application/vnd.github+json")
+            .header("User-Agent", "tauri-app")
+            .bearer_auth(&token)
+            .json(&json!({
+                "commit_title": format!("Merge PR #{} via Tauri app", pr_number),
+                "merge_method": "merge"
+            }))
+            .send()
+            .map_err(|e| e.to_string())?;
+
+        if merge_resp.status().is_success() {
+            return Ok(format!(
+                "✅ PR merged automatically: {}\nBranch: {}",
+                pr.html_url, branch_name
+            ));
+        } else {
+            let txt = merge_resp.text().unwrap_or_default();
+            return Ok(format!(
+                "⚠️ PR created but could not be merged automatically.\n{} \nReason: {}",
+                pr.html_url, txt
+            ));
+        }
+    }
+
+    // 10️⃣ Otherwise, let user manually merge
     Ok(format!(
-        "✅ Pull request created: {}\nPR #{}",
-        pr.html_url, pr.number
+        "📝 Pull Request created: {}\nAutomatic merge not possible.",
+        pr.html_url
     ))
 }
 
@@ -281,7 +345,7 @@ pub async fn create_pr_command(
     pr_title: String,
     pr_body: String,
 ) -> Result<String, String> {
-    async_command!(commit_push_and_create_pr(
+    async_command!(commit_push_create_and_merge_pr(
         app,
         &repo_path,
         &commit_message,
