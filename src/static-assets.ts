@@ -232,8 +232,7 @@ export type StaticAssetPath =
   'items/wheat-optimized.glb' |
   'items/wheat_seeds-optimized.glb' |
   'levels/data.json' |
-  'levels/farm.json' |
-  'levels/test.json' |
+  'levels/farm2.json' |
   'mainMenuAssets/book-optimized.glb' |
   'models/Beanstalk-optimized.glb' |
   'models/Berry_Bush-optimized.glb' |
@@ -720,8 +719,7 @@ export const assets = new Set<string>([
   'items/wheat-optimized.glb',
   'items/wheat_seeds-optimized.glb',
   'levels/data.json',
-  'levels/farm.json',
-  'levels/test.json',
+  'levels/farm2.json',
   'mainMenuAssets/book-optimized.glb',
   'models/Beanstalk-optimized.glb',
   'models/Berry_Bush-optimized.glb',
