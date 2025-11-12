@@ -17,13 +17,14 @@ import { entries } from '../../../src/utils/mapFunctions'
 
 type Shape = 'cuboid' | 'ball' | 'capsule' | 'cylinder'
 
-export function EntityProps({ world, model, selectedCategory, selectedAsset, addTransformControls, boundingBox }: {
+export function EntityProps({ world, model, selectedCategory, selectedAsset, addTransformControls, boundingBox, entities }: {
 	world: World
 	model: Accessor<Object3D | null>
 	selectedCategory: Accessor<string | null>
 	selectedAsset: Accessor<string | null>
 	addTransformControls: () => [Mesh, TransformControls]
 	boundingBox: Record<string, Record<string, AssetData>>
+	entities: Record<string, Record<string, Object3D>>
 
 }) {
 	const colliderShapes: Record<string, Shape | undefined> = {
@@ -36,10 +37,12 @@ export function EntityProps({ world, model, selectedCategory, selectedAsset, add
 	const body = world.createRigidBody(RigidBodyDesc.fixed())
 	const collider = atom<Collider | null>(null)
 	const size = createMutable(new Vector3(1, 1, 1))
-	const selectedShape = atom<Shape | undefined>(undefined)
+	const selectedShape = atom<Shape | 'link' | undefined>(undefined)
 
 	const dummy = atom<Mesh | null>(null)
 	const transformControls = atom<TransformControls | null>(null)
+	const linkedCategory = atom<string | null>(null)
+	const linkedModel = atom<string | null>(null)
 
 	const sizeOffet = createMemo(() => {
 		switch (selectedShape()) {
@@ -85,15 +88,21 @@ export function EntityProps({ world, model, selectedCategory, selectedAsset, add
 		const asset = selectedAsset()
 		if (category && asset) {
 			const box = boundingBox?.[category]?.[asset]?.collider
-			if (box) {
+			if (box && box.type !== 'link') {
 				selectedShape(box.type)
 				size.x = box.size.x
 				size.y = box.size.y ?? box.size.x
 				size.z = box.size.z ?? box.size.x
+			} else if (box?.type === 'link') {
+				selectedShape(box.type)
+				linkedCategory(box.category)
+				linkedModel(box.model)
 			} else {
 				size.x = 1
 				size.y = 1
 				size.z = 1
+				linkedModel(null)
+				linkedCategory(null)
 			}
 		}
 	}
@@ -189,14 +198,51 @@ export function EntityProps({ world, model, selectedCategory, selectedAsset, add
 		}
 	}
 
+	const modelOptions = createMemo(() => {
+		const linkedCategoryValue = linkedCategory()
+		if (linkedCategoryValue !== null) {
+			return Object.keys(entities[linkedCategoryValue])
+				.filter(model => model in boundingBox[linkedCategoryValue] && boundingBox[linkedCategoryValue][model].collider?.type !== 'link')
+				.sort((a, b) => a.localeCompare(b))
+				.map((model) => {
+					return (
+						<option
+							selected={linkedModel() === model}
+							value={model}
+						>
+							{model}
+						</option>
+					)
+				})
+		}
+		return <></>
+	})
+	createEffect(() => {
+		linkedCategory(selectedCategory())
+	})
+
 	createEffect(() => {
 		const category = selectedCategory()
 		const asset = selectedAsset()
 		const type = selectedShape()
+		const linkedCategoryValue = linkedCategory()
+		const linkedModelValue = linkedModel()
 		if (category && asset && type) {
-			const size = getColliderSize(type)
-			boundingBox[category] ??= {}
-			boundingBox[category][asset] = { collider: { type, size }, secondaryColliders: [] }
+			if (type === 'link') {
+				if (linkedCategoryValue && linkedModelValue) {
+					boundingBox[category][asset] = {
+						collider: {
+							type: 'link',
+							category: linkedCategoryValue,
+							model: linkedModelValue,
+						},
+					}
+				}
+			} else {
+				const size = getColliderSize(type)
+				boundingBox[category] ??= {}
+				boundingBox[category][asset] = { collider: { type, size }, secondaryColliders: [] }
+			}
 		}
 	})
 	onCleanup(() => {
@@ -228,14 +274,46 @@ export function EntityProps({ world, model, selectedCategory, selectedAsset, add
 								</option>
 							)}
 						</For>
+						<option
+							selected={selectedShape() === 'link'}
+							value="link"
+						>
+							Link
+						</option>
 					</select>
 
-					<Show when={selectedShape() !== undefined && selectedShape()}>
+					<Show when={selectedShape() !== undefined && selectedShape() !== 'link'}>
 
 						<button onClick={setAutoSize}><Fa icon={faA} /></button>
 						<button onClick={editCollider}><Fa icon={faPenToSquare} /></button>
 					</Show>
 				</div>
+				<Show when={selectedShape() === 'link'}>
+					<select onChange={(e) => {
+						linkedModel(null)
+						linkedCategory(e.target.value)
+					}}
+					>
+						<For each={Object.keys(entities)}>
+							{category => (
+								<option
+									selected={linkedCategory() === category}
+									value={category}
+								>
+									{category}
+								</option>
+
+							)}
+						</For>
+					</select>
+					<select onChange={e => e.target.value !== '' && linkedModel(e.target.value)}>
+						{modelOptions()}
+						<option
+							value=""
+						>
+						</option>
+					</select>
+				</Show>
 			</div>
 		</>
 	)

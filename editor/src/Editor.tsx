@@ -867,6 +867,7 @@ export function Editor() {
 								model={model}
 								world={world}
 								addTransformControls={addTransformControls}
+								entities={entities}
 							/>
 						</Show>
 

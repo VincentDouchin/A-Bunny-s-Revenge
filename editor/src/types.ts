@@ -26,9 +26,13 @@ export interface LevelData {
 
 }
 
-interface ColliderData {
+type ColliderData = {
 	type: 'ball' | 'cuboid' | 'capsule' | 'cylinder'
 	size: { x: number, y?: number, z?: number }
+} | {
+	type: 'link'
+	category: string
+	model: string
 }
 
 export interface AssetData {
