@@ -2,10 +2,19 @@ import { AmbientLight, DirectionalLight, Group, OrthographicCamera, Quaternion, 
 import { clone } from 'three/examples/jsm/utils/SkeletonUtils'
 import { degToRad } from 'three/src/math/MathUtils'
 import { Animator } from '@/global/animator'
-import { RenderGroup } from '@/global/entity'
+import { EmoteContainer, RenderGroup } from '@/global/entity'
 import { assets, ecs } from '@/global/init'
+import { getBoundingBoxShape } from '@/lib/models'
 import { once } from '@/utils/mapFunctions'
 
+export interface ConversationLine {
+	emote?: keyof typeof assets['emotes']['emotes']
+	speaker: string
+	fr: string
+	en: string
+	choice: Record<string, { fr: string, en: string }>
+	next?: string
+}
 export interface Conversation {
 	actor: Array<{
 		name: string
@@ -14,12 +23,10 @@ export interface Conversation {
 		scale?: number
 		animation?: string
 	}>
-	dialog: Array<{
-		emote?: keyof typeof assets['emotes']['emotes']
-		fr: string
-		en: string
-		speaker: string
-	}>
+	dialog: {
+		main: ConversationLine[]
+		[key: string]: ConversationLine[]
+	}
 }
 
 export const conversationQuery = ecs.with('conversation')
@@ -66,27 +73,49 @@ export const setupDialogRenderGroup = once(() => {
 })
 
 export const validateConversation = (conversation: Conversation) => {
-	for (const actor of conversation.actor) {
-		if (!(actor.model in assets.characters)) {
-			throw new Error(`Unknown model : ${actor.model}`)
+	try {
+		if (!conversation.dialog.main) {
+			throw new Error('No starting point, please add a \"main\" branch')
 		}
-		if (actor.animation && !assets.characters[actor.model].animations.some(animation => actor.animation === animation.name)) {
-			throw new Error(`Unknown animation : ${actor.animation} for model ${actor.model} \n Possible animations: ${assets.characters[actor.model].animations.map(a => a.name).join(' / ')}`)
+		for (const actor of conversation.actor) {
+			if (!(actor.model in assets.characters)) {
+				throw new Error(`Unknown model : ${actor.model}`)
+			}
+			if (actor.animation && !assets.characters[actor.model].animations.some(animation => actor.animation === animation.name)) {
+				throw new Error(`Unknown animation : ${actor.animation} for model ${actor.model} \n Possible animations: ${assets.characters[actor.model].animations.map(a => a.name).join(' / ')}`)
+			}
+			if (!['left', 'right'].includes(actor.position)) {
+				throw new Error(`wrong placement : ${actor.position}`)
+			}
+			if (!('name' in actor)) {
+				throw new Error(`missing name for ${JSON.stringify(actor)}`)
+			}
 		}
-		if (!['left', 'right'].includes(actor.position)) {
-			throw new Error(`wrong placement : ${actor.position}`)
+		for (const line of Object.values(conversation.dialog).flat()) {
+			if (line.next && !(line.next in conversation.dialog)) {
+				throw new Error(`the branch ${line.next} is not present in the dialog`)
+			}
+			if (!conversation.actor.some(actor => line.speaker === actor.name)) {
+				throw new Error(`Unknown speaker : ${line.speaker}`)
+			}
+			if (line.emote && !(line.emote in assets.emotes.emotes)) {
+				throw new Error(`Unknown emote : ${line.emote}`)
+			}
+			if (line.choice) {
+				if (Object.keys(line.choice).length !== 2) {
+					throw new Error('Only 2 choices are supported for now')
+				}
+				for (const choice in line.choice) {
+					if (!(choice in conversation.dialog)) {
+						throw new Error(`the branch ${choice} is not present in the dialog`)
+					}
+				}
+			}
 		}
-		if (!('name' in actor)) {
-			throw new Error(`missing name for ${JSON.stringify(actor)}`)
-		}
-	}
-	for (const line of conversation.dialog) {
-		if (!conversation.actor.some(actor => line.speaker === actor.name)) {
-			throw new Error(`Unknown speaker : ${line.speaker}`)
-		}
-		if (line.emote && !(line.emote in assets.emotes.emotes)) {
-			throw new Error(`Unknown emote : ${line.emote}`)
-		}
+	} catch (e: any) {
+		// eslint-disable-next-line no-console
+		console.log(conversation)
+		throw new Error(e)
 	}
 }
 
@@ -101,9 +130,13 @@ const displayDialog = (dialog: Conversation) => {
 	if (!renderGroup) return
 	for (const actor of dialog.actor) {
 		const model = clone(assets.characters[actor.model].scene)
-		model.scale.setScalar(2.2 * (actor.scale ?? 1))
-
+		const scale = 2.2 * (actor.scale ?? 1)
+		model.scale.setScalar(scale)
+		const emoteContainer = new EmoteContainer(actor.name)
+		emoteContainer.position.y = getBoundingBoxShape('characters', actor.model).y * scale
+		model.add(emoteContainer)
 		const actorEntity = ecs.add({
+			emoteContainer,
 			parent: renderGroup,
 			model,
 			position: new Vector3(3 * placement[actor.position], -2, 0),

@@ -102,6 +102,7 @@ export const renderGame = () => {
 		renderer.clearDepth()
 		renderer.render(dialogRenderGroup.scene, dialogCamera.camera)
 		renderer.autoClear = true
+		cssRenderer.render(dialogRenderGroup.scene, dialogCamera.camera)
 	}
 	cssRenderer.render(scene, camera)
 }

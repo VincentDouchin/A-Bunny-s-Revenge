@@ -1,6 +1,6 @@
 [[actor]]
 name = "Jack"
-model = "Archibald_animated"
+model = "Archibald_animated2"
 position = "right"
 scale = 0.8
 animation = "Idle"

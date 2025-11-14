@@ -51,7 +51,7 @@ const findClosest = (selected: HTMLElement, neighbors: Set<HTMLElement>) => (dir
 
 interface MenuProps {
 	children: (fn: (itemProps: MenuItemProps2) => JSX.Element) => JSX.Element
-	showArrow?: boolean
+	showArrow?: Accessor<boolean> | boolean
 }
 
 export type MenuItemComponent = (props: MenuItemProps2) => JSX.Element
@@ -71,7 +71,7 @@ export interface MenuItemChildrenProps {
 	trigger: () => void
 }
 
-export function Menu({ children, showArrow = false }: MenuProps) {
+export function Menu({ children, showArrow = () => false }: MenuProps) {
 	const selected = atom<HTMLElement | null>(null)
 	const items = new Set<HTMLElement>()
 	const callbacks = {
@@ -134,6 +134,9 @@ export function Menu({ children, showArrow = false }: MenuProps) {
 			onCleanup(() => {
 				const selfValue = self()
 				if (!selfValue) return
+				if (self === selected) {
+					selected(null)
+				}
 				items.delete(selfValue)
 				callbacks.left.delete(selfValue)
 				callbacks.right.delete(selfValue)
@@ -178,7 +181,7 @@ export function Menu({ children, showArrow = false }: MenuProps) {
 	`
 	return (
 		<>
-			<Show when={showArrow && selected()}>
+			<Show when={(typeof showArrow === 'function' ? showArrow() : showArrow) && selected()}>
 				{selected => (
 					<Portal mount={selected()}>
 						<div class="arrow"><CaretRight /></div>

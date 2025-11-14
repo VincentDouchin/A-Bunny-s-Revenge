@@ -14,7 +14,6 @@ export type StaticAssetPath =
   'characters/Archibald_animated-optimized.glb' |
   'characters/Armabee-optimized.glb' |
   'characters/Armabee_Evolved-optimized.glb' |
-  'characters/Basket-optimized.glb' |
   'characters/Batty_A-optimized.glb' |
   'characters/Batty_B-optimized.glb' |
   'characters/Batty_C-optimized.glb' |
@@ -22,9 +21,7 @@ export type StaticAssetPath =
   'characters/Big_Boar_A-optimized.glb' |
   'characters/Big_Boar_B-optimized.glb' |
   'characters/Big_Boar_C-optimized.glb' |
-  'characters/Bunny-optimized.glb' |
   'characters/BunnyClothed-optimized.glb' |
-  'characters/BunnyNewRig-optimized.glb' |
   'characters/Devilu_A-optimized.glb' |
   'characters/Devilu_B-optimized.glb' |
   'characters/Devilu_C-optimized.glb' |
@@ -501,7 +498,6 @@ export const assets = new Set<string>([
   'characters/Archibald_animated-optimized.glb',
   'characters/Armabee-optimized.glb',
   'characters/Armabee_Evolved-optimized.glb',
-  'characters/Basket-optimized.glb',
   'characters/Batty_A-optimized.glb',
   'characters/Batty_B-optimized.glb',
   'characters/Batty_C-optimized.glb',
@@ -509,9 +505,7 @@ export const assets = new Set<string>([
   'characters/Big_Boar_A-optimized.glb',
   'characters/Big_Boar_B-optimized.glb',
   'characters/Big_Boar_C-optimized.glb',
-  'characters/Bunny-optimized.glb',
   'characters/BunnyClothed-optimized.glb',
-  'characters/BunnyNewRig-optimized.glb',
   'characters/Devilu_A-optimized.glb',
   'characters/Devilu_B-optimized.glb',
   'characters/Devilu_C-optimized.glb',

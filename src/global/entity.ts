@@ -3,7 +3,6 @@ import type { Collider, ColliderDesc, KinematicCharacterController, RigidBody, R
 import type { Query, With } from 'miniplex'
 import type { BufferGeometry, Camera, Group, Light, Mesh, MeshPhongMaterial, Object3D, Object3DEventMap, Quaternion, Scene, ShaderMaterial, Sprite, Vector3, WebGLRenderer } from 'three'
 import type { BatchedRenderer, ParticleEmitter, ParticleSystem } from 'three.quarks'
-import type { CSS2DObject } from 'three/examples/jsm/renderers/CSS2DRenderer'
 import type { RequiredKeysOf } from 'type-fest'
 import type { Animator } from './animator'
 import type { InstanceHandle } from './assetLoaders'
@@ -26,6 +25,7 @@ import type { WeaponArc } from '@/shaders/weaponArc'
 import type { Room } from '@/states/dungeon/generateDungeon'
 import type { Dash } from '@/states/game/dash'
 import type { MainMenuBook } from '@/states/mainMenu/book'
+import { CSS2DObject } from 'three/examples/jsm/renderers/CSS2DRenderer'
 
 export type AssetNames = { [K in keyof typeof assets]: keyof typeof assets[K] }
 
@@ -127,6 +127,12 @@ export type WithState<S extends AllStates[]> = { [K in keyof Required<Entity>]: 
 
 export type StatesWith<S extends AllStates[]> = Required<Entity>[WithState<S>]
 
+export class EmoteContainer extends CSS2DObject {
+	constructor(public name: string) {
+		super(document.createElement('div'))
+	}
+}
+
 export type Entity = Partial<AttackStyle> & {
 	playerAnimator?: Animator<PlayerAnimations>
 	// ! BehaviorTree
@@ -189,7 +195,6 @@ export type Entity = Partial<AttackStyle> & {
 	// ! Animations
 	animator?: Animator<Animations['explode']>
 	explodeAnimator?: Animator<Animations['explode']>
-	basketAnimator?: Animator<Animations['Basket']>
 	enemyAnimator?: Animator<EnemyAnimations>
 	pumpkinBossAnimator?: Animator<PumpkinBossAnimations>
 	ovenAnimator?: Animator<Animations['BunnyOvenPacked']>
@@ -259,6 +264,7 @@ export type Entity = Partial<AttackStyle> & {
 	dialog?: Dialog
 	dialogContainer?: CSS2DObject
 	conversation?: Conversation
+	emoteContainer?: EmoteContainer
 	// ! Health
 	currentHealth?: number
 	maxHealth?: Stat

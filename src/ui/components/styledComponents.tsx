@@ -13,6 +13,7 @@ interface OutlineTextProps {
 export const OutlineText = (props: OutlineTextProps) => {
 	css/* css */`
 	.outline-text {
+		display: contents;
 		line-height: 1.2;
 		font-size:${props?.textSize ?? '1em'};
 		padding: var(--size);

@@ -189,11 +189,13 @@ export const DebugUi = () => {
 				const conversation = load(result) as Conversation
 				try {
 					validateConversation(conversation)
+					// eslint-disable-next-line no-console
+					console.log(conversation)
+					ecs.add({ conversation })
 				}
 				catch (e) {
 					conversationError(String(e))
 				}
-				ecs.add({ conversation })
 			}
 		}
 		reader.readAsText(file)
