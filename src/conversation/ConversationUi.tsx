@@ -110,7 +110,7 @@ function ConversationLineDisplay({ line, finished, onSelected }: {
 							</div>
 						</Show>
 						<Show when={!('choice' in line())}>
-							<MenuItem onClick={onSelected} defaultSelected={true}>
+							<MenuItem onClick={() => onSelected(line().next)} defaultSelected={true}>
 								{() => (
 									<DialogText text={line().en} finished={finished} />
 								)}
