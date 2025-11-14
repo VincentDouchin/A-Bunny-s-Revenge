@@ -107,8 +107,7 @@ export const collideWithDoorClearing = onCollideWithDoor((door, player) => {
 	if (door.doorLevel !== undefined && player.weapon) {
 		const dungeon = genDungeon(7 + door.doorLevel * 5, true, door.doorLevel).find(room => room.type === RoomType.Entrance)!
 		app.enable('dungeon', { dungeon, direction: Direction.S, firstEntry: true, playerHealth: player.currentHealth, dungeonLevel: door.doorLevel, weapon: player.weapon.weaponName })
-	}
-	if (door.doorLevel === undefined) {
+	} else	if (door.doorLevel === undefined) {
 		app.enable('farm', { door: 'clearing' })
 	}
 })

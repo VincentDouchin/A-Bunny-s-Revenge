@@ -57,7 +57,7 @@ export class App<States extends string[], Resources extends Record<string, any> 
 
 	#states: Set<States[number]>[] = []
 	#enabledStates: { [S in States[number]]?: Resources[S] } = {}
-	#queue = new Set<() => void>()
+	#queue = new Set<() => Promise<void> | void>()
 
 	readonly #fixedTimeStep: number = 1000 / 60 // 60 FPS in milliseconds
 	#previousTime: number = 0
@@ -207,12 +207,12 @@ export class App<States extends string[], Resources extends Record<string, any> 
 		}
 	}
 
-	#update() {
+	async #update() {
 		this.#runSchedule('preUpdate')
 		this.#runSchedule('update')
 		this.#runSchedule('postUpdate')
 		for (const callBack of this.#queue) {
-			callBack()
+			await callBack()
 		}
 		this.#queue.clear()
 	}
@@ -224,7 +224,7 @@ export class App<States extends string[], Resources extends Record<string, any> 
 		return this
 	}
 
-	loop() {
+	async loop() {
 		if (!this.#running) return
 
 		const currentTime = performance.now()
@@ -238,7 +238,7 @@ export class App<States extends string[], Resources extends Record<string, any> 
 		this.#previousTime = currentTime
 
 		while (this.#accumulator >= this.#fixedTimeStep) {
-			this.#update()
+			await this.#update()
 			this.#accumulator -= this.#fixedTimeStep
 		}
 
