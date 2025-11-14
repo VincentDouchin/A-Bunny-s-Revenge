@@ -63,7 +63,7 @@ app
 	.onEnter('default', initHowler, initTexturesItemsAndEnemies)
 	.addSubscribers('default', () => ui.render(UI), resize, disablePortrait, enableFullscreen, stopOnLosingFocus, completeQuestStep)
 	.onPreUpdate('default', coroutines.tick, savePlayerFromTheEmbraceOfTheVoid, updateMousePosition(), moveCamera())
-	.onUpdate('default', runIf(() => app.isDisabled('paused'), ...updateAnimations('playerAnimator', 'basketAnimator', 'enemyAnimator', 'ovenAnimator', 'houseAnimator', 'chestAnimator', 'kayAnimator', 'cellarDoorAnimator', 'pumpkinBossAnimator', 'explodeAnimator', 'pumpkinSeedAnimator', 'animator')))
+	.onUpdate('default', runIf(() => app.isDisabled('paused'), ...updateAnimations('playerAnimator', 'enemyAnimator', 'ovenAnimator', 'houseAnimator', 'chestAnimator', 'kayAnimator', 'cellarDoorAnimator', 'pumpkinBossAnimator', 'explodeAnimator', 'pumpkinSeedAnimator', 'animator')))
 	.onRender('default', renderGame)
 	.onRender('default', runIf(() => app.isDisabled('paused'), stepWorld))
 	.onPreUpdate('default', inputManager.update, ui.update)
