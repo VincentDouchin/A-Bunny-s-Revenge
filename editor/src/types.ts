@@ -13,22 +13,21 @@ export interface LevelEntity {
 	}
 }
 
-export interface LevelData {
+type Maps = 'heightMap' | 'treeMap' | 'pathMap' | 'waterMap' | 'grassMap'
+
+export interface BaseLevel {
 	sizeX: number
 	sizeY: number
 	entities: Record<string, LevelEntity>
 	displacementScale: number
-	heightMap: string
-	treeMap: string
-	pathMap: string
-	waterMap: string
-	grassMap: string
-
 }
+export type LevelData = Record<Maps, string> & BaseLevel
+export type LevelLoaded = Record<Maps, HTMLCanvasElement> & BaseLevel
 
-type ColliderData = {
+export type ColliderData = {
 	type: 'ball' | 'cuboid' | 'capsule' | 'cylinder'
 	size: { x: number, y?: number, z?: number }
+	position: { x: number, y: number, z: number }
 } | {
 	type: 'link'
 	category: string

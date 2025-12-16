@@ -167,10 +167,12 @@ export function Configuration({ folder, reload, repoCloned, saveLevel }: {
 				prTitle: 'Update level',
 				prBody: 'Update level',
 			})
-			// alert('Changes pushed successfully!')
+			// eslint-disable-next-line no-alert
+			alert('Changes pushed successfully!')
 		} catch (err) {
 			console.error(err)
-			// alert(`Failed to push changes: ${err}`)
+			// eslint-disable-next-line no-alert
+			alert(`Failed to push changes: ${err}`)
 		}
 	}
 

@@ -1,5 +1,4 @@
 import type { Atom } from 'solid-use/atom'
-import type { Scene } from 'three'
 import { faArrowsLeftRight, faArrowsUpDown } from '@fortawesome/free-solid-svg-icons'
 import Fa from 'solid-fa'
 import { css } from 'solid-styled'
@@ -7,7 +6,6 @@ import { Vector2 } from 'three'
 
 export function LevelProps({ levelSize }: {
 	levelSize: Atom<Vector2 | null>
-	scene: Scene
 }) {
 	css/* css */`
 	.size-input {

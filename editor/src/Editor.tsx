@@ -113,7 +113,7 @@ export function Editor() {
 	})
 
 	const debugRenderer = new RapierDebugRenderer(world)
-	scene.add(debugRenderer.mesh)
+	scene.add(debugRenderer)
 
 	let assets: Awaited<ReturnType<typeof loadAssets>> | null = null
 
@@ -167,7 +167,7 @@ export function Editor() {
 			mapControls.enabled = false
 			scene.add(new AmbientLight(0xFFFFFF, 1))
 			camera.position.set(0, 10, 5)
-			scene.add(debugRenderer.mesh)
+			scene.add(debugRenderer)
 			transformControls.detach()
 
 			const grid = new GridHelper(10, 10)
@@ -285,9 +285,11 @@ export function Editor() {
 			entities.trees.Low_Poly_Forest_treeTall03,
 			entities.trees.Low_Poly_Forest_treeTall04,
 		]
-		const { process } = getTrees(models, hCanvas, tCanvas, 10, scale)
-		const newTreeGroup = process()
-		group.add(newTreeGroup)
+		const trees = getTrees(models, hCanvas, tCanvas, 10, scale)
+		const newTreeGroup = new Group()
+		for (const [generator] of trees) {
+			group.add(generator.process())
+		}
 		treeGroup?.removeFromParent()
 		treeGroup = newTreeGroup
 	})
@@ -849,7 +851,6 @@ export function Editor() {
 						<Show when={mode() === 'level'}>
 							<LevelProps
 								levelSize={levelSize}
-								scene={scene}
 							/>
 
 							<EntityList
@@ -861,6 +862,8 @@ export function Editor() {
 						</Show>
 						<Show when={mode() === 'entity'}>
 							<EntityProps
+								debugRenderer={debugRenderer}
+								transformControlsMode={transformControlsMode}
 								boundingBox={boundingBox}
 								selectedAsset={selectedAsset}
 								selectedCategory={selectedCategory}
@@ -886,7 +889,8 @@ export function Editor() {
 						onContextMenu={e => e.preventDefault()}
 					>
 						<Renderer renderer={renderer} camera={camera} onPointerDown={onPointerDown} />
-						<Show when={selectedId()}>
+
+						<Show when={selectedId() || mode() === 'entity'}>
 							<div class="mode-buttons">
 								<div class="scale-buttons">
 									<button onClick={() => transformControlsMode('scale')} classList={{ selected: transformControlsMode() === 'scale' }}>
@@ -894,26 +898,28 @@ export function Editor() {
 										{' '}
 										(S)
 									</button>
-									<button onClick={() => scaleLock(!scaleLock())}>
-										<Fa icon={scaleLock() ? faLock : faLockOpen}></Fa>
-										{' '}
-										Lock scale axis
-									</button>
-									<button onClick={applyGlobalScale}>
-										<Fa icon={faEarth}></Fa>
-										{' '}
-										Apply to all
-									</button>
-									<button onClick={resetScale}>
-										<Fa icon={faArrowRotateBack}></Fa>
-										{' '}
-										Reset
-									</button>
-									<button onClick={resetGlobalScale}>
-										<Fa icon={faArrowRotateBack}></Fa>
-										{' '}
-										Reset global scale
-									</button>
+									<Show when={selectedId()}>
+										<button onClick={() => scaleLock(!scaleLock())}>
+											<Fa icon={scaleLock() ? faLock : faLockOpen}></Fa>
+											{' '}
+											Lock scale axis
+										</button>
+										<button onClick={applyGlobalScale}>
+											<Fa icon={faEarth}></Fa>
+											{' '}
+											Apply to all
+										</button>
+										<button onClick={resetScale}>
+											<Fa icon={faArrowRotateBack}></Fa>
+											{' '}
+											Reset
+										</button>
+										<button onClick={resetGlobalScale}>
+											<Fa icon={faArrowRotateBack}></Fa>
+											{' '}
+											Reset global scale
+										</button>
+									</Show>
 								</div>
 								<button onClick={() => transformControlsMode('translate')} classList={{ selected: transformControlsMode() === 'translate' }}>
 									<Fa icon={faArrowsUpDownLeftRight}></Fa>
@@ -925,7 +931,6 @@ export function Editor() {
 									{' '}
 									(R)
 								</button>
-
 							</div>
 						</Show>
 					</div>
