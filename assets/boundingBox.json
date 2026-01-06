@@ -1,1 +1,679 @@
-{"models":{"barrel":{"collider":{"type":"cylinder","size":{"x":1.800000011920929,"y":2},"position":{"x":-0.01611897880998847,"y":1,"z":0}},"secondaryColliders":[],"scale":[4.23207181835716,4.23207181835716,4.23207181835716]},"barrel_small":{"collider":{"type":"cuboid","size":{"x":1.8501402735710144,"y":1.7701382287264664,"z":1.0000000596046448},"position":{"x":0.05013365099244904,"y":0.8850691143632332,"z":0}},"secondaryColliders":[]},"bench":{"collider":{"type":"cuboid","size":{"x":2.875,"y":1.4750400068699345,"z":1.5625},"position":{"x":-0.07638247840461632,"y":0.7375200034349673,"z":0}},"secondaryColliders":[]},"box_small":{"collider":{"type":"cuboid","size":{"x":1,"y":1,"z":1},"position":{"x":0.03793883439078294,"y":0.5,"z":0}},"secondaryColliders":[]},"box_large":{"collider":{"type":"cuboid","size":{"x":1.5000000596046448,"y":1.4999999403953552,"z":1.5000001192092896},"position":{"x":-0.026257088376254734,"y":0.7499999701976776,"z":0}},"secondaryColliders":[]},"box_stack":{"collider":{"type":"cuboid","size":{"x":3.475274920463562,"y":3.308905285682414,"z":3.6347475051879883},"position":{"x":-0.026257088376254734,"y":1.654452642841207,"z":0}},"secondaryColliders":[]},"Bulliten":{"collider":{"type":"cuboid","size":{"x":1.3087096810340881,"y":1.1093997161118487,"z":0.22059635587392595},"position":{"x":-0.026257088376254734,"y":0.5546998580559244,"z":0.08735456162459465}},"secondaryColliders":[]},"BunnyOvenPacked":{"collider":{"type":"cylinder","size":{"x":2.7263322563663723,"y":5.8959469158075715},"position":{"x":-0.026257088376254734,"y":2.9479734579037857,"z":0.08735456162459465}},"secondaryColliders":[]},"cauldron":{"collider":{"type":"cylinder","size":{"x":0.5195494294166565,"y":0.4462568461894989},"position":{"x":-0.026257088376254734,"y":0.22312842309474945,"z":0.08735456162459465}},"secondaryColliders":[]},"Chest":{"collider":{"type":"cuboid","size":{"x":1.700000030912033,"y":1.300023116243417,"z":1.4457732192227666},"position":{"x":-0.026257088376254734,"y":0.6500115581217085,"z":0.4360650878287917}},"secondaryColliders":[]},"CookingPot":{"collider":{"type":"cylinder","size":{"x":2.233933766282274,"y":1.1490804384956288},"position":{"x":-0.026257088376254734,"y":0.6500115581217085,"z":0.4360650878287917}},"secondaryColliders":[]},"crate":{"collider":{"type":"cuboid","size":{"x":2.000000238418579,"y":0.800000011920929,"z":1.4000046849250793},"position":{"x":-0.026257088376254734,"y":0.4000000059604645,"z":-0.0185116531788469}},"secondaryColliders":[]},"Fence":{"collider":{"type":"cuboid","size":{"x":1.5549071504859828,"y":0.527416542172432,"z":0.0683501660959703},"position":{"x":-0.013032313408551599,"y":0.263708271086216,"z":-0.03522558979964463}},"secondaryColliders":[],"scale":[7.119542699771352,7.119542699771352,7.119542699771352]},"gardenPlot1":{"collider":{"type":"cuboid","size":{"x":6.195494436744686,"y":1.4710069049450458,"z":6.420163133477464},"position":{"x":-0.026257088376254734,"y":0.6500115581217085,"z":0.4360650878287917}},"secondaryColliders":[]},"keg":{"collider":{"type":"cuboid","size":{"x":1.800000011920929,"y":2.050724148750305,"z":2},"position":{"x":-0.026257088376254734,"y":1.0253620743751526,"z":-0.01387071383165095}},"secondaryColliders":[]},"House":{"collider":{"type":"cylinder","size":{"x":2.920282647037548,"y":2.6059936075623646},"position":{"x":-0.026257088376254734,"y":1.3029968037811823,"z":0.05516198291549379}},"secondaryColliders":[]},"KitchenSet1":{"collider":{"type":"cuboid","size":{"x":23.805258928947406,"y":19.784689031836965,"z":7.575348351221415},"position":{"x":1.3967035749326115,"y":9.892344515918483,"z":-4.255071036205607}},"secondaryColliders":[]},"Lamp":{"collider":{"type":"cylinder","size":{"x":0.224217951920247,"y":1.50452379888224},"position":{"x":-0.00837448065137969,"y":0.75226189944112,"z":0}},"secondaryColliders":[],"scale":[13.38725435208343,13.38725435208343,13.38725435208343]},"WoodLog_Moss":{"collider":{"type":"cuboid","size":{"x":0.5465294491348733,"y":0.6883237061406646,"z":2.6702951650710793},"position":{"x":0,"y":0.3441618530703323,"z":-0.17054354718260856}},"secondaryColliders":[]},"WoodLog":{"collider":{"type":"link","category":"models","model":"WoodLog_Moss"}},"WoodenSign2":{"collider":{"type":"cuboid","size":{"x":0.7010467946529388,"y":0.8393034338951111,"z":0.18932533264160156},"position":{"x":0,"y":0.41965171694755554,"z":0}},"secondaryColliders":[]},"WoodenSign":{"collider":{"type":"cuboid","size":{"x":0.6421455144882202,"y":0.8393034338951111,"z":0.18932533264160156},"position":{"x":0,"y":0.41965171694755554,"z":0}},"secondaryColliders":[]},"well":{"collider":{"type":"cylinder","size":{"x":0.30152355686415294,"y":0.4931696802377701},"position":{"x":0,"y":0.24658484011888504,"z":0}},"secondaryColliders":[]},"trunk":{"collider":{"type":"cuboid","size":{"x":1.5000000596046448,"y":0.9999999643737851,"z":1.2999998927116394},"position":{"x":0,"y":0,"z":0}},"secondaryColliders":[]},"TreeStump_Moss":{"collider":{"type":"cylinder","size":{"x":0.8223618635682411,"y":0.6215806935629734},"position":{"x":0,"y":0,"z":0}},"secondaryColliders":[]},"TreeStump":{"collider":{"type":"link","category":"models","model":"TreeStump_Moss"}},"table":{"collider":{"type":"cylinder","size":{"x":8.574134826660156,"y":5.637992953062142},"position":{"x":0,"y":0,"z":0}},"secondaryColliders":[]},"stringLights":{"collider":{"type":"cylinder","size":{"x":1.8645608121671293,"y":19.231245735523494},"position":{"x":0,"y":0,"z":0}},"secondaryColliders":[]},"Stove1":{"collider":{"type":"cylinder","size":{"x":0.556924741819371,"y":0.380380779504776},"position":{"x":0,"y":0,"z":0}},"secondaryColliders":[]},"stall":{"collider":{"type":"cuboid","size":{"x":2.9987483844194895,"y":2.2821033477021335,"z":1.051902414089656},"position":{"x":0,"y":0,"z":0}},"secondaryColliders":[]},"Shroom4":{"collider":{"type":"cylinder","size":{"x":0.3376884776118705,"y":0.9396247792933761},"position":{"x":0.039266050232759725,"y":0.46981238964668803,"z":-0.05522266357817607}},"secondaryColliders":[],"scale":[13.818116246730824,13.818116246730824,13.818116246730824]},"Bush_1":{"collider":{"type":"cylinder","size":{"x":1.3284285552799702,"y":1.2417479236661597},"position":{"x":0,"y":0.6208739618330799,"z":0}},"secondaryColliders":[]},"Bush_2":{"collider":{"type":"cylinder","size":{"x":1.3460079208016396,"y":1.11056375913478},"position":{"x":0,"y":0.55528187956739,"z":0}},"secondaryColliders":[]},"Rock_1":{"collider":{"type":"cuboid","size":{"x":0.48532288055866957,"y":0.8777499584590621,"z":0.4667483550771794},"position":{"x":0,"y":0.43887497922953106,"z":-0.018496417541011}},"secondaryColliders":[]},"Rock_2":{"collider":{"type":"cuboid","size":{"x":0.5613724235445261,"y":0.6456158307187169,"z":0.5650293249229764},"position":{"x":0,"y":0.32280791535935843,"z":0}},"secondaryColliders":[]},"Rock_3":{"collider":{"type":"cuboid","size":{"x":0.546636793688974,"y":0.675989960644131,"z":0.5884594013437833},"position":{"x":-0.023967215951310378,"y":0.3379949803220655,"z":0.062848567915394}},"secondaryColliders":[]},"Rock_4":{"collider":{"type":"cuboid","size":{"x":0.7435695733875036,"y":0.783637504818807,"z":1.2505156048613366},"position":{"x":-0.11921312553422553,"y":0.3918187524094035,"z":0.028990301970206633}},"secondaryColliders":[]},"bookshelf":{"collider":{"type":"cuboid","size":{"x":4,"y":3,"z":0.7209772169589996},"position":{"x":0,"y":1.5,"z":0}},"secondaryColliders":[]},"Gate_Vines":{"collider":{"type":"cuboid","size":{"x":90.7874755859375,"y":43.94308090209961,"z":6.456006671835542},"position":{"x":0,"y":21.971540451049805,"z":-5.293909064386851}},"secondaryColliders":[]},"Rock_5":{"collider":{"type":"cuboid","size":{"x":0.6631902884691954,"y":0.6527829520391176,"z":0.9147827548733418},"position":{"x":0,"y":0,"z":0}},"secondaryColliders":[]},"Rock_6":{"collider":{"type":"cuboid","size":{"x":0.9120303438976407,"y":0.707818401461896,"z":1.1419510885374833},"position":{"x":-0.028298440567318395,"y":0.353909200730948,"z":-0.03684545692714311}},"secondaryColliders":[]},"Rock_7":{"collider":{"type":"cuboid","size":{"x":0.8755458984524012,"y":0.8493813979007273,"z":1.0982701051582064},"position":{"x":-0.0689374397410148,"y":0.42469069895036365,"z":0.044901799179769}},"secondaryColliders":[]},"Rock_Moss_1":{"collider":{"type":"cuboid","size":{"x":0.48532283399254084,"y":0.9500334868986825,"z":0.4667483536921435},"position":{"x":0.04130214746823921,"y":0.47501674344934125,"z":0.022011347614343063}},"secondaryColliders":[]},"Rock_Moss_2":{"collider":{"type":"cuboid","size":{"x":0.6125458981841803,"y":0.69175400257326,"z":0.6504263475817558},"position":{"x":0.037908406941816936,"y":0.34587700128663,"z":0.00409337582912267}},"secondaryColliders":[]},"Rock_Moss_3":{"collider":{"type":"cuboid","size":{"x":0.738359079696238,"y":0.5567014501903923,"z":0.802583560200832},"position":{"x":-0.062476025411118324,"y":0.27835072509519615,"z":0.0938491968878182}},"secondaryColliders":[],"scale":[18.532083815914703,18.532083815914703,18.532083815914703]},"Rock_Moss_4":{"collider":{"type":"cuboid","size":{"x":0.7435695733875036,"y":0.783637504818807,"z":1.2505156048613366},"position":{"x":-0.08517290705439037,"y":0.3918187524094035,"z":0.010664094741745206}},"secondaryColliders":[]},"Rock_Moss_5":{"collider":{"type":"cuboid","size":{"x":0.6631903117522597,"y":0.5767394161028914,"z":0.9147827724461335},"position":{"x":0,"y":0.2883697080514457,"z":0}},"secondaryColliders":[]},"Rock_Moss_6":{"collider":{"type":"cuboid","size":{"x":0.9120303438976407,"y":0.7078183998280194,"z":1.141951084511223},"position":{"x":-0.03178423452108786,"y":0.3539091999140097,"z":-0.07857462531848083}},"secondaryColliders":[]},"Rock_Moss_7":{"collider":{"type":"cuboid","size":{"x":0.8755458984524012,"y":0.7739007616518851,"z":1.0982700822916285},"position":{"x":-0.11810531290399146,"y":0.3869503808259426,"z":0.0379603271032094}},"secondaryColliders":[]},"Shroom1":{"collider":{"type":"cylinder","size":{"x":0.32562191699654963,"y":0.9827203410770058},"position":{"x":0,"y":0,"z":0}},"secondaryColliders":[],"scale":[16.094060158835187,16.094060158835187,16.094060158835187]},"Shroom2":{"collider":{"type":"cylinder","size":{"x":0.2158863720231312,"y":0.8184457404759866},"position":{"x":0,"y":0,"z":0}},"secondaryColliders":[],"scale":[18.714556521336355,18.714556521336355,18.714556521336355]},"Shroom3":{"collider":{"type":"cylinder","size":{"x":0.19549070457223608,"y":0.6955132281484587},"position":{"x":0,"y":0,"z":0}},"secondaryColliders":[],"scale":[32.876399072772365,32.876399072772365,32.876399072772365]},"SM_Env_RicePlant_02":{"scale":[7.32465025324488,7.32465025324488,7.32465025324488]},"SM_Env_RicePlant_01":{"scale":[13.0771021591412,13.0771021591412,13.0771021591412]},"Lamp2":{"collider":{"type":"cylinder","size":{"x":0.24907610103115568,"y":1},"position":{"x":0,"y":0.5,"z":0}},"secondaryColliders":[]},"SM_Env_Reeds_02":{"scale":[11.018394196126424,11.018394196126424,11.018394196126424]},"SM_Env_Reeds_01":{"scale":[11.952287573641675,11.952287573641675,11.952287573641675]}},"characters":{"ALICE_animated":{"collider":{"type":"capsule","size":{"x":0.8368981281629142,"y":0.9294266879551364},"position":{"x":0,"y":0,"z":0}},"secondaryColliders":[]},"Archibald_animated":{"collider":{"type":"capsule","size":{"x":1.0398870626294285,"y":1.2380136734914515},"position":{"x":0,"y":0,"z":0}},"secondaryColliders":[]},"Armabee":{"collider":{"type":"capsule","size":{"x":1.4940540737162002,"y":1.4280291981619901},"position":{"x":0,"y":0,"z":0}},"secondaryColliders":[]},"Armabee_Evolved":{"collider":{"type":"capsule","size":{"x":1.5345185120149525,"y":1.2892788112208622},"position":{"x":0,"y":0,"z":0}},"secondaryColliders":[]},"Batty_A":{"collider":{"type":"capsule","size":{"x":0.28693832261352903,"y":0.1660189242324695},"position":{"x":0,"y":0,"z":0}},"secondaryColliders":[]},"Batty_B":{"collider":{"type":"link","category":"characters","model":"Batty_A"}},"Batty_C":{"collider":{"type":"link","category":"characters","model":"Batty_A"}},"Batty_D":{"collider":{"type":"link","category":"characters","model":"Batty_A"}},"Big_Boar_A":{"collider":{"type":"ball","size":{"x":4.799360581073247},"position":{"x":0,"y":2.3996802905366237,"z":0.46458229277951735}},"secondaryColliders":[]},"Big_Boar_B":{"collider":{"type":"link","category":"characters","model":"Big_Boar_A"}},"Big_Boar_C":{"collider":{"type":"link","category":"characters","model":"Big_Boar_A"}},"BunnyClothed":{"collider":{"type":"capsule","size":{"x":1.0597366004995494,"y":1.3046036542946142},"position":{"x":0,"y":1.182170127397082,"z":0}},"secondaryColliders":[]},"death_mage":{"collider":{"type":"capsule","size":{"x":1.2707274850572186,"y":2.689073106406764},"position":{"x":0,"y":2.7886196832575565,"z":0}},"secondaryColliders":[]},"Devilu_A":{"collider":{"type":"capsule","size":{"x":0.20536702809576063,"y":0.19246809983413132},"position":{"x":0,"y":0,"z":0}},"secondaryColliders":[]},"Devilu_B":{"collider":{"type":"link","category":"characters","model":"Devilu_A"}},"Devilu_C":{"collider":{"type":"link","category":"characters","model":"Devilu_A"}},"Forest_Butterfly_A":{"collider":{"type":"capsule","size":{"x":1.6766774347638564,"y":4.198519333295341},"position":{"x":0,"y":0,"z":0}},"secondaryColliders":[]},"Forest_Butterfly_B":{"collider":{"type":"link","category":"characters","model":"Forest_Butterfly_A"}},"Forest_Butterfly_C":{"collider":{"type":"link","category":"characters","model":"Forest_Butterfly_A"}},"Forest_Butterfly_D":{"collider":{"type":"link","category":"characters","model":"Forest_Butterfly_A"}},"Gloom":{"collider":{"type":"capsule","size":{"x":0.7079304902696689,"y":1.107436874043005},"position":{"x":0,"y":0,"z":0}},"secondaryColliders":[]},"grandma":{"collider":{"type":"capsule","size":{"x":0.8232383274146737,"y":1.165224242711305},"position":{"x":0,"y":0,"z":0}},"secondaryColliders":[]},"JACK_animated":{"collider":{"type":"capsule","size":{"x":0.9760443387290467,"y":0.9037238686452235},"position":{"x":0,"y":0,"z":0}},"secondaryColliders":[]},"Magicbook_A":{"collider":{"type":"capsule","size":{"x":0.4813161643162615,"y":0.1427214882864703},"position":{"x":0,"y":0,"z":0}},"secondaryColliders":[]},"Magicbook_B":{"collider":{"type":"link","category":"characters","model":"Magicbook_A"}},"Magicbook_C":{"collider":{"type":"link","category":"characters","model":"Magicbook_A"}},"Magicbook_D":{"collider":{"type":"link","category":"characters","model":"Magicbook_A"}},"Magicbook_E":{"collider":{"type":"link","category":"characters","model":"Magicbook_A"}},"MushroomAngryPA":{"collider":{"type":"capsule","size":{"x":1.1372970255943207,"y":0.08264948125873536},"position":{"x":0,"y":0,"z":0}},"secondaryColliders":[]},"OWL_animated":{"collider":{"type":"capsule","size":{"x":0.7162035703659065,"y":0.9176488093378996},"position":{"x":0,"y":0,"z":0}},"secondaryColliders":[]},"plant_chewer":{"collider":{"type":"capsule","size":{"x":1.4393537591702987,"y":0.0693808795360735},"position":{"x":0,"y":0,"z":0}},"secondaryColliders":[]},"Platopo_A":{"collider":{"type":"ball","size":{"x":0.9921678389265116},"position":{"x":0,"y":0.4960839194632558,"z":0.15442469227675404}},"secondaryColliders":[]},"Platopo_B":{"collider":{"type":"link","category":"characters","model":"Platopo_A"}},"Platopo_C":{"collider":{"type":"link","category":"characters","model":"Platopo_A"}},"Pollen":{"collider":{"type":"capsule","size":{"x":0.31769060306887953,"y":0.8847787456477417},"position":{"x":0,"y":0.27149256368580393,"z":0}},"secondaryColliders":[]},"Porin_A":{"collider":{"type":"capsule","size":{"x":5.634222346229587,"y":0.36015923488425666},"position":{"x":0,"y":0,"z":0}},"secondaryColliders":[]},"Porin_B":{"collider":{"type":"link","category":"characters","model":"Porin_A"}},"Porin_C":{"collider":{"type":"link","category":"characters","model":"Porin_A"}},"Porin_D":{"collider":{"type":"link","category":"characters","model":"Porin_A"}},"Porin_E":{"collider":{"type":"link","category":"characters","model":"Porin_A"}},"Racco_A":{"collider":{"type":"capsule","size":{"x":4.965283437562678,"y":0.4510833820185676},"position":{"x":0,"y":0,"z":0}},"secondaryColliders":[]},"Racco_B":{"collider":{"type":"link","category":"characters","model":"Racco_A"}},"Racco_C":{"collider":{"type":"link","category":"characters","model":"Racco_A"}},"Reaper":{"collider":{"type":"capsule","size":{"x":1.0325239092121408,"y":0.7939548242186951},"position":{"x":0,"y":0,"z":0}},"secondaryColliders":[]},"Shaga_A":{"collider":{"type":"capsule","size":{"x":4.812814371079478,"y":0.23369865271532553},"position":{"x":0,"y":0,"z":0}},"secondaryColliders":[]},"Shaga_B":{"collider":{"type":"link","category":"characters","model":"Shaga_A"}},"Shaga_C":{"collider":{"type":"link","category":"characters","model":"Shaga_A"}},"Snailo_A":{"collider":{"type":"ball","size":{"x":6.176154330770166},"position":{"x":0,"y":0,"z":0}},"secondaryColliders":[]},"Snailo_B":{"collider":{"type":"link","category":"characters","model":"Snailo_A"}},"Snailo_C":{"collider":{"type":"link","category":"characters","model":"Snailo_A"}},"Snailo_D":{"collider":{"type":"link","category":"characters","model":"Snailo_A"}},"soot_sprite":{"collider":{"type":"capsule","size":{"x":1.0918757912959296,"y":0.6635258793830872},"position":{"x":0,"y":0,"z":0}},"secondaryColliders":[]},"spider_king":{"collider":{"type":"ball","size":{"x":1.7147022290707918},"position":{"x":0,"y":0,"z":0}},"secondaryColliders":[]},"werewolf":{"collider":{"type":"capsule","size":{"x":1.8576209370784147,"y":0.9352618379651182},"position":{"x":0,"y":0,"z":0}},"secondaryColliders":[]}},"vegetation":{"SM_Env_Bush_04":{"scale":[6.1036252404806115,6.1036252404806115,6.1036252404806115]},"SM_Env_Bush_03":{"scale":[6.785853662632208,6.785853662632208,6.785853662632208]},"SM_Env_Plant_01":{"scale":[7.570078775021493,7.570078775021493,7.570078775021493]},"SM_Env_Bush_01":{"scale":[5.1771705817689435,5.1771705817689435,5.1771705817689435]},"SM_Env_Flowers_01":{"scale":[16.161825825490055,16.161825825490055,16.161825825490055]},"SM_Env_Flower_07":{"scale":[1.395350520135079,1.395350520135079,1.395350520135079]},"SM_Env_Flowers_02":{"scale":[9.131382930952954,9.131382930952954,9.131382930952954]},"SM_Env_Bush_02":{"scale":[9.8686071754967,9.8686071754967,9.8686071754967]}}}
+{
+    "models": {
+        "barrel": {
+            "collider": {
+                "type": "cylinder",
+                "size": {"x": 1.800000011920929, "y": 2},
+                "position": {"x": -0.01611897880998847, "y": 1, "z": 0}
+            },
+            "secondaryColliders": [],
+            "scale": [4.23207181835716, 4.23207181835716, 4.23207181835716]
+        },
+        "barrel_small": {
+            "collider": {
+                "type": "cuboid",
+                "size": {"x": 1.8501402735710144, "y": 1.7701382287264664, "z": 1.0000000596046448},
+                "position": {"x": 0.05013365099244904, "y": 0.8850691143632332, "z": 0}
+            },
+            "secondaryColliders": []
+        },
+        "bench": {
+            "collider": {
+                "type": "cuboid",
+                "size": {"x": 2.875, "y": 1.4750400068699345, "z": 1.5625},
+                "position": {"x": -0.07638247840461632, "y": 0.7375200034349673, "z": 0}
+            },
+            "secondaryColliders": []
+        },
+        "box_small": {
+            "collider": {
+                "type": "cuboid",
+                "size": {"x": 1, "y": 0.9999999701976776, "z": 1},
+                "position": {"x": 0.03793883439078294, "y": 0.5, "z": 0}
+            },
+            "secondaryColliders": []
+        },
+        "box_large": {
+            "collider": {
+                "type": "cuboid",
+                "size": {"x": 1.5000000596046448, "y": 1.4999999403953552, "z": 1.5000001192092896},
+                "position": {"x": -0.026257088376254734, "y": 0.7499999701976776, "z": 0}
+            },
+            "secondaryColliders": []
+        },
+        "box_stack": {
+            "collider": {
+                "type": "cuboid",
+                "size": {"x": 3.475274920463562, "y": 3.308905285682414, "z": 3.6347475051879883},
+                "position": {"x": -0.026257088376254734, "y": 1.654452642841207, "z": 0}
+            },
+            "secondaryColliders": []
+        },
+        "Bulliten": {
+            "collider": {
+                "type": "cuboid",
+                "size": {"x": 1.3087096810340881, "y": 1.1093997161118487, "z": 0.22059635587392595},
+                "position": {"x": -0.026257088376254734, "y": 0.5546998580559244, "z": 0.08735456162459465}
+            },
+            "secondaryColliders": []
+        },
+        "BunnyOvenPacked": {
+            "collider": {
+                "type": "cylinder",
+                "size": {"x": 2.7263322563663723, "y": 5.8959469158075715},
+                "position": {"x": -0.026257088376254734, "y": 2.9479734579037857, "z": 0.08735456162459465}
+            },
+            "secondaryColliders": []
+        },
+        "cauldron": {
+            "collider": {
+                "type": "cylinder",
+                "size": {"x": 0.5195494294166565, "y": 0.4462568461894989},
+                "position": {"x": -0.026257088376254734, "y": 0.22312842309474945, "z": 0.08735456162459465}
+            },
+            "secondaryColliders": []
+        },
+        "Chest": {
+            "collider": {
+                "type": "cuboid",
+                "size": {"x": 1.700000030912033, "y": 1.300023116243417, "z": 1.4457732192227666},
+                "position": {"x": -0.026257088376254734, "y": 0.6500115581217085, "z": 0.4360650878287917}
+            },
+            "secondaryColliders": []
+        },
+        "CookingPot": {
+            "collider": {
+                "type": "cylinder",
+                "size": {"x": 2.233933766282274, "y": 1.1490804384956288},
+                "position": {"x": -0.026257088376254734, "y": 0.6500115581217085, "z": 0.4360650878287917}
+            },
+            "secondaryColliders": []
+        },
+        "crate": {
+            "collider": {
+                "type": "cuboid",
+                "size": {"x": 2.000000238418579, "y": 0.800000011920929, "z": 1.4000046849250793},
+                "position": {"x": -0.026257088376254734, "y": 0.4000000059604645, "z": -0.0185116531788469}
+            },
+            "secondaryColliders": []
+        },
+        "Fence": {
+            "collider": {
+                "type": "cuboid",
+                "size": {"x": 1.5549071504859828, "y": 2.043066609234297, "z": 0.0683501660959703},
+                "position": {"x": -0.013032313408551599, "y": 0.263708271086216, "z": -0.03522558979964463}
+            },
+            "secondaryColliders": [],
+            "scale": [7.048093222993907, 7.048093222993907, 7.048093222993907]
+        },
+        "gardenPlot1": {
+            "collider": {
+                "type": "cuboid",
+                "size": {"x": 6.195494436744686, "y": 1.4710069049450458, "z": 6.420163133477464},
+                "position": {"x": -0.026257088376254734, "y": 0.6500115581217085, "z": 0.4360650878287917}
+            },
+            "secondaryColliders": []
+        },
+        "keg": {
+            "collider": {
+                "type": "cuboid",
+                "size": {"x": 1.800000011920929, "y": 2.050724148750305, "z": 2},
+                "position": {"x": -0.026257088376254734, "y": 1.0253620743751526, "z": -0.01387071383165095}
+            },
+            "secondaryColliders": []
+        },
+        "House": {
+            "collider": {
+                "type": "cylinder",
+                "size": {"x": 2.920282647037548, "y": 2.6059936075623646},
+                "position": {"x": -0.026257088376254734, "y": 1.3029968037811823, "z": 0.05516198291549379}
+            },
+            "secondaryColliders": []
+        },
+        "KitchenSet1": {
+            "collider": {
+                "type": "cuboid",
+                "size": {"x": 23.805258928947406, "y": 19.784689031836965, "z": 7.575348351221415},
+                "position": {"x": 1.3967035749326115, "y": 9.892344515918483, "z": -4.255071036205607}
+            },
+            "secondaryColliders": []
+        },
+        "Lamp": {
+            "collider": {
+                "type": "cylinder",
+                "size": {"x": 0.224217951920247, "y": 1.50452379888224},
+                "position": {"x": -0.00837448065137969, "y": 0.75226189944112, "z": 0}
+            },
+            "secondaryColliders": [],
+            "scale": [13.38725435208343, 13.38725435208343, 13.38725435208343]
+        },
+        "WoodLog_Moss": {
+            "collider": {
+                "type": "cuboid",
+                "size": {"x": 0.5465294491348733, "y": 0.6883237061406646, "z": 2.6702951650710793},
+                "position": {"x": 0, "y": 0.3441618530703323, "z": -0.17054354718260856}
+            },
+            "secondaryColliders": []
+        },
+        "WoodLog": { "collider": {"type": "link", "category": "models", "model": "WoodLog_Moss"} },
+        "WoodenSign2": {
+            "collider": {
+                "type": "cuboid",
+                "size": {"x": 0.7010467946529388, "y": 0.8393034338951111, "z": 0.18932533264160156},
+                "position": {"x": 0, "y": 0.41965171694755554, "z": 0}
+            },
+            "secondaryColliders": []
+        },
+        "WoodenSign": {
+            "collider": {
+                "type": "cuboid",
+                "size": {"x": 0.6421455144882202, "y": 0.8393034338951111, "z": 0.18932533264160156},
+                "position": {"x": 0, "y": 0.41965171694755554, "z": 0}
+            },
+            "secondaryColliders": []
+        },
+        "well": {
+            "collider": {
+                "type": "cylinder",
+                "size": {"x": 0.30152355686415294, "y": 0.4931696802377701},
+                "position": {"x": 0, "y": 0.24658484011888504, "z": 0}
+            },
+            "secondaryColliders": []
+        },
+        "trunk": {
+            "collider": {
+                "type": "cuboid",
+                "size": {"x": 1.5000000596046448, "y": 0.9999999643737851, "z": 1.2999998927116394},
+                "position": {"x": 0, "y": 0, "z": 0}
+            },
+            "secondaryColliders": []
+        },
+        "TreeStump_Moss": {
+            "collider": {
+                "type": "cylinder",
+                "size": {"x": 0.8223618635682411, "y": 0.6215806935629734},
+                "position": {"x": 0, "y": 0, "z": 0}
+            },
+            "secondaryColliders": []
+        },
+        "TreeStump": { "collider": {"type": "link", "category": "models", "model": "TreeStump_Moss"} },
+        "table": {
+            "collider": {
+                "type": "cylinder",
+                "size": {"x": 8.574134826660156, "y": 5.637992953062142},
+                "position": {"x": 0, "y": 0, "z": 0}
+            },
+            "secondaryColliders": []
+        },
+        "stringLights": {
+            "collider": {
+                "type": "cylinder",
+                "size": {"x": 1.8645608121671293, "y": 19.231245735523494},
+                "position": {"x": 0, "y": 0, "z": 0}
+            },
+            "secondaryColliders": []
+        },
+        "Stove1": {
+            "collider": {
+                "type": "cylinder",
+                "size": {"x": 0.556924741819371, "y": 0.380380779504776},
+                "position": {"x": 0, "y": 0, "z": 0}
+            },
+            "secondaryColliders": []
+        },
+        "stall": {
+            "collider": {
+                "type": "cuboid",
+                "size": {"x": 2.9987483844194895, "y": 2.2821033477021335, "z": 1.051902414089656},
+                "position": {"x": 0, "y": 0, "z": 0}
+            },
+            "secondaryColliders": []
+        },
+        "Shroom4": {
+            "collider": {
+                "type": "cylinder",
+                "size": {"x": 0.3376884776118705, "y": 0.9396247792933761},
+                "position": {"x": 0.039266050232759725, "y": 0.46981238964668803, "z": -0.05522266357817607}
+            },
+            "secondaryColliders": [],
+            "scale": [13.818116246730824, 13.818116246730824, 13.818116246730824]
+        },
+        "Bush_1": {
+            "collider": {
+                "type": "cylinder",
+                "size": {"x": 1.3284285552799702, "y": 1.2417479236661597},
+                "position": {"x": 0, "y": 0.6208739618330799, "z": 0}
+            },
+            "secondaryColliders": []
+        },
+        "Bush_2": {
+            "collider": {
+                "type": "cylinder",
+                "size": {"x": 1.3460079208016396, "y": 1.11056375913478},
+                "position": {"x": 0, "y": 0.55528187956739, "z": 0}
+            },
+            "secondaryColliders": []
+        },
+        "Rock_1": {
+            "collider": {
+                "type": "cuboid",
+                "size": {"x": 0.48532288055866957, "y": 0.8777499584590621, "z": 0.4667483550771794},
+                "position": {"x": 0, "y": 0.43887497922953106, "z": -0.018496417541011}
+            },
+            "secondaryColliders": []
+        },
+        "Rock_2": {
+            "collider": {
+                "type": "cuboid",
+                "size": {"x": 0.5613724235445261, "y": 0.6456158307187169, "z": 0.5650293249229764},
+                "position": {"x": 0, "y": 0.32280791535935843, "z": 0}
+            },
+            "secondaryColliders": []
+        },
+        "Rock_3": {
+            "collider": {
+                "type": "cuboid",
+                "size": {"x": 0.546636793688974, "y": 0.675989960644131, "z": 0.5884594013437833},
+                "position": {"x": -0.023967215951310378, "y": 0.3379949803220655, "z": 0.062848567915394}
+            },
+            "secondaryColliders": []
+        },
+        "Rock_4": {
+            "collider": {
+                "type": "cuboid",
+                "size": {"x": 0.7435695733875036, "y": 0.783637504818807, "z": 1.2505156048613366},
+                "position": {"x": -0.11921312553422553, "y": 0.3918187524094035, "z": 0.028990301970206633}
+            },
+            "secondaryColliders": []
+        },
+        "bookshelf": {
+            "collider": {
+                "type": "cuboid",
+                "size": {"x": 4, "y": 3, "z": 0.7209772169589996},
+                "position": {"x": 0, "y": 1.5, "z": 0}
+            },
+            "secondaryColliders": []
+        },
+        "Gate_Vines": {
+            "collider": {
+                "type": "cuboid",
+                "size": {"x": 90.7874755859375, "y": 43.94308090209961, "z": 6.456006671835542},
+                "position": {"x": 0, "y": 21.971540451049805, "z": -5.293909064386851}
+            },
+            "secondaryColliders": []
+        },
+        "Rock_5": {
+            "collider": {
+                "type": "cuboid",
+                "size": {"x": 0.6631902884691954, "y": 0.6527829520391176, "z": 0.9147827548733418},
+                "position": {"x": 0, "y": 0, "z": 0}
+            },
+            "secondaryColliders": []
+        },
+        "Rock_6": {
+            "collider": {
+                "type": "cuboid",
+                "size": {"x": 0.9120303438976407, "y": 0.707818401461896, "z": 1.1419510885374833},
+                "position": {"x": -0.028298440567318395, "y": 0.353909200730948, "z": -0.03684545692714311}
+            },
+            "secondaryColliders": []
+        },
+        "Rock_7": {
+            "collider": {
+                "type": "cuboid",
+                "size": {"x": 0.8755458984524012, "y": 0.8493813979007273, "z": 1.0982701051582064},
+                "position": {"x": -0.0689374397410148, "y": 0.42469069895036365, "z": 0.044901799179769}
+            },
+            "secondaryColliders": []
+        },
+        "Rock_Moss_1": {
+            "collider": {
+                "type": "cuboid",
+                "size": {"x": 0.48532283399254084, "y": 0.9500334868986825, "z": 0.4667483536921435},
+                "position": {"x": 0.04130214746823921, "y": 0.47501674344934125, "z": 0.022011347614343063}
+            },
+            "secondaryColliders": []
+        },
+        "Rock_Moss_2": {
+            "collider": {
+                "type": "cuboid",
+                "size": {"x": 0.6125458981841803, "y": 0.69175400257326, "z": 0.6504263475817558},
+                "position": {"x": 0.037908406941816936, "y": 0.34587700128663, "z": 0.00409337582912267}
+            },
+            "secondaryColliders": []
+        },
+        "Rock_Moss_3": {
+            "collider": {
+                "type": "cuboid",
+                "size": {"x": 0.738359079696238, "y": 0.5567014501903923, "z": 0.802583560200832},
+                "position": {"x": -0.062476025411118324, "y": 0.27835072509519615, "z": 0.0938491968878182}
+            },
+            "secondaryColliders": [],
+            "scale": [18.532083815914703, 18.532083815914703, 18.532083815914703]
+        },
+        "Rock_Moss_4": {
+            "collider": {
+                "type": "cuboid",
+                "size": {"x": 0.7435695733875036, "y": 0.783637504818807, "z": 1.2505156048613366},
+                "position": {"x": -0.08517290705439037, "y": 0.3918187524094035, "z": 0.010664094741745206}
+            },
+            "secondaryColliders": []
+        },
+        "Rock_Moss_5": {
+            "collider": {
+                "type": "cuboid",
+                "size": {"x": 0.6631903117522597, "y": 0.5767394161028914, "z": 0.9147827724461335},
+                "position": {"x": 0, "y": 0.2883697080514457, "z": 0}
+            },
+            "secondaryColliders": []
+        },
+        "Rock_Moss_6": {
+            "collider": {
+                "type": "cuboid",
+                "size": {"x": 0.9120303438976407, "y": 0.7078183998280194, "z": 1.141951084511223},
+                "position": {"x": -0.03178423452108786, "y": 0.3539091999140097, "z": -0.07857462531848083}
+            },
+            "secondaryColliders": []
+        },
+        "Rock_Moss_7": {
+            "collider": {
+                "type": "cuboid",
+                "size": {"x": 0.8755458984524012, "y": 0.7739007616518851, "z": 1.0982700822916285},
+                "position": {"x": -0.11810531290399146, "y": 0.3869503808259426, "z": 0.0379603271032094}
+            },
+            "secondaryColliders": []
+        },
+        "Shroom1": {
+            "collider": {
+                "type": "cylinder",
+                "size": {"x": 0.32562191699654963, "y": 0.9827203410770058},
+                "position": {"x": 0, "y": 0, "z": 0}
+            },
+            "secondaryColliders": [],
+            "scale": [16.094060158835187, 16.094060158835187, 16.094060158835187]
+        },
+        "Shroom2": {
+            "collider": {
+                "type": "cylinder",
+                "size": {"x": 0.2158863720231312, "y": 0.8184457404759866},
+                "position": {"x": 0, "y": 0, "z": 0}
+            },
+            "secondaryColliders": [],
+            "scale": [18.714556521336355, 18.714556521336355, 18.714556521336355]
+        },
+        "Shroom3": {
+            "collider": {
+                "type": "cylinder",
+                "size": {"x": 0.19549070457223608, "y": 0.6955132281484587},
+                "position": {"x": 0, "y": 0, "z": 0}
+            },
+            "secondaryColliders": [],
+            "scale": [32.876399072772365, 32.876399072772365, 32.876399072772365]
+        },
+        "SM_Env_RicePlant_02": { "scale": [7.32465025324488, 7.32465025324488, 7.32465025324488] },
+        "SM_Env_RicePlant_01": { "scale": [13.0771021591412, 13.0771021591412, 13.0771021591412] },
+        "Lamp2": {
+            "collider": {
+                "type": "cylinder",
+                "size": {"x": 0.24907610103115568, "y": 1},
+                "position": {"x": 0, "y": 0.5, "z": 0}
+            },
+            "secondaryColliders": []
+        },
+        "SM_Env_Reeds_02": { "scale": [11.018394196126424, 11.018394196126424, 11.018394196126424] },
+        "SM_Env_Reeds_01": { "scale": [11.952287573641675, 11.952287573641675, 11.952287573641675] }
+    },
+    "characters": {
+        "ALICE_animated": {
+            "collider": {
+                "type": "capsule",
+                "size": {"x": 0.8368981281629142, "y": 0.9294266879551364},
+                "position": {"x": 0, "y": 0, "z": 0}
+            },
+            "secondaryColliders": []
+        },
+        "Archibald_animated": {
+            "collider": {
+                "type": "capsule",
+                "size": {"x": 1.0398870626294285, "y": 1.2380136734914515},
+                "position": {"x": 0, "y": 0, "z": 0}
+            },
+            "secondaryColliders": []
+        },
+        "Armabee": {
+            "collider": {
+                "type": "capsule",
+                "size": {"x": 1.4940540737162002, "y": 1.4280291981619901},
+                "position": {"x": 0, "y": 0, "z": 0}
+            },
+            "secondaryColliders": []
+        },
+        "Armabee_Evolved": {
+            "collider": {
+                "type": "capsule",
+                "size": {"x": 1.5345185120149525, "y": 1.2892788112208622},
+                "position": {"x": 0, "y": 0, "z": 0}
+            },
+            "secondaryColliders": []
+        },
+        "Batty_A": {
+            "collider": {
+                "type": "capsule",
+                "size": {"x": 0.28693832261352903, "y": 0.1660189242324695},
+                "position": {"x": 0, "y": 0, "z": 0}
+            },
+            "secondaryColliders": []
+        },
+        "Batty_B": { "collider": {"type": "link", "category": "characters", "model": "Batty_A"} },
+        "Batty_C": { "collider": {"type": "link", "category": "characters", "model": "Batty_A"} },
+        "Batty_D": { "collider": {"type": "link", "category": "characters", "model": "Batty_A"} },
+        "Big_Boar_A": {
+            "collider": {
+                "type": "ball",
+                "size": {"x": 4.799360581073247},
+                "position": {"x": 0, "y": 2.3996802905366237, "z": 0.46458229277951735}
+            },
+            "secondaryColliders": []
+        },
+        "Big_Boar_B": { "collider": {"type": "link", "category": "characters", "model": "Big_Boar_A"} },
+        "Big_Boar_C": { "collider": {"type": "link", "category": "characters", "model": "Big_Boar_A"} },
+        "BunnyClothed": {
+            "collider": {
+                "type": "capsule",
+                "size": {"x": 1.0597366004995494, "y": 1.3046036542946142},
+                "position": {"x": 0, "y": 1.182170127397082, "z": 0}
+            },
+            "secondaryColliders": []
+        },
+        "death_mage": {
+            "collider": {
+                "type": "capsule",
+                "size": {"x": 1.2707274850572186, "y": 2.689073106406764},
+                "position": {"x": 0, "y": 2.7886196832575565, "z": 0}
+            },
+            "secondaryColliders": []
+        },
+        "Devilu_A": {
+            "collider": {
+                "type": "capsule",
+                "size": {"x": 0.20536702809576063, "y": 0.19246809983413132},
+                "position": {"x": 0, "y": 0, "z": 0}
+            },
+            "secondaryColliders": []
+        },
+        "Devilu_B": { "collider": {"type": "link", "category": "characters", "model": "Devilu_A"} },
+        "Devilu_C": { "collider": {"type": "link", "category": "characters", "model": "Devilu_A"} },
+        "Forest_Butterfly_A": {
+            "collider": {
+                "type": "capsule",
+                "size": {"x": 1.6766774347638564, "y": 4.198519333295341},
+                "position": {"x": 0, "y": 0, "z": 0}
+            },
+            "secondaryColliders": []
+        },
+        "Forest_Butterfly_B": {
+            "collider": {"type": "link", "category": "characters", "model": "Forest_Butterfly_A"}
+        },
+        "Forest_Butterfly_C": {
+            "collider": {"type": "link", "category": "characters", "model": "Forest_Butterfly_A"}
+        },
+        "Forest_Butterfly_D": {
+            "collider": {"type": "link", "category": "characters", "model": "Forest_Butterfly_A"}
+        },
+        "Gloom": {
+            "collider": {
+                "type": "capsule",
+                "size": {"x": 0.7079304902696689, "y": 1.107436874043005},
+                "position": {"x": 0, "y": 0, "z": 0}
+            },
+            "secondaryColliders": []
+        },
+        "grandma": {
+            "collider": {
+                "type": "capsule",
+                "size": {"x": 0.8232383274146737, "y": 1.165224242711305},
+                "position": {"x": 0, "y": 0, "z": 0}
+            },
+            "secondaryColliders": []
+        },
+        "JACK_animated": {
+            "collider": {
+                "type": "capsule",
+                "size": {"x": 0.9760443387290467, "y": 0.9037238686452235},
+                "position": {"x": 0, "y": 0, "z": 0}
+            },
+            "secondaryColliders": []
+        },
+        "Magicbook_A": {
+            "collider": {
+                "type": "capsule",
+                "size": {"x": 0.4813161643162615, "y": 0.1427214882864703},
+                "position": {"x": 0, "y": 0, "z": 0}
+            },
+            "secondaryColliders": []
+        },
+        "Magicbook_B": { "collider": {"type": "link", "category": "characters", "model": "Magicbook_A"} },
+        "Magicbook_C": { "collider": {"type": "link", "category": "characters", "model": "Magicbook_A"} },
+        "Magicbook_D": { "collider": {"type": "link", "category": "characters", "model": "Magicbook_A"} },
+        "Magicbook_E": { "collider": {"type": "link", "category": "characters", "model": "Magicbook_A"} },
+        "MushroomAngryPA": {
+            "collider": {
+                "type": "capsule",
+                "size": {"x": 1.1372970255943207, "y": 0.08264948125873536},
+                "position": {"x": 0, "y": 0, "z": 0}
+            },
+            "secondaryColliders": []
+        },
+        "OWL_animated": {
+            "collider": {
+                "type": "capsule",
+                "size": {"x": 0.7162035703659065, "y": 0.9176488093378996},
+                "position": {"x": 0, "y": 0, "z": 0}
+            },
+            "secondaryColliders": []
+        },
+        "plant_chewer": {
+            "collider": {
+                "type": "capsule",
+                "size": {"x": 1.4393537591702987, "y": 0.0693808795360735},
+                "position": {"x": 0, "y": 0, "z": 0}
+            },
+            "secondaryColliders": []
+        },
+        "Platopo_A": {
+            "collider": {
+                "type": "ball",
+                "size": {"x": 0.9921678389265116},
+                "position": {"x": 0, "y": 0.4960839194632558, "z": 0.15442469227675404}
+            },
+            "secondaryColliders": []
+        },
+        "Platopo_B": { "collider": {"type": "link", "category": "characters", "model": "Platopo_A"} },
+        "Platopo_C": { "collider": {"type": "link", "category": "characters", "model": "Platopo_A"} },
+        "Pollen": {
+            "collider": {
+                "type": "capsule",
+                "size": {"x": 0.31769060306887953, "y": 0.8847787456477417},
+                "position": {"x": 0, "y": 0.27149256368580393, "z": 0}
+            },
+            "secondaryColliders": []
+        },
+        "Porin_A": {
+            "collider": {
+                "type": "capsule",
+                "size": {"x": 5.634222346229587, "y": 0.36015923488425666},
+                "position": {"x": 0, "y": 0, "z": 0}
+            },
+            "secondaryColliders": []
+        },
+        "Porin_B": { "collider": {"type": "link", "category": "characters", "model": "Porin_A"} },
+        "Porin_C": { "collider": {"type": "link", "category": "characters", "model": "Porin_A"} },
+        "Porin_D": { "collider": {"type": "link", "category": "characters", "model": "Porin_A"} },
+        "Porin_E": { "collider": {"type": "link", "category": "characters", "model": "Porin_A"} },
+        "Racco_A": {
+            "collider": {
+                "type": "capsule",
+                "size": {"x": 4.965283437562678, "y": 0.4510833820185676},
+                "position": {"x": 0, "y": 0, "z": 0}
+            },
+            "secondaryColliders": []
+        },
+        "Racco_B": { "collider": {"type": "link", "category": "characters", "model": "Racco_A"} },
+        "Racco_C": { "collider": {"type": "link", "category": "characters", "model": "Racco_A"} },
+        "Reaper": {
+            "collider": {
+                "type": "capsule",
+                "size": {"x": 1.0325239092121408, "y": 0.7939548242186951},
+                "position": {"x": 0, "y": 0, "z": 0}
+            },
+            "secondaryColliders": []
+        },
+        "Shaga_A": {
+            "collider": {
+                "type": "capsule",
+                "size": {"x": 4.812814371079478, "y": 0.23369865271532553},
+                "position": {"x": 0, "y": 0, "z": 0}
+            },
+            "secondaryColliders": []
+        },
+        "Shaga_B": { "collider": {"type": "link", "category": "characters", "model": "Shaga_A"} },
+        "Shaga_C": { "collider": {"type": "link", "category": "characters", "model": "Shaga_A"} },
+        "Snailo_A": {
+            "collider": { "type": "ball", "size": {"x": 6.176154330770166}, "position": {"x": 0, "y": 0, "z": 0} },
+            "secondaryColliders": []
+        },
+        "Snailo_B": { "collider": {"type": "link", "category": "characters", "model": "Snailo_A"} },
+        "Snailo_C": { "collider": {"type": "link", "category": "characters", "model": "Snailo_A"} },
+        "Snailo_D": { "collider": {"type": "link", "category": "characters", "model": "Snailo_A"} },
+        "soot_sprite": {
+            "collider": {
+                "type": "capsule",
+                "size": {"x": 1.0918757912959296, "y": 0.6635258793830872},
+                "position": {"x": 0, "y": 0, "z": 0}
+            },
+            "secondaryColliders": []
+        },
+        "spider_king": {
+            "collider": { "type": "ball", "size": {"x": 1.7147022290707918}, "position": {"x": 0, "y": 0, "z": 0} },
+            "secondaryColliders": []
+        },
+        "werewolf": {
+            "collider": {
+                "type": "capsule",
+                "size": {"x": 1.8576209370784147, "y": 0.9352618379651182},
+                "position": {"x": 0, "y": 0, "z": 0}
+            },
+            "secondaryColliders": []
+        }
+    },
+    "vegetation": {
+        "SM_Env_Bush_04"   : { "scale": [ 6.1036252404806115,  6.1036252404806115,  6.1036252404806115] },
+        "SM_Env_Bush_03"   : { "scale": [ 6.785853662632208 ,  6.785853662632208 ,  6.785853662632208 ] },
+        "SM_Env_Plant_01"  : { "scale": [ 7.570078775021493 ,  7.570078775021493 ,  7.570078775021493 ] },
+        "SM_Env_Bush_01"   : { "scale": [ 5.1771705817689435,  5.1771705817689435,  5.1771705817689435] },
+        "SM_Env_Flowers_01": { "scale": [16.161825825490055 , 16.161825825490055 , 16.161825825490055 ] },
+        "SM_Env_Flower_07" : { "scale": [ 1.395350520135079 ,  1.395350520135079 ,  1.395350520135079 ] },
+        "SM_Env_Flowers_02": { "scale": [ 9.131382930952954 ,  9.131382930952954 ,  9.131382930952954 ] },
+        "SM_Env_Bush_02"   : { "scale": [ 9.8686071754967   ,  9.8686071754967   ,  9.8686071754967   ] }
+    }
+}
