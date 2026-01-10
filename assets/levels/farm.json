@@ -191,7 +191,8 @@
             "scale": [1, 1, 1],
             "position": [46.89862787980538, 1.0658141036401503e-14, -43.536881092403284],
             "grounded": true,
-            "rotation": [0, 0, 0, 1]
+            "rotation": [0, 0, 0, 1],
+            "tags": []
         },
         "4db24dd3-7806-4879-b2e3-537381236fcb": {
             "category": "models",
@@ -432,9 +433,10 @@
             "category": "vegetation",
             "model": "SM_Env_Plant_01",
             "scale": [1, 1, 1],
-            "position": [54.52092011013558, 3.552713678800501e-15, -45.778268273971484],
+            "position": [54.52092011013558, 1.0658141036401503e-14, -45.778268273971484],
             "grounded": true,
-            "rotation": [0, 0, 0, 1]
+            "rotation": [0, 0, 0, 1],
+            "tags": []
         },
         "deddfc36-8901-4798-916f-ff4608a3625a": {
             "category": "vegetation",
@@ -714,14 +716,6 @@
             "model": "SM_Env_Flower_02",
             "scale": [1, 1, 1],
             "position": [-35.03222712553115, -1.4210854715202004e-14, 7.435144953963605],
-            "grounded": true,
-            "rotation": [0, 0, 0, 1]
-        },
-        "72aa2b38-5948-47b1-88e5-e82dd0c0e3f4": {
-            "category": "models",
-            "model": "box_large",
-            "scale": [1, 1, 1],
-            "position": [0, 0, 0],
             "grounded": true,
             "rotation": [0, 0, 0, 1]
         },
