@@ -1,0 +1,1 @@
+export type tags = 'obstacle'|'house'|'oven'|'door'|'lamp'
