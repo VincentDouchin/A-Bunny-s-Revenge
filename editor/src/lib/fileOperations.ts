@@ -1,8 +1,17 @@
 import type { AssetData, LevelData } from '../types'
 import { path } from '@tauri-apps/api'
 import { BaseDirectory, exists, mkdir, readDir, readTextFile, remove, writeTextFile } from '@tauri-apps/plugin-fs'
+import {
+	Formatter,
+} from 'fracturedjsonjs'
 import { get } from 'idb-keyval'
 
+const format = (data: any) => {
+	const formatter = new Formatter()
+	formatter.Options.MaxPropNamePadding = 0
+	const txt = formatter.Serialize(data)!
+	return formatter.Reformat(txt)
+}
 // Bounding box
 export const createFolder = async (folder: string) => {
 	const folderExists = await exists(folder, { baseDir: BaseDirectory.AppData })
@@ -32,7 +41,32 @@ export const loadBoundingBox = async (folder: string): Promise<Record<string, Re
 
 export const saveBoundingBox = async (folder: string, boundingBox: Record<string, Record<string, AssetData>>) => {
 	const filePath = await getBoundingBoxPath(folder)
-	await writeTextFile(filePath, JSON.stringify(boundingBox), { baseDir: BaseDirectory.AppData })
+	await writeTextFile(filePath, format(boundingBox), { baseDir: BaseDirectory.AppData })
+}
+
+// Tags
+const getTagsListPath = (folder: string, ext: 'json' | 'ts') => path.join(folder, 'assets', `tagsList.${ext}`)
+const saveTagsListTypes = async (folder: string, tags: string[]) => {
+	const tagsString = tags.map(t => `'${t}'`).join('|')
+	const fileContent = `export type tags = ${tagsString}`
+	const filePath = await getTagsListPath(folder, 'ts')
+	await writeTextFile(filePath, fileContent, { baseDir: BaseDirectory.AppData })
+}
+export const loadTagsList = async (folder: string) => {
+	const filePath = await getTagsListPath(folder, 'json')
+	const fileExists = await exists(filePath, { baseDir: BaseDirectory.AppData })
+	if (fileExists) {
+		const contents = await readTextFile(filePath, { baseDir: BaseDirectory.AppData })
+		return JSON.parse(contents) as { tags: string[] }
+	} else {
+		await writeTextFile(filePath, JSON.stringify({ tags: [] }), { baseDir: BaseDirectory.AppData })
+		return { tags: [] }
+	}
+}
+export const saveTagsList = async (folder: string, tags: string[]) => {
+	await saveTagsListTypes(folder, tags)
+	const filePath = await getTagsListPath(folder, 'json')
+	await writeTextFile(filePath, format({ tags }), { baseDir: BaseDirectory.AppData })
 }
 
 // Levels
@@ -43,7 +77,7 @@ export const loadLevels = async (folder: string) => {
 export const saveLevelFile = async (folder: string, levelName: string, level: LevelData) => {
 	return writeTextFile(
 		await path.join(await getLevelsDirPath(folder), `${levelName}.json`),
-		JSON.stringify(level),
+		format(level),
 		{ baseDir: BaseDirectory.AppData },
 	)
 }

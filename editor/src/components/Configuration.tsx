@@ -1,15 +1,17 @@
 import type { Atom } from 'solid-use/atom'
 import { faGithub } from '@fortawesome/free-brands-svg-icons'
-import { faCloudArrowUp, faDownload, faExclamationTriangle, faSpinner } from '@fortawesome/free-solid-svg-icons'
+import { faCloudArrowUp, faDownload, faExclamationTriangle, faFolderOpen, faSpinner } from '@fortawesome/free-solid-svg-icons'
 import { path } from '@tauri-apps/api'
 import { invoke } from '@tauri-apps/api/core'
 import { listen } from '@tauri-apps/api/event'
 import { appDataDir } from '@tauri-apps/api/path'
 import { BaseDirectory, exists, mkdir, remove } from '@tauri-apps/plugin-fs'
+import { openPath } from '@tauri-apps/plugin-opener'
 import Fa from 'solid-fa'
 import { createSignal, onCleanup, onMount, Show } from 'solid-js'
 import { css } from 'solid-styled'
 import atom from 'solid-use/atom'
+
 import { Modal } from './Modal'
 
 export default function GithubDeviceLogin({ onLoggedIn }: { onLoggedIn: () => void }) {
@@ -81,13 +83,16 @@ export default function GithubDeviceLogin({ onLoggedIn }: { onLoggedIn: () => vo
 		</div>
 	)
 }
-
 export function Configuration({ folder, reload, repoCloned, saveLevel }: {
 	folder: string
 	reload: (folder: string) => void
 	repoCloned: Atom<boolean>
 	saveLevel: () => Promise<void>
 }) {
+	const openFolder = async () => {
+		const dir = await appDataDir()
+		openPath(await path.join(dir, folder))
+	}
 	const authModalOpen = atom(false)
 
 	const status = atom<'cloning' | 'done' | null>(null)
@@ -213,27 +218,7 @@ export function Configuration({ folder, reload, repoCloned, saveLevel }: {
 		gap: 0.5rem;
 		place-items:center;
 	}
-	.modal-container{
-		position: fixed;
-		margin: auto;
-		inset: 0;
-		pointer-events: none;
-	}
-	.modal{
-		margin: auto;
-		width: 50dvw;
-		top: 20dvh;
-		z-index: 1;
-		pointer-events: all;
-		background: var(--color-1);
-		position: relative
-	}
-	.modal-content{
-		display: grid;
-		grid-template-columns: 2fr 5fr;
-		gap: 2rem;
-		padding: 2rem;
-	}
+
 	.close-button{
 		position: absolute;
 		top:0.5rem;
@@ -253,13 +238,16 @@ export function Configuration({ folder, reload, repoCloned, saveLevel }: {
 	}
 	.config-buttons{
 		display: grid;
-		grid-template-columns: 1fr 1fr 1fr
+		grid-template-columns: 1fr 1fr 1fr 1fr;
 	}
 	`
+
 	return (
 		<>
 			<section class="config-buttons">
-
+				<button title="open folder" onClick={openFolder}>
+					<Fa size="lg" icon={faFolderOpen}></Fa>
+				</button>
 				<button onClick={pushChanges} title="Upload changes">
 					<Fa size="lg" icon={faCloudArrowUp}></Fa>
 				</button>

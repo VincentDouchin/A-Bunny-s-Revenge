@@ -1,4 +1,4 @@
-import type { Accessor } from 'solid-js'
+import type { Accessor, Setter } from 'solid-js'
 import type { Atom } from 'solid-use/atom'
 import type { Object3D } from 'three'
 import type { getThumbnailRenderer } from '../../../src/lib/thumbnailRenderer'
@@ -11,14 +11,14 @@ import { css } from 'solid-styled'
 import atom from 'solid-use/atom'
 import { loadImage } from '../../../src/global/assetLoaders'
 
-export function EntitySelector({ selectedCategory, entities, selectedAsset, mode, thumbnailRenderer, boundingBox, assetInMap }: {
+export function EntitySelector({ selectedCategory, entities, selectedAsset, setMode, thumbnailRenderer, boundingBox, assetInMap }: {
 	selectedCategory: Atom<string | null>
 	thumbnailRenderer: ReturnType<typeof getThumbnailRenderer>
 	selectedAsset: Atom<string | null>
 	entities: Record<string, Record<string, Object3D>>
 	boundingBox: Record<string, Record<string, AssetData>>
 	model: Accessor<Object3D | null>
-	mode: Atom<'level' | 'entity'>
+	setMode: Setter<'level' | 'entity'>
 	assetInMap: Accessor<string | null>
 }) {
 	const tabs = createMemo(() => Object.keys(entities).toSorted((a, b) => a.localeCompare(b)))
@@ -32,7 +32,7 @@ export function EntitySelector({ selectedCategory, entities, selectedAsset, mode
 	})
 
 	const editEntity = (category: string, asset: string) => {
-		mode('entity')
+		setMode('entity')
 		selectedCategory(category)
 		selectedAsset(asset)
 	}

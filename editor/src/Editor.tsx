@@ -1,24 +1,29 @@
+import type { tags } from '@assets/tagsList'
 import type { Atom } from 'solid-use/atom'
 import type { BufferGeometry, Material, Vec2 } from 'three'
 import type { AssetData, LevelData, LevelEntity } from './types'
+
 import { init, World } from '@dimforge/rapier3d-compat'
-
 import { faArrowRotateBack, faArrowsRotate, faArrowsUpDownLeftRight, faEarth, faLock, faLockOpen, faMaximize } from '@fortawesome/free-solid-svg-icons'
-import { trackDeep } from '@solid-primitives/deep'
-import { createScheduled, debounce } from '@solid-primitives/scheduled'
+import { trackDeep, trackStore } from '@solid-primitives/deep'
+import { debounce } from '@solid-primitives/scheduled'
+import { makePersisted } from '@solid-primitives/storage'
 import { get, set } from 'idb-keyval'
-import Fa from 'solid-fa'
-import { createEffect, createMemo, on, onCleanup, onMount, Show } from 'solid-js'
 
+import Fa from 'solid-fa'
+import { batch, createEffect, createMemo, createSignal, For, on, onCleanup, onMount, Show } from 'solid-js'
 import { createMutable, modifyMutable, reconcile, unwrap } from 'solid-js/store'
+import { Portal } from 'solid-js/web'
 import { css } from 'solid-styled'
 import atom from 'solid-use/atom'
 import { AmbientLight, BoxGeometry, CanvasTexture, ConeGeometry, CylinderGeometry, GridHelper, Group, Mesh, MeshBasicMaterial, MeshStandardMaterial, Object3D, PerspectiveCamera, PlaneGeometry, Quaternion, Raycaster, Scene, SphereGeometry, Vector2, Vector3, WebGLRenderer } from 'three'
 import { MapControls } from 'three/examples/jsm/controls/MapControls'
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls'
 import { TransformControls } from 'three/examples/jsm/controls/TransformControls'
+import { CSS2DObject, CSS2DRenderer } from 'three/examples/jsm/renderers/CSS2DRenderer'
 import { clone } from 'three/examples/jsm/utils/SkeletonUtils'
 import { generateUUID } from 'three/src/math/MathUtils'
+import { doorSide } from '@/states/game/doorModel'
 import { loadImage } from '../../src/global/assetLoaders'
 import { loadAssets } from '../../src/global/assets'
 import { RapierDebugRenderer } from '../../src/lib/debugRenderer'
@@ -37,7 +42,8 @@ import { MapEditor } from './components/MapEditor'
 import { RangeInput } from './components/RangeInput'
 import { Renderer } from './components/Renderer'
 import { SelectedEntityProps } from './components/SelectedEntityProps'
-import { createFolder, isRepoCloned, loadBoundingBox, loadLevel, loadLevels, saveBoundingBox, saveLevelFile } from './lib/fileOperations'
+import { Tags } from './components/Tags'
+import { createFolder, isRepoCloned, loadBoundingBox, loadLevel, loadLevels, loadTagsList, saveBoundingBox, saveLevelFile, saveTagsList } from './lib/fileOperations'
 
 function createArrowMesh() {
 	const arrow = new Group()
@@ -72,10 +78,14 @@ export function Editor() {
 
 	const folder = 'A-Bunny-s-Revenge'
 
+	const tagsList = atom<string[]>([])
+
 	const thumbnailRenderer = getThumbnailRenderer(128, 1.3)
-	const mode = atom<'level' | 'entity'>('level')
+	const [mode, setMode] = makePersisted(createSignal<'level' | 'entity'>('level'))
 	const renderer = new WebGLRenderer({ alpha: true })
-	renderer.domElement.classList.add('level-renderer')
+	const cssRenderer = new CSS2DRenderer()
+	renderer.domElement.classList.add('renderer', 'level-renderer')
+	cssRenderer.domElement.classList.add('renderer', 'css-renderer')
 	renderer.setClearColor(0x222222)
 	const scene = new Scene()
 	const camera = new PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000)
@@ -85,6 +95,7 @@ export function Editor() {
 
 	const levelEntitiesData = createMutable<Record<string, LevelEntity>>({})
 	const levelEntities: Record<string, Object3D> = {}
+	const tagsContainers = createMutable<Record<string, CSS2DObject>>({})
 	const selectedId = atom<string | null>(null)
 	const transformControls = new TransformControls(camera, renderer.domElement)
 	const transformControlsMode = atom<'translate' | 'scale' | 'rotate'>('translate')
@@ -156,6 +167,35 @@ export function Editor() {
 	}
 	let prevModel: Object3D | null = null
 
+	const tags = atom<tags[]>([])
+	const localTags = atom<tags[]>([])
+	createEffect(on(selectedId, (id) => {
+		if (id) {
+			const entity = levelEntitiesData[id]
+			const globalTags = boundingBox?.[entity.category]?.[entity.model]?.tags
+			tags(globalTags || [])
+			localTags(entity.tags ?? [])
+		} else {
+			tags([])
+		}
+	}))
+	createEffect(on(tags, (tagsValue) => {
+		const id = selectedId()
+		if (id) {
+			const entity = levelEntitiesData[id]
+			boundingBox[entity.category] ??= {}
+			boundingBox[entity.category][entity.model] ??= {}
+			boundingBox[entity.category][entity.model].tags = tagsValue
+		}
+	}))
+	createEffect(on(localTags, (localTagsValue) => {
+		const id = selectedId()
+		if (id) {
+			const entity = levelEntitiesData[id]
+			entity.tags = localTagsValue
+		}
+	}))
+
 	const openEditor = atom<null | string>(null)
 	const drawing = atom<boolean>(false)
 	createEffect<'level' | 'entity'>((prev) => {
@@ -183,9 +223,15 @@ export function Editor() {
 		}
 		return mode()
 	}, mode())
+	let isGrounding = false
+
 	const groundEntity = (id: string | null) => {
+		if (isGrounding) return // Prevent recursive calls
+
 		const scale = displacementScale()
 		if (id && levelEntities[id] && levelEntitiesData[id].grounded && scale) {
+			isGrounding = true // Set flag
+
 			const pos = levelEntities[id].position
 			const ray = new Raycaster(pos.clone().add(new Vector3(0, 1000, 0)), new Vector3(0, -1, 0), 1, 2000)
 			const intersection = ray.intersectObject(groundMesh)?.[0]
@@ -194,7 +240,6 @@ export function Editor() {
 			}
 			for (const repetition of Object.values(repetitions?.[id] ?? {})) {
 				const origin = new Vector3()
-
 				repetition.getWorldPosition(origin)
 				origin.setY(1000)
 				const ray = new Raycaster(origin, new Vector3(0, -1, 0), 0.1, 2000)
@@ -204,6 +249,8 @@ export function Editor() {
 					repetition.position.setY(int.point.y)
 				}
 			}
+
+			isGrounding = false // Clear flag
 		}
 	}
 
@@ -288,10 +335,11 @@ export function Editor() {
 		const trees = getTrees(models, hCanvas, tCanvas, 10, scale)
 		const newTreeGroup = new Group()
 		for (const [generator] of trees) {
-			group.add(generator.process())
+			newTreeGroup.add(generator.process())
 		}
 		treeGroup?.removeFromParent()
 		treeGroup = newTreeGroup
+		group.add(treeGroup)
 	})
 
 	createEffect(() => {
@@ -509,6 +557,9 @@ export function Editor() {
 				cloned.position.fromArray(entityData.position)
 				cloned.rotation.setFromQuaternion(new Quaternion().fromArray(entityData.rotation))
 				cloned.scale.copy(new Vector3(...entityData.scale).multiply(getGlobalScale(id)))
+				const obj = new CSS2DObject(document.createElement('div'))
+				tagsContainers[id] = obj
+				cloned.add(obj)
 				group.add(cloned)
 
 				levelEntities[id] = cloned
@@ -554,44 +605,46 @@ export function Editor() {
 			removeEntity(id)
 		}
 		const levelData = await loadLevel(folder, levelName)
-		displacementScale(levelData.displacementScale)
-		heightMap(levelData.heightMap)
-		treeMap(levelData.treeMap)
-		pathMap(levelData.pathMap)
-		waterMap(levelData.waterMap)
-		grassMap(levelData.grassMap)
-		heightMapSource(levelData.heightMap)
-		treeMapSource(levelData.treeMap)
-		pathMapSource(levelData.pathMap)
-		waterMapSource(levelData.waterMap)
-		grassMapSource(levelData.grassMap)
+		batch(async () => {
+			displacementScale(levelData.displacementScale)
+			heightMap(levelData.heightMap)
+			treeMap(levelData.treeMap)
+			pathMap(levelData.pathMap)
+			waterMap(levelData.waterMap)
+			grassMap(levelData.grassMap)
+			heightMapSource(levelData.heightMap)
+			treeMapSource(levelData.treeMap)
+			pathMapSource(levelData.pathMap)
+			waterMapSource(levelData.waterMap)
+			grassMapSource(levelData.grassMap)
 
-		selectedLevel(levelName)
-		const size = new Vector2(levelData.sizeX, levelData.sizeY)
-		levelSize(size)
-		waterCanvas(imgToCanvas(await loadImage(levelData.waterMap)).canvas)
-		heightCanvas(imgToCanvas(await loadImage(levelData.heightMap)).canvas)
-		treeCanvas(imgToCanvas(await loadImage(levelData.treeMap)).canvas)
-		pathCanvas(imgToCanvas(await loadImage(levelData.pathMap)).canvas)
-		grassCanvas(imgToCanvas(await loadImage(levelData.grassMap)).canvas)
-		orbitControls.enabled = false
-		mapControls.enabled = true
-		scene.add(camera)
-		camera.lookAt(new Vector3())
-		camera.updateProjectionMatrix()
+			selectedLevel(levelName)
+			const size = new Vector2(levelData.sizeX, levelData.sizeY)
+			levelSize(size)
+			waterCanvas(imgToCanvas(await loadImage(levelData.waterMap)).canvas)
+			heightCanvas(imgToCanvas(await loadImage(levelData.heightMap)).canvas)
+			treeCanvas(imgToCanvas(await loadImage(levelData.treeMap)).canvas)
+			pathCanvas(imgToCanvas(await loadImage(levelData.pathMap)).canvas)
+			grassCanvas(imgToCanvas(await loadImage(levelData.grassMap)).canvas)
+			orbitControls.enabled = false
+			mapControls.enabled = true
+			scene.add(camera)
+			camera.lookAt(new Vector3())
+			camera.updateProjectionMatrix()
 
-		scene.clear()
-		scene.add(group)
-		groundMesh.geometry = setDisplacement(size, heightCanvas()!, waterCanvas()!, levelData.displacementScale)
-		pointerMesh.geometry = setDisplacement(size, heightCanvas()!, waterCanvas()!, levelData.displacementScale)
+			scene.clear()
+			scene.add(group)
+			groundMesh.geometry = setDisplacement(size, heightCanvas()!, waterCanvas()!, levelData.displacementScale)
+			pointerMesh.geometry = setDisplacement(size, heightCanvas()!, waterCanvas()!, levelData.displacementScale)
 
-		modifyMutable(levelEntitiesData, reconcile(levelData.entities))
-		mode('level')
-		setTimeout(() => {
-			for (const id in levelEntitiesData) {
-				updateEntity(id)
-			}
-		}, 10)
+			modifyMutable(levelEntitiesData, reconcile(levelData.entities))
+			setMode('level')
+			setTimeout(() => {
+				for (const id in levelEntitiesData) {
+					updateEntity(id)
+				}
+			}, 10)
+		})
 	}
 
 	createEffect(() => {
@@ -701,15 +754,18 @@ export function Editor() {
 			arrow.visible = false
 		}
 	})
-	const sheduled = createScheduled(fn => debounce(fn, 1000))
-	createEffect(() => {
+
+	const saveLevelLocal = debounce(() => {
 		const levelName = selectedLevel()
 		const data = levelData()
-
-		if (levelName && data && sheduled() && loaded()) {
+		if (levelName && data && loaded()) {
 			set(levelName, unwrap(data))
 		}
-	})
+	}, 1000)
+	createEffect(on(levelData, () => {
+		saveLevelLocal()
+	}))
+
 	const saveLevel = async () => {
 		const levelName = selectedLevel()
 		if (levelName) {
@@ -718,13 +774,19 @@ export function Editor() {
 		}
 	}
 
-	const saveBoundingBoxDebounced = createScheduled(fn => debounce(fn, 100))
-	createEffect(() => {
-		trackDeep(boundingBox)
-		if (saveBoundingBoxDebounced() && loaded()) {
+	const saveBoundingBoxDebounced = debounce(() => {
+		if (loaded()) {
 			saveBoundingBox(folder, boundingBox)
 		}
+	}, 500)
+	createEffect(() => {
+		trackStore(boundingBox)
+		saveBoundingBoxDebounced()
 	})
+	const saveTagsListfn = (tags: string[]) => {
+		tagsList(tags)
+		saveTagsList(folder, tags)
+	}
 
 	const fetchLevels = async (folder: string) => {
 		const dirs = await loadLevels(folder)
@@ -736,6 +798,10 @@ export function Editor() {
 	const fetchBoundingBox = async (folder: string) => {
 		const data = await loadBoundingBox(folder)
 		modifyMutable(boundingBox, reconcile(data))
+	}
+	const fetchTagsList = async (folder: string) => {
+		const { tags } = await loadTagsList(folder)
+		tagsList(tags)
 	}
 
 	const repoCloned = atom(false)
@@ -751,11 +817,20 @@ export function Editor() {
 		if (repo) {
 			await fetchBoundingBox(folder)
 			await fetchLevels(folder)
+			await fetchTagsList(folder)
 			loaded(true)
 		}
 	}
 
 	onMount(async () => {
+		const marker = new Mesh(new SphereGeometry(3), new MeshBasicMaterial())
+		const arrow = new Mesh(new ConeGeometry(2, 5), new MeshBasicMaterial({ color: 0xFF0000 }))
+		arrow.position.set(0, 0, 3)
+		arrow.rotateX(Math.PI / 2)
+		marker.add(arrow)
+		const box = new Mesh(new BoxGeometry(1, 1), new MeshBasicMaterial({ color: 0xFF0000, transparent: true, opacity: 1 }))
+		const door = doorSide()
+		entities.markers = { box, marker, door }
 		assets = await loadAssets(thumbnailRenderer)
 		for (const key in assets) {
 			const category = assets[key as keyof typeof assets]
@@ -781,6 +856,7 @@ export function Editor() {
 		}
 		updateTempModelPosition()
 		renderer.render(scene, camera)
+		cssRenderer.render(scene, camera)
 	})
 
 	css/* css */`
@@ -827,6 +903,17 @@ export function Editor() {
 		display: flex;
 		gap: 0.5rem;
 	}
+	.tag{
+		padding: 0 .2rem;
+    	font-size: .7rem;
+		border-radius:0.1rem;
+	}
+	.global-tag{
+		background: var(--global-tag-color);
+	}
+	.entity-tag{
+		background: var(--entity-tag-color);
+	}
   	`
 
 	return (
@@ -841,27 +928,56 @@ export function Editor() {
 							repoCloned={repoCloned}
 							saveLevel={saveLevel}
 						/>
-						<LevelSelector
-							fetchLevels={fetchLevels}
-							levels={levels}
-							loadLevel={fetchLevel}
-							selectedLevel={selectedLevel}
-							folder={folder}
-						/>
-						<Show when={mode() === 'level'}>
-							<LevelProps
-								levelSize={levelSize}
+						<Show when={!selectedId()}>
+							<LevelSelector
+								fetchLevels={fetchLevels}
+								levels={levels}
+								loadLevel={fetchLevel}
+								selectedLevel={selectedLevel}
+								folder={folder}
 							/>
-
+						</Show>
+						<Show when={mode() === 'level'}>
+							<Show when={!selectedId()}>
+								<LevelProps
+									levelSize={levelSize}
+								/>
+							</Show>
+							<Show when={selectedId()}>
+								<Tags tagsList={tagsList} tags={localTags} saveTagsList={saveTagsListfn} global={false}></Tags>
+								<Tags tagsList={tagsList} tags={tags} saveTagsList={saveTagsListfn}></Tags>
+							</Show>
 							<EntityList
 								selectedId={selectedId}
 								hoveredEntity={hoveredEntity}
 								levelEntitiesData={levelEntitiesData}
 								removeEntity={removeEntity}
 							/>
+							<For each={Object.entries(tagsContainers)}>
+								{([id, el]) => {
+									const entity = levelEntitiesData[id]
+									const globalTags = createMemo(() => boundingBox?.[entity.category]?.[entity.model]?.tags)
+									const entityTags = createMemo(() => levelEntitiesData[id].tags)
+									if (globalTags() || entityTags()) {
+										return (
+											<Portal mount={el.element}>
+												<For each={globalTags()}>
+													{tag => <div class="tag global-tag">{tag}</div>}
+												</For>
+												<For each={entityTags()}>
+													{tag => <div class="tag entity-tag">{tag}</div>}
+												</For>
+											</Portal>
+										)
+									}
+									return <></>
+								}}
+							</For>
 						</Show>
 						<Show when={mode() === 'entity'}>
 							<EntityProps
+								saveTagsList={saveTagsListfn}
+								tagsList={tagsList}
 								debugRenderer={debugRenderer}
 								transformControlsMode={transformControlsMode}
 								boundingBox={boundingBox}
@@ -888,7 +1004,7 @@ export function Editor() {
 						}}
 						onContextMenu={e => e.preventDefault()}
 					>
-						<Renderer renderer={renderer} camera={camera} onPointerDown={onPointerDown} />
+						<Renderer renderer={renderer} camera={camera} onPointerDown={onPointerDown} cssRenderer={cssRenderer} />
 
 						<Show when={selectedId() || mode() === 'entity'}>
 							<div class="mode-buttons">
@@ -989,6 +1105,7 @@ export function Editor() {
 										levelSize={size}
 										transparency={false}
 										blur={false}
+										realTimeUpdate={false}
 										defaultColor="#00FF00"
 										open={openEditor}
 										globalMode={globalMode}
@@ -1068,6 +1185,7 @@ export function Editor() {
 										levelSize={size}
 										transparency={false}
 										blur={false}
+										realTimeUpdate={false}
 										defaultColor="#00FF00"
 										open={openEditor}
 										globalMode={globalMode}
@@ -1082,7 +1200,7 @@ export function Editor() {
 					<EntitySelector
 						boundingBox={boundingBox}
 						thumbnailRenderer={thumbnailRenderer}
-						mode={mode}
+						setMode={setMode}
 						model={model}
 						entities={entities}
 						selectedCategory={selectedCategory}

@@ -1,3 +1,5 @@
+import type { tags } from '@assets/tagsList'
+
 export interface LevelEntity {
 	category: string
 	model: string
@@ -11,6 +13,7 @@ export interface LevelEntity {
 		spacingX: number
 		spacingY: number
 	}
+	tags?: tags[]
 }
 
 type Maps = 'heightMap' | 'treeMap' | 'pathMap' | 'waterMap' | 'grassMap'
@@ -38,4 +41,5 @@ export interface AssetData {
 	collider?: ColliderData
 	secondaryColliders?: ColliderData[]
 	scale?: [number, number, number]
+	tags?: tags[]
 }

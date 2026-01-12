@@ -5,22 +5,23 @@ import type { Mesh, Object3D } from 'three'
 import type { TransformControls } from 'three/examples/jsm/controls/TransformControls'
 import type { AssetData } from '../types'
 import type { RapierDebugRenderer } from '@/lib/debugRenderer'
-import { Ball, Capsule, ColliderDesc, Cuboid, Cylinder, RigidBodyDesc } from '@dimforge/rapier3d-compat'
 
+import { Ball, Capsule, ColliderDesc, Cuboid, Cylinder, RigidBodyDesc } from '@dimforge/rapier3d-compat'
 import { faA } from '@fortawesome/free-solid-svg-icons'
 import { trackDeep } from '@solid-primitives/deep'
 import Fa from 'solid-fa'
-import { createEffect, createMemo, For, on, onCleanup, onMount, Show } from 'solid-js'
-import { createMutable } from 'solid-js/store'
+import { createEffect, createMemo, For, on, onCleanup, onMount, Show, untrack } from 'solid-js'
+import { createMutable, unwrap } from 'solid-js/store'
 import { css } from 'solid-styled'
 
 import atom from 'solid-use/atom'
 import { Box3, Vector3 } from 'three'
 import { entries } from '../../../src/utils/mapFunctions'
+import { Tags } from './Tags'
 
 type Shape = 'cuboid' | 'ball' | 'capsule' | 'cylinder'
 
-export function EntityProps({ world, model, selectedCategory, selectedAsset, addTransformControls, boundingBox, entities, transformControlsMode, debugRenderer }: {
+export function EntityProps({ world, model, selectedCategory, selectedAsset, addTransformControls, boundingBox, entities, transformControlsMode, debugRenderer, tagsList, saveTagsList }: {
 	world: World
 	model: Accessor<Object3D | null>
 	selectedCategory: Accessor<string | null>
@@ -30,6 +31,8 @@ export function EntityProps({ world, model, selectedCategory, selectedAsset, add
 	entities: Record<string, Record<string, Object3D>>
 	transformControlsMode: Atom<'translate' | 'scale' | 'rotate'>
 	debugRenderer: RapierDebugRenderer
+	tagsList: Atom<string[]>
+	saveTagsList: (tags: string[]) => void
 }) {
 	const colliderShapes: Record<string, Shape | undefined> = {
 		None: undefined,
@@ -42,11 +45,13 @@ export function EntityProps({ world, model, selectedCategory, selectedAsset, add
 	const collider = world.createCollider(ColliderDesc.ball(1), body)
 	let dummy: Mesh | null = null
 	let transformControls: TransformControls | null = null
+
 	const size = createMutable({ x: 1, y: 1, z: 1 })
 	const position = createMutable({ x: 0, y: 0, z: 0 })
 	const selectedShape = atom<Shape | 'link' | undefined>(undefined)
 	const linkedCategory = atom<string | null>(null)
 	const linkedModel = atom<string | null>(null)
+	const tags = atom<string[]>([])
 
 	const sizeOffet = createMemo(() => {
 		switch (selectedShape()) {
@@ -57,25 +62,6 @@ export function EntityProps({ world, model, selectedCategory, selectedAsset, add
 		}
 		return null
 	})
-
-	createEffect(() => {
-		const y = sizeOffet()
-		if (y !== null) {
-			dummy?.position.setY(y)
-			body.setTranslation({ x: 0, y, z: 0 }, true)
-		}
-	})
-
-	const colliderShape = createMemo(() => {
-		switch (selectedShape()) {
-			case 'cuboid': return new Cuboid(size.x / 2, size.y / 2, size.z / 2)
-			case 'ball': return new Ball(size.x / 2)
-			case 'capsule':return new Capsule(size.y / 2, size.x / 2)
-			case 'cylinder':return new Cylinder(size.y / 2, size.x / 2)
-		}
-		return null
-	})
-
 	const updateDummy = () => {
 		if (dummy) {
 			if (transformControlsMode() === 'scale') {
@@ -91,7 +77,30 @@ export function EntityProps({ world, model, selectedCategory, selectedAsset, add
 		}
 	}
 
+	createEffect(() => {
+		const y = sizeOffet()
+		if (y !== null) {
+			transformControls?.removeEventListener('change', updateDummy)
+			dummy?.position.setY(y)
+			body.setTranslation({ x: 0, y, z: 0 }, true)
+			transformControls?.addEventListener('change', updateDummy)
+		}
+	})
+
+	const colliderShape = createMemo(() => {
+		switch (selectedShape()) {
+			case 'cuboid': return new Cuboid(size.x / 2, size.y / 2, size.z / 2)
+			case 'ball': return new Ball(size.x / 2)
+			case 'capsule':return new Capsule(size.y / 2, size.x / 2)
+			case 'cylinder':return new Cylinder(size.y / 2, size.x / 2)
+		}
+		return null
+	})
+
+	let loading = true
 	const setExistingBoundingBox = () => {
+		const b = untrack(() => boundingBox)
+		loading = true
 		selectedShape(undefined)
 
 		transformControls?.detach()
@@ -108,7 +117,9 @@ export function EntityProps({ world, model, selectedCategory, selectedAsset, add
 		size.y = 1
 		size.z = 1
 		if (category && asset) {
-			const box = boundingBox?.[category]?.[asset]?.collider
+			const entity = b?.[category]?.[asset]
+			const box = entity?.collider
+			tags(entity?.tags ? entity.tags : [])
 			if (box && box.type !== 'link') {
 				selectedShape(box.type)
 				size.x = box.size.x
@@ -136,7 +147,7 @@ export function EntityProps({ world, model, selectedCategory, selectedAsset, add
 		dummy = dummyMesh
 		transformControls = controls
 		transformControls.addEventListener('change', updateDummy)
-
+		loading = false
 		createEffect(() => {
 			const visible = Boolean(selectedShape())
 			if (transformControls) {
@@ -172,7 +183,9 @@ export function EntityProps({ world, model, selectedCategory, selectedAsset, add
 
 	createEffect(() => {
 		trackDeep(position)
-		body.setTranslation(position, true)
+		untrack(() => {
+			body.setTranslation(position, true)
+		})
 	})
 
 	createEffect(() => {
@@ -208,18 +221,17 @@ export function EntityProps({ world, model, selectedCategory, selectedAsset, add
 	})
 
 	const getColliderSize = (shape: Shape) => {
-		const { x, y, z } = size
 		switch (shape) {
-			case 'ball':return { x }
-			case 'cuboid':return { x, y, z }
-			case 'capsule':return { x, y }
-			case 'cylinder':return { x, y }
+			case 'ball':return { x: size.x }
+			case 'cuboid':return { x: size.x, y: size.y, z: size.z }
+			case 'capsule':return { x: size.x, y: size.y }
+			case 'cylinder':return { x: size.x, y: size.y }
 		}
 	}
 
-	const modelOptions = createMemo(() => {
+	const modelOptions = () => {
 		const linkedCategoryValue = linkedCategory()
-		if (linkedCategoryValue !== null) {
+		if (linkedCategoryValue !== null && selectedShape() === 'link') {
 			return Object.keys(entities[linkedCategoryValue])
 				.filter(model => boundingBox?.[linkedCategoryValue] && model in boundingBox?.[linkedCategoryValue] && boundingBox[linkedCategoryValue][model].collider?.type !== 'link')
 				.sort((a, b) => a.localeCompare(b))
@@ -235,39 +247,63 @@ export function EntityProps({ world, model, selectedCategory, selectedAsset, add
 				})
 		}
 		return <></>
-	})
+	}
 	createEffect(() => {
 		linkedCategory(selectedCategory())
 	})
 
-	createEffect(() => {
-		const category = selectedCategory()
-		const asset = selectedAsset()
-		const type = selectedShape()
-		const linkedCategoryValue = linkedCategory()
-		const linkedModelValue = linkedModel()
-		trackDeep(position)
-		if (category && asset && type) {
-			if (type === 'link') {
-				if (linkedCategoryValue && linkedModelValue) {
-					boundingBox[category][asset] = {
-						collider: {
-							type: 'link',
-							category: linkedCategoryValue,
-							model: linkedModelValue,
-						},
+	createEffect(
+		on(
+			() => [
+				selectedShape(),
+				linkedCategory(),
+				linkedModel(),
+				unwrap(position),
+				unwrap(size),
+				tags(),
+			],
+			() => {
+				if (loading) return
+
+				const category = selectedCategory()
+				const asset = selectedAsset()
+				const type = selectedShape()
+				const linkedCategoryValue = linkedCategory()
+				const linkedModelValue = linkedModel()
+				const p = unwrap(position)
+
+				if (category && asset && type) {
+					let newAssetData: AssetData | null = null
+
+					if (type === 'link') {
+						if (linkedCategoryValue && linkedModelValue) {
+							newAssetData = {
+								collider: {
+									type: 'link',
+									category: linkedCategoryValue,
+									model: linkedModelValue,
+								},
+								tags: tags(),
+							}
+						}
+					} else {
+						const sizeVal = getColliderSize(type as Shape)
+						newAssetData = {
+							collider: { type, size: sizeVal, position: p },
+							secondaryColliders: [],
+							scale: boundingBox[category]?.[asset]?.scale ?? undefined,
+							tags: tags(),
+						}
+					}
+
+					if (newAssetData) {
+						boundingBox[category][asset] = newAssetData!
 					}
 				}
-			} else {
-				const size = getColliderSize(type)
-				boundingBox[category] ??= {}
-				boundingBox[category][asset] = {
-					collider: { type, size: { ...size }, position: { ...position } },
-					secondaryColliders: [],
-				}
-			}
-		}
-	})
+			},
+			{ defer: loading },
+		),
+	)
 	onCleanup(() => {
 		world.removeRigidBody(body)
 	})
@@ -283,7 +319,7 @@ export function EntityProps({ world, model, selectedCategory, selectedAsset, add
 	`
 	return (
 		<>
-			<div>
+			<section>
 				<div class="title">Collision Box</div>
 				<div style="display: grid;grid-template-columns: 1fr auto auto">
 					<select onChange={e => selectedShape(e.target.value as Shape)}>
@@ -304,9 +340,7 @@ export function EntityProps({ world, model, selectedCategory, selectedAsset, add
 							Link
 						</option>
 					</select>
-
 					<Show when={selectedShape() !== undefined && selectedShape() !== 'link'}>
-
 						<button onClick={setAutoSize}><Fa icon={faA} /></button>
 					</Show>
 				</div>
@@ -324,7 +358,6 @@ export function EntityProps({ world, model, selectedCategory, selectedAsset, add
 								>
 									{category}
 								</option>
-
 							)}
 						</For>
 					</select>
@@ -336,7 +369,9 @@ export function EntityProps({ world, model, selectedCategory, selectedAsset, add
 						</option>
 					</select>
 				</Show>
-			</div>
+			</section>
+
+			<Tags tags={tags} tagsList={tagsList} saveTagsList={saveTagsList}></Tags>
 		</>
 	)
 }

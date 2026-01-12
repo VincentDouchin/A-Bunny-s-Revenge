@@ -193,7 +193,7 @@ export function MapEditor({
 				if (canvas && finalCtx && ctx && finalC) {
 					finalCtx.globalAlpha = transparencyValue() / 100
 					finalCtx.globalCompositeOperation = (mode() === 'brush' || eraseColor) ? 'source-over' : 'destination-out'
-					finalCtx.drawImage(canvas, 0, 0, levelSize().x, levelSize().y)
+					finalCtx.drawImage(ctx.canvas, 0, 0, levelSize().x, levelSize().y)
 					finalCtx.globalAlpha = 1
 					ctx.clearRect(0, 0, levelSize().x, levelSize().y)
 					dataUrl(finalC.toDataURL())
