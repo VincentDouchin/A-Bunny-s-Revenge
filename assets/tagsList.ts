@@ -1,1 +1,1 @@
-export type tags = 'obstacle'|'house'|'oven'|'door'|'lamp'
+export type tags = 'obstacle'|'house'|'oven'|'door'|'lamp'|'weaponStand'
