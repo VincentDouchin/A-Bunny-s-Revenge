@@ -162,7 +162,7 @@
             },
             "secondaryColliders": []
         },
-        "WoodLog": {"collider": {"type": "link", "category": "models", "model": "WoodLog_Moss"}},
+        "WoodLog": { "collider": {"type": "link", "category": "models", "model": "WoodLog_Moss"} },
         "WoodenSign2": {
             "collider": {
                 "type": "cuboid",
@@ -185,7 +185,8 @@
                 "size": {"x": 0.30152355686415294, "y": 0.4931696802377701},
                 "position": {"x": 0, "y": 0.24658484011888504, "z": 0}
             },
-            "secondaryColliders": []
+            "secondaryColliders": [],
+            "tags": {}
         },
         "trunk": {
             "collider": {
@@ -205,7 +206,7 @@
         },
         "TreeStump": {
             "collider": {"type": "link", "category": "models", "model": "TreeStump_Moss"},
-            "tags": {"weaponStand": true},
+            "tags": {},
             "scale": [22.634453186807235, 22.634453186807235, 22.634453186807235]
         },
         "table": {
@@ -438,8 +439,8 @@
             "scale": [32.876399072772365, 32.876399072772365, 32.876399072772365],
             "tags": {}
         },
-        "SM_Env_RicePlant_02": {"scale": [7.32465025324488, 7.32465025324488, 7.32465025324488]},
-        "SM_Env_RicePlant_01": {"scale": [13.0771021591412, 13.0771021591412, 13.0771021591412]},
+        "SM_Env_RicePlant_02": { "scale": [7.32465025324488, 7.32465025324488, 7.32465025324488] },
+        "SM_Env_RicePlant_01": { "scale": [13.0771021591412, 13.0771021591412, 13.0771021591412] },
         "Lamp2": {
             "collider": {
                 "type": "cylinder",
@@ -448,8 +449,8 @@
             },
             "secondaryColliders": []
         },
-        "SM_Env_Reeds_02": {"scale": [11.018394196126424, 11.018394196126424, 11.018394196126424]},
-        "SM_Env_Reeds_01": {"scale": [11.952287573641675, 11.952287573641675, 11.952287573641675]}
+        "SM_Env_Reeds_02": { "scale": [11.018394196126424, 11.018394196126424, 11.018394196126424] },
+        "SM_Env_Reeds_01": { "scale": [11.952287573641675, 11.952287573641675, 11.952287573641675] }
     },
     "characters": {
         "ALICE_animated": {
@@ -492,9 +493,9 @@
             },
             "secondaryColliders": []
         },
-        "Batty_B": {"collider": {"type": "link", "category": "characters", "model": "Batty_A"}},
-        "Batty_C": {"collider": {"type": "link", "category": "characters", "model": "Batty_A"}},
-        "Batty_D": {"collider": {"type": "link", "category": "characters", "model": "Batty_A"}},
+        "Batty_B": { "collider": {"type": "link", "category": "characters", "model": "Batty_A"} },
+        "Batty_C": { "collider": {"type": "link", "category": "characters", "model": "Batty_A"} },
+        "Batty_D": { "collider": {"type": "link", "category": "characters", "model": "Batty_A"} },
         "Big_Boar_A": {
             "collider": {
                 "type": "ball",
@@ -503,8 +504,8 @@
             },
             "secondaryColliders": []
         },
-        "Big_Boar_B": {"collider": {"type": "link", "category": "characters", "model": "Big_Boar_A"}},
-        "Big_Boar_C": {"collider": {"type": "link", "category": "characters", "model": "Big_Boar_A"}},
+        "Big_Boar_B": { "collider": {"type": "link", "category": "characters", "model": "Big_Boar_A"} },
+        "Big_Boar_C": { "collider": {"type": "link", "category": "characters", "model": "Big_Boar_A"} },
         "BunnyClothed": {
             "collider": {
                 "type": "capsule",
@@ -529,8 +530,8 @@
             },
             "secondaryColliders": []
         },
-        "Devilu_B": {"collider": {"type": "link", "category": "characters", "model": "Devilu_A"}},
-        "Devilu_C": {"collider": {"type": "link", "category": "characters", "model": "Devilu_A"}},
+        "Devilu_B": { "collider": {"type": "link", "category": "characters", "model": "Devilu_A"} },
+        "Devilu_C": { "collider": {"type": "link", "category": "characters", "model": "Devilu_A"} },
         "Forest_Butterfly_A": {
             "collider": {
                 "type": "capsule",
@@ -539,9 +540,15 @@
             },
             "secondaryColliders": []
         },
-        "Forest_Butterfly_B": {"collider": {"type": "link", "category": "characters", "model": "Forest_Butterfly_A"}},
-        "Forest_Butterfly_C": {"collider": {"type": "link", "category": "characters", "model": "Forest_Butterfly_A"}},
-        "Forest_Butterfly_D": {"collider": {"type": "link", "category": "characters", "model": "Forest_Butterfly_A"}},
+        "Forest_Butterfly_B": {
+            "collider": {"type": "link", "category": "characters", "model": "Forest_Butterfly_A"}
+        },
+        "Forest_Butterfly_C": {
+            "collider": {"type": "link", "category": "characters", "model": "Forest_Butterfly_A"}
+        },
+        "Forest_Butterfly_D": {
+            "collider": {"type": "link", "category": "characters", "model": "Forest_Butterfly_A"}
+        },
         "Gloom": {
             "collider": {
                 "type": "capsule",
@@ -574,10 +581,10 @@
             },
             "secondaryColliders": []
         },
-        "Magicbook_B": {"collider": {"type": "link", "category": "characters", "model": "Magicbook_A"}},
-        "Magicbook_C": {"collider": {"type": "link", "category": "characters", "model": "Magicbook_A"}},
-        "Magicbook_D": {"collider": {"type": "link", "category": "characters", "model": "Magicbook_A"}},
-        "Magicbook_E": {"collider": {"type": "link", "category": "characters", "model": "Magicbook_A"}},
+        "Magicbook_B": { "collider": {"type": "link", "category": "characters", "model": "Magicbook_A"} },
+        "Magicbook_C": { "collider": {"type": "link", "category": "characters", "model": "Magicbook_A"} },
+        "Magicbook_D": { "collider": {"type": "link", "category": "characters", "model": "Magicbook_A"} },
+        "Magicbook_E": { "collider": {"type": "link", "category": "characters", "model": "Magicbook_A"} },
         "MushroomAngryPA": {
             "collider": {
                 "type": "capsule",
@@ -610,8 +617,8 @@
             },
             "secondaryColliders": []
         },
-        "Platopo_B": {"collider": {"type": "link", "category": "characters", "model": "Platopo_A"}},
-        "Platopo_C": {"collider": {"type": "link", "category": "characters", "model": "Platopo_A"}},
+        "Platopo_B": { "collider": {"type": "link", "category": "characters", "model": "Platopo_A"} },
+        "Platopo_C": { "collider": {"type": "link", "category": "characters", "model": "Platopo_A"} },
         "Pollen": {
             "collider": {
                 "type": "capsule",
@@ -628,10 +635,10 @@
             },
             "secondaryColliders": []
         },
-        "Porin_B": {"collider": {"type": "link", "category": "characters", "model": "Porin_A"}},
-        "Porin_C": {"collider": {"type": "link", "category": "characters", "model": "Porin_A"}},
-        "Porin_D": {"collider": {"type": "link", "category": "characters", "model": "Porin_A"}},
-        "Porin_E": {"collider": {"type": "link", "category": "characters", "model": "Porin_A"}},
+        "Porin_B": { "collider": {"type": "link", "category": "characters", "model": "Porin_A"} },
+        "Porin_C": { "collider": {"type": "link", "category": "characters", "model": "Porin_A"} },
+        "Porin_D": { "collider": {"type": "link", "category": "characters", "model": "Porin_A"} },
+        "Porin_E": { "collider": {"type": "link", "category": "characters", "model": "Porin_A"} },
         "Racco_A": {
             "collider": {
                 "type": "capsule",
@@ -640,8 +647,8 @@
             },
             "secondaryColliders": []
         },
-        "Racco_B": {"collider": {"type": "link", "category": "characters", "model": "Racco_A"}},
-        "Racco_C": {"collider": {"type": "link", "category": "characters", "model": "Racco_A"}},
+        "Racco_B": { "collider": {"type": "link", "category": "characters", "model": "Racco_A"} },
+        "Racco_C": { "collider": {"type": "link", "category": "characters", "model": "Racco_A"} },
         "Reaper": {
             "collider": {
                 "type": "capsule",
@@ -658,15 +665,15 @@
             },
             "secondaryColliders": []
         },
-        "Shaga_B": {"collider": {"type": "link", "category": "characters", "model": "Shaga_A"}},
-        "Shaga_C": {"collider": {"type": "link", "category": "characters", "model": "Shaga_A"}},
+        "Shaga_B": { "collider": {"type": "link", "category": "characters", "model": "Shaga_A"} },
+        "Shaga_C": { "collider": {"type": "link", "category": "characters", "model": "Shaga_A"} },
         "Snailo_A": {
-            "collider": {"type": "ball", "size": {"x": 6.176154330770166}, "position": {"x": 0, "y": 0, "z": 0}},
+            "collider": { "type": "ball", "size": {"x": 6.176154330770166}, "position": {"x": 0, "y": 0, "z": 0} },
             "secondaryColliders": []
         },
-        "Snailo_B": {"collider": {"type": "link", "category": "characters", "model": "Snailo_A"}},
-        "Snailo_C": {"collider": {"type": "link", "category": "characters", "model": "Snailo_A"}},
-        "Snailo_D": {"collider": {"type": "link", "category": "characters", "model": "Snailo_A"}},
+        "Snailo_B": { "collider": {"type": "link", "category": "characters", "model": "Snailo_A"} },
+        "Snailo_C": { "collider": {"type": "link", "category": "characters", "model": "Snailo_A"} },
+        "Snailo_D": { "collider": {"type": "link", "category": "characters", "model": "Snailo_A"} },
         "soot_sprite": {
             "collider": {
                 "type": "capsule",
@@ -676,7 +683,7 @@
             "secondaryColliders": []
         },
         "spider_king": {
-            "collider": {"type": "ball", "size": {"x": 1.7147022290707918}, "position": {"x": 0, "y": 0, "z": 0}},
+            "collider": { "type": "ball", "size": {"x": 1.7147022290707918}, "position": {"x": 0, "y": 0, "z": 0} },
             "secondaryColliders": []
         },
         "werewolf": {
@@ -689,15 +696,15 @@
         }
     },
     "vegetation": {
-        "SM_Env_Bush_04"   : {"scale": [ 6.1036252404806115,  6.1036252404806115,  6.1036252404806115]            },
-        "SM_Env_Bush_03"   : {"scale": [ 6.785853662632208 ,  6.785853662632208 ,  6.785853662632208 ]            },
-        "SM_Env_Plant_01"  : {"scale": [ 7.570078775021493 ,  7.570078775021493 ,  7.570078775021493 ], "tags": {}},
-        "SM_Env_Bush_01"   : {"scale": [ 5.1771705817689435,  5.1771705817689435,  5.1771705817689435]            },
-        "SM_Env_Flowers_01": {"scale": [16.161825825490055 , 16.161825825490055 , 16.161825825490055 ]            },
-        "SM_Env_Flower_07" : {"scale": [ 1.395350520135079 ,  1.395350520135079 ,  1.395350520135079 ]            },
-        "SM_Env_Flowers_02": {"scale": [ 9.131382930952954 ,  9.131382930952954 ,  9.131382930952954 ], "tags": {}},
-        "SM_Env_Bush_02"   : {"scale": [ 9.8686071754967   ,  9.8686071754967   ,  9.8686071754967   ], "tags": {}},
-        "Bush_2"           : {                                                                          "tags": {}}
+        "SM_Env_Bush_04"   : { "scale": [ 6.1036252404806115,  6.1036252404806115,  6.1036252404806115]             },
+        "SM_Env_Bush_03"   : { "scale": [ 6.785853662632208 ,  6.785853662632208 ,  6.785853662632208 ]             },
+        "SM_Env_Plant_01"  : { "scale": [ 7.570078775021493 ,  7.570078775021493 ,  7.570078775021493 ], "tags": {} },
+        "SM_Env_Bush_01"   : { "scale": [ 5.1771705817689435,  5.1771705817689435,  5.1771705817689435]             },
+        "SM_Env_Flowers_01": { "scale": [16.161825825490055 , 16.161825825490055 , 16.161825825490055 ]             },
+        "SM_Env_Flower_07" : { "scale": [ 1.395350520135079 ,  1.395350520135079 ,  1.395350520135079 ]             },
+        "SM_Env_Flowers_02": { "scale": [ 9.131382930952954 ,  9.131382930952954 ,  9.131382930952954 ], "tags": {} },
+        "SM_Env_Bush_02"   : { "scale": [ 9.8686071754967   ,  9.8686071754967   ,  9.8686071754967   ], "tags": {} },
+        "Bush_2"           : {                                                                           "tags": {} }
     },
-    "markers": {"box": {"tags": {}}, "door": {"tags": {}}, "marker": {"tags": {}}}
+    "markers": { "box": {"tags": {}}, "door": {"tags": {}}, "marker": {"tags": {}} }
 }
