@@ -1,5 +1,6 @@
-import type { tags } from '@assets/tagsList'
+import type { Tags } from '@assets/tagsList'
 
+export type EditorTags = Record<string, true | string[]>
 export interface LevelEntity {
 	category: string
 	model: string
@@ -13,7 +14,7 @@ export interface LevelEntity {
 		spacingX: number
 		spacingY: number
 	}
-	tags?: tags[]
+	tags?: Partial<Tags>
 }
 
 type Maps = 'heightMap' | 'treeMap' | 'pathMap' | 'waterMap' | 'grassMap'
@@ -41,5 +42,5 @@ export interface AssetData {
 	collider?: ColliderData
 	secondaryColliders?: ColliderData[]
 	scale?: [number, number, number]
-	tags?: tags[]
+	tags?: Partial<Tags>
 }

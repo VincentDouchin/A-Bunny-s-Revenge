@@ -19,6 +19,7 @@ export function Modal(props: {
 		height: 100%;
 		display: grid;
 		place-items:center;
+		z-index: 5;
 	}
 	.modal{
 		margin: auto;

@@ -3,5 +3,5 @@
 	"compilerOptions": {
 		"outDir": "../dist/editor"
 	},
-	"include": ["src/**/*", "../src/**/*", "../../src/**/*"]
+	"include": ["src/**/*", "../src/**/*", "../../src/**/*", "../scripts/convertLevels.ts"]
 }

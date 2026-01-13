@@ -3,21 +3,21 @@ import type { Accessor } from 'solid-js'
 import type { Atom } from 'solid-use/atom'
 import type { Mesh, Object3D } from 'three'
 import type { TransformControls } from 'three/examples/jsm/controls/TransformControls'
-import type { AssetData } from '../types'
-import type { RapierDebugRenderer } from '@/lib/debugRenderer'
+import type { AssetData, EditorTags } from '../types'
 
+import type { RapierDebugRenderer } from '@/lib/debugRenderer'
 import { Ball, Capsule, ColliderDesc, Cuboid, Cylinder, RigidBodyDesc } from '@dimforge/rapier3d-compat'
 import { faA } from '@fortawesome/free-solid-svg-icons'
 import { trackDeep } from '@solid-primitives/deep'
 import Fa from 'solid-fa'
 import { createEffect, createMemo, For, on, onCleanup, onMount, Show, untrack } from 'solid-js'
 import { createMutable, unwrap } from 'solid-js/store'
-import { css } from 'solid-styled'
 
+import { css } from 'solid-styled'
 import atom from 'solid-use/atom'
 import { Box3, Vector3 } from 'three'
 import { entries } from '../../../src/utils/mapFunctions'
-import { Tags } from './Tags'
+import { TagsEditor } from './TagsEditor'
 
 type Shape = 'cuboid' | 'ball' | 'capsule' | 'cylinder'
 
@@ -31,8 +31,8 @@ export function EntityProps({ world, model, selectedCategory, selectedAsset, add
 	entities: Record<string, Record<string, Object3D>>
 	transformControlsMode: Atom<'translate' | 'scale' | 'rotate'>
 	debugRenderer: RapierDebugRenderer
-	tagsList: Atom<string[]>
-	saveTagsList: (tags: string[]) => void
+	tagsList: Atom<EditorTags>
+	saveTagsList: (tags: EditorTags) => void
 }) {
 	const colliderShapes: Record<string, Shape | undefined> = {
 		None: undefined,
@@ -51,7 +51,7 @@ export function EntityProps({ world, model, selectedCategory, selectedAsset, add
 	const selectedShape = atom<Shape | 'link' | undefined>(undefined)
 	const linkedCategory = atom<string | null>(null)
 	const linkedModel = atom<string | null>(null)
-	const tags = atom<string[]>([])
+	const tags = atom<EditorTags>({})
 
 	const sizeOffet = createMemo(() => {
 		switch (selectedShape()) {
@@ -119,7 +119,7 @@ export function EntityProps({ world, model, selectedCategory, selectedAsset, add
 		if (category && asset) {
 			const entity = b?.[category]?.[asset]
 			const box = entity?.collider
-			tags(entity?.tags ? entity.tags : [])
+			tags(entity?.tags ? entity.tags : {})
 			if (box && box.type !== 'link') {
 				selectedShape(box.type)
 				size.x = box.size.x
@@ -371,7 +371,7 @@ export function EntityProps({ world, model, selectedCategory, selectedAsset, add
 				</Show>
 			</section>
 
-			<Tags tags={tags} tagsList={tagsList} saveTagsList={saveTagsList}></Tags>
+			<TagsEditor tags={tags} tagsList={tagsList} saveTagsList={saveTagsList}></TagsEditor>
 		</>
 	)
 }

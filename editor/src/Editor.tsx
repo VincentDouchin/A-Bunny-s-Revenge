@@ -1,7 +1,7 @@
-import type { tags } from '@assets/tagsList'
+import type { Tags } from '@assets/tagsList'
 import type { Atom } from 'solid-use/atom'
 import type { BufferGeometry, Material, Vec2 } from 'three'
-import type { AssetData, LevelData, LevelEntity } from './types'
+import type { AssetData, EditorTags, LevelData, LevelEntity } from './types'
 
 import { init, World } from '@dimforge/rapier3d-compat'
 import { faArrowRotateBack, faArrowsRotate, faArrowsUpDownLeftRight, faEarth, faLock, faLockOpen, faMaximize } from '@fortawesome/free-solid-svg-icons'
@@ -42,7 +42,7 @@ import { MapEditor } from './components/MapEditor'
 import { RangeInput } from './components/RangeInput'
 import { Renderer } from './components/Renderer'
 import { SelectedEntityProps } from './components/SelectedEntityProps'
-import { Tags } from './components/Tags'
+import { TagsEditor } from './components/TagsEditor'
 import { createFolder, isRepoCloned, loadBoundingBox, loadLevel, loadLevels, loadTagsList, saveBoundingBox, saveLevelFile, saveTagsList } from './lib/fileOperations'
 
 function createArrowMesh() {
@@ -78,7 +78,7 @@ export function Editor() {
 
 	const folder = 'A-Bunny-s-Revenge'
 
-	const tagsList = atom<string[]>([])
+	const tagsList = atom<EditorTags>({})
 
 	const thumbnailRenderer = getThumbnailRenderer(128, 1.3)
 	const [mode, setMode] = makePersisted(createSignal<'level' | 'entity'>('level'))
@@ -167,16 +167,17 @@ export function Editor() {
 	}
 	let prevModel: Object3D | null = null
 
-	const tags = atom<tags[]>([])
-	const localTags = atom<tags[]>([])
+	const tags = atom<Partial<Tags>>({})
+	const localTags = atom<Partial<Tags>>({})
 	createEffect(on(selectedId, (id) => {
 		if (id) {
 			const entity = levelEntitiesData[id]
 			const globalTags = boundingBox?.[entity.category]?.[entity.model]?.tags
-			tags(globalTags || [])
-			localTags(entity.tags ?? [])
+			tags(globalTags ?? {})
+			localTags(entity.tags ?? {})
 		} else {
-			tags([])
+			tags({})
+			localTags({})
 		}
 	}))
 	createEffect(on(tags, (tagsValue) => {
@@ -606,6 +607,10 @@ export function Editor() {
 		}
 		const levelData = await loadLevel(folder, levelName)
 		batch(async () => {
+			for (const tagContainer of Object.values(tagsContainers)) {
+				tagContainer.remove()
+			}
+			modifyMutable(tagsContainers, reconcile({}))
 			displacementScale(levelData.displacementScale)
 			heightMap(levelData.heightMap)
 			treeMap(levelData.treeMap)
@@ -783,7 +788,7 @@ export function Editor() {
 		trackStore(boundingBox)
 		saveBoundingBoxDebounced()
 	})
-	const saveTagsListfn = (tags: string[]) => {
+	const saveTagsListfn = (tags: EditorTags) => {
 		tagsList(tags)
 		saveTagsList(folder, tags)
 	}
@@ -800,7 +805,7 @@ export function Editor() {
 		modifyMutable(boundingBox, reconcile(data))
 	}
 	const fetchTagsList = async (folder: string) => {
-		const { tags } = await loadTagsList(folder)
+		const tags = await loadTagsList(folder)
 		tagsList(tags)
 	}
 
@@ -889,6 +894,7 @@ export function Editor() {
 		position: relative;
 		overflow: hidden;
 		border: solid 3px var(--color-2);
+		z-index: 0;
 	}
 	.mode-buttons{
 		position: absolute;
@@ -943,9 +949,9 @@ export function Editor() {
 									levelSize={levelSize}
 								/>
 							</Show>
-							<Show when={selectedId()}>
-								<Tags tagsList={tagsList} tags={localTags} saveTagsList={saveTagsListfn} global={false}></Tags>
-								<Tags tagsList={tagsList} tags={tags} saveTagsList={saveTagsListfn}></Tags>
+							<Show when={selectedId() && tagsList()}>
+								<TagsEditor tagsList={tagsList} tags={localTags} saveTagsList={saveTagsListfn} global={false}></TagsEditor>
+								<TagsEditor tagsList={tagsList} tags={tags} saveTagsList={saveTagsListfn}></TagsEditor>
 							</Show>
 							<EntityList
 								selectedId={selectedId}
@@ -956,21 +962,28 @@ export function Editor() {
 							<For each={Object.entries(tagsContainers)}>
 								{([id, el]) => {
 									const entity = levelEntitiesData[id]
-									const globalTags = createMemo(() => boundingBox?.[entity.category]?.[entity.model]?.tags)
-									const entityTags = createMemo(() => levelEntitiesData[id].tags)
-									if (globalTags() || entityTags()) {
-										return (
-											<Portal mount={el.element}>
-												<For each={globalTags()}>
-													{tag => <div class="tag global-tag">{tag}</div>}
-												</For>
-												<For each={entityTags()}>
-													{tag => <div class="tag entity-tag">{tag}</div>}
-												</For>
-											</Portal>
-										)
-									}
-									return <></>
+									const globalTags = createMemo(() => boundingBox?.[entity.category]?.[entity.model]?.tags ?? {})
+									const entityTags = createMemo(() => levelEntitiesData[id]?.tags ?? {})
+									return (
+										<Portal mount={el.element}>
+											<For each={Object.entries(globalTags())}>
+												{([tag, val]) => (
+													<div class="tag global-tag">
+														{tag}
+														{val === true ? '' : ` ${val}`}
+													</div>
+												)}
+											</For>
+											<For each={Object.entries(entityTags())}>
+												{([tag, val]) => (
+													<div class="tag entity-tag">
+														{tag}
+														{val === true ? '' : ` ${val}`}
+													</div>
+												)}
+											</For>
+										</Portal>
+									)
 								}}
 							</For>
 						</Show>
