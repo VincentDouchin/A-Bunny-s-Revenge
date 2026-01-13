@@ -1,1 +1,1 @@
-{ "tags": ["obstacle", "house", "oven", "door", "lamp"] }
+{ "obstacle": true, "house": true, "oven": true, "door": ["farm", "dungeon"], "lamp": true, "weaponStand": true }
