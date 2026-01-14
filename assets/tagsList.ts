@@ -1,1 +1,9 @@
-export type Tags = {"obstacle":true,"house":true,"oven":true,"door":"'farm'|'dungeon'","lamp":true,"weaponStand":true}
+export type Tags = {
+obstacle: true
+house: true
+oven: true
+door: 'farm'|'dungeon'|'village'
+lamp: true
+weaponStand: true
+test: true
+}
