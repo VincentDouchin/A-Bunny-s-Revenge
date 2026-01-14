@@ -706,5 +706,13 @@
         "SM_Env_Bush_02"   : { "scale": [ 9.8686071754967   ,  9.8686071754967   ,  9.8686071754967   ], "tags": {} },
         "Bush_2"           : {                                                                           "tags": {} }
     },
-    "markers": { "box": {"tags": {}}, "door": {"tags": {}}, "marker": {"tags": {}} }
+    "markers": {
+        "box": {
+            "collider": { "type": "cuboid", "size": {"x": 1, "y": 1, "z": 1}, "position": {"x": 0, "y": 0.5, "z": 0} },
+            "secondaryColliders": [],
+            "tags": {}
+        },
+        "door": {"tags": {}},
+        "marker": {"tags": {}}
+    }
 }
