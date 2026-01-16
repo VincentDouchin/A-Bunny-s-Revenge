@@ -309,7 +309,8 @@
                 "position": {"x": 0, "y": 1.5, "z": 0.01786854872502497}
             },
             "secondaryColliders": [],
-            "tags": {}
+            "tags": {},
+            "scale": [5, 5, 5]
         },
         "Gate_Vines": {
             "collider": {
@@ -450,7 +451,11 @@
             "secondaryColliders": []
         },
         "SM_Env_Reeds_02": { "scale": [11.018394196126424, 11.018394196126424, 11.018394196126424] },
-        "SM_Env_Reeds_01": { "scale": [11.952287573641675, 11.952287573641675, 11.952287573641675] }
+        "SM_Env_Reeds_01": { "scale": [11.952287573641675, 11.952287573641675, 11.952287573641675] },
+        "cellar_wall3": { "tags": {}, "scale": [5, 5, 5] },
+        "cellar_wall": { "tags": {}, "scale": [5, 5, 5] },
+        "cellar_wall_corner": { "tags": {}, "scale": [5, 5, 5] },
+        "scaffold1": {"tags": {}}
     },
     "characters": {
         "ALICE_animated": {
