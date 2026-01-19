@@ -24,6 +24,7 @@ export interface BaseLevel {
 	sizeY: number
 	entities: Record<string, LevelEntity>
 	displacementScale: number
+	floorTexture: 'planks' | 'grass'
 }
 export type LevelData = Record<Maps, string> & BaseLevel
 export type LevelLoaded = Record<Maps, HTMLCanvasElement> & BaseLevel

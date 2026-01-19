@@ -73,6 +73,12 @@ option[selected]{
   text-decoration: underline;
   font-weight: bold;
 }
+.title.with-button{
+  display: grid;
+  grid-template-columns: 1fr auto;
+  padding: 0;
+  place-items: center;
+}
 
 section{
   border: solid 2px var(--color-4);

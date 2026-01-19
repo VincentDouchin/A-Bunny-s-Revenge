@@ -1,4 +1,3 @@
-import type { Tags } from '@assets/tagsList'
 import type { AssetData, EditorTags, LevelData } from '../types'
 import { path } from '@tauri-apps/api'
 import { BaseDirectory, exists, mkdir, readDir, readTextFile, remove, writeTextFile } from '@tauri-apps/plugin-fs'
@@ -46,16 +45,18 @@ export const saveBoundingBox = async (folder: string, boundingBox: Record<string
 // Tags
 const getTagsListPath = (folder: string, ext: 'json' | 'ts') => path.join(folder, 'assets', `tagsList.${ext}`)
 const saveTagsListTypes = async (folder: string, tags: EditorTags) => {
-	const tagsTypes = Object.entries(tags).reduce<Record<string, true | string>>((acc, [key, val]) => {
+	const tagsTypes = Object.entries(tags).reduce((acc, [key, val]) => {
 		if (val === true) {
-			acc[key] = val
+			acc += `
+${key}: true`
 		} else {
-			acc[key] = val.map(t => `'${t}'`).join('|')
+			acc += `
+${key}: ${val.map(t => `'${t}'`).join('|')}`
 		}
 		return acc
-	}, {})
-	const tagsString = JSON.stringify(tagsTypes)
-	const fileContent = `export type Tags = ${tagsString}`
+	}, '')
+	const fileContent = `export type Tags = {${tagsTypes}
+}`
 	const filePath = await getTagsListPath(folder, 'ts')
 	await writeTextFile(filePath, fileContent, { baseDir: BaseDirectory.AppData })
 }
@@ -64,10 +65,10 @@ export const loadTagsList = async (folder: string) => {
 	const fileExists = await exists(filePath, { baseDir: BaseDirectory.AppData })
 	if (fileExists) {
 		const contents = await readTextFile(filePath, { baseDir: BaseDirectory.AppData })
-		return JSON.parse(contents) as Tags
+		return JSON.parse(contents) as EditorTags
 	} else {
 		await writeTextFile(filePath, JSON.stringify({ }), { baseDir: BaseDirectory.AppData })
-		return { } as Tags
+		return { } as EditorTags
 	}
 }
 export const saveTagsList = async (folder: string, tags: EditorTags) => {

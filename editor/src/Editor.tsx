@@ -1,22 +1,23 @@
 import type { Tags } from '@assets/tagsList'
 import type { Atom } from 'solid-use/atom'
-import type { BufferGeometry, Material, Vec2 } from 'three'
+import type { BufferGeometry, Material, Object3D, Vec2 } from 'three'
+import type { ThumbnailRenderer } from '../../src/lib/thumbnailRenderer'
 import type { AssetData, EditorTags, LevelData, LevelEntity } from './types'
-
+import type { loadAssets } from '@/global/assets'
 import { init, World } from '@dimforge/rapier3d-compat'
-import { faArrowRotateBack, faArrowsRotate, faArrowsUpDownLeftRight, faEarth, faLock, faLockOpen, faMaximize } from '@fortawesome/free-solid-svg-icons'
+import { faArrowsRotate, faArrowsUpDownLeftRight, faEarth, faLock, faLockOpen, faMaximize } from '@fortawesome/free-solid-svg-icons'
 import { trackDeep, trackStore } from '@solid-primitives/deep'
-import { debounce } from '@solid-primitives/scheduled'
+import { Rerun } from '@solid-primitives/keyed'
+import { debounce, throttle } from '@solid-primitives/scheduled'
 import { makePersisted } from '@solid-primitives/storage'
 import { get, set } from 'idb-keyval'
-
 import Fa from 'solid-fa'
-import { batch, createEffect, createMemo, createSignal, For, on, onCleanup, onMount, Show } from 'solid-js'
+import { createEffect, createMemo, createSignal, For, on, onCleanup, onMount, Show } from 'solid-js'
 import { createMutable, modifyMutable, reconcile, unwrap } from 'solid-js/store'
 import { Portal } from 'solid-js/web'
 import { css } from 'solid-styled'
 import atom from 'solid-use/atom'
-import { AmbientLight, BoxGeometry, CanvasTexture, ConeGeometry, CylinderGeometry, GridHelper, Group, Mesh, MeshBasicMaterial, MeshStandardMaterial, Object3D, PerspectiveCamera, PlaneGeometry, Quaternion, Raycaster, Scene, SphereGeometry, Vector2, Vector3, WebGLRenderer } from 'three'
+import { AmbientLight, BoxGeometry, CanvasTexture, ConeGeometry, CylinderGeometry, GridHelper, Group, Mesh, MeshBasicMaterial, MeshStandardMaterial, MeshToonMaterial, PerspectiveCamera, PlaneGeometry, Quaternion, Raycaster, Scene, SphereGeometry, Vector2, Vector3, WebGLRenderer } from 'three'
 import { MapControls } from 'three/examples/jsm/controls/MapControls'
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls'
 import { TransformControls } from 'three/examples/jsm/controls/TransformControls'
@@ -24,14 +25,11 @@ import { CSS2DObject, CSS2DRenderer } from 'three/examples/jsm/renderers/CSS2DRe
 import { clone } from 'three/examples/jsm/utils/SkeletonUtils'
 import { generateUUID } from 'three/src/math/MathUtils'
 import { doorSide } from '@/states/game/doorModel'
-import { loadImage } from '../../src/global/assetLoaders'
-import { loadAssets } from '../../src/global/assets'
 import { RapierDebugRenderer } from '../../src/lib/debugRenderer'
 import { getSize } from '../../src/lib/models'
-import { getThumbnailRenderer } from '../../src/lib/thumbnailRenderer'
 import { GroundMaterial, WaterMaterial } from '../../src/shaders/materials'
 import { getGrass, getTrees, setDisplacement } from '../../src/states/game/spawnTrees'
-import { getScreenBuffer, imgToCanvas } from '../../src/utils/buffer'
+import { getScreenBuffer } from '../../src/utils/buffer'
 import { Configuration } from './components/Configuration'
 import { EntitySelector } from './components/EntitiySelector'
 import { EntityList } from './components/EntityList'
@@ -72,15 +70,19 @@ function createArrowMesh() {
 
 export const BOUNDING_BOX_FILE_PATH = 'assets/boundingBox.json'
 await init()
-export function Editor() {
+export function Editor({ entities, thumbnailRenderer, assets }: {
+	entities: Record<string, Record<string, Object3D>>
+	thumbnailRenderer: ThumbnailRenderer
+	assets: Awaited<ReturnType<typeof loadAssets>>
+}) {
 	const boundingBox = createMutable<Record<string, Record<string, AssetData>>>({})
 	const loaded = atom(false)
-
+	const loading = atom(false)
+	const floorTexture = atom<'planks' | 'grass' | null>(null)
 	const folder = 'A-Bunny-s-Revenge'
 
 	const tagsList = atom<EditorTags>({})
 
-	const thumbnailRenderer = getThumbnailRenderer(128, 1.3)
 	const [mode, setMode] = makePersisted(createSignal<'level' | 'entity'>('level'))
 	const renderer = new WebGLRenderer({ alpha: true })
 	const cssRenderer = new CSS2DRenderer()
@@ -97,24 +99,25 @@ export function Editor() {
 	const levelEntities: Record<string, Object3D> = {}
 	const tagsContainers = createMutable<Record<string, CSS2DObject>>({})
 	const selectedId = atom<string | null>(null)
+
 	const transformControls = new TransformControls(camera, renderer.domElement)
 	const transformControlsMode = atom<'translate' | 'scale' | 'rotate'>('translate')
 
 	const displacementScale = atom<number | null>(null)
+
 	const heightCanvas = atom<HTMLCanvasElement | null>(null, () => false)
-	const heightMapSource = atom<string>('')
 	const heightMap = atom<string>('')
+
 	const treeCanvas = atom<HTMLCanvasElement | null>(null, () => false)
-	const treeMapSource = atom<string>('')
 	const treeMap = atom<string>('')
+
 	const pathCanvas = atom<HTMLCanvasElement | null>(null, () => false)
-	const pathMapSource = atom<string>('')
 	const pathMap = atom<string>('')
+
 	const waterCanvas = atom<HTMLCanvasElement | null>(null, () => false)
-	const waterMapSource = atom<string>('')
 	const waterMap = atom<string>('')
+
 	const grassCanvas = atom<HTMLCanvasElement | null>(null, () => false)
-	const grassMapSource = atom<string>('')
 	const grassMap = atom<string>('')
 	let treeGroup: Object3D | null = null
 	let grassGroup: Object3D | null = null
@@ -125,10 +128,6 @@ export function Editor() {
 
 	const debugRenderer = new RapierDebugRenderer(world)
 	scene.add(debugRenderer)
-
-	let assets: Awaited<ReturnType<typeof loadAssets>> | null = null
-
-	const entities: Record<string, Record<string, Object3D>> = createMutable({})
 
 	const selectedCategory = atom<string | null>(null)
 	const selectedAsset = atom<string | null>(null)
@@ -289,22 +288,22 @@ export function Editor() {
 		return [dummyMesh, transformControls]
 	}
 
-	const resizeCanvas = (canvas: Atom<HTMLCanvasElement | null>, source: Atom<string>, size: Vector2) => {
+	const resizeCanvas = (canvas: Atom<HTMLCanvasElement | null>, dataUrl: Atom<string>, size: Vector2) => {
 		const canvasElement = canvas()
 		if (!canvasElement) return
 		const newCanvas = getScreenBuffer(size.x, size.y)
 		newCanvas.drawImage(canvasElement, 0, 0, canvasElement.width, canvasElement.height, 0, 0, size.x, size.y)
 		const url = newCanvas.canvas.toDataURL()
 		canvas(newCanvas.canvas)
-		source(url)
+		dataUrl(url)
 	}
 	createEffect(on(levelSize, (size) => {
 		if (!size) return
-		resizeCanvas(heightCanvas, heightMapSource, size)
-		resizeCanvas(pathCanvas, pathMapSource, size)
-		resizeCanvas(grassCanvas, grassMapSource, size)
-		resizeCanvas(waterCanvas, waterMapSource, size)
-		resizeCanvas(treeCanvas, treeMapSource, size)
+		resizeCanvas(heightCanvas, heightMap, size)
+		resizeCanvas(pathCanvas, pathMap, size)
+		resizeCanvas(grassCanvas, grassMap, size)
+		resizeCanvas(waterCanvas, waterMap, size)
+		resizeCanvas(treeCanvas, treeMap, size)
 	}))
 
 	createEffect(on(
@@ -322,30 +321,30 @@ export function Editor() {
 		},
 	))
 
-	createEffect(() => {
-		const hCanvas = heightCanvas()
-		const tCanvas = treeCanvas()
-		const scale = displacementScale()
-		if (!hCanvas || !tCanvas || !scale) return
-		const models = [
-			entities.trees.Low_Poly_Forest_treeTall01,
-			entities.trees.Low_Poly_Forest_treeTall02,
-			entities.trees.Low_Poly_Forest_treeTall03,
-			entities.trees.Low_Poly_Forest_treeTall04,
-		]
-		const trees = getTrees(models, hCanvas, tCanvas, 10, scale)
-		const newTreeGroup = new Group()
-		for (const [generator] of trees) {
-			newTreeGroup.add(generator.process())
+	createEffect(on(treeCanvas, (tCanvas) => {
+		if (tCanvas) {
+			const hCanvas = heightCanvas()
+			const scale = displacementScale()
+			if (!hCanvas || !scale) return
+			const models = [
+				entities.trees.Low_Poly_Forest_treeTall01,
+				entities.trees.Low_Poly_Forest_treeTall02,
+				entities.trees.Low_Poly_Forest_treeTall03,
+				entities.trees.Low_Poly_Forest_treeTall04,
+			]
+			const trees = getTrees(models, hCanvas, tCanvas, 10, scale)
+			const newTreeGroup = new Group()
+			for (const [generator] of trees) {
+				newTreeGroup.add(generator.process())
+			}
+			treeGroup?.removeFromParent()
+			treeGroup = newTreeGroup
+			group.add(treeGroup)
 		}
-		treeGroup?.removeFromParent()
-		treeGroup = newTreeGroup
-		group.add(treeGroup)
-	})
+	}))
 
-	createEffect(() => {
+	createEffect(on(grassCanvas, (gCanvas) => {
 		const hCanvas = heightCanvas()
-		const gCanvas = grassCanvas()
 		const scale = displacementScale()
 		if (!hCanvas || !gCanvas || !scale) return
 		const [grass, flowers] = ['Grass_', 'Flower_'].map(name => Object.entries(entities.vegetation).reduce<Object3D[]>((acc, [modelName, model]) => {
@@ -357,26 +356,37 @@ export function Editor() {
 		group.add(newGrassGroup)
 		grassGroup?.removeFromParent()
 		grassGroup = newGrassGroup
-	})
+	}))
+	const getWoodFlooring = ({ x, y }: { x: number, y: number }) => {
+		const map = assets.textures.planks
+		map.repeat.set(x / 32, y / 32)
+		const mat = new MeshToonMaterial({ map })
+		return mat
+	}
 	createEffect(() => {
+		const floorTextureValue = floorTexture()
 		const size = levelSize()
 		const canvas = pathCanvas()
-		if (!size || !canvas) return
+		if (!size || !canvas || !floorTextureValue) return
 		const level = new CanvasTexture(canvas)
-		groundMesh.material = new GroundMaterial().setUniforms({
-			level,
-			rock: null,
-			size: new Vector2(size.x, size.y),
-			ground: assets?.textures.Dirt4_Dark,
-			rock_texture: assets?.textures.Rocks1_Light,
-		})
+		switch (floorTextureValue) {
+			case 'grass': groundMesh.material = new GroundMaterial().setUniforms({
+				level,
+				rock: null,
+				size: new Vector2(size.x, size.y),
+				ground: assets?.textures.Dirt4_Dark,
+				rock_texture: assets?.textures.Rocks1_Light,
+			})
+				break
+			case 'planks': groundMesh.material = getWoodFlooring(size)
+				break
+		}
 	})
-	createEffect(() => {
+	createEffect(on(waterCanvas, (canvas) => {
 		const size = levelSize()
-		const canvas = waterCanvas()
 		if (!size || !canvas) return
 		waterMesh.material = new WaterMaterial({ map: new CanvasTexture(canvas) }).setUniforms({ size, time: 1 })
-	})
+	}))
 
 	transformControls.addEventListener('axis-changed', ({ value }) => {
 		mapControls.enabled = value === null
@@ -529,8 +539,9 @@ export function Editor() {
 		const water = waterMap()
 		const grass = grassMap()
 		const scale = displacementScale()
+		const floorTextureValue = floorTexture()
 		trackDeep(levelEntitiesData)
-		if (size && scale) {
+		if (size && scale && !loading() && floorTextureValue) {
 			return {
 				sizeX: size.x,
 				sizeY: size.y,
@@ -541,31 +552,34 @@ export function Editor() {
 				pathMap: path,
 				waterMap: water,
 				grassMap: grass,
+				floorTexture: floorTextureValue,
 			}
 		}
 		return null
 	})
 
-	const updateEntity = (id: string) => {
+	const updateEntity = (id: string, init = false) => {
 		const entityData = levelEntitiesData[id]
 		const model = entities?.[entityData.category]?.[entityData.model]
 		if (model) {
-			let parent = levelEntities[id]
-			if (!parent) {
+			let existingEntity = levelEntities[id]
+			if (!existingEntity) {
 				const model = entities?.[entityData.category]?.[entityData.model]
 
 				const cloned = clone(model)
-				cloned.position.fromArray(entityData.position)
-				cloned.rotation.setFromQuaternion(new Quaternion().fromArray(entityData.rotation))
-				cloned.scale.copy(new Vector3(...entityData.scale).multiply(getGlobalScale(id)))
+
 				const obj = new CSS2DObject(document.createElement('div'))
 				tagsContainers[id] = obj
 				cloned.add(obj)
 				group.add(cloned)
 
 				levelEntities[id] = cloned
-				parent = cloned
+				existingEntity = cloned
 			}
+			existingEntity.position.fromArray(entityData.position)
+			existingEntity.rotation.setFromQuaternion(new Quaternion().fromArray(entityData.rotation))
+
+			existingEntity.scale.copy(new Vector3(...entityData.scale).multiply(getGlobalScale(id)))
 			if (entityData.grid && (entityData.grid.repetitionX > 0 || entityData.grid.repetitionY > 0)) {
 				repetitions[id] ??= {}
 				const prevData = repetitions[id]
@@ -577,7 +591,7 @@ export function Editor() {
 							prevData[key] ??= clone(model)
 							newData[key] = prevData[key]
 							const repetition = newData[key]
-							parent.add(repetition)
+							existingEntity.add(repetition)
 							repetition.position.set(entityData.grid.spacingX * x, 0, entityData.grid.spacingY * y)
 							delete prevData[key]
 						}
@@ -588,7 +602,9 @@ export function Editor() {
 			} else {
 				Object.values(repetitions[id] ?? {}).forEach(o => o.removeFromParent())
 			}
-			groundEntity(id)
+			if (init) {
+				groundEntity(id)
+			}
 		}
 	}
 
@@ -601,55 +617,53 @@ export function Editor() {
 	}
 
 	const fetchLevel = async (levelName: string) => {
+		loading(true)
+
 		scene.clear()
 		for (const id in levelEntities) {
 			removeEntity(id)
 		}
-		const levelData = await loadLevel(folder, levelName)
-		batch(async () => {
-			for (const tagContainer of Object.values(tagsContainers)) {
-				tagContainer.remove()
-			}
-			modifyMutable(tagsContainers, reconcile({}))
-			displacementScale(levelData.displacementScale)
-			heightMap(levelData.heightMap)
-			treeMap(levelData.treeMap)
-			pathMap(levelData.pathMap)
-			waterMap(levelData.waterMap)
-			grassMap(levelData.grassMap)
-			heightMapSource(levelData.heightMap)
-			treeMapSource(levelData.treeMap)
-			pathMapSource(levelData.pathMap)
-			waterMapSource(levelData.waterMap)
-			grassMapSource(levelData.grassMap)
+		for (const tagContainer of Object.values(tagsContainers)) {
+			tagContainer.remove()
+		}
+		selectedLevel('')
+		displacementScale(null)
+		heightMap('')
+		treeMap('')
+		pathMap('')
+		waterMap('')
+		grassMap('')
+		treeCanvas(null)
+		heightCanvas(null)
+		pathCanvas(null)
+		waterCanvas(null)
+		grassCanvas(null)
+		modifyMutable(tagsContainers, reconcile({}))
+		modifyMutable(levelEntitiesData, reconcile({}))
+		const data = await loadLevel(folder, levelName)
+		floorTexture(data.floorTexture)
+		selectedLevel(levelName)
+		displacementScale(data.displacementScale)
+		heightMap(data.heightMap)
+		treeMap(data.treeMap)
+		pathMap(data.pathMap)
+		waterMap(data.waterMap)
+		grassMap(data.grassMap)
+		levelSize(new Vector2(data.sizeX, data.sizeY))
 
-			selectedLevel(levelName)
-			const size = new Vector2(levelData.sizeX, levelData.sizeY)
-			levelSize(size)
-			waterCanvas(imgToCanvas(await loadImage(levelData.waterMap)).canvas)
-			heightCanvas(imgToCanvas(await loadImage(levelData.heightMap)).canvas)
-			treeCanvas(imgToCanvas(await loadImage(levelData.treeMap)).canvas)
-			pathCanvas(imgToCanvas(await loadImage(levelData.pathMap)).canvas)
-			grassCanvas(imgToCanvas(await loadImage(levelData.grassMap)).canvas)
-			orbitControls.enabled = false
-			mapControls.enabled = true
-			scene.add(camera)
-			camera.lookAt(new Vector3())
-			camera.updateProjectionMatrix()
+		orbitControls.enabled = false
+		mapControls.enabled = true
+		scene.add(camera)
+		camera.lookAt(new Vector3())
+		camera.updateProjectionMatrix()
+		scene.add(group)
 
-			scene.clear()
-			scene.add(group)
-			groundMesh.geometry = setDisplacement(size, heightCanvas()!, waterCanvas()!, levelData.displacementScale)
-			pointerMesh.geometry = setDisplacement(size, heightCanvas()!, waterCanvas()!, levelData.displacementScale)
-
-			modifyMutable(levelEntitiesData, reconcile(levelData.entities))
-			setMode('level')
-			setTimeout(() => {
-				for (const id in levelEntitiesData) {
-					updateEntity(id)
-				}
-			}, 10)
-		})
+		modifyMutable(levelEntitiesData, reconcile(data.entities))
+		setMode('level')
+		for (const id in levelEntitiesData) {
+			updateEntity(id, false)
+		}
+		loading(false)
 	}
 
 	createEffect(() => {
@@ -760,13 +774,14 @@ export function Editor() {
 		}
 	})
 
-	const saveLevelLocal = debounce(() => {
+	const saveLevelDebounced = throttle((levelName: string, data: LevelData) => set(levelName, data), 1000)
+	const saveLevelLocal = () => {
 		const levelName = selectedLevel()
-		const data = levelData()
+		const data = unwrap(levelData())
 		if (levelName && data && loaded()) {
-			set(levelName, unwrap(data))
+			saveLevelDebounced(levelName, data)
 		}
-	}, 1000)
+	}
 	createEffect(on(levelData, () => {
 		saveLevelLocal()
 	}))
@@ -794,7 +809,7 @@ export function Editor() {
 	}
 
 	const fetchLevels = async (folder: string) => {
-		const dirs = await loadLevels(folder)
+		const dirs = await loadLevels(folder) as { name: string }[]
 		levels(dirs.filter(x => x.name !== 'data.json').map(x => x.name.replace('.json', '')))
 		if (levels().length !== 0) {
 			await fetchLevel(levels()[0])
@@ -811,6 +826,7 @@ export function Editor() {
 
 	const repoCloned = atom(false)
 	const reload = async (folder: string) => {
+		loaded(false)
 		selectedLevel(null)
 		for (const id in levelEntities) {
 			removeEntity(id)
@@ -821,10 +837,10 @@ export function Editor() {
 		repoCloned(repo)
 		if (repo) {
 			await fetchBoundingBox(folder)
-			await fetchLevels(folder)
 			await fetchTagsList(folder)
-			loaded(true)
+			await fetchLevels(folder)
 		}
+		loaded(true)
 	}
 
 	onMount(async () => {
@@ -833,25 +849,13 @@ export function Editor() {
 		arrow.position.set(0, 0, 3)
 		arrow.rotateX(Math.PI / 2)
 		marker.add(arrow)
+		const boxGroup = new Group()
 		const box = new Mesh(new BoxGeometry(1, 1), new MeshBasicMaterial({ color: 0xFF0000, transparent: true, opacity: 1 }))
+		box.position.y = 0.5
+		boxGroup.add(box)
 		const door = doorSide()
-		entities.markers = { box, marker, door }
-		assets = await loadAssets(thumbnailRenderer)
-		for (const key in assets) {
-			const category = assets[key as keyof typeof assets]
-			const cat = category as unknown as Record<string, any>
-			for (const asset in cat) {
-				const obj = cat[asset] as unknown as any
-				if (typeof obj == 'object' && 'scene' in obj) {
-					entities[key] ??= {}
-					entities[key][asset] = obj.scene
-				}
-				if (obj instanceof Object3D) {
-					entities[key] ??= {}
-					entities[key][asset] ??= obj
-				}
-			}
-		}
+		entities.markers = { box: boxGroup, marker, door }
+
 		reload(folder)
 	})
 	renderer.setAnimationLoop(() => {
@@ -947,6 +951,7 @@ export function Editor() {
 							<Show when={!selectedId()}>
 								<LevelProps
 									levelSize={levelSize}
+									floorTexture={floorTexture}
 								/>
 							</Show>
 							<Show when={selectedId() && tagsList()}>
@@ -1038,16 +1043,7 @@ export function Editor() {
 											{' '}
 											Apply to all
 										</button>
-										<button onClick={resetScale}>
-											<Fa icon={faArrowRotateBack}></Fa>
-											{' '}
-											Reset
-										</button>
-										<button onClick={resetGlobalScale}>
-											<Fa icon={faArrowRotateBack}></Fa>
-											{' '}
-											Reset global scale
-										</button>
+
 									</Show>
 								</div>
 								<button onClick={() => transformControlsMode('translate')} classList={{ selected: transformControlsMode() === 'translate' }}>
@@ -1068,143 +1064,143 @@ export function Editor() {
 						<Show when={selectedId()}>
 							{(id) => {
 								const entity = levelEntitiesData[id()]
-								const globalScale = boundingBox?.[entity.category]?.[entity.model]?.scale
+								const assetData = boundingBox?.[entity.category]?.[entity.model]
 								return (
 									<SelectedEntityProps
-										globalScale={globalScale}
+										assetData={assetData}
 										destroy={() => removeEntity(id())}
 										entity={levelEntitiesData[id()]}
-										update={() => updateEntity(id())}
+										update={() => updateEntity(id(), false)}
+										applyGlobalScale={applyGlobalScale}
+										scaleLock={scaleLock}
+										resetScale={resetScale}
+										resetGlobalScale={resetGlobalScale}
 									/>
 								)
 							}}
 						</Show>
-						<Show when={mode() === 'level' && levelSize()}>
+						<Show when={loaded() && !loading() && mode() === 'level' && levelSize()}>
 							{size => (
-								<div classList={{ hidden: Boolean(selectedId()) }}>
-									<MapEditor
-										drawing={drawing}
-										mouseCanvas={mouse}
-										source={heightMapSource}
-										dataUrl={heightMap}
-										name="Height map"
-										setCanvas={heightCanvas}
-										levelSize={size}
-										open={openEditor}
-										eraseColor="black"
-										realTimeUpdate={false}
-										globalMode={globalMode}
-										globalPosition={groundUV}
-									>
-										{(color) => {
-											const height = atom(1)
-											createEffect(() => color(`hsl(0deg,0%,${height()}%)`))
-											return (
-												<>
-													<RangeInput value={height} name="Height" max={100} />
-													<RangeInput name="Displacement scale" value={displacementScale} min={0} />
-												</>
-											)
-										}}
-									</MapEditor>
-
-									<MapEditor
-										drawing={drawing}
-										mouseCanvas={mouse}
-										source={treeMapSource}
-										dataUrl={treeMap}
-										name="Trees"
-										setCanvas={treeCanvas}
-										levelSize={size}
-										transparency={false}
-										blur={false}
-										realTimeUpdate={false}
-										defaultColor="#00FF00"
-										open={openEditor}
-										globalMode={globalMode}
-										globalPosition={groundUV}
-									>
-										{(color) => {
-											css/* css */`
-												.color-buttons{
-													display: grid;
-													grid-template-columns: 1fr 1fr;
-												}
-												.square{
-													width: 0.8rem;
-													aspect-ratio: 1;
-													display: inline-block;
-													margin-right: 0.2rem;
-												}
-												.green{
-													background: #00FF00
-												}
-												.red{
-													background: #FF0000
-												}
-												`
-											return (
-												<div class="color-buttons">
-													<button onClick={() => color('#00FF00')} classList={{ selected: color() === '#00FF00' }}>
-														<div class="square green" />
-														Trees
-													</button>
-													<button onClick={() => color('#FF0000')} classList={{ selected: color() === '#FF0000' }}>
-														<div class="square red" />
-														Transparent Trees
-													</button>
-												</div>
-											)
-										}}
-									</MapEditor>
-									<MapEditor
-										drawing={drawing}
-										mouseCanvas={mouse}
-										source={pathMapSource}
-										dataUrl={pathMap}
-										name="Path"
-										setCanvas={pathCanvas}
-										levelSize={size}
-										transparency={true}
-										blur={true}
-										defaultColor="#FF0000"
-										open={openEditor}
-										globalMode={globalMode}
-										globalPosition={groundUV}
-									/>
-									<MapEditor
-										drawing={drawing}
-										mouseCanvas={mouse}
-										source={waterMapSource}
-										dataUrl={waterMap}
-										name="Water"
-										setCanvas={waterCanvas}
-										levelSize={size}
-										transparency={false}
-										blur={false}
-										defaultColor="#0000FF"
-										open={openEditor}
-										realTimeUpdate={false}
-										globalMode={globalMode}
-										globalPosition={groundUV}
-									/>
-									<MapEditor
-										drawing={drawing}
-										mouseCanvas={mouse}
-										source={grassMapSource}
-										dataUrl={grassMap}
-										name="Grass"
-										setCanvas={grassCanvas}
-										levelSize={size}
-										transparency={false}
-										blur={false}
-										realTimeUpdate={false}
-										defaultColor="#00FF00"
-										open={openEditor}
-										globalMode={globalMode}
-										globalPosition={groundUV}
-									/>
-								</div>
+								<Rerun on={[selectedLevel]}>
+									<div classList={{ hidden: Boolean(selectedId()) }}>
+										<MapEditor
+											name="Height map"
+											drawing={drawing}
+											mouseCanvas={mouse}
+											dataUrl={heightMap}
+											setCanvas={heightCanvas}
+											levelSize={size}
+											open={openEditor}
+											eraseColor="black"
+											realTimeUpdate={false}
+											globalMode={globalMode}
+											globalPosition={groundUV}
+										>
+											{(color) => {
+												const height = atom(1)
+												createEffect(() => color(`hsl(0deg,0%,${height()}%)`))
+												return (
+													<>
+														<RangeInput value={height} name="Height" max={100} />
+														<RangeInput name="Displacement scale" value={displacementScale} min={0} />
+													</>
+												)
+											}}
+										</MapEditor>
+										<MapEditor
+											name="Trees"
+											drawing={drawing}
+											mouseCanvas={mouse}
+											dataUrl={treeMap}
+											setCanvas={treeCanvas}
+											levelSize={size}
+											transparency={false}
+											blur={false}
+											realTimeUpdate={false}
+											defaultColor="#00FF00"
+											open={openEditor}
+											globalMode={globalMode}
+											globalPosition={groundUV}
+										>
+											{(color) => {
+												css/* css */`
+													.color-buttons{
+														display: grid;
+														grid-template-columns: 1fr 1fr;
+													}
+													.square{
+														width: 0.8rem;
+														aspect-ratio: 1;
+														display: inline-block;
+														margin-right: 0.2rem;
+													}
+													.green{
+														background: #00FF00
+													}
+													.red{
+														background: #FF0000
+													}
+													`
+												return (
+													<div class="color-buttons">
+														<button onClick={() => color('#00FF00')} classList={{ selected: color() === '#00FF00' }}>
+															<div class="square green" />
+															Trees
+														</button>
+														<button onClick={() => color('#FF0000')} classList={{ selected: color() === '#FF0000' }}>
+															<div class="square red" />
+															Transparent Trees
+														</button>
+													</div>
+												)
+											}}
+										</MapEditor>
+										<MapEditor
+											drawing={drawing}
+											mouseCanvas={mouse}
+											dataUrl={pathMap}
+											name="Path"
+											setCanvas={pathCanvas}
+											levelSize={size}
+											transparency={true}
+											blur={true}
+											defaultColor="#FF0000"
+											open={openEditor}
+											globalMode={globalMode}
+											globalPosition={groundUV}
+										/>
+										<MapEditor
+											drawing={drawing}
+											mouseCanvas={mouse}
+											dataUrl={waterMap}
+											name="Water"
+											setCanvas={waterCanvas}
+											levelSize={size}
+											transparency={false}
+											blur={false}
+											defaultColor="#0000FF"
+											open={openEditor}
+											realTimeUpdate={false}
+											globalMode={globalMode}
+											globalPosition={groundUV}
+										/>
+										<MapEditor
+											drawing={drawing}
+											mouseCanvas={mouse}
+											dataUrl={grassMap}
+											name="Grass"
+											setCanvas={grassCanvas}
+											levelSize={size}
+											transparency={false}
+											blur={false}
+											realTimeUpdate={false}
+											defaultColor="#00FF00"
+											open={openEditor}
+											globalMode={globalMode}
+											globalPosition={groundUV}
+										/>
+									</div>
+								</Rerun>
 							)}
 						</Show>
 					</div>

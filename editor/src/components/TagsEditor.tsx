@@ -71,7 +71,7 @@ export function TagsEditor({ tags, tagsList, saveTagsList, global = true }: {
 	`
 	return (
 		<section>
-			<div class="title">
+			<div class="title with-button">
 				{global ? 'Model tags' : 'Entity tags'}
 				<TagsListModal tagsList={tagsList} saveTagsList={saveTagsList}></TagsListModal>
 			</div>

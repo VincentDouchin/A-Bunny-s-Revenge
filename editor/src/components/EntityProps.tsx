@@ -1,10 +1,10 @@
+import type { Tags } from '@assets/tagsList'
 import type { World } from '@dimforge/rapier3d-compat'
 import type { Accessor } from 'solid-js'
 import type { Atom } from 'solid-use/atom'
 import type { Mesh, Object3D } from 'three'
 import type { TransformControls } from 'three/examples/jsm/controls/TransformControls'
 import type { AssetData, EditorTags } from '../types'
-
 import type { RapierDebugRenderer } from '@/lib/debugRenderer'
 import { Ball, Capsule, ColliderDesc, Cuboid, Cylinder, RigidBodyDesc } from '@dimforge/rapier3d-compat'
 import { faA } from '@fortawesome/free-solid-svg-icons'
@@ -12,7 +12,6 @@ import { trackDeep } from '@solid-primitives/deep'
 import Fa from 'solid-fa'
 import { createEffect, createMemo, For, on, onCleanup, onMount, Show, untrack } from 'solid-js'
 import { createMutable, unwrap } from 'solid-js/store'
-
 import { css } from 'solid-styled'
 import atom from 'solid-use/atom'
 import { Box3, Vector3 } from 'three'
@@ -51,7 +50,7 @@ export function EntityProps({ world, model, selectedCategory, selectedAsset, add
 	const selectedShape = atom<Shape | 'link' | undefined>(undefined)
 	const linkedCategory = atom<string | null>(null)
 	const linkedModel = atom<string | null>(null)
-	const tags = atom<EditorTags>({})
+	const tags = atom<Partial<Tags>>({})
 
 	const sizeOffet = createMemo(() => {
 		switch (selectedShape()) {

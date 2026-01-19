@@ -1,14 +1,20 @@
-import type { LevelEntity } from '../types'
-import { faLink, faLinkSlash, faTrash } from '@fortawesome/free-solid-svg-icons'
-import Fa from 'solid-fa'
-import { For, Show } from 'solid-js'
+import type { Atom } from 'solid-use/atom'
+import type { AssetData, LevelEntity } from '../types'
+import { faArrowRotateBack, faLink, faLinkSlash, faTrash } from '@fortawesome/free-solid-svg-icons'
+import Fa, { } from 'solid-fa'
+import { createMemo, For, Show } from 'solid-js'
 import { css } from 'solid-styled'
+import { Euler, Quaternion } from 'three'
 
-export function SelectedEntityProps({ destroy, entity, update, globalScale }: {
+export function SelectedEntityProps({ destroy, entity, update, applyGlobalScale, assetData, scaleLock, resetScale, resetGlobalScale }: {
 	destroy: () => void
 	entity: LevelEntity
-	globalScale?: number[]
+	assetData?: AssetData
 	update: () => void
+	applyGlobalScale: () => void
+	scaleLock: Atom<boolean>
+	resetScale: () => void
+	resetGlobalScale: () => void
 }) {
 	const setGrid = (key: keyof NonNullable<LevelEntity['grid']>) => (e: Event & {
 		currentTarget: HTMLInputElement
@@ -27,7 +33,30 @@ export function SelectedEntityProps({ destroy, entity, update, globalScale }: {
 		}
 		update()
 	}
-
+	const updateScale = (index: number, value: number, model: LevelEntity | AssetData, global: boolean) => {
+		if (scaleLock()) {
+			model.scale = [value, value, value]
+		} else if (model.scale) {
+			model.scale[index] = value
+		}
+		update()
+		if (global) applyGlobalScale()
+	}
+	const updatePosition = (index: number, value: number) => {
+		entity.position[index] = value
+		update()
+	}
+	const eulerAngle = createMemo(() => {
+		const euler =	new Euler().setFromQuaternion(new Quaternion().fromArray(entity.rotation))
+		return [euler.x, euler.y, euler.z].map(x => x / Math.PI * 360)
+	})
+	const updateRotation = (index: number, value: number) => {
+		const val = value / 360 * Math.PI
+		const eulerAngleValue = eulerAngle().map((x, i) => i === index ? val : x) as [number, number, number]
+		const quaternion = new Quaternion().setFromEuler(new Euler().set(...eulerAngleValue))
+		entity.rotation = quaternion.toArray()
+		update()
+	}
 	css/* css */`
 	.icon-button{
 		padding: 0.5rem;
@@ -59,7 +88,6 @@ export function SelectedEntityProps({ destroy, entity, update, globalScale }: {
 	}
 	.vec-display{
 		display: grid;
-		grid-template-columns: 1fr 1fr 1fr;
 		place-items: center;
 		padding: 0.5rem;
 	}
@@ -94,47 +122,90 @@ export function SelectedEntityProps({ destroy, entity, update, globalScale }: {
 				</button>
 			</section>
 			<section>
-				<div class="title">Position</div>
+				<div class="title">
+					Position
+				</div>
 				<div class="vec-display">
 					<For each={['X', 'Y', 'Z']}>
 						{(axis, index) => (
 							<div>
 								{axis}
+								<input
+									disabled={axis === 'Y' && entity.grounded}
+									type="number"
+									value={entity.position[index()].toFixed(1)}
+									onChange={e => updatePosition(index(), e.target.valueAsNumber)}
+								/>
 
-								<div>
-									{entity.position[index()].toFixed(1)}
-								</div>
 							</div>
 						)}
 					</For>
 				</div>
 			</section>
 			<section>
-				<div class="title">Scale</div>
+				<div class="title">
+					Rotation
+				</div>
 				<div class="vec-display">
-					<For each={['X', 'Y', 'Z']}>
+					<For each={['x', 'y', 'z'] as const}>
 						{(axis, index) => (
 							<div>
 								{axis}
-								<div>
-									{entity.scale?.[index()].toFixed(1)}
-								</div>
+								<input
+									max={180}
+									min={-180}
+									step={15}
+									type="number"
+									value={eulerAngle()[index()].toFixed(0)}
+									onChange={e => updateRotation(index(), e.target.valueAsNumber)}
+								/>
+
 							</div>
 						)}
 					</For>
 				</div>
 			</section>
-			<Show when={globalScale?.some(Boolean)}>
+			<section>
+				<div class="title with-button">
+					Scale
+					<button onClick={resetScale}>
+						<Fa icon={faArrowRotateBack}></Fa>
+					</button>
+				</div>
+				<div class="vec-display">
+					<For each={['X', 'Y', 'Z']}>
+						{(axis, index) => (
+							<div>
+								{axis}
+								<input
+									type="number"
+									value={entity.scale?.[index()].toFixed(1)}
+									onChange={e => updateScale(index(), e.target.valueAsNumber, entity, false)}
+								/>
+
+							</div>
+						)}
+					</For>
+				</div>
+			</section>
+			<Show when={assetData?.scale}>
 				<section>
-					<div class="title">Model scale</div>
+					<div class="title with-button">
+						Model scale
+						<button onClick={resetGlobalScale}>
+							<Fa icon={faArrowRotateBack}></Fa>
+						</button>
+					</div>
 					<div class="vec-display">
 						<For each={['X', 'Y', 'Z']}>
 							{(axis, index) => (
 								<div>
 									{axis}
-									<div>
-										{globalScale?.[index()].toFixed(1)}
-									</div>
+									<input
+										type="number"
+										value={assetData?.scale?.[index()].toFixed(1)}
+										onChange={e => updateScale(index(), e.target.valueAsNumber, assetData!, true)}
+									/>
 								</div>
 							)}
 						</For>

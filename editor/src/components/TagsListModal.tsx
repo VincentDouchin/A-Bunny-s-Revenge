@@ -40,10 +40,6 @@ export function TagsListModal({ tagsList, saveTagsList }: {
 	}
 
 	css/* css */`
-	.tags-trigger{
-		position: absolute;
-		right: 0;
-	}
 	.new-tag{
 		display: grid;
 		grid-template-columns: 1fr auto;
@@ -70,7 +66,7 @@ export function TagsListModal({ tagsList, saveTagsList }: {
 	return (
 		<Modal
 			trigger={(
-				<button onClick={() => open(!open())} class="tags-trigger">
+				<button onClick={() => open(!open())}>
 					<Fa icon={faTags}></Fa>
 				</button>
 			)}
