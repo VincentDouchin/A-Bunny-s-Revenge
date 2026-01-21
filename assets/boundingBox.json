@@ -719,5 +719,22 @@
         },
         "door": {"tags": {}},
         "marker": {"tags": {}}
+    },
+    "dungeon": {
+        "banner_green": {"tags": {}},
+        "banner_shield_red": {"tags": {}},
+        "pillar": {"tags": {}},
+        "table_long_decorated_B": {"tags": {}},
+        "table_small_decorated_C": {"tags": {}},
+        "torch_mounted": { "tags": {}, "scale": [5.798101903233528, 5.798101903233528, 5.798101903233528] },
+        "floor_tile_large": {"tags": {}},
+        "floor_tile_small": {"tags": {}},
+        "bookcase_double_decoratedA": { "tags": {}, "scale": [5, 5, 5] },
+        "sword_shield_gold": {"tags": {}},
+        "bench": {"tags": {}},
+        "banner_triple_red": {"tags": {}},
+        "floor_wood_large_dark": {"tags": {}},
+        "wall_archedwindow_gated": {"tags": {}},
+        "ceiling_tile": {"tags": {}}
     }
 }
