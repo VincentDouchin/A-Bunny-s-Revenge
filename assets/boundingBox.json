@@ -455,7 +455,8 @@
         "cellar_wall3": { "tags": {}, "scale": [5, 5, 5] },
         "cellar_wall": { "tags": {}, "scale": [5, 5, 5] },
         "cellar_wall_corner": { "tags": {}, "scale": [5, 5, 5] },
-        "scaffold1": {"tags": {}}
+        "scaffold1": {"tags": {}},
+        "ume-wood": { "tags": {}, "scale": [2.9287175957162193, 2.9287175957162193, 2.9287175957162193] }
     },
     "characters": {
         "ALICE_animated": {
@@ -735,6 +736,16 @@
         "banner_triple_red": {"tags": {}},
         "floor_wood_large_dark": {"tags": {}},
         "wall_archedwindow_gated": {"tags": {}},
-        "ceiling_tile": {"tags": {}}
+        "ceiling_tile": {"tags": {}},
+        "wall_archedwindow_open": {"tags": {}},
+        "wall_gated": {"tags": {}},
+        "barrier": {"tags": {}},
+        "column": {"tags": {}},
+        "floor_foundation_allsides": {"tags": {}},
+        "candle_lit": {"tags": {}},
+        "candle_triple": {"tags": {}},
+        "banner_thin_red": {"tags": {}},
+        "floor_foundation_front_and_sides": {"tags": {}},
+        "floor_foundation_front": {"tags": {}}
     }
 }
