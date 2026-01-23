@@ -112,9 +112,12 @@
             "scale": [7.048093222993907, 7.048093222993907, 7.048093222993907]
         },
         "gardenPlot1": {
-            "collider": { "type": "undefined", "position": {"x": 0, "y": 0, "z": 0} },
-            "secondaryColliders": [],
-            "tags": {}
+            "collider": {
+                "type": "cuboid",
+                "size": {"x": 6.195494436744686, "y": 1.4710069049450458, "z": 6.420163133477464},
+                "position": {"x": -0.026257088376254734, "y": 0.6500115581217085, "z": 0.4360650878287917}
+            },
+            "secondaryColliders": []
         },
         "keg": {
             "collider": {
