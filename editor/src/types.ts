@@ -19,10 +19,17 @@ export interface LevelEntity {
 
 type Maps = 'heightMap' | 'treeMap' | 'pathMap' | 'waterMap' | 'grassMap'
 
+export interface InstanceData {
+	category: string
+	model: string
+	entities: Array<number[]>
+	data?: Record<string, any>
+}
 export interface BaseLevel {
 	sizeX: number
 	sizeY: number
 	entities: Record<string, LevelEntity>
+	instances: Record<string, InstanceData>
 	displacementScale: number
 	floorTexture: 'planks' | 'grass'
 }

@@ -1,13 +1,14 @@
 import type { Atom } from 'solid-use/atom'
-import { faArrowsLeftRight, faArrowsUpDown } from '@fortawesome/free-solid-svg-icons'
-import Fa from 'solid-fa'
-import { For } from 'solid-js'
+import type { Vec2, Vector2 } from 'three'
+import type { AnchorX, AnchorY } from './ResizeModal'
+import { For, Show } from 'solid-js'
 import { css } from 'solid-styled'
-import { Vector2 } from 'three'
+import { ResizeModal } from './ResizeModal'
 
-export function LevelProps({ levelSize, floorTexture }: {
+export function LevelProps({ levelSize, floorTexture, resize }: {
 	levelSize: Atom<Vector2 | null>
 	floorTexture: Atom<'grass' | 'planks' | null>
+	resize: (anchorX: AnchorX, anchorY: AnchorY, mode: 'extend' | 'resize', size: Vec2) => void
 }) {
 	css/* css */`
 	.props-inputs {
@@ -22,22 +23,28 @@ export function LevelProps({ levelSize, floorTexture }: {
 		aspect-ratio: 1;
 		text-align: center;
 	}
+	.level-buttons{
+		display: grid;
+		gap: 1rem;
+		padding: 1rem;
+	}
 	`
 
 	return (
 		<section>
 			<div class="title">Level Properties</div>
-			<div class="props-inputs">
-				<div class="size-icon"><Fa icon={faArrowsLeftRight}></Fa></div>
-				<input type="number" value={levelSize()?.x} onChange={e => levelSize(new Vector2(e.target.valueAsNumber, levelSize()?.y ?? 1))} />
-				<div class="size-icon"><Fa icon={faArrowsUpDown}></Fa></div>
-				<input type="number" value={levelSize()?.y} onChange={e => levelSize(new Vector2(levelSize()?.x ?? 1, e.target.valueAsNumber))} />
-				Floor
-				<select value={floorTexture() ?? undefined} onChange={e => floorTexture(e.target.value as 'grass' | 'planks')}>
-					<For each={['grass', 'planks']}>
-						{floor => <option value={floor}>{floor}</option>}
-					</For>
-				</select>
+			<div class="level-buttons">
+				<Show when={levelSize()}>
+					{size => <ResizeModal resize={resize} size={size}></ResizeModal>}
+				</Show>
+				<div class="props-inputs">
+					Floor
+					<select value={floorTexture() ?? undefined} onChange={e => floorTexture(e.target.value as 'grass' | 'planks')}>
+						<For each={['grass', 'planks']}>
+							{floor => <option value={floor}>{floor}</option>}
+						</For>
+					</select>
+				</div>
 			</div>
 		</section>
 	)
