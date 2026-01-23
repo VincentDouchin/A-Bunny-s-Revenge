@@ -207,7 +207,7 @@
         "TreeStump": {
             "collider": {"type": "link", "category": "models", "model": "TreeStump_Moss"},
             "tags": {},
-            "scale": [22.634453186807235, 22.634453186807235, 22.634453186807235]
+            "scale": [11.54220880995721, 11.54220880995721, 11.54220880995721]
         },
         "table": {
             "collider": {
