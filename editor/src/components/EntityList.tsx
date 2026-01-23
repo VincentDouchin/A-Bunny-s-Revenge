@@ -14,43 +14,31 @@ export function EntityList({ hoveredEntity, selectedId, levelEntitiesData, remov
 	css/* css */`
 	.entity-button{
 		display: grid;
-		grid-template-columns: minmax(0, 1fr) auto;
-	}
-	.entity-buttons{
-		display: grid;
-	}
-	.entity-label{
-		text-overflow: ellipsis;
-		overflow: clip;
-	}
-	`
+		grid-template-columns: 1fr auto;
+	}`
 	return (
 		<section onMouseLeave={() => hoveredEntity(null)}>
 			<div class="title">Entities List</div>
-			<div class="entity-buttons">
-				<For each={Object.entries(levelEntitiesData)}>
-					{([id, data]) => (
-						<div class="entity-button" onMouseOver={() => hoveredEntity(id)}>
-							<button
-								onClick={() => selectedId(id)}
-								classList={{ selected: selectedId() === id }}
-								class="entity-label"
-							>
-								<span>
-									{data.category}
-									{' '}
-									-
-									{' '}
-									{data.model}
-								</span>
-							</button>
-							<button onClick={() => removeEntity(id)}>
-								<Fa icon={faTrash}></Fa>
-							</button>
-						</div>
-					)}
-				</For>
-			</div>
+			<For each={Object.entries(levelEntitiesData)}>
+				{([id, data]) => (
+					<div class="entity-button" onMouseOver={() => hoveredEntity(id)}>
+						<button
+							onClick={() => selectedId(id)}
+							classList={{ selected: selectedId() === id }}
+
+						>
+							{data.category}
+							{' '}
+							-
+							{' '}
+							{data.model}
+						</button>
+						<button onClick={() => removeEntity(id)}>
+							<Fa icon={faTrash}></Fa>
+						</button>
+					</div>
+				)}
+			</For>
 		</section>
 	)
 }

@@ -1,11 +1,10 @@
-import type { Event } from 'eventery'
 import type { Accessor, JSX } from 'solid-js'
-
 import type { Atom } from 'solid-use/atom'
+
 import type { Vec2 } from 'three'
 import { faEraser, faPen, faRotateLeft, faRotateRight } from '@fortawesome/free-solid-svg-icons'
 import Fa from 'solid-fa'
-import { createMemo, onCleanup, onMount, Show } from 'solid-js'
+import { createMemo, onMount, Show } from 'solid-js'
 import { createMutable } from 'solid-js/store'
 import { css } from 'solid-styled'
 import atom from 'solid-use/atom'
@@ -27,7 +26,8 @@ export function MapEditor({
 	eraseColor = null,
 	drawing,
 	realTimeUpdate = true,
-	redrawEvent,
+	// globalMode,
+	// globalPosition,
 }: {
 	name: string
 	backgroundColor?: string
@@ -45,7 +45,6 @@ export function MapEditor({
 	realTimeUpdate?: boolean
 	globalMode: Atom<'eraser' | 'brush' | null>
 	globalPosition: Atom<Vector2 | null>
-	redrawEvent: Event
 }) {
 	const initialUrl = atom('')
 	const getContext = (el: Accessor<HTMLCanvasElement | null>) => createMemo(() => {
@@ -186,16 +185,13 @@ export function MapEditor({
 	}
 
 	onMount(async () => {
-		const unsub = redrawEvent.subscribe(async () => {
-			initialUrl(dataUrl())
-			const finalContextValue = finalCtx()
-			if (finalContextValue) {
-				const img = await loadImage(dataUrl())
-				finalContextValue.drawImage(img, 0, 0)
-				setCanvas(finalContextValue.canvas)
-			}
-		})
-		onCleanup(unsub)
+		initialUrl(dataUrl())
+		const finalContextValue = finalCtx()
+		if (finalContextValue) {
+			const img = await loadImage(dataUrl())
+			finalContextValue.drawImage(img, 0, 0)
+			setCanvas(finalContextValue.canvas)
+		}
 	})
 
 	const undo = async () => {

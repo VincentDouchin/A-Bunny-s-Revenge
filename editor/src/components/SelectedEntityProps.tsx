@@ -1,12 +1,12 @@
 import type { Atom } from 'solid-use/atom'
 import type { AssetData, LevelEntity } from '../types'
-import { faArrowRotateBack, faClone, faLink, faLinkSlash, faTrash } from '@fortawesome/free-solid-svg-icons'
+import { faArrowRotateBack, faLink, faLinkSlash, faTrash } from '@fortawesome/free-solid-svg-icons'
 import Fa, { } from 'solid-fa'
 import { createMemo, For, Show } from 'solid-js'
 import { css } from 'solid-styled'
 import { Euler, Quaternion } from 'three'
 
-export function SelectedEntityProps({ destroy, entity, update, applyGlobalScale, assetData, scaleLock, resetScale, resetGlobalScale, duplicate }: {
+export function SelectedEntityProps({ destroy, entity, update, applyGlobalScale, assetData, scaleLock, resetScale, resetGlobalScale }: {
 	destroy: () => void
 	entity: LevelEntity
 	assetData?: AssetData
@@ -14,7 +14,6 @@ export function SelectedEntityProps({ destroy, entity, update, applyGlobalScale,
 	applyGlobalScale: () => void
 	scaleLock: Atom<boolean>
 	resetScale: () => void
-	duplicate: () => void
 	resetGlobalScale: () => void
 }) {
 	const setGrid = (key: keyof NonNullable<LevelEntity['grid']>) => (e: Event & {
@@ -85,6 +84,7 @@ export function SelectedEntityProps({ destroy, entity, update, applyGlobalScale,
 	}
 	.selected-entity-props-buttons{
 		display: grid;
+		grid-template-columns: 1fr 1fr;
 	}
 	.vec-display{
 		display: grid;
@@ -101,12 +101,6 @@ export function SelectedEntityProps({ destroy, entity, update, applyGlobalScale,
 	return (
 		<>
 			<section class="selected-entity-props-buttons">
-				<button class="icon-button" onClick={duplicate}>
-					<div class="button-content">
-						Clone
-						<Fa icon={faClone} />
-					</div>
-				</button>
 				<button class="icon-button" onClick={destroy}>
 					<div class="button-content">
 						Remove

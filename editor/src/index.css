@@ -50,11 +50,6 @@ button.selected{
   font-weight: bold;
   background: var(--color-3);
 }
-button[with-icon]{
-  display: grid;
-  grid-template-columns: auto 1fr;
-  gap: 0.5rem;
-}
 
 input{
   background-color: var(--color-2);
@@ -90,6 +85,14 @@ section{
   position: relative;
   border-radius: 5px;
   overflow: hidden
+}
+section::after{
+  border: solid 1px var(--color-4);
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: 5px;
+  pointer-events: none;
 }
 section + section {
   margin-top: 1rem;
