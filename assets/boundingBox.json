@@ -746,6 +746,7 @@
         "candle_triple": {"tags": {}},
         "banner_thin_red": {"tags": {}},
         "floor_foundation_front_and_sides": {"tags": {}},
-        "floor_foundation_front": {"tags": {}}
+        "floor_foundation_front": {"tags": {}},
+        "rocks_gold": {"tags": {}}
     }
 }
