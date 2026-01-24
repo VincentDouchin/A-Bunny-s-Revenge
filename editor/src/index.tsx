@@ -16,7 +16,7 @@ render(() => {
 	const loaded = atom(false)
 	const assets = atom<Awaited<ReturnType<typeof loadAssets>> | null>(null)
 	onMount(async () => {
-		assets(await loadAssets(thumbnailRenderer, true))
+		assets(await loadAssets(thumbnailRenderer))
 		for (const key in assets()) {
 			const category = assets()?.[key as keyof typeof assets]
 			const cat = category as unknown as Record<string, any>

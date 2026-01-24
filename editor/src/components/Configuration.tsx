@@ -1,6 +1,6 @@
 import type { Atom } from 'solid-use/atom'
 import { faGithub } from '@fortawesome/free-brands-svg-icons'
-import { faCheck, faCloudArrowUp, faDownload, faExclamationTriangle, faFolderOpen, faSpinner } from '@fortawesome/free-solid-svg-icons'
+import { faCloudArrowUp, faDownload, faExclamationTriangle, faFolderOpen, faSpinner } from '@fortawesome/free-solid-svg-icons'
 import { path } from '@tauri-apps/api'
 import { invoke } from '@tauri-apps/api/core'
 import { listen } from '@tauri-apps/api/event'
@@ -161,10 +161,7 @@ export function Configuration({ folder, reload, repoCloned, saveLevel }: {
 		})
 		downloadModalOpen(false)
 	}
-	const pushingChanges = atom<'in_progress' | 'success' | null>(null)
 	const pushChanges = async () => {
-		if (pushingChanges() !== null) return
-		pushingChanges('in_progress')
 		await pullLatest(folder)
 		await saveLevel()
 		try {
@@ -177,8 +174,6 @@ export function Configuration({ folder, reload, repoCloned, saveLevel }: {
 			})
 			// eslint-disable-next-line no-alert
 			alert('Changes pushed successfully!')
-			pushingChanges('success')
-			setTimeout(() => pushingChanges(null), 2000)
 		} catch (err) {
 			console.error(err)
 			// eslint-disable-next-line no-alert
@@ -245,20 +240,6 @@ export function Configuration({ folder, reload, repoCloned, saveLevel }: {
 		display: grid;
 		grid-template-columns: 1fr 1fr 1fr 1fr;
 	}
-	@keyframes fa-spin{
-		0% {
-    		transform: rotate(0deg);
-		}
-		100% {
-			transform: rotate(1turn);
-		}
-	}
-	.spinner{
-		animation-name: fa-spin;
-		animation-duration: 2s;
-		animation-iteration-count: infinite;
-		animation-timing-function: linear;
-	}
 	`
 
 	return (
@@ -268,17 +249,7 @@ export function Configuration({ folder, reload, repoCloned, saveLevel }: {
 					<Fa size="lg" icon={faFolderOpen}></Fa>
 				</button>
 				<button onClick={pushChanges} title="Upload changes">
-					<Show when={pushingChanges() === null}>
-						<Fa size="lg" icon={faCloudArrowUp}></Fa>
-					</Show>
-					<Show when={pushingChanges() === 'success'}>
-						<Fa size="lg" icon={faCheck}></Fa>
-					</Show>
-					<Show when={pushingChanges() === 'in_progress'}>
-						<div class="spinner">
-							<Fa size="lg" icon={faSpinner}></Fa>
-						</div>
-					</Show>
+					<Fa size="lg" icon={faCloudArrowUp}></Fa>
 				</button>
 				<Modal
 					trigger={(

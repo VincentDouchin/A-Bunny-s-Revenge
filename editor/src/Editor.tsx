@@ -25,6 +25,7 @@ import { CSS2DObject, CSS2DRenderer } from 'three/examples/jsm/renderers/CSS2DRe
 import { clone } from 'three/examples/jsm/utils/SkeletonUtils'
 import { generateUUID } from 'three/src/math/MathUtils'
 import { InstancedModel } from '@/global/assetLoaders'
+import { doorSide } from '@/states/game/doorModel'
 import { RapierDebugRenderer } from '../../src/lib/debugRenderer'
 import { GroundMaterial, WaterMaterial } from '../../src/shaders/materials'
 import { getGrass, getTrees, setDisplacement } from '../../src/states/game/spawnTrees'
@@ -843,7 +844,19 @@ export function Editor({ entities, thumbnailRenderer, assets }: {
 		loaded(true)
 	}
 
-	onMount(() => {
+	onMount(async () => {
+		const marker = new Mesh(new SphereGeometry(3), new MeshBasicMaterial())
+		const arrow = new Mesh(new ConeGeometry(2, 5), new MeshBasicMaterial({ color: 0xFF0000 }))
+		arrow.position.set(0, 0, 3)
+		arrow.rotateX(Math.PI / 2)
+		marker.add(arrow)
+		const boxGroup = new Group()
+		const box = new Mesh(new BoxGeometry(1, 1), new MeshBasicMaterial({ color: 0xFF0000, transparent: true, opacity: 1 }))
+		box.position.y = 0.5
+		boxGroup.add(box)
+		const door = doorSide()
+		entities.markers = { box: boxGroup, marker, door }
+
 		reload(folder)
 	})
 	renderer.setAnimationLoop(() => {
@@ -895,7 +908,7 @@ export function Editor({ entities, thumbnailRenderer, assets }: {
 			if (mode === 'extend') {
 				ctx.drawImage(canvasValue, offsetX, offsetY, oldSize.x, oldSize.y)
 			} else {
-				ctx.drawImage(canvasValue, 0, 0, size.x, size.y)
+				ctx.drawImage(canvasValue, 0, 0, size.x, size.y, 0, 0, size.x, size.y)
 			}
 			canvasValue.width = size.x
 			canvasValue.height = size.y

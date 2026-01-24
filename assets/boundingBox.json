@@ -200,14 +200,15 @@
             "collider": {
                 "type": "cylinder",
                 "size": {"x": 0.8223618635682411, "y": 0.6215806935629734},
-                "position": {"x": 0, "y": 0, "z": 0}
+                "position": {"x": 0, "y": 0.3107903467814867, "z": 0}
             },
-            "secondaryColliders": []
+            "secondaryColliders": [],
+            "tags": {}
         },
         "TreeStump": {
             "collider": {"type": "link", "category": "models", "model": "TreeStump_Moss"},
             "tags": {},
-            "scale": [11.54220880995721, 11.54220880995721, 11.54220880995721]
+            "scale": [9.902639706270525, 9.902639706270525, 9.902639706270525]
         },
         "table": {
             "collider": {
