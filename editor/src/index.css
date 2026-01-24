@@ -55,6 +55,14 @@ button[with-icon]{
   grid-template-columns: auto 1fr;
   gap: 0.5rem;
 }
+.button-group > button:not(:last-child){
+  border-bottom-right-radius: 0;
+  border-top-right-radius: 0;
+}
+.button-group > button:not(:first-child){
+  border-bottom-left-radius: 0;
+  border-top-left-radius: 0;
+}
 
 input{
   background-color: var(--color-2);

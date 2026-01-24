@@ -81,7 +81,7 @@ export function LevelSelector({ loadLevel, selectedLevel, folder, fetchLevels, l
 			<For each={levels()}>
 				{(level) => {
 					return (
-						<div class="level">
+						<div class="level button-group">
 							<button classList={{ selected: selectedLevel() === level }} onClick={() => loadLevel(level)}>{level}</button>
 							<button onClick={() => deleteLevel(level)}><Fa icon={faTrash} /></button>
 							<button onClick={() => reset(level)}><Fa icon={faArrowRotateBack} /></button>

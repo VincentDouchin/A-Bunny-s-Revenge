@@ -30,7 +30,7 @@ export function EntityList({ hoveredEntity, selectedId, levelEntitiesData, remov
 			<div class="entity-buttons">
 				<For each={Object.entries(levelEntitiesData)}>
 					{([id, data]) => (
-						<div class="entity-button" onMouseOver={() => hoveredEntity(id)}>
+						<div class="entity-button button-group" onMouseOver={() => hoveredEntity(id)}>
 							<button
 								onClick={() => selectedId(id)}
 								classList={{ selected: selectedId() === id }}

@@ -255,15 +255,16 @@ export function Configuration({ folder, reload, repoCloned, saveLevel }: {
 	}
 	.spinner{
 		animation-name: fa-spin;
-		animation-duration: 2s;
-		animation-iteration-count: infinite;
-		animation-timing-function: linear;
+    	animation-direction: normal;
+    	animation-duration: 1.5s;
+    	animation-iteration-count: infinite;
+    	animation-timing-function: steps(8);
 	}
 	`
 
 	return (
 		<>
-			<section class="config-buttons">
+			<section class="config-buttons button-group">
 				<button title="open folder" onClick={openFolder}>
 					<Fa size="lg" icon={faFolderOpen}></Fa>
 				</button>
