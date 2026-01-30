@@ -1,33 +1,28 @@
-import type { Tags } from '@assets/tagsList'
-import type { BufferGeometry, Material, Object3D, Vec2 } from 'three'
-import type { ThumbnailRenderer } from '../../src/lib/thumbnailRenderer'
-import type { AnchorX, AnchorY } from './components/ResizeModal'
-import type { AssetData, EditorTags, InstanceData, LevelData, LevelEntity } from './types'
+import { InstancedModel } from '@/global/assetLoaders'
 import type { loadAssets } from '@/global/assets'
+import type { Tags } from '@assets/tagsList'
 import { init, World } from '@dimforge/rapier3d-compat'
 import { faArrowsRotate, faArrowsUpDownLeftRight, faEarth, faLocationArrow, faLock, faLockOpen, faMaximize } from '@fortawesome/free-solid-svg-icons'
-import { trackDeep, trackStore } from '@solid-primitives/deep'
+import { trackDeep } from '@solid-primitives/deep'
 import { debounce, throttle } from '@solid-primitives/scheduled'
 import { makePersisted } from '@solid-primitives/storage'
 import { Event } from 'eventery'
 import { get, set } from 'idb-keyval'
+import type { NavMesh } from 'navcat'
 import Fa from 'solid-fa'
 import { createEffect, createMemo, createSignal, For, on, onCleanup, onMount, Show } from 'solid-js'
 import { createMutable, modifyMutable, reconcile, unwrap } from 'solid-js/store'
 import { Portal } from 'solid-js/web'
 import { css } from 'solid-styled'
 import atom from 'solid-use/atom'
-import { AmbientLight, BoxGeometry, CanvasTexture, ConeGeometry, GridHelper, Group, Matrix4, Mesh, MeshBasicMaterial, MeshStandardMaterial, MeshToonMaterial, PerspectiveCamera, PlaneGeometry, Quaternion, Raycaster, Scene, SphereGeometry, Vector2, Vector3, WebGLRenderer } from 'three'
-import { MapControls } from 'three/examples/jsm/controls/MapControls'
-import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls'
-import { TransformControls } from 'three/examples/jsm/controls/TransformControls'
-import { CSS2DObject, CSS2DRenderer } from 'three/examples/jsm/renderers/CSS2DRenderer'
-import { clone } from 'three/examples/jsm/utils/SkeletonUtils'
-import { generateUUID } from 'three/src/math/MathUtils'
-import { InstancedModel } from '@/global/assetLoaders'
+import type { BufferGeometry, Material, Object3D, Vec2 } from 'three'
+import { AmbientLight, CanvasTexture, GridHelper, Group, Matrix4, Mesh, MeshBasicMaterial, MeshStandardMaterial, MeshToonMaterial, PerspectiveCamera, PlaneGeometry, Quaternion, Raycaster, Scene, SphereGeometry, Vector2, Vector3, WebGLRenderer } from 'three'
+import { CSS2DObject, CSS2DRenderer, MapControls, OrbitControls, SkeletonUtils, TransformControls } from 'three-stdlib'
+import { generateUUID } from 'three/src/math/MathUtils.js'
 import { RapierDebugRenderer } from '../../src/lib/debugRenderer'
+import type { ThumbnailRenderer } from '../../src/lib/thumbnailRenderer'
 import { GroundMaterial, WaterMaterial } from '../../src/shaders/materials'
-import { getGrass, getTrees, setDisplacement } from '../../src/states/game/spawnTrees'
+import { getTrees, setDisplacement } from '../../src/states/game/spawnTrees'
 import { Configuration } from './components/Configuration'
 import { EntitySelector } from './components/EntitiySelector'
 import { EntityList } from './components/EntityList'
@@ -37,9 +32,12 @@ import { LevelSelector } from './components/LevelSelector'
 import { MapEditor } from './components/MapEditor'
 import { RangeInput } from './components/RangeInput'
 import { Renderer } from './components/Renderer'
+import type { AnchorX, AnchorY } from './components/ResizeModal'
 import { SelectedEntityProps } from './components/SelectedEntityProps'
 import { TagsEditor } from './components/TagsEditor'
 import { createFolder, isRepoCloned, loadBoundingBox, loadLevel, loadLevels, loadTagsList, saveBoundingBox, saveLevelFile, saveTagsList } from './lib/fileOperations'
+import { floodFill, generateNavMesh, getMesh } from './lib/navMesh'
+import type { AssetData, EditorTags, InstanceData, LevelData, LevelEntity } from './types'
 
 export const BOUNDING_BOX_FILE_PATH = 'assets/boundingBox.json'
 await init()
@@ -74,7 +72,7 @@ export function Editor({ entities, thumbnailRenderer, assets }: {
 	const tagsContainers = createMutable<Record<string, CSS2DObject>>({})
 	const selectedId = atom<string | null>(null)
 
-	const transformControls = new TransformControls(camera, renderer.domElement)
+	const t = new TransformControls<PerspectiveCamera>(camera, renderer.domElement)
 	const transformControlsMode = atom<'translate' | 'scale' | 'rotate'>('translate')
 
 	const displacementScale = atom<number | null>(null)
@@ -94,7 +92,7 @@ export function Editor({ entities, thumbnailRenderer, assets }: {
 	const grassCanvas = atom<HTMLCanvasElement | null>(null, () => false)
 	const grassMap = atom<string>('')
 	let treeGroup: Object3D | null = null
-	let grassGroup: Object3D | null = null
+	// let grassGroup: Object3D | null = null
 	onCleanup(() => {
 		renderer.dispose()
 		thumbnailRenderer.dispose()
@@ -124,6 +122,8 @@ export function Editor({ entities, thumbnailRenderer, assets }: {
 	const repetitions: Record<string, Record<string, Object3D>> = {}
 
 	const group = new Group()
+	const helperGroup = new Group()
+	scene.add(helperGroup)
 	const groundMaterial = new MeshStandardMaterial({ transparent: true, opacity: 0 })
 	const groundGeometry = new PlaneGeometry(1, 1)
 	const groundMesh = new Mesh<BufferGeometry, Material>(groundGeometry, groundMaterial)
@@ -182,7 +182,7 @@ export function Editor({ entities, thumbnailRenderer, assets }: {
 			scene.add(new AmbientLight(0xFFFFFF, 1))
 			camera.position.set(0, 10, 5)
 			scene.add(debugRenderer)
-			transformControls.detach()
+			t.detach()
 
 			const grid = new GridHelper(10, 10)
 			scene.add(grid)
@@ -239,46 +239,7 @@ export function Editor({ entities, thumbnailRenderer, assets }: {
 		}
 	})
 
-	const addTransformControls = (): [Mesh, TransformControls] => {
-		const dummyMesh = new Mesh(new BoxGeometry(1, 1, 1), new MeshBasicMaterial({ transparent: true, opacity: 0, color: 0xFFFFFF }))
-		const transformControls = new TransformControls(camera, renderer.domElement)
-		transformControls.attach(dummyMesh)
-		scene.add(dummyMesh, transformControls)
-		let prevOrbit: boolean | null = null
-		let prevMap: boolean | null = null
-		transformControls.addEventListener('axis-changed', ({ value }) => {
-			if (value === null && typeof prevOrbit === 'boolean' && typeof prevMap === 'boolean') {
-				orbitControls.enabled = prevOrbit
-				mapControls.enabled = prevMap
-				prevOrbit = null
-				prevMap = null
-			} else {
-				prevOrbit ??= orbitControls.enabled
-				prevMap ??= mapControls.enabled
-				orbitControls.enabled = false
-				mapControls.enabled = false
-			}
-		})
-		return [dummyMesh, transformControls]
-	}
-
-	// const resizeCanvas = (canvas: Atom<HTMLCanvasElement | null>, dataUrl: Atom<string>, size: Vector2) => {
-	// 	const canvasElement = canvas()
-	// 	if (!canvasElement) return
-	// 	const newCanvas = getScreenBuffer(size.x, size.y)
-	// 	newCanvas.drawImage(canvasElement, 0, 0, canvasElement.width, canvasElement.height, 0, 0, size.x, size.y)
-	// 	const url = newCanvas.canvas.toDataURL()
-	// 	canvas(newCanvas.canvas)
-	// 	dataUrl(url)
-	// }
-	// createEffect(on(levelSize, (size) => {
-	// 	if (!size) return
-	// 	resizeCanvas(heightCanvas, heightMap, size)
-	// 	resizeCanvas(pathCanvas, pathMap, size)
-	// 	resizeCanvas(grassCanvas, grassMap, size)
-	// 	resizeCanvas(waterCanvas, waterMap, size)
-	// 	resizeCanvas(treeCanvas, treeMap, size)
-	// }))
+	const transformControls = new TransformControls(camera, renderer.domElement)
 
 	createEffect(on(
 		() => [heightCanvas(), levelSize(), waterCanvas(), displacementScale()],
@@ -294,7 +255,44 @@ export function Editor({ entities, thumbnailRenderer, assets }: {
 			waterMesh.position.set(0, 0, scale / 2 - 2)
 		},
 	))
+	const completeNavMesh = atom<NavMesh | null>(null)
+	let navMeshHelperObj: Object3D | null = null
+	let navMesh: NavMesh | null = null
+	const addNavMesh = () => {
+		const meshes: Mesh<BufferGeometry>[] = [groundMesh]
+		for (const id in levelEntitiesData) {
+			const data = levelEntitiesData[id]
+			const matrix = new Matrix4().compose(
+				new Vector3().fromArray(data.position),
+				new Quaternion().fromArray(data.rotation),
+				new Vector3().fromArray(data.scale),
+			)
+			const bb = boundingBox?.[data.category]?.[data.model]
 
+			const mesh = getMesh(bb, matrix)
+			if (mesh) {
+				helperGroup.add(mesh)
+				meshes.push(mesh)
+			}
+		}
+		for (const key in instances) {
+			const instance = instances[key]
+			for (const matrixArray of instance.entities) {
+				const matrix = new Matrix4().fromArray(matrixArray)
+				const bb = boundingBox?.[instance.category]?.[instance.model]
+				const mesh = getMesh(bb, matrix)
+				if (mesh) {
+					helperGroup.add(mesh)
+					meshes.push(mesh)
+				}
+			}
+		}
+		const res = generateNavMesh(meshes)
+		navMesh = res.navMesh
+		navMeshHelperObj?.removeFromParent()
+		navMeshHelperObj = res.navMeshHelper.object
+		scene.add(navMeshHelperObj)
+	}
 	createEffect(on(treeCanvas, (tCanvas) => {
 		if (tCanvas) {
 			const hCanvas = heightCanvas()
@@ -322,9 +320,10 @@ export function Editor({ entities, thumbnailRenderer, assets }: {
 					model: modelName,
 					entities: [],
 				}
-				const instancedModel = new InstancedModel(assets.trees[modelName].scene)
+				const instancedModel = new InstancedModel(SkeletonUtils.clone((assets.trees[modelName] as any).scene))
 				for (const tree of trees[i]) {
-					const instanceHandle = instancedModel.addInstance(new Matrix4().fromArray(tree.matrix.toArray()))
+					const m4 = new Matrix4().fromArray(tree.matrix.toArray())
+					const instanceHandle = instancedModel.addInstance(m4)
 					let key = modelName
 					if (tree.transparent) {
 						instanceHandle.setUniform('transparent', 1)
@@ -341,20 +340,20 @@ export function Editor({ entities, thumbnailRenderer, assets }: {
 		}
 	}))
 
-	createEffect(on(grassCanvas, (gCanvas) => {
-		const hCanvas = heightCanvas()
-		const scale = displacementScale()
-		if (!hCanvas || !gCanvas || !scale) return
-		const [grass, flowers] = ['Grass_', 'Flower_'].map(name => Object.entries(entities.vegetation).reduce<Object3D[]>((acc, [modelName, model]) => {
-			if (modelName.includes(name)) acc.push(model)
-			return acc
-		}, []))
-		const { process } = getGrass(grass, flowers, hCanvas, gCanvas, 5, scale)
-		const newGrassGroup = process()
-		group.add(newGrassGroup)
-		grassGroup?.removeFromParent()
-		grassGroup = newGrassGroup
-	}))
+	// createEffect(on(grassCanvas, (gCanvas) => {
+		// const hCanvas = heightCanvas()
+		// const scale = displacementScale()
+		// if (!hCanvas || !gCanvas || !scale) return
+		// const [grass, flowers] = ['Grass_', 'Flower_'].map(name => Object.entries(entities.vegetation).reduce<Object3D[]>((acc, [modelName, model]) => {
+		// 	if (modelName.includes(name)) acc.push(model)
+		// 	return acc
+		// }, []))
+		// const { process } = getGrass(grass, flowers, hCanvas, gCanvas, 5, scale)
+		// const newGrassGroup = process()
+		// group.add(newGrassGroup)
+		// grassGroup?.removeFromParent()
+		// grassGroup = newGrassGroup
+	// }))
 	const getWoodFlooring = ({ x, y }: { x: number, y: number }) => {
 		const map = assets.textures.planks
 		map.repeat.set(x / 32, y / 32)
@@ -386,10 +385,12 @@ export function Editor({ entities, thumbnailRenderer, assets }: {
 		waterMesh.material = new WaterMaterial({ map: new CanvasTexture(canvas) }).setUniforms({ size, time: 1 })
 	}))
 
-	transformControls.addEventListener('axis-changed', ({ value }) => {
-		mapControls.enabled = value === null
+	;(t as any).addEventListener('axis-changed', (e: { value: string }) => {
+		mapControls.enabled = e.value === null && mode() === 'level'
+		orbitControls.enabled = e.value === null && mode() === 'entity'
+
 		const id = selectedId()
-		if (value === null && id) {
+		if (e.value === null && id) {
 			levelEntitiesData[id].position = levelEntities[id].position.toArray()
 			levelEntitiesData[id].scale = levelEntities[id].scale.clone().divide(getGlobalScale(id)).toArray()
 			levelEntitiesData[id].rotation = new Quaternion().setFromEuler(levelEntities[id].rotation).toArray()
@@ -436,7 +437,7 @@ export function Editor({ entities, thumbnailRenderer, assets }: {
 	createEffect(on(model, (obj) => {
 		if (obj && mode() === 'level') {
 			tempModel()?.removeFromParent()
-			const cloneModel = clone(obj)
+			const cloneModel = SkeletonUtils.clone(obj)
 			scene.add(cloneModel)
 			cloneModel.visible = false
 			const category = selectedCategory()
@@ -452,14 +453,23 @@ export function Editor({ entities, thumbnailRenderer, assets }: {
 	}))
 
 	const onPointerDown = (e: PointerEvent) => {
+		const pos = getMousePosition(e)
+		if (navMesh && pos) {
+			const ray = new Raycaster()
+			ray.setFromCamera(new Vector2(pos.x, pos.y), camera)
+			group.visible = false
+			navMeshHelperObj?.removeFromParent()
+			helperGroup.children.forEach(c => c.removeFromParent())
+			floodFill(scene, ray, navMesh)
+			completeNavMesh(navMesh)
+		}
 		if (mode() === 'level' && !drawing()) {
 			if (e.buttons === 1) {
 				const model = tempModel()
-				const pos = getMousePosition(e)
 				const category = selectedCategory()
 				const asset = selectedAsset()
 				if (model && category && asset) {
-					const entity = clone(model)
+					const entity = SkeletonUtils.clone(model)
 					scene.add(entity)
 					const id = generateUUID()
 					levelEntities[id] = entity
@@ -491,12 +501,12 @@ export function Editor({ entities, thumbnailRenderer, assets }: {
 	}
 	createEffect(on(selectedId, (id) => {
 		if (!id) {
-			transformControls.detach()
+			t.detach()
 		} else {
 			const entity = levelEntities[id]
-			transformControls.attach(entity)
+			t.attach(entity)
 			transformControlsMode('translate')
-			scene.add(transformControls)
+			scene.add(t)
 			selectedCategory(levelEntitiesData[id].category)
 		}
 	}))
@@ -517,17 +527,18 @@ export function Editor({ entities, thumbnailRenderer, assets }: {
 			case 'r':return	transformControlsMode('rotate')
 		}
 	}
-	createEffect(() => transformControls.setMode(transformControlsMode()))
+	createEffect(() => t.setMode(transformControlsMode()))
 
 	const setMaxScale = () => {
-		if (transformControls.axis && transformControls.mode === 'scale' && scaleLock()) {
-			const axis = [...transformControls.axis?.toLowerCase()].filter(axis => ['x', 'y', 'z'].includes(axis)) as Array<'x' | 'y' | 'z'>
-			const max = Math.max(...axis.map(axis => transformControls.object?.scale[axis] ?? 0))
-			transformControls.object?.scale.setScalar(max)
+		const t = transformControls as any
+		if (t.axis && t.getMode() === 'scale' && scaleLock() && mode() === 'level') {
+			const axis = [...t.axis?.toLowerCase()].filter(axis => ['x', 'y', 'z'].includes(axis)) as Array<'x' | 'y' | 'z'>
+			const max = Math.max(...axis.map(axis => t.object?.scale[axis] ?? 0))
+			t.object?.scale.setScalar(max)
 		}
 	}
 	createEffect(on(scaleLock, setMaxScale))
-	transformControls.addEventListener('change', setMaxScale)
+	t.addEventListener('change', setMaxScale)
 	onMount(() => window.addEventListener('keydown', changeMode))
 	onCleanup(() => window.removeEventListener('keydown', changeMode))
 
@@ -564,6 +575,7 @@ export function Editor({ entities, thumbnailRenderer, assets }: {
 				grassMap: grass,
 				floorTexture: floorTextureValue,
 				instances: unwrap(instances),
+				navMesh: completeNavMesh(),
 			}
 		}
 		return null
@@ -577,7 +589,7 @@ export function Editor({ entities, thumbnailRenderer, assets }: {
 			if (!existingEntity) {
 				const model = entities?.[entityData.category]?.[entityData.model]
 
-				const cloned = clone(model)
+				const cloned = SkeletonUtils.clone(model)
 
 				const obj = new CSS2DObject(document.createElement('div'))
 				tagsContainers[id] = obj
@@ -599,7 +611,7 @@ export function Editor({ entities, thumbnailRenderer, assets }: {
 					for (let y = 0; y <= entityData.grid.repetitionY; y++) {
 						if (!(x === 0 && y === 0)) {
 							const key = `${x}-${y}`
-							prevData[key] ??= clone(model)
+							prevData[key] ??= SkeletonUtils.clone(model)
 							newData[key] = prevData[key]
 							const repetition = newData[key]
 							existingEntity.add(repetition)
@@ -643,6 +655,7 @@ export function Editor({ entities, thumbnailRenderer, assets }: {
 		pathMap('')
 		waterMap('')
 		grassMap('')
+		completeNavMesh(null)
 		treeCanvas(null)
 		heightCanvas(null)
 		pathCanvas(null)
@@ -661,7 +674,7 @@ export function Editor({ entities, thumbnailRenderer, assets }: {
 		waterMap(data.waterMap)
 		grassMap(data.grassMap)
 		levelSize(new Vector2(data.sizeX, data.sizeY))
-
+		completeNavMesh(data.navMesh)
 		orbitControls.enabled = false
 		mapControls.enabled = true
 		scene.add(camera)
@@ -800,7 +813,7 @@ export function Editor({ entities, thumbnailRenderer, assets }: {
 		}
 	}, 500)
 	createEffect(() => {
-		trackStore(boundingBox)
+		trackDeep(boundingBox)
 		saveBoundingBoxDebounced()
 	})
 	const saveTagsListfn = (tags: EditorTags) => {
@@ -1025,6 +1038,7 @@ export function Editor({ entities, thumbnailRenderer, assets }: {
 						<Show when={mode() === 'level'}>
 							<Show when={!selectedId()}>
 								<LevelProps
+									addNavMesh={addNavMesh}
 									resize={resize}
 									levelSize={levelSize}
 									floorTexture={floorTexture}
@@ -1077,6 +1091,8 @@ export function Editor({ entities, thumbnailRenderer, assets }: {
 						</Show>
 						<Show when={mode() === 'entity'}>
 							<EntityProps
+								scene={scene}
+								transformControls={t}
 								saveTagsList={saveTagsListfn}
 								tagsList={tagsList}
 								debugRenderer={debugRenderer}
@@ -1086,7 +1102,6 @@ export function Editor({ entities, thumbnailRenderer, assets }: {
 								selectedCategory={selectedCategory}
 								model={model}
 								world={world}
-								addTransformControls={addTransformControls}
 								entities={entities}
 							/>
 						</Show>

@@ -1,37 +1,51 @@
 import type { Tags } from '@assets/tagsList'
-import type { World } from '@dimforge/rapier3d-compat'
+import type { Collider, World } from '@dimforge/rapier3d-compat'
 import type { Accessor } from 'solid-js'
+
 import type { Atom } from 'solid-use/atom'
-import type { Mesh, Object3D } from 'three'
-import type { TransformControls } from 'three/examples/jsm/controls/TransformControls'
+import type { Object3D, Scene, Vector3Like } from 'three'
+import type { TransformControls } from 'three-stdlib'
 import type { AssetData, EditorTags } from '../types'
+// import type { TransformControls } from 'three/examples/jsm/controls/TransformControls'
 import type { RapierDebugRenderer } from '@/lib/debugRenderer'
-import { Ball, Capsule, ColliderDesc, Cuboid, Cylinder, RigidBodyDesc } from '@dimforge/rapier3d-compat'
+import { ColliderDesc, RigidBodyDesc } from '@dimforge/rapier3d-compat'
 import { faA } from '@fortawesome/free-solid-svg-icons'
-import { trackDeep } from '@solid-primitives/deep'
+import { debounce } from '@solid-primitives/scheduled'
 import Fa from 'solid-fa'
-import { createEffect, createMemo, For, on, onCleanup, onMount, Show, untrack } from 'solid-js'
-import { createMutable, unwrap } from 'solid-js/store'
+import { createEffect, createMemo, For, on, onCleanup, onMount, Show } from 'solid-js'
 import { css } from 'solid-styled'
+
 import atom from 'solid-use/atom'
-import { Box3, Vector3 } from 'three'
+import { Box3, BoxGeometry, CapsuleGeometry, CylinderGeometry, Group, Mesh, MeshBasicMaterial, SphereGeometry, Vector3 } from 'three'
 import { entries } from '../../../src/utils/mapFunctions'
 import { TagsEditor } from './TagsEditor'
 
 type Shape = 'cuboid' | 'ball' | 'capsule' | 'cylinder'
 
-export function EntityProps({ world, model, selectedCategory, selectedAsset, addTransformControls, boundingBox, entities, transformControlsMode, debugRenderer, tagsList, saveTagsList }: {
+export function EntityProps({
+	model,
+	selectedCategory,
+	selectedAsset,
+	boundingBox,
+	entities,
+	tagsList,
+	saveTagsList,
+	transformControls,
+	scene,
+	world,
+}: {
 	world: World
 	model: Accessor<Object3D | null>
 	selectedCategory: Accessor<string | null>
 	selectedAsset: Accessor<string | null>
-	addTransformControls: () => [Mesh, TransformControls]
 	boundingBox: Record<string, Record<string, AssetData>>
 	entities: Record<string, Record<string, Object3D>>
 	transformControlsMode: Atom<'translate' | 'scale' | 'rotate'>
 	debugRenderer: RapierDebugRenderer
 	tagsList: Atom<EditorTags>
 	saveTagsList: (tags: EditorTags) => void
+	transformControls: TransformControls
+	scene: Scene
 }) {
 	const colliderShapes: Record<string, Shape | undefined> = {
 		None: undefined,
@@ -40,132 +54,145 @@ export function EntityProps({ world, model, selectedCategory, selectedAsset, add
 		Capsule: 'capsule',
 		Cylinder: 'cylinder',
 	}
+	const group = new Group()
+	let mesh: Object3D | null = null
 	const body = world.createRigidBody(RigidBodyDesc.fixed())
-	const collider = world.createCollider(ColliderDesc.ball(1), body)
-	let dummy: Mesh | null = null
-	let transformControls: TransformControls | null = null
+	let collider: Collider | null = null
+	onMount(() => {
+		scene.add(group)
+	})
+	onCleanup(() => {
+		group.removeFromParent()
+	})
 
-	const size = createMutable({ x: 1, y: 1, z: 1 })
-	const position = createMutable({ x: 0, y: 0, z: 0 })
 	const selectedShape = atom<Shape | 'link' | undefined>(undefined)
 	const linkedCategory = atom<string | null>(null)
 	const linkedModel = atom<string | null>(null)
 	const tags = atom<Partial<Tags>>({})
-
-	const sizeOffet = createMemo(() => {
+	const size = atom<Vector3Like | null>(null)
+	const position = atom<Vector3Like | null>(null)
+	const geo = createMemo(() => {
 		switch (selectedShape()) {
-			case 'ball' :return size.x / 2
-			case 'cuboid' : return size.y / 2
-			case 'capsule' : return size.y / 2 + size.x / 2
-			case 'cylinder' : return size.y / 2
-		}
-		return null
-	})
-	const updateDummy = () => {
-		if (dummy) {
-			if (transformControlsMode() === 'scale') {
-				size.x = Math.abs(dummy.scale.x)
-				size.y = Math.abs(dummy.scale.y)
-				size.z = Math.abs(dummy.scale.z)
-			}
-			if (transformControlsMode() === 'translate') {
-				position.x = dummy.position.x
-				position.y = dummy.position.y
-				position.z = dummy.position.z
-			}
-		}
-	}
-
-	createEffect(() => {
-		const y = sizeOffet()
-		if (y !== null) {
-			transformControls?.removeEventListener('change', updateDummy)
-			dummy?.position.setY(y)
-			body.setTranslation({ x: 0, y, z: 0 }, true)
-			transformControls?.addEventListener('change', updateDummy)
+			case 'ball': return new SphereGeometry(0.5)
+			case 'capsule': return new CapsuleGeometry(0.5)
+			case 'cuboid': return new BoxGeometry()
+			case 'cylinder': return new CylinderGeometry(0.5, 0.5)
+			default: return null
 		}
 	})
-
-	const colliderShape = createMemo(() => {
+	const computedSize = createMemo(() => {
+		const s = size()
+		if (!s) return null
 		switch (selectedShape()) {
-			case 'cuboid': return new Cuboid(size.x / 2, size.y / 2, size.z / 2)
-			case 'ball': return new Ball(size.x / 2)
-			case 'capsule':return new Capsule(size.y / 2, size.x / 2)
-			case 'cylinder':return new Cylinder(size.y / 2, size.x / 2)
+			case 'ball': return { x: s.x, y: s.x, z: s.x }
+			case 'cylinder':
+			case 'capsule': return { x: s.x, y: s.y, z: s.x }
+			default: return s
 		}
-		return null
+	})
+	const colShape = createMemo(() => {
+		const size = computedSize()
+		if (!size) return null
+		switch (selectedShape()) {
+			case 'ball': return ColliderDesc.ball(size.x)
+			case 'capsule': return ColliderDesc.capsule(size.x, size.y)
+			case 'cuboid': return ColliderDesc.cuboid(size.x / 2, size.y / 2, size.z / 2)
+			case 'cylinder': return ColliderDesc.cylinder(size.y / 2, size.x / 2)
+			default: return null
+		}
 	})
 
-	let loading = true
-	const setExistingBoundingBox = () => {
-		const b = untrack(() => boundingBox)
-		loading = true
-		selectedShape(undefined)
+	const update = debounce(() => {
+		if (mesh) {
+			size({ x: mesh.scale.x, y: mesh.scale.y, z: mesh.scale.z })
+			position({ x: mesh.position.x, y: mesh.position.y, z: mesh.position.z })
+		}
+	}, 100)
 
-		transformControls?.detach()
-		transformControls?.removeFromParent()
-		transformControls?.removeEventListener('change', updateDummy)
-		dummy?.removeFromParent()
+	onMount(() => {
+		transformControls.addEventListener('change', update)
+	})
+	onCleanup(() => {
+		transformControls.removeEventListener('change', update)
+	})
 
-		const category = selectedCategory()
-		const asset = selectedAsset()
-		position.x = 0
-		position.y = 0
-		position.z = 0
-		size.x = 1
-		size.y = 1
-		size.z = 1
-		if (category && asset) {
-			const entity = b?.[category]?.[asset]
-			const box = entity?.collider
-			tags(entity?.tags ? entity.tags : {})
-			if (box && box.type !== 'link') {
-				selectedShape(box.type)
-				size.x = box.size.x
-				size.y = box.size.y ?? box.size.x
-				size.z = box.size.z ?? box.size.x
-				position.x = box.position.x
-				position.y = box.position.y
-				position.z = box.position.z
-			} else if (box?.type === 'link') {
-				selectedShape(box.type)
-				linkedCategory(box.category)
-				linkedModel(box.model)
+	createEffect(on(
+		() => [selectedCategory(), selectedAsset()],
+		() => {
+			selectedShape(undefined)
+			transformControls.detach()
+			const category = selectedCategory()
+			const asset = selectedAsset()
+			if (category && asset) {
+				boundingBox[category] ??= {}
+				boundingBox[category][asset] ??= {}
+				const collider = boundingBox[category][asset].collider
+				if (collider && collider.type !== 'link') {
+					selectedShape(collider.type)
+					size(collider.size)
+					position(collider.position)
+				} else {
+					size(null)
+					position(null)
+				}
+				if (boundingBox[category][asset].tags) {
+					tags(boundingBox[category][asset].tags)
+				} else {
+					tags({})
+				}
+			}
+		},
+	))
+
+	createEffect(on(colShape, (colShape) => {
+		if (collider) {
+			world.removeCollider(collider, true)
+		}
+		if (colShape) {
+			collider = world.createCollider(colShape, body)
+		}
+	}))
+
+	createEffect(on(geo, (geo) => {
+		mesh?.removeFromParent()
+
+		if (geo) {
+			const col = new Mesh(geo, new MeshBasicMaterial({ color: 0xFF0000, transparent: true, opacity: 0.2 }))
+			if (selectedShape() === 'capsule') {
+				col.position.set(0, 1, 0)
 			} else {
-				size.x = 1
-				size.y = 1
-				size.z = 1
-				linkedModel(null)
-				linkedCategory(null)
+				col.position.set(0, 0.5, 0)
+			}
+			mesh = new Group()
+			mesh.add(col)
+			transformControls.attach(mesh)
+			group.add(transformControls)
+			group.add(mesh)
+		}
+	}))
+
+	createEffect(on(computedSize, (size) => {
+		if (size && mesh) {
+			mesh.scale.copy(size)
+		}
+	}))
+	createEffect(on(position, (pos) => {
+		const size = computedSize()
+		if (pos && mesh) {
+			mesh.position.copy(pos)
+			if (size) {
+				body.setTranslation({
+					x: pos.x,
+					y: pos.y + size.y / 2,
+					z: pos.z,
+				}, true)
 			}
 		}
-		const [dummyMesh, controls] = addTransformControls()
-		dummyMesh.scale.copy(size)
-		dummyMesh.position.copy(position)
-		controls.setMode('scale')
-		dummy = dummyMesh
-		transformControls = controls
-		transformControls.addEventListener('change', updateDummy)
-		loading = false
-		createEffect(() => {
-			const visible = Boolean(selectedShape())
-			if (transformControls) {
-				transformControls.visible = visible
-			}
-			debugRenderer.visible = visible
-		})
-		createEffect(() => {
-			if (transformControls) {
-				transformControls.setMode(transformControlsMode())
-			}
-		})
-	}
-	onMount(setExistingBoundingBox)
-	createEffect(on(model, setExistingBoundingBox))
+	}))
 
 	const setAutoSize = () => {
 		const m = model()
-		if (m && collider) {
+		if (m) {
 			const box = new Box3().setFromObject(m)
 			const sizeTemp = new Vector3()
 			box.getSize(sizeTemp)
@@ -173,58 +200,10 @@ export function EntityProps({ world, model, selectedCategory, selectedAsset, add
 				sizeTemp.x /= 2
 				sizeTemp.y /= 2
 			}
-			size.x = sizeTemp.x
-			size.y = sizeTemp.y
-			size.z = sizeTemp.z
-			dummy?.scale.copy(sizeTemp)
-		}
-	}
-
-	createEffect(() => {
-		trackDeep(position)
-		untrack(() => {
-			body.setTranslation(position, true)
-		})
-	})
-
-	createEffect(() => {
-		const shape = colliderShape()
-		if (shape) {
-			collider?.setShape(shape)
-		}
-	})
-
-	createEffect(() => {
-		if (!transformControls) return
-		if (transformControlsMode() === 'scale') {
-			if (selectedShape() === 'ball') {
-				transformControls.showX = true
-				transformControls.showY = false
-				transformControls.showZ = false
-			}
-			if (selectedShape() === 'cuboid') {
-				transformControls.showX = true
-				transformControls.showY = true
-				transformControls.showZ = true
-			}
-			if (selectedShape() === 'capsule' || selectedShape() === 'cylinder') {
-				transformControls.showX = true
-				transformControls.showY = true
-				transformControls.showZ = false
-			}
-		} else {
-			transformControls.showX = true
-			transformControls.showY = true
-			transformControls.showZ = true
-		}
-	})
-
-	const getColliderSize = (shape: Shape) => {
-		switch (shape) {
-			case 'ball':return { x: size.x }
-			case 'cuboid':return { x: size.x, y: size.y, z: size.z }
-			case 'capsule':return { x: size.x, y: size.y }
-			case 'cylinder':return { x: size.x, y: size.y }
+			size({ x: sizeTemp.x, y: sizeTemp.y, z: sizeTemp.z })
+			const posTemp = new Vector3()
+			box.getCenter(posTemp)
+			position({ x: posTemp.x, y: posTemp.y - sizeTemp.y / 2, z: posTemp.z })
 		}
 	}
 
@@ -247,9 +226,6 @@ export function EntityProps({ world, model, selectedCategory, selectedAsset, add
 		}
 		return <></>
 	}
-	createEffect(() => {
-		linkedCategory(selectedCategory())
-	})
 
 	createEffect(
 		on(
@@ -257,19 +233,18 @@ export function EntityProps({ world, model, selectedCategory, selectedAsset, add
 				selectedShape(),
 				linkedCategory(),
 				linkedModel(),
-				unwrap(position),
-				unwrap(size),
+				position(),
+				size(),
 				tags(),
 			],
 			() => {
-				if (loading) return
-
 				const category = selectedCategory()
 				const asset = selectedAsset()
 				const type = selectedShape()
 				const linkedCategoryValue = linkedCategory()
 				const linkedModelValue = linkedModel()
-				const p = unwrap(position)
+				const p = position()
+				const s = size()
 
 				if (category && asset && type) {
 					let newAssetData: AssetData | null = null
@@ -285,10 +260,9 @@ export function EntityProps({ world, model, selectedCategory, selectedAsset, add
 								tags: tags(),
 							}
 						}
-					} else {
-						const sizeVal = getColliderSize(type as Shape)
+					} else if (s && p) {
 						newAssetData = {
-							collider: { type, size: sizeVal, position: p },
+							collider: { type, size: s, position: p },
 							secondaryColliders: [],
 							scale: boundingBox[category]?.[asset]?.scale ?? undefined,
 							tags: tags(),
@@ -296,16 +270,16 @@ export function EntityProps({ world, model, selectedCategory, selectedAsset, add
 					}
 
 					if (newAssetData) {
+						boundingBox[category] ??= {}
 						boundingBox[category][asset] = newAssetData!
 					}
 				}
 			},
-			{ defer: loading },
 		),
 	)
-	onCleanup(() => {
-		world.removeRigidBody(body)
-	})
+	// onCleanup(() => {
+	// 	world.removeRigidBody(body)
+	// })
 
 	css/* css */`
 	.range-input{
@@ -313,6 +287,12 @@ export function EntityProps({ world, model, selectedCategory, selectedAsset, add
 		grid-template-columns:auto 1fr;
 		background: var(--color-1);
 		gap: 1rem;
+		padding: 1rem;
+	}
+	.vec3-display{
+		display: grid;
+		grid-template-columns: 1fr 1fr 1fr;
+		display-items: center;
 		padding: 1rem;
 	}
 	`
@@ -343,6 +323,56 @@ export function EntityProps({ world, model, selectedCategory, selectedAsset, add
 						<button onClick={setAutoSize}><Fa icon={faA} /></button>
 					</Show>
 				</div>
+				<Show when={size()}>
+					{size => (
+						<div>
+							<div class="title">Size</div>
+							<div class="vec3-display">
+								<div>
+									X:
+									{size().x?.toFixed(1)}
+								</div>
+								<div>
+									Y:
+									{size().y?.toFixed(1)}
+								</div>
+								<div>
+									Z:
+									{size().z?.toFixed(1)}
+								</div>
+							</div>
+						</div>
+					)}
+				</Show>
+				<Show when={position()}>
+					{position => (
+						<div>
+							<div class="title">Position</div>
+							<div class="vec3-display">
+								<div>
+									X:
+									{position().x.toFixed(1)}
+								</div>
+								<div>
+									Y:
+									{position().y.toFixed(1)}
+								</div>
+								<div>
+									Z:
+									{position().z.toFixed(1)}
+								</div>
+							</div>
+						</div>
+					)}
+				</Show>
+				<Show when={selectedShape()}>
+					<button
+						style="width: 100%"
+						onClick={() => position({ x: 0, y: 0, z: 0 })}
+					>
+						Reset position
+					</button>
+				</Show>
 				<Show when={selectedShape() === 'link'}>
 					<select onChange={(e) => {
 						linkedModel(null)

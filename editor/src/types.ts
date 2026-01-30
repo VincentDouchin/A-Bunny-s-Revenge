@@ -1,4 +1,5 @@
 import type { Tags } from '@assets/tagsList'
+import type { NavMesh } from 'navcat'
 
 export type EditorTags = Record<string, true | string[]>
 export interface LevelEntity {
@@ -32,13 +33,14 @@ export interface BaseLevel {
 	instances: Record<string, InstanceData>
 	displacementScale: number
 	floorTexture: 'planks' | 'grass'
+	navMesh: NavMesh | null
 }
 export type LevelData = Record<Maps, string> & BaseLevel
 export type LevelLoaded = Record<Maps, HTMLCanvasElement> & BaseLevel
 
 export type ColliderData = {
 	type: 'ball' | 'cuboid' | 'capsule' | 'cylinder'
-	size: { x: number, y?: number, z?: number }
+	size: { x: number, y: number, z: number }
 	position: { x: number, y: number, z: number }
 } | {
 	type: 'link'

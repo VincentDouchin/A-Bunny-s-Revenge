@@ -60,8 +60,10 @@ export function LevelSelector({ loadLevel, selectedLevel, folder, fetchLevels, l
 			pathMap: url,
 			waterMap: url,
 			treeMap: url,
+			floorTexture: 'grass',
 			sizeX: 100,
 			sizeY: 100,
+			instances: {},
 		}
 		await saveLevelFile(folder, levelName(), levelTemplate)
 		loadLevel(levelName())
