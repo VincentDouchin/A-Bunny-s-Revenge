@@ -803,13 +803,15 @@ export function Editor({ entities, thumbnailRenderer, assets }: {
 		const levelName = selectedLevel()
 		if (levelName) {
 			const data = await get(levelName)
-			return saveLevelFile(folder, levelName, data)
+			const boundingBoxData = await get('boundingBox')
+			await saveBoundingBox(folder, boundingBoxData)
+			await saveLevelFile(folder, levelName, data)
 		}
 	}
 
-	const saveBoundingBoxDebounced = debounce(() => {
+	const saveBoundingBoxDebounced = debounce(async () => {
 		if (loaded()) {
-			saveBoundingBox(folder, boundingBox)
+			await set('boundingBox', unwrap(boundingBox))
 		}
 	}, 500)
 	createEffect(() => {
@@ -829,7 +831,8 @@ export function Editor({ entities, thumbnailRenderer, assets }: {
 		}
 	}
 	const fetchBoundingBox = async (folder: string) => {
-		const data = await loadBoundingBox(folder)
+		let data = await get('boundingBox')
+		data ??= await loadBoundingBox(folder)
 		modifyMutable(boundingBox, reconcile(data))
 	}
 	const fetchTagsList = async (folder: string) => {
