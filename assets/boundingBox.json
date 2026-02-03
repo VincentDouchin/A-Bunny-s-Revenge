@@ -416,33 +416,9 @@
             "secondaryColliders": [],
             "tags": {"obstacle": true}
         },
-        "Rock_Moss_5": {
-            "collider": {
-                "type": "cuboid",
-                "size": {"x": 0.6631903117522597, "y": 0.5767394161028914, "z": 0.9147827724461335},
-                "position": {"x": 0.00893973046913743, "y": 0.0128004922457573, "z": -0.026494699180656528}
-            },
-            "secondaryColliders": [],
-            "tags": {"obstacle": true}
-        },
-        "Rock_Moss_6": {
-            "collider": {
-                "type": "cuboid",
-                "size": {"x": 0.9120303438976407, "y": 0.7078183998280194, "z": 1.141951084511223},
-                "position": {"x": -0.07244836306199431, "y": 0.005867982827329032, "z": -0.09531511790832053}
-            },
-            "secondaryColliders": [],
-            "tags": {"obstacle": true}
-        },
-        "Rock_Moss_7": {
-            "collider": {
-                "type": "cuboid",
-                "size": {"x": 1, "y": 1, "z": 1},
-                "position": {"x": -0.11541687417775393, "y": -0.22721297142571484, "z": 0.0961826524002434}
-            },
-            "secondaryColliders": [],
-            "tags": {"obstacle": true}
-        },
+        "Rock_Moss_5": { "collider": {"type": "trimesh"}, "tags": {"obstacle": true} },
+        "Rock_Moss_6": { "collider": {"type": "trimesh"}, "tags": {"obstacle": true} },
+        "Rock_Moss_7": { "collider": {"type": "trimesh"}, "tags": {"obstacle": true} },
         "Shroom1": {
             "collider": {
                 "type": "cylinder",
@@ -754,7 +730,8 @@
             "tags": {}
         },
         "door": {"tags": {}},
-        "marker": {"tags": {}}
+        "marker": {"tags": {}},
+        "Rock_Moss_7": {}
     },
     "dungeon": {
         "banner_green": {"tags": {}},
