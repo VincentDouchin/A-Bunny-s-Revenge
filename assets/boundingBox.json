@@ -298,42 +298,10 @@
             "secondaryColliders": [],
             "tags": {}
         },
-        "Rock_1": {
-            "collider": {
-                "type": "cuboid",
-                "size": {"x": 0.48532288055866957, "y": 0.8777499584590621, "z": 0.4667483550771794},
-                "position": {"x": 0.0002935878001153469, "y": -0.05110145503536323, "z": -0.01826013808173156}
-            },
-            "secondaryColliders": [],
-            "tags": {"obstacle": true}
-        },
-        "Rock_2": {
-            "collider": {
-                "type": "cuboid",
-                "size": {"x": 0.5613724235445261, "y": 0.6456158307187169, "z": 0.5650293249229764},
-                "position": {"x": -0.0030860304832458496, "y": -0.09095938464711625, "z": -0.006078520972055246}
-            },
-            "secondaryColliders": [],
-            "tags": {"obstacle": true}
-        },
-        "Rock_3": {
-            "collider": {
-                "type": "cuboid",
-                "size": {"x": 0.738359079696238, "y": 0.675989960644131, "z": 0.8025835963388424},
-                "position": {"x": -0.09157935855910182, "y": -0.12133344260635748, "z": 0.11269859145281591}
-            },
-            "secondaryColliders": [],
-            "tags": {"obstacle": true}
-        },
-        "Rock_4": {
-            "collider": {
-                "type": "cuboid",
-                "size": {"x": 0.7435695733875036, "y": 0.783637504818807, "z": 1.2505156048613366},
-                "position": {"x": -0.0677019590511918, "y": -0.27312610389203706, "z": -3.595749625828759e-8}
-            },
-            "secondaryColliders": [],
-            "tags": {"obstacle": true}
-        },
+        "Rock_1": { "collider": {"type": "trimesh"}, "tags": {"obstacle": true} },
+        "Rock_2": { "collider": {"type": "trimesh"}, "tags": {"obstacle": true} },
+        "Rock_3": { "collider": {"type": "trimesh"}, "tags": {"obstacle": true} },
+        "Rock_4": { "collider": {"type": "trimesh"}, "tags": {"obstacle": true} },
         "bookshelf": {
             "collider": {
                 "type": "cuboid",
@@ -352,70 +320,13 @@
             },
             "secondaryColliders": []
         },
-        "Rock_5": {
-            "collider": {
-                "type": "cuboid",
-                "size": {"x": 0.6631902884691954, "y": 0.6527829520391176, "z": 0.9147827548733418},
-                "position": {"x": 0.008939742110669613, "y": -0.063243030939382, "z": -0.026494667357158302}
-            },
-            "secondaryColliders": [],
-            "tags": {"obstacle": true}
-        },
-        "Rock_6": {
-            "collider": {
-                "type": "cuboid",
-                "size": {"x": 0.9120303438976407, "y": 0.707818401461896, "z": 1.1419510885374833},
-                "position": {"x": -0.07244836306199431, "y": 0.005867982827329032, "z": -0.0953151199214507}
-            },
-            "secondaryColliders": [],
-            "tags": {"obstacle": true}
-        },
-        "Rock_7": {
-            "collider": {
-                "type": "cuboid",
-                "size": {"x": 0.8755458984524012, "y": 0.8493813979007273, "z": 1.0982701051582064},
-                "position": {"x": -0.11541687417775393, "y": -0.302693607674557, "z": 0.09618266383353238}
-            },
-            "secondaryColliders": [],
-            "tags": {"obstacle": true}
-        },
-        "Rock_Moss_1": {
-            "collider": {
-                "type": "cuboid",
-                "size": {"x": 0.48532283399254084, "y": 0.9500334868986825, "z": 0.4667483536921435},
-                "position": {"x": 0.05782988155260682, "y": -0.17183455894691857, "z": 0.008519704330699943}
-            },
-            "secondaryColliders": [],
-            "tags": {"obstacle": true}
-        },
-        "Rock_Moss_2": {
-            "collider": {
-                "type": "cuboid",
-                "size": {"x": 0.6125458981841803, "y": 0.69175400257326, "z": 0.6504263475817558},
-                "position": {"x": 0.04183407872915268, "y": -0.13709755091640963, "z": -0.03034058195768316}
-            },
-            "secondaryColliders": [],
-            "tags": {"obstacle": true}
-        },
-        "Rock_Moss_3": {
-            "collider": {
-                "type": "cuboid",
-                "size": {"x": 0.738359079696238, "y": 0.5567014501903923, "z": 0.802583560200832},
-                "position": {"x": -0.09157935855910182, "y": -0.002044932152618806, "z": 0.11269857338381073}
-            },
-            "secondaryColliders": [],
-            "scale": [18.532083815914703, 18.532083815914703, 18.532083815914703],
-            "tags": {"obstacle": true}
-        },
-        "Rock_Moss_4": {
-            "collider": {
-                "type": "cuboid",
-                "size": {"x": 0.7435695733875036, "y": 0.783637504818807, "z": 1.2505156048613366},
-                "position": {"x": -0.0677019590511918, "y": -0.27312610389203706, "z": -3.595749625828759e-8}
-            },
-            "secondaryColliders": [],
-            "tags": {"obstacle": true}
-        },
+        "Rock_5": { "collider": {"type": "trimesh"}, "tags": {"obstacle": true} },
+        "Rock_6": { "collider": {"type": "trimesh"}, "tags": {"obstacle": true} },
+        "Rock_7": { "collider": {"type": "trimesh"}, "tags": {"obstacle": true} },
+        "Rock_Moss_1": { "collider": {"type": "trimesh"}, "tags": {"obstacle": true} },
+        "Rock_Moss_2": { "collider": {"type": "trimesh"}, "tags": {"obstacle": true} },
+        "Rock_Moss_3": { "collider": {"type": "trimesh"}, "tags": {"obstacle": true} },
+        "Rock_Moss_4": { "collider": {"type": "trimesh"}, "tags": {"obstacle": true} },
         "Rock_Moss_5": { "collider": {"type": "trimesh"}, "tags": {"obstacle": true} },
         "Rock_Moss_6": { "collider": {"type": "trimesh"}, "tags": {"obstacle": true} },
         "Rock_Moss_7": { "collider": {"type": "trimesh"}, "tags": {"obstacle": true} },
