@@ -36,5 +36,8 @@
 		"vite": "^7.1.2",
 		"vite-plugin-solid": "^2.11.8",
 		"vite-plugin-solid-styled": "^0.12.0"
+	},
+	"overrides": {
+		"three": "0.180.0"
 	}
 }
