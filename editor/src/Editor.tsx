@@ -1,6 +1,10 @@
-import { InstancedModel } from '@/global/assetLoaders'
-import type { loadAssets } from '@/global/assets'
 import type { Tags } from '@assets/tagsList'
+import type { NavMesh } from 'navcat'
+import type { BufferGeometry, Material, Object3D, Vec2 } from 'three'
+import type { ThumbnailRenderer } from '../../src/lib/thumbnailRenderer'
+import type { AnchorX, AnchorY } from './components/ResizeModal'
+import type { AssetData, EditorTags, InstanceData, LevelData, LevelEntity } from './types'
+import type { loadAssets } from '@/global/assets'
 import { init, World } from '@dimforge/rapier3d-compat'
 import { faArrowsRotate, faArrowsUpDownLeftRight, faEarth, faLocationArrow, faLock, faLockOpen, faMaximize } from '@fortawesome/free-solid-svg-icons'
 import { trackDeep } from '@solid-primitives/deep'
@@ -8,19 +12,17 @@ import { debounce, throttle } from '@solid-primitives/scheduled'
 import { makePersisted } from '@solid-primitives/storage'
 import { Event } from 'eventery'
 import { get, set } from 'idb-keyval'
-import type { NavMesh } from 'navcat'
 import Fa from 'solid-fa'
 import { createEffect, createMemo, createSignal, For, on, onCleanup, onMount, Show } from 'solid-js'
 import { createMutable, modifyMutable, reconcile, unwrap } from 'solid-js/store'
 import { Portal } from 'solid-js/web'
 import { css } from 'solid-styled'
 import atom from 'solid-use/atom'
-import type { BufferGeometry, Material, Object3D, Vec2 } from 'three'
 import { AmbientLight, CanvasTexture, GridHelper, Group, Matrix4, Mesh, MeshBasicMaterial, MeshStandardMaterial, MeshToonMaterial, PerspectiveCamera, PlaneGeometry, Quaternion, Raycaster, Scene, SphereGeometry, Vector2, Vector3, WebGLRenderer } from 'three'
 import { CSS2DObject, CSS2DRenderer, MapControls, OrbitControls, SkeletonUtils, TransformControls } from 'three-stdlib'
 import { generateUUID } from 'three/src/math/MathUtils.js'
+import { InstancedModel } from '@/global/assetLoaders'
 import { RapierDebugRenderer } from '../../src/lib/debugRenderer'
-import type { ThumbnailRenderer } from '../../src/lib/thumbnailRenderer'
 import { GroundMaterial, WaterMaterial } from '../../src/shaders/materials'
 import { getTrees, setDisplacement } from '../../src/states/game/spawnTrees'
 import { Configuration } from './components/Configuration'
@@ -32,12 +34,10 @@ import { LevelSelector } from './components/LevelSelector'
 import { MapEditor } from './components/MapEditor'
 import { RangeInput } from './components/RangeInput'
 import { Renderer } from './components/Renderer'
-import type { AnchorX, AnchorY } from './components/ResizeModal'
 import { SelectedEntityProps } from './components/SelectedEntityProps'
 import { TagsEditor } from './components/TagsEditor'
 import { createFolder, isRepoCloned, loadBoundingBox, loadLevel, loadLevels, loadTagsList, saveBoundingBox, saveLevelFile, saveTagsList } from './lib/fileOperations'
-import { floodFill, generateNavMesh, getMesh } from './lib/navMesh'
-import type { AssetData, EditorTags, InstanceData, LevelData, LevelEntity } from './types'
+import { floodFill, generateNavMesh, getMesh, updateNavMeshVisualization } from './lib/navMesh'
 
 export const BOUNDING_BOX_FILE_PATH = 'assets/boundingBox.json'
 await init()
@@ -258,6 +258,12 @@ export function Editor({ entities, thumbnailRenderer, assets }: {
 	const completeNavMesh = atom<NavMesh | null>(null)
 	let navMeshHelperObj: Object3D | null = null
 	let navMesh: NavMesh | null = null
+	const displayNavMesh = () => {
+		const completeNavMeshValue = completeNavMesh()
+		if (completeNavMeshValue) {
+			updateNavMeshVisualization(scene, completeNavMeshValue)
+		}
+	}
 	const addNavMesh = () => {
 		const meshes: Mesh<BufferGeometry>[] = [groundMesh]
 		for (const id in levelEntitiesData) {
@@ -268,30 +274,35 @@ export function Editor({ entities, thumbnailRenderer, assets }: {
 				new Vector3().fromArray(data.scale),
 			)
 			const bb = boundingBox?.[data.category]?.[data.model]
+			const model = entities[data.category][data.model]
 
-			const mesh = getMesh(bb, matrix)
-			if (mesh) {
+			const meshColliders = getMesh(bb, matrix, model)
+
+			meshColliders.forEach((mesh) => {
 				helperGroup.add(mesh)
 				meshes.push(mesh)
-			}
+			})
 		}
 		for (const key in instances) {
 			const instance = instances[key]
 			for (const matrixArray of instance.entities) {
 				const matrix = new Matrix4().fromArray(matrixArray)
 				const bb = boundingBox?.[instance.category]?.[instance.model]
-				const mesh = getMesh(bb, matrix)
-				if (mesh) {
+				const model = entities[instance.category][instance.model]
+
+				const meshColliders = getMesh(bb, matrix, model)
+
+				meshColliders.forEach((mesh) => {
 					helperGroup.add(mesh)
 					meshes.push(mesh)
-				}
+				})
 			}
 		}
 		const res = generateNavMesh(meshes)
 		navMesh = res.navMesh
 		navMeshHelperObj?.removeFromParent()
 		navMeshHelperObj = res.navMeshHelper.object
-		scene.add(navMeshHelperObj)
+		group.add(navMeshHelperObj)
 	}
 	createEffect(on(treeCanvas, (tCanvas) => {
 		if (tCanvas) {
@@ -341,18 +352,18 @@ export function Editor({ entities, thumbnailRenderer, assets }: {
 	}))
 
 	// createEffect(on(grassCanvas, (gCanvas) => {
-		// const hCanvas = heightCanvas()
-		// const scale = displacementScale()
-		// if (!hCanvas || !gCanvas || !scale) return
-		// const [grass, flowers] = ['Grass_', 'Flower_'].map(name => Object.entries(entities.vegetation).reduce<Object3D[]>((acc, [modelName, model]) => {
-		// 	if (modelName.includes(name)) acc.push(model)
-		// 	return acc
-		// }, []))
-		// const { process } = getGrass(grass, flowers, hCanvas, gCanvas, 5, scale)
-		// const newGrassGroup = process()
-		// group.add(newGrassGroup)
-		// grassGroup?.removeFromParent()
-		// grassGroup = newGrassGroup
+	// const hCanvas = heightCanvas()
+	// const scale = displacementScale()
+	// if (!hCanvas || !gCanvas || !scale) return
+	// const [grass, flowers] = ['Grass_', 'Flower_'].map(name => Object.entries(entities.vegetation).reduce<Object3D[]>((acc, [modelName, model]) => {
+	// 	if (modelName.includes(name)) acc.push(model)
+	// 	return acc
+	// }, []))
+	// const { process } = getGrass(grass, flowers, hCanvas, gCanvas, 5, scale)
+	// const newGrassGroup = process()
+	// group.add(newGrassGroup)
+	// grassGroup?.removeFromParent()
+	// grassGroup = newGrassGroup
 	// }))
 	const getWoodFlooring = ({ x, y }: { x: number, y: number }) => {
 		const map = assets.textures.planks
@@ -457,7 +468,7 @@ export function Editor({ entities, thumbnailRenderer, assets }: {
 		if (navMesh && pos) {
 			const ray = new Raycaster()
 			ray.setFromCamera(new Vector2(pos.x, pos.y), camera)
-			group.visible = false
+			// group.visible = false
 			navMeshHelperObj?.removeFromParent()
 			helperGroup.children.forEach(c => c.removeFromParent())
 			floodFill(scene, ray, navMesh)
@@ -1045,6 +1056,7 @@ export function Editor({ entities, thumbnailRenderer, assets }: {
 									resize={resize}
 									levelSize={levelSize}
 									floorTexture={floorTexture}
+									displayNavMesh={displayNavMesh}
 								/>
 							</Show>
 							<Show when={selectedId() && tagsList()}>

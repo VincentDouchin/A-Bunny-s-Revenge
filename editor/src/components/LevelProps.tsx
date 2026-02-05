@@ -1,17 +1,18 @@
 import type { Atom } from 'solid-use/atom'
 import type { Vec2, Vector2 } from 'three'
 import type { AnchorX, AnchorY } from './ResizeModal'
-import { faMap } from '@fortawesome/free-solid-svg-icons'
+import { faEye, faMap } from '@fortawesome/free-solid-svg-icons'
 import Fa from 'solid-fa'
 import { For, Show } from 'solid-js'
 import { css } from 'solid-styled'
 import { ResizeModal } from './ResizeModal'
 
-export function LevelProps({ levelSize, floorTexture, resize, addNavMesh }: {
+export function LevelProps({ levelSize, floorTexture, resize, addNavMesh, displayNavMesh }: {
 	levelSize: Atom<Vector2 | null>
 	floorTexture: Atom<'grass' | 'planks' | null>
 	resize: (anchorX: AnchorX, anchorY: AnchorY, mode: 'extend' | 'resize', size: Vec2) => void
 	addNavMesh: () => void
+	displayNavMesh: () => void
 }) {
 	css/* css */`
 	.props-inputs {
@@ -43,6 +44,10 @@ export function LevelProps({ levelSize, floorTexture, resize, addNavMesh }: {
 				<button with-icon onClick={addNavMesh}>
 					<Fa icon={faMap}></Fa>
 					Generate NavMesh
+				</button>
+				<button with-icon onClick={displayNavMesh}>
+					<Fa icon={faEye}></Fa>
+					Display NavMesh
 				</button>
 				<div class="props-inputs">
 					Floor

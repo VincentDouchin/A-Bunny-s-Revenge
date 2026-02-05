@@ -1,8 +1,9 @@
 import type { NavMesh, NodeRef } from 'navcat'
 import type { SoloNavMeshInput, SoloNavMeshOptions } from 'navcat/blocks'
 import type { DebugObject } from 'navcat/three'
-import type { Matrix4, Raycaster, Scene } from 'three'
+import type { Matrix4, Object3D, Raycaster, Scene } from 'three'
 import type { AssetData } from '../types'
+import { ColliderDesc } from '@dimforge/rapier3d-compat'
 import { getNodeByTileAndPoly, getNodeRefIndex } from 'navcat'
 import { floodFillNavMesh, generateSoloNavMesh } from 'navcat/blocks'
 import { createNavMeshHelper, createNavMeshPolyHelper, getPositionsAndIndices } from 'navcat/three'
@@ -21,7 +22,7 @@ export const generateNavMesh = (obj: Mesh<BufferGeometry>[]) => {
 	const cellSize = 0.15
 	const cellHeight = 0.15
 
-	const walkableRadiusWorld = 1
+	const walkableRadiusWorld = 5
 	const walkableRadiusVoxels = Math.ceil(walkableRadiusWorld / cellSize)
 	const walkableClimbWorld = 0.5
 	const walkableClimbVoxels = Math.ceil(walkableClimbWorld / cellHeight)
@@ -100,7 +101,7 @@ export const generateNavMesh = (obj: Mesh<BufferGeometry>[]) => {
 	return { navMesh, navMeshHelper }
 }
 
-export const getMesh = (boundingBox: AssetData | undefined, matrix: Matrix4) => {
+export const getMesh = (boundingBox: AssetData | undefined, matrix: Matrix4, model: Object3D) => {
 	const mat = new MeshBasicMaterial({
 		color: 0xFF0000,
 		transparent: true,
@@ -108,7 +109,24 @@ export const getMesh = (boundingBox: AssetData | undefined, matrix: Matrix4) => 
 	})
 
 	const collider = boundingBox?.collider
-	if (!boundingBox || !collider || collider.type === 'link') return
+	if (collider && collider.type === 'trimesh') {
+		const meshes: Mesh[] = []
+
+		model.updateWorldMatrix(true, true)
+
+		model.traverse((object) => {
+			if (object instanceof Mesh && object.geometry instanceof BufferGeometry) {
+				const geometry = object.geometry.clone()
+				geometry.applyMatrix4(object.matrixWorld)
+				const mesh = new Mesh(geometry, mat)
+				mesh.applyMatrix4(matrix)
+				meshes.push(mesh)
+			}
+		})
+
+		return meshes
+	}
+	if (!boundingBox || !collider || collider.type === 'link') return []
 
 	let geo: BufferGeometry
 
@@ -131,7 +149,7 @@ export const getMesh = (boundingBox: AssetData | undefined, matrix: Matrix4) => 
 	   Rebuild the SAME hierarchy
 	------------------------------ */
 
-	const mesh = new Mesh(geo, mat)
+	const mesh = new Mesh(geo!, mat)
 
 	mesh.position.y = collider.type === 'capsule' ? 1 : 0.5
 
@@ -169,7 +187,7 @@ export const getMesh = (boundingBox: AssetData | undefined, matrix: Matrix4) => 
 	mesh.scale.set(1, 1, 1)
 	mesh.updateMatrixWorld(true)
 
-	return mesh
+	return [mesh]
 }
 
 export function findClickedPolygon(raycaster: Raycaster, navMesh: NavMesh): NodeRef | null {
@@ -296,7 +314,7 @@ const createPolyHelpers = (scene: Scene, navMesh: NavMesh): void => {
 		}
 	}
 }
-function updateNavMeshVisualization(scene: Scene, navMesh: NavMesh) {
+export function updateNavMeshVisualization(scene: Scene, navMesh: NavMesh) {
 	// clear existing helpers
 	clearPolyHelpers(scene)
 

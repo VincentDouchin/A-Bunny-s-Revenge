@@ -37,15 +37,17 @@ export interface BaseLevel {
 }
 export type LevelData = Record<Maps, string> & BaseLevel
 export type LevelLoaded = Record<Maps, HTMLCanvasElement> & BaseLevel
-
+export type Shape = 'cuboid' | 'ball' | 'capsule' | 'cylinder'
 export type ColliderData = {
-	type: 'ball' | 'cuboid' | 'capsule' | 'cylinder'
+	type: Shape
 	size: { x: number, y: number, z: number }
 	position: { x: number, y: number, z: number }
 } | {
 	type: 'link'
 	category: string
 	model: string
+} | {
+	type: 'trimesh'
 }
 
 export interface AssetData {
