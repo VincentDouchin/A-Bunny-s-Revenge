@@ -119,15 +119,7 @@
             "scale": [7.048093222993907, 7.048093222993907, 7.048093222993907],
             "tags": {}
         },
-        "gardenPlot1": {
-            "collider": {
-                "type": "undefined",
-                "size": {"x": 1, "y": 1, "z": 1},
-                "position": {"x": -0.026257088376254734, "y": 0.6500115581217085, "z": 0.4360650878287917}
-            },
-            "secondaryColliders": [],
-            "tags": {}
-        },
+        "gardenPlot1": {"tags": {}},
         "keg": {
             "collider": {
                 "type": "cuboid",
@@ -378,7 +370,9 @@
         "cellar_wall_corner": { "tags": {}, "scale": [5, 5, 5] },
         "scaffold1": {"tags": {}},
         "ume-wood": { "tags": {}, "scale": [2.9287175957162193, 2.9287175957162193, 2.9287175957162193] },
-        "Creepy_Flower": {}
+        "Creepy_Flower": {},
+        "gardenPlot2": {},
+        "gardenPlot3": {}
     },
     "characters": {
         "ALICE_animated": {
@@ -642,7 +636,8 @@
         },
         "door": {"tags": {}},
         "marker": {"tags": {}},
-        "Rock_Moss_7": {}
+        "Rock_Moss_7": {},
+        "gardenPlot3": {}
     },
     "dungeon": {
         "banner_green": {"tags": {}},

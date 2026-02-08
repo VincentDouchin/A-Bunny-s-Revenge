@@ -7,4 +7,5 @@ lamp: true
 weaponStand: true
 marker: 'boss-position-start'|'minion-position-1'|'minion-position-2'
 doorDungeon: 'north'|'south'|'east'|'west'
+dungeonChest: true
 }
