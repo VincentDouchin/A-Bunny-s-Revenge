@@ -122,7 +122,7 @@ export class MainMenuBook extends Object3D {
 				onPlay() {
 					if (newSelected === 'Continue') {
 						app.disable('intro')
-						app.enable('farm', { door: 'clearing' })
+						app.enable('farm', { direction: 'doorFarm' })
 					}
 					if (newSelected === 'New Game') {
 						app.disable('farm')

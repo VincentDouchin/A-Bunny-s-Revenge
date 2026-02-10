@@ -1,10 +1,9 @@
 import { AmbientLight, DirectionalLight, Group, OrthographicCamera, Quaternion, Scene, Vector3 } from 'three'
-import { clone } from 'three/examples/jsm/utils/SkeletonUtils'
-import { degToRad } from 'three/src/math/MathUtils'
+import { SkeletonUtils } from 'three-stdlib'
+import { degToRad } from 'three/src/math/MathUtils.js'
 import { Animator } from '@/global/animator'
 import { EmoteContainer, RenderGroup } from '@/global/entity'
 import { assets, ecs } from '@/global/init'
-import { getBoundingBoxShape } from '@/lib/models'
 import { once } from '@/utils/mapFunctions'
 
 export interface ConversationLine {
@@ -129,11 +128,11 @@ const displayDialog = (dialog: Conversation) => {
 	const renderGroup = dialogRenderGroupQuery.first
 	if (!renderGroup) return
 	for (const actor of dialog.actor) {
-		const model = clone(assets.characters[actor.model].scene)
+		const model = SkeletonUtils.clone(assets.characters[actor.model].scene)
 		const scale = 2.2 * (actor.scale ?? 1)
 		model.scale.setScalar(scale)
 		const emoteContainer = new EmoteContainer(actor.name)
-		emoteContainer.position.y = getBoundingBoxShape('characters', actor.model).y * scale
+		// emoteContainer.position.y = getBoundingBoxSize('characters', actor.model, [scale, scale, scale])[0].y
 		model.add(emoteContainer)
 		const actorEntity = ecs.add({
 			emoteContainer,

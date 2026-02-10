@@ -1,22 +1,33 @@
 import type { AssetNames } from '@/global/entity'
 import { weaponsData } from '@/constants/weapons'
+import { OutlineText } from '@/ui/components/styledComponents'
 
 export const WeaponStatsUi = ({ name }: { name: AssetNames['weapons'] }) => {
 	const data = weaponsData[name]
 	return (
 		<div style={{ 'display': 'grid', 'place-items': 'center' }}>
-			<div style={{ 'font-size': '1.5rem' }}>{data.name}</div>
-			<div style={{ 'font-size': '1.2rem' }}>
-				Attack:
-				{data.attack}
+			<div>
+				<OutlineText textSize="1.5rem">
+					{data.name}
+				</OutlineText>
 			</div>
-			<div style={{ 'font-size': '1.2rem' }}>
-				Knockback:
-				{data.knockBack}
+			<div>
+				<OutlineText textSize="1.2rem">
+					Attack:
+					{data.attack}
+				</OutlineText>
 			</div>
-			<div style={{ 'font-size': '1.2rem' }}>
-				Attack speed:
-				{data.attackSpeed}
+			<div>
+				<OutlineText textSize="1.2rem">
+					Knockback:
+					{data.knockBack}
+				</OutlineText>
+			</div>
+			<div>
+				<OutlineText textSize="1.2rem">
+					Attack speed:
+					{data.attackSpeed}
+				</OutlineText>
 			</div>
 		</div>
 	)

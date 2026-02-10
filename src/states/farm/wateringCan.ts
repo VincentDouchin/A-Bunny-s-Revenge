@@ -1,11 +1,11 @@
 import type { With } from 'miniplex'
-import type { Quaternion } from 'three'
+import type { Quaternion } from 'three.quarks'
 import type { Entity } from '@/global/entity'
-import { CircleGeometry, Mesh, MeshBasicMaterial, Vector3 } from 'three'
-import { ApplyForce, ColorRange, ConeEmitter, ConstantValue, IntervalValue, ParticleSystem, RandomQuatGenerator, RenderMode } from 'three.quarks'
+import { CircleGeometry, Mesh, MeshBasicMaterial } from 'three'
+import { ApplyForce, ColorRange, ConeEmitter, ConstantValue, IntervalValue, ParticleSystem, RandomQuatGenerator, RenderMode, Vector3 } from 'three.quarks'
 import { Interactable } from '@/global/entity'
 import { assets, ecs, gameInputs, tweens } from '@/global/init'
-import { batchRendererQuery } from '@/lib/particles'
+import { batchRendererQuery, toQuarks } from '@/lib/particles'
 import { getWorldRotation } from '@/lib/transforms'
 import { colorToVec4 } from '@/particles/honeySplatParticles'
 import { getIntersections } from '../game/sensor'
@@ -96,7 +96,7 @@ export const waterCrops = () => {
 				const spout = player.wateringCan.model.getObjectByName('spout')
 				const batchRenderer = batchRendererQuery.first
 				if (spout && batchRenderer) {
-					const water = waterParticles(getWorldRotation(spout))
+					const water = waterParticles(toQuarks.quaternion(getWorldRotation(spout)))
 					spout.add(water)
 					batchRenderer.batchRenderer.addSystem(water.system)
 				}

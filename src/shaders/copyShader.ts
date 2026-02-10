@@ -1,6 +1,6 @@
 import type { WebGLRenderer } from 'three'
 import { ShaderMaterial, Uniform, WebGLRenderTarget } from 'three'
-import { FullScreenQuad } from 'three/examples/jsm/postprocessing/Pass'
+import { FullScreenQuad } from 'three-stdlib'
 
 export const copyShader = (source: WebGLRenderTarget) => {
 	const copy = new ShaderMaterial({

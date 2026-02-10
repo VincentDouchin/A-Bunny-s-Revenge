@@ -1,8 +1,8 @@
 import type { ColorRepresentation } from 'three'
 import type { Entity } from '@/global/entity'
 import { between } from 'randomish'
-import { CircleGeometry, Color, MeshPhongMaterial, Vector3 } from 'three'
-import { Bezier, ColorOverLife, ColorRange, ConstantValue, Gradient, IntervalValue, ParticleSystem, PiecewiseBezier, SizeOverLife, SphereEmitter } from 'three.quarks'
+import { CircleGeometry, Color, MeshPhongMaterial } from 'three'
+import { Bezier, ColorOverLife, ColorRange, ConstantValue, Gradient, IntervalValue, ParticleSystem, PiecewiseBezier, SizeOverLife, SphereEmitter, Vector3 } from 'three.quarks'
 import { colorToVec4 } from './honeySplatParticles'
 
 const geo = new CircleGeometry(1, 16)

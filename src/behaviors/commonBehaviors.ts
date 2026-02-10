@@ -4,12 +4,12 @@ import type { State } from './state'
 import type { Animator } from '@/global/animator'
 import type { AllAnimations, AllStates, AnimatorsWith, AssetNames, BehaviorNode, ComponentsOfType, Entity, QueryEntity, StatesWith } from '@/global/entity'
 import type { ToonMaterial } from '@/shaders/materials'
-import { Material, Mesh } from 'three'
+import { DEFAULT_QUERY_FILTER, findSmoothPath } from 'navcat'
+import { Material, Mesh, Vector3 } from 'three'
 import { Faction } from '@/global/entity'
-import { ecs, tweens, world } from '@/global/init'
+import { assets, ecs, tweens } from '@/global/init'
 import { playSound } from '@/global/sounds'
 import { action, condition, enteringState, inState, selector, sequence, setState, wait, waitFor } from '@/lib/behaviors'
-import { collisionGroups } from '@/lib/collisionGroups'
 import { spawnDamageNumber } from '@/particles/damageNumber'
 import { calculateDamage, flash, squish } from '@/states/dungeon/battle'
 import { selectNewLockedEnemy } from '@/states/dungeon/locking'
@@ -19,24 +19,30 @@ import { inverter } from '../lib/behaviors'
 import { applyMove, applyRotate, getMovementForce, moveToDirection, takeDamage } from './behaviorHelpers'
 
 export const playerQuery = ecs.with('position', 'strength', 'body', 'critChance', 'critDamage', 'playerAnimator', 'weapon', 'player', 'collider', 'sensor', 'rotation', 'playerAttackStyle', 'playerState').where(({ faction }) => faction === Faction.Player)
-const navGridQuery = ecs.with('dungeon')
+// const navGridQuery = ecs.with('dungeon')
 const getPlayerDirection = (e: QueryEntity<typeof baseEnemyQuery>, player: With<Entity, 'position'> | undefined) => {
 	if (!player) return null
+	const direction = new Vector3()
+	// const direction = player.position.clone().sub(e.position).normalize()
+	// const hit = world.castShape(e.position, e.rotation, direction, e.collider.shape, 1, 20, false, undefined, collisionGroups('any', ['obstacle', 'player']), undefined, undefined)
+	// const obstacle = hit && hit?.collider !== player.collider
+	// const canSeePlayer = player.position.distanceTo(e.position) < 70
+	// if (obstacle) {
+	const navMesh = assets.levels.dungeon_room_1.navMesh!
 
-	const direction = player.position.clone().sub(e.position).normalize()
-	const hit = world.castShape(e.position, e.rotation, direction, e.collider.shape, 1, 20, false, undefined, collisionGroups('any', ['obstacle', 'player']), undefined, undefined)
-	const obstacle = hit && hit?.collider !== player.collider
-	const navGrid = navGridQuery.first?.dungeon?.navgrid
-	const canSeePlayer = player.position.distanceTo(e.position) < 70
-	if (obstacle && navGrid) {
-		const navPoint = navGrid.findPath(e.position, player.position)?.sub(e.position).normalize()
+	const path = findSmoothPath(navMesh, e.position.toArray(), player.position.toArray(), [10, 1, 10], DEFAULT_QUERY_FILTER, 1, 0.1, 3)
+	const point = path.path[1]
+	if (point) {
+		const direction = point
+			? new Vector3(point.position[0], 0, point.position[2]).sub(new Vector3(e.position.x, 0, e.position.z)).normalize()
+			: null
 		return {
-			direction: navPoint ?? null,
-			canSeePlayer,
-			canShootPlayer: !obstacle,
+			direction,
+			canSeePlayer: true,
+			canShootPlayer: false,
 		}
 	}
-	return { direction, canSeePlayer, canShootPlayer: !obstacle }
+	return { direction, canSeePlayer: true, canShootPlayer: false }
 }
 
 export const enemyContext = <E extends QueryEntity<typeof baseEnemyQuery>>(entity: E) => {

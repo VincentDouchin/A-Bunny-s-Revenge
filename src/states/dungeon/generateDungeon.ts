@@ -1,14 +1,12 @@
+import type { LevelLoaded } from 'editor/src/types'
+import type { encounters } from './encounters'
 import type { Item } from '@/constants/items'
 import type { Entity } from '@/global/entity'
-import type { Level } from '@/types/legecyLevel'
 import { Mushroom } from '@/constants/enemies'
 import { enemyGroups } from '@/constants/enemyGroups'
-import { getSellableItems } from '@/constants/items'
-import { levelsData } from '@/global/init'
+import { assets } from '@/global/init'
 import { cardinalDirections, Direction, otherDirection } from '@/lib/directions'
-import { NavGrid } from '@/lib/navGrid'
 import { getRandom, mapValues } from '@/utils/mapFunctions'
-import { encounters } from './encounters'
 
 // ! ROOMS
 type Connections = Partial<Record<Direction, number | null>>
@@ -22,14 +20,13 @@ export enum RoomType {
 	Seller,
 }
 export interface Room {
-	plan: Level
+	plan: LevelLoaded
 	enemies: Entity[]
 	doors: Partial<Record<Direction, Room | null>>
 	type: RoomType
 	encounter: keyof typeof encounters | null
 	items?: (Item | null)[]
 	chest?: true
-	navgrid: NavGrid
 }
 interface Position {
 	x: number
@@ -208,37 +205,38 @@ const getEnemies = (type: RoomType, level: number) => {
 }
 
 export const assignPlanAndEnemies = (rooms: BlankRoom[], level: number): Room[] => {
-	const dungeons = levelsData.levels.filter(level => level.type === 'dungeon')
-	let hasSeller = false
+	const dungeonLevel = assets.levels.dungeon_room_1
+	// const dungeons = levelsData.levels.filter(level => level.type === 'dungeon')
+	// let hasSeller = false
 	const filledRooms = rooms.map((room) => {
-		const directions = Object.keys(room.connections) as Direction[]
-		const possibleRooms = dungeons.filter((dungeon) => {
-			const props = Object.values(levelsData.levelData).filter(p => p?.map === dungeon.id && p?.data?.direction)
-			return directions.length === props.length && directions.every(dir => props.some((p) => {
-				return p?.data?.direction === dir
-			}))
-		})
+		// const directions = Object.keys(room.connections) as Direction[]
+		// const possibleRooms = dungeons.filter((dungeon) => {
+		// 	const props = Object.values(levelsData.levelData).filter(p => p?.map === dungeon.id && p?.data?.direction)
+		// 	return directions.length === props.length && directions.every(dir => props.some((p) => {
+		// 		return p?.data?.direction === dir
+		// 	}))
+		// })
 		const doors = {}
-		const plan = getRandom(possibleRooms)
-		if (!plan) throw new Error(`no plan found for connections : ${directions.join(', ')}`)
-		let encounter: null | keyof typeof encounters = null
-		if (room.type === RoomType.NPC) {
-			encounter = getRandom(Object.keys(encounters) as (keyof typeof encounters)[])
-		}
+		// const plan = getRandom(possibleRooms)
+		// if (!plan) throw new Error(`no plan found for connections : ${directions.join(', ')}`)
+		// let encounter: null | keyof typeof encounters = null
+		// if (room.type === RoomType.NPC) {
+		// 	encounter = getRandom(Object.keys(encounters) as (keyof typeof encounters)[])
+		// }
 		const enemies = getEnemies(room.type, level).map(enemy => enemy(level))
-		if (!plan.navgrid) throw new Error(`Navgrid not generated for level ${plan.name}`)
-		const navgrid = new NavGrid(plan.navgrid, plan.size)
-		const newRoom: Room = { ...room, plan, enemies, doors, encounter, navgrid }
-		if (
-			!hasSeller
-			&& Object.values(levelsData.levelData).filter(x => x && x.map === plan.id).some(x => x && x.model === 'stall')
-			&& [RoomType.NPC, RoomType.Battle].includes(room.type)
-		) {
-			newRoom.enemies = []
-			newRoom.type = RoomType.Seller
-			newRoom.items = getSellableItems(3)
-			hasSeller = true
-		}
+		// if (!plan.navgrid) throw new Error(`Navgrid not generated for level ${plan.name}`)
+		// const navgrid = new NavGrid(plan.navgrid, plan.size)
+		const newRoom: Room = { ...room, plan: dungeonLevel, enemies, doors, encounter: null }
+		// if (
+		// !hasSeller
+		// 	&& Object.values(levelsData.levelData).filter(x => x && x.map === plan.id).some(x => x && x.model === 'stall')
+		// 	&& [RoomType.NPC, RoomType.Battle].includes(room.type)
+		// ) {
+		// 	newRoom.enemies = []
+		// 	newRoom.type = RoomType.Seller
+		// 	newRoom.items = getSellableItems(3)
+		// 	hasSeller = true
+		// }
 
 		return newRoom
 	})
@@ -260,12 +258,12 @@ const placeNPC = (rooms: BlankRoom[]) => {
 	}
 }
 
-export const genDungeon = (roomsAmount: number, npc: boolean, level: number) => {
+export const genDungeon = (roomsAmount: number, npc: boolean) => {
 	const rooms = createRooms(roomsAmount)
 	findStartExit(rooms)
 	if (npc) {
 		placeNPC(rooms)
 	}
-	const filledRooms = assignPlanAndEnemies(rooms, level)
+	const filledRooms = assignPlanAndEnemies(rooms, 0)
 	return filledRooms
 }

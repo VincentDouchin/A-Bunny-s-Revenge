@@ -1,4 +1,4 @@
-import { objectKeys } from '@/utils/mapFunctions'
+import { entries, objectKeys } from '@/utils/mapFunctions'
 
 export type AppStates<A extends App<any, any>> = A extends App<infer States, any> ? States[number] : never
 
@@ -57,8 +57,7 @@ export class App<States extends string[], Resources extends Record<string, any> 
 
 	#states: Set<States[number]>[] = []
 	#enabledStates: { [S in States[number]]?: Resources[S] } = {}
-	#queue = new Set<() => Promise<void> | void>()
-
+	#nextEnabled: { [S in States[number]]?: Resources[S] } = {}
 	readonly #fixedTimeStep: number = 1000 / 60 // 60 FPS in milliseconds
 	#previousTime: number = 0
 	#accumulator: number = 0
@@ -98,31 +97,33 @@ export class App<States extends string[], Resources extends Record<string, any> 
 	}
 
 	async enable<S extends States[number]>(...args: S extends keyof Resources ? [state: S, resources: Resources[S]] : [state: S]) {
-		return new Promise<void>((resolve) => {
-			this.#queue.add(async () => {
-				const [state, resources] = args
-				this.#enabledStates[state] = resources as Resources[S]
-				const systems = this.#systems[state]?.enter ?? []
-				const otherStates = this.#states.find(s => s.has(state))
-				if (otherStates) {
-					for (const otherState of otherStates) {
-						if (otherState !== state) {
-							await this.disable(otherState)
-						}
+		const [state, resources] = args
+		this.#nextEnabled[state] = resources
+	}
+
+	async #enable() {
+		const transitions = entries(this.#nextEnabled)
+		this.#nextEnabled = {}
+		for (const [state, resources] of transitions) {
+			this.#enabledStates[state] = resources as Resources[typeof state]
+			const systems = this.#systems[state]?.enter ?? []
+			const otherStates = this.#states.find(s => s.has(state))
+			if (otherStates) {
+				for (const otherState of otherStates) {
+					if (otherState !== state) {
+						await this.disable(otherState)
 					}
 				}
-				for (const system of systems) {
-					await system(resources as Resources[S])
-				}
-				const subscriberSets = this.#systems[state]?.subscribers ?? []
-				for (const sub of subscriberSets) {
-					const unSub = sub(resources as Resources[S])
-					this.#systems[state]?.cleanUp.add(unSub)
-				}
-
-				resolve()
-			})
-		})
+			}
+			for (const system of systems) {
+				await system(resources as Resources[typeof state])
+			}
+			const subscriberSets = this.#systems[state]?.subscribers ?? []
+			for (const sub of subscriberSets) {
+				const unSub = sub(resources as Resources[typeof state])
+				this.#systems[state]?.cleanUp.add(unSub)
+			}
+		}
 	}
 
 	disable = async <S extends States[number]>(state: S) => {
@@ -211,10 +212,6 @@ export class App<States extends string[], Resources extends Record<string, any> 
 		this.#runSchedule('preUpdate')
 		this.#runSchedule('update')
 		this.#runSchedule('postUpdate')
-		for (const callBack of this.#queue) {
-			await callBack()
-		}
-		this.#queue.clear()
 	}
 
 	addPlugins(...plugins: Plugin<this>[]) {
@@ -222,6 +219,10 @@ export class App<States extends string[], Resources extends Record<string, any> 
 			plugin(this)
 		}
 		return this
+	}
+
+	initState() {
+
 	}
 
 	async loop() {
@@ -236,11 +237,11 @@ export class App<States extends string[], Resources extends Record<string, any> 
 
 		this.#accumulator += deltaTime
 		this.#previousTime = currentTime
-
 		while (this.#accumulator >= this.#fixedTimeStep) {
-			await this.#update()
+			this.#update()
 			this.#accumulator -= this.#fixedTimeStep
 		}
+		this.#enable()
 
 		this.#render()
 
@@ -258,19 +259,17 @@ export class App<States extends string[], Resources extends Record<string, any> 
 
 	async start() {
 		this.#running = true
-		this.loop()
 		this.#initCallBack && await this.#initCallBack()
 		this.#initCallBack = null
+		this.loop()
 	}
 
 	pause() {
-		this.#queue.add(() => {
-			if (this.#callbackId !== null) {
-				window.cancelAnimationFrame(this.#callbackId)
-				this.#callbackId = null
-				this.#running = false
-			}
-		})
+		if (this.#callbackId !== null) {
+			window.cancelAnimationFrame(this.#callbackId)
+			this.#callbackId = null
+			this.#running = false
+		}
 	}
 
 	async stop() {

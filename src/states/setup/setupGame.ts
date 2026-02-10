@@ -1,7 +1,6 @@
 import { throttle } from '@solid-primitives/scheduled'
 import { Vector2 } from 'three'
-import { bosses, Mushroom } from '@/constants/enemies'
-import { selectedBoss } from '@/debug/debugUi'
+import { Armabee } from '@/constants/enemies'
 import { updateCameraZoom } from '@/global/camera'
 import { params } from '@/global/context'
 import { settings, time } from '@/global/init'
@@ -9,7 +8,6 @@ import { updateRenderSize } from '@/global/rendering'
 import { app } from '@/global/states'
 import { Direction } from '@/lib/directions'
 import { windowEvent } from '@/lib/uiManager'
-import { startIntro } from '@/quests/introQuest'
 import { assignPlanAndEnemies, RoomType } from '../dungeon/generateDungeon'
 import { setMainCameraPosition } from '../mainMenu/mainMenuRendering'
 
@@ -24,25 +22,25 @@ export const setupGame = async () => {
 		updateRenderSize()
 		updateCameraZoom()
 	} else	if (params.debugBoss) {
-		const bossRoom = assignPlanAndEnemies([{ position: { x: 0, y: 0 }, connections: { north: 1, south: null }, type: RoomType.Boss }], 0)
-		bossRoom[0].enemies = [bosses[selectedBoss.boss](0)]
-		app.enable('dungeon', { dungeon: bossRoom[0], direction: Direction.S, firstEntry: true, playerHealth: 10, dungeonLevel: 0, weapon: 'Hoe' })
+		// const bossRoom = assignPlanAndEnemies([{ position: { x: 0, y: 0 }, connections: { north: 1, south: null }, type: RoomType.Boss }], 0)
+		// bossRoom[0].enemies = [bosses[selectedBoss.boss](0)]
+		// app.enable('dungeon', { dungeon: bossRoom[0], direction: Direction.S, firstEntry: true, playerHealth: 10, dungeonLevel: 0, weapon: 'Hoe' })
 		updateRenderSize()
 		updateCameraZoom()
 	} else if (params.debugEnemies) {
 		const enemiesRoom = assignPlanAndEnemies([{ position: { x: 0, y: 0 }, connections: { north: 1, south: null, east: null }, type: RoomType.Battle }], 0)
-		enemiesRoom[0].enemies = [Mushroom(1)]
+		enemiesRoom[0].enemies = [Armabee(1)]
 		enemiesRoom[0].type = RoomType.Battle
-		app.enable('dungeon', { dungeon: enemiesRoom[0], direction: Direction.S, firstEntry: true, playerHealth: 10, dungeonLevel: 0, weapon: 'SwordWeapon' })
+		app.enable('dungeon', { direction: Direction.N, dungeon: enemiesRoom[0], firstEntry: true, playerHealth: 10, dungeonLevel: 0, weapon: 'SwordWeapon' })
 		updateRenderSize()
 		updateCameraZoom()
 	} else if (params.debugIntro) {
 		await app.enable('intro')
-		setTimeout(() => startIntro(), 2000)
+		// setTimeout(() => startIntro(), 2000)
 		app.disable('cutscene')
 		updateRenderSize()
 	} else {
-		app.enable('farm', { door: null })
+		app.enable('farm', { direction: null })
 		updateRenderSize()
 		updateCameraZoom()
 	}

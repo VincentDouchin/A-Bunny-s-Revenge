@@ -1,5 +1,6 @@
 import { ColliderDesc, RigidBodyDesc } from '@dimforge/rapier3d-compat'
 import { AdditiveBlending, Mesh, MeshBasicMaterial, PlaneGeometry, Vector3 } from 'three'
+import { ParticleSystem } from 'three.quarks'
 import { Faction } from '@/global/entity'
 import { assets, coroutines, ecs, tweens, world } from '@/global/init'
 import { playSound } from '@/global/sounds'

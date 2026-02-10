@@ -1,49 +1,39 @@
-const mat2 myt = mat2(.12121212, .13131313, -.13131313, .12121212);
-const vec2 mys = vec2(1e4, 1e6);
-
-vec2 rhash(vec2 uv) {
-  uv *= myt;
-  uv *= mys;
-  return fract(fract(uv / mys) * uv);
+// Improved hash function - returns vec3 for color
+vec3 hash3(vec2 p) {
+    vec3 p3 = fract(vec3(p.xyx) * 0.1031);
+    p3 += dot(p3, p3.yzx + 33.33);
+    return fract((p3.xxy + p3.yzz) * p3.zyx);
 }
 
-vec3 hash(vec3 p) {
-  return fract(sin(vec3(dot(p, vec3(1.0, 57.0, 113.0)),
-                        dot(p, vec3(57.0, 113.0, 1.0)),
-                        dot(p, vec3(113.0, 1.0, 57.0)))) *
-               43758.5453);
-}
-
-float voronoi2d(const in vec2 point) {
-  vec2 p = floor(point);
-  vec2 f = fract(point);
-  float res = 0.0;
-  for (int j = -1; j <= 1; j++) {
-    for (int i = -1; i <= 1; i++) {
-      vec2 b = vec2(i, j);
-      vec2 r = vec2(b) - f + rhash(p + b);
-      res += 1. / pow(dot(r, r), 8.);
-    }
-  }
-  return pow(1. / res, 0.0625);
-}
-
-float voronoi(vec2 uv) {
-    vec2 p = floor(uv);
+// 2D Voronoi with cell ID
+vec3 voronoi(vec2 uv) {
+    vec2 i = floor(uv);
     vec2 f = fract(uv);
-
-    float res = 8.0;
-    float d = 1.0;
-
-    for (float j = -1.0; j <= 1.0; j++) {
-        for (float i = -1.0; i <= 1.0; i++) {
-            vec2 g = vec2(i, j);
-            vec2 cellCenter = g + p + rhash(g + p);
-            float d2 = distance(f, cellCenter);
-
-            d = min(d, d2);
+    
+    vec3 minData = vec3(1.0); // x: distance, yz: cell id
+    
+    // Check 3x3 neighboring cells
+    for (int x = -1; x <= 1; x++) {
+        for (int y = -1; y <= 1; y++) {
+            vec2 neighbor = vec2(float(x), float(y));
+            vec2 cell = i + neighbor;
+            vec2 point = neighbor + hash3(cell).xy; // Random point in cell
+            
+            float dist = length(point - f);
+            if (dist < minData.x) {
+                minData = vec3(dist, hash3(cell).xy);
+            }
         }
     }
-
-    return d;
+    
+    return minData;
+}
+float triangle2D(vec2 p){
+    p *= 0.01;
+    const float k = sqrt(3.0);
+    p.x = abs(p.x) - 1.0;
+    p.y = p.y + 1.0/k;
+    if( p.x+k*p.y>0.0 ) p = vec2(p.x-k*p.y,-k*p.x-p.y)/2.0;
+    p.x -= clamp( p.x, -2.0, 0.0 );
+    return -length(p)*sign(p.y) * 100.;
 }

@@ -2,22 +2,24 @@ import type { Animations } from '@assets/animations'
 import type { Drop } from '@/constants/enemies'
 import type { AssetNames, AttackStyle, ComponentsOfType, Entity } from '@/global/entity'
 import type { app } from '@/global/states'
-import type { SubscriberSystem } from '@/lib/app'
+import type { SubscriberSystem, UpdateSystem } from '@/lib/app'
 import { ActiveEvents, Cuboid, RigidBodyType } from '@dimforge/rapier3d-compat'
+import { DEFAULT_QUERY_FILTER, findRandomPoint } from 'navcat'
 import { BoxGeometry, Mesh, Quaternion, Vector3 } from 'three'
-import { generateUUID } from 'three/src/math/MathUtils'
+import { generateUUID } from 'three/src/math/MathUtils.js'
 import { State } from '@/behaviors/state'
 import { Animator } from '@/global/animator'
 import { Faction } from '@/global/entity'
 import { assets, ecs, save, time } from '@/global/init'
 import { modelColliderBundle } from '@/lib/colliders'
 import { collisionGroups } from '@/lib/collisionGroups'
+import { inMap } from '@/lib/hierarchy'
 import { Stat } from '@/lib/stats'
 import { Timer } from '@/lib/timer'
 import { dash } from '@/particles/dashParticles'
 import { enemyDefeated } from '@/particles/enemyDefeated'
 import { impact } from '@/particles/impact'
-import { getRandom, opt } from '@/utils/mapFunctions'
+import { opt } from '@/utils/mapFunctions'
 import { collectItems } from '../game/items'
 import { healthBundle } from './health'
 import { spawnChest } from './spawnChest'
@@ -94,11 +96,17 @@ export const enemyBundle = <M extends keyof Animations & AssetNames['characters'
 	return entity
 }
 const enemyQuery = ecs.with('faction', 'enemyId').where(e => e.faction === Faction.Enemy)
+const chestLocation = ecs.with('dungeonChest', 'position', 'rotation')
 export const removeEnemyFromSpawn: SubscriberSystem<typeof app, 'dungeon'> = ({ dungeon, dungeonLevel }) => enemyQuery.onEntityRemoved.subscribe((entity) => {
 	dungeon.enemies = dungeon.enemies.filter(e => e.enemyId !== entity.enemyId)
 	if (dungeon.enemies.length === 0) {
 		if (!dungeon.chest) {
-			spawnChest(dungeonLevel)
+			for (const parent of chestLocation) {
+				ecs.add({
+					...spawnChest(dungeonLevel),
+					parent,
+				})
+			}
 			dungeon.chest = true
 		}
 		setTimeout(() => collectItems(true)(), 2000)
@@ -115,17 +123,14 @@ export const displaySensors = () => ecs.with('sensor', 'group', 'rotation').onEn
 	}
 })
 
-const dungeonQuery = ecs.with('dungeon')
-
-export const spawnEnemies = () => {
-	for (const e of dungeonQuery) {
-		const possiblePoints = e.dungeon.navgrid.getSpawnPoints()
-		for (const enemy of e.dungeon.enemies) {
-			ecs.add({
+export const spawnEnemies: UpdateSystem<typeof app, 'dungeon'> = ({ dungeon }) => {
+	for (const enemy of dungeon.enemies) {
+		const point = findRandomPoint(dungeon.plan.navMesh!, DEFAULT_QUERY_FILTER, Math.random)
+		if (point.success) {
+			ecs.add(inMap({
 				...enemy,
-				position: getRandom([...possiblePoints]),
-				parent: e,
-			})
+				position: new Vector3(...point.position),
+			}))
 		}
 	}
 }

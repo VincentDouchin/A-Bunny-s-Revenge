@@ -12,12 +12,10 @@ import { tweensManager } from '@/lib/tweens'
 import { UIManager } from '@/lib/uiManager'
 import { loadAssets } from './assets'
 import { menuInputMap, playerInputMap } from './inputMaps'
-import { loadLevelData } from './levelData'
 import { useSave, useSettings } from './save'
 import { app } from './states'
 
 await init()
-// await getSave()
 export const scene = new Scene()
 export const settings = await useSettings()
 export const { save, resetSave, addItem, removeItem } = await useSave()
@@ -27,9 +25,8 @@ export const ecs = new MiniplexWorld<Entity>()
 export const ui = new UIManager(settings)
 export const coroutines = new CoroutinesManager()
 export const inputManager = new InputManager()
-export const levelsData = await loadLevelData()
 export const thumbnailRenderer = getThumbnailRenderer()
-export const assets = await loadAssets(thumbnailRenderer)
+export const assets = await loadAssets(thumbnailRenderer, false)
 export const dayTime = new DayTime(600_000)
 export const musicManager = new MusicManager()
 export const tweens = tweensManager(time, ecs)

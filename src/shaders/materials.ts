@@ -2,6 +2,7 @@ import { Color, MeshPhongMaterial, Vector2, Vector3 } from 'three'
 import { addUniform, addVarying, extendMaterial, importLib, insertAfter, insertBefore, MaterialExtension, override, remove, replace, replaceInclude, unpack } from '@/lib/materialExtension'
 import noise from '@/shaders/glsl/lib/cnoise.glsl?raw'
 import { gradient } from '@/shaders/glsl/lib/generateGradient'
+import voronoi from '@/shaders/glsl/lib/voronoi.glsl?raw'
 import water from '@/shaders/glsl/water.glsl?raw'
 import { useLocalStorage } from '@/utils/useLocalStorage'
 
@@ -61,6 +62,7 @@ const groundExtension = new MaterialExtension({
 	.defines('USE_ENVMAP')
 	.frag(
 		importLib(noise),
+		importLib(voronoi),
 		addUniform('size', 'vec2'),
 		addUniform('level', 'sampler2D'),
 		addUniform(`pathColor2`, 'vec3'),
@@ -106,6 +108,11 @@ const groundExtension = new MaterialExtension({
 			float rock_amount = step(0.2,texture2D(rock,vUv).a);
 			vec3 grass_and_path_and_rock = mix(grass_and_path,rock_mixed,rock_amount);
 			color.rgb = mix(tex.rgb,grass_and_path_and_rock,normal_noised);
+			// float scale = 25.0;
+			// vec3 vor = voronoi(vUv * scale);
+    		// vec3 c = hash3(vec2(vor.y, vor.z));
+			
+			// color.rgb = mix(grassColor, topColor, c);
 	`),
 	)
 
@@ -166,9 +173,9 @@ export const waterExtension = new MaterialExtension({
 		addUniform('foam_color', 'vec3'),
 		addUniform('size', 'vec2'),
 		replace('gl_FragColor = vec4(outgoingLight2,color.a);', /* glsl */`
-			if (sampledDiffuseColor.b == 0.){
-				discard;
-			}
+			// if (sampledDiffuseColor.b == 0.){
+			// 	discard;
+			// }
 			vec3 water_color = water(vUv*size/8., vec3(0,1,0),time,water_color,water_color - vec3(0.1) ,foam_color) * outgoingLight;
 			gl_FragColor = vec4(water_color,1.);
 		`),

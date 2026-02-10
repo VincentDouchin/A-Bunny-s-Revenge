@@ -1,13 +1,12 @@
-import type { BufferGeometry, Euler, Material, Mesh, Object3D, Object3DEventMap, Vec2, Vector4Like } from 'three'
+import type { BufferGeometry, Material, Matrix4, Mesh, Object3D, Vec2, Vector4Like } from 'three'
 import type { Simplify } from 'type-fest'
 import assetManifest from '@assets/assetManifest.json'
 import { createStore, del, entries, set } from 'idb-keyval'
-import { DynamicDrawUsage, Group, LoadingManager, Matrix4, TextureLoader, Vector3 } from 'three'
+import { DynamicDrawUsage, Group, LoadingManager, TextureLoader } from 'three'
 import { InstancedUniformsMesh } from 'three-instanced-uniforms-mesh'
+import { DRACOLoader, GLTFLoader } from 'three-stdlib'
 import draco_decoder from 'three/examples/jsm/libs/draco/draco_decoder.wasm?url'
 import draco_wasm_wrapper from 'three/examples/jsm/libs/draco/draco_wasm_wrapper.js?url'
-import { DRACOLoader } from 'three/examples/jsm/loaders/DRACOLoader'
-import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader'
 import { assets } from '@/static-assets'
 import { getScreenBuffer } from '@/utils/buffer'
 import { useLocalStorage } from '@/utils/useLocalStorage'
@@ -98,70 +97,112 @@ export const loadImage = (path: string) => new Promise<HTMLImageElement>((resolv
 	img.onload = () => resolve(img)
 })
 
-export interface InstanceHandle {
-	setMatrix: (fn: (matrix: Matrix4) => void) => void
-	setUniform: (name: string, value: any) => void
-}
+// export interface InstanceHandle {
+// 	setMatrix: (fn: (matrix: Matrix4) => void) => void
+// 	setUniform: (name: string, value: any) => void
+// }
 
-export interface InstanceGenerator {
-	addAt: (position: Vector3, scale: number, rotation: Euler) => InstanceHandle
-	process: () => Group
-	obj: Object3D
-}
+// export interface InstanceGenerator {
+// 	addAt: (position: Vector3, scale: number, rotation: Euler) => InstanceHandle
+// 	process: () => Group
+// 	obj: Object3D
+// }
 
-export const isMesh = <M extends Material = Material>(node: Object3D): node is Mesh<BufferGeometry, M> => node.type === 'Mesh'
+export const isMesh = <M extends Material = Material>(node: any): node is Mesh<BufferGeometry, M> => node.type === 'Mesh'
 
-export const instanceMesh = <T extends Material>(obj: Object3D<Object3DEventMap>, castShadow = true) => {
-	const instanceParams: Matrix4[] = []
-	const meshes: InstancedUniformsMesh<T>[] = []
-	const group = new Group()
+export class InstancedModel extends Group {
+	matrixes: Matrix4[] = []
+	meshes: InstancedUniformsMesh<Material>[] = []
+	constructor(private model: Object3D) {
+		super()
+	}
 
-	const addAt = (position: Vector3, scale = 1, rotation: Euler) => {
-		const matrix = new Matrix4()
-		matrix.makeRotationFromEuler(rotation)
-		matrix.setPosition(position)
-		matrix.scale(new Vector3().setScalar(scale))
-		const i = instanceParams.length
-		instanceParams.push(matrix)
+	addInstance(matrix: Matrix4) {
+		const i = this.matrixes.length
+		this.matrixes.push(matrix)
 		const uniformCache: Record<string, any> = {}
 		return {
-			setMatrix: (fn: (m: Matrix4) => void) => {
-				fn(matrix)
-				for (const mesh of meshes) {
-					mesh.setMatrixAt(i, matrix)
-				}
-			},
 			setUniform: (name: string, value: any) => {
 				if (uniformCache[name] === value) return
 				uniformCache[name] = value
-				for (const mesh of meshes) {
+				for (const mesh of this.meshes) {
 					mesh.setUniformAt(name, i, value)
 				}
 			},
 		}
 	}
-	const process = () => {
-		obj.traverse((node) => {
-			if (isMesh<T>(node)) {
-				const mesh = new InstancedUniformsMesh(node.geometry.clone(), node.material.clone(), instanceParams.length)
+
+	build() {
+		this.model.traverse((node) => {
+			if (isMesh(node)) {
+				const mesh = new InstancedUniformsMesh(node.geometry.clone(), node.material.clone(), this.matrixes.length)
 				mesh.instanceMatrix.setUsage(DynamicDrawUsage)
-				meshes.push(mesh)
+				this.meshes.push(mesh)
 			}
 		})
-		for (const mesh of meshes) {
-			mesh.castShadow = castShadow
-			group.add(mesh)
-			for (let i = 0; i < instanceParams.length; i++) {
-				const matrix = instanceParams[i]
+		for (const mesh of this.meshes) {
+			this.add(mesh)
+			for (let i = 0; i < this.matrixes.length; i++) {
+				const matrix = this.matrixes[i]
 				mesh.setMatrixAt(i, matrix)
 				mesh.material.needsUpdate = true
 			}
 		}
-
-		return group
+		return this
 	}
-	return { addAt, process, obj }
 }
+
+// export const instanceMesh = <T extends Material>(obj: Object3D<Object3DEventMap>, castShadow = true) => {
+// 	const instanceParams: Matrix4[] = []
+// 	const meshes: InstancedUniformsMesh<T>[] = []
+// 	const group = new Group()
+
+// 	const addAt = (position: Vector3, scale = 1, rotation: Euler) => {
+// 		const matrix = new Matrix4()
+// 		matrix.makeRotationFromEuler(rotation)
+// 		matrix.setPosition(position)
+// 		matrix.scale(new Vector3().setScalar(scale))
+// 		const i = instanceParams.length
+// 		instanceParams.push(matrix)
+// 		const uniformCache: Record<string, any> = {}
+// 		return {
+// 			setMatrix: (fn: (m: Matrix4) => void) => {
+// 				fn(matrix)
+// 				for (const mesh of meshes) {
+// 					mesh.setMatrixAt(i, matrix)
+// 				}
+// 			},
+// 			setUniform: (name: string, value: any) => {
+// 				if (uniformCache[name] === value) return
+// 				uniformCache[name] = value
+// 				for (const mesh of meshes) {
+// 					mesh.setUniformAt(name, i, value)
+// 				}
+// 			},
+// 		}
+// 	}
+// 	const process = () => {
+// 		obj.traverse((node) => {
+// 			if (isMesh<T>(node)) {
+// 				const mesh = new InstancedUniformsMesh(node.geometry.clone(), node.material.clone(), instanceParams.length)
+// 				mesh.instanceMatrix.setUsage(DynamicDrawUsage)
+// 				meshes.push(mesh)
+// 			}
+// 		})
+// 		for (const mesh of meshes) {
+// 			mesh.castShadow = castShadow
+// 			group.add(mesh)
+// 			for (let i = 0; i < instanceParams.length; i++) {
+// 				const matrix = instanceParams[i]
+// 				mesh.setMatrixAt(i, matrix)
+// 				mesh.material.needsUpdate = true
+// 			}
+// 		}
+
+// 		return group
+// 	}
+// 	return { addAt, process, obj }
+// }
 
 export const dataUrlToCanvas = async (size: Vec2, dataUrl?: string) => {
 	const buffer = getScreenBuffer(size.x, size.y)
@@ -171,8 +212,8 @@ export const dataUrlToCanvas = async (size: Vec2, dataUrl?: string) => {
 	}
 	return buffer.canvas
 }
-export const canvasToArray = (canvas: HTMLCanvasElement): Vector4Like[] => {
-	const context = canvas.getContext('2d')!
+export const canvasToArray = (canvas: HTMLCanvasElement, reverse = false): Vector4Like[] => {
+	const context = canvas.getContext('2d', { willReadFrequently: true })!
 	const imageData = context.getImageData(0, 0, canvas.width, canvas.height)
 	const pixels = []
 
@@ -183,8 +224,11 @@ export const canvasToArray = (canvas: HTMLCanvasElement): Vector4Like[] => {
 			z: imageData.data[i + 2],
 			w: imageData.data[i + 3],
 		}
-
-		pixels.push(pixel)
+		if (reverse) {
+			pixels.push(pixel)
+		} else {
+			pixels.unshift(pixel)
+		}
 	}
 	return pixels
 }
@@ -197,6 +241,10 @@ export const canvasToGrid = (canvas: HTMLCanvasElement): Vector4Like[][] => {
 	}
 
 	return arrayOfArrays
+}
+export const canvasToBuffer = (canvas: HTMLCanvasElement): Uint8ClampedArray => {
+	const ctx = canvas.getContext('2d')!
+	return ctx.getImageData(0, 0, canvas.width, canvas.height).data
 }
 
 export const loaderProgress = () => {

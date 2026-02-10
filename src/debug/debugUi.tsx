@@ -1,6 +1,6 @@
 import type { Boss } from '@/constants/enemies'
 import type { Conversation } from '@/conversation/setupConversation'
-import { load } from 'js-toml'
+import { parse } from '@ltd/j-toml'
 import { createSignal, For, onCleanup, onMount, Show } from 'solid-js'
 import atom from 'solid-use/atom'
 import { Color, Mesh, OrthographicCamera, PerspectiveCamera, Quaternion, Vector3 } from 'three'
@@ -26,7 +26,7 @@ import { ColorCorrection, ToonEditor } from './toonEditor'
 export const [selectedBoss, setSelectedBoss] = useLocalStorage<{ boss: Boss }>('selectedBoss', { boss: 'Armabee_Evolved' })
 const rendererQuery = ecs.with('renderer', 'scene', 'renderGroup').where(e => e.renderGroup === RenderGroup.Game)
 
-const [localParams, setParams] = useLocalStorage('params', params)
+const [localParams, setParams] = useLocalStorage('params', params as any)
 Object.assign(params, { ...localParams, zoom: params.zoom, cameraOffsetX: 0, cameraOffsetY: 150, cameraOffsetZ: -200 })
 export const getGameRenderGroup = () => {
 	const gameRenderGroup = rendererQuery.first
@@ -66,7 +66,7 @@ export const DebugUi = () => {
 	}
 	const destroyCrops = () => {
 		save.crops = {}
-		app.enable('farm', { door: 'clearing' })
+		app.enable('farm', { direction: null })
 	}
 	const reset = async () => {
 		app.disable('farm')
@@ -153,10 +153,10 @@ export const DebugUi = () => {
 	const toggleDebugRenderer = (enable: boolean) => {
 		if (enable) {
 			debugRenderer = new RapierDebugRenderer(world)
-			scene.add(debugRenderer.mesh)
+			scene.add(debugRenderer)
 		} else {
 			if (debugRenderer) {
-				debugRenderer.mesh.removeFromParent()
+				debugRenderer.removeFromParent()
 				debugRenderer = null
 			}
 		}
@@ -164,14 +164,7 @@ export const DebugUi = () => {
 	ui.updateSync(() => {
 		debugRenderer && debugRenderer.update()
 	})
-	const navgridQuery = ecs.with('dungeon')
-	const isNavGridRendered = ui.sync(() => !!navgridQuery.first?.dungeon?.navgrid?.mesh?.parent)
-	const toggleNavGrid = () => {
-		const navgrid = navgridQuery.first?.dungeon.navgrid
-		if (navgrid) {
-			navgrid.render()
-		}
-	}
+
 	const showToonEditor = atom(false)
 	const showGroundEditor = atom(false)
 	const showColorCorrection = atom(false)
@@ -186,7 +179,7 @@ export const DebugUi = () => {
 		reader.onload = async (e: ProgressEvent<FileReader>) => {
 			const result = e.target?.result
 			if (typeof result == 'string') {
-				const conversation = load(result) as Conversation
+				const conversation = parse(result) as unknown as Conversation
 				try {
 					validateConversation(conversation)
 					// eslint-disable-next-line no-console
@@ -269,8 +262,6 @@ export const DebugUi = () => {
 					<input type="checkbox" checked={params.debugIntro} onChange={e => setParams(d => ({ ...d, debugIntro: e.target.checked }))}></input>
 					Debug Renderer
 					<input type="checkbox" onChange={e => toggleDebugRenderer(e.target.checked)}></input>
-					nav grid
-					<input type="checkbox" checked={isNavGridRendered()} onChange={() => toggleNavGrid()}></input>
 					Time of day
 					<input
 						type="range"

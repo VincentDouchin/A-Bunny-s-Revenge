@@ -36,10 +36,10 @@ export const movePlayer = () => {
 	for (const e of playerQuery) {
 		const { movementForce } = e
 		movementForce.setScalar(0)
-		movementForce.x += gameInputs.get('left').pressed
-		movementForce.x -= gameInputs.get('right').pressed
-		movementForce.z -= gameInputs.get('backward').pressed
-		movementForce.z += gameInputs.get('forward').pressed
+		movementForce.x -= gameInputs.get('left').pressed
+		movementForce.x += gameInputs.get('right').pressed
+		movementForce.z += gameInputs.get('backward').pressed
+		movementForce.z -= gameInputs.get('forward').pressed
 		if (inputManager.controls() === 'keyboard') {
 			movementForce.normalize()
 		}

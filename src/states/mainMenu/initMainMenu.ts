@@ -54,6 +54,6 @@ export const intiMainMenuRendering = () => {
 		menuBook,
 		stateEntity: 'mainMenu',
 		...menuInputMap(),
-		withTimeUniform: menuBook.withTimeUniforms,
+		// withTimeUniform: menuBook.withTimeUniforms,
 	})
 }

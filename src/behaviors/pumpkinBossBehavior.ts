@@ -3,7 +3,6 @@ import type { Entity } from '@/global/entity'
 import type { Plugin } from '@/lib/app'
 import { ColliderDesc, RigidBodyDesc } from '@dimforge/rapier3d-compat'
 import { Mesh } from 'three'
-import { Seedling } from '@/constants/enemies'
 import { isMesh } from '@/global/assetLoaders'
 import { addCameraShake } from '@/global/camera'
 import { assertEntity, Interactable } from '@/global/entity'
@@ -15,7 +14,6 @@ import { inMap } from '@/lib/hierarchy'
 import { traverseFind } from '@/lib/models'
 import { addExploder } from '@/particles/exploder'
 import { squish } from '@/states/dungeon/battle'
-import { getRandom } from '@/utils/mapFunctions'
 import { attackNode, cooldownNode, damagedByPlayer, deadNode, enemyContext, hitNode, idleNode, runningNode, waitingAttackNode, withContext } from './commonBehaviors'
 import { baseEnemyQuery } from './enemyBehavior'
 
@@ -23,22 +21,22 @@ const sporeQuery = ecs.with('enemyName').where(e => e.enemyName === 'pollen')
 const pumpkinBossBossQuery = baseEnemyQuery.with('pumpkinBossState', 'boss', 'pumpkinBoss', 'pumpkinBossAnimator')
 
 const mapQuery = ecs.with('dungeon')
-const spawnSpore = (boss: Entity) => {
+const spawnSpore = (_boss: Entity) => {
 	const map = mapQuery.first
 	if (map) {
-		const spawnPoint = getRandom(map.dungeon.navgrid.getSpawnPoints())
+		// const spawnPoint = getRandom(map.dungeon.navgrid.getSpawnPoints())
 		const resources = app.getResources('dungeon')
 		if (resources && 'dungeonLevel' in resources) {
-			const seedling = ecs.add(inMap({
-				...Seedling(resources.dungeonLevel),
-				position: spawnPoint,
-			}))
-			const { onDestroy } = boss
-			ecs.removeComponent(boss, 'onDestroy')
-			ecs.update(boss, { onDestroy() {
-				onDestroy && onDestroy()
-				seedling.pumpkinSeedState!.next = 'dying'
-			} })
+			// const seedling = ecs.add(inMap({
+			// 	...Seedling(resources.dungeonLevel),
+			// 	position: spawnPoint,
+			// }))
+			// const { onDestroy } = boss
+			// ecs.removeComponent(boss, 'onDestroy')
+			// ecs.update(boss, { onDestroy() {
+			// 	onDestroy && onDestroy()
+			// 	seedling.pumpkinSeedState!.next = 'dying'
+			// } })
 		}
 	}
 }

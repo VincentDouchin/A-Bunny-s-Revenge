@@ -53,7 +53,6 @@ export const getInteractables = (
 			]
 			case Interactable.WeaponStand: return [{ text: 'Equip', icon: HandOpen }]
 			case Interactable.Buy: return [{ text: `Buy (${entity.price})` }]
-			case Interactable.MagicBean: return [{ text: 'Plant magic bean' }, undefined]
 			case Interactable.BulletinBoard :return [{ text: Interactable.BulletinBoard, icon: Clipboard }]
 			default: return [{ text: entity?.interactable }]
 		}
@@ -107,7 +106,7 @@ export const InteractionUi = () => {
 									<Transition name="popup">
 										<Show when={visible() && (!context?.usingTouch() || entity.weaponStand)}>
 											<div class="interaction">
-												<Show when={entity.weaponStand}>
+												<Show when={entity.weaponStand ? entity.weaponName : null}>
 													{weaponName => <WeaponStatsUi name={weaponName()} />}
 												</Show>
 												<Show when={!context?.usingTouch()}>

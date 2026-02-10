@@ -1,10 +1,12 @@
 import type { With } from 'miniplex'
 import type { Entity, QueryEntity } from '@/global/entity'
-import { Vector3 } from 'three'
+import { CircleGeometry, Vector3 } from 'three'
+import { EmitterShape, VFXParticles } from 'vanilla-vfx'
 import { addCameraShake } from '@/global/camera'
 import { Faction } from '@/global/entity'
 import { gameOverEvent } from '@/global/events'
-import { ecs, gameInputs, world } from '@/global/init'
+import { coroutines, ecs, gameInputs, scene, world } from '@/global/init'
+import { renderer } from '@/global/rendering'
 import { playSound } from '@/global/sounds'
 import { inMap } from '@/lib/hierarchy'
 import { spawnDamageNumber } from '@/particles/damageNumber'
@@ -222,8 +224,39 @@ export const playerBehavior = createBehaviorTree(
 			enteringState('dash'),
 			action(({ entity }) => {
 				playSound('zapsplat_cartoon_whoosh_swipe_fast_grab_dash_007_74748')
-				entity.dashParticles?.restart()
-				entity.dashParticles?.play()
+				const vfx = new VFXParticles(renderer, {
+					maxParticles: 300,
+					size: [0.3, 0.6],
+					colorStart: ['#666666', '#888888'],
+					colorEnd: ['#333333'],
+					fadeSize: [0.5, 1.5],
+					fadeOpacity: [0.6, 0],
+					gravity: [0, 0.5, 0],
+					lifetime: [3, 5],
+					direction: [
+						[-0.1, 0.1],
+						[0.3, 0.5],
+						[-0.1, 0.1],
+					],
+					speed: [0.02, 0.05],
+					turbulence: {
+						intensity: 1.2,
+						frequency: 0.8,
+						speed: 0.3,
+					},
+					debug: true,
+				})
+				scene.add(vfx.group)
+				vfx.init()
+				// vfx.start()
+				// scene.add(vfx.object3D)
+				coroutines.add(function* () {
+					vfx.update(1)
+					yield
+				})
+
+				// entity.dashParticles?.restart()
+				// entity.dashParticles?.play()
 				setState('idle')
 			}),
 		),

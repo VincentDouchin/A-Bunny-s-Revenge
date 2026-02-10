@@ -13,7 +13,7 @@ export const addToHand = (entity: With<Entity, 'model'>, model: Object3D) => {
 
 export const equip = (...components: ComponentsOfType<With<Entity, 'model'>>[]) => {
 	return components.flatMap((component) => {
-		const query = ecs.with(component, 'model')
+		const query = ecs.with(component).with('model' as const)
 		return [
 			() => query.onEntityAdded.subscribe((e) => {
 				for (const c of components) {

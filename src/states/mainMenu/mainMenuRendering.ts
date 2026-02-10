@@ -26,7 +26,7 @@ export const setMainCameraPosition = () => {
 	for (const menuCam of mainMenuCameraQuery) {
 		for (const gameCam of gameCameraQuery) {
 			menuCam.camera.updateMatrixWorld()
-			const offset = new Vector3(params.cameraOffsetX, params.cameraOffsetY, params.cameraOffsetZ)
+			const offset = new Vector3(0, 150, 200)
 			// reset gameCam
 			gameCam.position.copy(offset)
 			gameCam.position.copy(offset)
@@ -58,7 +58,7 @@ export const renderMainMenu = () => {
 }
 export const setupWindow = () => {
 	if (save.started) {
-		app.enable('farm', { door: 'clearing' })
+		app.enable('farm', { direction: null })
 	} else {
 		app.enable('intro')
 	}

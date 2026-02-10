@@ -62,7 +62,6 @@ export const spawnPoisonTrail = () => {
 			trail.model.material.opacity = easeOut((1 - trail.trail.timer.percent()) / 2)
 		}
 		if (trail.trail.timer.finished()) {
-			// @ts-expect-error wrong type
 			trail.emitter.system.endEmit()
 		}
 	}

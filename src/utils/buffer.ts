@@ -24,8 +24,8 @@ export const scaleCanvas = (canvas: HTMLCanvasElement, scale: number | { x: numb
 	newBuffer.drawImage(canvas, 0, 0, newWidth, newHeight)
 	return newBuffer.canvas
 }
-export const imgToCanvas = (img: HTMLImageElement | HTMLCanvasElement) => {
-	const buffer = getScreenBuffer(img.width, img.height)
+export const imgToCanvas = (img: HTMLImageElement | HTMLCanvasElement, willReadFrequently = false) => {
+	const buffer = getScreenBuffer(img.width, img.height, willReadFrequently)
 	buffer.drawImage(img, 0, 0)
 	return buffer
 }

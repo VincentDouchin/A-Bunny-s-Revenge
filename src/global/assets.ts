@@ -1,14 +1,16 @@
-import type { village } from '@assets/assets'
-import type { ColorRepresentation, Material, Object3D, Side, TextureFilter } from 'three'
+import type { dungeon, village } from '@assets/assets'
+import type { BaseLevel, LevelData, LevelLoaded } from 'editor/src/types'
 
-import type { GLTF } from 'three/examples/jsm/loaders/GLTFLoader'
+import type { ColorRepresentation, Material, Object3D, Side, TextureFilter } from 'three'
+import type { GLTF } from 'three-stdlib'
 import type { Constructor } from 'type-fest'
 import type { ThumbnailRenderer } from '@/lib/thumbnailRenderer'
 import type { StaticAssetPath } from '@/static-assets'
 import { Howl } from 'howler'
 import { DoubleSide, FrontSide, Mesh, MeshBasicMaterial, MeshPhysicalMaterial, MeshStandardMaterial, NearestFilter, RepeatWrapping, SRGBColorSpace, Texture } from 'three'
-import { getAssetPathsLoader, loadAudio, loadGLB, loadImage, textureLoader } from '@/global/assetLoaders'
+import { dataUrlToCanvas, getAssetPathsLoader, loadAudio, loadGLB, loadImage, textureLoader } from '@/global/assetLoaders'
 import { CharacterMaterial, GardenPlotMaterial, GrassMaterial, ToonMaterial, TreeMaterial, VineGateMaterial } from '@/shaders/materials'
+import { customModels } from '@/states/game/doorModel'
 import { getScreenBuffer } from '@/utils/buffer'
 import { asyncMap, asyncMapValues, entries, mapKeys, mapValues, objectKeys, objectValues } from '@/utils/mapFunctions'
 
@@ -187,18 +189,33 @@ const splitChildren = async <K extends string>(glb: Promise<Record<string, GLTF>
 		return {
 			...acc,
 			...glb.scene.children.reduce((acc2, obj) => {
+				obj.position.setScalar(0)
 				return { ...acc2, [obj.name]: obj }
 			}, {}),
 		}
 	}, {}) as Record<K, Object3D>
 }
 
+const levelLoader = async <K extends string> (levelsUrls: Record<K, string>) => {
+	const mapKeys = ['heightMap', 'treeMap', 'grassMap', 'waterMap', 'pathMap'] as const satisfies (keyof LevelData)[]
+	return asyncMapValues(levelsUrls, async (url) => {
+		const level = await (await fetch(url)).json() as LevelData
+		const newLevel = level as BaseLevel
+		const maps: Partial<Record<(typeof mapKeys)[number], HTMLCanvasElement>> = {}
+		for (const mapKey of mapKeys) {
+			maps[mapKey] = await dataUrlToCanvas({ x: level.sizeX, y: level.sizeY }, level[mapKey])
+		}
+		return { ...newLevel, ...maps } as LevelLoaded
+	})
+}
+
 type AssetsLoaded<T extends Record<string, Promise<any> | any>> = { [K in keyof T]: Awaited<T[K]> }
-export const loadAssets = async (thumbnailRenderer: ThumbnailRenderer, loader?: () => () => void) => {
+export const loadAssets = async (thumbnailRenderer: ThumbnailRenderer, showMarkers: boolean, loader?: () => () => void) => {
 	const clear = loader && loader()
 	const getAssetPaths = getAssetPathsLoader<StaticAssetPath>(import.meta.glob('@assets/*/**.*', { eager: true, query: '?url', import: 'default' }))
 
 	const assets = {
+		markers: customModels(showMarkers),
 		// ! models
 		characters: loadGLBAsToon(
 			getAssetPaths({ folder: 'characters', extension: 'glb', suffix: '-optimized' }),
@@ -212,7 +229,7 @@ export const loadAssets = async (thumbnailRenderer: ThumbnailRenderer, loader?: 
 		),
 		trees: loadGLBAsToon(
 			getAssetPaths({ folder: 'trees', extension: 'glb', suffix: '-optimized' }),
-			() => ({ material: TreeMaterial, shadow: true, transparent: true }),
+			() => ({ material: TreeMaterial, shadow: false, transparent: true }),
 		),
 		crops: cropsLoader(
 			[1, 2, 3, 4].map(nb => getAssetPaths({ folder: 'crops', extension: 'glb', suffix: `_${nb}-optimized`, lowercase: true })),
@@ -239,6 +256,10 @@ export const loadAssets = async (thumbnailRenderer: ThumbnailRenderer, loader?: 
 		items: loadItems(
 			getAssetPaths({ folder: 'items', extension: 'glb', suffix: '-optimized' }),
 			thumbnailRenderer,
+		),
+		// ! levels
+		levels: levelLoader(
+			getAssetPaths({ folder: 'levels', extension: 'json' }),
 		),
 
 		// ! textures
@@ -276,6 +297,7 @@ export const loadAssets = async (thumbnailRenderer: ThumbnailRenderer, loader?: 
 			{ ...getAssetPaths({ folder: 'fonts', extension: 'ttf' }), ...getAssetPaths({ folder: 'fonts', extension: 'otf' }) },
 		),
 		village: splitChildren<village>(loadGLBAsToon(getAssetPaths({ folder: 'village', extension: 'glb' }))),
+		dungeon: splitChildren<dungeon>(loadGLBAsToon(getAssetPaths({ folder: 'dungeon', extension: 'glb' }))),
 		emotes: {
 			containers: getAssetPaths({ folder: 'emotes', prefix: 'container_', extension: 'png' }),
 			emotes: getAssetPaths({ folder: 'emotes', prefix: 'emote_', extension: 'png' }),

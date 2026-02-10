@@ -1,26 +1,22 @@
 import type { Animations } from '@assets/animations'
 import type { AssetNames, Entity, PlayerAnimations, PlayerStates } from '@/global/entity'
+import type { app } from '@/global/states'
 import type { UpdateSystem } from '@/lib/app'
 import { ActiveEvents, Cuboid } from '@dimforge/rapier3d-compat'
-import { Euler, LinearSRGBColorSpace, Mesh, Quaternion, Vector3 } from 'three'
-import { CSS2DObject } from 'three/examples/jsm/renderers/CSS2DRenderer'
-import { clone } from 'three/examples/jsm/utils/SkeletonUtils'
+import { LinearSRGBColorSpace, Mesh, Quaternion, Vector3 } from 'three'
+import { CSS2DObject, SkeletonUtils } from 'three-stdlib'
 import { State } from '@/behaviors/state'
 import { Animator } from '@/global/animator'
 import { Faction } from '@/global/entity'
 import { assets, ecs, save, world } from '@/global/init'
 import { menuInputMap, playerInputMap } from '@/global/inputMaps'
 import { ModifierContainer } from '@/global/modifiers'
-import { app } from '@/global/states'
 import { capsuleColliderBundle } from '@/lib/colliders'
 import { collisionGroups } from '@/lib/collisionGroups'
-import { isCardinalDirection } from '@/lib/directions'
 import { inMap } from '@/lib/hierarchy'
 import { Stat } from '@/lib/stats'
 import { Timer } from '@/lib/timer'
 import { dash } from '@/particles/dashParticles'
-import { leaveHouse, setSensor } from '@/utils/dialogHelpers'
-import { RoomType } from '../dungeon/generateDungeon'
 import { healthBundle } from '../dungeon/health'
 import { Dash } from './dash'
 import { inventoryBundle } from './inventory'
@@ -31,7 +27,7 @@ export const characterControllerBundle = () => {
 	controller.setApplyImpulsesToDynamicBodies(false)
 	controller.setCharacterMass(0.1)
 	controller.enableAutostep(4, 0, false)
-	controller.setMaxSlopeClimbAngle(Math.PI / 2 * 1.5)
+	controller.setMaxSlopeClimbAngle(0)
 	return { controller } as const satisfies Entity
 }
 
@@ -60,7 +56,7 @@ const playerAnimationMap: Record<PlayerAnimations, Animations['BunnyClothed']> =
 export const PLAYER_DEFAULT_HEALTH = 10
 
 export const playerBundle = (health: number, weapon: AssetNames['weapons'] | null) => {
-	const model = clone(assets.characters.BunnyClothed.scene)
+	const model = SkeletonUtils.clone(assets.characters.BunnyClothed.scene)
 	model.traverse((node) => {
 		if (node instanceof Mesh && node.material.map) {
 			node.material.map.colorSpace = LinearSRGBColorSpace
@@ -123,69 +119,32 @@ export const playerBundle = (health: number, weapon: AssetNames['weapons'] | nul
 	return player
 }
 const doorQuery = ecs.with('door', 'position', 'rotation')
-const doorQueryCollider = doorQuery.with('collider')
-export const spawnCharacter: UpdateSystem<typeof app, 'farm' | 'village'> = (resources) => {
-	const position = new Vector3()
-	const rotation = new Quaternion()
-	if (resources.door) {
-		const door = doorQuery.entities.find(e => e.door === resources.door)
-		if (door) {
-			const rawRotation = new Euler().setFromQuaternion(door.rotation).y
-			position.copy(door.position)
-			rotation.copy(new Quaternion().setFromEuler(new Euler(0, rawRotation, 0)).multiply(new Quaternion().setFromAxisAngle(new Vector3(0, 1, 0), Math.PI)))
-		}
-	}
-	const player = {
-		...playerBundle(PLAYER_DEFAULT_HEALTH, null),
+export const spawnPlayer = (position: Vector3, rotation: Quaternion, weapon: AssetNames['weapons'] | null = null) => {
+	ecs.add({
+		...playerBundle(PLAYER_DEFAULT_HEALTH, weapon),
 		position,
-		rotation,
+		rotation: rotation.clone(),
 		targetRotation: rotation.clone(),
-	}
-
-	ecs.add(player)
+	})
 }
 
-export const spawnPlayerDungeon: UpdateSystem<typeof app, 'dungeon'> = (resources) => {
-	const isStart = resources.dungeon.type === RoomType.Entrance && resources.firstEntry
-	for (const door of doorQuery) {
-		if ((isStart && isCardinalDirection(door.door)) ? resources.dungeon.doors[door.door] === null : door.door === resources.direction) {
-			const rotation = door.rotation.clone().multiply(new Quaternion().setFromAxisAngle(new Vector3(0, 1, 0), Math.PI))
-			ecs.add({
-				...playerBundle(resources.playerHealth, resources.weapon),
-				position: door.position.clone(),
-				rotation,
-				targetRotation: rotation.clone(),
-			})
+export const spawnPlayerFarm: UpdateSystem<typeof app, 'farm'> = (resources) => {
+	if (resources.direction === 'doorFarm') {
+		for (const door of doorQuery) {
+			if (door.door === 'farm') {
+				const position = door.position.clone().add(new Vector3(0, 0, 10).applyQuaternion(door.rotation))
+				spawnPlayer(position, door.rotation)
+			}
 		}
+	} else {
+		spawnPlayer(new Vector3(), new Quaternion())
 	}
 }
 export const spawnPlayerClearing = () => {
-	for (const door of doorQuery) {
-		if (door.door === 'south') {
-			const rotation = door.rotation.clone().multiply(new Quaternion().setFromAxisAngle(new Vector3(0, 1, 0), Math.PI))
-			ecs.add({
-				...playerBundle(PLAYER_DEFAULT_HEALTH, null),
-				position: new Vector3(...door.position.toArray()).add(new Vector3(0, 0, -20).applyQuaternion(door.rotation)),
-				rotation,
-				targetRotation: rotation.clone(),
-			})
+	for (const { door, position, rotation } of doorQuery) {
+		if (door === 'farm') {
+			const p = position.clone().add(new Vector3(0, 0, 10).applyQuaternion(rotation))
+			spawnPlayer(p, rotation)
 		}
 	}
-}
-const houseQuery = ecs.with('npcName', 'worldPosition', 'houseAnimator', 'rotation', 'collider').where(e => e.npcName === 'Grandma')
-
-export const spawnPlayerContinueGame = async () => {
-	app.enable('cutscene')
-	for (const house of houseQuery) {
-		setSensor(houseQuery, true)
-		setSensor(doorQueryCollider, true)
-		ecs.add({
-			...playerBundle(PLAYER_DEFAULT_HEALTH, null),
-			position: house.worldPosition.clone(),
-			rotation: house.rotation.clone(),
-			targetRotation: house.rotation.clone(),
-		})
-		await leaveHouse()
-	}
-	app.disable('cutscene')
 }

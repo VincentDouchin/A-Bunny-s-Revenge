@@ -5,7 +5,7 @@ import type { AppStates, Plugin } from '@/lib/app'
 import { bounceOut, circIn } from 'popmotion'
 import { CylinderGeometry, Group, Mesh, MeshBasicMaterial, SphereGeometry, Vector3 } from 'three'
 import { toastEvent } from '@/global/events'
-import { ecs, levelsData, questManager, tweens } from '@/global/init'
+import { ecs, questManager, tweens } from '@/global/init'
 import { entries } from '@/utils/mapFunctions'
 
 const actorsQuery = ecs.with('actor', 'position', 'rotation')
@@ -102,13 +102,13 @@ export const displayUnlockQuestToast = () => questManager.unlockedQuestEvent.sub
 	}
 })
 
-const mapQuery = ecs.with('map')
-export const isInMap = (map: string) => {
-	const mapId = levelsData.levels.find(level => level.name === map)?.id
-	for (const { map } of mapQuery) {
-		if (map === mapId) {
-			return true
-		}
-	}
-	return false
-}
+// const mapQuery = ecs.with('map')
+// export const isInMap = (map: string) => {
+// 	// const mapId = levelsData.levels.find(level => level.name === map)?.id
+// 	// for (const { map } of mapQuery) {
+// 	// 	if (map === mapId) {
+// 	// 		return true
+// 	// 	}
+// 	// }
+// 	return false
+// }

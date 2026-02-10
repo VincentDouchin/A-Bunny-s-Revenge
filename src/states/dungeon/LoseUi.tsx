@@ -15,7 +15,7 @@ export const LoseUi = () => {
 	})
 	const retry = () => {
 		app.disable('menu')
-		app.enable('farm', { door: 'clearing' })
+		app.enable('farm', { direction: null })
 		save.modifiers = []
 		gameOver(false)
 	}

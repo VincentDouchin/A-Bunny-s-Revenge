@@ -65,8 +65,7 @@ export const stepWorld = () => {
 	secondaryCollidersToRemove.clear()
 	callBacks.forEach(callBack => callBack())
 }
-export const physicsPlugin: Plugin<typeof app> = (app) => {
-	app
 
-		.addSubscribers('default', removeBodies, removeColliders, removeSecondaryColliders)
+export const physicsPlugin: Plugin<typeof app> = (app) => {
+	app.addSubscribers('default', removeBodies, removeColliders, removeSecondaryColliders)
 }

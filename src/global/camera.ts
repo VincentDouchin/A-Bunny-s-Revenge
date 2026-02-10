@@ -1,9 +1,8 @@
 import { easeOut } from 'popmotion'
 import { OrthographicCamera, PerspectiveCamera, Vector3 } from 'three'
-import { Direction } from '@/lib/directions'
 import { params } from './context'
 import { RenderGroup } from './entity'
-import { ecs, levelsData, settings, tweens } from './init'
+import { assets, ecs, settings, tweens } from './init'
 import { app } from './states'
 
 export const initCamera = () => {
@@ -34,7 +33,6 @@ const cameraQuery = ecs.with('camera')
 const gameCameraQuery = ecs.with('camera', 'position', 'mainCamera', 'cameraLookAt', 'cameraShake', 'cameraLerp')
 export const cameraTargetQuery = ecs.with('cameraTarget', 'worldPosition')
 const lockedOnQuery = ecs.with('lockedOn', 'position')
-const doorsQuery = ecs.with('boundary', 'position').where(e => e.doorType === 'fog')
 export const updateCameraZoom = (zoom: number = params.zoom) => {
 	for (const { camera } of cameraQuery) {
 		const h = 600
@@ -68,8 +66,8 @@ export const addCameraShake = () => {
 		})
 	}
 }
-const OFFSET_Z = 30
-const OFFSET_X = 50
+// const OFFSET_Z = 30
+// const OFFSET_X = 50
 const MAP_OFFSET = 10
 const levelQuery = ecs.with('map')
 export const moveCamera = (init = false) => () => {
@@ -80,7 +78,6 @@ export const moveCamera = (init = false) => () => {
 			for (const entity of cameraTargetQuery) {
 				const { worldPosition, targetRotation } = entity
 				target.copy(worldPosition)
-
 				const lockedOn = lockedOnQuery.entities.reduce<null | number>((acc, v) => {
 					const dist = v.position.distanceTo(worldPosition) / 2
 					if (acc === null || dist < acc) {
@@ -99,26 +96,13 @@ export const moveCamera = (init = false) => () => {
 
 				const mapId = levelQuery.first?.map
 				if (mapId) {
-					const level = levelsData.levels.find(level => level.id === mapId)
-					if (level && level.containCamera) {
-						for (const door of doorsQuery) {
-							switch (door.boundary) {
-								case Direction.N : target.z = Math.min(target.z, door.position.z - OFFSET_Z)
-									break
-								case Direction.S : target.z = Math.max(target.z, door.position.z + OFFSET_Z)
-									break
-								case Direction.E : target.x = Math.max(target.x, door.position.x + OFFSET_X)
-									break
-								case Direction.W : target.x = Math.min(target.x, door.position.x - OFFSET_X)
-									break
-							}
-						}
-						const levelSize = level?.size
+					const level = assets.levels[mapId]
+					if (level) {
 						if (camera instanceof OrthographicCamera) {
-							target.x = Math.min(target.x, levelSize.x / 2 + camera.left - MAP_OFFSET)
-							target.x = Math.max(target.x, -levelSize.x / 2 + camera.right + MAP_OFFSET)
-							target.z = Math.min(target.z, levelSize.y / 2 + camera.bottom - MAP_OFFSET * 4)
-							target.z = Math.max(target.z, -levelSize.y / 2 + camera.top + MAP_OFFSET * 5)
+							target.x = Math.min(target.x, level.sizeX / 2 + camera.left - MAP_OFFSET)
+							target.x = Math.max(target.x, -level.sizeX / 2 + camera.right + MAP_OFFSET)
+							target.z = Math.min(target.z, level.sizeY / 2 + camera.bottom - MAP_OFFSET * 4)
+							target.z = Math.max(target.z, -level.sizeY / 2 + camera.top + MAP_OFFSET * 5)
 						}
 					}
 				}
@@ -127,7 +111,7 @@ export const moveCamera = (init = false) => () => {
 
 		if (app.isEnabled('debug')) return
 
-		const offset = new Vector3(params.cameraOffsetX, params.cameraOffsetY, params.cameraOffsetZ)
+		const offset = new Vector3(0, 150, 200)
 		const newPosition = target.clone().add({ x: cameraShake.x, y: 0, z: cameraShake.y })
 		if (cameraOffset) {
 			newPosition.add(cameraOffset)

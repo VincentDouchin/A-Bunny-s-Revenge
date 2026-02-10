@@ -4,7 +4,7 @@ import type { Crop, Entity } from '@/global/entity'
 import { RigidBodyType } from '@dimforge/rapier3d-compat'
 import { createBackIn, reverseEasing } from 'popmotion'
 import { Vector3 } from 'three'
-import { randFloat } from 'three/src/math/MathUtils'
+import { randFloat } from 'three/src/math/MathUtils.js'
 import { itemsData } from '@/constants/items'
 import { Interactable, MenuType } from '@/global/entity'
 import { harvestCropEvent } from '@/global/events'
@@ -142,7 +142,6 @@ export const harvestCrop = async () => {
 							const position = getWorldPosition(spot.group)
 							ecs.add({
 								...bundle,
-
 								position: position.add(new Vector3(0, bundle.size.y + randFloat(4, 6), 0)),
 							})
 							await sleep(100)

@@ -1,12 +1,19 @@
+import type { Quaternion, Vector4 } from 'three'
 import type { ParticleSystem } from 'three.quarks'
 import type { Plugin } from './app'
 import type { ComponentsOfType } from '@/global/entity'
 import type { app } from '@/global/states'
 import { Vector3 } from 'three'
-import { BatchedRenderer } from 'three.quarks'
+import { BatchedRenderer, Quaternion as QuarksQuaternion, Vector3 as QuarksVector3, Vector4 as QuarksVector4 } from 'three.quarks'
 import { ecs, time } from '@/global/init'
 import { gameRenderGroupQuery } from '@/global/rendering'
 import { runIf } from './app'
+
+export const toQuarks = {
+	v3: (vec: Vector3) => new QuarksVector3(vec.x, vec.y, vec.z),
+	v4: (vec: Vector4) => new QuarksVector4(vec.x, vec.y, vec.z, vec.w),
+	quaternion: (quaternion: Quaternion) => new QuarksQuaternion(quaternion.x, quaternion.y, quaternion.z, quaternion.w),
+}
 
 const initBatchRender = () => {
 	let initiated = false

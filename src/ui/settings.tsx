@@ -32,7 +32,7 @@ export const Settings = () => {
 			height: fit-content;
 			align-items: center;
 			gap: 0.5rem 2rem;
-			overflow-y:scroll;
+			overflow-y: scroll;
 			height: 100%;
 			scroll-behavior: smooth;
     		scrollbar-width: none;

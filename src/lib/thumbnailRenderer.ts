@@ -1,10 +1,9 @@
 import type { Object3D, Object3DEventMap } from 'three'
 import { AmbientLight, LinearSRGBColorSpace, OrthographicCamera, Scene, Vector2, Vector3, WebGLRenderer, WebGLRenderTarget } from 'three'
-import { FullScreenQuad } from 'three/examples/jsm/postprocessing/Pass'
-import { clone } from 'three/examples/jsm/utils/SkeletonUtils'
-import { getSize } from '@/lib/models'
+import { FullScreenQuad, SkeletonUtils } from 'three-stdlib'
 import { outlinePass } from '@/shaders/PixelOutlineMaterial'
 import { getScreenBuffer } from '@/utils/buffer'
+import { getSize } from './models'
 
 export const getThumbnailRenderer = (size = 24, zoom = 1): ThumbnailRenderer => {
 	const renderer = new WebGLRenderer({ alpha: true })
@@ -16,13 +15,13 @@ export const getThumbnailRenderer = (size = 24, zoom = 1): ThumbnailRenderer => 
 	const camera = new OrthographicCamera()
 	const scene = new Scene()
 	scene.add(camera)
-	camera.position.set(0, 1, -1)
+	camera.position.set(0, 1, 1)
 	camera.zoom = 2.3 * zoom
 	camera.lookAt(new Vector3(0, 0.3, 0))
 	camera.updateProjectionMatrix()
 	scene.add(new AmbientLight(0xFFFFFF, 2))
 	const getCanvas = (model: Object3D<Object3DEventMap>, scale = false, zoom = 2.3) => {
-		const cloneModel = clone(model)
+		const cloneModel = SkeletonUtils.clone(model)
 		if (scale) {
 			const size = getSize(cloneModel)
 			const maxSize = Math.max(size.x, size.y, size.z)

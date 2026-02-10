@@ -3,7 +3,7 @@ import type { Entity } from '@/global/entity'
 import { circIn, circOut, createExpoIn } from 'popmotion'
 import { between } from 'randomish'
 import { Vector3 } from 'three'
-import { CSS2DObject } from 'three/examples/jsm/renderers/CSS2DRenderer'
+import { CSS2DObject } from 'three-stdlib'
 import { ecs, tweens } from '@/global/init'
 
 export const spawnDamageNumber = (amount: number, enemy: With<Entity, 'position' | 'size'>, crit: boolean) => {

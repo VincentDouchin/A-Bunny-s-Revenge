@@ -2,7 +2,6 @@ import type { Vec2 } from 'three'
 import type { Entity } from '@/global/entity'
 import { AmbientLight, DirectionalLight, Vector3 } from 'three'
 import { ecs } from '@/global/init'
-import { inMap } from '@/lib/hierarchy'
 
 export const spawnLight = ({ x, y }: Vec2, parent: Entity) => {
 	const light = new DirectionalLight(0xFFFFFF, 0.6)
@@ -14,21 +13,21 @@ export const spawnLight = ({ x, y }: Vec2, parent: Entity) => {
 	light.shadow.camera.left = -x / 2
 	light.shadow.camera.right = x / 2
 	light.shadow.bias = 0.002
-	ecs.add(inMap({
+	ecs.add({
 		parent,
 		light,
 		position: new Vector3(0, 50, 0),
-	}))
-	ecs.add(inMap({
+	})
+	ecs.add({
 		parent,
 		ambientLight: 'day',
 		light: new AmbientLight(0xFFFFFF, 2),
 		position: new Vector3(),
-	}))
-	ecs.add(inMap({
+	})
+	ecs.add({
 		parent,
 		ambientLight: 'night',
 		light: new AmbientLight(0x7F96D7, 2),
 		position: new Vector3(),
-	}))
+	})
 }

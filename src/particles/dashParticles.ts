@@ -1,10 +1,14 @@
-import { CircleGeometry, MeshBasicMaterial, Vector4 } from 'three'
-import { Bezier, ConstantValue, IntervalValue, ParticleSystem, PiecewiseBezier, PointEmitter, RandomColor, SizeOverLife } from 'three.quarks'
+import { CircleGeometry, MeshBasicMaterial } from 'three'
+import { Bezier, ConstantValue, IntervalValue, ParticleSystem, PiecewiseBezier, PointEmitter, RandomColor, SizeOverLife, Vector4 } from 'three.quarks'
+import { EmitterShape, VFXParticles, VFXParticleSystem } from 'vanilla-vfx'
+import { renderer } from '@/global/rendering'
 
 const geo = new CircleGeometry(1, 8)
 const mat = new MeshBasicMaterial({ depthWrite: false })
 
 export const dash = (duration: number) => {
+	
+
 	const system = new ParticleSystem({
 		duration,
 		looping: false,

@@ -1,6 +1,6 @@
 import type { Material, WebGLProgramParametersWithUniforms } from 'three'
 import { ShaderChunk, Uniform } from 'three'
-import { generateUUID } from 'three/src/math/MathUtils'
+import { generateUUID } from 'three/src/math/MathUtils.js'
 
 type Constructor<T> = new (...args: any[]) => T
 

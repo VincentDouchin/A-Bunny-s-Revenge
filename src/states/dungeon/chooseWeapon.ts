@@ -1,11 +1,10 @@
 import type { AssetNames, Entity } from '@/global/entity'
-import { ActiveCollisionTypes, ColliderDesc, RigidBodyDesc } from '@dimforge/rapier3d-compat'
+import { Event } from 'eventery'
 import { Quaternion, Vector3 } from 'three'
 import { weaponsData } from '@/constants/weapons'
 import { Interactable } from '@/global/entity'
 import { assets, coroutines, ecs } from '@/global/init'
 import { app } from '@/global/states'
-import { inMap } from '@/lib/hierarchy'
 import { objectKeys } from '@/utils/mapFunctions'
 import { weaponBundle } from '../game/weapon'
 
@@ -20,6 +19,7 @@ const displayWeapon = (weaponName: AssetNames['weapons'], parent: Entity) => {
 		weaponName,
 		parent,
 	})
+	ecs.update(parent, { interactable: Interactable.WeaponStand })
 	coroutines.add(function* () {
 		let rotation = 0
 		while (app.isEnabled('clearing')) {
@@ -28,52 +28,28 @@ const displayWeapon = (weaponName: AssetNames['weapons'], parent: Entity) => {
 			weapon.rotation.setFromAxisAngle(new Vector3(0, 1, 0), rotation)
 		}
 	})
+	return weaponModel
 }
+const chooseWeaponEvent = new Event<[AssetNames['weapons']]>()
 const stumpQuery = ecs.with('weaponStand')
-const weaponDisplayedQuery = ecs.with('weaponName', 'parent')
-const chooseWeapon = (weaponName: AssetNames['weapons']) => {
-	for (const stump of stumpQuery) {
-		let foundWeapon = false
-		for (const weaponDisplayed of weaponDisplayedQuery) {
-			if (weaponDisplayed.parent === stump) {
-				foundWeapon = true
-				if (stump.weaponStand === weaponName) {
-					ecs.remove(weaponDisplayed)
-
-					ecs.removeComponent(stump, 'interactable')
-				}
-			}
-		}
-		if (!foundWeapon) {
-			ecs.addComponent(stump, 'interactable', Interactable.WeaponStand)
-			displayWeapon(stump.weaponStand, stump)
-		}
-		ecs.reindex(stump)
-	}
-}
-
 export const spawnWeaponsChoice = () => {
-	for (let i = 0; i < weaponNames.length; i++) {
-		const stumpModel = assets.models.TreeStump.scene.clone()
-		stumpModel.scale.setScalar(10)
-		const offsetX = i * 20 - (weaponNames.length - 1) / 2 - 50
-
+	for (let i = 0; i < stumpQuery.size; i++) {
+		const stump = stumpQuery.entities[i]
 		const weaponName = weaponNames[i]
-		const stump = ecs.add(inMap({
-			model: stumpModel,
-			position: new Vector3(offsetX, 0, 10),
-			bodyDesc: RigidBodyDesc.fixed().lockRotations(),
-			colliderDesc: ColliderDesc.cylinder(4, 3).setActiveCollisionTypes(ActiveCollisionTypes.ALL),
-			rotation: new Quaternion().setFromAxisAngle(new Vector3(0, 1, 0), Math.random() * Math.PI * 2),
-			weaponStand: weaponName,
-			interactable: Interactable.WeaponStand,
+		const weaponModel = displayWeapon(weaponName, stump)
+		const unsub = chooseWeaponEvent.subscribe((weaponEquipped) => {
+			weaponModel.visible = weaponEquipped !== weaponName
+		})
+		ecs.update(stump, {
+			weaponName,
 			onPrimary(_stump, player) {
 				ecs.removeComponent(player, 'weapon')
-				// player.playerAnimator?.enter('cheer', player)
-				chooseWeapon(weaponName)
+				chooseWeaponEvent.emit(weaponName)
 				ecs.update(player, { weapon: weaponBundle(weaponName) })
 			},
-		}))
-		displayWeapon(weaponName, stump)
+			onDestroy() {
+				unsub()
+			},
+		})
 	}
 }

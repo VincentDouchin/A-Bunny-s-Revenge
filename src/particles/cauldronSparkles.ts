@@ -1,6 +1,7 @@
-import { Color, DoubleSide, MeshStandardMaterial, PlaneGeometry, Vector4 } from 'three'
+import { DoubleSide, MeshStandardMaterial, PlaneGeometry } from 'three'
 import { Bezier, ColorRange, ConeEmitter, ConstantValue, IntervalValue, ParticleSystem, PiecewiseBezier, RenderMode, SizeOverLife } from 'three.quarks'
 import { assets } from '@/global/init'
+import { colorToVec4 } from './honeySplatParticles'
 
 const geo = new PlaneGeometry(2, 2)
 const mat = new MeshStandardMaterial({
@@ -18,8 +19,8 @@ export const cauldronSparkles = (amount: number) => {
 		startLife: new IntervalValue(5.0, 10.0),
 		startSpeed: new ConstantValue(2),
 		startColor: new ColorRange(
-			new Vector4(...new Color(0xDE5D3A).toArray(), 1),
-			new Vector4(...new Color(0xF3A833).toArray(), 1),
+			colorToVec4(0xDE5D3A, 1),
+			colorToVec4(0xF3A833, 1),
 		),
 		worldSpace: true,
 		emissionOverTime: new ConstantValue(amount / 10),

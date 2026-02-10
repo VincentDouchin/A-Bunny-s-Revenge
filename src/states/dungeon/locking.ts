@@ -1,5 +1,5 @@
 import type { Entity } from '@/global/entity'
-import { CSS2DObject } from 'three/examples/jsm/renderers/CSS2DRenderer'
+import { CSS2DObject } from 'three-stdlib'
 import { Faction } from '@/global/entity'
 import { ecs, gameInputs } from '@/global/init'
 

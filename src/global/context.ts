@@ -2,11 +2,8 @@ export const context = {
 	save: 'save',
 }
 
-interface Params extends Record<string, any> {
+interface Params {
 	renderHeight: number
-	cameraOffsetX: number
-	cameraOffsetY: number
-	cameraOffsetZ: number
 	zoom: number
 	fov: number
 	speedUp: number
@@ -22,9 +19,6 @@ interface Params extends Record<string, any> {
 export const params: Params = {
 	pixelation: true,
 	renderHeight: 225,
-	cameraOffsetX: 0,
-	cameraOffsetY: 150,
-	cameraOffsetZ: -200,
 	zoom: 9,
 	fov: 50,
 	speedUp: 1,

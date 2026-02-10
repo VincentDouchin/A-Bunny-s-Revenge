@@ -1,11 +1,11 @@
 import type { Animations } from '@assets/animations'
+import type { Tags } from '@assets/tagsList'
 import type { Collider, ColliderDesc, KinematicCharacterController, RigidBody, RigidBodyDesc, Shape } from '@dimforge/rapier3d-compat'
 import type { Query, With } from 'miniplex'
-import type { BufferGeometry, Camera, Group, Light, Mesh, MeshPhongMaterial, Object3D, Object3DEventMap, Quaternion, Scene, ShaderMaterial, Sprite, Vector3, WebGLRenderer } from 'three'
+import type { BufferGeometry, Camera, Group, Light, Mesh, MeshPhongMaterial, Object3D, Object3DEventMap, Quaternion, Scene, Sprite, Vector3, WebGLRenderer } from 'three'
 import type { BatchedRenderer, ParticleEmitter, ParticleSystem } from 'three.quarks'
 import type { RequiredKeysOf } from 'type-fest'
 import type { Animator } from './animator'
-import type { InstanceHandle } from './assetLoaders'
 import type { assets } from './init'
 import type { ModifierContainer } from './modifiers'
 import type { app } from './states'
@@ -25,7 +25,7 @@ import type { WeaponArc } from '@/shaders/weaponArc'
 import type { Room } from '@/states/dungeon/generateDungeon'
 import type { Dash } from '@/states/game/dash'
 import type { MainMenuBook } from '@/states/mainMenu/book'
-import { CSS2DObject } from 'three/examples/jsm/renderers/CSS2DRenderer'
+import { CSS2DObject } from 'three-stdlib'
 
 export type AssetNames = { [K in keyof typeof assets]: keyof typeof assets[K] }
 
@@ -53,7 +53,6 @@ export enum Interactable {
 	FillWateringCan = 'fill watering can',
 	Water = 'water',
 	Buy = 'buy',
-	MagicBean = 'Plant magic bean',
 	Fishing = 'use fishing pole',
 	Read = 'read',
 	PickUp = 'pick up',
@@ -79,8 +78,6 @@ export enum RenderGroup {
 }
 
 export const actors = ['cellarDoor', 'houseDoor', 'playerIntro', 'basketIntro', 'intro', 'cellarStairs', 'oven', 'cookingPot', 'blanket'] as const
-export const farmDoors = ['intro', 'cellar', 'clearing', 'village', 'fromVillage'] as const
-export type Doors = typeof farmDoors[number] | Direction
 export type Actor = (typeof actors)[number]
 
 export const assertEntity = <C extends keyof Entity>(e: Entity, ...components: C[]) => {
@@ -133,242 +130,241 @@ export class EmoteContainer extends CSS2DObject {
 	}
 }
 
-export type Entity = Partial<AttackStyle> & {
-	playerAnimator?: Animator<PlayerAnimations>
-	// ! BehaviorTree
-	enemyState?: State<BaseEnemyStates | 'stun'>
-	mushroomState?: State<BaseEnemyStates | 'runaway' | 'escape'>
-	beeBossState?: State<BaseEnemyStates | 'rangeAttack'>
-	pumpkinSeedState?: State<BaseEnemyStates | 'spawn'>
-	pumpkinBossState?: State<BaseEnemyStates | 'summon' | 'underground' | 'rangeAttack'>
-	playerState?: State<PlayerStates>
-	fishState?: State<'going' | 'hooked' | 'wander' | 'bounce' | 'runaway'>
-	attacking?: true
-	// ! Rendering
-	renderGroup?: RenderGroup
-	// ! Transforms
-	movementForce?: Vector3
-	targetMovementForce?: Vector3
-	acceleration?: number
-	speed?: Stat
-	position?: Vector3
-	worldPosition?: Vector3
-	rotation?: Quaternion
-	targetRotation?: Quaternion
-	// ! Camera
-	cameraTarget?: true
-	cameraShake?: Vector3
-	initialCameraTarget?: true
-	followCamera?: true
-	fixedCamera?: true
-	mainCamera?: true
-	cameraLookAt?: Vector3
-	cameraOffset?: Vector3
-	cameraLerp?: Vector3
-	lockX?: boolean
-	// ! ThreeJS
-	scene?: Scene
-	renderer?: WebGLRenderer
-	batchRenderer?: BatchedRenderer
-	camera?: Camera
-	light?: Light
-	group?: Group
-	model?: Object3D
-	outline?: true
-	// ! Hierarchy
-	parent?: Entity
-	children?: Set<Entity>
-	withChildren?: (parent: Entity) => void
-	onDestroy?: () => void
-	// ! Physics
-	bodyDesc?: RigidBodyDesc
-	body?: RigidBody
-	colliderDesc?: ColliderDesc
-	collider?: Collider
-	secondaryCollidersDesc?: ColliderDesc[]
-	secondaryColliders?: Collider[]
-	directedDynamic?: true
-	size?: Vector3
-	controller?: KinematicCharacterController
-	// ! Behaviors
-	// behaviorController?: keyof States
-	// ! Animations
-	animator?: Animator<Animations['explode']>
-	explodeAnimator?: Animator<Animations['explode']>
-	enemyAnimator?: Animator<EnemyAnimations>
-	pumpkinBossAnimator?: Animator<PumpkinBossAnimations>
-	ovenAnimator?: Animator<Animations['BunnyOvenPacked']>
-	houseAnimator?: Animator<Animations['House']>
-	chestAnimator?: Animator<Animations['Chest']>
-	kayAnimator?: Animator<Animations['ALICE_animated']>
-	cellarDoorAnimator?: Animator<Animations['cellar_entrance']>
-	pumpkinSeedAnimator?: Animator<PumpkinSeedAnimations>
-	// ! Farming
-	sensor?: { shape: Shape, distance: number }
-	crop?: Crop
-	plantableSpot?: string
-	planted?: With<Entity, 'crop'>
-	wateringCan?: With<Entity, 'model' | 'waterAmount'>
-	waterAmount?: number
-	// ! Game
-	map?: string
-	ground?: true
-	interacting?: true
-	interactable?: Interactable
-	interactionContainer?: CSS2DObject
-	onPrimary?: (entity: Entity, player: Entity) => void
-	onSecondary?: (entity: Entity, player: Entity) => void
-	// ! Camp
-	door?: Direction | (typeof farmDoors)[number]
-	boundary?: Direction
-	doorType?: 'vine' | 'fog' | 'marker'
-	doorLevel?: number
-	doorLocked?: true
-	unlocked?: true
-	tree?: true
-	obstacle?: true
-	grass?: true
-	instanceHandle?: InstanceHandle
-	// ! Dungeon
-	dungeon?: Room
-	faction?: Faction
-	ignoreDoor?: Direction
-	// ! Items
-	item?: true
-	itemLabel?: AssetNames['items']
-	collecting?: true
-	recipe?: AssetNames['items']
-	health?: number
-	popDirection?: Vector3
-	groundLevel?: number
-	bounce?: { amount: number, force: Vector3, touchedGround: boolean }
-	// ! Inventory
-	inventory?: (Item | null)[]
-	inventorySize?: number
-	menuType?: MenuType
-	inventoryId?: string
-	// ! Cooking
-	displayedItem?: Entity
-	// ! Player
-	player?: true
-	// ! NPC
-	npc?: true
-	voice?: AssetNames['voices']
-	npcName?: (typeof NPC)[number]
-	questMarker?: { quest: Quest2<any, any, any>, step: string }[]
-	questMarkerContainer?: Group
-	questMarkerPosition?: Vector3
-	actor?: Actor
-	// ! Dialog
-	dialogHeight?: number
-	dialog?: Dialog
-	dialogContainer?: CSS2DObject
-	conversation?: Conversation
-	emoteContainer?: EmoteContainer
-	// ! Health
-	currentHealth?: number
-	maxHealth?: Stat
+export type Entity = Partial<AttackStyle>
+	& Partial<Tags>
+	& {
+		playerAnimator?: Animator<PlayerAnimations>
+		// ! BehaviorTree
+		enemyState?: State<BaseEnemyStates | 'stun'>
+		mushroomState?: State<BaseEnemyStates | 'runaway' | 'escape'>
+		beeBossState?: State<BaseEnemyStates | 'rangeAttack'>
+		pumpkinSeedState?: State<BaseEnemyStates | 'spawn'>
+		pumpkinBossState?: State<BaseEnemyStates | 'summon' | 'underground' | 'rangeAttack'>
+		playerState?: State<PlayerStates>
+		fishState?: State<'going' | 'hooked' | 'wander' | 'bounce' | 'runaway'>
+		attacking?: true
+		// ! Rendering
+		renderGroup?: RenderGroup
+		// ! Transforms
+		movementForce?: Vector3
+		targetMovementForce?: Vector3
+		acceleration?: number
+		speed?: Stat
+		position?: Vector3
+		worldPosition?: Vector3
+		rotation?: Quaternion
+		targetRotation?: Quaternion
+		// ! Camera
+		cameraTarget?: true
+		cameraShake?: Vector3
+		initialCameraTarget?: true
+		followCamera?: true
+		fixedCamera?: true
+		mainCamera?: true
+		cameraLookAt?: Vector3
+		cameraOffset?: Vector3
+		cameraLerp?: Vector3
+		lockX?: boolean
+		// ! ThreeJS
+		scene?: Scene
+		renderer?: WebGLRenderer
+		batchRenderer?: BatchedRenderer
+		camera?: Camera
+		light?: Light
+		group?: Group
+		model?: Object3D
+		outline?: true
+		// ! Hierarchy
+		parent?: Entity
+		children?: Set<Entity>
+		withChildren?: (parent: Entity) => void
+		onDestroy?: () => void
+		// ! Physics
+		bodyDesc?: RigidBodyDesc
+		body?: RigidBody
+		colliderDesc?: ColliderDesc
+		collider?: Collider
+		secondaryCollidersDesc?: ColliderDesc[]
+		secondaryColliders?: Collider[]
+		size?: Vector3
+		controller?: KinematicCharacterController
+		// ! Behaviors
+		// behaviorController?: keyof States
+		// ! Animations
+		animator?: Animator<Animations['explode']>
+		explodeAnimator?: Animator<Animations['explode']>
+		enemyAnimator?: Animator<EnemyAnimations>
+		pumpkinBossAnimator?: Animator<PumpkinBossAnimations>
+		ovenAnimator?: Animator<Animations['BunnyOvenPacked']>
+		houseAnimator?: Animator<Animations['House']>
+		chestAnimator?: Animator<Animations['Chest']>
+		kayAnimator?: Animator<Animations['ALICE_animated']>
+		cellarDoorAnimator?: Animator<Animations['cellar_entrance']>
+		pumpkinSeedAnimator?: Animator<PumpkinSeedAnimations>
+		deathMageAnimator?: Animator<Animations['death_mage']>
+		// ! Farming
+		sensor?: { shape: Shape, distance: number }
+		crop?: Crop
+		plantableSpot?: string
+		planted?: With<Entity, 'crop'>
+		wateringCan?: With<Entity, 'model' | 'waterAmount'>
+		waterAmount?: number
+		// ! Game
+		map?: keyof typeof assets['levels']
+		ground?: true
+		interacting?: true
+		interactable?: Interactable
+		interactionContainer?: CSS2DObject
+		onPrimary?: (entity: Entity, player: Entity) => void
+		onSecondary?: (entity: Entity, player: Entity) => void
+		// ! Camp
+		boundary?: Direction
+		doorType?: 'vine' | 'fog' | 'marker'
+		doorLevel?: number
+		doorLocked?: true
+		unlocked?: true
+		tree?: true
+		grass?: true
+		// ! Dungeon
+		dungeon?: Room
+		doorDirection?: Direction
+		faction?: Faction
+		ignoreDoor?: Direction
+		// ! Items
+		item?: true
+		itemLabel?: AssetNames['items']
+		collecting?: true
+		recipe?: AssetNames['items']
+		health?: number
+		popDirection?: Vector3
+		groundLevel?: number
+		bounce?: { amount: number, force: Vector3, touchedGround: boolean }
+		// ! Inventory
+		inventory?: (Item | null)[]
+		inventorySize?: number
+		menuType?: MenuType
+		inventoryId?: string
+		// ! Cooking
+		displayedItem?: Entity
+		// ! Player
+		player?: true
+		// ! NPC
+		npc?: true
+		voice?: AssetNames['voices']
+		npcName?: (typeof NPC)[number]
+		questMarker?: { quest: Quest2<any, any, any>, step: string }[]
+		questMarkerContainer?: Group
+		questMarkerPosition?: Vector3
+		actor?: Actor
+		// ! Dialog
+		dialogHeight?: number
+		dialog?: Dialog
+		dialogContainer?: CSS2DObject
+		conversation?: Conversation
+		emoteContainer?: EmoteContainer
+		// ! Health
+		currentHealth?: number
+		maxHealth?: Stat
 
-	// ! Enemies
-	inactive?: Timer<false>
-	healthBar?: true
-	healthBarContainer?: CSS2DObject
-	boss?: true
-	projectile?: true
-	archingProjectile?: Vector3
-	honeyProjectile?: true
-	honeySpot?: true
-	deathTimer?: Timer<false>
-	drops?: Drop[]
-	enemyName?: string
-	enemyId?: string
-	// ! Debuff
-	sneeze?: Timer<false>
-	poisoned?: Timer<false>
-	sleepy?: Timer<false>
-	sleeping?: true // intro
-	pollen?: true
-	sleepingPowder?: true
-	modifiers?: ModifierContainer
-	// ! Particles
-	emitter?: ParticleEmitter<Object3DEventMap>
-	autoDestroy?: true
-	enemyDefeated?: ParticleSystem
-	enemyImpact?: ParticleSystem
-	dashParticles?: ParticleSystem
-	smokeParticles?: ParticleSystem
-	fireParticles?: ParticleSystem
-	// ! Stats
-	strength?: Stat
-	critChance?: Stat
-	critDamage?: Stat
-	attackSpeed?: Stat
-	lootQuantity?: Stat
-	lootChance?: Stat
-	// ! Level Editor
-	entityId?: string
-	// ! MiniGame
-	recipesQueued?: Recipe[]
-	miniGameContainer?: CSS2DObject
-	spoon?: Entity
-	// ! Sounds
-	lastStep?: { left: boolean, right: boolean }
-	// ! DayNight
-	nightLight?: Light
-	emissiveMat?: MeshPhongMaterial
-	ambientLight?: 'night' | 'day'
-	withTimeUniform?: true | (ShaderMaterial | MeshPhongMaterial)[]
-	// ! Weapon
-	weapon?: With<Entity, 'model' | 'weaponName' | 'weaponArc'>
-	weaponArc?: WeaponArc
-	weaponName?: AssetNames['weapons']
-	weaponStand?: AssetNames['weapons']
-	// ! Main menu
-	stateEntity?: AppStates<typeof app>
-	menuBook?: MainMenuBook
-	// ! Money
-	acorn?: true
-	// ! Berry Bush
-	bush?: true
-	shake?: number
-	shaken?: number
-	berries?: Set<Mesh<BufferGeometry, MeshPhongMaterial>>
-	dash?: Dash
-	dashDisplay?: Sprite
-	// ! Stun
-	stun?: Group
-	hitTimer?: Timer<true>
-	// ! Wander
-	wander?: { target: Vector3, cooldown: Timer<false> }
-	// ! Debuffs
-	debuffsContainer?: CSS2DObject
-	// ! Trail
-	trailMaker?: true
-	trail?: { origin: Entity, timer: Timer<false> }
-	poison?: true
-	// ! Stall
-	price?: number
-	stallPosition?: number
-	// ! Alice
-	beanstalk?: true
-	magicHaricot?: Entity
-	// ! Fishing
-	fishingPole?: With<Entity, 'model'>
-	fishingLine?: Mesh<MeshLine, MeshLineMaterial>
-	fishingSpot?: true
-	bobber?: With<Entity, 'position'>
-	fish?: Timer<false>
-	fishingProgress?: { attempts: number, success: number, done: boolean }
-	bobbing?: true
-	fishSpawner?: true
-	// ! Lock on
-	lockedOn?: CSS2DObject
-	// ! Cellar
-	crate?: true
-	// ! Explode
-	explode?: (amount: number) => void
-	exploder?: With<Entity, 'explode'>
-}
+		// ! Enemies
+		inactive?: Timer<false>
+		healthBar?: true
+		healthBarContainer?: CSS2DObject
+		boss?: true
+		projectile?: true
+		archingProjectile?: Vector3
+		honeyProjectile?: true
+		honeySpot?: true
+		deathTimer?: Timer<false>
+		drops?: Drop[]
+		enemyName?: string
+		enemyId?: string
+		// ! Debuff
+		sneeze?: Timer<false>
+		poisoned?: Timer<false>
+		sleepy?: Timer<false>
+		sleeping?: true // intro
+		pollen?: true
+		sleepingPowder?: true
+		modifiers?: ModifierContainer
+		// ! Particles
+		emitter?: ParticleEmitter<Object3DEventMap>
+		autoDestroy?: true
+		enemyDefeated?: ParticleSystem
+		enemyImpact?: ParticleSystem
+		dashParticles?: ParticleSystem
+		smokeParticles?: ParticleSystem
+		fireParticles?: ParticleSystem
+		// ! Stats
+		strength?: Stat
+		critChance?: Stat
+		critDamage?: Stat
+		attackSpeed?: Stat
+		lootQuantity?: Stat
+		lootChance?: Stat
+		// ! Level Editor
+		entityId?: string
+		// ! MiniGame
+		recipesQueued?: Recipe[]
+		miniGameContainer?: CSS2DObject
+		spoon?: Entity
+		// ! Sounds
+		lastStep?: { left: boolean, right: boolean }
+		// ! DayNight
+		nightLight?: Light
+		emissiveMat?: MeshPhongMaterial
+		ambientLight?: 'night' | 'day'
+		withTimeUniform?: (time: number) => void
+		// ! Weapon
+		weapon?: With<Entity, 'model' | 'weaponName' | 'weaponArc'>
+		weaponArc?: WeaponArc
+		weaponName?: AssetNames['weapons']
+		// ! Main menu
+		stateEntity?: AppStates<typeof app>
+		menuBook?: MainMenuBook
+		// ! Money
+		acorn?: true
+		// ! Berry Bush
+		bush?: true
+		shake?: number
+		shaken?: number
+		berries?: Set<Mesh<BufferGeometry, MeshPhongMaterial>>
+		dash?: Dash
+		dashDisplay?: Sprite
+		// ! Stun
+		stun?: Group
+		hitTimer?: Timer<true>
+		// ! Wander
+		wander?: { target: Vector3, cooldown: Timer<false> }
+		// ! Debuffs
+		debuffsContainer?: CSS2DObject
+		// ! Trail
+		trailMaker?: true
+		trail?: { origin: Entity, timer: Timer<false> }
+		poison?: true
+		// ! Stall
+		price?: number
+		stallPosition?: number
+		// ! Alice
+		beanstalk?: true
+		magicHaricot?: Entity
+		// ! Fishing
+		fishingPole?: With<Entity, 'model'>
+		fishingLine?: Mesh<MeshLine, MeshLineMaterial>
+		fishingSpot?: true
+		bobber?: With<Entity, 'position'>
+		fish?: Timer<false>
+		fishingProgress?: { attempts: number, success: number, done: boolean }
+		bobbing?: true
+		fishSpawner?: true
+		// ! Lock on
+		lockedOn?: CSS2DObject
+		// ! Cellar
+		crate?: true
+		// ! Explode
+		explode?: (amount: number) => void
+		exploder?: With<Entity, 'explode'>
+	}
 
 export type BehaviorNode<E> = (e: E) => 'success' | 'failure' | 'running'
 export type Bundle<C extends keyof Entity> = () => With<Entity, C>

@@ -1,4 +1,4 @@
-import type { AssetNames, farmDoors } from './entity'
+import type { AssetNames } from './entity'
 import type { Direction } from '@/lib/directions'
 import type { Room } from '@/states/dungeon/generateDungeon'
 import { AppBuilder } from '@/lib/app'
@@ -13,16 +13,17 @@ export const app = new AppBuilder()
 	.addState('menu')
 	.addState('introQuest')
 	.addState('testDialog')
+	.addState('test')
 	.bindResource<'farm', FarmResources>()
 	.bindResource<'village', { door: 'village' }>()
 	.bindResource<'dungeon', DungeonResources>()
 	.build()
 export interface FarmResources {
-	door: (typeof farmDoors)[number] | null
+	direction: 'doorFarm' | null
 }
 export interface DungeonResources {
+	direction: Direction
 	dungeon: Room
-	direction: Direction | (typeof farmDoors)[number]
 	playerHealth: number
 	firstEntry: boolean
 	dungeonLevel: number

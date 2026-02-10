@@ -1,7 +1,7 @@
 import type { ColorRepresentation } from 'three'
 import type { Entity } from '@/global/entity'
-import { CircleGeometry, Color, MeshPhongMaterial, SphereGeometry, Vector3, Vector4 } from 'three'
-import { ApplyForce, Bezier, CircleEmitter, ColorOverLife, ColorRange, ConstantValue, Gradient, GridEmitter, IntervalValue, ParticleSystem, PiecewiseBezier, RenderMode, SizeOverLife } from 'three.quarks'
+import { CircleGeometry, Color, MeshPhongMaterial, SphereGeometry } from 'three'
+import { ApplyForce, Bezier, CircleEmitter, ColorOverLife, ColorRange, ConstantValue, Gradient, GridEmitter, IntervalValue, ParticleSystem, PiecewiseBezier, RenderMode, SizeOverLife, Vector3, Vector4 } from 'three.quarks'
 
 const geo = new CircleGeometry(1, 16)
 export const colorToVec4 = (color: ColorRepresentation, opacity = 1) => {

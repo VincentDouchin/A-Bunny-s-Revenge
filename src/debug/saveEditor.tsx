@@ -40,7 +40,7 @@ export const SaveEditor = () => {
 						editor.destroy()
 						app.disable('farm')
 						await sleep(2000)
-						app.enable('farm', { door: 'clearing' })
+						app.enable('farm', { direction: null })
 					})
 				})
 
