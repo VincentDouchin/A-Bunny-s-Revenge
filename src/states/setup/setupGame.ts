@@ -1,5 +1,5 @@
 import { throttle } from '@solid-primitives/scheduled'
-import { Vector2 } from 'three'
+import { Vector2 } from 'three/webgpu'
 import { Armabee } from '@/constants/enemies'
 import { updateCameraZoom } from '@/global/camera'
 import { params } from '@/global/context'
@@ -29,7 +29,7 @@ export const setupGame = async () => {
 		updateCameraZoom()
 	} else if (params.debugEnemies) {
 		const enemiesRoom = assignPlanAndEnemies([{ position: { x: 0, y: 0 }, connections: { north: 1, south: null, east: null }, type: RoomType.Battle }], 0)
-		enemiesRoom[0].enemies = [Armabee(1)]
+		enemiesRoom[0].enemies = [Armabee(0), Armabee(0)]
 		enemiesRoom[0].type = RoomType.Battle
 		app.enable('dungeon', { direction: Direction.N, dungeon: enemiesRoom[0], firstEntry: true, playerHealth: 10, dungeonLevel: 0, weapon: 'SwordWeapon' })
 		updateRenderSize()

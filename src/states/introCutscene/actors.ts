@@ -1,5 +1,5 @@
-import { Quaternion, Vector3 } from 'three'
-import { SkeletonUtils } from 'three-stdlib'
+import { SkeletonUtils } from 'three/addons'
+import { Quaternion, Vector3 } from 'three/webgpu'
 import { Animator } from '@/global/animator'
 import { assets, ecs } from '@/global/init'
 

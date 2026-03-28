@@ -144,3 +144,5 @@ export function pipe(...fns: Func<any, any>[]): (input: any) => any {
 }
 
 export const opt = <O extends object>(condition: boolean, obj: O) => condition ? obj : {}
+
+export const round = (num: number) => Math.round((num + Number.EPSILON) * 100) / 100

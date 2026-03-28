@@ -2,7 +2,7 @@ import type { Collider } from '@dimforge/rapier3d-compat'
 import type { With } from 'miniplex'
 import type { Entity } from '@/global/entity'
 import { Cuboid } from '@dimforge/rapier3d-compat'
-import { Vector3 } from 'three'
+import { Vector3 } from 'three/webgpu'
 import { world } from '@/global/init'
 
 export const getIntersections = (e: With<Entity, 'position' | 'rotation' | 'sensor'>, group?: number, callback?: (collider: Collider) => boolean) => {

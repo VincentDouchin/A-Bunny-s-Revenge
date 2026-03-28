@@ -1,5 +1,5 @@
 import type { Entity } from '@/global/entity'
-import { Euler, Group, Sprite, SpriteMaterial } from 'three'
+import { Euler, Group, Sprite, SpriteMaterial } from 'three/webgpu'
 import { assets, ecs } from '@/global/init'
 import { range } from '@/utils/mapFunctions'
 

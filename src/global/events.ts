@@ -1,4 +1,4 @@
-import type { Object3D } from 'three'
+import type { Object3D } from 'three/webgpu'
 import type { AssetNames } from './entity'
 import type { crops } from '@/constants/items'
 import type { Toast } from '@/ui/Toaster'

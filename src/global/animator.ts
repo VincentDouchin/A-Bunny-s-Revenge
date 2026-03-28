@@ -1,5 +1,5 @@
-import type { AnimationAction, AnimationBlendMode, AnimationClip, Object3D, Object3DEventMap } from 'three'
-import { AnimationMixer, LoopOnce } from 'three'
+import type { AnimationAction, AnimationBlendMode, AnimationClip, Object3D, Object3DEventMap } from 'three/webgpu'
+import { AnimationMixer, LoopOnce } from 'three/webgpu'
 import { entries } from '@/utils/mapFunctions'
 
 interface playOptions {

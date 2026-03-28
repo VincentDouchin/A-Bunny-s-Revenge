@@ -1,7 +1,7 @@
 import type { AssetNames } from '@/global/entity'
 import { RigidBodyType } from '@dimforge/rapier3d-compat'
 import { createBackIn, easeInOut, linear } from 'popmotion'
-import { AdditiveBlending, Mesh, MeshBasicMaterial, SphereGeometry, Vector3 } from 'three'
+import { AdditiveBlending, Mesh, MeshBasicMaterial, SphereGeometry, Vector3 } from 'three/webgpu'
 import { assets, ecs, save, tweens } from '@/global/init'
 import { playSound } from '@/global/sounds'
 import { modelColliderBundle } from '@/lib/colliders'

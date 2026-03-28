@@ -1,4 +1,4 @@
-import { CSS2DObject } from 'three-stdlib'
+import { CSS2DObject } from 'three/addons'
 import { ecs } from '@/global/init'
 
 const healthBarQuery = ecs.with('healthBar', 'size').without('healthBarContainer')

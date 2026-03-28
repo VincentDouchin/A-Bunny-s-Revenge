@@ -1,5 +1,5 @@
 import { easeOut } from 'popmotion'
-import { OrthographicCamera, PerspectiveCamera, Vector3 } from 'three'
+import { OrthographicCamera, PerspectiveCamera, Vector3 } from 'three/webgpu'
 import { params } from './context'
 import { RenderGroup } from './entity'
 import { assets, ecs, settings, tweens } from './init'
@@ -21,7 +21,6 @@ export const initCamera = () => {
 		renderGroup: RenderGroup.Game,
 		camera,
 		fixedCamera: true,
-		position: new Vector3(),
 		mainCamera: true,
 		cameraLookAt: new Vector3(),
 		cameraShake: new Vector3(),
@@ -30,7 +29,7 @@ export const initCamera = () => {
 	})
 }
 const cameraQuery = ecs.with('camera')
-const gameCameraQuery = ecs.with('camera', 'position', 'mainCamera', 'cameraLookAt', 'cameraShake', 'cameraLerp')
+const gameCameraQuery = ecs.with('camera', 'mainCamera', 'cameraLookAt', 'cameraShake', 'cameraLerp')
 export const cameraTargetQuery = ecs.with('cameraTarget', 'worldPosition')
 const lockedOnQuery = ecs.with('lockedOn', 'position')
 export const updateCameraZoom = (zoom: number = params.zoom) => {
@@ -66,12 +65,11 @@ export const addCameraShake = () => {
 		})
 	}
 }
-// const OFFSET_Z = 30
-// const OFFSET_X = 50
-const MAP_OFFSET = 10
+const OFFSET_Z = 40
+const OFFSET_X = 30
 const levelQuery = ecs.with('map')
 export const moveCamera = (init = false) => () => {
-	for (const { position, camera, cameraOffset, cameraShake, fixedCamera, cameraLerp } of gameCameraQuery) {
+	for (const { camera, cameraOffset, cameraShake, fixedCamera, cameraLerp } of gameCameraQuery) {
 		const target = new Vector3()
 		const lerpSpeed = 3 / 60
 		if (app.isDisabled('mainMenu')) {
@@ -99,10 +97,10 @@ export const moveCamera = (init = false) => () => {
 					const level = assets.levels[mapId]
 					if (level) {
 						if (camera instanceof OrthographicCamera) {
-							target.x = Math.min(target.x, level.sizeX / 2 + camera.left - MAP_OFFSET)
-							target.x = Math.max(target.x, -level.sizeX / 2 + camera.right + MAP_OFFSET)
-							target.z = Math.min(target.z, level.sizeY / 2 + camera.bottom - MAP_OFFSET * 4)
-							target.z = Math.max(target.z, -level.sizeY / 2 + camera.top + MAP_OFFSET * 5)
+							target.x = Math.min(target.x, level.sizeX / 2 + camera.left - OFFSET_X)
+							target.x = Math.max(target.x, -level.sizeX / 2 + camera.right + OFFSET_X)
+							target.z = Math.min(target.z, level.sizeY / 2 + camera.bottom - OFFSET_Z)
+							target.z = Math.max(target.z, -level.sizeY / 2 + camera.top + OFFSET_Z)
 						}
 					}
 				}
@@ -120,21 +118,14 @@ export const moveCamera = (init = false) => () => {
 			newPosition.add(offset)
 		}
 		if (init || settings.lockCamera) {
-			position.copy(newPosition)
+			camera.position.copy(newPosition)
 		} else {
-			position.lerp(newPosition, lerpSpeed)
+			camera.position.lerp(newPosition, lerpSpeed)
 		}
 		if (fixedCamera) {
-			camera.lookAt(position.clone().sub(offset))
+			camera.lookAt(camera.position.clone().sub(offset))
 		} else {
 			camera.lookAt(target)
 		}
 	}
 }
-
-export const initializeCameraPosition = () => ecs.with('initialCameraTarget', 'position').onEntityAdded.subscribe((e) => {
-	for (const camera of gameCameraQuery) {
-		camera.cameraLookAt.copy(e.position)
-		ecs.removeComponent(e, 'initialCameraTarget')
-	}
-})

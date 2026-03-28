@@ -1,5 +1,5 @@
 import type { Dialog, Entity } from '@/global/entity'
-import { Quaternion, Vector3 } from 'three'
+import { Quaternion, Vector3 } from 'three/webgpu'
 import { Interactable } from '@/global/entity'
 import { ecs, time } from '@/global/init'
 

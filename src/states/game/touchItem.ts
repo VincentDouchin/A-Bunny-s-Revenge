@@ -1,8 +1,8 @@
 import type { Entity } from '@/global/entity'
 import type { app } from '@/global/states'
 import type { Plugin } from '@/lib/app'
-import { Vector3 } from 'three'
-import { CSS2DObject } from 'three-stdlib'
+import { CSS2DObject } from 'three/addons'
+import { Vector3 } from 'three/webgpu'
 import { ecs } from '@/global/init'
 import { runIf } from '@/lib/app'
 import { getIntersections } from './sensor'
@@ -11,7 +11,7 @@ const interactableQuery = ecs.with('interactable')
 const playerQuery = ecs.with('sensor', 'position', 'rotation')
 const interactingQuery = interactableQuery.with('collider', 'position')
 const losingInteractionQuery = interactingQuery.with('interactionContainer')
-const outlineQuery = ecs.with('outline')
+const outlineQuery = ecs.with('outline', 'group')
 const touchItem = () => {
 	for (const player of playerQuery) {
 		let lastDist = Number.POSITIVE_INFINITY
@@ -33,24 +33,24 @@ const touchItem = () => {
 		}
 		for (const item of losingInteractionQuery) {
 			if (lastEntity !== item) {
-				ecs.removeComponent(item, 'interactionContainer')
 				ecs.removeComponent(item, 'outline')
+				ecs.removeComponent(item, 'interactionContainer')
 			}
 		}
 	}
 }
 
 const removeOutlines = () => outlineQuery.onEntityRemoved.subscribe((e) => {
-	e.model?.traverse(node => node.layers.disable(1))
+	e.group.traverse(node => node.layers.disable(1))
 })
 
 const addOutline = () => outlineQuery.onEntityAdded.subscribe((e) => {
-	e.model?.traverse(node => node.layers.enable(1))
+	e.group.traverse(node => node.layers.enable(1))
 })
 
-const removeInteractionContainer = () => interactingQuery.onEntityRemoved.subscribe((e) => {
-	ecs.removeComponent(e, 'interactionContainer')
+const removeInteractionContainer = () => interactableQuery.onEntityRemoved.subscribe((e) => {
 	ecs.removeComponent(e, 'outline')
+	ecs.removeComponent(e, 'interactionContainer')
 })
 
 export const interactionPlugin: Plugin<typeof app> = (app) => {

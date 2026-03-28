@@ -1,5 +1,5 @@
-import type { BufferGeometry, Mesh, MeshPhongMaterial } from 'three'
-import { Vector3 } from 'three'
+import type { BufferGeometry, Mesh, MeshPhongMaterial } from 'three/webgpu'
+import { Vector3 } from 'three/webgpu'
 import { ecs, gameInputs, tweens } from '@/global/init'
 import { shakenLeaves } from '@/particles/bushShaken'
 import { itemBundle } from '../game/items'

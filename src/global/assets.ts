@@ -1,18 +1,21 @@
 import type { dungeon, village } from '@assets/assets'
-import type { BaseLevel, LevelData, LevelLoaded } from 'editor/src/types'
-
-import type { ColorRepresentation, Material, Object3D, Side, TextureFilter } from 'three'
-import type { GLTF } from 'three-stdlib'
+import type { LevelData, LevelLoaded } from 'editor/src/types'
+import type { GLTF } from 'three/addons'
+import type { ColorRepresentation, Material, Object3D, Side, TextureFilter } from 'three/webgpu'
 import type { Constructor } from 'type-fest'
-import type { ThumbnailRenderer } from '@/lib/thumbnailRenderer'
+import type { Thumbnailer } from '@/lib/thumbnailRenderer'
 import type { StaticAssetPath } from '@/static-assets'
 import { Howl } from 'howler'
-import { DoubleSide, FrontSide, Mesh, MeshBasicMaterial, MeshPhysicalMaterial, MeshStandardMaterial, NearestFilter, RepeatWrapping, SRGBColorSpace, Texture } from 'three'
-import { dataUrlToCanvas, getAssetPathsLoader, loadAudio, loadGLB, loadImage, textureLoader } from '@/global/assetLoaders'
-import { CharacterMaterial, GardenPlotMaterial, GrassMaterial, ToonMaterial, TreeMaterial, VineGateMaterial } from '@/shaders/materials'
+import { DoubleSide, FrontSide, Mesh, MeshBasicMaterial, NearestFilter, RepeatWrapping, SRGBColorSpace, Texture } from 'three/webgpu'
+import { getAssetPathsLoader, loadAudio, loadGLB, loadImage, textureLoader } from '@/global/assetLoaders'
+import { CharacterMaterial } from '@/shaders/characterMaterial'
+import { GardenPlotMaterial } from '@/shaders/gardenPlotMaterial'
+import { ToonMaterial } from '@/shaders/toonMaterial'
+import { VegetationMaterial } from '@/shaders/vegetationMaterial'
+import { VineGateMaterial } from '@/shaders/VineGateMaterial'
 import { customModels } from '@/states/game/doorModel'
-import { getScreenBuffer } from '@/utils/buffer'
-import { asyncMap, asyncMapValues, entries, mapKeys, mapValues, objectKeys, objectValues } from '@/utils/mapFunctions'
+import { getScreenBuffer, imgToCanvas } from '@/utils/buffer'
+import { asyncMap, asyncMapValues, entries, filterKeys, mapKeys, mapValues, objectKeys, objectValues } from '@/utils/mapFunctions'
 
 type GlobEager<T = string> = Record<string, T>
 
@@ -37,7 +40,7 @@ const loadGLBAsToon = async <K extends string>(
 	const toons = mapValues(loaded, (glb, key) => {
 		glb.scene.traverse((node) => {
 			if (node instanceof Mesh) {
-				if (node.material instanceof MeshStandardMaterial || node.material instanceof MeshPhysicalMaterial) {
+				if (node.material.isMaterial) {
 					const options = getOptions ? getOptions(key, node.material.name, node.name, node) : {}
 					if (!materials.has(node.material.uuid) || options.isolate) {
 						const Mat = options?.material ?? ToonMaterial
@@ -45,7 +48,7 @@ const loadGLBAsToon = async <K extends string>(
 							color: (options && 'color' in options) ? options.color : node.material.color,
 							map: node.material.map,
 							transparent: options?.transparent ?? node.material.transparent,
-							side: node.material.side ?? options?.side ?? FrontSide,
+							side: options?.side ?? node.material.side ?? FrontSide,
 							emissiveMap: node.material.emissiveMap,
 							opacity: node.material.opacity,
 							depthWrite: options?.depthWrite ?? true,
@@ -61,8 +64,10 @@ const loadGLBAsToon = async <K extends string>(
 						materials.set(node.material.uuid, newMaterial)
 						node.castShadow = options.shadow ?? false
 						node.receiveShadow = false
+						node.material = newMaterial
+					} else {
+						node.material = materials.get(node.material.uuid)
 					}
-					node.material = materials.get(node.material.uuid)
 				}
 			}
 		})
@@ -150,12 +155,15 @@ const loadSounds = async <K extends string>(paths: Record<K, string>, pool: numb
 	})
 }
 
-const loadItems = async <K extends string>(paths: Record<K, string>, thumbnail: ThumbnailRenderer) => {
+const loadItems = async <K extends string>(paths: Record<K, string>, thumbnail: Thumbnailer) => {
 	const models = await loadGLBAsToon(paths, () => ({ side: DoubleSide }))
-	const modelsAndthumbnails = mapValues(models, model => ({
-		model: model.scene,
-		img: thumbnail.getCanvas(model.scene).toDataURL(),
-	}))
+	const modelsAndthumbnails = mapValues(models, (model) => {
+		model.scene.rotateY(Math.PI)
+		return {
+			model: model.scene,
+			img: thumbnail.getCanvas(model.scene).toDataURL(),
+		}
+	})
 	thumbnail.dispose()
 	return modelsAndthumbnails
 }
@@ -196,24 +204,25 @@ const splitChildren = async <K extends string>(glb: Promise<Record<string, GLTF>
 	}, {}) as Record<K, Object3D>
 }
 
-const levelLoader = async <K extends string> (levelsUrls: Record<K, string>) => {
-	const mapKeys = ['heightMap', 'treeMap', 'grassMap', 'waterMap', 'pathMap'] as const satisfies (keyof LevelData)[]
-	return asyncMapValues(levelsUrls, async (url) => {
+const levelLoader = async <K extends string> (levelsUrls: Record<K, string>, imagesUrls: Record<string, string>) => {
+	const images = await asyncMapValues(imagesUrls, async url => imgToCanvas(await loadImage(url)).canvas)
+	return asyncMapValues(levelsUrls, async (url, levelName) => {
 		const level = await (await fetch(url)).json() as LevelData
-		const newLevel = level as BaseLevel
-		const maps: Partial<Record<(typeof mapKeys)[number], HTMLCanvasElement>> = {}
-		for (const mapKey of mapKeys) {
-			maps[mapKey] = await dataUrlToCanvas({ x: level.sizeX, y: level.sizeY }, level[mapKey])
-		}
-		return { ...newLevel, ...maps } as LevelLoaded
+		const maps = mapKeys(
+			filterKeys(
+				images,
+				key => key.startsWith(levelName),
+			)[0],
+			key => key.replace(`${levelName}/`, ''),
+		)
+		return { ...level, ...maps } as LevelLoaded
 	})
 }
 
 type AssetsLoaded<T extends Record<string, Promise<any> | any>> = { [K in keyof T]: Awaited<T[K]> }
-export const loadAssets = async (thumbnailRenderer: ThumbnailRenderer, showMarkers: boolean, loader?: () => () => void) => {
+export const loadAssets = async (thumbnailRenderer: Thumbnailer, showMarkers: boolean, loader?: () => () => void) => {
 	const clear = loader && loader()
-	const getAssetPaths = getAssetPathsLoader<StaticAssetPath>(import.meta.glob('@assets/*/**.*', { eager: true, query: '?url', import: 'default' }))
-
+	const getAssetPaths = getAssetPathsLoader<StaticAssetPath>(import.meta.glob('@assets/**/**.*', { eager: true, query: '?url', import: 'default' }))
 	const assets = {
 		markers: customModels(showMarkers),
 		// ! models
@@ -229,7 +238,7 @@ export const loadAssets = async (thumbnailRenderer: ThumbnailRenderer, showMarke
 		),
 		trees: loadGLBAsToon(
 			getAssetPaths({ folder: 'trees', extension: 'glb', suffix: '-optimized' }),
-			() => ({ material: TreeMaterial, shadow: false, transparent: true }),
+			() => ({ material: VegetationMaterial, shadow: false, transparent: true }),
 		),
 		crops: cropsLoader(
 			[1, 2, 3, 4].map(nb => getAssetPaths({ folder: 'crops', extension: 'glb', suffix: `_${nb}-optimized`, lowercase: true })),
@@ -244,7 +253,7 @@ export const loadAssets = async (thumbnailRenderer: ThumbnailRenderer, showMarke
 		),
 		vegetation: loadGLBAsToon(
 			getAssetPaths({ folder: 'vegetation', extension: 'glb', suffix: '-optimized' }),
-			() => ({ material: GrassMaterial, shadow: true }),
+			// () => ({ material: GrassMaterial, shadow: true }),
 		),
 		mainMenuAssets: loadMainMenuAssets(
 			getAssetPaths({ folder: 'mainMenuAssets', extension: 'glb', suffix: '-optimized' }),
@@ -259,7 +268,8 @@ export const loadAssets = async (thumbnailRenderer: ThumbnailRenderer, showMarke
 		),
 		// ! levels
 		levels: levelLoader(
-			getAssetPaths({ folder: 'levels', extension: 'json' }),
+			getAssetPaths({ folder: 'levels', extension: 'json', suffix: '/data' }),
+			getAssetPaths({ folder: 'levels', extension: 'png' }),
 		),
 
 		// ! textures

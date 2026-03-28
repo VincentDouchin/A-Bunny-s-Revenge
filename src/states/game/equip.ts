@@ -1,5 +1,5 @@
 import type { With } from 'miniplex'
-import type { Object3D } from 'three'
+import type { Object3D } from 'three/webgpu'
 import type { ComponentsOfType, Entity } from '@/global/entity'
 import { ecs } from '@/global/init'
 

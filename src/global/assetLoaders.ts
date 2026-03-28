@@ -1,12 +1,12 @@
-import type { BufferGeometry, Material, Matrix4, Mesh, Object3D, Vec2, Vector4Like } from 'three'
+import type { BufferGeometry, Material, Matrix4, Mesh, Object3D, Vector2Like, Vector4Like } from 'three/webgpu'
 import type { Simplify } from 'type-fest'
 import assetManifest from '@assets/assetManifest.json'
 import { createStore, del, entries, set } from 'idb-keyval'
-import { DynamicDrawUsage, Group, LoadingManager, TextureLoader } from 'three'
 import { InstancedUniformsMesh } from 'three-instanced-uniforms-mesh'
-import { DRACOLoader, GLTFLoader } from 'three-stdlib'
+import { DRACOLoader, GLTFLoader } from 'three/addons'
 import draco_decoder from 'three/examples/jsm/libs/draco/draco_decoder.wasm?url'
 import draco_wasm_wrapper from 'three/examples/jsm/libs/draco/draco_wasm_wrapper.js?url'
+import { DynamicDrawUsage, Group, LoadingManager, TextureLoader } from 'three/webgpu'
 import { assets } from '@/static-assets'
 import { getScreenBuffer } from '@/utils/buffer'
 import { useLocalStorage } from '@/utils/useLocalStorage'
@@ -145,66 +145,14 @@ export class InstancedModel extends Group {
 			for (let i = 0; i < this.matrixes.length; i++) {
 				const matrix = this.matrixes[i]
 				mesh.setMatrixAt(i, matrix)
-				mesh.material.needsUpdate = true
+				// mesh.material.needsUpdate = true
 			}
 		}
 		return this
 	}
 }
 
-// export const instanceMesh = <T extends Material>(obj: Object3D<Object3DEventMap>, castShadow = true) => {
-// 	const instanceParams: Matrix4[] = []
-// 	const meshes: InstancedUniformsMesh<T>[] = []
-// 	const group = new Group()
-
-// 	const addAt = (position: Vector3, scale = 1, rotation: Euler) => {
-// 		const matrix = new Matrix4()
-// 		matrix.makeRotationFromEuler(rotation)
-// 		matrix.setPosition(position)
-// 		matrix.scale(new Vector3().setScalar(scale))
-// 		const i = instanceParams.length
-// 		instanceParams.push(matrix)
-// 		const uniformCache: Record<string, any> = {}
-// 		return {
-// 			setMatrix: (fn: (m: Matrix4) => void) => {
-// 				fn(matrix)
-// 				for (const mesh of meshes) {
-// 					mesh.setMatrixAt(i, matrix)
-// 				}
-// 			},
-// 			setUniform: (name: string, value: any) => {
-// 				if (uniformCache[name] === value) return
-// 				uniformCache[name] = value
-// 				for (const mesh of meshes) {
-// 					mesh.setUniformAt(name, i, value)
-// 				}
-// 			},
-// 		}
-// 	}
-// 	const process = () => {
-// 		obj.traverse((node) => {
-// 			if (isMesh<T>(node)) {
-// 				const mesh = new InstancedUniformsMesh(node.geometry.clone(), node.material.clone(), instanceParams.length)
-// 				mesh.instanceMatrix.setUsage(DynamicDrawUsage)
-// 				meshes.push(mesh)
-// 			}
-// 		})
-// 		for (const mesh of meshes) {
-// 			mesh.castShadow = castShadow
-// 			group.add(mesh)
-// 			for (let i = 0; i < instanceParams.length; i++) {
-// 				const matrix = instanceParams[i]
-// 				mesh.setMatrixAt(i, matrix)
-// 				mesh.material.needsUpdate = true
-// 			}
-// 		}
-
-// 		return group
-// 	}
-// 	return { addAt, process, obj }
-// }
-
-export const dataUrlToCanvas = async (size: Vec2, dataUrl?: string) => {
+export const dataUrlToCanvas = async (size: Vector2Like, dataUrl?: string) => {
 	const buffer = getScreenBuffer(size.x, size.y)
 	if (dataUrl && dataUrl !== 'data:,') {
 		const img = await loadImage(dataUrl)
@@ -278,12 +226,14 @@ export const getAssetPathsLoader = <Paths extends string>(assetPaths: Record<str
 	const escapedFolder = escapeRegex(folder)
 	const escapedSuffix = escapeRegex(suffix)
 	const escapedExtension = escapeRegex(extension)
-
 	const regex = new RegExp(`${escapedFolder}/${escapedPrefix}(.*?)${escapedSuffix}.${escapedExtension}`)
 	return [...assets]
 		.filter(assets => assets.match(regex)?.[0])
 		.reduce((acc, v) => {
-			const realPath = Object.entries(assetPaths).find(([rawPath, _realPath]) => rawPath.endsWith(v))![1]
+			const realPath = Object.entries(assetPaths).find(([rawPath, _realPath]) => rawPath.endsWith(v))?.[1]
+			if (!realPath) {
+				throw new Error(`${v} does not exist`)
+			}
 			let fileName = regex.exec(v)![1]
 			if (lowercase) {
 				fileName = fileName.toLocaleLowerCase()

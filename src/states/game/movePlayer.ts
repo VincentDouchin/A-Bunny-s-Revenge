@@ -1,4 +1,4 @@
-import { Vector3 } from 'three'
+import { Vector3 } from 'three/webgpu'
 import { ecs, gameInputs, inputManager } from '@/global/init'
 import { app } from '@/global/states'
 import { spawnFootstep } from '@/particles/footsteps'
