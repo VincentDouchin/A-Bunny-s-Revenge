@@ -1,16 +1,26 @@
 import type { AssetData, ColliderData, Shape } from 'editor/src/types'
 import type { With } from 'miniplex'
-import type { Object3D, Object3DEventMap, Vector3Tuple } from 'three'
+import type { Object3D, Object3DEventMap, Vector3Tuple } from 'three/webgpu'
 import type { Entity } from '@/global/entity'
 import boundingBoxes from '@assets/boundingBox.json'
 import { ActiveCollisionTypes, Ball, Capsule, ColliderDesc, Cuboid, Cylinder, RigidBodyDesc, RigidBodyType } from '@dimforge/rapier3d-compat'
-import { BufferGeometry, Mesh, Quaternion, Vector3 } from 'three'
 
-import { clone } from 'three/examples/jsm/utils/SkeletonUtils.js'
-import { cloneMaterials, getSize } from './models'
+import { SkeletonUtils } from 'three/addons'
+import { BufferGeometry, Mesh, MeshStandardNodeMaterial, Quaternion, Vector3 } from 'three/webgpu'
+import { getSize } from './models'
+
+export const cloneMaterials = (obj: Object3D) => {
+	obj.traverse((node) => {
+		if (node instanceof Mesh && node.material instanceof MeshStandardNodeMaterial) {
+			const mat = node.material.clone()
+			mat.map = node.material.map
+			node.material = mat
+		}
+	})
+}
 
 export const modelColliderBundle = (model: Object3D<Object3DEventMap>, type = RigidBodyType.Dynamic, sensor = false, size?: Vector3, shape: 'ball' | 'cuboid' = 'cuboid') => {
-	const cloneModel = clone(model)
+	const cloneModel = SkeletonUtils.clone(model)
 	cloneMaterials(cloneModel)
 	size ??= getSize(cloneModel)
 	const collideDesc = {
@@ -142,7 +152,7 @@ export const getBodyAndColliders = (
 }
 
 export const capsuleColliderBundle = (model: Object3D<Object3DEventMap>, size: Vector3) => {
-	const cloneModel = clone(model)
+	const cloneModel = SkeletonUtils.clone(model)
 	return {
 		model: cloneModel,
 		bodyDesc: RigidBodyDesc.kinematicPositionBased().lockRotations(),

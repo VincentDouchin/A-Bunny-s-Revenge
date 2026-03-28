@@ -3,7 +3,7 @@
 // import type { Entity } from '@/global/entity'
 // import type { Room } from '@/states/dungeon/generateDungeon'
 // import { RigidBodyType } from '@dimforge/rapier3d-compat'
-// import { Vector3 } from 'three'
+// import { Vector3 } from 'three/webgpu'
 // import { SootSprite } from '@/constants/enemies'
 // import { Faction, Interactable } from '@/global/entity'
 // import { cookedMealEvent, harvestCropEvent, showTutorialEvent } from '@/global/events'

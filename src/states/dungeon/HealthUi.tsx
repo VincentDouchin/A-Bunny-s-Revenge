@@ -1,13 +1,12 @@
 import type { Accessor } from 'solid-js'
 import Drop from '@assets/icons/droplet-solid.svg'
-import { createEffect, createMemo, For, onCleanup, onMount, Show } from 'solid-js'
+import { createEffect, createMemo, For, onMount, Show } from 'solid-js'
 import { css } from 'solid-styled'
 import { Transition } from 'solid-transition-group'
 import atom from 'solid-use/atom'
 import { itemsData } from '@/constants/items'
 import { assets, save, ui } from '@/global/init'
 import { sharedSignal } from '@/lib/signal'
-import { getThumbnailRenderer } from '@/lib/thumbnailRenderer'
 import { OutlineText } from '@/ui/components/styledComponents'
 import { useGame } from '@/ui/store'
 import { range } from '@/utils/mapFunctions'
@@ -107,7 +106,7 @@ export const MealAmount = (props: { amount: Accessor<number>, size?: 'small' | '
 	)
 }
 export const extra = sharedSignal(0)
-const acornRenderer = getThumbnailRenderer(64)
+// const acornRenderer = getThumbnailRenderer(64)
 export const amountEaten = () => save.modifiers.reduce((acc, v) => acc + (itemsData[v]?.meal ?? 0), 0)
 export const HealthUi = () => {
 	const context = useGame()
@@ -209,9 +208,9 @@ export const HealthUi = () => {
 				const healthDisplay = createMemo(() => `${current()} / ${max()}`)
 				const model = assets.items.acorn.model.clone()
 				model.rotateY(Math.PI / 2)
-				const clear = acornRenderer.spin(model)
+				// const clear = acornRenderer.spin(model)
 				const acorns = ui.sync(() => save.acorns)
-				onCleanup(clear)
+				// onCleanup(clear)
 				const wateringCan = ui.sync(() => player().wateringCan)
 				const visible = atom(false)
 				onMount(() => setTimeout(() => visible(true), 100))

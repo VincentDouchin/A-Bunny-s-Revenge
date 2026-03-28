@@ -74,12 +74,14 @@ export const KeyboardControls = () => {
 									</div>
 								</Show>
 								<StateUi state="dungeon">
-									<div class="keyboard-controls">
-										<div class="controls-icons">
-											<InputIcon input={gameInputs.get('lock')}></InputIcon>
+									{() =>	(
+										<div class="keyboard-controls">
+											<div class="controls-icons">
+												<InputIcon input={gameInputs.get('lock')}></InputIcon>
+											</div>
+											<OutlineText>Lock on</OutlineText>
 										</div>
-										<OutlineText>Lock on</OutlineText>
-									</div>
+									)}
 								</StateUi>
 								<Show when={interactables[0]}>
 									{(interactable) => {

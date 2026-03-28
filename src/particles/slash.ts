@@ -1,6 +1,6 @@
-import type { BufferGeometry } from 'three'
-import { MeshStandardMaterial, PlaneGeometry } from 'three'
+import type { BufferGeometry } from 'three/webgpu'
 import { ConstantValue, IntervalValue, MeshSurfaceEmitter, ParticleSystem, RandomQuatGenerator, RenderMode } from 'three.quarks'
+import { MeshStandardMaterial, PlaneGeometry } from 'three/webgpu'
 
 const geo = new PlaneGeometry(1, 1)
 const mat = new MeshStandardMaterial({ color: 'red' })

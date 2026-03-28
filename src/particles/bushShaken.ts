@@ -1,5 +1,5 @@
-import { DoubleSide, MeshStandardMaterial, PlaneGeometry } from 'three'
 import { AxisAngleGenerator, Bezier, ConstantValue, ForceOverLife, HemisphereEmitter, IntervalValue, ParticleSystem, PiecewiseBezier, RandomQuatGenerator, RenderMode, Rotation3DOverLife, SizeOverLife, Vector3 } from 'three.quarks'
+import { DoubleSide, MeshStandardMaterial, PlaneGeometry } from 'three/webgpu'
 import { assets } from '@/global/init'
 
 const geo = new PlaneGeometry(3, 6)

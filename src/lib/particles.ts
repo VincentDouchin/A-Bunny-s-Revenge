@@ -1,70 +1,133 @@
-import type { Quaternion, Vector4 } from 'three'
-import type { ParticleSystem } from 'three.quarks'
+import type { WebGPURenderer } from 'three/webgpu'
+import type { VFXParticlesOptions } from 'vanilla-vfx'
 import type { Plugin } from './app'
-import type { ComponentsOfType } from '@/global/entity'
+import type { Pool } from './pool'
 import type { app } from '@/global/states'
-import { Vector3 } from 'three'
-import { BatchedRenderer, Quaternion as QuarksQuaternion, Vector3 as QuarksVector3, Vector4 as QuarksVector4 } from 'three.quarks'
+import { Object3D, Vector3 } from 'three/webgpu'
+import { VFXParticles } from 'vanilla-vfx'
+import { getGameRenderGroup } from '@/debug/debugUi'
 import { ecs, time } from '@/global/init'
-import { gameRenderGroupQuery } from '@/global/rendering'
+import { chestAppearingParticles } from '@/particles/chestAppearing'
+import { dashParticles } from '@/particles/dashParticles'
+import { enemyDefeatedParticles } from '@/particles/enemyDefeated'
+import { wateringCanParticles } from '@/states/farm/wateringCan'
+import { objectKeys } from '@/utils/mapFunctions'
 import { runIf } from './app'
 
-export const toQuarks = {
-	v3: (vec: Vector3) => new QuarksVector3(vec.x, vec.y, vec.z),
-	v4: (vec: Vector4) => new QuarksVector4(vec.x, vec.y, vec.z, vec.w),
-	quaternion: (quaternion: Quaternion) => new QuarksQuaternion(quaternion.x, quaternion.y, quaternion.z, quaternion.w),
+export type Particles = 'dashParticles' | 'wateringCanParticles' | 'chestAppearingParticles' | 'enemyDefeatedParticles'
+
+export type ParticlesPool = Record<Particles, Pool<Vfx>>
+export const spawnVfx = async (vfxOptions: CustomVFXParticlesOptions) => {
+	const { renderer, scene } = getGameRenderGroup()
+	const vfx = new Vfx(renderer, vfxOptions)
+	scene.add(vfx.group)
+	await vfx.init()
+	return vfx
 }
 
-const initBatchRender = () => {
-	let initiated = false
-	return gameRenderGroupQuery.onEntityAdded.subscribe((e) => {
-		if (initiated) return
-		const batchRenderer = new BatchedRenderer()
-		e.scene.add(batchRenderer)
-		ecs.add({ batchRenderer })
-		initiated = true
-	})
-}
-export const batchRendererQuery = ecs.with('batchRenderer')
-const updateParticles = () => batchRendererQuery.first && batchRendererQuery.first.batchRenderer.update(time.delta * 1000)
-const emittersQuery = ecs.with('emitter')
-const addParticles = () => emittersQuery.onEntityAdded.subscribe((entity) => {
-	const batchRenderer = batchRendererQuery.first?.batchRenderer
-	if (batchRenderer) {
-		batchRenderer.addSystem(entity.emitter.system)
+const particlePoolQuery = ecs.with('particlePool')
+export const getParticleFromPool = (particle: Particles, target?: Object3D) => {
+	const entity = particlePoolQuery.entities.filter(e => e[particle])[0]
+	if (!entity) {
+		throw new Error(`particle pool not initiated for ${particle}`)
 	}
-})
+	const vfx = entity[particle]
+	ecs.remove(entity)
 
-const removeEmitter = () => {
-	for (const entity of emittersQuery) {
-		// @ts-expect-error wrong interface
-		if (entity.emitter.system.emitEnded && entity.emitter.system.particleNum === 0) {
-			if (entity.autoDestroy) {
-				ecs.removeComponent(entity, 'emitter')
-				ecs.remove(entity)
+	if (!vfx) {
+		throw new Error('Particle not instanciated')
+	}
+	if (target) {
+		vfx.target = target
+	}
+	return vfx
+}
+
+export interface CustomVFXParticlesOptions extends VFXParticlesOptions {
+	world?: boolean
+	target?: Object3D
+}
+
+export class Vfx extends VFXParticles {
+	duration?: number
+	target = new Object3D()
+	world = false
+	accumulator = 0
+	constructor(renderer: WebGPURenderer, options: CustomVFXParticlesOptions) {
+		super(renderer, options)
+		if (options.target) {
+			this.target = options.target
+		}
+		if (options.world) {
+			this.world = options.world
+		} else {
+			this.group.add(this.target)
+		}
+		this.isEmitting = options.autoStart ?? true
+	}
+
+	resetTarget() {
+		this.target = new Object3D()
+		this.group.add(this.target)
+	}
+
+	update(delta: number): void {
+		if (!this.system || !this.system.initialized) return
+		this.system.update(delta)
+
+		if (this.isEmitting) {
+			const delay = this.system.normalizedProps.delay
+			const emitCount = this.system.normalizedProps.emitCount
+			const pos = this.position()
+			if (!delay) {
+				this.spawn(pos.x, pos.y, pos.z, emitCount)
+			} else {
+				this.accumulator += delta
+				if (this.accumulator >= delay) {
+					this.accumulator -= delay
+					this.spawn(pos.x, pos.y, pos.z, emitCount)
+				}
 			}
 		}
 	}
+
+	position() {
+		const pos = new Vector3()
+		if (this.world) {
+			this.target.getWorldPosition(pos)
+		}
+		return pos
+	}
 }
 
-const addEmitters = (...components: ComponentsOfType<ParticleSystem>[]) => components.map((component) => {
-	const particleSystemQuery = ecs.with(component)
-	return () => particleSystemQuery.onEntityAdded.subscribe((e) => {
-		e[component].pause()
-		const batchRenderer = batchRendererQuery.first?.batchRenderer
-		const emitter = e[component].emitter
+const particleDefinitions: Record<Particles, CustomVFXParticlesOptions> = {
+	chestAppearingParticles,
+	dashParticles,
+	wateringCanParticles,
+	enemyDefeatedParticles,
+}
 
-		ecs.add({ parent: e, position: new Vector3(), emitter })
-
-		if (batchRenderer) {
-			batchRenderer.addSystem(e[component])
+export const particlesPlugin = (components: Record<Particles, number>): Plugin<typeof app> => (app) => {
+	for (const component of objectKeys(components)) {
+		const query = ecs.with(component).without('particlePool')
+		const updateParticles = () => {
+			for (const entity of query) {
+				entity[component].update(time.delta / 1000)
+			}
 		}
-	})
-})
+		const spawnPool = async () => {
+			for (let i = 0; i < components[component]; i++) {
+				const vfx = await spawnVfx(particleDefinitions[component])
+				ecs.add({ [component]: vfx, particlePool: true })
+			}
+		}
 
-export const particlesPlugin: Plugin<typeof app> = (app) => {
-	app
-		.addSubscribers('default', initBatchRender, addParticles, ...addEmitters('enemyDefeated', 'enemyImpact', 'dashParticles', 'smokeParticles', 'fireParticles'))
-		.onRender('default', runIf(() => app.isDisabled('paused'), updateParticles))
-		.onPreUpdate('default', removeEmitter)
+		app.onRender('default', runIf(() => app.isDisabled('paused'), updateParticles))
+		app.onEnter('game', spawnPool)
+		app.addSubscribers('game', () => query.onEntityRemoved.subscribe((e) => {
+			const vfx = e[component]
+			vfx.clear()
+			ecs.add({ [component]: vfx, particlePool: true })
+		}))
+	}
 }

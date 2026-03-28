@@ -1,5 +1,5 @@
-import { Color, DoubleSide, MeshBasicMaterial } from 'three'
 import { ConeEmitter, ConstantColor, ConstantValue, IntervalValue, ParticleSystem, RenderMode, Vector4 } from 'three.quarks'
+import { Color, DoubleSide, MeshBasicMaterial } from 'three/webgpu'
 
 const mat = new MeshBasicMaterial({ side: DoubleSide })
 

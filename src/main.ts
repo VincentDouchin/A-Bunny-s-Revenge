@@ -6,8 +6,8 @@ import { updateStates } from './behaviors/state'
 import { setupConversation } from './conversation/setupConversation'
 import { debugPlugin } from './debug/debugPlugin'
 import { updateAnimations } from './global/animations'
-import { initCamera, initializeCameraPosition, moveCamera } from './global/camera'
-import { coroutines, inputManager, musicManager, questManager, resetSave, thumbnailRenderer, time, tweens, ui } from './global/init'
+import { initCamera, moveCamera } from './global/camera'
+import { coroutines, inputManager, musicManager, questManager, resetSave, time, tweens, ui } from './global/init'
 import { tickModifiersPlugin } from './global/modifiers'
 import { updateMousePosition } from './global/mousePosition'
 import { compileShaders, initTexturesItemsAndEnemies, initThree, renderGame } from './global/rendering'
@@ -31,16 +31,17 @@ import { lockOnEnemy } from './states/dungeon/locking'
 import { spawnDrops } from './states/dungeon/lootPool'
 import { spawnPoisonTrail } from './states/dungeon/poisonTrail'
 import { rotateStun } from './states/dungeon/stun'
-import { harvestCrop } from './states/farm/farming'
+import { harvestCrop, interactablePlantableSpot, plantSeed } from './states/farm/farming'
 import { fishingPlugin } from './states/farm/fishing'
-import { closePlayerInventory, disableInventoryState, enableInventoryState, interact } from './states/farm/openInventory'
-import { addDashDisplay, updateDashDisplay } from './states/game/dash'
+import { closePlayerInventory, disableInventoryState, enableInventoryState, interact, openPlayerInventory } from './states/farm/openInventory'
+import { waterCrops } from './states/farm/wateringCan'
+import { updateDashDisplay } from './states/game/dash'
 import { dayNight } from './states/game/dayNight'
 import { turnNPCHead } from './states/game/dialog'
 import { equip } from './states/game/equip'
 import { bobItems, collectItems, popItems, stopItems } from './states/game/items'
 import { canPlayerMove, movePlayer, playerSteps, savePlayerFromTheEmbraceOfTheVoid, stopPlayer } from './states/game/movePlayer'
-import { collideWithDoorClearing, collideWithDoorFarm } from './states/game/spawnDoor'
+import { collideWithDoorClearing, collideWithDoorFarm, hideVinesDoors, unlockDoorClearing } from './states/game/spawnDoor'
 import { spawnDungeon, spawnLevel } from './states/game/spawnLevel'
 import { spawnPlayerClearing, spawnPlayerFarm } from './states/game/spawnPlayer'
 import { spawnTagsPlugin } from './states/game/tags'
@@ -57,8 +58,9 @@ app
 		app.enable('default')
 	})
 	// ! DEFAULT
-	.addPlugins(debugPlugin, hierarchyPlugin, transformsPlugin, physicsPlugin, addToScene('camera', 'light', 'model', 'dialogContainer', 'emitter', 'interactionContainer', 'miniGameContainer', 'healthBarContainer', 'dashDisplay', 'stun', 'debuffsContainer', 'weaponArc', 'questMarkerContainer', 'lockedOn'), particlesPlugin, removeStateEntityPlugin)
+	.addPlugins(debugPlugin, hierarchyPlugin, transformsPlugin, physicsPlugin, addToScene('light', 'model', 'dialogContainer', 'interactionContainer', 'miniGameContainer', 'healthBarContainer', 'stun', 'debuffsContainer', 'weaponArc', 'questMarkerContainer', 'lockedOn', 'dashIndicator'), removeStateEntityPlugin)
 	.onEnter('default', initThree, initCamera)
+	.addPlugins(particlesPlugin({ chestAppearingParticles: 1, dashParticles: 5, wateringCanParticles: 1, enemyDefeatedParticles: 5 }))
 	.onEnter('default', initHowler, initTexturesItemsAndEnemies)
 	.addSubscribers('default', () => ui.render(UI), resize, disablePortrait, enableFullscreen, stopOnLosingFocus, completeQuestStep)
 	.onPreUpdate('default', coroutines.tick, savePlayerFromTheEmbraceOfTheVoid, updateMousePosition(), moveCamera())
@@ -67,13 +69,12 @@ app
 	.onRender('default', runIf(() => app.isDisabled('paused'), stepWorld))
 	.onPreUpdate('default', inputManager.update, ui.update)
 	.onRender('default', runIf(() => app.isDisabled('paused'), updateTimeUniforms))
-	.onUpdate('default', () => thumbnailRenderer.update(time.delta))
 	.onPreUpdate('default', runIf(() => app.isDisabled('paused'), time.tick, dayNight, tweens.tick))
 	// !SETUP
 	.onEnter('default', setupGame)
 	// ! GAME
 	.addPlugins(fishingPlugin, interactionPlugin, tickModifiersPlugin('speed', 'maxHealth', 'strength', 'critChance', 'critDamage', 'attackSpeed', 'lootQuantity', 'lootChance'), spawnTagsPlugin)
-	.addSubscribers('game', initializeCameraPosition, bobItems, enableInventoryState, popItems, addHealthBarContainer, ...equip('wateringCan', 'weapon', 'fishingPole'), addDashDisplay, addQuestMarkers, displayUnlockQuestToast, setupConversation)
+	.addSubscribers('game', bobItems, enableInventoryState, popItems, addHealthBarContainer, ...equip('wateringCan', 'weapon', 'fishingPole'), addQuestMarkers, displayUnlockQuestToast, setupConversation)
 	.onEnter('game', questManager.enableQuests)
 	.onPreUpdate(
 		'game',
@@ -107,18 +108,21 @@ app
 	// .onUpdate('intro', runIf(() => app.isDisabled('mainMenu'), playAmbience))
 	// .addSubscribers('intro', enableCutscene)
 	// ! FARM
-	// .addSubscribers('farm', ...interactablePlantableSpot)
-	.onEnter('farm', spawnLevel('farm', 'farm'), compileShaders, initTexturesItemsAndEnemies, spawnPlayerFarm, moveCamera(true))
+	.addSubscribers('farm', ...interactablePlantableSpot)
+	.onEnter('farm', spawnLevel('farm', 'farm'), spawnPlayerFarm, moveCamera(true), async () => {
+		// ecs.add(inMap({ ...getParticleFromPool('chestAppearing'), position: new Vector3(0, 10, 0) }))
+	})
 	.onUpdate('farm', collideWithDoorFarm)
+
 	// .onEnter('farm', runIf(() => app.isDisabled('mainMenu'), spawnCharacter, setInitialHealth), moveCamera(true))
 	// .onUpdate('farm', runIf(() => app.isDisabled('mainMenu'), playNightMusic, playAmbience))
-	// .onUpdate('farm', waterCrops, growCrops)
+	.onUpdate('farm', waterCrops)
 	// .onUpdate('farm', collideWithDoorCamp, waterCrops, growCrops)
-	// .onUpdate('farm', runIf(canPlayerMove, plantSeed, harvestCrop, openPlayerInventory))
+	.onUpdate('farm', runIf(canPlayerMove, plantSeed, harvestCrop, openPlayerInventory))
 	// ! CLEARING
+	.addSubscribers('clearing', hideVinesDoors, unlockDoorClearing)
 	.onEnter('clearing', spawnLevel('clearing', 'clearing'), compileShaders, initTexturesItemsAndEnemies, spawnPlayerClearing, spawnWeaponsChoice, moveCamera(true))
 	.onUpdate('clearing', collideWithDoorClearing)
-// .addSubscribers('clearing', unlockDoorClearing)
 	// .onEnter('clearing', spawnLevel('crossroad', 'clearing'), spawnLevelData, spawnPlayerClearing, setInitialHealth, spawnWeaponsChoice, moveCamera(true))
 	// .onEnter('clearing', initTexturesItemsAndEnemies, compileShaders)
 	// .onUpdate('clearing', collideWithDoorClearing)
@@ -142,7 +146,6 @@ app
 	.onEnter('dungeon', compileShaders, initTexturesItemsAndEnemies)
 	.onUpdate(
 		'dungeon',
-		runIf(canPlayerMove, harvestCrop),
 		// runIf(canPlayerMove, harvestCrop, unlockDoorDungeon),
 		// runIf(canPlayerMove, allowDoorCollision, collideWithDoorDungeon, harvestCrop, unlockDoorDungeon),
 		runIf(() => app.isDisabled('paused'), tickHitCooldown, tickSneeze, tickPoison, tickInactiveTimer, tickSleepy),

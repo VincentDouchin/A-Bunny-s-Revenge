@@ -1,5 +1,5 @@
-// import type { Mesh } from 'three'
-// import { AdditiveBlending, BufferAttribute, BufferGeometry, Color, Points, ShaderMaterial, Uniform, Vector3 } from 'three'
+// import type { Mesh } from 'three/webgpu'
+// import { AdditiveBlending, BufferAttribute, BufferGeometry, Color, Points, ShaderMaterial, Uniform, Vector3 } from 'three/webgpu'
 // import { ecs, time } from '@/global/init'
 // import { height, width } from '@/global/rendering'
 // import type { State } from '@/lib/state'

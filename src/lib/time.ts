@@ -1,6 +1,6 @@
 import { easeInOut } from 'popmotion'
-import { Clock } from 'three'
 import { clamp } from 'three/src/math/MathUtils.js'
+import { Clock } from 'three/webgpu'
 import { save } from '@/global/init'
 
 export class Time extends Clock {

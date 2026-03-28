@@ -1,5 +1,5 @@
-import { MeshBasicMaterial, PlaneGeometry } from 'three'
 import { Bezier, ColorRange, ConeEmitter, ConstantValue, IntervalValue, ParticleSystem, PiecewiseBezier, RandomQuatGenerator, RenderMode, SizeOverLife } from 'three.quarks'
+import { MeshBasicMaterial, PlaneGeometry } from 'three/webgpu'
 import { assets } from '@/global/init'
 import { colorToVec4 } from './honeySplatParticles'
 

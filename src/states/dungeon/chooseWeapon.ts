@@ -1,10 +1,10 @@
 import type { AssetNames, Entity } from '@/global/entity'
 import { Event } from 'eventery'
-import { Quaternion, Vector3 } from 'three'
+import { bounceOut, linear } from 'popmotion'
+import { Group, Quaternion, Vector3 } from 'three/webgpu'
 import { weaponsData } from '@/constants/weapons'
 import { Interactable } from '@/global/entity'
-import { assets, coroutines, ecs } from '@/global/init'
-import { app } from '@/global/states'
+import { assets, ecs, tweens } from '@/global/init'
 import { objectKeys } from '@/utils/mapFunctions'
 import { weaponBundle } from '../game/weapon'
 
@@ -18,17 +18,22 @@ const displayWeapon = (weaponName: AssetNames['weapons'], parent: Entity) => {
 		rotation: new Quaternion(),
 		weaponName,
 		parent,
+		group: new Group(),
 	})
 	ecs.update(parent, { interactable: Interactable.WeaponStand })
-	coroutines.add(function* () {
-		let rotation = 0
-		while (app.isEnabled('clearing')) {
-			yield
-			rotation += 0.02
-			weapon.rotation.setFromAxisAngle(new Vector3(0, 1, 0), rotation)
-		}
+	tweens.add({
+		parent,
+		repeat: Number.POSITIVE_INFINITY,
+		repeatType: 'loop',
+		duration: 5000,
+		ease: linear,
+		to: Math.PI * 2,
+		onUpdate(f) {
+			weapon.rotation.setFromAxisAngle(new Vector3(0, 1, 0), f)
+		},
 	})
-	return weaponModel
+
+	return weapon
 }
 const chooseWeaponEvent = new Event<[AssetNames['weapons']]>()
 const stumpQuery = ecs.with('weaponStand')
@@ -36,10 +41,24 @@ export const spawnWeaponsChoice = () => {
 	for (let i = 0; i < stumpQuery.size; i++) {
 		const stump = stumpQuery.entities[i]
 		const weaponName = weaponNames[i]
-		const weaponModel = displayWeapon(weaponName, stump)
+		const weapon = displayWeapon(weaponName, stump)
 		const unsub = chooseWeaponEvent.subscribe((weaponEquipped) => {
-			weaponModel.visible = weaponEquipped !== weaponName
+			const wasVisible = weapon.model.visible
+			weapon.model.visible = weaponEquipped !== weaponName
+			if (wasVisible !== weapon.model.visible) {
+				tweens.add({
+					from: 0.5,
+					to: 1,
+					duration: 500,
+					ease: bounceOut,
+					onUpdate(f) {
+						weapon.group.scale.setScalar(f)
+					},
+				})
+			}
 		})
+		const onDestroy = new Event()
+		onDestroy.subscribe(unsub)
 		ecs.update(stump, {
 			weaponName,
 			onPrimary(_stump, player) {
@@ -47,9 +66,7 @@ export const spawnWeaponsChoice = () => {
 				chooseWeaponEvent.emit(weaponName)
 				ecs.update(player, { weapon: weaponBundle(weaponName) })
 			},
-			onDestroy() {
-				unsub()
-			},
+			onDestroy,
 		})
 	}
 }

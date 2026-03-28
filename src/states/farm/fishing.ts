@@ -2,15 +2,14 @@ import type { app } from '@/global/states'
 import type { Plugin } from '@/lib/app'
 import { ColliderDesc, RigidBodyDesc, RigidBodyType } from '@dimforge/rapier3d-compat'
 import { between } from 'randomish'
-import { BufferGeometry, CatmullRomCurve3, Mesh, MeshBasicMaterial, PlaneGeometry, Quaternion, SphereGeometry, Vector3 } from 'three'
+import { Mesh, MeshBasicMaterial, PlaneGeometry, Quaternion, SphereGeometry, Vector3 } from 'three/webgpu'
 import { fishBehavior } from '@/behaviors/fishBehavior'
 import { State } from '@/behaviors/state'
 import { MenuType } from '@/global/entity'
-import { assets, ecs, menuInputs, scene, tweens } from '@/global/init'
+import { assets, ecs, menuInputs, tweens } from '@/global/init'
 import { playSound } from '@/global/sounds'
 import { runIf } from '@/lib/app'
 import { inMap } from '@/lib/hierarchy'
-import { MeshLine, MeshLineMaterial } from '@/lib/MeshLine'
 import { Timer } from '@/lib/timer'
 import { getWorldPosition } from '@/lib/transforms'
 import { fishParticles } from '@/particles/fishParticles'
@@ -23,12 +22,10 @@ const fishingPoleBundle = () => {
 	poleModel.scale.setScalar(3)
 	poleModel.rotateY(-Math.PI / 2)
 	poleModel.rotateX(Math.PI / 3)
-	const line = new MeshLine()
-	line.setGeometry(new BufferGeometry().setFromPoints([new Vector3(), new Vector3()]))
-	const mat = new MeshLineMaterial({ color: 0xFFFFFF, lineWidth: 0.3 })
-	const fishingLine = new Mesh(line, mat)
-	scene.add(fishingLine)
-	const fishingPole = ecs.add({ model: poleModel, fishingLine })
+	// line.setGeometry(new BufferGeometry().setFromPoints([new Vector3(), new Vector3()]))
+	// const fishingLine = new Mesh(line, mat)
+	// scene.add(fishingLine)
+	const fishingPole = ecs.add({ model: poleModel })
 	return fishingPole
 }
 
@@ -54,8 +51,7 @@ export const stopFishing = (force: boolean = false) => {
 				setTimeout(() => {
 					ecs.remove(bobber)
 					ecs.removeComponent(player.fishingPole, 'bobber')
-					player.fishingPole.fishingLine?.removeFromParent()
-					ecs.removeComponent(player.fishingPole, 'fishingLine')
+					// ecs.removeComponent(player.fishingPole, 'fishingLine')
 					if (force) {
 						addItemToPlayer({ name: 'redSnapper', quantity: 1 })
 					}
@@ -88,14 +84,11 @@ const updateFishingLine = () => {
 			pos2.lerpVectors(pos1, pos3, 0.5)
 			const y = pos1.y - pos3.y
 			pos2.y = pos3.y + y / 3
-			const points = new CatmullRomCurve3([
-				pos1,
-				pos2,
-				pos3,
-			]).getPoints(50)
-			if (fishingPole.fishingLine) {
-				fishingPole.fishingLine.geometry.setGeometry(new BufferGeometry().setFromPoints(points))
-			}
+			// const points = new CatmullRomCurve3([
+			// 	pos1,
+			// 	pos2,
+			// 	pos3,
+			// ]).getPoints(50)
 		}
 	}
 }

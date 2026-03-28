@@ -30,16 +30,16 @@ export const useQuery = <T,>(query: Query<T>) => {
 }
 export function GameProvider(props: { children: JSXElement | JSXElement[] }) {
 	const controls = inputManager.controls
-	const isMenuOpen = stateSignal('menu')
+	const [isMenuOpen] = stateSignal('menu')
 	const usingTouch = createMemo(() => inputManager.controls() === 'touch')
 	const usingKeyboard = createMemo(() => inputManager.controls() === 'keyboard')
 	const usingGamepad = createMemo(() => inputManager.controls() === 'gamepad')
-	const isPauseState = stateSignal('paused')
-	const isMainMenuState = stateSignal('mainMenu')
+	const [isPauseState] = stateSignal('paused')
+	const [isMainMenuState] = stateSignal('mainMenu')
 	const players = useQuery(playerQuery)
 	const player = createMemo(() => players()?.[0])
 	const showTouch = createMemo(() => usingTouch() && !isMenuOpen() && !isPauseState() && !isMainMenuState())
-	const data = {
+	const data = createMemo(() => ({
 		player,
 		controls,
 		showTouch,
@@ -48,10 +48,10 @@ export function GameProvider(props: { children: JSXElement | JSXElement[] }) {
 		usingGamepad,
 		usingTouch,
 		isPauseState,
-	}
+	}))
 
 	return (
-		<GameContext.Provider value={data}>
+		<GameContext.Provider value={data()}>
 			{props.children}
 		</GameContext.Provider>
 	)

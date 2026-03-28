@@ -1,16 +1,16 @@
-import type { Object3D } from 'three'
-import { CSS2DRenderer, FullScreenQuad } from 'three-stdlib'
-import { BasicShadowMap, DepthTexture, Group, LinearSRGBColorSpace, Material, MeshBasicMaterial, RenderTarget, ShaderMaterial, Texture, Vector2, WebGPURenderer } from 'three/webgpu'
-import { conversationQuery } from '@/conversation/setupConversation'
-import { getGameRenderGroup } from '@/debug/debugUi'
-import { getSobelShader, outlineShader } from '@/shaders/EdgePass'
+import type { Object3D } from 'three/webgpu'
+import { CSS2DRenderer } from 'three/addons'
+
+import { ACESFilmicToneMapping, BasicShadowMap, DepthTexture, Group, Material, MeshBasicNodeMaterial, NodeMaterial, OrthographicCamera, QuadMesh, RenderTarget, SRGBColorSpace, Texture, Vector2, Vector3, WebGPURenderer } from 'three/webgpu'
+
+import { setupPostProcessing } from '@/shaders/EdgePass'
 import { entries, objectValues } from '@/utils/mapFunctions'
 import { params } from './context'
 import { RenderGroup } from './entity'
 import { assets, ecs, scene, settings } from './init'
-import { app } from './states'
 
 export const renderer = new WebGPURenderer({ alpha: false })
+await renderer.init()
 renderer.debug.checkShaderErrors = false
 renderer.setPixelRatio(1)
 
@@ -25,19 +25,28 @@ outlineTarget.depthTexture = new DepthTexture(width, height)
 const outlineTarget2 = new RenderTarget(width, height)
 export const finalTarget = new RenderTarget(width, height)
 
-const outlineMat = new ShaderMaterial(outlineShader(target, outlineTarget))
-const outlineQuad = new FullScreenQuad(outlineMat)
-export const sobelMat = new ShaderMaterial(getSobelShader(width, height, target, outlineTarget2))
-const sobelQuad = new FullScreenQuad(sobelMat)
+const { postProcessing, uniforms, outlineNode } = setupPostProcessing(
+	renderer,
+	width,
+	height,
+	target,
+	outlineTarget,
+	outlineTarget2,
+)
+
+// Create a quad mesh for rendering the outline pass
+const outlineMaterial = new NodeMaterial()
+outlineMaterial.colorNode = outlineNode
+const outlineQuad = new QuadMesh(outlineMaterial)
 export const getTargetSize = (height = params.renderHeight) => {
-	return new Vector2(window.innerWidth, window.innerHeight)
-	// const ratio = window.innerWidth / window.innerHeight
-	// const width = height * ratio
-	// return new Vector2(width, height)
+	// return new Vector2(window.innerWidth, window.innerHeight)
+	const ratio = window.innerWidth / window.innerHeight
+	const width = height * ratio
+	return new Vector2(width, height)
 }
 export const updateRenderSize = (newSize?: Vector2, force = true) => {
 	newSize ??= getTargetSize()
-	sobelMat.uniforms.resolution.value = newSize
+	uniforms.resolution.value = newSize
 	if (force) {
 		const cssRendererSize = cssRenderer.getSize()
 		if (cssRendererSize.width !== window.innerWidth || cssRendererSize.height !== window.innerHeight) {
@@ -51,7 +60,9 @@ export const initThree = () => {
 	renderer.shadowMap.type = BasicShadowMap
 	renderer.domElement.classList.add('main')
 	document.body.appendChild(renderer.domElement)
-	renderer.outputColorSpace = LinearSRGBColorSpace
+	renderer.outputColorSpace = SRGBColorSpace
+	renderer.toneMapping = ACESFilmicToneMapping
+	renderer.toneMappingExposure = 0.8
 	renderer.setSize(width, height, false)
 	cssRenderer.setSize(window.innerWidth, window.innerHeight)
 	cssRenderer.domElement.classList.add('main', 'css-renderer')
@@ -66,47 +77,78 @@ export const dialogCameraQuery = ecs.with('camera', 'renderGroup', 'cameraOffset
 
 export const gameCameraQuery = cameraQuery.with('cameraOffset').where(e => e.renderGroup === RenderGroup.Game)
 const outlineQuery = ecs.with('outline')
+const blankMaterial = new MeshBasicNodeMaterial()
+
+const _right = new Vector3()
+const _up = new Vector3()
+const _tmp = new Vector3()
+
+export function snapCameraPixel(camera: OrthographicCamera): void {
+	const renderW = uniforms.resolution.value.x
+	const renderH = uniforms.resolution.value.y
+
+	const pixW = (camera.right - camera.left) / renderW
+	const pixH = (camera.top - camera.bottom) / renderH
+
+	camera.updateMatrixWorld()
+	camera.matrixWorld.extractBasis(_right, _up, _tmp)
+
+	const pos = camera.position
+	const projR = pos.dot(_right)
+	const projU = pos.dot(_up)
+
+	const snappedR = Math.round(projR / pixW) * pixW
+	const snappedU = Math.round(projU / pixH) * pixH
+
+	pos.addScaledVector(_right, snappedR - projR)
+	pos.addScaledVector(_up, snappedU - projU)
+	camera.updateMatrixWorld()
+
+	const errR = projR - snappedR // world units
+	const errU = projU - snappedU
+
+	uniforms.subPixelOffset.value.set(
+		errR / (camera.right - camera.left),
+		-errU / (camera.top - camera.bottom), // flip Y: UV vs screen space
+	)
+}
+
 export const renderGame = () => {
 	const camera = cameraQuery.first?.camera
 	if (!camera) return
+	const truePosition = camera.position.clone()
+	if (camera instanceof OrthographicCamera) {
+		snapCameraPixel(camera)
+	}
+
 	// Base scene
 	renderer.setRenderTarget(target)
 	renderer.render(scene, camera)
-	// if (outlineQuery.size > 0) {
-	// 	// outline entities
-	// 	camera.layers.set(1)
-	// 	scene.overrideMaterial = new MeshBasicMaterial()
-	// 	renderer.setRenderTarget(outlineTarget)
-	// 	renderer.render(scene, camera)
-	// 	scene.overrideMaterial = null
-	// 	camera.layers.set(0)
-	// 	// outline entities with depth
-	// 	renderer.setRenderTarget(outlineTarget2)
-	// 	outlineQuad.render(renderer)
-	// } else {
-	// 	renderer.setRenderTarget(outlineTarget2)
-	// 	renderer.clear()
-	// }
 
-	// if (app.isEnabled('mainMenu')) {
-	// 	renderer.setRenderTarget(finalTarget)
-	// } else {
-	// 	renderer.setRenderTarget(null)
-	// }
-	// sobelQuad.render(renderer)
-	// const dialogCamera = dialogCameraQuery.first
-	// const dialogRenderGroup = dialogRenderGroupQuery.first
+	if (outlineQuery.size > 0) {
+		// Outline entities
+		camera.layers.set(1)
+		scene.overrideMaterial = blankMaterial
+		renderer.setRenderTarget(outlineTarget)
+		renderer.render(scene, camera)
+		scene.overrideMaterial = null
+		camera.layers.set(0)
 
-	// if (dialogCamera && dialogRenderGroup && conversationQuery.size !== 0) {
-	// 	renderer.autoClear = false
-	// 	renderer.clearDepth()
-	// 	renderer.render(dialogRenderGroup.scene, dialogCamera.camera)
-	// 	renderer.autoClear = true
-	// 	cssRenderer.render(dialogRenderGroup.scene, dialogCamera.camera)
-	// }
+		// Render outline depth comparison to outlineTarget2
+		renderer.setRenderTarget(outlineTarget2)
+		outlineQuad.render(renderer)
+	} else {
+		renderer.setRenderTarget(outlineTarget2)
+		renderer.clear()
+	}
+
+	// Apply final sobel post processing (renders to screen)
+	renderer.setRenderTarget(null)
+	postProcessing.render()
+
 	cssRenderer.render(scene, camera)
+	camera.position.copy(truePosition)
 }
-
 const initTextures = (obj: Object3D) => {
 	obj.traverse((node) => {
 		if ('material' in node && node.material instanceof Material) {
@@ -130,7 +172,6 @@ export const initTexturesItemsAndEnemies = () => {
 }
 
 export const compileShaders = async () => {
-	const { scene, renderer } = getGameRenderGroup()
 	initTextures(scene)
 	const invisible: Object3D[] = []
 	scene.traverse((node) => {

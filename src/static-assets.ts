@@ -235,6 +235,9 @@ export type StaticAssetPath =
   'levels/clearing/pathMap.png' |
   'levels/clearing/treeMap.png' |
   'levels/clearing/waterMap.png' |
+  'levels/dungeon_room_1/data.json' |
+  'levels/dungeon_room_1/grassMap.png' |
+  'levels/dungeon_room_1/treeMap.png' |
   'levels/farm/data.json' |
   'levels/farm/grassMap.png' |
   'levels/farm/grassNoise.png' |
@@ -471,6 +474,7 @@ export type StaticAssetDirectory =
   'items/' |
   'levels/' |
   'levels/clearing/' |
+  'levels/dungeon_room_1/' |
   'levels/farm/' |
   'mainMenuAssets/' |
   'models/' |
@@ -737,6 +741,9 @@ export const assets = new Set<string>([
   'levels/clearing/pathMap.png',
   'levels/clearing/treeMap.png',
   'levels/clearing/waterMap.png',
+  'levels/dungeon_room_1/data.json',
+  'levels/dungeon_room_1/grassMap.png',
+  'levels/dungeon_room_1/treeMap.png',
   'levels/farm/data.json',
   'levels/farm/grassMap.png',
   'levels/farm/grassNoise.png',

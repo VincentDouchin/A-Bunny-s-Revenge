@@ -1,11 +1,11 @@
 // import type { With } from 'miniplex'
-// import type { BufferGeometry, Object3DEventMap } from 'three'
+// import type { BufferGeometry, Object3DEventMap } from 'three/webgpu'
 // import type { Actor, Entity } from '@/global/entity'
 // import type { DungeonResources, FarmResources } from '@/global/states'
 // import type { EntityData, ModelName } from '@/types/legecyLevel'
 // import { ActiveCollisionTypes, ColliderDesc, RigidBodyDesc } from '@dimforge/rapier3d-compat'
 // import FastNoiseLite from 'fastnoise-lite'
-// import { Color, ConeGeometry, DoubleSide, Euler, Group, Material, Mesh, MeshBasicMaterial, MeshPhongMaterial, Object3D, PlaneGeometry, PointLight, Quaternion, SphereGeometry, Vector2, Vector3 } from 'three'
+// import { Color, ConeGeometry, DoubleSide, Euler, Group, Material, Mesh, MeshBasicMaterial, MeshPhongMaterial, Object3D, PlaneGeometry, PointLight, Quaternion, SphereGeometry, Vector2, Vector3 } from 'three/webgpu'
 // import { itemsData } from '@/constants/items'
 // import { Animator } from '@/global/animator'
 // import { Interactable, MenuType } from '@/global/entity'
@@ -231,11 +231,6 @@
 // 		},
 // 	},
 // 	{
-// 		name: 'rock',
-// 		models: ['Rock_1', 'Rock_2', 'Rock_3', 'Rock_4', 'Rock_5', 'Rock_6', 'Rock_7'],
-// 		bundle: entity => ({ ...entity, obstacle: true }),
-// 	},
-// 	{
 // 		name: 'bush',
 // 		models: ['Bush_1', 'Bush_2', 'SM_Env_Bush_01', 'SM_Env_Bush_02', 'SM_Env_Bush_03', 'SM_Env_Bush_04'],
 // 		bundle(entity) {
@@ -267,29 +262,6 @@
 // 			interactable: Interactable.BulletinBoard,
 // 			onPrimary: openMenu(MenuType.Quest),
 // 		}),
-// 	},
-// 	{
-// 		name: 'lamp',
-// 		models: ['Lamp', 'Lamp2'],
-// 		bundle(entity) {
-// 			entity.withChildren = (parent) => {
-// 				entity.model.traverse((node) => {
-// 					if (node.name.includes('light')) {
-// 						const nightLight = new PointLight(0xFFFF00, 1, 100, 0.01)
-// 						node.add(nightLight)
-// 						ecs.add({ parent, nightLight })
-// 					}
-// 					if (node instanceof Mesh && node.material instanceof MeshPhongMaterial) {
-// 						node.material.side = DoubleSide
-// 						if (node.name.includes('bulb')) {
-// 							node.material.emissive = new Color(0xFFFF00)
-// 							ecs.add({ parent, emissiveMat: node.material })
-// 						}
-// 					}
-// 				})
-// 			}
-// 			return entity
-// 		},
 // 	},
 // 	{
 // 		name: 'oven',
@@ -403,51 +375,7 @@
 // 			}
 // 		},
 // 	},
-// 	{
-// 		name: 'fence',
-// 		models: ['Fence'],
-// 	},
-// 	{
-// 		name: 'plots',
-// 		models: ['gardenPlot1', 'gardenPlot2', 'gardenPlot3'],
-// 		bundle: (entity, _, resources) => {
-// 			const crop = save.crops[entity.entityId]
-// 			const noise = new FastNoiseLite(Number(entity.entityId.replace(/\D/g, '')))
-// 			noise.SetNoiseType(FastNoiseLite.NoiseType.OpenSimplex2S)
-// 			entity.model.traverse((node) => {
-// 				if (node instanceof Mesh && node.material) {
-// 					node.material = new GardenPlotMaterial().copy(node.material)
-// 					if (node.name.includes('rock')) {
-// 						const noiseValue = noise.GetNoise(...node.position.toArray())
-// 						if (noiseValue < 0) {
-// 							node.visible = false
-// 						}
-// 					} else if (crop?.watered) {
-// 						node.material.uniforms.water.value = 1
-// 					}
-// 				}
-// 			})
-// 			const newEntity: Entity = {
-// 				...entity,
-// 				plantableSpot: entity.entityId,
-// 				bodyDesc: RigidBodyDesc.fixed().lockRotations(),
-// 				colliderDesc: ColliderDesc.cuboid(3, 3, 3).setSensor(true),
-// 			}
 
-// 			if (crop && resources) {
-// 				const grow = 'previousState' in resources && resources.previousState === 'dungeon'
-// 				newEntity.withChildren = (parent) => {
-// 					const planted = ecs.add({
-// 						parent,
-// 						...cropBundle(grow, crop),
-// 					})
-// 					ecs.update(parent, { planted })
-// 				}
-// 			}
-
-// 			return newEntity
-// 		},
-// 	},
 // 	{
 // 		name: 'Flower/plants',
 // 		models: ['SM_Env_Flower_01', 'SM_Env_Flower_02', 'SM_Env_Flower_03', 'SM_Env_Flower_05', 'SM_Env_Flower_06', 'SM_Env_Flower_07', 'SM_Env_Flower_08', 'SM_Env_Grass_01', 'SM_Env_Grass_02', 'grass&vines', 'SM_Env_Flowers_01', 'SM_Env_Flowers_02', 'SM_Env_Plant_01', 'SM_Env_Plant_02', 'SM_Env_Plant_03', 'Creepy_Flower', 'Creepy_Grass', 'SM_Env_Lillypad_Large_01', 'SM_Env_Lillypad_Large_02', 'SM_Env_Lillypad_Large_03', 'SM_Env_Lillypad_Small_01', 'SM_Env_Reeds_01', 'SM_Env_Reeds_02', 'SM_Env_RicePlant_01', 'SM_Env_RicePlant_02'],

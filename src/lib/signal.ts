@@ -1,17 +1,20 @@
-import type { AppStates } from './app'
+import type { AppStates, Resources } from './app'
 import { Event } from 'eventery'
 import atom from 'solid-use/atom'
 import { app } from '@/global/states'
 
-export const stateSignal = (state: AppStates<typeof app>) => {
+export const stateSignal = <S extends AppStates<typeof app>>(state: S) => {
 	const signal = atom(app.isEnabled(state))
-	app.onEnter(state, () => {
+	const resources = atom<Resources<typeof app, S> | null>(app.getResources(state) ?? null)
+	app.onEnter(state, (r) => {
 		signal(true)
+		resources(r)
 	})
 	app.onExit(state, () => {
 		signal(false)
+		resources(null)
 	})
-	return signal
+	return [signal, resources] as const
 }
 
 export const sharedSignal = <T>(val: T) => {

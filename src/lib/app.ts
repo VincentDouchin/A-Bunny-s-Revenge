@@ -6,9 +6,7 @@ export type UpdateSystem<A extends App<any, any>, S extends AppStates<A> | void 
 	? (resources: S extends keyof Resources ? Resources[S] : void) => void
 	: never
 
-export type TransitionSystem<A extends App<any, any>, S extends AppStates<A> | void = void> = A extends App<any, infer Resources>
-	? (resources: S extends keyof Resources ? Resources[S] : void) => Promise<void> | void
-	: never
+export type TransitionSystem<A extends App<any, any>, S extends AppStates<A>> = (resources: Resources<A, S>) => Promise<void> | void
 
 export type SubscriberSystem<A extends App<any, any>, S extends AppStates<A> | void = void> = A extends App<any, infer Resources>
 	? (resources: S extends keyof Resources ? Resources[S] : void) => () => void
@@ -219,10 +217,6 @@ export class App<States extends string[], Resources extends Record<string, any> 
 			plugin(this)
 		}
 		return this
-	}
-
-	initState() {
-
 	}
 
 	async loop() {

@@ -3,6 +3,7 @@ import { dayTime, ecs, musicManager, time } from '@/global/init'
 const nightLightQuery = ecs.with('nightLight')
 const emissiveMatQuery = ecs.with('emissiveMat')
 const ambientLightQuery = ecs.with('light', 'ambientLight')
+const LIGHT_INTENSITY = 0.8
 export const dayNight = () => {
 	dayTime.tick(time.delta)
 	for (const entity of nightLightQuery) {
@@ -13,10 +14,10 @@ export const dayNight = () => {
 	}
 	for (const entity of ambientLightQuery) {
 		if (entity.ambientLight === 'night') {
-			entity.light.intensity = dayTime.intensity() * 2
+			entity.light.intensity = dayTime.intensity() * LIGHT_INTENSITY
 		}
 		if (entity.ambientLight === 'day') {
-			entity.light.intensity = (1 - dayTime.intensity()) * 2
+			entity.light.intensity = (1 - dayTime.intensity()) * LIGHT_INTENSITY
 		}
 	}
 }

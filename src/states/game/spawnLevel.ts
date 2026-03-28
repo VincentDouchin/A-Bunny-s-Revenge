@@ -1,13 +1,13 @@
 import type { AssetData, LevelEntity, LevelLoaded } from 'editor/src/types'
-import type { GLTF } from 'three-stdlib'
+import type { GLTF } from 'three/addons'
 import type { Entity } from '@/global/entity'
 import type { app } from '@/global/states'
 import type { AppStates, UpdateSystem } from '@/lib/app'
 import type { Direction } from '@/lib/directions'
 import boundingBoxes from '@assets/boundingBox.json'
 import { ActiveEvents, ColliderDesc, RigidBodyDesc, RigidBodyType } from '@dimforge/rapier3d-compat'
-import { Box2, CanvasTexture, Group, Matrix4, Mesh, Object3D, PlaneGeometry, Quaternion, Vector2, Vector3 } from 'three'
-import { SkeletonUtils } from 'three-stdlib'
+import { SkeletonUtils } from 'three/addons'
+import { CanvasTexture, Group, Mesh, Object3D, PlaneGeometry, Quaternion, Vector2, Vector3 } from 'three/webgpu'
 import { canvasToArray, InstancedModel } from '@/global/assetLoaders'
 import { assets, ecs } from '@/global/init'
 import { getBodyAndColliders } from '@/lib/colliders'
@@ -15,22 +15,24 @@ import { collisionGroups } from '@/lib/collisionGroups'
 import { cardinalDirections } from '@/lib/directions'
 import { inGameScene } from '@/lib/hierarchy'
 import { getSize } from '@/lib/models'
-import { WaterMaterial } from '@/shaders/materials'
+import { WaterMaterial } from '@/shaders/waterMaterial'
 import { getScreenBuffer, scaleCanvas } from '@/utils/buffer'
 import { getGroundMaterial } from './groundMaterial'
 import { spawnLight } from './spawnLights'
-import { setDisplacement } from './spawnTrees'
+import { composeMatrix, getGrassModel, setDisplacement } from './spawnTrees'
 
 export const getDisplacementMap = (level: LevelLoaded) => {
-	const ctx = getScreenBuffer(level.heightMap.width, level.heightMap.height)
+	const ctx = getScreenBuffer(level.sizeX, level.sizeY)
 	// ! heightMap
-	const filledHeightMap = getScreenBuffer(level.heightMap.width, level.heightMap.height)
+	const filledHeightMap = getScreenBuffer(level.sizeX, level.sizeY)
 	filledHeightMap.fillStyle = 'black'
-	filledHeightMap.fillRect(0, 0, level.heightMap.width, level.heightMap.height)
-	filledHeightMap.drawImage(level.heightMap, 0, 0)
+	filledHeightMap.fillRect(0, 0, level.sizeX, level.sizeY)
+	if (level.heightMap) {
+		filledHeightMap.drawImage(level.heightMap, 0, 0)
+	}
 	// ! combine
 	ctx.fillStyle = 'rgb(128,128,128)'
-	ctx.fillRect(0, 0, ctx.canvas.width, ctx.canvas.height)
+	ctx.fillRect(0, 0, level.sizeX, level.sizeY)
 	ctx.save()
 	ctx.globalAlpha = 0.5
 	ctx.drawImage(filledHeightMap.canvas, 0, 0)
@@ -39,10 +41,12 @@ export const getDisplacementMap = (level: LevelLoaded) => {
 	ctx.save()
 
 	ctx.filter = `invert(1)`
-	ctx.drawImage(level.waterMap, 0, 0)
+	if (level.waterMap) {
+		ctx.drawImage(level.waterMap, 0, 0)
+	}
 
 	ctx.restore()
-	ctx.translate(level.heightMap.width, 0)
+	ctx.translate(level.sizeX, 0)
 	ctx.scale(-1, 1)
 	ctx.drawImage(ctx.canvas, 0, 0)
 	return ctx.canvas
@@ -50,29 +54,31 @@ export const getDisplacementMap = (level: LevelLoaded) => {
 
 const spawnWater = (level: LevelLoaded, parent: Entity) => {
 	const waterMap = new CanvasTexture(level.waterMap)
-	// waterMap.flipY = false
-	const waterMesh = new Mesh(
-		new PlaneGeometry(level.sizeX, level.sizeY),
-		new WaterMaterial({ map: waterMap, transparent: true })
-			.setUniforms({ size: new Vector2(level.sizeX, level.sizeY) }),
-	)
+	const waterMaterial = new WaterMaterial({ map: waterMap, transparent: true }, new Vector2(level.sizeX, level.sizeY))
+	const waterMesh = new Mesh(new PlaneGeometry(level.sizeX, level.sizeY), waterMaterial)
 	ecs.add({
 		model: waterMesh,
 		position: new Vector3(0, -3, 0),
-		withTimeUniform: (time: number) => waterMesh.material.uniforms.time.value = time,
+		withTimeUniform: (time: number) => waterMaterial.time.value = time,
 		rotation: new Quaternion().setFromAxisAngle(new Vector3(1, 0, 0), -Math.PI / 2),
 		parent,
 	})
 }
 
 const spawnGround = (level: LevelLoaded, parent: Entity) => {
-	const geometry = setDisplacement(new Vector2(level.sizeX, level.sizeY), level.heightMap, level.waterMap, level.displacementScale)
+	const geometry = setDisplacement(
+		new Vector2(level.sizeX, level.sizeY),
+		level.heightMap ?? null,
+		level.waterMap ?? null,
+		level.displacementScale,
+	)
 	const material = getGroundMaterial(level.floorTexture ?? 'grass', {
 		size: { x: level.sizeX, y: level.sizeY },
 		planksTexture: assets.textures.planks,
 		groundTexture: assets.textures.Dirt4_Dark,
 		rockTexture: assets.textures.Rocks1_Light,
 		level: new CanvasTexture(level.pathMap),
+		grassNoiseTexture: new CanvasTexture(level.grassNoise),
 	})
 	const groundMesh = new Mesh(geometry, material)
 	groundMesh.rotation.x = -Math.PI / 2
@@ -110,46 +116,24 @@ const spawnGround = (level: LevelLoaded, parent: Entity) => {
 	})
 }
 
-const doorsQuery = ecs.with('doorDungeon', 'position', 'model', 'rotation')
-
 const spawnInstances = <C extends keyof typeof assets, M extends keyof typeof assets[C]>(level: LevelLoaded, parent: Entity, directions?: Direction[]) => {
-	const doors = doorsQuery.entities
-		.filter(e => directions?.includes(e.doorDungeon))
-		.map((e) => {
-			const p = e.position
-			const halfSize = e.model.scale.clone()
-				.multiplyScalar(0.5)
-				.applyQuaternion(e.rotation)
-
-			const min = new Vector2(
-				p.x - Math.abs(halfSize.x),
-				p.z - Math.abs(halfSize.z),
-			)
-			const max = new Vector2(
-				p.x + Math.abs(halfSize.x),
-				p.z + Math.abs(halfSize.z),
-			)
-
-			return new Box2(min, max)
-		})
-
-	const pos = new Vector3()
-	const rot = new Quaternion()
-	const scale = new Vector3()
 	for (const instance of Object.values(level.instances)) {
+		if (instance.entities.length === 0) {
+			continue
+		}
 		const model = assets[instance.category as C][instance.model as M] as GLTF
-		const instancedModel = new InstancedModel(model.scene)
+		const instancedModel = new InstancedModel(model.scene.clone())
 		const bodyDesc = RigidBodyDesc.fixed()
 		const size = getSize(model.scene)
 		const secondaryCollidersDesc = []
 
-		for (const matrix of instance.entities) {
-			const m4 = new Matrix4().fromArray(matrix)
-			m4.decompose(pos, rot, scale)
-			if (!doors.some(d => d.containsPoint(new Vector2(pos.x, pos.z)))) {
-				instancedModel.addInstance(m4)
-				const treeSize = size.clone().multiply(scale)
-				secondaryCollidersDesc.push(ColliderDesc.cylinder(treeSize.y, treeSize.x / 2).setTranslation(pos.x, pos.y + treeSize.y / 2, pos.z))
+		for (const instanceEntity of instance.entities) {
+			if (!instanceEntity.doorDungeon || !directions?.includes(instanceEntity.doorDungeon)) {
+				instancedModel.addInstance(composeMatrix(instanceEntity))
+				if (instanceEntity.collider) {
+					const treeSize = size.clone().multiply(instanceEntity.scale)
+					secondaryCollidersDesc.push(ColliderDesc.cylinder(treeSize.y, treeSize.x / 2).setTranslation(instanceEntity.position.x, instanceEntity.position.y + treeSize.y / 2, instanceEntity.position.z))
+				}
 			}
 		}
 		ecs.add({
@@ -158,6 +142,7 @@ const spawnInstances = <C extends keyof typeof assets, M extends keyof typeof as
 			position: new Vector3(),
 			bodyDesc,
 			secondaryCollidersDesc,
+
 		})
 	}
 }
@@ -175,12 +160,13 @@ const getModel = <C extends keyof typeof assets, M extends keyof typeof assets[C
 	}
 }
 
-const spawnEntity = (mapEntity: LevelEntity, parent: Entity) => {
+const spawnEntity = (mapEntity: LevelEntity, entityId: string, parent: Entity) => {
 	const model = getModel(mapEntity.category, mapEntity.model)
 	const boundingBox = (boundingBoxes as unknown as Record<string, Record<string, AssetData>>)?.[mapEntity.category]?.[mapEntity.model]
 	const boundingBoxScale = boundingBox?.scale
-
+	const tags = { ...(boundingBox?.tags ?? {}), ...(mapEntity?.tags ?? {}) }
 	model.scale.copy(new Vector3().fromArray(mapEntity.scale))
+	model.userData = mapEntity
 	if (boundingBoxScale) {
 		model.scale.multiply(new Vector3().fromArray(boundingBoxScale))
 	}
@@ -200,16 +186,19 @@ const spawnEntity = (mapEntity: LevelEntity, parent: Entity) => {
 		for (let y = 0; y <= mapEntity.grid.repetitionY; y++) {
 			for (let x = 0; x <= mapEntity.grid.repetitionX; x++) {
 				if (!(x === 0 && y === 0)) {
+					const gridPosition = new Vector3(
+						x * mapEntity.grid.spacingX,
+						0,
+						y * mapEntity.grid.spacingY,
+					).multiply(model.scale).applyQuaternion(rotation).add(position)
 					ecs.add({
 						model: SkeletonUtils.clone(model),
-						position: new Vector3(
-							x * mapEntity.grid.spacingX,
-							0,
-							y * mapEntity.grid.spacingY,
-						).multiply(model.scale).applyQuaternion(rotation).add(position),
+						position: gridPosition,
 						parent,
 						rotation: rotation.clone(),
+						entityId: `${entityId}:${x}-${y}`,
 						...getBody(),
+						...tags,
 					})
 				}
 			}
@@ -221,9 +210,30 @@ const spawnEntity = (mapEntity: LevelEntity, parent: Entity) => {
 		position,
 		rotation,
 		parent,
+		entityId,
 		...getBody(),
-		...(boundingBox?.tags ?? {}),
-		...(mapEntity?.tags ?? {}),
+		...tags,
+	})
+}
+const spawnGrass = (level: LevelLoaded, parent: Entity) => {
+	if (!level.grassNoise || !level.grassMap) return
+	const grassModel = getGrassModel(
+		assets.textures.grass,
+		new CanvasTexture(level.grassNoise),
+		{
+			grassMap: level.grassMap,
+			heightMap: level.heightMap,
+			waterMap: level.waterMap,
+			pathMap: level.pathMap,
+		},
+		level.displacementScale,
+		{ x: level.sizeX, y: level.sizeY },
+	)
+	if (!grassModel) return
+	ecs.add({
+		parent,
+		model: grassModel,
+		position: new Vector3(),
 	})
 }
 
@@ -232,8 +242,9 @@ const spawnLevelAsset = (level: LevelLoaded, state: AppStates<typeof app>) => {
 	spawnLight({ x: level.sizeX, y: level.sizeY }, levelEntity)
 	spawnGround(level, levelEntity)
 	spawnWater(level, levelEntity)
+	spawnGrass(level, levelEntity)
 	for (const id in level.entities) {
-		spawnEntity(level.entities[id], levelEntity)
+		spawnEntity(level.entities[id], id, levelEntity)
 	}
 	return levelEntity
 }

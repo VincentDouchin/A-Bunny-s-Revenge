@@ -1,16 +1,29 @@
+import type { Entity } from '@/global/entity'
 import { ColliderDesc, RigidBodyDesc } from '@dimforge/rapier3d-compat'
 import { createBackIn, reverseEasing } from 'popmotion'
-import { Vector3 } from 'three'
-import { SkeletonUtils } from 'three-stdlib'
+import { SkeletonUtils } from 'three/addons'
+import { Vector3 } from 'three/webgpu'
 import { chestLoot } from '@/constants/chestLoot'
 import { Animator } from '@/global/animator'
 import { assets, ecs, tweens } from '@/global/init'
 import { playSound } from '@/global/sounds'
-import { chestAppearing } from '@/particles/chestAppearing'
+import { getParticleFromPool } from '@/lib/particles'
 import { sleep } from '@/utils/sleep'
 import { dropBundle, lootPool } from './lootPool'
 
 export const lootPlayerQuery = ecs.with('player', 'lootQuantity', 'lootChance')
+
+export const chestBundle = () => {
+	const chest = SkeletonUtils.clone(assets.models.Chest.scene)
+
+	return {
+		model: chest,
+		bodyDesc: RigidBodyDesc.fixed().lockRotations(),
+		colliderDesc: ColliderDesc.cuboid(6, 4, 6).setTranslation(0, 2, 0),
+		chestAnimator: new Animator(chest, assets.models.Chest.animations),
+		chestAppearingParticles: getParticleFromPool('chestAppearingParticles', chest),
+	} as const satisfies Entity
+}
 
 export const spawnChest = (dungeonLevel: number) => {
 	const player = lootPlayerQuery.first
@@ -19,23 +32,16 @@ export const spawnChest = (dungeonLevel: number) => {
 	if (!pool) throw new Error(`lootPool not found for level ${dungeonLevel}`)
 	const items = lootPool(pool.items, player, pool.quantity)
 	if (items.length === 0) return
-	const chest = SkeletonUtils.clone(assets.models.Chest.scene)
-	chest.scale.setScalar(0)
-	chest.rotateY(Math.PI)
+
 	playSound('085_save_game_02', { playbackRate: 1.5 })
 	playSound('202092__spookymodem__chest-opening')
-	const chestEntity = {
-		model: chest,
-		bodyDesc: RigidBodyDesc.fixed().lockRotations(),
-		colliderDesc: ColliderDesc.cuboid(6, 4, 6).setTranslation(0, 2, 0),
-		chestAnimator: new Animator(chest, assets.models.Chest.animations),
-		emitter: chestAppearing(),
-	}
+	const chestEntity = chestBundle()
+	chestEntity.model.scale.setScalar(0)
 	tweens.add({
 		from: 0,
 		to: 8,
 		ease: reverseEasing(createBackIn(4)),
-		onUpdate: f => chest.scale.setScalar(f),
+		onUpdate: f => chestEntity.model.scale.setScalar(f),
 		onComplete: async () => {
 			chestEntity.chestAnimator.playClamped('chest_open')
 			await sleep(200)

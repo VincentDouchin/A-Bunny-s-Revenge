@@ -1,5 +1,5 @@
-import { CircleGeometry, MeshBasicMaterial } from 'three'
 import { ColorRange, ConeEmitter, ConstantValue, IntervalValue, ParticleSystem, RandomQuatGenerator, RenderMode } from 'three.quarks'
+import { CircleGeometry, MeshBasicMaterial } from 'three/webgpu'
 import { colorToVec4 } from './honeySplatParticles'
 
 const geo = new CircleGeometry(1, 8)

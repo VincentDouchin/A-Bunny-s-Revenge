@@ -1,6 +1,6 @@
-import { AmbientLight, DirectionalLight, Group, OrthographicCamera, Quaternion, Scene, Vector3 } from 'three'
-import { SkeletonUtils } from 'three-stdlib'
+import { SkeletonUtils } from 'three/addons'
 import { degToRad } from 'three/src/math/MathUtils.js'
+import { AmbientLight, DirectionalLight, Group, OrthographicCamera, Quaternion, Scene, Vector3 } from 'three/webgpu'
 import { Animator } from '@/global/animator'
 import { EmoteContainer, RenderGroup } from '@/global/entity'
 import { assets, ecs } from '@/global/init'

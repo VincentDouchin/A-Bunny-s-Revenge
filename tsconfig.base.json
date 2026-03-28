@@ -9,7 +9,7 @@
 		"baseUrl": "./",
 		"module": "ESNext",
 		/* Bundler mode */
-		"moduleResolution": "Node",
+		"moduleResolution": "bundler",
 		"paths": {
 			"@/*": ["./src/*"],
 			"@assets/*": ["./assets/*"]

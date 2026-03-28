@@ -1,29 +1,27 @@
 import type { With } from 'miniplex'
 import type { Entity } from '@/global/entity'
 import { circIn } from 'popmotion'
-import { Color, Mesh, Vector3 } from 'three'
+import { Color, Mesh, Vector3 } from 'three/webgpu'
 import { ecs, time, tweens } from '@/global/init'
-import { CharacterMaterial } from '@/shaders/materials'
+import { CharacterMaterial } from '@/shaders/characterMaterial'
 
 export const flash = (entity: With<Entity, 'model'>, duration: number, type: 'preparing' | 'damage' | 'poisoned' = 'preparing') => {
 	return tweens.async({
-		from: 0,
-		to: 1,
-		repeat: 1,
-		repeatType: 'reverse',
+		from: 1,
+		to: 0,
+		// repeat: 1,
+		// repeatType: 'reverse',
 		duration,
 		onUpdate: (f) => {
 			entity.model.traverse((node) => {
 				if (node instanceof Mesh && node.material instanceof CharacterMaterial) {
-					node.material.uniforms.flash.value = f
+					node.material.flash.value = f
 					if (type === 'preparing') {
-						node.material.uniforms.flashColor.value = new Vector3(1, 1, 1)
-					}
-					if (type === 'damage') {
-						node.material.uniforms.flashColor.value = new Vector3(1, 0, 0)
-					}
-					if (type === 'poisoned') {
-						node.material.uniforms.flashColor.value = new Vector3(...new Color(0x9DE64E).toArray())
+						node.material.flashColor.value = new Color(0xFFFFFF)
+					} else if (type === 'damage') {
+						node.material.flashColor.value = new Color(0xFF0000)
+					} else if (type === 'poisoned') {
+						node.material.flashColor.value = new Color(0x9DE64E)
 					}
 				}
 			})

@@ -1,12 +1,12 @@
 import type { Entity } from './entity'
 import { init, World as RapierWorld } from '@dimforge/rapier3d-compat'
 import { World as MiniplexWorld } from 'miniplex'
-import { Scene } from 'three'
+import { Scene } from 'three/webgpu'
 import { QuestManager } from '@/constants/quests'
 import { CoroutinesManager } from '@/lib/coroutines'
 import { InputManager } from '@/lib/inputs'
 import { MusicManager } from '@/lib/musicManager'
-import { getThumbnailRenderer } from '@/lib/thumbnailRenderer'
+import { Thumbnailer } from '@/lib/thumbnailRenderer'
 import { DayTime, Time } from '@/lib/time'
 import { tweensManager } from '@/lib/tweens'
 import { UIManager } from '@/lib/uiManager'
@@ -25,7 +25,7 @@ export const ecs = new MiniplexWorld<Entity>()
 export const ui = new UIManager(settings)
 export const coroutines = new CoroutinesManager()
 export const inputManager = new InputManager()
-export const thumbnailRenderer = getThumbnailRenderer()
+export const thumbnailRenderer = await Thumbnailer.create()
 export const assets = await loadAssets(thumbnailRenderer, false)
 export const dayTime = new DayTime(600_000)
 export const musicManager = new MusicManager()

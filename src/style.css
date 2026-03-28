@@ -73,6 +73,7 @@ img {
 canvas.main {
 	width: 100dvw !important;
 	height: 100dvh !important;
+	filter: contrast(1.1) saturate(1.2);
 }
 .input-icon > canvas {
 	width: 100%;

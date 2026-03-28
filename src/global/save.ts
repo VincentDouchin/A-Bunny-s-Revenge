@@ -2,12 +2,12 @@ import type { With } from 'miniplex'
 import type { AssetNames, Crop, Entity } from './entity'
 import type { crops, Item, Meals } from '@/constants/items'
 import type { QuestManager } from '@/constants/quests'
-import { trackStore } from '@solid-primitives/deep'
+import { trackDeep } from '@solid-primitives/deep'
 import { createScheduled, debounce } from '@solid-primitives/scheduled'
 import { get, set } from 'idb-keyval'
 import { createEffect } from 'solid-js'
 import { createMutable, unwrap } from 'solid-js/store'
-import { Quaternion, Vector3 } from 'three'
+import { Quaternion, Vector3 } from 'three/webgpu'
 import { context } from './context'
 
 const blankSettings = (): Settings => ({
@@ -95,7 +95,7 @@ export const useSave = async () => {
 	const scheduled = createScheduled(fn => debounce(fn, 2000))
 	createEffect(() => {
 		if (scheduled()) {
-			trackStore(save)
+			trackDeep(save)
 			set(context.save, unwrap(save))
 		}
 	})

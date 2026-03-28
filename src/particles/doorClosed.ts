@@ -1,5 +1,5 @@
-import { CircleGeometry, MeshBasicMaterial, PlaneGeometry } from 'three'
 import { Bezier, ColorOverLife, Gradient, IntervalValue, MeshSurfaceEmitter, ParticleSystem, PiecewiseBezier, SizeOverLife, SpeedOverLife, Vector3 } from 'three.quarks'
+import { CircleGeometry, MeshBasicMaterial, PlaneGeometry } from 'three/webgpu'
 
 const geo = new CircleGeometry(1, 8)
 const mat = new MeshBasicMaterial()

@@ -1,5 +1,5 @@
 import type { Accessor, JSX, JSXElement } from 'solid-js'
-import type { Vec2 } from 'three'
+import type { Vector2Like } from 'three/webgpu'
 import type { TouchController } from '@/lib/inputs'
 import Inventory from '@assets/icons/basket-shopping-solid.svg'
 import Lock from '@assets/icons/lockIndicator.svg'
@@ -7,7 +7,7 @@ import Pause from '@assets/icons/pause-solid.svg'
 import { createMemo, onCleanup, Show } from 'solid-js'
 import { css } from 'solid-styled'
 import { Transition } from 'solid-transition-group'
-import { Vector2 } from 'three'
+import { Vector2 } from 'three/webgpu'
 import { ecs, gameInputs } from '@/global/init'
 import { atom } from '@/lib/uiManager'
 import { StateUi } from './components/StateUi'
@@ -122,7 +122,7 @@ export const TouchControls = () => {
 				const centerPostion = createMemo(() => `translate(calc(-50% + ${pixelOffset().x}px),calc(-50% + ${pixelOffset().y}px) )`)
 				const container = atom<null | HTMLDivElement>(null)
 				const isJoystickPressed = atom(false)
-				const initialPos = atom<null | Vec2>(null)
+				const initialPos = atom<null | Vector2Like>(null)
 				const moveCenter = (e: TouchEvent) => {
 					isJoystickPressed(true)
 					const cont = container()
@@ -291,14 +291,18 @@ export const TouchControls = () => {
 							</div>
 						</div>
 						<StateUi state="farm">
-							<TouchButton input="inventory" controller={gameInputs.touchController!} size="7rem" angle="45deg" distance="15rem" text="Open inventory">
-								<Inventory />
-							</TouchButton>
+							{() => (
+								<TouchButton input="inventory" controller={gameInputs.touchController!} size="7rem" angle="45deg" distance="15rem" text="Open inventory">
+									<Inventory />
+								</TouchButton>
+							)}
 						</StateUi>
 						<StateUi state="dungeon">
-							<TouchButton input="lock" controller={gameInputs.touchController!} size="7rem" angle="45deg" distance="15rem" text="Lock">
-								<Lock />
-							</TouchButton>
+							{() => (
+								<TouchButton input="lock" controller={gameInputs.touchController!} size="7rem" angle="45deg" distance="15rem" text="Lock">
+									<Lock />
+								</TouchButton>
+							)}
 						</StateUi>
 						<TouchButton input="primary" controller={gameInputs.touchController!} interactable={primaryInteractable} size="10rem" />
 						<TouchButton input="secondary" controller={gameInputs.touchController!} interactable={secondaryInteractable} size="7rem" angle="100deg" distance="15rem" />

@@ -16,7 +16,7 @@ export const TopRight = () => {
 	return (
 		<div class="top-right">
 			<StateUi state="dungeon">
-				<MiniMapUi />
+				{r => <MiniMapUi resources={r} />}
 			</StateUi>
 			<Toaster />
 		</div>

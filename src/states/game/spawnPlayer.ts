@@ -3,9 +3,10 @@ import type { AssetNames, Entity, PlayerAnimations, PlayerStates } from '@/globa
 import type { app } from '@/global/states'
 import type { UpdateSystem } from '@/lib/app'
 import { ActiveEvents, Cuboid } from '@dimforge/rapier3d-compat'
-import { LinearSRGBColorSpace, Mesh, Quaternion, Vector3 } from 'three'
-import { CSS2DObject, SkeletonUtils } from 'three-stdlib'
+import { CSS2DObject, SkeletonUtils } from 'three/addons'
+import { LinearSRGBColorSpace, Mesh, Quaternion, Vector3 } from 'three/webgpu'
 import { State } from '@/behaviors/state'
+import { getGameRenderGroup } from '@/debug/debugUi'
 import { Animator } from '@/global/animator'
 import { Faction } from '@/global/entity'
 import { assets, ecs, save, world } from '@/global/init'
@@ -14,9 +15,12 @@ import { ModifierContainer } from '@/global/modifiers'
 import { capsuleColliderBundle } from '@/lib/colliders'
 import { collisionGroups } from '@/lib/collisionGroups'
 import { inMap } from '@/lib/hierarchy'
+import { getParticleFromPool, spawnVfx } from '@/lib/particles'
 import { Stat } from '@/lib/stats'
 import { Timer } from '@/lib/timer'
-import { dash } from '@/particles/dashParticles'
+import { windowEvent } from '@/lib/uiManager'
+import { enemyDefeatedParticles } from '@/particles/enemyDefeated'
+import { sleep } from '@/utils/sleep'
 import { healthBundle } from '../dungeon/health'
 import { Dash } from './dash'
 import { inventoryBundle } from './inventory'
@@ -55,13 +59,14 @@ const playerAnimationMap: Record<PlayerAnimations, Animations['BunnyClothed']> =
 
 export const PLAYER_DEFAULT_HEALTH = 10
 
-export const playerBundle = (health: number, weapon: AssetNames['weapons'] | null) => {
+export const playerBundle = async (health: number, weapon: AssetNames['weapons'] | null) => {
 	const model = SkeletonUtils.clone(assets.characters.BunnyClothed.scene)
 	model.traverse((node) => {
 		if (node instanceof Mesh && node.material.map) {
 			node.material.map.colorSpace = LinearSRGBColorSpace
 		}
 	})
+
 	model.scale.multiplyScalar(4.5)
 	const size = new Vector3(5, 6, 5)
 	const bundle = capsuleColliderBundle(model, size)
@@ -102,14 +107,25 @@ export const playerBundle = (health: number, weapon: AssetNames['weapons'] | nul
 		lastStep: { right: false, left: false },
 		...healthBundle(10, health),
 		playerState: new State<PlayerStates>('idle'),
-		dashParticles: dash(2),
 		hitTimer: new Timer(1000, true),
-		dash: new Dash(1000),
+		dashIndicator: new Dash(1000),
 		sneeze: new Timer(2000, false),
 		poisoned: new Timer(500, false),
 		sleepy: new Timer(2000, false),
 		modifiers: new ModifierContainer(),
 		...(weapon !== null ? { weapon: weaponBundle(weapon) } : {}),
+		dashParticles: getParticleFromPool('dashParticles', bundle.model),
+	})
+	spawnVfx({ ...enemyDefeatedParticles }).then((vfx) => {
+		getGameRenderGroup().scene.add(vfx.group)
+		ecs.add({ dashParticles: vfx })
+		windowEvent('keydown', async (e) => {
+			if (e.code === 'KeyH') {
+				vfx.start()
+				await sleep(1000)
+				vfx.stop()
+			}
+		})
 	})
 
 	for (const item of save.modifiers) {
@@ -119,32 +135,32 @@ export const playerBundle = (health: number, weapon: AssetNames['weapons'] | nul
 	return player
 }
 const doorQuery = ecs.with('door', 'position', 'rotation')
-export const spawnPlayer = (position: Vector3, rotation: Quaternion, weapon: AssetNames['weapons'] | null = null) => {
+export const spawnPlayer = async (position: Vector3, rotation: Quaternion, weapon: AssetNames['weapons'] | null = null) => {
 	ecs.add({
-		...playerBundle(PLAYER_DEFAULT_HEALTH, weapon),
+		...(await playerBundle(PLAYER_DEFAULT_HEALTH, weapon)),
 		position,
 		rotation: rotation.clone(),
 		targetRotation: rotation.clone(),
 	})
 }
 
-export const spawnPlayerFarm: UpdateSystem<typeof app, 'farm'> = (resources) => {
+export const spawnPlayerFarm: UpdateSystem<typeof app, 'farm'> = async (resources) => {
 	if (resources.direction === 'doorFarm') {
 		for (const door of doorQuery) {
 			if (door.door === 'farm') {
 				const position = door.position.clone().add(new Vector3(0, 0, 10).applyQuaternion(door.rotation))
-				spawnPlayer(position, door.rotation)
+				await spawnPlayer(position, door.rotation)
 			}
 		}
 	} else {
 		spawnPlayer(new Vector3(), new Quaternion())
 	}
 }
-export const spawnPlayerClearing = () => {
+export const spawnPlayerClearing = async () => {
 	for (const { door, position, rotation } of doorQuery) {
 		if (door === 'farm') {
 			const p = position.clone().add(new Vector3(0, 0, 10).applyQuaternion(rotation))
-			spawnPlayer(p, rotation)
+			await spawnPlayer(p, rotation)
 		}
 	}
 }

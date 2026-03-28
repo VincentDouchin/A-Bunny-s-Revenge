@@ -1,5 +1,5 @@
-import { DoubleSide, MeshStandardMaterial, PlaneGeometry } from 'three'
 import { Bezier, ColorRange, ConeEmitter, ConstantValue, IntervalValue, ParticleSystem, PiecewiseBezier, RenderMode, SizeOverLife } from 'three.quarks'
+import { DoubleSide, MeshStandardMaterial, PlaneGeometry } from 'three/webgpu'
 import { assets } from '@/global/init'
 import { colorToVec4 } from './honeySplatParticles'
 

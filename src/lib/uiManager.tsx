@@ -33,7 +33,7 @@ export class UIManager {
 	}
 
 	sync<T>(data: () => T) {
-		const [state, setState] = createSignal(data(), { equals: false })
+		const [state, setState] = createSignal(data())
 		const refetch = () => setState(() => data())
 		this.listeners.add(refetch)
 		onCleanup(() => this.listeners.delete(refetch))

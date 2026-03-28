@@ -1,35 +1,45 @@
-import { CircleGeometry, MeshBasicMaterial } from 'three'
-import { Bezier, ConeEmitter, ConstantValue, IntervalValue, ParticleSystem, PiecewiseBezier, RandomColor, RandomQuatGenerator, SizeOverLife, SpeedOverLife } from 'three.quarks'
-import { colorToVec4 } from './honeySplatParticles'
+import type { CustomVFXParticlesOptions } from '@/lib/particles'
 
-const mat = new MeshBasicMaterial({ depthWrite: false })
-const geo = new CircleGeometry(1, 8)
-
-export const enemyDefeated = () => {
-	const system = new ParticleSystem({
-		duration: 3,
-		looping: false,
-		prewarm: false,
-		instancingGeometry: geo,
-		startLife: new IntervalValue(5.0, 10.0),
-		startSize: new IntervalValue(2, 3),
-		startSpeed: new IntervalValue(1, 2),
-		startRotation: new RandomQuatGenerator(),
-		startColor: new RandomColor(colorToVec4(0x5E5B8C, 0.5), colorToVec4(0xCC99FF, 0.5)),
-		worldSpace: false,
-		emissionOverDistance: new ConstantValue(0),
-		emissionOverTime: new ConstantValue(10),
-		emissionBursts: [],
-		shape: new ConeEmitter({ radius: 4 }),
-		material: mat,
-		renderOrder: 1,
-		behaviors: [
-			new SizeOverLife(new PiecewiseBezier([[new Bezier(1, 0.75, 0.50, 0.25), 0]])),
-			new SpeedOverLife(new PiecewiseBezier([[new Bezier(3, 1, 0.5, 0), 0]])),
+export const enemyDefeatedParticles: CustomVFXParticlesOptions = {
+	world: true,
+	maxParticles: 200,
+	position: [0, 3, 0],
+	autoStart: false,
+	size: [3, 5],
+	fadeSize: [1, 0.4],
+	colorStart: ['#a855f7', '#8b5cf6'],
+	speed: [8.94, 15],
+	lifetime: [1, 1],
+	velocityCurve: {
+		points: [
+			{
+				pos: [0, 1],
+				handleOut: [0, 0],
+			},
+			{
+				pos: [0.6492852783203125, 1],
+				handleIn: [-0.1, 0],
+				handleOut: [0.1, 0],
+			},
+			{
+				pos: [1, 0],
+				handleIn: [0.03428527832031247, 0.9628573608398437],
+			},
 		],
-	})
-	system.emitter.name = 'defeated'
-	system.emitter.rotateX(-Math.PI / 2)
-
-	return system
+	},
+	direction: [[-1, 1], [1, 1], [-1, 1]],
+	rotation: [[0, 0], [0, 0], [0, 0]],
+	rotationSpeed: [[0, 0], [0, 0], [0, 0]],
+	appearance: 'circular',
+	lighting: 'basic',
+	emitterShape: 2,
+	emitterRadius: [1, 5],
+	emitterAngle: 0,
+	emitterDirection: [0, 0, 1],
+	emitterSurfaceOnly: true,
+	turbulence: {
+		intensity: 5,
+		frequency: 10,
+		speed: 5,
+	},
 }

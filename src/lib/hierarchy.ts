@@ -1,15 +1,12 @@
 import type { With } from 'miniplex'
-import type { Object3D } from 'three'
+import type { Object3D } from 'three/webgpu'
 import type { ComponentsOfType, Entity } from '../global/entity'
-
 import type { Plugin } from './app'
-
 import type { app } from '@/global/states'
-
-import { Group } from 'three'
+import { Event } from 'eventery'
+import { Group } from 'three/webgpu'
 import { RenderGroup } from '../global/entity'
 import { ecs } from '../global/init'
-
 import { set } from './app'
 
 const gameSceneQuery = ecs.with('scene', 'renderGroup').where(e => e.renderGroup === RenderGroup.Game)
@@ -83,9 +80,15 @@ const addChildrenCallBack = () => {
 		ecs.removeComponent(entity, 'withChildren')
 	}
 }
+export const addOnDestroy = (e: Entity) => {
+	if (!e.onDestroy) {
+		ecs.addComponent(e, 'onDestroy', new Event())
+	}
+	return e.onDestroy!
+}
 const onDestroyQuery = ecs.with('onDestroy')
 const onDestroyCallBack = () => onDestroyQuery.onEntityRemoved.subscribe((e) => {
-	e.onDestroy()
+	e.onDestroy.emit()
 })
 
 export const hierarchyPlugin: Plugin<typeof app> = (app) => {

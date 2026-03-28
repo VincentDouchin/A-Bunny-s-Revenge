@@ -1,9 +1,10 @@
 import type { Animations } from '@assets/animations'
 import type { Tags } from '@assets/tagsList'
 import type { Collider, ColliderDesc, KinematicCharacterController, RigidBody, RigidBodyDesc, Shape } from '@dimforge/rapier3d-compat'
+import type { Event } from 'eventery'
 import type { Query, With } from 'miniplex'
-import type { BufferGeometry, Camera, Group, Light, Mesh, MeshPhongMaterial, Object3D, Object3DEventMap, Quaternion, Scene, Sprite, Vector3, WebGLRenderer } from 'three'
-import type { BatchedRenderer, ParticleEmitter, ParticleSystem } from 'three.quarks'
+import type { BatchedRenderer, ParticleSystem } from 'three.quarks'
+import type { BufferGeometry, Camera, Group, Light, Mesh, MeshPhongMaterial, Object3D, Quaternion, Scene, Vector3, WebGPURenderer } from 'three/webgpu'
 import type { RequiredKeysOf } from 'type-fest'
 import type { Animator } from './animator'
 import type { assets } from './init'
@@ -18,14 +19,14 @@ import type { Recipe } from '@/constants/recipes'
 import type { Conversation } from '@/conversation/setupConversation'
 import type { AppStates } from '@/lib/app'
 import type { Direction } from '@/lib/directions'
-import type { MeshLine, MeshLineMaterial } from '@/lib/MeshLine'
+import type { Particles, Vfx } from '@/lib/particles'
 import type { Stat } from '@/lib/stats'
 import type { Timer } from '@/lib/timer'
 import type { WeaponArc } from '@/shaders/weaponArc'
 import type { Room } from '@/states/dungeon/generateDungeon'
 import type { Dash } from '@/states/game/dash'
 import type { MainMenuBook } from '@/states/mainMenu/book'
-import { CSS2DObject } from 'three-stdlib'
+import { CSS2DObject } from 'three/addons'
 
 export type AssetNames = { [K in keyof typeof assets]: keyof typeof assets[K] }
 
@@ -132,6 +133,7 @@ export class EmoteContainer extends CSS2DObject {
 
 export type Entity = Partial<AttackStyle>
 	& Partial<Tags>
+	& Partial<Record<Particles, Vfx>>
 	& {
 		playerAnimator?: Animator<PlayerAnimations>
 		// ! BehaviorTree
@@ -157,7 +159,6 @@ export type Entity = Partial<AttackStyle>
 		// ! Camera
 		cameraTarget?: true
 		cameraShake?: Vector3
-		initialCameraTarget?: true
 		followCamera?: true
 		fixedCamera?: true
 		mainCamera?: true
@@ -167,7 +168,7 @@ export type Entity = Partial<AttackStyle>
 		lockX?: boolean
 		// ! ThreeJS
 		scene?: Scene
-		renderer?: WebGLRenderer
+		renderer?: WebGPURenderer
 		batchRenderer?: BatchedRenderer
 		camera?: Camera
 		light?: Light
@@ -178,7 +179,7 @@ export type Entity = Partial<AttackStyle>
 		parent?: Entity
 		children?: Set<Entity>
 		withChildren?: (parent: Entity) => void
-		onDestroy?: () => void
+		onDestroy?: Event
 		// ! Physics
 		bodyDesc?: RigidBodyDesc
 		body?: RigidBody
@@ -205,9 +206,8 @@ export type Entity = Partial<AttackStyle>
 		// ! Farming
 		sensor?: { shape: Shape, distance: number }
 		crop?: Crop
-		plantableSpot?: string
 		planted?: With<Entity, 'crop'>
-		wateringCan?: With<Entity, 'model' | 'waterAmount'>
+		wateringCan?: With<Entity, 'model' | 'waterAmount' | 'wateringCanParticles'>
 		waterAmount?: number
 		// ! Game
 		map?: keyof typeof assets['levels']
@@ -219,8 +219,6 @@ export type Entity = Partial<AttackStyle>
 		onSecondary?: (entity: Entity, player: Entity) => void
 		// ! Camp
 		boundary?: Direction
-		doorType?: 'vine' | 'fog' | 'marker'
-		doorLevel?: number
 		doorLocked?: true
 		unlocked?: true
 		tree?: true
@@ -288,13 +286,15 @@ export type Entity = Partial<AttackStyle>
 		sleepingPowder?: true
 		modifiers?: ModifierContainer
 		// ! Particles
-		emitter?: ParticleEmitter<Object3DEventMap>
+		// emitter?: ParticleEmitter<Object3DEventMap>
 		autoDestroy?: true
-		enemyDefeated?: ParticleSystem
+		// wateringCanEmitter?: Vfx
+		// dashParticles?: Vfx
+		// enemyDefeated?: ParticleSystem
 		enemyImpact?: ParticleSystem
-		dashParticles?: ParticleSystem
 		smokeParticles?: ParticleSystem
 		fireParticles?: ParticleSystem
+		particlePool?: true
 		// ! Stats
 		strength?: Stat
 		critChance?: Stat
@@ -329,8 +329,7 @@ export type Entity = Partial<AttackStyle>
 		shake?: number
 		shaken?: number
 		berries?: Set<Mesh<BufferGeometry, MeshPhongMaterial>>
-		dash?: Dash
-		dashDisplay?: Sprite
+		dashIndicator?: Dash
 		// ! Stun
 		stun?: Group
 		hitTimer?: Timer<true>
@@ -350,7 +349,6 @@ export type Entity = Partial<AttackStyle>
 		magicHaricot?: Entity
 		// ! Fishing
 		fishingPole?: With<Entity, 'model'>
-		fishingLine?: Mesh<MeshLine, MeshLineMaterial>
 		fishingSpot?: true
 		bobber?: With<Entity, 'position'>
 		fish?: Timer<false>

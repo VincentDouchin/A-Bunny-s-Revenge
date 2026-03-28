@@ -1,5 +1,5 @@
 import { easeInOut } from 'popmotion'
-import { PerspectiveCamera, Raycaster, Vector2, Vector3 } from 'three'
+import { PerspectiveCamera, Raycaster, Vector2, Vector3 } from 'three/webgpu'
 import { moveCamera, updateCameraZoom } from '@/global/camera'
 import { params } from '@/global/context'
 import { RenderGroup } from '@/global/entity'
@@ -86,10 +86,10 @@ export const transitionToGame = once(async () => {
 					mainMenuCam.camera.updateProjectionMatrix()
 					const newSize = finalResolution.clone().add(new Vector2(window.innerWidth, window.innerHeight).sub(finalResolution).multiplyScalar(1 - f))
 					updateRenderSize(newSize, f === 1)
-					book.windowShader.uniforms.parchmentMix.value = 0.3 * f + 0.7
-					book.windowShader.uniforms.windowSize.value = f * 0.5
-					book.windowShader.uniforms.resolution.value = newSize
-					book.windowShader.uniforms.kSize.value = 1 + 4 * (1 - f)
+					book.windowShader.parchmentMix.value = 0.3 * f + 0.7
+					book.windowShader.windowSize.value = f * 0.5
+					book.windowShader.resolution.value = newSize
+					book.windowShader.kSize.value = 1 + 4 * (1 - f)
 					gameCam.cameraOffset.lerpVectors(initialOffset, worldPosition, f)
 					updateCameraZoom(params.zoom - 5 * (1 - f))
 				}

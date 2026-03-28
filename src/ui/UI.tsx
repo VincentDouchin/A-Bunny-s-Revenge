@@ -32,46 +32,58 @@ export const UI = () => {
 		<GameProvider>
 			<DebugUi />
 			<StateUi state="debug" disabled>
-				<StateUi state="farm">
-					<RecipesUi />
-					<OvenMiniGameUi />
-					<CauldronMiniGameUi />
-					<InventoryUi />
-					<SeedUi />
-					<QuestUi />
-					<HealthUi />
-				</StateUi>
-				<StateUi state="dungeon">
-					<SneezeUi />
-					<HealthUi />
-					<LockIndicator />
-					<EnemyHealthBarUi />
-				</StateUi>
-				<StateUi state="clearing">
-					<HealthUi />
-				</StateUi>
-				<StateUi state="mainMenu" disabled>
-					<KeyboardControls />
-				</StateUi>
-				<StateUi state="mainMenu">
-					<MainMenuUi />
-				</StateUi>
-				<StateUi state="testDialog">
-					<ConversationUi />
-				</StateUi>
-				<ConversationUi />
-				<Errors />
-				<PauseUi />
-				<FullscreenUi />
-				<LoseUi />
-				<DialogUi />
-				<FishingMiniGameUi />
-				<TouchControls />
-				<InteractionUi />
-				<TopRight />
-				<OverlayUi />
-				<KeyItem />
-				<TutorialUi />
+				{() => (
+					<>
+						<StateUi state="farm">
+							{() => (
+								<>
+									<RecipesUi />
+									<OvenMiniGameUi />
+									<CauldronMiniGameUi />
+									<InventoryUi />
+									<SeedUi />
+									<QuestUi />
+									<HealthUi />
+								</>
+							)}
+						</StateUi>
+						<StateUi state="dungeon">
+							{() => (
+								<>
+									<SneezeUi />
+									<HealthUi />
+									<LockIndicator />
+									<EnemyHealthBarUi />
+								</>
+							)}
+						</StateUi>
+						<StateUi state="clearing">
+							{() => <HealthUi />}
+						</StateUi>
+						<StateUi state="mainMenu" disabled>
+							{() => <KeyboardControls />}
+						</StateUi>
+						<StateUi state="mainMenu">
+							{() => <MainMenuUi />}
+						</StateUi>
+						<StateUi state="testDialog">
+							{() => <ConversationUi />}
+						</StateUi>
+						<ConversationUi />
+						<Errors />
+						<PauseUi />
+						<FullscreenUi />
+						<LoseUi />
+						<DialogUi />
+						<FishingMiniGameUi />
+						<TouchControls />
+						<InteractionUi />
+						<TopRight />
+						<OverlayUi />
+						<KeyItem />
+						<TutorialUi />
+					</>
+				)}
 			</StateUi>
 		</GameProvider>
 	)

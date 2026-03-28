@@ -2,6 +2,7 @@ import type { World } from 'miniplex'
 import type { AnimationOptions, Driver } from 'popmotion'
 import type { Time } from './time'
 import type { Entity } from '@/global/entity'
+import { Event } from 'eventery'
 import { animate } from 'popmotion'
 
 type TweenOptions<V> = AnimationOptions<V> & { parent?: Entity, destroy?: Entity }
@@ -28,11 +29,11 @@ export const tweensManager = (time: Time, ecs: World) => {
 			}
 			const tween = animate<V>({ ...option, driver })
 			if (option.parent) {
+				const onDestroy = new Event()
+				onDestroy.subscribe(() => tween.stop())
 				ecs.add({
 					parent: option.parent,
-					onDestroy() {
-						tween.stop()
-					},
+					onDestroy,
 				})
 			}
 		}

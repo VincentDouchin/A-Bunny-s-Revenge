@@ -1,6 +1,6 @@
 import { createMap } from 'solid-proxies'
 import atom from 'solid-use/atom'
-import { Vector2, Vector3 } from 'three'
+import { Vector2, Vector3 } from 'three/webgpu'
 import { keys, metaKeys, mouse } from '@/constants/keys'
 
 export const GAMEPAD_AXIS = {

@@ -1,10 +1,10 @@
-import type { ShaderMaterial } from 'three'
+import type { Material } from 'three/webgpu'
 import { easeInOut } from 'popmotion'
-import { CanvasTexture, Mesh, MeshBasicMaterial, Object3D } from 'three'
+import { CanvasTexture, Mesh, MeshBasicMaterial, Object3D } from 'three/webgpu'
 import { assets, save, tweens } from '@/global/init'
 import { playSound } from '@/global/sounds'
 import { app } from '@/global/states'
-import { drawnHouseShader } from '@/shaders/drawnHouseShader'
+import { DrawnHouseMaterial } from '@/shaders/drawnHouseMaterial'
 import { cloneCanvas, imgToCanvas } from '@/utils/buffer'
 
 type MenuOption = 'Continue' | 'New Game' | 'Settings' | 'Credits'
@@ -24,7 +24,7 @@ const selectOption = (fn: (offset: number) => void) => new Promise<void>((resolv
 })
 
 export class MainMenuBook extends Object3D {
-	withTimeUniforms = new Array<ShaderMaterial>()
+	withTimeUniforms = new Array<Material>()
 	buttons = new Map<MenuOption, Mesh>()
 	disabled = new Array<MenuOption>()
 	selected: MenuOption
@@ -37,7 +37,7 @@ export class MainMenuBook extends Object3D {
 	disabledTextColor = '#a597aa'
 	font = 'EnchantedLand'
 	transition = false
-	windowShader = drawnHouseShader()
+	windowShader = new DrawnHouseMaterial()
 	confirmed = false
 	constructor() {
 		super()
@@ -113,7 +113,7 @@ export class MainMenuBook extends Object3D {
 				to: -1,
 				ease: [easeInOut],
 				duration: 1000,
-				onUpdate: f => this.windowShader.uniforms.windowSize.value = f,
+				onUpdate: f => this.windowShader.windowSize.value = f,
 			}, {
 				from: -1,
 				to: 0,
@@ -129,7 +129,7 @@ export class MainMenuBook extends Object3D {
 						app.enable('intro')
 					}
 				},
-				onUpdate: f => this.windowShader.uniforms.windowSize.value = f,
+				onUpdate: f => this.windowShader.windowSize.value = f,
 			})
 			this.transition = false
 		}

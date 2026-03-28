@@ -1,28 +1,32 @@
-import type { CanvasTexture, Texture, Vec2 } from 'three'
-import { MeshToonMaterial, Vector2 } from 'three'
+import type { CanvasTexture, Texture, Vector2Like } from 'three/webgpu'
+import { Vector2 } from 'three/webgpu'
+import { GroundMaterial } from '@/shaders/groundMaterial'
+import { ToonMaterial } from '@/shaders/toonMaterial'
 
-import { GroundMaterial } from '@/shaders/materials'
-
-const getWoodFlooring = ({ x, y }: Vec2, map: Texture) => {
+const getWoodFlooring = ({ x, y }: Vector2Like, map: Texture) => {
 	map.repeat.set(x / 16, y / 16)
-	return new MeshToonMaterial({ map })
+	return new ToonMaterial({ map })
 }
 
 export const getGroundMaterial = (type: 'grass' | 'planks', args: {
-	size: Vec2
+	size: Vector2Like
 	planksTexture: Texture
 	groundTexture: Texture
 	rockTexture: Texture
 	level: CanvasTexture
+	grassNoiseTexture: CanvasTexture | null
 }) => {
 	switch (type) {
 		case 'grass':{
-			return new GroundMaterial().setUniforms({
+			if (!args.grassNoiseTexture) {
+				throw new Error('no grass noise texture')
+			}
+			return new GroundMaterial({
+				levelSize: new Vector2(args.size.x, args.size.y),
+				groundTexture: args.groundTexture,
+				rockTexture: args.rockTexture,
 				level: args.level,
-				rock: null,
-				size: new Vector2(args.size.x, args.size.y),
-				ground: args.groundTexture,
-				rock_texture: args.rockTexture,
+				grassNoiseTexture: args.grassNoiseTexture,
 			})
 		}
 		case 'planks':{

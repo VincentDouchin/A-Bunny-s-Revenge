@@ -3,8 +3,8 @@ import type { crops } from '@/constants/items'
 import type { Crop, Entity } from '@/global/entity'
 import { RigidBodyType } from '@dimforge/rapier3d-compat'
 import { createBackIn, reverseEasing } from 'popmotion'
-import { Vector3 } from 'three'
 import { randFloat } from 'three/src/math/MathUtils.js'
+import { Vector3 } from 'three/webgpu'
 import { itemsData } from '@/constants/items'
 import { Interactable, MenuType } from '@/global/entity'
 import { harvestCropEvent } from '@/global/events'
@@ -18,13 +18,7 @@ import { itemBundle } from '../game/items'
 import { updateSpotWatered } from './wateringCan'
 
 const playerQuery = ecs.with('movementForce', 'inventory', 'inventoryId', 'inventorySize', 'playerAnimator')
-const plantedSpotQuery = ecs.with('plantableSpot', 'planted', 'group', 'model', 'entityId')
-
-export const updateCropsSave = () => {
-	save.crops = plantedSpotQuery.entities.reduce((acc, v) => {
-		return { ...acc, [v.plantableSpot]: v.planted.crop }
-	}, {})
-}
+const plantedSpotQuery = ecs.with('gardenPlot', 'planted', 'group', 'model', 'entityId')
 
 export const maxStage = (name: crops) => (assets.crops[name].length ?? 1) - 1
 export const cropBundle = (grow: boolean, crop: NonNullable<Entity['crop']>) => {
@@ -71,7 +65,7 @@ export const cropBundle = (grow: boolean, crop: NonNullable<Entity['crop']>) => 
 	return bundle
 }
 
-const plantableSpotsQuery = ecs.with('plantableSpot').without('planted')
+const plantableSpotsQuery = ecs.with('gardenPlot', 'entityId').without('planted')
 
 export const plantSeed = () => {
 	for (const player of playerQuery) {
@@ -83,12 +77,14 @@ export const plantSeed = () => {
 					return 'seed' in itemData && itemData.seed === save.selectedSeed && item.quantity > 0
 				})
 				if (spot.interactionContainer && save.selectedSeed && seed) {
-					if (save.crops[spot.plantableSpot] === undefined) {
+					if (save.crops[spot.entityId] === undefined) {
+						const crop = { name: save.selectedSeed, stage: 0, watered: false, luck: 0, planted: dayTime.dayLight }
 						const planted = ecs.add({
-							...cropBundle(false, { name: save.selectedSeed, stage: 0, watered: false, luck: 0, planted: dayTime.dayLight }),
+							...cropBundle(false, crop),
 							parent: spot,
 							position: new Vector3(),
 						})
+						save.crops[spot.entityId] = crop
 						removeItem(player, { name: seed.name, quantity: 1 })
 						ecs.addComponent(spot, 'planted', planted)
 					}
@@ -106,11 +102,10 @@ export const initPlantableSpotsInteractions = () => {
 export const interactablePlantableSpot = [
 	() => plantedSpotQuery.onEntityAdded.subscribe((entity) => {
 		ecs.removeComponent(entity, 'interactable')
-		updateCropsSave()
+		ecs.reindex(entity)
 	}),
 	() => plantableSpotsQuery.onEntityAdded.subscribe((entity) => {
 		ecs.update(entity, { interactable: Interactable.Plant })
-		updateCropsSave()
 	}),
 ]
 
@@ -181,6 +176,5 @@ export const growCrops = () => {
 				}
 			}
 		}
-		updateCropsSave()
 	}
 }

@@ -1,4 +1,4 @@
-import { BufferAttribute, BufferGeometry, Color, LineSegments, Matrix4, Ray, ShaderChunk, ShaderMaterial, Sphere, UniformsLib, Vector2, Vector3 } from 'three'
+import { BufferAttribute, BufferGeometry, Color, LineSegments, Matrix4, Ray, ShaderChunk, ShaderMaterial, Sphere, UniformsLib, Vector2, Vector3 } from 'three/webgpu'
 
 export class MeshLine extends BufferGeometry {
 	constructor() {
@@ -662,25 +662,25 @@ export class MeshLineMaterial extends ShaderMaterial {
 	}
 }
 
-MeshLineMaterial.prototype.copy = function (source) {
-	ShaderMaterial.prototype.copy.call(this, source)
+// MeshLineMaterial.prototype.copy = function (source) {
+// 	ShaderMaterial.prototype.copy.call(this, source)
 
-	this.lineWidth = source.lineWidth
-	this.map = source.map
-	this.useMap = source.useMap
-	this.alphaMap = source.alphaMap
-	this.useAlphaMap = source.useAlphaMap
-	this.color.copy(source.color)
-	this.opacity = source.opacity
-	this.resolution.copy(source.resolution)
-	this.sizeAttenuation = source.sizeAttenuation
-	this.dashArray.copy(source.dashArray)
-	this.dashOffset.copy(source.dashOffset)
-	this.dashRatio.copy(source.dashRatio)
-	this.useDash = source.useDash
-	this.visibility = source.visibility
-	this.alphaTest = source.alphaTest
-	this.repeat.copy(source.repeat)
+// 	this.lineWidth = source.lineWidth
+// 	this.map = source.map
+// 	this.useMap = source.useMap
+// 	this.alphaMap = source.alphaMap
+// 	this.useAlphaMap = source.useAlphaMap
+// 	this.color.copy(source.color)
+// 	this.opacity = source.opacity
+// 	this.resolution.copy(source.resolution)
+// 	this.sizeAttenuation = source.sizeAttenuation
+// 	this.dashArray.copy(source.dashArray)
+// 	this.dashOffset.copy(source.dashOffset)
+// 	this.dashRatio.copy(source.dashRatio)
+// 	this.useDash = source.useDash
+// 	this.visibility = source.visibility
+// 	this.alphaTest = source.alphaTest
+// 	this.repeat.copy(source.repeat)
 
-	return this
-}
+// 	return this
+// }

@@ -112,7 +112,7 @@ export class Quest2<A extends App<any, Record<string, never>>, S extends Readonl
 		return previousStep?.key
 	}
 
-	onEnter(fn: TransitionSystem<A>) {
+	onEnter(fn: TransitionSystem<A, any>) {
 		this.#app.onEnter(this.state, fn)
 	}
 
@@ -120,7 +120,7 @@ export class Quest2<A extends App<any, Record<string, never>>, S extends Readonl
 		this.#app.onUpdate(this.state, fn)
 	}
 
-	onExit(fn: TransitionSystem<A>) {
+	onExit(fn: TransitionSystem<A, any>) {
 		this.#app.onExit(this.state, fn)
 	}
 
@@ -139,7 +139,7 @@ export class Quest2<A extends App<any, Record<string, never>>, S extends Readonl
 				this.#subscribers[step].add(unsub)
 			}
 		}
-		this.#app.onEnter(this.state, system as TransitionSystem<A>)
+		this.#app.onEnter(this.state, system as TransitionSystem<A, any>)
 	}
 
 	marker(step: S[number]['key']) {

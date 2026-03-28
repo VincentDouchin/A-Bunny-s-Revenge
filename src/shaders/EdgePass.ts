@@ -1,110 +1,158 @@
-import type { Texture, WebGLRenderTarget } from 'three'
-import { Color, Uniform, Vector2 } from 'three'
-import kuwahara from '@/shaders/glsl/lib/kuwahara.glsl?raw'
-import sobel from '@/shaders/glsl/lib/sobel.glsl?raw'
+import type { Color, DepthTexture, Node, RenderTarget, Texture, TextureNode, UniformNode, WebGPURenderer } from 'three/webgpu'
 
-export const outlineShader = (target: WebGLRenderTarget, outlineTarget: WebGLRenderTarget) => ({
-	name: 'outlineShader',
-	uniforms: {
-		tDepth: new Uniform(target.depthTexture),
-		outlineDepth: new Uniform(outlineTarget.depthTexture),
-		outlineText: new Uniform(outlineTarget.texture),
+import { clamp, color, dot, float, Fn, If, mix, sqrt, step, texture, uniform, uv, vec2, vec3, vec4 } from 'three/tsl'
+import { RenderPipeline, Vector2 } from 'three/webgpu'
 
-	},
-	vertexShader: /* glsl */`
-	varying vec2 vUv;
-	void main() {
-		vUv = uv;
-		gl_Position = projectionMatrix * modelViewMatrix * vec4( position, 1.0 );
-	}`,
-	fragmentShader: /* glsl */`
-	uniform sampler2D tDepth;
-	uniform sampler2D outlineDepth;
-	uniform sampler2D outlineText;
-	varying vec2 vUv;
-	void main(){
-		float textD = texture2D(tDepth,vUv).x; 
-		float outlineD = texture2D(outlineDepth,vUv).x; 
-		if(outlineD > textD){
-			discard;
+// Helper function - Sobel edge detection
+const sobelFn = Fn<[TextureNode, Node<'vec2'>, Node<'vec2'>], Node<'float'>>(([depthTexture, uvCoord, resolution]) => {
+	const texel = vec2(1.0).div(resolution)
+
+	// 2x2 kernel definition
+	// Gx = [1, 0; 0, -1]
+	// Gy = [0, 1; -1, 0]
+
+	// Fetch the 2x2 neighbourhood
+	const tx0y0 = depthTexture.sample(uvCoord).r
+	const tx1y0 = depthTexture.sample(uvCoord.add(texel.mul(vec2(1, 0)))).r
+	const tx0y1 = depthTexture.sample(uvCoord.add(texel.mul(vec2(0, 1)))).r
+	const tx1y1 = depthTexture.sample(uvCoord.add(texel.mul(vec2(1, 1)))).r
+
+	// Gradient value in x direction: Gx[0][0] * tx0y0 + Gx[1][0] * tx1y0 + Gx[0][1] * tx0y1 + Gx[1][1] * tx1y1
+	// = 1 * tx0y0 + 0 * tx1y0 + 0 * tx0y1 + (-1) * tx1y1
+	const valueGx = tx0y0.sub(tx1y1)
+
+	// Gradient value in y direction: Gy[0][0] * tx0y0 + Gy[1][0] * tx1y0 + Gy[0][1] * tx0y1 + Gy[1][1] * tx1y1
+	// = 0 * tx0y0 + 1 * tx1y0 + (-1) * tx0y1 + 0 * tx1y1
+	const valueGy = tx1y0.sub(tx0y1)
+
+	// Magnitude of the total gradient
+	const G = sqrt(valueGx.mul(valueGx).add(valueGy.mul(valueGy)))
+
+	return G
+})
+
+export const createQuantizeNode = (
+	inputNode: Node<'vec4'>,
+	palette: string[], // hex strings, e.g. ['#0f380f', '#306230']
+) => {
+	// Parse once at node-build time — these become shader constants
+	const paletteColors = palette.map(hex => color(hex))
+
+	return Fn(() => {
+		const inputColor = inputNode.rgb
+		const bestColor = vec3(0.0).toVar()
+		const bestDist = float(1e9).toVar()
+
+		// Fully unrolled — no uniform lookup, no loop overhead
+		for (const palColor of paletteColors) {
+			const diff = inputColor.sub(palColor.rgb)
+			const dist = dot(diff.mul(diff), vec3(0.299, 0.587, 0.114))
+
+			If(dist.lessThan(bestDist), () => {
+				bestDist.assign(dist)
+				bestColor.assign(vec3(palColor))
+			})
 		}
-		gl_FragColor = texture2D(outlineText,vUv);
+
+		return vec4(bestColor, inputNode.a)
+	})()
+}
+
+// Outline shader node (depth comparison)
+const createOutlineNode = (
+	targetDepthTexture: DepthTexture,
+	outlineDepthTexture: DepthTexture,
+	outlineTextureSource: Texture,
+) => {
+	const targetDepth = texture(targetDepthTexture)
+	const outlineDepth = texture(outlineDepthTexture)
+	const outlineTexture = texture(outlineTextureSource)
+
+	return Fn(() => {
+		const uvCoord = uv()
+
+		const textD = targetDepth.sample(uvCoord).r
+		const outlineD = outlineDepth.sample(uvCoord).r
+
+		// Discard if outline is behind scene
+		outlineD.greaterThan(textD).discard()
+
+		return outlineTexture.sample(uvCoord)
+	})()
+}
+
+// Adjustable parameters (only these need to be uniforms)
+export interface SobelUniforms {
+	edgeColor: UniformNode<'color', Color>
+	resolution: UniformNode<'vec2', Vector2>
+	subPixelOffset: UniformNode<'vec2', Vector2>
+}
+
+// Sobel shader node (edge detection + color grading)
+const createSobelNode = (
+	diffuseTexture: Texture,
+	depthTexture: DepthTexture,
+	outlineTexture: Texture,
+
+	uniforms: SobelUniforms,
+) => {
+	const tDiffuse = texture(diffuseTexture)
+	const tDepth = texture(depthTexture)
+	const outline = texture(outlineTexture)
+
+	return Fn(() => {
+		const pixelSize = vec2(1.0).div(uniforms.resolution)
+		const uvCoord = uv()
+			.add(uniforms.subPixelOffset)
+			.div(pixelSize)
+			.floor()
+			.mul(pixelSize)
+
+		// Edge detection
+		const G = sobelFn(tDepth, uvCoord, uniforms.resolution)
+		const Gfactor = clamp(step(G.mul(5.0), 0.01).add(0.8), 0.0, 1.0)
+
+		// Get base color
+		const texColor = tDiffuse.sample(uvCoord).rgb
+
+		// Mix edge color with texture
+		const finalColor = vec4(mix(uniforms.edgeColor, texColor, Gfactor), 1.0)
+
+		// Outline overlay
+		const outlineEdge = sobelFn(outline, uvCoord, uniforms.resolution)
+		finalColor.assign(outlineEdge.greaterThan(0.0).select(vec4(1.0), finalColor))
+
+		return finalColor
+	})()
+}
+
+// Setup post processing
+export const setupPostProcessing = (
+	renderer: WebGPURenderer,
+	width: number,
+	height: number,
+	target: RenderTarget,
+	outlineTarget: RenderTarget,
+	outlineTarget2: RenderTarget,
+) => {
+	const postProcessing = new RenderPipeline(renderer)
+
+	// Only parameters that change need to be uniforms
+	const uniforms: SobelUniforms = {
+		edgeColor: uniform(color(0x4D3533)),
+		resolution: uniform(new Vector2(width, height)),
+		subPixelOffset: uniform(new Vector2(0, 0)),
 	}
-	`,
-})
 
-export const getSobelShader = (x: number, y: number, diffuseTarget: WebGLRenderTarget, outlineTarget: WebGLRenderTarget) => ({
+	// Create the outline processing node
+	const outlineNode = createOutlineNode(target.depthTexture as DepthTexture, outlineTarget.depthTexture as DepthTexture, outlineTarget.texture)
 
-	name: 'SobelOperatorShader',
+	// Create the final sobel node
+	const sobelNode = createSobelNode(target.texture, target.depthTexture as DepthTexture, outlineTarget2.texture, uniforms)
 
-	uniforms: {
+	// const quantizeNode = createQuantizeNode(sobelNode, palette)
 
-		tDiffuse: new Uniform<Texture>(diffuseTarget.texture),
-		tDepth: new Uniform<Texture>(diffuseTarget.depthTexture),
-		outline: new Uniform<Texture>(outlineTarget.texture),
-		resolution: new Uniform(new Vector2(x, y)),
-		edgeColor: new Uniform(new Color(0x4D3533)),
-		brightness: new Uniform(0),
-		contrast: new Uniform(1),
-		saturation: new Uniform(1),
-		powRGB: new Uniform(new Color(0xFFFFFF)),
-		mulRGB: new Uniform(new Color(0xFFFFFF)),
-		addRGB: new Uniform(new Color(0x00000)),
-		cameraNear: { value: 0.1 },
-		cameraFar: { value: 100 },
-	},
+	postProcessing.outputNode = sobelNode
 
-	vertexShader: /* glsl */`
-	varying vec2 vUv;
-	void main() {
-		vUv = uv;
-		gl_Position = projectionMatrix * modelViewMatrix * vec4( position, 1.0 );
-	}`,
-	fragmentShader: /* glsl */`
-		precision highp sampler2D;
-		uniform sampler2D tDepth;
-		uniform sampler2D tDiffuse;
-		uniform sampler2D outline;
-		uniform vec3 edgeColor;
-		uniform vec2 resolution;
-		varying vec2 vUv;
-		uniform float brightness;
-		uniform float contrast;
-		uniform float saturation;
-		uniform vec3 powRGB;
-		uniform vec3 mulRGB;
-		uniform vec3 addRGB;
-		uniform float cameraNear;
-		uniform float cameraFar;
-
-		${kuwahara}
-		${sobel}
-		#include <packing>
-	
-		void main() {
-			vec2 pixel_size = vec2(1.0,1.0) / resolution;
-			vec2 uv = floor(vUv / pixel_size) * pixel_size;
-			float G = sobel2(tDepth,uv,resolution);	
-			float Gfactor = clamp(step(G * 5.0,0.01)+0.8,0.0,1.0);
-			vec3 tex_color = texture2D(tDiffuse,uv).rgb;
-			float dark = step(0.4,(tex_color.r+tex_color.g+tex_color.b) /3.);
-			vec4 color = vec4(mix(edgeColor,tex_color,Gfactor),1.); 
-			
-			// Adjust brightness
-			color.rgb += brightness;
-
-			// Adjust contrast
-			color.rgb = (color.rgb - 0.5) * contrast + 0.5;
-
-			// Adjust saturation
-			float grey = dot(color.rgb, vec3(0.299, 0.587, 0.114));
-			
-			color.rgb = mix(vec3(grey), color.rgb, saturation);
-			color.rgb = mulRGB * pow(color.rgb + addRGB, powRGB );
-			color = sobel2(outline,uv,resolution)>0. 
-				? vec4(1.)
-				: color;
-			gl_FragColor = color;
-		}`,
-
-})
+	return { postProcessing, uniforms, outlineNode }
+}

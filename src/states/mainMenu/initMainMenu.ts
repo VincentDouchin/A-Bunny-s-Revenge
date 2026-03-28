@@ -1,25 +1,25 @@
-import { Group, Mesh, PerspectiveCamera, PlaneGeometry, Scene, Vector2, Vector3 } from 'three'
+import { Group, Mesh, PerspectiveCamera, PlaneGeometry, Scene, Vector3 } from 'three/webgpu'
 import { updateCameraZoom } from '@/global/camera'
 import { params } from '@/global/context'
 import { RenderGroup } from '@/global/entity'
 import { coroutines, ecs } from '@/global/init'
 import { menuInputMap } from '@/global/inputMaps'
 import { renderer } from '@/global/rendering'
-import { mainMenuBackgound } from '@/shaders/mainMenuBackground'
+// import { mainMenuBackgound } from '@/shaders/mainMenuBackground'
 import { MainMenuBook } from './book'
 
 const ZOOM_OUT = -5
 
 const addBackground = (scene: Scene) => {
-	const background = new Mesh(new PlaneGeometry(20, 10), mainMenuBackgound)
+	const background = new Mesh(new PlaneGeometry(20, 10))
 	const coroutine = coroutines.add(function* () {
-		const now = Date.now()
-		while (true) {
-			mainMenuBackgound.uniforms.time.value = now - Date.now()
-			mainMenuBackgound.uniforms.resolution.value = new Vector2(window.innerWidth, window.innerHeight)
-			mainMenuBackgound.needsUpdate = true
-			yield
-		}
+		// const now = Date.now()
+		// while (true) {
+		// 	mainMenuBackgound.uniforms.time.value = now - Date.now()
+		// 	mainMenuBackgound.uniforms.resolution.value = new Vector2(window.innerWidth, window.innerHeight)
+		// 	mainMenuBackgound.needsUpdate = true
+		// 	yield
+		// }
 	})
 	background.rotateX(-Math.PI / 2)
 	background.addEventListener('removed', coroutine)

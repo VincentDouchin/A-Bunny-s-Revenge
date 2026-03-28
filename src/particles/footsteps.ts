@@ -1,4 +1,4 @@
-import { CircleGeometry, Mesh, MeshBasicMaterial, Quaternion, Vector3 } from 'three'
+import { CircleGeometry, Mesh, MeshBasicMaterial, Quaternion, Vector3 } from 'three/webgpu'
 import { ecs, tweens } from '@/global/init'
 import { playStep } from '@/global/sounds'
 import { inMap } from '@/lib/hierarchy'

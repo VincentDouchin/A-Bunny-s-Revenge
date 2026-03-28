@@ -1,5 +1,5 @@
-import { DoubleSide, MeshStandardMaterial, PlaneGeometry } from 'three'
 import { Bezier, ConstantValue, IntervalValue, ParticleSystem, PiecewiseBezier, RandomQuatGenerator, RenderMode, SizeOverLife, SphereEmitter } from 'three.quarks'
+import { DoubleSide, MeshStandardMaterial, PlaneGeometry } from 'three/webgpu'
 import { assets } from '@/global/init'
 
 const geo = new PlaneGeometry(10, 10)

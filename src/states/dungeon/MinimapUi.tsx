@@ -1,4 +1,6 @@
 import type { Room } from './generateDungeon'
+import type { app } from '@/global/states'
+import type { Resources } from '@/lib/app'
 import Door from '@assets/icons/door-closed-solid.svg'
 import Pawn from '@assets/icons/pawn.svg'
 import Pouch from '@assets/icons/pouch.svg'
@@ -9,9 +11,7 @@ import { For, Match, onMount, Show, Switch } from 'solid-js'
 import { css } from 'solid-styled'
 import { Transition } from 'solid-transition-group'
 import atom from 'solid-use/atom'
-import { ecs } from '@/global/init'
 import { Direction } from '@/lib/directions'
-import { useQuery } from '@/ui/store'
 import { entries } from '@/utils/mapFunctions'
 import { RoomType } from './generateDungeon'
 
@@ -143,8 +143,7 @@ const RoomUi = ({ room, direction, previous, current }: { room: Room, direction?
 	)
 }
 
-const dungeonQuery = useQuery(ecs.with('dungeon'))
-export const MiniMapUi = () => {
+export const MiniMapUi = (props: { resources: Resources<typeof app, 'dungeon'> }) => {
 	css/* css */`
 	.minimap{
 		margin: 1rem;
@@ -158,23 +157,18 @@ export const MiniMapUi = () => {
 		position:relative;
 	}
 	`
+
+	const visible = atom(false)
+	onMount(() => setTimeout(() => visible(true), 100))
 	return (
-		<For each={dungeonQuery()}>
-			{(dungeon) => {
-				const visible = atom(false)
-				onMount(() => setTimeout(() => visible(true), 100))
-				return (
 
-					<Transition name="traverse-down">
-						<Show when={visible()}>
-							<div class="minimap">
-								<RoomUi room={dungeon.dungeon} current={true} />
-							</div>
-						</Show>
-					</Transition>
+		<Transition name="traverse-down">
+			<Show when={visible()}>
+				<div class="minimap">
+					<RoomUi room={props.resources.dungeon} current={true} />
+				</div>
+			</Show>
+		</Transition>
 
-				)
-			}}
-		</For>
 	)
 }

@@ -12,7 +12,7 @@ import { InputIcon } from '@/ui/InputIcon'
 import { useGame, useQuery } from '@/ui/store'
 import { ItemDisplay } from './InventoryUi'
 
-const seedQuery = useQuery(ecs.with('menuType', 'interactionContainer', 'plantableSpot'))
+const seedQuery = useQuery(ecs.with('menuType', 'interactionContainer', 'gardenPlot'))
 export const SeedUi = () => {
 	const context = useGame()
 

@@ -1,19 +1,20 @@
 import type { Accessor, JSX, JSXElement, Setter } from 'solid-js'
+import type { Object3D } from 'three'
 import type { Item } from '@/constants/items'
 import type { Recipe } from '@/constants/recipes'
 import type { AssetNames } from '@/global/entity'
+import type { Thumbnailer } from '@/lib/thumbnailRenderer'
 import type { MenuItemComponent } from '@/ui/components/Menu'
 import Check from '@assets/icons/circle-check-solid.svg'
 import Cross from '@assets/icons/circle-xmark-solid.svg'
-import { autoUpdate } from '@floating-ui/dom'
-import { useFloating } from 'solid-floating-ui'
-import { createEffect, createMemo, createSignal, For, onCleanup, onMount, Show } from 'solid-js'
+import Tooltip from '@corvu/tooltip'
+import { createEffect, createMemo, createSignal, For, onCleanup, Show } from 'solid-js'
 import { css } from 'solid-styled'
 import atom from 'solid-use/atom'
 import { isMeal, itemsData } from '@/constants/items'
 import { recipes } from '@/constants/recipes'
 import { MenuType } from '@/global/entity'
-import { assets, ecs, menuInputs, save, thumbnailRenderer, ui } from '@/global/init'
+import { assets, ecs, menuInputs, save, thumbnailRenderer, time, ui } from '@/global/init'
 import { modifiers } from '@/global/modifiers'
 import { Menu } from '@/ui/components/Menu'
 import { Modal } from '@/ui/components/Modal'
@@ -72,12 +73,37 @@ export const IconDisplay = (props: { children: () => JSXElement, completed?: boo
 	<ItemBox completed={props.completed}>
 		<div
 			style={{ width: '80%', display: 'grid' }}
-
 		>
 			<props.children />
 		</div>
 	</ItemBox>
 )
+
+const Spin = ({ obj, children, renderer, spin }: { obj: Object3D, children: JSXElement, renderer: Thumbnailer, spin: Accessor<boolean> }) => {
+	css/* css */`
+		.item {
+			width: 80%;
+		}
+		.item > canvas {
+			width: 100% !important;
+			height: 100% !important;
+		}
+	`
+	return (
+		<div class="item">
+			{/* <Show when={spin()}>
+				{(_) => {
+					const spinner = renderer.spin({ obj, children })
+					ui.updateSync(() => spinner.update(time.getDelta()))
+					return spinner
+				}}
+			</Show> */}
+			<Show when={!spin()}>
+				{children}
+			</Show>
+		</div>
+	)
+}
 
 export const ItemDisplay = (props: {
 	item: Item | null
@@ -87,23 +113,17 @@ export const ItemDisplay = (props: {
 	completed?: boolean
 	hidden?: boolean
 }) => {
-	const showName = atom(false)
-	onMount(() => {
-		setTimeout(() => showName(true), 500)
-	})
 	const isDisabled = createMemo(() => props.disabled ?? false)
 	const disabledStyles = createMemo(() => {
 		return isDisabled()
 			? { opacity: '50%' }
-			: {}
+			: { }
 	})
-	const [delay, setDelay] = createSignal(false)
 
 	const isSelected = createMemo(() => Boolean(props.selected && props.selected()))
 	createEffect(() => {
 		if (isSelected()) {
 			props.onSelected && props.onSelected()
-			setTimeout(() => setDelay(true), 100)
 		}
 	})
 	const quantity = ui.sync(() => props.item?.quantity)
@@ -123,13 +143,11 @@ export const ItemDisplay = (props: {
 		z-index:1;
 		padding: 0.5rem;
 	}
-	.item {
-		width: 80%;
+	.item{
+		width: 100%;
+		height: 100%;
 	}
-	.item > canvas {
-		width: 100% !important;
-		height: 100% !important;
-	}
+
 	@keyframes item-selected {
 		from {
 			transform: scale(1.2);
@@ -148,7 +166,6 @@ export const ItemDisplay = (props: {
 		filter: contrast(0%) brightness(0%);
 	}
 	`
-
 	return (
 		<ItemBox
 			selected={isSelected()}
@@ -157,51 +174,21 @@ export const ItemDisplay = (props: {
 			<Show when={Boolean(quantity()) && props.item?.name && itemsData[props.item.name]}>
 				{item => (
 					<>
-						<Show when={delay() && isSelected()}>
-							{(_) => {
-								const clear = thumbnailRenderer.spin(assets.items[props.item!.name].model)
-
-								onCleanup(() => {
-									setDelay(false)
-									clear()
-								})
-								const [reference, setReference] = createSignal<HTMLElement | null>(null)
-								const [floating, setFloating] = createSignal<HTMLElement | null>(null)
-								const position = useFloating(reference, floating, {
-									whileElementsMounted: autoUpdate,
-									placement: 'bottom',
-									strategy: 'fixed',
-								})
-								return (
-									<>
-										<div ref={setReference} class="item" classList={{ hidden: props.hidden }}>{thumbnailRenderer.element}</div>
-										<Show when={!props.hidden && showName()}>
-											<div
-												ref={setFloating}
-												style={{
-													position: position.strategy,
-													top: `${position.y}px`,
-													left: `${position.x}px`,
-												}}
-												class="name"
-											>
-												<OutlineText>{item().name}</OutlineText>
-											</div>
-										</Show>
-									</>
-								)
-							}}
-
-						</Show>
-						<Show when={!(isSelected() && delay())}>
-							<img
-								src={assets.items[props.item!.name].img}
-								style={disabledStyles()}
-								class="item"
-								classList={{ 'item-selected': isSelected(), 'hidden': props.hidden }}
-							>
-							</img>
-						</Show>
+						<Tooltip open={isSelected()} placement="bottom" strategy="fixed" openDelay={200}>
+							<Tooltip.Anchor style={{ 'width': '100%', 'height': '100%', 'display': 'grid', 'place-items': 'center' }}>
+								<Spin obj={assets.items[props.item!.name].model} renderer={thumbnailRenderer} spin={isSelected}>
+									<img
+										src={assets.items[props.item!.name].img}
+										style={disabledStyles()}
+										class="item"
+										classList={{ 'item-selected': isSelected(), 'hidden': props.hidden }}
+									/>
+								</Spin>
+							</Tooltip.Anchor>
+							<Tooltip.Content style={{ 'z-index': 1 }}>
+								<OutlineText textSize="1.5rem">{item().name}</OutlineText>
+							</Tooltip.Content>
+						</Tooltip>
 						<Show when={!props.hidden}>
 							<div class="quantity">
 								<OutlineText>{quantity()}</OutlineText>

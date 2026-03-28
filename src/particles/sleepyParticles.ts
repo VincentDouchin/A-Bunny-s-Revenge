@@ -1,5 +1,5 @@
-import { MeshBasicMaterial, PlaneGeometry } from 'three'
 import { Bezier, ConeEmitter, ConstantValue, IntervalValue, ParticleSystem, PiecewiseBezier, RandomQuatGenerator, SizeOverLife } from 'three.quarks'
+import { MeshBasicMaterial, PlaneGeometry } from 'three/webgpu'
 import { assets } from '@/global/init'
 
 const geo = new PlaneGeometry(3, 3)

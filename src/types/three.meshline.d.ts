@@ -1,5 +1,5 @@
 declare module '@/lib/MeshLine' {
-	import type { BufferGeometry, Line, Material } from 'three'
+	import type { BufferGeometry, Line, Material } from 'three/webgpu'
 
 	export class MeshLine extends BufferGeometry {
 		constructor()

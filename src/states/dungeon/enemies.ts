@@ -5,8 +5,8 @@ import type { app } from '@/global/states'
 import type { SubscriberSystem, UpdateSystem } from '@/lib/app'
 import { ActiveEvents, Cuboid, RigidBodyType } from '@dimforge/rapier3d-compat'
 import { DEFAULT_QUERY_FILTER, findRandomPoint } from 'navcat'
-import { BoxGeometry, Mesh, Quaternion, Vector3 } from 'three'
 import { generateUUID } from 'three/src/math/MathUtils.js'
+import { BoxGeometry, Mesh, Quaternion, Vector3 } from 'three/webgpu'
 import { State } from '@/behaviors/state'
 import { Animator } from '@/global/animator'
 import { Faction } from '@/global/entity'
@@ -14,10 +14,9 @@ import { assets, ecs, save, time } from '@/global/init'
 import { modelColliderBundle } from '@/lib/colliders'
 import { collisionGroups } from '@/lib/collisionGroups'
 import { inMap } from '@/lib/hierarchy'
+import { getParticleFromPool } from '@/lib/particles'
 import { Stat } from '@/lib/stats'
 import { Timer } from '@/lib/timer'
-import { dash } from '@/particles/dashParticles'
-import { enemyDefeated } from '@/particles/enemyDefeated'
 import { impact } from '@/particles/impact'
 import { opt } from '@/utils/mapFunctions'
 import { collectItems } from '../game/items'
@@ -74,7 +73,6 @@ export const enemyBundle = <M extends keyof Animations & AssetNames['characters'
 		strength: new Stat(1 + level),
 		inactive: new Timer(2000, false),
 		faction: Faction.Enemy,
-		enemyDefeated: enemyDefeated(),
 		enemyImpact: impact(),
 		enemyName: enemy.name,
 		movementForce: new Vector3(),
@@ -85,7 +83,16 @@ export const enemyBundle = <M extends keyof Animations & AssetNames['characters'
 		drops: enemy.drops,
 		...enemy.attackStyle,
 		...enemy.components,
-		...opt('charging' in enemy.attackStyle, { dashParticles: dash(8) }),
+		withChildren(parent) {
+			if ('charging' in enemy.attackStyle) {
+				ecs.update(parent, {
+					dashParticles: getParticleFromPool('dashParticles', bundle.model),
+				})
+			}
+			ecs.update(parent, {
+				enemyDefeatedParticles: getParticleFromPool('enemyDefeatedParticles', bundle.model),
+			})
+		},
 		...opt(enemy.boss, { boss: true, sensor: { distance: bundle.size.z / 2 + 2, shape: new Cuboid(5, 5, 5) } }),
 	} as const satisfies Entity
 

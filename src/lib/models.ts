@@ -1,14 +1,6 @@
-import type { Object3D, Object3DEventMap } from 'three'
+import type { Object3D, Object3DEventMap } from 'three/webgpu'
 import type { Constructor } from 'type-fest'
-import { Box3, Mesh, Vector3 } from 'three'
-
-export const cloneMaterials = (model: Object3D<Object3DEventMap>) => {
-	model.traverse((node) => {
-		if (node instanceof Mesh) {
-			node.material = node.material.clone()
-		}
-	})
-}
+import { Box3, Vector3 } from 'three/webgpu'
 
 export const getSize = (model: Object3D<Object3DEventMap>) => {
 	const size = new Vector3()
