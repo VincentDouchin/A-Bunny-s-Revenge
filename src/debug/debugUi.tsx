@@ -1,16 +1,18 @@
 import type { Boss } from '@/constants/enemies'
 import type { Conversation } from '@/conversation/setupConversation'
+import type { QueryEntity } from '@/global/entity'
 import { parse } from '@ltd/j-toml'
 import { createSignal, For, onCleanup, onMount, Show } from 'solid-js'
 import atom from 'solid-use/atom'
-import { Color, Mesh, OrthographicCamera, PerspectiveCamera, Quaternion, Vector3 } from 'three'
+import { MapControls } from 'three/addons'
+import { OrthographicCamera, PerspectiveCamera, Quaternion, Vector3 } from 'three/webgpu'
 import { bosses } from '@/constants/enemies'
 import { recipes } from '@/constants/recipes'
 import { validateConversation } from '@/conversation/setupConversation'
 import { params } from '@/global/context'
 import { RenderGroup } from '@/global/entity'
 import { assets, dayTime, ecs, save, scene, ui, world } from '@/global/init'
-import { cameraQuery, getTargetSize, height, updateRenderSize, width } from '@/global/rendering'
+import { cameraQuery, gameCameraQuery, getTargetSize, height, updateRenderSize, width } from '@/global/rendering'
 import { app } from '@/global/states'
 import { RapierDebugRenderer } from '@/lib/debugRenderer'
 import { encounters } from '@/states/dungeon/encounters'
@@ -21,7 +23,6 @@ import { useLocalStorage } from '@/utils/useLocalStorage'
 import { debugOptions } from './debugState'
 import { SaveEditor } from './saveEditor'
 import { SoundUi } from './SoundUi'
-import { ColorCorrection, ToonEditor } from './toonEditor'
 
 export const [selectedBoss, setSelectedBoss] = useLocalStorage<{ boss: Boss }>('selectedBoss', { boss: 'Armabee_Evolved' })
 const rendererQuery = ecs.with('renderer', 'scene', 'renderGroup').where(e => e.renderGroup === RenderGroup.Game)
@@ -37,7 +38,6 @@ export const getGameRenderGroup = () => {
 	}
 }
 
-const groundQuery = ecs.with('ground', 'model')
 export const updatePixelation = (e: Event) => {
 	const target = e.target as HTMLInputElement
 	const val = target.valueAsNumber
@@ -79,21 +79,7 @@ export const DebugUi = () => {
 			setShowUi(!showUi())
 		}
 	}
-	const [groundColors, setGroundColor, resetGroundColors] = useLocalStorage('groundColor', {
-		topColor: '#5AB552',
-		pathColor: '#856342',
-		pathColor2: '#A26D3F',
-		grassColor: '#26854C',
-	})
 
-	const updateGroundColor = (key: string, value: string) => {
-		setGroundColor(d => ({ ...d, [key]: value }))
-		for (const ground of groundQuery) {
-			if (ground.model instanceof Mesh && ground.model.material) {
-				(ground.model.material as any).uniforms[key].value = new Color(value)
-			}
-		}
-	}
 	onMount(() => {
 		document.addEventListener('keydown', showUiListener)
 	})
@@ -165,10 +151,37 @@ export const DebugUi = () => {
 		debugRenderer && debugRenderer.update()
 	})
 
-	const showToonEditor = atom(false)
-	const showGroundEditor = atom(false)
-	const showColorCorrection = atom(false)
+	const debug = () => {
+		save
+		// eslint-disable-next-line no-debugger
+		debugger
+	}
 
+	let gameCamera: QueryEntity<typeof gameCameraQuery> | null = null
+	let controls: MapControls | null = null
+	let controlsUpdate: number | null = null
+	const unlockCamera = () => {
+		if (gameCamera && controls && controlsUpdate !== null) {
+			controls.dispose()
+			controls = null
+			cancelAnimationFrame(controlsUpdate)
+			ecs.addComponent(gameCamera, 'mainCamera', true)
+			gameCamera = null
+			controlsUpdate = null
+		} else {
+			const camera = gameCameraQuery.first
+			if (camera) {
+				ecs.removeComponent(camera, 'mainCamera')
+				gameCamera = camera
+				controls = new MapControls(camera.camera, document.body)
+				function update() {
+					controls?.update()
+					requestAnimationFrame(update)
+				}
+				controlsUpdate = requestAnimationFrame(update)
+			}
+		}
+	}
 	const conversationError = atom<string | null>(null)
 	const displayCharacterList = atom(false)
 	const testConversation = (e: Event) => {
@@ -217,10 +230,16 @@ export const DebugUi = () => {
 							})}
 						</div>
 					</Show>
+					<div>debug</div>
+					<button onClick={debug}>debug</button>
 					<div>Perspective</div>
 					<div>
 						<button onClick={changeCameraNormal}>Normal</button>
 						<button onClick={changeCameraOrtho}>Ortho</button>
+					</div>
+					Camera
+					<div>
+						<button onClick={unlockCamera}>Unlock camera</button>
 					</div>
 					Render height
 					<input
@@ -289,42 +308,6 @@ export const DebugUi = () => {
 				</div>
 
 				<div style={{ position: 'fixed', right: 0, top: 0 }}>
-					<div style={{ 'background': 'darkgray', 'margin': '1rem', 'padding': '1rem', 'color': 'black', 'font-size': '20px' }}>
-						<button onClick={() => showGroundEditor(!showGroundEditor())}>Edit ground colors</button>
-						<Show when={showGroundEditor()}>
-							<For each={entries(groundColors)}>
-								{([name, color]) => {
-									return (
-										<div>
-											{name}
-											<input type="color" value={color} onChange={e => updateGroundColor(name, e.target.value)}></input>
-											{color}
-										</div>
-									)
-								}}
-							</For>
-							<div>
-								<button onClick={() => {
-									resetGroundColors()
-									window.location.reload() }}
-								>
-									reset ground colors
-								</button>
-							</div>
-						</Show>
-					</div>
-					<div style={{ 'background': 'darkgray', 'margin': '1rem', 'padding': '1rem', 'color': 'black', 'font-size': '20px' }}>
-						<button onClick={() => showToonEditor(!showToonEditor())}>Edit toon shader</button>
-						<Show when={showToonEditor()}>
-							<ToonEditor />
-						</Show>
-					</div>
-					<div style={{ 'background': 'darkgray', 'margin': '1rem', 'padding': '1rem', 'color': 'black', 'font-size': '20px' }}>
-						<button onClick={() => showColorCorrection(!showColorCorrection())}>Edit color correction</button>
-						<Show when={showColorCorrection()}>
-							<ColorCorrection />
-						</Show>
-					</div>
 					<div style={{ 'background': 'darkgray', 'margin': '1rem', 'padding': '1rem', 'color': 'black', 'font-size': '20px' }}>
 						<div>Debug NPC encounters</div>
 						<For each={objectKeys(encounters)}>
