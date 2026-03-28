@@ -1,0 +1,756 @@
+{
+    "sizeX": 400,
+    "sizeY": 400,
+    "displacementScale": 43,
+    "floorTexture": "grass",
+    "entities": {
+        "0c0f9db2-2e52-42cf-941f-55d77e1b11a7": {
+            "category": "models",
+            "model": "Shroom4",
+            "scale": [1, 1, 1],
+            "position": [98.60979183020723, 1.0658141036401503e-14, -50.02397502557225],
+            "grounded": true,
+            "rotation": [0, 0, 0, 1]
+        },
+        "11201456-dd49-4d5e-8e78-044fa8e3d3c5": {
+            "category": "models",
+            "model": "stringLights",
+            "scale": [1, 1, 1],
+            "position": [-101.82520850258294, 7.105427357601002e-15, -27.650070457227127],
+            "grounded": true,
+            "rotation": [0, 0.18246563589925613, 0, 0.983212231268448]
+        },
+        "12214cde-ca58-4bc1-a8d5-3a8b86f99989": {
+            "category": "models",
+            "model": "well",
+            "scale": [43.06196475198253, 43.06196475198253, 43.06196475198253],
+            "position": [26.906440896982573, -3.552713678800501e-15, 7.241788432889507],
+            "grounded": true,
+            "rotation": [0, 0, 0, 1],
+            "tags": {}
+        },
+        "15fce4df-9651-4b1d-b01c-e4fa18a225eb": {
+            "category": "vegetation",
+            "model": "SM_Env_Flower_05",
+            "scale": [1, 1, 1],
+            "position": [64.58549535331123, 1.7763568394002505e-14, -45.12720938967879],
+            "grounded": true,
+            "rotation": [0, 0, 0, 1]
+        },
+        "16001950-033b-423b-9a94-bd4636bce366": {
+            "category": "models",
+            "model": "bench",
+            "scale": [4.892213288321943, 4.892213288321943, 4.892213288321943],
+            "position": [85.29855739585877, 7.105427357601002e-15, -24.34069072604385],
+            "grounded": true,
+            "rotation": [-8.659051021078204e-17, -0.714735880552701, -8.659051021078204e-17, -0.6993944674148882],
+            "tags": {}
+        },
+        "199b0e23-5331-40ef-87a7-c10f733b6359": {
+            "category": "models",
+            "model": "box_stack",
+            "scale": [3.277169966864828, 3.277169966864828, 3.277169966864828],
+            "position": [-74.90873818718161, 0, -5.8322211252137945],
+            "grounded": true,
+            "rotation": [0, 0, 0, 1]
+        },
+        "20d87a9c-5b10-47df-931e-804933fd960f": {
+            "category": "models",
+            "model": "Fence",
+            "scale": [1, 1, 1],
+            "position": [-44.05202721345612, -2.1316282072803006e-14, 96.70484546004509],
+            "grounded": true,
+            "rotation": [0, 0, 0, 1],
+            "grid": {"repetitionX": 7, "repetitionY": 0, "spacingX": 1.5, "spacingY": 0}
+        },
+        "20e5056a-78ae-4631-a71c-230f475e9a1d": {
+            "category": "vegetation",
+            "model": "SM_Env_Flower_03",
+            "scale": [1, 1, 1],
+            "position": [-36.63876037590365, 7.105427357601002e-15, 5.9681929086711465],
+            "grounded": true,
+            "rotation": [0, 0, 0, 1]
+        },
+        "2204f4d1-2ba8-4053-9b4e-d78ce5463dad": {
+            "category": "vegetation",
+            "model": "SM_Env_Flower_03",
+            "scale": [1, 1, 1],
+            "position": [4.259272759123316, 1.0658141036401503e-14, -51.37547767358198],
+            "grounded": true,
+            "rotation": [0, -0.5272578128434415, 0, 0.849705359989891]
+        },
+        "22be7783-554a-4f2e-8bf0-108b3267333c": {
+            "category": "models",
+            "model": "SM_Env_RicePlant_02",
+            "scale": [1.6087554242868634, 1.6087554242868634, 1.6087554242868634],
+            "position": [-8.510743263801263, 1.0658141036401503e-14, -46.27999857361268],
+            "grounded": true,
+            "rotation": [0, 0, 0, 1]
+        },
+        "26dee45d-6ec6-4e56-8fe4-cb2c2d0568ed": {
+            "category": "models",
+            "model": "SM_Env_Lillypad_Small_01",
+            "scale": [9.714036549956669, 9.714036549956669, 9.714036549956669],
+            "position": [-111.10976195910257, -2.000000000000017, 75.90176818901794],
+            "grounded": true,
+            "rotation": [0, 0, 0, 1]
+        },
+        "26eb702c-eab2-4222-82c7-328fdec072c2": {
+            "category": "models",
+            "model": "Lamp",
+            "scale": [1, 1, 1],
+            "position": [46.89862787980538, 1.0658141036401503e-14, -43.536881092403284],
+            "grounded": true,
+            "rotation": [0, 0, 0, 1],
+            "tags": {}
+        },
+        "29f1d648-699d-4120-b785-afd3e1778a03": {
+            "category": "vegetation",
+            "model": "SM_Env_Bush_02",
+            "scale": [1, 1, 1],
+            "position": [63.01641709775467, 1.4210854715202004e-14, -56.40334942447681],
+            "grounded": true,
+            "rotation": [0, 0, 0, 1]
+        },
+        "2ac03e22-c233-4a0f-8dd0-846ac56f1c86": {
+            "category": "models",
+            "model": "Rock_6",
+            "scale": [16.711177189354267, 16.711177189354267, 16.711177189354267],
+            "position": [-131.7782168274275, 3.552713678800501e-15, -23.727747355544043],
+            "grounded": true,
+            "rotation": [0, 0, 0, 1]
+        },
+        "2be5215d-6c51-4a0b-99ce-a35a155c425b": {
+            "category": "vegetation",
+            "model": "SM_Env_Flower_05",
+            "scale": [1, 1, 1],
+            "position": [-85.21458652134982, -1.7763568394002505e-14, 77.44759030345776],
+            "grounded": true,
+            "rotation": [0, 0.6593431002519504, 0, 0.7518421883282066]
+        },
+        "2c403c1f-66f6-4702-92aa-eb1489a963d3": {
+            "category": "vegetation",
+            "model": "Bush_2",
+            "scale": [10.667892596491921, 10.667892596491921, 10.667892596491921],
+            "position": [42.53348534602587, 3.552713678800501e-15, -13.606720877912391],
+            "grounded": true,
+            "rotation": [0, 0, 0, 1],
+            "tags": {}
+        },
+        "304121ca-b86d-4978-8049-f832cc64792c": {
+            "category": "models",
+            "model": "Shroom3",
+            "scale": [1, 1, 1],
+            "position": [-58.50699257172562, 0, -2.4019047342648414],
+            "grounded": true,
+            "rotation": [0, 0, 0, 1]
+        },
+        "30741167-064c-4d54-9f6e-e11c2f4e0e5f": {
+            "category": "vegetation",
+            "model": "SM_Env_Bush_02",
+            "scale": [1, 1, 1],
+            "position": [5.136137221514861, 1.4210854715202004e-14, -60.808014638329304],
+            "grounded": true,
+            "rotation": [0, 0, 0, 1],
+            "tags": {}
+        },
+        "3199db0f-87c2-4594-97a6-7b97515105ab": {
+            "category": "models",
+            "model": "stringLights",
+            "scale": [1, 1, 1],
+            "position": [-72.48640122409799, 3.552713678800501e-15, -15.183356132312229],
+            "grounded": true,
+            "rotation": [0, -0.32732910308579816, 0, 0.9449103969546779]
+        },
+        "336ab4a5-3010-4ace-8871-ca8f26b76dd2": {
+            "category": "models",
+            "model": "Shroom2",
+            "scale": [1, 1, 1],
+            "position": [-31.167285875910423, 24.6708765999887, -28.23413348090071],
+            "grounded": false,
+            "rotation": [0, 0, 0, 1]
+        },
+        "3582819a-d534-40c3-bd37-85eaf1c12821": {
+            "category": "gardenPlots",
+            "model": "gardenPlot1",
+            "scale": [1, 1, 1],
+            "position": [7.686367279452313, -1.0658141036401503e-14, 51.314899653741314],
+            "grounded": true,
+            "rotation": [0, 0, 0, 1],
+            "tags": {},
+            "grid": {"repetitionX": 2, "repetitionY": 3, "spacingX": 11, "spacingY": 12}
+        },
+        "3b47c3db-a247-4d4c-8e65-093093547b35": {
+            "category": "models",
+            "model": "SM_Env_RicePlant_02",
+            "scale": [1, 1, 1],
+            "position": [-1.1469874215195546, -2.000000000000025, 114.5745867339113],
+            "grounded": true,
+            "rotation": [0, 0, 0, 1]
+        },
+        "3ebdd30a-f314-4e70-8467-04d87f798868": {
+            "category": "models",
+            "model": "WoodLog_Moss",
+            "scale": [7.711062072088922, 7.711062072088922, 7.711062072088922],
+            "position": [-135.58662995795368, -7.105427357601002e-15, 26.16169168742037],
+            "grounded": true,
+            "rotation": [0, 0.2245228583455014, 0, 0.9744688225286461]
+        },
+        "4db24dd3-7806-4879-b2e3-537381236fcb": {
+            "category": "models",
+            "model": "Lamp",
+            "scale": [1, 1, 1],
+            "position": [-73.13603738853301, -3.552713678800501e-15, 15.953621007530662],
+            "grounded": true,
+            "rotation": [0, 0, 0, 1]
+        },
+        "4e331df7-b345-47d3-a33d-79b64de4dc43": {
+            "category": "models",
+            "model": "House",
+            "scale": [14.708087000106737, 14.708087000106737, 14.708087000106737],
+            "position": [-33.77919794355965, 3.552713678800501e-15, -22.677736275754512],
+            "grounded": true,
+            "rotation": [0, 0.37586863364473444, 0, 0.9266729575432966]
+        },
+        "5014d124-fdcb-4ee1-8c8b-a32356b8fae9": {
+            "category": "models",
+            "model": "barrel",
+            "scale": [1, 1, 1],
+            "position": [-92.47040913078416, 3.552713678800501e-15, -21.14446484278326],
+            "grounded": true,
+            "rotation": [0, 0, 0, 1]
+        },
+        "536e3334-cf7a-49e9-beb0-c9a284fa7209": {
+            "category": "models",
+            "model": "SM_Env_RicePlant_02",
+            "scale": [1.4772830794455607, 1.4772830794455607, 1.4772830794455607],
+            "position": [4.9399004674021825, -2.0000000000000266, 120.89020032238521],
+            "grounded": true,
+            "rotation": [0, 0.41723767588407407, 0, 0.9087974041681988]
+        },
+        "54459625-9b3d-4759-ad8f-1f8a484ee2f7": {
+            "category": "vegetation",
+            "model": "SM_Env_Bush_04",
+            "scale": [1, 1, 1],
+            "position": [29.215706603560207, -1.0658141036401503e-14, 119.78819138107318],
+            "grounded": true,
+            "rotation": [0, 0, 0, 1]
+        },
+        "54d80328-0981-4e43-a594-1478e7d114cf": {
+            "category": "models",
+            "model": "table",
+            "scale": [1, 1, 1],
+            "position": [-80.49126997600753, -3.552713678800501e-15, 10.333230666623406],
+            "grounded": true,
+            "rotation": [0, 0, 0, 1]
+        },
+        "54dbb24e-cfac-41ac-88e4-e186d01f64c2": {
+            "category": "models",
+            "model": "kitchen_table",
+            "scale": [1, 1, 1],
+            "position": [-123.81353930674236, -7.105427357601002e-15, 29.18046044226585],
+            "grounded": true,
+            "rotation": [0, 0.29306427866005214, 0, 0.9560927405714695]
+        },
+        "5563a273-9781-442d-87c8-f43dd2525879": {
+            "category": "vegetation",
+            "model": "SM_Env_Bush_02",
+            "scale": [0.7978561608362728, 0.7978561608362728, 0.7978561608362728],
+            "position": [-48.90557938094968, 0, 6.887572116740101],
+            "grounded": true,
+            "rotation": [0, 0, 0, 1]
+        },
+        "5d35944b-5c1d-4a0d-8fde-8a0199636ec1": {
+            "category": "vegetation",
+            "model": "SM_Env_Flower_07",
+            "scale": [1, 1, 1],
+            "position": [-63.09379245200513, -2.1316282072803006e-14, 91.98332736670045],
+            "grounded": true,
+            "rotation": [0, 0.562224327893891, 0, 0.826984767165794]
+        },
+        "5dec8171-40c7-4745-86de-9277e0269742": {
+            "category": "models",
+            "model": "Rock_7",
+            "scale": [10.987616057863088, 10.987616057863088, 10.987616057863088],
+            "position": [-135.1576564718537, 3.552713678800501e-15, -15.908459396089453],
+            "grounded": true,
+            "rotation": [0, 0, 0, 1]
+        },
+        "619742cd-124f-471b-93b5-bc7c33e770fd": {
+            "category": "models",
+            "model": "Shroom3",
+            "scale": [1, 1, 1],
+            "position": [-1.5591968592333956, 1.0658141036401503e-14, -52.33251916796211],
+            "grounded": true,
+            "rotation": [0, 0, 0, 1],
+            "tags": {}
+        },
+        "62c8bafc-2375-4f7d-9030-8be954bc01be": {
+            "category": "models",
+            "model": "WoodLog",
+            "scale": [6.65491354981472, 6.65491354981472, 6.65491354981472],
+            "position": [104.74282596171307, 3.552713678800501e-15, -14.952770905132105],
+            "grounded": true,
+            "rotation": [0, 0.35783960919631547, 0, 0.9337830658617815]
+        },
+        "64c42544-3043-445d-a42c-5d6b4e791e91": {
+            "category": "vegetation",
+            "model": "SM_Env_Flowers_02",
+            "scale": [1, 1, 1],
+            "position": [-10.015497978160226, 3.552713678800501e-15, -10.16282759106637],
+            "grounded": true,
+            "rotation": [0, 0, 0, 1]
+        },
+        "665c79a5-48da-41b4-b65f-e2aa5f7d31b1": {
+            "category": "vegetation",
+            "model": "SM_Env_Flowers_01",
+            "scale": [1, 1, 1],
+            "position": [40.73683242425979, -1.0658141036401503e-14, 21.000159917436964],
+            "grounded": true,
+            "rotation": [0, 0, 0, 1]
+        },
+        "66df8a9c-5325-4207-bb50-e885aa8a43d7": {
+            "category": "models",
+            "model": "Shroom1",
+            "scale": [1, 1, 1],
+            "position": [-64.55846409271292, 0, 0.9716984096384399],
+            "grounded": true,
+            "rotation": [0, 0, 0, 1]
+        },
+        "6785409b-29bd-4229-b5c9-bb0838884c3d": {
+            "category": "vegetation",
+            "model": "SM_Env_Bush_04",
+            "scale": [1, 1, 1],
+            "position": [24.48019056342016, -2.4868995751603507e-14, 111.22362883794287],
+            "grounded": true,
+            "rotation": [0, 0, 0, 1]
+        },
+        "67d16481-e12e-4c39-9471-75527d9b18d4": {
+            "category": "vegetation",
+            "model": "SM_Env_Bush_01",
+            "scale": [1, 1, 1],
+            "position": [21.34145556999341, 1.4210854715202004e-14, -70.95688764592798],
+            "grounded": true,
+            "rotation": [0, 0, 0, 1]
+        },
+        "75c69730-b148-4fca-8951-b91e5eead4fb": {
+            "category": "models",
+            "model": "stringLights",
+            "scale": [1, 1, 1],
+            "position": [-84.97587449240095, 3.552713678800501e-15, -23.65402625018375],
+            "grounded": true,
+            "rotation": [0, -0.1122628910944327, 0, 0.9936785412210125]
+        },
+        "787e91f4-5ce6-424f-a325-824a88763a41": {
+            "category": "models",
+            "model": "box_large",
+            "scale": [5.270483426760007, 5.270483426760007, 5.270483426760007],
+            "position": [-121.6270373411924, 3.552713678800501e-15, -15.396725050463631],
+            "grounded": true,
+            "rotation": [0, 0, 0, 1]
+        },
+        "7cd45bb1-d231-4881-821b-1bf156843e5b": {
+            "category": "models",
+            "model": "SM_Env_Reeds_02",
+            "scale": [1, 1, 1],
+            "position": [-110.18468362754538, -2.0000000000000244, 110.9167801972296],
+            "grounded": true,
+            "rotation": [0, 0, 0, 1]
+        },
+        "7d31a8a4-b1c2-4d44-83c3-e0416f12173d": {
+            "category": "markers",
+            "model": "box",
+            "scale": [54.00296196949748, 29.403624720533518, -2.8422121119194608],
+            "position": [42.953918347553504, 3.197442310920451e-14, -145.54772780541032],
+            "grounded": true,
+            "rotation": [0, 0, 0, 1],
+            "tags": {"door": "farm"}
+        },
+        "7f0611a9-4793-4dbd-bd87-b6cb97649f3d": {
+            "category": "models",
+            "model": "Fence",
+            "scale": [1, 1, 1],
+            "position": [-47.439335463089975, -1.0658141036401503e-14, 47.73441816766017],
+            "grounded": true,
+            "rotation": [1.350745261866477e-18, -0.7180504259093736, 1.350745261866477e-18, 0.6959910817326376],
+            "grid": {"repetitionX": 4, "repetitionY": 0, "spacingX": 1.5, "spacingY": 0}
+        },
+        "80fd352b-6817-4cad-944c-a3dcd2bcd783": {
+            "category": "gardenPlots",
+            "model": "gardenPlot1",
+            "scale": [1, 1, 1],
+            "position": [-40.24908145599737, -1.0658141036401503e-14, 51.314899653741314],
+            "grounded": true,
+            "rotation": [0, 0, 0, 1],
+            "tags": {},
+            "grid": {"repetitionX": 2, "repetitionY": 3, "spacingX": 11, "spacingY": 12}
+        },
+        "81763dfb-a05e-4ea2-b88e-ce057ecf0218": {
+            "category": "models",
+            "model": "crate",
+            "scale": [3.106138672568881, 3.106138672568881, 3.106138672568881],
+            "position": [-121.38924857012366, 8.155354372771436, -15.301792665444724],
+            "grounded": false,
+            "rotation": [0, -0.1313740718545835, 0, 0.9913328670251716]
+        },
+        "85c472c9-5a70-4a63-8793-9e69141f1980": {
+            "category": "vegetation",
+            "model": "SM_Env_Bush_03",
+            "scale": [1, 1, 1],
+            "position": [-14.922068650369521, 1.0658141036401503e-14, -46.579341051590156],
+            "grounded": true,
+            "rotation": [0, 0, 0, 1]
+        },
+        "873ed87f-259d-43e9-9345-227c793f7429": {
+            "category": "vegetation",
+            "model": "SM_Env_Flower_02",
+            "scale": [1, 1, 1],
+            "position": [75.05860669064865, 7.105427357601002e-15, -38.842910732823185],
+            "grounded": true,
+            "rotation": [0, 0, 0, 1]
+        },
+        "890ec5c4-15ed-44dd-add7-0ace83612cd2": {
+            "category": "models",
+            "model": "Rock_Moss_7",
+            "scale": [11.794961627433562, 11.794961627433562, 11.794961627433562],
+            "position": [4.254425883276596, -2.8479601666091554, 105.73956259100956],
+            "grounded": false,
+            "rotation": [0, 0.3545237742310134, 0, 0.9350470006930119]
+        },
+        "8aa52a68-3087-4b5e-8fe0-cb7eac69f1f6": {
+            "category": "models",
+            "model": "SM_Env_Reeds_02",
+            "scale": [1, 1, 1],
+            "position": [-115.04634762388037, -1.0658141036401503e-14, 58.02231213520839],
+            "grounded": true,
+            "rotation": [0, 0, 0, 1]
+        },
+        "8b8ceaf8-44e6-43c3-8546-9a19387b1846": {
+            "category": "vegetation",
+            "model": "SM_Env_Flower_07",
+            "scale": [1, 1, 1],
+            "position": [-8.460834188354447, 3.552713678800501e-15, -16.255681184406225],
+            "grounded": true,
+            "rotation": [0, 0, 0, 1]
+        },
+        "8c0ca000-167f-45ff-affe-f6e7388f9884": {
+            "category": "models",
+            "model": "Bucket",
+            "scale": [1, 1, 1],
+            "position": [-121.28712670582543, -3.552713678800501e-15, 17.151132060248816],
+            "grounded": true,
+            "rotation": [0, 0, 0, 1]
+        },
+        "8ed59206-1229-48e8-852f-a92d5179506d": {
+            "category": "models",
+            "model": "SM_Env_RicePlant_02",
+            "scale": [1, 1, 1],
+            "position": [-124.67489389541021, -2.000000000000011, 50.95380060773083],
+            "grounded": true,
+            "rotation": [0, 0, 0, 1]
+        },
+        "8ef01b7d-278a-4fcc-8ea4-7ef66b2c670f": {
+            "category": "models",
+            "model": "Shroom1",
+            "scale": [1, 1, 1],
+            "position": [-32.27592880577748, 24.370287743669774, -12.331653922253999],
+            "grounded": false,
+            "rotation": [-8.072881775894442e-17, -0.9150411543572851, -8.072881775894442e-17, -0.4033604911645253]
+        },
+        "8f735c95-137f-4840-8ac6-56b087b12c33": {
+            "category": "vegetation",
+            "model": "SM_Env_Bush_03",
+            "scale": [1, 1, 1],
+            "position": [-5.537685770756436, 3.552713678800501e-15, -28.95103622640793],
+            "grounded": true,
+            "rotation": [0, 0, 0, 1]
+        },
+        "92a61f6e-c64b-42a3-abbd-0f3b984d5754": {
+            "category": "markers",
+            "model": "door",
+            "scale": [1, 1, 1],
+            "position": [36.34606340775116, 2.1316282072803006e-14, -90.0193990242777],
+            "grounded": true,
+            "rotation": [5.993905582642215e-17, -0.9997815198715851, 5.993905582642215e-17, 0.02090245256574544],
+            "tags": {}
+        },
+        "9509a36c-9054-4e95-aad5-272c4b8b031c": {
+            "category": "models",
+            "model": "KitchenSet1",
+            "scale": [1, 1, 1],
+            "position": [-122.23343094604091, 0, 3.913361255722144],
+            "grounded": true,
+            "rotation": [-8.621572307984098e-17, -0.7701654789359667, -8.621572307984098e-17, -0.6378441306897267],
+            "tags": {}
+        },
+        "9536cb4e-3c42-4197-9965-83153bc4149c": {
+            "category": "vegetation",
+            "model": "SM_Env_Bush_02",
+            "scale": [1, 1, 1],
+            "position": [-12.716284197208747, 1.4210854715202004e-14, -58.19656047822577],
+            "grounded": true,
+            "rotation": [0, 0, 0, 1]
+        },
+        "96005443-6ced-46f3-bc3e-a58ee7a7d989": {
+            "category": "vegetation",
+            "model": "SM_Env_Flower_02",
+            "scale": [1, 1, 1],
+            "position": [-35.03222712553115, -1.4210854715202004e-14, 7.435144953963605],
+            "grounded": true,
+            "rotation": [0, 0, 0, 1]
+        },
+        "9c5e9e3c-8182-454d-8f2a-2856bff715fb": {
+            "category": "vegetation",
+            "model": "SM_Env_Flowers_02",
+            "scale": [1, 1, 1],
+            "position": [-30.162813056717184, 0, 3.140437236935562],
+            "grounded": true,
+            "rotation": [0, 0, 0, 1],
+            "tags": {}
+        },
+        "9e97bdcd-7566-4430-8081-221df85cbb51": {
+            "category": "models",
+            "model": "CookingPot",
+            "scale": [3.4473214007004094, 3.4473214007004094, 3.4473214007004094],
+            "position": [-99.76256379386263, -3.552713678800501e-15, 9.534070000001888],
+            "grounded": true,
+            "rotation": [0, 0, 0, 1]
+        },
+        "a09e20be-7e01-426c-9296-20bbccd034b1": {
+            "category": "vegetation",
+            "model": "SM_Env_Bush_03",
+            "scale": [1, 1, 1],
+            "position": [-62.906223454298036, -3.552713678800501e-15, 12.188077784783806],
+            "grounded": true,
+            "rotation": [0, 0, 0, 1]
+        },
+        "a229e8dc-b28a-400f-a5a5-584003ec554e": {
+            "category": "models",
+            "model": "Bulliten",
+            "scale": [14.822119530747639, 14.822119530747639, 14.822119530747639],
+            "position": [73.76207023175617, 1.0658141036401503e-14, -45.06425905387225],
+            "grounded": true,
+            "rotation": [0, -0.2704800302383596, 0, 0.9627255856381174]
+        },
+        "a700c1a2-ca57-4f1f-82ea-b7bc7a06ce9e": {
+            "category": "vegetation",
+            "model": "SM_Env_Plant_01",
+            "scale": [1, 1, 1],
+            "position": [54.52092011013558, 1.0658141036401503e-14, -45.778268273971484],
+            "grounded": true,
+            "rotation": [0, 0, 0, 1],
+            "tags": {}
+        },
+        "ae6cf329-0182-485d-826e-c6759f6c4c67": {
+            "category": "models",
+            "model": "SM_Env_Lillypad_Large_03",
+            "scale": [5.608451277254626, 5.608451277254626, 5.608451277254626],
+            "position": [-97.12100812514713, -2.000000000000022, 99.13160053542819],
+            "grounded": true,
+            "rotation": [0, 0, 0, 1]
+        },
+        "b1ced0e6-a50c-41bb-9286-1274dcbf6b21": {
+            "category": "models",
+            "model": "SM_Env_Reeds_01",
+            "scale": [1, 1, 1],
+            "position": [-93.38352524604171, -2.0000000000000178, 79.47139971500394],
+            "grounded": true,
+            "rotation": [0, 0, 0, 1]
+        },
+        "b4c8ac90-47d5-44a9-851a-133b8c350154": {
+            "category": "vegetation",
+            "model": "SM_Env_Flower_03",
+            "scale": [1, 1, 1],
+            "position": [31.027986678703563, -7.105427357601002e-15, 24.38807366536003],
+            "grounded": true,
+            "rotation": [0, 0, 0, 1]
+        },
+        "b7426e7d-e70c-4d6a-83c2-3056b62d54e7": {
+            "category": "models",
+            "model": "Rock_7",
+            "scale": [12.91138037581496, 12.91138037581496, 12.91138037581496],
+            "position": [-7.703469589032228, -4.596470809681806, 103.84699630288529],
+            "grounded": false,
+            "rotation": [0, 0.5723427396910302, 0, 0.8200145049466903]
+        },
+        "b8720869-d6f6-4534-a981-b3c918102cf1": {
+            "category": "models",
+            "model": "SM_Env_Lillypad_Large_02",
+            "scale": [7.537100005678205, 7.537100005678205, 7.537100005678205],
+            "position": [-90.12293372452027, -2.0000000000000253, 113.4973732035547],
+            "grounded": true,
+            "rotation": [0, 0, 0, 1]
+        },
+        "bb432083-28f0-421b-bd95-d76783aaea3d": {
+            "category": "models",
+            "model": "Rock_5",
+            "scale": [26.026526505547103, 26.026526505547103, 26.026526505547103],
+            "position": [14.504244979202781, -6.840682287872046, 116.64201192562138],
+            "grounded": false,
+            "rotation": [0, 0, 0, 1]
+        },
+        "bdbce8ac-dce3-4cd1-9684-223639d2d9fa": {
+            "category": "models",
+            "model": "Fence",
+            "scale": [1, 1, 1],
+            "position": [34.91441872691679, -1.0658141036401503e-14, 47.82854060602681],
+            "grounded": true,
+            "rotation": [2.2890974758822404e-18, -0.6938541723030792, 2.0963668817190493e-18, 0.7201155376587904],
+            "grid": {"repetitionX": 4, "repetitionY": 0, "spacingX": 1.5, "spacingY": 0}
+        },
+        "bf1f445e-c47b-4ccb-b9c0-87884e1e0e64": {
+            "category": "vegetation",
+            "model": "SM_Env_Plant_01",
+            "scale": [1, 1, 1],
+            "position": [-55.402714589112946, -3.552713678800501e-15, 14.276627394140709],
+            "grounded": true,
+            "rotation": [0, 0, 0, 1]
+        },
+        "c0608321-df31-4c37-bf4b-fef6b1ec8f98": {
+            "category": "vegetation",
+            "model": "SM_Env_Flower_03",
+            "scale": [1, 1, 1],
+            "position": [-56.21292337109203, -2.1316282072803006e-14, 92.52234753359335],
+            "grounded": true,
+            "rotation": [0, 0, 0, 1]
+        },
+        "c1c44baa-7293-41a2-9dce-5766e9c2d5b1": {
+            "category": "models",
+            "model": "Rock_Moss_5",
+            "scale": [8.615236511192299, 8.615236511192299, 8.615236511192299],
+            "position": [-61.816180058241635, 3.552713678800501e-15, -11.780452658235243],
+            "grounded": true,
+            "rotation": [0, 0, 0, 1]
+        },
+        "c3e6c4f0-65ed-4d7e-a3a5-ce3fc17f7da0": {
+            "category": "vegetation",
+            "model": "SM_Env_Bush_03",
+            "scale": [1, 1, 1],
+            "position": [48.098322688771454, 0, -4.587994218637152],
+            "grounded": true,
+            "rotation": [0, 0, 0, 1]
+        },
+        "c68ee41d-23cb-47dd-b3ef-1b79da692149": {
+            "category": "models",
+            "model": "Shroom4",
+            "scale": [1, 1, 1],
+            "position": [-22.48867206138487, 23.906800958996918, -21.240210116046306],
+            "grounded": false,
+            "rotation": [-7.390281606554172e-17, -0.9720179370982538, -7.390281606554172e-17, -0.23490664094328012]
+        },
+        "c87337f8-fc83-4908-966e-22fbc075a613": {
+            "category": "models",
+            "model": "SM_Env_RicePlant_02",
+            "scale": [1, 1, 1],
+            "position": [-98.34040280945277, -2.0000000000000164, 74.03474231480706],
+            "grounded": true,
+            "rotation": [0, 0, 0, 1]
+        },
+        "ca7353d7-4a34-46d0-b699-05bc73444c55": {
+            "category": "vegetation",
+            "model": "SM_Env_Bush_01",
+            "scale": [1, 1, 1],
+            "position": [32.87696947261638, -2.4868995751603507e-14, 117.34400170846507],
+            "grounded": true,
+            "rotation": [0, 0, 0, 1]
+        },
+        "cf5eebb6-bb0f-456f-824c-26f856a891bc": {
+            "category": "models",
+            "model": "SM_Env_Reeds_02",
+            "scale": [1, 1, 1],
+            "position": [-4.077650861090802, -2.0000000000000253, 114.15159146176873],
+            "grounded": true,
+            "rotation": [0, 0, 0, 1]
+        },
+        "db4c7c5b-71f5-4ce6-8419-cc1fd5867392": {
+            "category": "models",
+            "model": "BunnyOvenPacked",
+            "scale": [3.663076814273899, 3.663076814273899, 3.663076814273899],
+            "position": [-104.9092813919412, 3.552713678800501e-15, -16.638858959158892],
+            "grounded": true,
+            "rotation": [0, 0.22324354307855104, 0, 0.9747626995703801],
+            "tags": {}
+        },
+        "dd5dcb72-91df-4cfb-a25d-ac38b667d218": {
+            "category": "vegetation",
+            "model": "SM_Env_Flower_05",
+            "scale": [1, 1, 1],
+            "position": [-2.5624494452441624, 3.552713678800501e-15, -23.651841798953367],
+            "grounded": true,
+            "rotation": [0, 0, 0, 1]
+        },
+        "deddfc36-8901-4798-916f-ff4608a3625a": {
+            "category": "vegetation",
+            "model": "SM_Env_Plant_02",
+            "scale": [3.121401274042426, 3.121401274042426, 3.121401274042426],
+            "position": [44.79961801961785, 3.552713678800501e-15, -4.227898050045363],
+            "grounded": true,
+            "rotation": [0, 0, 0, 1]
+        },
+        "def00603-baf9-4c4f-96a5-0c870b2ea8ce": {
+            "category": "vegetation",
+            "model": "SM_Env_Plant_02",
+            "scale": [4.742349777230174, 4.742349777230174, 4.742349777230174],
+            "position": [-3.335234687949784, 3.552713678800501e-15, -14.062624041858228],
+            "grounded": true,
+            "rotation": [0, 0, 0, 1]
+        },
+        "ec68d158-fcfa-40ef-8214-1af681eb12d8": {
+            "category": "vegetation",
+            "model": "SM_Env_Flower_05",
+            "scale": [1, 1, 1],
+            "position": [19.296242653717947, 1.4210854715202004e-14, -61.10470304975177],
+            "grounded": true,
+            "rotation": [0, 0, 0, 1]
+        },
+        "eceef8d7-5547-4852-a030-d8b5054c22e4": {
+            "category": "models",
+            "model": "SM_Env_Reeds_02",
+            "scale": [1, 1, 1],
+            "position": [-101.88713868176026, -2.0000000000000266, 120.47500109288428],
+            "grounded": true,
+            "rotation": [0, 0, 0, 1]
+        },
+        "efa23d8a-fbe3-4875-9397-18160862da67": {
+            "category": "models",
+            "model": "barrel",
+            "scale": [1, 1, 1],
+            "position": [-81.19163168187865, 3.552713678800501e-15, -16.725104090435256],
+            "grounded": true,
+            "rotation": [0, 0, 0, 1]
+        },
+        "f4ef28ab-f33d-41aa-86cc-590270672b10": {
+            "category": "models",
+            "model": "SM_Env_RicePlant_02",
+            "scale": [1, 1, 1],
+            "position": [-121.65056520506485, -2.0000000000000115, 52.87280748139229],
+            "grounded": true,
+            "rotation": [0, 0, 0, 1]
+        },
+        "f552fbe7-4d70-4e46-93cd-e708ab66b81b": {
+            "category": "models",
+            "model": "Shroom2",
+            "scale": [0.6749020852530029, 0.6749020852530029, 0.6749020852530029],
+            "position": [99.21993393770643, 7.105427357601002e-15, -38.776718580557905],
+            "grounded": true,
+            "rotation": [0, 0, 0, 1],
+            "tags": {}
+        },
+        "fe7f80b8-ce4c-40d3-95b9-e8e02c722825": {
+            "category": "models",
+            "model": "SM_Env_RicePlant_02",
+            "scale": [1, 1, 1],
+            "position": [-139.62768667843352, -2.000000000000009, 40.69961536553385],
+            "grounded": true,
+            "rotation": [0, 0, 0, 1]
+        },
+        "fefacd76-e4d1-4fac-a3df-9c0b3bd32839": {
+            "category": "models",
+            "model": "SM_Env_RicePlant_02",
+            "scale": [1.6848325091970968, 1.6848325091970968, 1.6848325091970968],
+            "position": [87.27267995181911, 1.0658141036401503e-14, -54.41586344977799],
+            "grounded": true,
+            "rotation": [0, 0, 0, 1]
+        }
+    }
+}

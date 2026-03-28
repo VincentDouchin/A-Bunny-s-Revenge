@@ -229,10 +229,18 @@ export type StaticAssetPath =
   'items/tomato_soup-optimized.glb' |
   'items/wheat-optimized.glb' |
   'items/wheat_seeds-optimized.glb' |
-  'levels/clearing.json' |
-  'levels/dungeon_room_1.json' |
-  'levels/farm.json' |
-  'levels/library.json' |
+  'levels/clearing/data.json' |
+  'levels/clearing/grassMap.png' |
+  'levels/clearing/grassNoise.png' |
+  'levels/clearing/pathMap.png' |
+  'levels/clearing/treeMap.png' |
+  'levels/clearing/waterMap.png' |
+  'levels/farm/data.json' |
+  'levels/farm/grassMap.png' |
+  'levels/farm/grassNoise.png' |
+  'levels/farm/pathMap.png' |
+  'levels/farm/treeMap.png' |
+  'levels/farm/waterMap.png' |
   'mainMenuAssets/book-optimized.glb' |
   'models/Beanstalk-optimized.glb' |
   'models/Berry_Bush-optimized.glb' |
@@ -326,6 +334,7 @@ export type StaticAssetPath =
   'models/ume-wood-optimized.glb' |
   'models/well-optimized.glb' |
   'music/garden_night.webm' |
+  'palette.txt' |
   'particles/star.webp' |
   'particles/star_07.webp' |
   'soundEffects/004_Hover_04.webm' |
@@ -393,6 +402,7 @@ export type StaticAssetPath =
   'textures/emotes.webp' |
   'textures/fish.webp' |
   'textures/grass-dead.png' |
+  'textures/grass.webp' |
   'textures/heart.webp' |
   'textures/parchment.webp' |
   'textures/planks.webp' |
@@ -460,6 +470,8 @@ export type StaticAssetDirectory =
   'icons/' |
   'items/' |
   'levels/' |
+  'levels/clearing/' |
+  'levels/farm/' |
   'mainMenuAssets/' |
   'models/' |
   'music/' |
@@ -719,10 +731,18 @@ export const assets = new Set<string>([
   'items/tomato_soup-optimized.glb',
   'items/wheat-optimized.glb',
   'items/wheat_seeds-optimized.glb',
-  'levels/clearing.json',
-  'levels/dungeon_room_1.json',
-  'levels/farm.json',
-  'levels/library.json',
+  'levels/clearing/data.json',
+  'levels/clearing/grassMap.png',
+  'levels/clearing/grassNoise.png',
+  'levels/clearing/pathMap.png',
+  'levels/clearing/treeMap.png',
+  'levels/clearing/waterMap.png',
+  'levels/farm/data.json',
+  'levels/farm/grassMap.png',
+  'levels/farm/grassNoise.png',
+  'levels/farm/pathMap.png',
+  'levels/farm/treeMap.png',
+  'levels/farm/waterMap.png',
   'mainMenuAssets/book-optimized.glb',
   'models/Beanstalk-optimized.glb',
   'models/Berry_Bush-optimized.glb',
@@ -816,6 +836,7 @@ export const assets = new Set<string>([
   'models/ume-wood-optimized.glb',
   'models/well-optimized.glb',
   'music/garden_night.webm',
+  'palette.txt',
   'particles/star.webp',
   'particles/star_07.webp',
   'soundEffects/004_Hover_04.webm',
@@ -883,6 +904,7 @@ export const assets = new Set<string>([
   'textures/emotes.webp',
   'textures/fish.webp',
   'textures/grass-dead.png',
+  'textures/grass.webp',
   'textures/heart.webp',
   'textures/parchment.webp',
   'textures/planks.webp',
