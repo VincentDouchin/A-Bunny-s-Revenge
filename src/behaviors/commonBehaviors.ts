@@ -1,16 +1,17 @@
 import type { With } from 'miniplex'
+import type { Material } from 'three/webgpu'
 import type { baseEnemyQuery } from './enemyBehavior'
 import type { State } from './state'
 import type { Animator } from '@/global/animator'
 import type { AllAnimations, AllStates, AnimatorsWith, AssetNames, BehaviorNode, ComponentsOfType, Entity, QueryEntity, StatesWith } from '@/global/entity'
-import type { ToonMaterial } from '@/shaders/materials'
 import { DEFAULT_QUERY_FILTER, findSmoothPath } from 'navcat'
-import { Material, Mesh, Vector3 } from 'three'
+import { Mesh, Vector3 } from 'three/webgpu'
 import { Faction } from '@/global/entity'
 import { assets, ecs, tweens } from '@/global/init'
 import { playSound } from '@/global/sounds'
 import { action, condition, enteringState, inState, selector, sequence, setState, wait, waitFor } from '@/lib/behaviors'
 import { spawnDamageNumber } from '@/particles/damageNumber'
+import { ToonMaterial } from '@/shaders/toonMaterial'
 import { calculateDamage, flash, squish } from '@/states/dungeon/battle'
 import { selectNewLockedEnemy } from '@/states/dungeon/locking'
 import { stunBundle } from '@/states/dungeon/stun'
@@ -114,7 +115,7 @@ export const hitNode: EnemyNode<['idle' | 'hit' | 'dead'], ['hit']> = () => sele
 				squish(entity)
 				flash(entity, 200, 'damage')
 				const [damage, crit] = calculateDamage(ctx.player)
-				takeDamage(entity, damage)
+				takeDamage(entity, damage * 2)
 				entity.enemyImpact?.restart()
 				entity.enemyImpact?.play()
 				spawnDamageNumber(damage, entity, crit)
@@ -205,29 +206,37 @@ export const deadNode: EnemyNode<['dead'], ['dead']> = () => selector(
 		}),
 		action(({ animator }) => animator.playClamped('dead')),
 		action(({ entity }) => {
-			if (entity.enemyDefeated) {
-				entity.enemyDefeated.restart()
-				entity.enemyDefeated.play()
+			if (entity.enemyDefeatedParticles) {
+				entity.enemyDefeatedParticles.start()
 			}
 			const mats = new Array<Material>()
 			entity.model.traverse((node) => {
 				if (node instanceof Mesh) {
 					node.castShadow = false
-					const mat = node.material as InstanceType<typeof ToonMaterial>
-					if (mat instanceof Material) {
-						mat.transparent = true
-						mat.depthWrite = false
-						mats.push(mat)
+					if (node.material instanceof ToonMaterial) {
+						node.material.transparent = true
+						node.material.depthWrite = false
+						mats.push(node.material)
 					}
 				}
+			})
+
+			tweens.add({
+				onComplete: () => entity.enemyDefeatedParticles?.stop(),
+				duration: 500,
 			})
 			tweens.add({
 				destroy: entity,
 				from: 1,
 				to: 0,
 				duration: 2000,
-				onUpdate: f => mats.forEach(m => m.opacity = f),
-				onComplete: () => ecs.remove(entity),
+				onUpdate: (f) => {
+					mats.forEach((m) => {
+						m.opacity = f
+						m.needsUpdate = true
+					})
+				},
+
 			})
 		}),
 	),

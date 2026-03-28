@@ -1,6 +1,5 @@
 import { ColliderDesc, RigidBodyDesc } from '@dimforge/rapier3d-compat'
-import { AdditiveBlending, Mesh, MeshBasicMaterial, PlaneGeometry, Vector3 } from 'three'
-import { ParticleSystem } from 'three.quarks'
+import { AdditiveBlending, Mesh, MeshBasicMaterial, PlaneGeometry, Vector3 } from 'three/webgpu'
 import { Faction } from '@/global/entity'
 import { assets, coroutines, ecs, tweens, world } from '@/global/init'
 import { playSound } from '@/global/sounds'
@@ -153,8 +152,7 @@ export const chargingBehavior = createBehaviorTree(
 		sequence(
 			enteringState('attack'),
 			action(({ entity, animator }) => {
-				entity.dashParticles.restart()
-				entity.dashParticles.play()
+				entity.dashParticles.start()
 				animator.playAnimation('running')
 				entity.charging.amount++
 			}),

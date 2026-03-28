@@ -1,7 +1,7 @@
 import type { With } from 'miniplex'
 import type { Entity } from '@/global/entity'
 import { QueryFilterFlags } from '@dimforge/rapier3d-compat'
-import { Vector3 } from 'three'
+import { Vector3 } from 'three/webgpu'
 import { params } from '@/global/context'
 import { ecs, gameInputs, inputManager, settings, time } from '@/global/init'
 import { app } from '@/global/states'

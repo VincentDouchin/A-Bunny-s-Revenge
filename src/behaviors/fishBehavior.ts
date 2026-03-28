@@ -1,7 +1,7 @@
 import type { QueryEntity } from '@/global/entity'
 import { circOut } from 'popmotion'
 import { between } from 'randomish'
-import { Mesh, Quaternion, Vector3 } from 'three'
+import { Mesh, Quaternion, Vector3 } from 'three/webgpu'
 import { ecs, gameInputs, time, tweens } from '@/global/init'
 import { playSound } from '@/global/sounds'
 import { action, condition, createBehaviorTree, enteringState, inState, inverter, parallel, runNodes, selector, sequence, setState, wait } from '@/lib/behaviors'

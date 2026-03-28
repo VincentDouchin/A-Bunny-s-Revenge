@@ -1,12 +1,10 @@
 import type { With } from 'miniplex'
 import type { Entity, QueryEntity } from '@/global/entity'
-import { CircleGeometry, Vector3 } from 'three'
-import { EmitterShape, VFXParticles } from 'vanilla-vfx'
+import { Vector3 } from 'three/webgpu'
 import { addCameraShake } from '@/global/camera'
 import { Faction } from '@/global/entity'
 import { gameOverEvent } from '@/global/events'
-import { coroutines, ecs, gameInputs, scene, world } from '@/global/init'
-import { renderer } from '@/global/rendering'
+import { ecs, gameInputs, world } from '@/global/init'
 import { playSound } from '@/global/sounds'
 import { inMap } from '@/lib/hierarchy'
 import { spawnDamageNumber } from '@/particles/damageNumber'
@@ -19,7 +17,7 @@ import { applyMove, applyRotate, getMovementForce, getPlayerRotation, getRelativ
 import { withContext } from './commonBehaviors'
 
 const ANIMATION_SPEED = 1.3
-const playerQuery = ecs.with('playerAnimator', 'movementForce', 'speed', 'body', 'rotation', 'attackSpeed', 'dash', 'collider', 'currentHealth', 'model', 'hitTimer', 'size', 'sneeze', 'targetRotation', 'poisoned', 'size', 'position', 'targetMovementForce', 'sleepy', 'modifiers', 'playerState', 'playerAttackStyle')
+export const playerQuery = ecs.with('playerAnimator', 'movementForce', 'speed', 'body', 'rotation', 'attackSpeed', 'dashIndicator', 'collider', 'currentHealth', 'model', 'hitTimer', 'size', 'sneeze', 'targetRotation', 'poisoned', 'size', 'position', 'targetMovementForce', 'sleepy', 'modifiers', 'playerState', 'playerAttackStyle')
 const enemyQuery = ecs.with('faction', 'strength', 'collider', 'position', 'attacking')
 const enemyWithSensor = enemyQuery.with('sensor', 'rotation').where(entity => entity.faction === Faction.Enemy)
 const enemyWithoutSensor = enemyQuery.without('sensor').where(entity => entity.faction === Faction.Enemy)
@@ -43,9 +41,9 @@ const getAttackSpeed = (e: With<Entity, 'attackSpeed' | 'sleepy'>) => {
 	return e.attackSpeed.value * ANIMATION_SPEED
 }
 
-const playerContext = <E extends QueryEntity<typeof playerQuery>>(e: E) => {
+export const playerContext = <E extends QueryEntity<typeof playerQuery>>(e: E) => {
 	const attackingEnemy = getAttackingEnemy(e)
-	const canDash = e.dash.finished() && !e.modifiers.hasModifier('honeySpot')
+	const canDash = e.dashIndicator.finished() && !e.modifiers.hasModifier('honeySpot')
 	const { force, isMoving } = getMovementForce(e)
 	const direction = getPlayerRotation(e, force)
 
@@ -216,7 +214,7 @@ export const playerBehavior = createBehaviorTree(
 		// ! Dash
 		sequence(
 			selector(inState('idle'), inState('running')),
-			condition(({ entity }) => gameInputs.get('secondary').justPressed && entity.dash.finished()),
+			condition(({ entity }) => gameInputs.get('secondary').justPressed && entity.dashIndicator.finished()),
 			condition(() => interactionQuery.size === 0),
 			setState('dash'),
 		),
@@ -224,40 +222,7 @@ export const playerBehavior = createBehaviorTree(
 			enteringState('dash'),
 			action(({ entity }) => {
 				playSound('zapsplat_cartoon_whoosh_swipe_fast_grab_dash_007_74748')
-				const vfx = new VFXParticles(renderer, {
-					maxParticles: 300,
-					size: [0.3, 0.6],
-					colorStart: ['#666666', '#888888'],
-					colorEnd: ['#333333'],
-					fadeSize: [0.5, 1.5],
-					fadeOpacity: [0.6, 0],
-					gravity: [0, 0.5, 0],
-					lifetime: [3, 5],
-					direction: [
-						[-0.1, 0.1],
-						[0.3, 0.5],
-						[-0.1, 0.1],
-					],
-					speed: [0.02, 0.05],
-					turbulence: {
-						intensity: 1.2,
-						frequency: 0.8,
-						speed: 0.3,
-					},
-					debug: true,
-				})
-				scene.add(vfx.group)
-				vfx.init()
-				// vfx.start()
-				// scene.add(vfx.object3D)
-				coroutines.add(function* () {
-					vfx.update(1)
-					yield
-				})
-
-				// entity.dashParticles?.restart()
-				// entity.dashParticles?.play()
-				setState('idle')
+				entity.dashParticles?.start()
 			}),
 		),
 		sequence(
@@ -268,7 +233,10 @@ export const playerBehavior = createBehaviorTree(
 			}),
 			applyMove(({ ctx: { force } }) => force.clone().normalize().multiplyScalar(2.5)),
 			wait(200)('dash'),
-			action(({ entity }) => entity.dash.reset()),
+			action(({ entity }) => {
+				entity.dashIndicator.reset()
+				entity.dashParticles?.stop()
+			}),
 			setState('idle'),
 		),
 		sequence(
