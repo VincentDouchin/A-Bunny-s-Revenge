@@ -8,9 +8,15 @@
     "fs:default",
     "fs:allow-app-write",
     "fs:allow-app-read",
+    "fs:scope-app-recursive",
+    "fs:allow-write-text-file",
+    "fs:allow-write-file",
     {
       "identifier": "fs:scope",
-      "allow": [ {"path": "$APPDATA"}, {"path": "$APPDATA/**/*"} ]
+      "allow": [
+        {"path": "$USER_SELECTED"     }, {"path": "$USER_SELECTED/**/*"}, {"path": "$APPDATA"           },
+        {"path": "$APPDATA/**/*"      }, {"path": "**"                 }
+      ]
     },
     "oauth:allow-start",
     "oauth:allow-cancel",
@@ -19,7 +25,9 @@
     "keyring:default",
     {
       "identifier": "opener:allow-open-path",
-      "allow": [ {"path": "$APPDATA/**/*"} ]
-    }
+      "allow": [{"path": "$APPDATA/**/*"}]
+    },
+    "dialog:default",
+    "fs:scope-resource-recursive"
   ]
 }

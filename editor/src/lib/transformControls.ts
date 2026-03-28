@@ -18,7 +18,7 @@ import {
 	SphereGeometry,
 	TorusGeometry,
 	Vector3,
-} from 'three'
+} from 'three/webgpu'
 
 const _raycaster = new Raycaster()
 

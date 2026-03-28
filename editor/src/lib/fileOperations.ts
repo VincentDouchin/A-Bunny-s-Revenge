@@ -1,32 +1,73 @@
 import type { AssetData, EditorTags, LevelData } from '../types'
 import { path } from '@tauri-apps/api'
-import { BaseDirectory, exists, mkdir, readDir, readTextFile, remove, writeTextFile } from '@tauri-apps/plugin-fs'
+import { BaseDirectory, copyFile, exists, mkdir, readDir, readFile, readTextFile, remove, writeFile, writeTextFile } from '@tauri-apps/plugin-fs'
 import { Formatter } from 'fracturedjsonjs'
-import { get } from 'idb-keyval'
+import { loadImage } from '@/global/assetLoaders'
 
 const format = (data: any) => {
 	const formatter = new Formatter()
 	formatter.Options.MaxPropNamePadding = 0
-	const txt = formatter.Serialize(data)!
+	const txt = JSON.stringify(data)
 	return formatter.Reformat(txt)
 }
-// Bounding box
-export const createFolder = async (folder: string) => {
-	const folderExists = await exists(folder, { baseDir: BaseDirectory.AppData })
-	if (!folderExists) {
-		await mkdir(folder, { baseDir: BaseDirectory.AppData, recursive: true })
+export const FOLDER = 'A-Bunny-s-Revenge'
+
+const copyFileLocal = async (filePath: string[], localDir: string | null) => {
+	if (localDir) {
+		await copyFile(
+			await path.join(FOLDER, ...filePath),
+			await path.join(localDir, ...filePath),
+			{ fromPathBaseDir: BaseDirectory.AppData },
+		)
 	}
 }
 
-export const isRepoCloned = async (folder: string) => {
-	const contents = await readDir(folder, { baseDir: BaseDirectory.AppData })
+export const createLevelFolder = async (level: string, localDir: string | null) => {
+	const pathAppData = await path.join(FOLDER, 'assets', 'levels', level)
+	if (!(await exists(pathAppData, { baseDir: BaseDirectory.AppData }))) {
+		await mkdir(pathAppData, { baseDir: BaseDirectory.AppData })
+	}
+	if (localDir) {
+		const pathLocal = await path.join(localDir, 'assets', 'levels', level)
+		if (!(await exists(pathLocal))) {
+			await mkdir(pathLocal)
+		}
+	}
+}
+
+const saveTextFile = async (filePath: string[], data: any, localDir: string | null) => {
+	const fileContent = filePath.at(-1)?.endsWith('.json') ? format(data) : data
+	await writeTextFile(await path.join(FOLDER, ...filePath), fileContent, { baseDir: BaseDirectory.AppData })
+	await copyFileLocal(filePath, localDir)
+}
+
+export const saveLevelImage = async (level: string, name: string, canvas: HTMLCanvasElement, localDir: string | null) => {
+	const blob = await new Promise<Blob | null>(res => canvas.toBlob(res, 'image/png'))
+	if (!blob) return
+	const arrayBuffer = await blob.arrayBuffer()
+	const bytes = new Uint8Array(arrayBuffer)
+	const filePath = ['assets', 'levels', level, `${name}.png`]
+	await writeFile(await path.join(FOLDER, ...filePath), bytes, { baseDir: BaseDirectory.AppData })
+	await copyFileLocal(filePath, localDir)
+}
+
+// Bounding box
+export const createFolder = async () => {
+	const folderExists = await exists(FOLDER, { baseDir: BaseDirectory.AppData })
+	if (!folderExists) {
+		await mkdir(FOLDER, { baseDir: BaseDirectory.AppData, recursive: true })
+	}
+}
+
+export const isRepoCloned = async () => {
+	const contents = await readDir(FOLDER, { baseDir: BaseDirectory.AppData })
 	return contents.length !== 0
 }
 
 const getBoundingBoxPath = (folder: string) => path.join(folder, 'assets', 'boundingBox.json')
 
-export const loadBoundingBox = async (folder: string): Promise<Record<string, Record<string, AssetData>>> => {
-	const filePath = await getBoundingBoxPath(folder)
+export const loadBoundingBox = async (): Promise<Record<string, Record<string, AssetData>>> => {
+	const filePath = await getBoundingBoxPath(FOLDER)
 	const fileExists = await exists(filePath, { baseDir: BaseDirectory.AppData })
 	if (fileExists) {
 		const contents = await readTextFile(filePath, { baseDir: BaseDirectory.AppData })
@@ -37,31 +78,37 @@ export const loadBoundingBox = async (folder: string): Promise<Record<string, Re
 	}
 }
 
-export const saveBoundingBox = async (folder: string, boundingBox: Record<string, Record<string, AssetData>>) => {
-	const filePath = await getBoundingBoxPath(folder)
-	await writeTextFile(filePath, format(boundingBox), { baseDir: BaseDirectory.AppData })
+export const saveBoundingBox = async (boundingBox: Record<string, Record<string, AssetData>>, localDir: string | null) => {
+	await saveTextFile(['assets', 'boundingBox.json'], boundingBox, localDir)
 }
 
 // Tags
-const getTagsListPath = (folder: string, ext: 'json' | 'ts') => path.join(folder, 'assets', `tagsList.${ext}`)
-const saveTagsListTypes = async (folder: string, tags: EditorTags) => {
+const getTagsListPath = (ext: 'json' | 'ts') => ['assets', `tagsList.${ext}`]
+const saveTagsListTypes = async (tags: EditorTags, localDir: string | null) => {
 	const tagsTypes = Object.entries(tags).reduce((acc, [key, val]) => {
-		if (val === true) {
+		if (val.type === 'tag') {
 			acc += `
-${key}: true`
-		} else {
+	${key}: true`
+		} else if (val.type === 'enum') {
 			acc += `
-${key}: ${val.map(t => `'${t}'`).join('|')}`
+	${key}: ${val.values.map(t => `'${t}'`).join('|')}`
+		} else if (val.type === 'number') {
+			acc += `
+	${key}: number`
+		} else if (val.type === 'string') {
+			acc += `
+	${key}: string`
 		}
 		return acc
 	}, '')
 	const fileContent = `export type Tags = {${tagsTypes}
 }`
-	const filePath = await getTagsListPath(folder, 'ts')
-	await writeTextFile(filePath, fileContent, { baseDir: BaseDirectory.AppData })
+	const filePath = getTagsListPath('ts')
+	await saveTextFile(filePath, fileContent, localDir)
 }
-export const loadTagsList = async (folder: string) => {
-	const filePath = await getTagsListPath(folder, 'json')
+export const loadTagsList = async () => {
+	const getFilePath = getTagsListPath('json')
+	const filePath = await path.join(FOLDER, ...getFilePath)
 	const fileExists = await exists(filePath, { baseDir: BaseDirectory.AppData })
 	if (fileExists) {
 		const contents = await readTextFile(filePath, { baseDir: BaseDirectory.AppData })
@@ -71,36 +118,54 @@ export const loadTagsList = async (folder: string) => {
 		return { } as EditorTags
 	}
 }
-export const saveTagsList = async (folder: string, tags: EditorTags) => {
-	await saveTagsListTypes(folder, tags)
-	const filePath = await getTagsListPath(folder, 'json')
-	await writeTextFile(filePath, format(tags), { baseDir: BaseDirectory.AppData })
+export const saveTagsList = async (tags: EditorTags, localDir: string | null) => {
+	await saveTagsListTypes(tags, localDir)
+	const filePath = getTagsListPath('json')
+	await saveTextFile(filePath, tags, localDir)
 }
 
 // Levels
 const getLevelsDirPath = (folder: string) => path.join(folder, 'assets', 'levels')
-export const loadLevels = async (folder: string) => {
-	return readDir(await getLevelsDirPath(folder), { baseDir: BaseDirectory.AppData })
+
+export const loadLevels = async () => {
+	return readDir(await getLevelsDirPath(FOLDER), { baseDir: BaseDirectory.AppData })
 }
-export const saveLevelFile = async (folder: string, levelName: string, level: LevelData) => {
-	return writeTextFile(
-		await path.join(await getLevelsDirPath(folder), `${levelName}.json`),
-		format(level),
-		{ baseDir: BaseDirectory.AppData },
-	)
+export const saveLevelFile = async (levelName: string, level: LevelData, localDir: string | null) => {
+	const filePath = ['assets', 'levels', levelName, 'data.json']
+	await saveTextFile(filePath, level, localDir)
 }
-export const removeLevel = async (folder: string, levelName: string) => {
-	remove(
-		await path.join(await getLevelsDirPath(folder), `${levelName}.json`),
-		{ baseDir: BaseDirectory.AppData },
-	)
+export const removeLevel = async (levelName: string) => {
+	const levelPath = await path.join(await getLevelsDirPath(FOLDER), `${levelName}.json`)
+	remove(levelPath, { baseDir: BaseDirectory.AppData })
 }
-export const loadLevel = async (folder: string, level: string) => {
-	const data = await get(level)
-	if (data) return data as LevelData
-	const fileContent = await readTextFile(
-		await path.join(await getLevelsDirPath(folder), `${level}.json`),
-		{ baseDir: BaseDirectory.AppData },
-	)
-	return JSON.parse(fileContent) as LevelData
+
+export const loadImageFile = async (level: string, name: string) => {
+	const bytes = await readFile(await path.join(FOLDER, 'assets', 'levels', level, `${name}.png`), { baseDir: BaseDirectory.AppData }).catch(() => null)
+	if (bytes) {
+		const blob = new Blob([bytes], { type: 'image/png' })
+		const url = URL.createObjectURL(blob)
+		const img = await loadImage(url)
+		return img
+	} else {
+		return null
+	}
+}
+
+export const loadLevel = async (level: string) => {
+	const levelDir = ['assets', 'levels', level]
+	const fileContent = await readTextFile(await path.join(FOLDER, ...levelDir, 'data.json'), { baseDir: BaseDirectory.AppData })
+	const dataParsed = JSON.parse(fileContent) as LevelData
+	return dataParsed
+}
+
+export const deleteFile = async (level: string, file: string, localDir: string | null) => {
+	const filePath = ['assets', 'levels', level, file]
+	await remove(await path.join(FOLDER, ...filePath)).catch(() => {
+		console.warn(`file ${file} for level ${level} does not exist`)
+	})
+	if (localDir) {
+		await remove(await path.join(localDir, ...filePath)).catch(() => {
+			console.warn(`file ${file} for level ${level} does not exist in ${localDir}`)
+		})
+	}
 }

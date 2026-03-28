@@ -1,13 +1,12 @@
 import type { NavMesh, NodeRef } from 'navcat'
 import type { SoloNavMeshInput, SoloNavMeshOptions } from 'navcat/blocks'
 import type { DebugObject } from 'navcat/three'
-import type { Matrix4, Object3D, Raycaster, Scene } from 'three'
+import type { Matrix4, Object3D, Raycaster, Scene } from 'three/webgpu'
 import type { AssetData } from '../types'
-import { ColliderDesc } from '@dimforge/rapier3d-compat'
 import { getNodeByTileAndPoly, getNodeRefIndex } from 'navcat'
 import { floodFillNavMesh, generateSoloNavMesh } from 'navcat/blocks'
 import { createNavMeshHelper, createNavMeshPolyHelper, getPositionsAndIndices } from 'navcat/three'
-import { BoxGeometry, BufferGeometry, CapsuleGeometry, CylinderGeometry, Float32BufferAttribute, Group, Mesh, MeshBasicMaterial, SphereGeometry, Vector3 } from 'three'
+import { BoxGeometry, BufferGeometry, CapsuleGeometry, CylinderGeometry, Float32BufferAttribute, Group, Mesh, MeshBasicMaterial, MeshBasicNodeMaterial, SphereGeometry, Vector3 } from 'three/webgpu'
 
 export const generateNavMesh = (obj: Mesh<BufferGeometry>[]) => {
 	// generation input
@@ -102,10 +101,10 @@ export const generateNavMesh = (obj: Mesh<BufferGeometry>[]) => {
 }
 
 export const getMesh = (boundingBox: AssetData | undefined, matrix: Matrix4, model: Object3D) => {
-	const mat = new MeshBasicMaterial({
+	const mat = new MeshBasicNodeMaterial({
 		color: 0xFF0000,
-		transparent: true,
-		opacity: 0.2,
+		// transparent: true,
+		// opacity: 0.2,
 	})
 
 	const collider = boundingBox?.collider

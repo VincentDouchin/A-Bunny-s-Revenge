@@ -1,7 +1,9 @@
 import type { Tags } from '@assets/tagsList'
 import type { NavMesh } from 'navcat'
+import type { QuaternionLike, Vector3Like } from 'three/webgpu'
+import type { Direction } from '@/lib/directions'
 
-export type EditorTags = Record<string, true | string[]>
+export type EditorTags = Record<string, { type: 'tag' } | { type: 'enum', values: string[] } | { type: 'number' } | { type: 'string' }>
 export interface LevelEntity {
 	category: string
 	model: string
@@ -18,15 +20,22 @@ export interface LevelEntity {
 	tags?: Partial<Tags>
 }
 
-type Maps = 'heightMap' | 'treeMap' | 'pathMap' | 'waterMap' | 'grassMap'
+export type MapNames = 'heightMap' | 'treeMap' | 'pathMap' | 'waterMap' | 'grassMap' | 'grassNoise'
 
+export interface InstanceEntity {
+	position: Vector3Like
+	rotation: QuaternionLike
+	scale: Vector3Like
+	collider: boolean
+	transparent?: boolean
+	doorDungeon?: Direction
+}
 export interface InstanceData {
 	category: string
 	model: string
-	entities: Array<number[]>
-	data?: Record<string, any>
+	entities: Array<InstanceEntity>
 }
-export interface BaseLevel {
+export interface LevelData {
 	sizeX: number
 	sizeY: number
 	entities: Record<string, LevelEntity>
@@ -34,14 +43,15 @@ export interface BaseLevel {
 	displacementScale: number
 	floorTexture: 'planks' | 'grass'
 	navMesh: NavMesh | null
+	grass: [number, number, number, number][]
 }
-export type LevelData = Record<Maps, string> & BaseLevel
-export type LevelLoaded = Record<Maps, HTMLCanvasElement> & BaseLevel
+export type LevelLoaded = LevelData &Partial< Record<MapNames, HTMLCanvasElement>>
 export type Shape = 'cuboid' | 'ball' | 'capsule' | 'cylinder'
 export type ColliderData = {
 	type: Shape
 	size: { x: number, y: number, z: number }
 	position: { x: number, y: number, z: number }
+	rotation: number[]
 } | {
 	type: 'link'
 	category: string
