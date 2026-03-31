@@ -1,15 +1,13 @@
-import type { BufferGeometry, Material, Matrix4, Mesh, Object3D, Vector2Like, Vector4Like } from 'three/webgpu'
-import type { Simplify } from 'type-fest'
+import { assets } from '@/static-assets'
+import { getScreenBuffer } from '@/utils/buffer'
 import assetManifest from '@assets/assetManifest.json'
-import { createStore, del, entries, set } from 'idb-keyval'
 import { InstancedUniformsMesh } from 'three-instanced-uniforms-mesh'
 import { DRACOLoader, GLTFLoader } from 'three/addons'
 import draco_decoder from 'three/examples/jsm/libs/draco/draco_decoder.wasm?url'
 import draco_wasm_wrapper from 'three/examples/jsm/libs/draco/draco_wasm_wrapper.js?url'
+import type { BufferGeometry, Material, Matrix4, Mesh, Object3D, Vector2Like, Vector4Like } from 'three/webgpu'
 import { DynamicDrawUsage, Group, LoadingManager, TextureLoader } from 'three/webgpu'
-import { assets } from '@/static-assets'
-import { getScreenBuffer } from '@/utils/buffer'
-import { useLocalStorage } from '@/utils/useLocalStorage'
+import type { Simplify } from 'type-fest'
 
 export type stringCaster<K extends string> = (s: string) => K
 export const getFileName = <K extends string>(path: string) => {
@@ -31,35 +29,34 @@ const cachedLoader = async <R>(storeName: string, fn: (arr: ArrayBuffer) => Prom
 	if (import.meta.env.DEV && fnDev) {
 		return fnDev
 	}
-	const store = createStore('fabled-recipes', storeName)
-	const [localManifest, setLocalManifest] = useLocalStorage<Partial<Record<string, number>>>('assetManifest', {})
-	const files = new Map<string, ArrayBuffer>(await entries(store))
-	for (const file of files.keys()) {
-		if (!(file in assetManifest)) {
-			await del(file, store)
+
+	const cache = await caches.open(`fabled-recipes/${storeName}`)
+
+	// Evict stale entries once at init — any key whose version no longer
+	// matches the manifest (or doesn't exist in it) gets purged.
+	for (const request of await cache.keys()) {
+		const [key, version] = new URL(request.url).pathname.slice(1).split('@')
+		const currentVersion = assetManifest[key as keyof typeof assetManifest]?.modified
+		if (!currentVersion || String(currentVersion) !== version) {
+			await cache.delete(request)
 		}
 	}
+
 	return async (src: string, key: string) => {
-		const localEntry = localManifest[key]
-		const existingEntry = files.get(key)
+		const version = assetManifest[key as keyof typeof assetManifest]?.modified
+		const cacheUrl = `https://cache/${key}@${version}`
 
-		if (!existingEntry || !localEntry || localEntry < assetManifest[key as keyof typeof assetManifest].modified) {
-			try {
-				const arr = await (await fetch(src)).arrayBuffer()
-				await set(key, arr, store)
-				setLocalManifest((manifest) => ({ ...manifest, [key]: assetManifest[key as keyof typeof assetManifest]?.modified }))
-
-				return await fn(arr!)
-				// eslint-disable-next-line unused-imports/no-unused-vars
-			} catch (_error) {
-				console.error(`Error loading ${src} ${key}`)
-			}
+		const cached = await cache.match(cacheUrl)
+		if (cached) {
+			return fn(await cached.arrayBuffer())
 		}
 
-		if (existingEntry && localEntry) {
-			return fn(existingEntry)
-		} else {
-			throw new Error(`cached asset ${key} not found`)
+		try {
+			const response = await fetch(src)
+			await cache.put(cacheUrl, response.clone())
+			return fn(await response.arrayBuffer())
+		} catch {
+			console.error(`Error loading ${src} ${key}`)
 		}
 	}
 }
@@ -75,7 +72,6 @@ const getDracoLoader = () => {
 	return new DRACOLoader(loadingManager).setDecoderPath('').preload()
 }
 export const draco = getDracoLoader()
-
 export const loadGLB = await cachedLoader(
 	'glb',
 	(arrayBuffer: ArrayBuffer) => new GLTFLoader().setDRACOLoader(draco).parseAsync(arrayBuffer, ''),
@@ -83,7 +79,7 @@ export const loadGLB = await cachedLoader(
 )
 
 export const loadAudio = await cachedLoader(
-	'glb',
+	'audio',
 	async (arrayBuffer: ArrayBuffer) => {
 		const audioBlob = new Blob([arrayBuffer], { type: 'audio/webm' })
 		const url = URL.createObjectURL(audioBlob)
