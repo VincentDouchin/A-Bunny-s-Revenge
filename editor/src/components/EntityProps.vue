@@ -4,8 +4,8 @@ const levelStore = useLevelStore()
 
 <template>
 	<NCard size="small">
-		<NInputGroup style="display:grid;grid-template-columns: 1fr 1fr">
-			<NButton @click="levelStore.selectedEntityId && levelStore.destroyEntity(levelStore.selectedEntityId) ">
+		<NInputGroup style="display: grid; grid-template-columns: 1fr 1fr">
+			<NButton @click="levelStore.selectedEntityId && levelStore.destroyEntity(levelStore.selectedEntityId)">
 				<template #icon>
 					<NIcon>
 						<fa-trash />

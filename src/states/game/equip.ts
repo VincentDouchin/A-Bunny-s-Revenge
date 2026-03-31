@@ -15,17 +15,19 @@ export const equip = (...components: ComponentsOfType<With<Entity, 'model'>>[]) 
 	return components.flatMap((component) => {
 		const query = ecs.with(component).with('model' as const)
 		return [
-			() => query.onEntityAdded.subscribe((e) => {
-				for (const c of components) {
-					if (e[c] && c !== component) {
-						ecs.removeComponent(e, c)
+			() =>
+				query.onEntityAdded.subscribe((e) => {
+					for (const c of components) {
+						if (e[c] && c !== component) {
+							ecs.removeComponent(e, c)
+						}
 					}
-				}
-				addToHand(e, e[component].model)
-			}),
-			() => query.onEntityRemoved.subscribe((e) => {
-				e[component].model.removeFromParent()
-			}),
+					addToHand(e, e[component].model)
+				}),
+			() =>
+				query.onEntityRemoved.subscribe((e) => {
+					e[component].model.removeFromParent()
+				}),
 		]
 	})
 }

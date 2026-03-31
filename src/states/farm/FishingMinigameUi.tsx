@@ -6,20 +6,29 @@ import { ecs, menuInputs } from '@/global/init'
 import { useGame, useQuery } from '@/ui/store'
 import { TouchButton } from '@/ui/TouchControls'
 
-const fishingQuery = useQuery(ecs.with('menuType').where(e => e.menuType === MenuType.Fishing))
+const fishingQuery = useQuery(ecs.with('menuType').where((e) => e.menuType === MenuType.Fishing))
 export const FishingMiniGameUi = () => {
 	const context = useGame()
 	return (
 		<Show when={context?.usingTouch()}>
 			<For each={fishingQuery()}>
-				{_e => (
+				{(_e) => (
 					<>
-						<TouchButton size="10rem" input="primary" controller={menuInputs.touchController!}>
+						<TouchButton
+							size="10rem"
+							input="primary"
+							controller={menuInputs.touchController!}
+						>
 							{' '}
-							<Fish />
-							{' '}
+							<Fish />{' '}
 						</TouchButton>
-						<TouchButton size="7rem" distance="15rem" angle="100deg" input="cancel" controller={menuInputs.touchController!}>
+						<TouchButton
+							size="7rem"
+							distance="15rem"
+							angle="100deg"
+							input="cancel"
+							controller={menuInputs.touchController!}
+						>
 							<Exit />
 						</TouchButton>
 					</>

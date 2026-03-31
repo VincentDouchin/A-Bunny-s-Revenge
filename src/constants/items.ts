@@ -3,7 +3,7 @@ import { assets, save } from '@/global/init'
 import { modifiers } from '@/global/modifiers'
 import { entries, shuffle } from '@/utils/mapFunctions'
 
-export const cropNames = Object.keys(assets.crops) as (keyof typeof assets['crops'])[]
+export const cropNames = Object.keys(assets.crops) as (keyof (typeof assets)['crops'])[]
 export const fruitNames = ['apple'] as const
 export type crops = (typeof cropNames)[number]
 export type fruits = (typeof fruitNames)[number]
@@ -21,13 +21,13 @@ export enum Rarity {
 }
 
 export interface ItemData {
-	'name': string
-	'seed'?: crops
-	'meal'?: number
-	'ingredient'?: true
+	name: string
+	seed?: crops
+	meal?: number
+	ingredient?: true
 	'key item'?: true
-	'price'?: number
-	'health'?: number
+	price?: number
+	health?: number
 }
 
 export const itemsData = {
@@ -35,7 +35,7 @@ export const itemsData = {
 		name: 'Acorn',
 	},
 	recipe_book: {
-		'name': 'Recipe book',
+		name: 'Recipe book',
 		'key item': true,
 	},
 	Heart: {
@@ -82,7 +82,6 @@ export const itemsData = {
 	honey: {
 		name: 'Honey',
 		ingredient: true,
-
 	},
 	parsley: {
 		name: 'Parsley',
@@ -161,7 +160,6 @@ export const itemsData = {
 	egg: {
 		name: 'Egg',
 		ingredient: true,
-
 	},
 	cinnamon: {
 		name: 'Cinnamon',
@@ -190,12 +188,10 @@ export const itemsData = {
 	tomato_soup: {
 		name: 'Tomato soup',
 		meal: 2,
-
 	},
 	honey_glazed_carrot: {
 		name: 'Honey glazed carrot',
 		meal: 1,
-
 	},
 	beetroot_salad: {
 		name: 'Beetroot Salad',
@@ -204,7 +200,6 @@ export const itemsData = {
 	ham_honey: {
 		name: 'Honey Ham',
 		meal: 2,
-
 	},
 	slime_bread: {
 		name: 'Slime Bread',
@@ -237,11 +232,11 @@ export const itemsData = {
 		meal: 2,
 	},
 	magic_bean: {
-		'name': '"Magic" bean',
+		name: '"Magic" bean',
 		'key item': true,
 	},
 	recipe: {
-		'name': 'Recipe',
+		name: 'Recipe',
 		'key item': true,
 	},
 	hummus: {

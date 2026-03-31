@@ -1,8 +1,8 @@
-import type { PathInfo } from './assetPipeline'
+import type { PathInfo } from './assetPipeline.ts'
 import { NodeIO } from '@gltf-transform/core'
 import { ALL_EXTENSIONS } from '@gltf-transform/extensions'
 import draco3d from 'draco3dgltf'
-import { AssetTransformer } from './assetPipeline'
+import { AssetTransformer } from './assetPipeline.ts'
 
 export class GenerateAssetNames extends AssetTransformer {
 	folders: Record<string, Set<string>> = {}
@@ -10,7 +10,6 @@ export class GenerateAssetNames extends AssetTransformer {
 	io: NodeIO | null = null
 	async add(path: PathInfo) {
 		const fileName = path.name?.replace('-optimized', '')
-		console.log(path.folder)
 		if (path.folder && fileName && path.folder !== 'assets') {
 			this.folders[path.folder] ??= new Set()
 			if (fileName.startsWith('$')) {
@@ -20,18 +19,16 @@ export class GenerateAssetNames extends AssetTransformer {
 				for (const child of scene?.listChildren() ?? []) {
 					this.folders[path.folder].add(child.getName())
 				}
-			} 
+			}
 		}
 	}
 
 	async registerIO() {
 		if (!this.io) {
-			this.io = new NodeIO()
-				.registerExtensions(ALL_EXTENSIONS)
-				.registerDependencies({
-					'draco3d.decoder': await draco3d.createDecoderModule(),
-					'draco3d.encoder': await draco3d.createEncoderModule(),
-				})
+			this.io = new NodeIO().registerExtensions(ALL_EXTENSIONS).registerDependencies({
+				'draco3d.decoder': await draco3d.createDecoderModule(),
+				'draco3d.encoder': await draco3d.createEncoderModule(),
+			})
 		}
 		return this.io
 	}
@@ -40,7 +37,7 @@ export class GenerateAssetNames extends AssetTransformer {
 		if (path.name && path.folder) {
 			const folder = this.folders[path.folder]
 			const name = path.name?.replace('-optimized', '')
-			name && folder.has(name) && folder.delete(name)
+			if (name && folder.has(name)) folder.delete(name)
 		}
 	}
 
@@ -53,7 +50,7 @@ export class GenerateAssetNames extends AssetTransformer {
 		let result = ''
 		for (const [folder, files] of sortedFolders) {
 			if (files.length > 0) {
-				result += `export type ${folder} = ${[...files].map(x => `\'${x}'`).join(` | `)}\n`
+				result += `export type ${folder} = ${[...files].map((x) => `'${x}'`).join(` | `)}\n`
 			}
 		}
 		return result

@@ -27,11 +27,14 @@ const selectedModel = useLocalStorage<null | string>('selectedModel', null)
 const transformMode = ref<'translate' | 'rotate' | 'scale'>('translate')
 useEventListener('keydown', (e) => {
 	switch (e.code) {
-		case 'KeyG':transformMode.value = 'translate'
+		case 'KeyG':
+			transformMode.value = 'translate'
 			break
-		case 'KeyS':transformMode.value = 'scale'
+		case 'KeyS':
+			transformMode.value = 'scale'
 			break
-		case 'KeyR':transformMode.value = 'rotate'
+		case 'KeyR':
+			transformMode.value = 'rotate'
 			break
 	}
 })
@@ -49,27 +52,31 @@ const updateModelTags = (tags: Partial<Tags>) => {
 	}
 }
 
-watch(() => levelStore.selectedEntityId, (id) => {
-	if (id !== null && (!levelStore.levelData || !(id in levelStore.levelEntities))) {
-		levelStore.selectedEntityId = null
-	}
-})
+watch(
+	() => levelStore.selectedEntityId,
+	(id) => {
+		if (id !== null && (!levelStore.levelData || !(id in levelStore.levelEntities))) {
+			levelStore.selectedEntityId = null
+		}
+	},
+)
 </script>
 
 <template>
 	<NConfigProvider :theme="darkTheme">
 		<NGlobalStyle />
-		<div v-if="loaded" class="wrapper">
+		<div
+			v-if="loaded"
+			class="wrapper"
+		>
 			<div class="container">
 				<div class="top">
-					<NScrollbar style="min-height: 0;height: 100%;">
-						<div style="display: grid; gap: 1rem;flex-direction: column; grid-template-rows:auto auto">
+					<NScrollbar style="min-height: 0; height: 100%">
+						<div style="display: grid; gap: 1rem; flex-direction: column; grid-template-rows: auto auto">
 							<Configuration />
 							<LevelsSelector v-model:mode="mode" />
 							<LevelProps v-if="levelStore.levelData && mode === 'level'" />
-							<LevelEntitiesList
-								v-if="levelStore.levelData && mode === 'level'"
-							/>
+							<LevelEntitiesList v-if="levelStore.levelData && mode === 'level'" />
 							<TagsEditor
 								v-if="selectedModel"
 								:global="true"
@@ -79,24 +86,28 @@ watch(() => levelStore.selectedEntityId, (id) => {
 						</div>
 					</NScrollbar>
 					<NCard
-						size="small" style="min-height: 0;height: 100%;"
-						@click.right="() => {
-							levelStore.selectedEntityId = null
-							colliderStore.selectedCollider = null
-							selectedModel = null
-						}"
+						size="small"
+						style="min-height: 0; height: 100%"
+						@click.right="
+							() => {
+								levelStore.selectedEntityId = null
+								colliderStore.selectedCollider = null
+								selectedModel = null
+							}
+						"
 					>
-						<div style="position:relative;height: 100%;overflow: clip;">
-							<div style="position:absolute;z-index:1">
+						<div style="position: relative; height: 100%; overflow: clip">
+							<div style="position: absolute; z-index: 1">
 								<NFlex>
 									<NFlex v-if="mode === 'level'">
 										<NSwitch v-model:value="hideTags" />
-										<NText>
-											Hide tags
-										</NText>
+										<NText> Hide tags </NText>
 									</NFlex>
 									<NInputGroup v-if="colliderStore.selectedKey || levelStore.selectedEntityId">
-										<NButton :secondary="transformMode === 'translate'" @click="transformMode = 'translate'">
+										<NButton
+											:secondary="transformMode === 'translate'"
+											@click="transformMode = 'translate'"
+										>
 											<template #icon>
 												<NIcon>
 													<fa-arrows />
@@ -104,7 +115,10 @@ watch(() => levelStore.selectedEntityId, (id) => {
 											</template>
 											G
 										</NButton>
-										<NButton :secondary="transformMode === 'scale'" @click="transformMode = 'scale'">
+										<NButton
+											:secondary="transformMode === 'scale'"
+											@click="transformMode = 'scale'"
+										>
 											<template #icon>
 												<NIcon>
 													<fa-maximize />
@@ -112,7 +126,10 @@ watch(() => levelStore.selectedEntityId, (id) => {
 											</template>
 											S
 										</NButton>
-										<NButton :secondary="transformMode === 'rotate'" @click="transformMode = 'rotate'">
+										<NButton
+											:secondary="transformMode === 'rotate'"
+											@click="transformMode = 'rotate'"
+										>
 											<template #icon>
 												<NIcon>
 													<fa-arrows-rotate />
@@ -142,7 +159,7 @@ watch(() => levelStore.selectedEntityId, (id) => {
 							</Renderer>
 						</div>
 					</NCard>
-					<NScrollbar style="min-height: 0;height: 100%;">
+					<NScrollbar style="min-height: 0; height: 100%">
 						<CollidersEditor
 							v-if="mode === 'model' && selectedCategory && selectedModel"
 							:category="selectedCategory"
@@ -158,7 +175,11 @@ watch(() => levelStore.selectedEntityId, (id) => {
 						/>
 					</NScrollbar>
 				</div>
-				<NCard class="bottom" size="small" style="min-width:0;width: 100%">
+				<NCard
+					class="bottom"
+					size="small"
+					style="min-width: 0; width: 100%"
+				>
 					<ModelSelector
 						:key="`${selectedCategory}-${selectedModel}`"
 						v-model:mode="mode"
@@ -175,11 +196,13 @@ watch(() => levelStore.selectedEntityId, (id) => {
 :global(body) {
 	margin: 0;
 }
+
 .wrapper {
 	position: fixed;
 	inset: 0;
 	padding: 1rem;
 }
+
 .container {
 	display: grid;
 	grid-template-rows: 3fr 1fr;
@@ -187,12 +210,14 @@ watch(() => levelStore.selectedEntityId, (id) => {
 	width: 100%;
 	gap: 1rem;
 }
+
 .top {
 	display: grid;
 	grid-template-columns: 1fr 4fr 1fr;
 	gap: 1rem;
 	min-height: 0;
 }
+
 :global(canvas) {
 	image-rendering: pixelated;
 }

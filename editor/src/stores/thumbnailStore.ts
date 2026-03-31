@@ -1,10 +1,10 @@
-import type { Object3D } from 'three/webgpu'
-import { createStore, entries, keys, set } from 'idb-keyval'
-import { defineStore } from 'pinia'
-import { ref } from 'vue'
 import { loadImage } from '@/global/assetLoaders'
 import { Thumbnailer } from '@/lib/thumbnailRenderer'
 import { imgToCanvas } from '@/utils/buffer'
+import { createStore, entries, set } from 'idb-keyval'
+import { defineStore } from 'pinia'
+import type { Object3D } from 'three/webgpu'
+import { ref } from 'vue'
 
 export const useThumbnailStore = defineStore('thumbnail', () => {
 	const thumbnailer = ref<Thumbnailer | null>(null)
@@ -16,7 +16,7 @@ export const useThumbnailStore = defineStore('thumbnail', () => {
 			return existingValue
 		} else if (thumbnailer.value) {
 			const canvas = thumbnailer.value.getCanvas(model, true, 1)
-			const blob = await new Promise<Blob | null>(res => canvas.toBlob(res, 'image/png'))
+			const blob = await new Promise<Blob | null>((res) => canvas.toBlob(res, 'image/png'))
 			if (blob) {
 				set(key, blob, store)
 			}

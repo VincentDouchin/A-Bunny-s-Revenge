@@ -19,7 +19,10 @@ onMounted(async () => {
 </script>
 
 <template>
-	<ElementWrapper v-if="canvas" :el="canvas" />
+	<ElementWrapper
+		v-if="canvas"
+		:el="canvas"
+	/>
 </template>
 
 <style scoped></style>

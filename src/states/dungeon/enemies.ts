@@ -24,7 +24,7 @@ import { healthBundle } from './health'
 import { spawnChest } from './spawnChest'
 
 type SingleAttackStyle = {
-	[K in keyof AttackStyle]: { [P in K]: AttackStyle[K] };
+	[K in keyof AttackStyle]: { [P in K]: AttackStyle[K] }
 }[keyof AttackStyle]
 
 export interface EnemyDef<M extends keyof Animations & AssetNames['characters'], A extends string, S extends ComponentsOfType<State<any>>> {
@@ -54,10 +54,7 @@ export const enemyBundle = <M extends keyof Animations & AssetNames['characters'
 	enemy.components ??= {}
 	model.scene.scale.setScalar(enemy.scale)
 	const bundle = modelColliderBundle(model.scene, RigidBodyType.Dynamic, false, enemy.size, 'ball')
-	bundle.bodyDesc
-		.setLinearDamping(20)
-		.setCcdEnabled(true)
-		.setDominanceGroup(1)
+	bundle.bodyDesc.setLinearDamping(20).setCcdEnabled(true).setDominanceGroup(1)
 	bundle.colliderDesc
 		.setMass(100)
 		.setCollisionGroups(collisionGroups('enemy', ['obstacle', 'player', 'floor', 'enemy']))
@@ -102,42 +99,46 @@ export const enemyBundle = <M extends keyof Animations & AssetNames['characters'
 
 	return entity
 }
-const enemyQuery = ecs.with('faction', 'enemyId').where(e => e.faction === Faction.Enemy)
+const enemyQuery = ecs.with('faction', 'enemyId').where((e) => e.faction === Faction.Enemy)
 const chestLocation = ecs.with('dungeonChest', 'position', 'rotation')
-export const removeEnemyFromSpawn: SubscriberSystem<typeof app, 'dungeon'> = ({ dungeon, dungeonLevel }) => enemyQuery.onEntityRemoved.subscribe((entity) => {
-	dungeon.enemies = dungeon.enemies.filter(e => e.enemyId !== entity.enemyId)
-	if (dungeon.enemies.length === 0) {
-		if (!dungeon.chest) {
-			for (const parent of chestLocation) {
-				ecs.add({
-					...spawnChest(dungeonLevel),
-					parent,
-				})
+export const removeEnemyFromSpawn: SubscriberSystem<typeof app, 'dungeon'> = ({ dungeon, dungeonLevel }) =>
+	enemyQuery.onEntityRemoved.subscribe((entity) => {
+		dungeon.enemies = dungeon.enemies.filter((e) => e.enemyId !== entity.enemyId)
+		if (dungeon.enemies.length === 0) {
+			if (!dungeon.chest) {
+				for (const parent of chestLocation) {
+					ecs.add({
+						...spawnChest(dungeonLevel),
+						parent,
+					})
+				}
+				dungeon.chest = true
 			}
-			dungeon.chest = true
+			setTimeout(() => collectItems(true)(), 2000)
 		}
-		setTimeout(() => collectItems(true)(), 2000)
-	}
-})
+	})
 
 // debug
-export const displaySensors = () => ecs.with('sensor', 'group', 'rotation').onEntityAdded.subscribe((e) => {
-	if (e.sensor.shape instanceof Cuboid) {
-		const { x, y, z } = e.sensor.shape.halfExtents
-		const box = new Mesh(new BoxGeometry(x * 2, y * 2, z * 2))
-		box.position.add(new Vector3(0, y, e.sensor.distance).applyQuaternion(e.rotation))
-		e.group.add(box)
-	}
-})
+export const displaySensors = () =>
+	ecs.with('sensor', 'group', 'rotation').onEntityAdded.subscribe((e) => {
+		if (e.sensor.shape instanceof Cuboid) {
+			const { x, y, z } = e.sensor.shape.halfExtents
+			const box = new Mesh(new BoxGeometry(x * 2, y * 2, z * 2))
+			box.position.add(new Vector3(0, y, e.sensor.distance).applyQuaternion(e.rotation))
+			e.group.add(box)
+		}
+	})
 
 export const spawnEnemies: UpdateSystem<typeof app, 'dungeon'> = ({ dungeon }) => {
 	for (const enemy of dungeon.enemies) {
 		const point = findRandomPoint(dungeon.plan.navMesh!, DEFAULT_QUERY_FILTER, Math.random)
 		if (point.success) {
-			ecs.add(inMap({
-				...enemy,
-				position: new Vector3(...point.position),
-			}))
+			ecs.add(
+				inMap({
+					...enemy,
+					position: new Vector3(...point.position),
+				}),
+			)
 		}
 	}
 }
@@ -153,6 +154,7 @@ export const tickInactiveTimer = () => {
 }
 
 const bossQuery = ecs.with('boss')
-export const unlockDungeon: SubscriberSystem<typeof app, 'dungeon'> = resources => bossQuery.onEntityRemoved.subscribe(() => {
-	save.unlockedPaths = Math.max(save.unlockedPaths, resources.dungeonLevel + 1)
-})
+export const unlockDungeon: SubscriberSystem<typeof app, 'dungeon'> = (resources) =>
+	bossQuery.onEntityRemoved.subscribe(() => {
+		save.unlockedPaths = Math.max(save.unlockedPaths, resources.dungeonLevel + 1)
+	})

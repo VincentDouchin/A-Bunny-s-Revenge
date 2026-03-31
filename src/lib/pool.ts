@@ -1,5 +1,8 @@
 export class Pool<T> extends Array<T> {
-	constructor(private fn: () => Promise<T>, private amount: number) {
+	constructor(
+		private fn: () => Promise<T>,
+		private amount: number,
+	) {
 		super()
 	}
 

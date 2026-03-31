@@ -6,7 +6,7 @@ export class State<K extends string> {
 	current: K
 	previous: K | null = null
 	next: K | null = null
-	wait: { state: K, duration: number } | null = null
+	wait: { state: K; duration: number } | null = null
 	constructor(defaultState: K) {
 		this.current = defaultState
 	}

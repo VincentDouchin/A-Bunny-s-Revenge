@@ -10,13 +10,11 @@ export const projectileTrail = () => {
 		startLife: new IntervalValue(3.8, 4.4),
 		startSpeed: new IntervalValue(-4, -5),
 		startSize: new ConstantValue(1),
-		startColor: new ConstantColor(new Vector4(...new Color(0x2C1E31).toArray(), 1)),
+		startColor: new ConstantColor(new Vector4(...new Color(0x2c1e31).toArray(), 1)),
 		worldSpace: true,
 
 		emissionOverTime: new ConstantValue(5),
-		emissionBursts: [
-
-		],
+		emissionBursts: [],
 
 		shape: new ConeEmitter({ radius: 1, angle: 0 }),
 		material: mat,

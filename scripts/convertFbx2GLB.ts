@@ -1,7 +1,7 @@
-import type { PathInfo } from './assetPipeline'
+import type { PathInfo } from './assetPipeline.ts'
 import { execSync } from 'node:child_process'
 import { rename } from 'node:fs/promises'
-import { AssetTransformer } from './assetPipeline'
+import { AssetTransformer } from './assetPipeline.ts'
 
 export class ConvertFBXToGLB extends AssetTransformer {
 	extensions = ['fbx']

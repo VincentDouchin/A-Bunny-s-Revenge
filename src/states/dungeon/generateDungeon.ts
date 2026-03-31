@@ -101,15 +101,15 @@ const floodFill = (roomId: number, rooms: RoomDistance[], distance: number) => {
 	}
 }
 const resetFloodFill = (rooms: RoomDistance[]) => {
-	rooms.forEach(room => delete room.distance)
+	rooms.forEach((room) => delete room.distance)
 }
 const assignStartOrEnd = (room: BlankRoom, rooms: BlankRoom[]) => {
 	const possibleStart = [...cardinalDirections].filter((dir) => {
 		const position = getRoomSidePosition(room, dir)
-		return !rooms.find(r => r.position.x === position.x && r.position.y === position.y)
+		return !rooms.find((r) => r.position.x === position.x && r.position.y === position.y)
 	})
 	if (possibleStart.length === 0) {
-		const newPossibleDirections = [...cardinalDirections].filter(dir => !(dir in room.connections))
+		const newPossibleDirections = [...cardinalDirections].filter((dir) => !(dir in room.connections))
 		possibleStart.push(...newPossibleDirections)
 	}
 	room.connections[getRandom(possibleStart)] = null
@@ -145,8 +145,8 @@ const findStartExit = (rooms: RoomDistance[]) => {
 }
 const findCriticalPath = (rooms: RoomDistance[]) => {
 	let maxInterations = rooms.length
-	const startRoomId = rooms.findIndex(room => room.type === RoomType.Entrance)
-	let currRoomId = rooms.findIndex(room => room.type === RoomType.Boss)
+	const startRoomId = rooms.findIndex((room) => room.type === RoomType.Entrance)
+	let currRoomId = rooms.findIndex((room) => room.type === RoomType.Boss)
 	const criticalRooms: RoomDistance[] = []
 	floodFill(startRoomId, rooms, 0)
 
@@ -167,11 +167,13 @@ const findCriticalPath = (rooms: RoomDistance[]) => {
 }
 
 const createRooms = (count: number): BlankRoom[] => {
-	const rooms: BlankRoom[] = [{
-		position: { x: 0, y: 0 },
-		connections: {},
-		type: RoomType.Battle,
-	}]
+	const rooms: BlankRoom[] = [
+		{
+			position: { x: 0, y: 0 },
+			connections: {},
+			type: RoomType.Battle,
+		},
+	]
 
 	while (count > 1) {
 		const rndRoomId = Math.floor(Math.random() * rooms.length)
@@ -194,13 +196,15 @@ const getEnemies = (type: RoomType, level: number) => {
 		case RoomType.Battle:
 		case RoomType.Entrance: {
 			const enemies = getRandom(enemyGroups[level].enemies)
-			if (Math.random() < 0.10) {
+			if (Math.random() < 0.1) {
 				enemies.push(Mushroom)
 			}
 			return enemies
 		}
-		case RoomType.Boss: return getRandom(enemyGroups[level].bosses)
-		default:return []
+		case RoomType.Boss:
+			return getRandom(enemyGroups[level].bosses)
+		default:
+			return []
 	}
 }
 
@@ -223,7 +227,7 @@ export const assignPlanAndEnemies = (rooms: BlankRoom[], level: number): Room[] 
 		// if (room.type === RoomType.NPC) {
 		// 	encounter = getRandom(Object.keys(encounters) as (keyof typeof encounters)[])
 		// }
-		const enemies = getEnemies(room.type, level).map(enemy => enemy(level))
+		const enemies = getEnemies(room.type, level).map((enemy) => enemy(level))
 		// if (!plan.navgrid) throw new Error(`Navgrid not generated for level ${plan.name}`)
 		// const navgrid = new NavGrid(plan.navgrid, plan.size)
 		const newRoom: Room = { ...room, plan: dungeonLevel, enemies, doors, encounter: null }
@@ -241,17 +245,14 @@ export const assignPlanAndEnemies = (rooms: BlankRoom[], level: number): Room[] 
 		return newRoom
 	})
 	for (let i = 0; i < filledRooms.length; i++) {
-		filledRooms[i].doors = mapValues(
-			rooms[i].connections,
-			index => typeof index === 'number' ? filledRooms[index] : null,
-		)
+		filledRooms[i].doors = mapValues(rooms[i].connections, (index) => (typeof index === 'number' ? filledRooms[index] : null))
 	}
 	return filledRooms
 }
 
 const placeNPC = (rooms: BlankRoom[]) => {
 	const criticalPath = findCriticalPath(rooms)
-	const possibleRooms = rooms.filter(r => !criticalPath.includes(r) && ![RoomType.Entrance, RoomType.Boss].includes(r.type))
+	const possibleRooms = rooms.filter((r) => !criticalPath.includes(r) && ![RoomType.Entrance, RoomType.Boss].includes(r.type))
 	if (possibleRooms.length) {
 		const npcRoom = getRandom(possibleRooms)
 		npcRoom.type = RoomType.NPC

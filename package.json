@@ -1,14 +1,14 @@
 {
 	"name": "a-bunny-s-revenge",
-	"type": "module",
 	"version": "0.0.0",
 	"private": true,
+	"type": "module",
 	"scripts": {
-		"dev": "vite",
+		"dev": "vp dev",
 		"editor": "cd editor && npm run tauri dev",
-		"build": "tsc && vite build",
-		"preview": "vite preview",
-		"test": "vitest",
+		"build": "tsc && vp build",
+		"preview": "vp preview",
+		"test": "vp test",
 		"generate-pwa-assets": "pwa-assets-generator --preset minimal public/logo-03.jpg",
 		"save_data_schema": "npx ts-json-schema-generator --path './src/global/save.ts' --type SaveData --tsconfig ./tsconfig.json --no-type-check --out ./src/debug/saveDataSchema.json",
 		"tauri": "tauri",
@@ -16,7 +16,8 @@
 		"android dev": "pnpm run tauri android dev --open",
 		"android build": "pnpm run tauri android build",
 		"preinstall": "npx only-allow pnpm",
-		"postinstall": "patch-package"
+		"postinstall": "patch-package",
+		"prepare": "vp config"
 	},
 	"dependencies": {
 		"@corvu/tooltip": "^0.2.2",
@@ -31,7 +32,6 @@
 		"@tauri-apps/api": "^2.0.0-beta.13",
 		"astar-typescript": "^1.2.7",
 		"eventery": "^0.0.4",
-		"fastnoise-lite": "^1.1.1",
 		"howler": "^2.2.4",
 		"idb-keyval": "^6.2.1",
 		"jsoneditor": "^10.0.0",
@@ -52,7 +52,6 @@
 		"vanilla-vfx": "^0.3.0"
 	},
 	"devDependencies": {
-		"@antfu/eslint-config": "^5.4.1",
 		"@ffmpeg-installer/ffmpeg": "^1.1.0",
 		"@gltf-transform/core": "^3.10.0",
 		"@gltf-transform/extensions": "^3.10.0",
@@ -69,25 +68,27 @@
 		"chalk": "^5.6.0",
 		"chokidar": "^4.0.3",
 		"draco3dgltf": "^1.5.6",
-		"eslint": "^9.37.0",
-		"eslint-plugin-format": "^0.1.2",
 		"fluent-ffmpeg": "^2.1.2",
 		"fracturedjsonjs": "^5.0.1",
 		"glob": "^10.3.10",
 		"jsdom": "^24.0.0",
 		"minimatch": "^10.0.3",
 		"new-javascript": "^0.4.1",
+		"oxfmt": "^0.42.0",
+		"oxlint": "^1.57.0",
 		"patch-package": "^8.0.1",
 		"ts-json-schema-generator": "^1.5.0",
 		"type-fest": "^4.21.0",
 		"typescript": "^5.7.3",
 		"typescript-plugin-toml": "^0.5.0",
-		"vite": "^7.1.2",
+		"vite": "catalog:",
 		"vite-plugin-pwa": "^1.0.2",
 		"vite-plugin-solid": "^2.11.0",
 		"vite-plugin-solid-styled": "^0.12.0",
 		"vite-plugin-solid-svg": "^0.8.1",
 		"vite-plugin-toml": "^0.8.5",
-		"vitest": "^1.6.1"
-	}
+		"vite-plus": "catalog:",
+		"vitest": "catalog:"
+	},
+	"packageManager": "pnpm@10.33.0"
 }

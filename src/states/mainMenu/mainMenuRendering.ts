@@ -10,12 +10,12 @@ import { once } from '@/utils/mapFunctions'
 
 export type MenuOptions = 'Continue' | 'New Game' | 'Settings' | 'Credits'
 
-export const mainMenuRenderGroupQuery = ecs.with('renderer', 'scene', 'renderGroup').where(e => e.renderGroup === RenderGroup.MainMenu)
+export const mainMenuRenderGroupQuery = ecs.with('renderer', 'scene', 'renderGroup').where((e) => e.renderGroup === RenderGroup.MainMenu)
 const menuBookQuery = ecs.with('menuBook')
 export const cameraQuery = ecs.with('camera', 'renderGroup', 'position')
-const mainMenuCameraQuery = cameraQuery.where(e => e.renderGroup === RenderGroup.MainMenu)
-export const gameCameraQuery = cameraQuery.with('cameraOffset').where(e => e.renderGroup === RenderGroup.Game)
-const houseQuery = ecs.with('npcName', 'worldPosition', 'houseAnimator', 'rotation', 'collider').where(e => e.npcName === 'Grandma')
+const mainMenuCameraQuery = cameraQuery.where((e) => e.renderGroup === RenderGroup.MainMenu)
+export const gameCameraQuery = cameraQuery.with('cameraOffset').where((e) => e.renderGroup === RenderGroup.Game)
+const houseQuery = ecs.with('npcName', 'worldPosition', 'houseAnimator', 'rotation', 'collider').where((e) => e.npcName === 'Grandma')
 const playerMarkerQuery = ecs.with('player', 'position')
 const getMainMenuCamTargetPos = () => {
 	return houseQuery.first?.worldPosition ?? playerMarkerQuery.first?.position
@@ -44,10 +44,7 @@ export const setMainCameraPosition = () => {
 	}
 }
 
-export const initMainMenuCamPos = [
-	() => houseQuery.onEntityAdded.subscribe(setMainCameraPosition),
-	() => playerMarkerQuery.onEntityAdded.subscribe(setMainCameraPosition),
-]
+export const initMainMenuCamPos = [() => houseQuery.onEntityAdded.subscribe(setMainCameraPosition), () => playerMarkerQuery.onEntityAdded.subscribe(setMainCameraPosition)]
 export const renderMainMenu = () => {
 	for (const { scene, renderer } of mainMenuRenderGroupQuery) {
 		for (const camera of mainMenuCameraQuery) {

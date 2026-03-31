@@ -5,7 +5,7 @@ import { ecs, gameInputs } from '@/global/init'
 
 const playerQuery = ecs.with('player', 'position')
 const lockedOnQuery = ecs.with('lockedOn')
-const enemiesQuery = ecs.with('faction', 'position', 'currentHealth').where(e => e.currentHealth > 0 && e.faction === Faction.Enemy)
+const enemiesQuery = ecs.with('faction', 'position', 'currentHealth').where((e) => e.currentHealth > 0 && e.faction === Faction.Enemy)
 const unlock = (e: Entity) => {
 	ecs.removeComponent(e, 'lockedOn')
 	ecs.removeComponent(e, 'outline')
@@ -27,7 +27,7 @@ export const selectNewLockedEnemy = () => {
 	}
 }
 const switchLockOn = (diff = 1 | -1) => {
-	const alreadyLocked = enemiesQuery.entities.find(e => e.lockedOn)
+	const alreadyLocked = enemiesQuery.entities.find((e) => e.lockedOn)
 	if (alreadyLocked) {
 		const lockOnIndex = enemiesQuery.entities.indexOf(alreadyLocked)
 		if (lockOnIndex !== -1) {
@@ -42,7 +42,7 @@ const switchLockOn = (diff = 1 | -1) => {
 
 export const lockOnEnemy = () => {
 	if (gameInputs.get('lock').justPressed) {
-		const alreadyLocked = enemiesQuery.entities.find(e => e.lockedOn)
+		const alreadyLocked = enemiesQuery.entities.find((e) => e.lockedOn)
 
 		if (alreadyLocked) {
 			unlock(alreadyLocked)

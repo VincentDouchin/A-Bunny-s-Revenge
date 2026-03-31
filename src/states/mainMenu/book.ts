@@ -9,26 +9,27 @@ import { cloneCanvas, imgToCanvas } from '@/utils/buffer'
 
 type MenuOption = 'Continue' | 'New Game' | 'Settings' | 'Credits'
 
-const selectOption = (fn: (offset: number) => void) => new Promise<void>((resolve) => {
-	playSound('020_Confirm_10')
-	tweens.add({
-		from: 0,
-		to: 20,
-		duration: 200,
-		onUpdate: fn,
-		repeatType: 'reverse',
-		repeat: 2,
-	})
+const selectOption = (fn: (offset: number) => void) =>
+	new Promise<void>((resolve) => {
+		playSound('020_Confirm_10')
+		tweens.add({
+			from: 0,
+			to: 20,
+			duration: 200,
+			onUpdate: fn,
+			repeatType: 'reverse',
+			repeat: 2,
+		})
 
-	setTimeout(resolve, 300)
-})
+		setTimeout(resolve, 300)
+	})
 
 export class MainMenuBook extends Object3D {
 	withTimeUniforms = new Array<Material>()
 	buttons = new Map<MenuOption, Mesh>()
 	disabled = new Array<MenuOption>()
 	selected: MenuOption
-	optionsDimensions = new Map<MenuOption, { y: number, w: number }>()
+	optionsDimensions = new Map<MenuOption, { y: number; w: number }>()
 	pageRightCanvas = imgToCanvas(assets.textures.parchment.source.data)
 	pageRightTexture = new CanvasTexture(this.pageRightCanvas.canvas)
 	menu = ['Continue', 'New Game'] as const
@@ -92,7 +93,7 @@ export class MainMenuBook extends Object3D {
 	confirm() {
 		if (this.transition) return
 		this.confirmed = true
-		return selectOption(f => this.drawPage(f))
+		return selectOption((f) => this.drawPage(f))
 	}
 
 	navigate(dir: -1 | 1) {
@@ -108,29 +109,32 @@ export class MainMenuBook extends Object3D {
 			this.selected = newSelected
 			this.drawPage()
 			this.transition = true
-			await tweens.async({
-				from: 0,
-				to: -1,
-				ease: [easeInOut],
-				duration: 1000,
-				onUpdate: f => this.windowShader.windowSize.value = f,
-			}, {
-				from: -1,
-				to: 0,
-				ease: [easeInOut],
-				duration: 1000,
-				onPlay() {
-					if (newSelected === 'Continue') {
-						app.disable('intro')
-						app.enable('farm', { direction: 'doorFarm' })
-					}
-					if (newSelected === 'New Game') {
-						app.disable('farm')
-						app.enable('intro')
-					}
+			await tweens.async(
+				{
+					from: 0,
+					to: -1,
+					ease: [easeInOut],
+					duration: 1000,
+					onUpdate: (f) => (this.windowShader.windowSize.value = f),
 				},
-				onUpdate: f => this.windowShader.windowSize.value = f,
-			})
+				{
+					from: -1,
+					to: 0,
+					ease: [easeInOut],
+					duration: 1000,
+					onPlay() {
+						if (newSelected === 'Continue') {
+							app.disable('intro')
+							app.enable('farm', { direction: 'doorFarm' })
+						}
+						if (newSelected === 'New Game') {
+							app.disable('farm')
+							app.enable('intro')
+						}
+					},
+					onUpdate: (f) => (this.windowShader.windowSize.value = f),
+				},
+			)
 			this.transition = false
 		}
 	}

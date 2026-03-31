@@ -7,17 +7,17 @@ import { assets, ecs } from '@/global/init'
 import { once } from '@/utils/mapFunctions'
 
 export interface ConversationLine {
-	emote?: keyof typeof assets['emotes']['emotes']
+	emote?: keyof (typeof assets)['emotes']['emotes']
 	speaker: string
 	fr: string
 	en: string
-	choice: Record<string, { fr: string, en: string }>
+	choice: Record<string, { fr: string; en: string }>
 	next?: string
 }
 export interface Conversation {
 	actor: Array<{
 		name: string
-		model: keyof typeof assets['characters']
+		model: keyof (typeof assets)['characters']
 		position: 'left' | 'right'
 		scale?: number
 		animation?: string
@@ -29,7 +29,7 @@ export interface Conversation {
 }
 
 export const conversationQuery = ecs.with('conversation')
-const dialogRenderGroupQuery = ecs.with('group', 'renderGroup', 'scene').where(e => e.renderGroup === RenderGroup.Dialog)
+const dialogRenderGroupQuery = ecs.with('group', 'renderGroup', 'scene').where((e) => e.renderGroup === RenderGroup.Dialog)
 export const setupDialogRenderGroup = once(() => {
 	const scene = new Scene()
 	const group = new Group()
@@ -40,12 +40,7 @@ export const setupDialogRenderGroup = once(() => {
 		group,
 	})
 	const ratio = 300
-	const camera = new OrthographicCamera(
-		-window.innerWidth / ratio,
-		window.innerWidth / ratio,
-		window.innerHeight / ratio,
-		-window.innerHeight / ratio,
-	)
+	const camera = new OrthographicCamera(-window.innerWidth / ratio, window.innerWidth / ratio, window.innerHeight / ratio, -window.innerHeight / ratio)
 	ecs.add({
 		camera,
 		position: new Vector3(0, 0, 15),
@@ -56,10 +51,10 @@ export const setupDialogRenderGroup = once(() => {
 	camera.lookAt(new Vector3(0, 0, 0))
 	ecs.add({
 		parent: dialogRenderGroup,
-		light: new AmbientLight(0xFFFFFF, 2),
+		light: new AmbientLight(0xffffff, 2),
 		position: new Vector3(),
 	})
-	const light = new DirectionalLight(0xFFFFFF, 0.6)
+	const light = new DirectionalLight(0xffffff, 0.6)
 	light.position.setZ(-2)
 	light.lookAt(new Vector3(0, 0, 0))
 	light.castShadow = true
@@ -74,14 +69,14 @@ export const setupDialogRenderGroup = once(() => {
 export const validateConversation = (conversation: Conversation) => {
 	try {
 		if (!conversation.dialog.main) {
-			throw new Error('No starting point, please add a \"main\" branch')
+			throw new Error('No starting point, please add a "main" branch')
 		}
 		for (const actor of conversation.actor) {
 			if (!(actor.model in assets.characters)) {
 				throw new Error(`Unknown model : ${actor.model}`)
 			}
-			if (actor.animation && !assets.characters[actor.model].animations.some(animation => actor.animation === animation.name)) {
-				throw new Error(`Unknown animation : ${actor.animation} for model ${actor.model} \n Possible animations: ${assets.characters[actor.model].animations.map(a => a.name).join(' / ')}`)
+			if (actor.animation && !assets.characters[actor.model].animations.some((animation) => actor.animation === animation.name)) {
+				throw new Error(`Unknown animation : ${actor.animation} for model ${actor.model} \n Possible animations: ${assets.characters[actor.model].animations.map((a) => a.name).join(' / ')}`)
 			}
 			if (!['left', 'right'].includes(actor.position)) {
 				throw new Error(`wrong placement : ${actor.position}`)
@@ -94,7 +89,7 @@ export const validateConversation = (conversation: Conversation) => {
 			if (line.next && !(line.next in conversation.dialog)) {
 				throw new Error(`the branch ${line.next} is not present in the dialog`)
 			}
-			if (!conversation.actor.some(actor => line.speaker === actor.name)) {
+			if (!conversation.actor.some((actor) => line.speaker === actor.name)) {
 				throw new Error(`Unknown speaker : ${line.speaker}`)
 			}
 			if (line.emote && !(line.emote in assets.emotes.emotes)) {
@@ -112,7 +107,7 @@ export const validateConversation = (conversation: Conversation) => {
 			}
 		}
 	} catch (e: any) {
-		// eslint-disable-next-line no-console
+		// oxlint-disable-next-line no-console
 		console.log(conversation)
 		throw new Error(e)
 	}
@@ -152,6 +147,7 @@ const displayDialog = (dialog: Conversation) => {
 		})
 	}
 }
-export const setupConversation = () => conversationQuery.onEntityAdded.subscribe((e) => {
-	displayDialog(e.conversation)
-})
+export const setupConversation = () =>
+	conversationQuery.onEntityAdded.subscribe((e) => {
+		displayDialog(e.conversation)
+	})

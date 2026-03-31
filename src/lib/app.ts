@@ -2,15 +2,13 @@ import { entries, objectKeys } from '@/utils/mapFunctions'
 
 export type AppStates<A extends App<any, any>> = A extends App<infer States, any> ? States[number] : never
 
-export type UpdateSystem<A extends App<any, any>, S extends AppStates<A> | void = void> = A extends App<any, infer Resources>
-	? (resources: S extends keyof Resources ? Resources[S] : void) => void
-	: never
+export type UpdateSystem<A extends App<any, any>, S extends AppStates<A> | void = void> =
+	A extends App<any, infer Resources> ? (resources: S extends keyof Resources ? Resources[S] : void) => void : never
 
 export type TransitionSystem<A extends App<any, any>, S extends AppStates<A>> = (resources: Resources<A, S>) => Promise<void> | void
 
-export type SubscriberSystem<A extends App<any, any>, S extends AppStates<A> | void = void> = A extends App<any, infer Resources>
-	? (resources: S extends keyof Resources ? Resources[S] : void) => () => void
-	: never
+export type SubscriberSystem<A extends App<any, any>, S extends AppStates<A> | void = void> =
+	A extends App<any, infer Resources> ? (resources: S extends keyof Resources ? Resources[S] : void) => () => void : never
 
 type Systems<A extends App<any, any>> = {
 	[S in AppStates<A>]?: {
@@ -24,9 +22,7 @@ type Systems<A extends App<any, any>> = {
 		render: Set<() => void>
 	}
 }
-export type Resources<A extends App<any, any>, S extends AppStates<A>> = A extends App<any, infer R>
-	? R[S]
-	: never
+export type Resources<A extends App<any, any>, S extends AppStates<A>> = A extends App<any, infer R> ? R[S] : never
 
 type Schedule = 'enter' | 'preUpdate' | 'update' | 'postUpdate' | 'exit'
 export type Plugin<A extends App<any, any>> = (app: A) => void
@@ -61,7 +57,7 @@ export class App<States extends string[], Resources extends Record<string, any> 
 	#accumulator: number = 0
 	#running: boolean = false
 	#callbackId: number | null = null
-	#initCallBack: (() => (void | Promise<void>)) | null = null
+	#initCallBack: (() => void | Promise<void>) | null = null
 	constructor(appBuilder: AppBuilder<States, Resources>) {
 		this.#enabledStates = appBuilder.enabledStates
 		this.#states = appBuilder.states
@@ -81,13 +77,13 @@ export class App<States extends string[], Resources extends Record<string, any> 
 		}
 	}
 
-	onInit(fn: () => (void | Promise<void>)) {
+	onInit(fn: () => void | Promise<void>) {
 		this.#initCallBack = fn
 		return this
 	}
 
 	get states() {
-		return this.#states.flatMap(states => [...states]) as AppStates<this>[]
+		return this.#states.flatMap((states) => [...states]) as AppStates<this>[]
 	}
 
 	getResources<S extends States[number]>(state: S) {
@@ -105,7 +101,7 @@ export class App<States extends string[], Resources extends Record<string, any> 
 		for (const [state, resources] of transitions) {
 			this.#enabledStates[state] = resources as Resources[typeof state]
 			const systems = this.#systems[state]?.enter ?? []
-			const otherStates = this.#states.find(s => s.has(state))
+			const otherStates = this.#states.find((s) => s.has(state))
 			if (otherStates) {
 				for (const otherState of otherStates) {
 					if (otherState !== state) {
@@ -253,7 +249,7 @@ export class App<States extends string[], Resources extends Record<string, any> 
 
 	async start() {
 		this.#running = true
-		this.#initCallBack && await this.#initCallBack()
+		if (this.#initCallBack) await this.#initCallBack()
 		this.#initCallBack = null
 		this.loop()
 	}
@@ -283,8 +279,10 @@ export const runIf = (condition: () => boolean, ...systems: ((...args: any[]) =>
 	}
 }
 
-export const set = <A extends App<any, any>, S extends AppStates<A>>(systems: UpdateSystem<A, S>[]) => (args: Resources<A, S>) => {
-	for (const system of systems) {
-		system(args)
+export const set =
+	<A extends App<any, any>, S extends AppStates<A>>(systems: UpdateSystem<A, S>[]) =>
+	(args: Resources<A, S>) => {
+		for (const system of systems) {
+			system(args)
+		}
 	}
-}

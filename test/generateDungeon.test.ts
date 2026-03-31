@@ -1,3 +1,4 @@
+// oxlint-disable unicorn/no-empty-file
 // import { World } from 'miniplex'
 // import { beforeEach, describe, expect, it, vi } from 'vitest'
 // import levelsData from '../assets/levels/data.json'

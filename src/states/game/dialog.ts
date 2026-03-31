@@ -27,7 +27,7 @@ export const turnNPCHead = () => {
 					} else {
 						targetQuaternion.setFromAxisAngle(new Vector3(0, 1, 0), 0)
 					}
-					headBone.quaternion.slerp(targetQuaternion, time.delta * 4 / 1000)
+					headBone.quaternion.slerp(targetQuaternion, (time.delta * 4) / 1000)
 				}
 			}
 		}

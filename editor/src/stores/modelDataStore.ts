@@ -8,10 +8,14 @@ export const useModelDataStore = defineStore('modelData', () => {
 	const modelData = shallowRef<Record<string, Record<string, AssetData>>>({})
 	const init = async () => {
 		const existingValue = await get(key)
-		modelData.value = existingValue ?? await loadBoundingBox()
+		modelData.value = existingValue ?? (await loadBoundingBox())
 	}
-	watchDebounced(modelData, (val) => {
-		set(key, toRaw(val))
-	}, { debounce: 1000, deep: true })
+	watchDebounced(
+		modelData,
+		(val) => {
+			set(key, toRaw(val))
+		},
+		{ debounce: 1000, deep: true },
+	)
 	return { init, modelData }
 })

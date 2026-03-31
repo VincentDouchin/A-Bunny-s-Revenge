@@ -6,25 +6,26 @@ interface ChestLoot {
 	quantity: number
 	items: Drop[]
 }
-export const chestLoot: ChestLoot[] = [{
-	level: 0,
-	quantity: 5,
-	items: [
-		{ name: 'carrot_seeds', quantity: 2, rarity: Rarity.Common },
-		{ name: 'tomato_seeds', quantity: 1, rarity: Rarity.Common },
-		{ name: 'lettuce_seeds', quantity: 1, rarity: Rarity.Common },
-		{ name: 'beet_seeds', quantity: 1, rarity: Rarity.Common },
-		{ name: 'recipe', recipe: 'tomato_soup', quantity: 1, rarity: Rarity.Common },
-		{ name: 'recipe', recipe: 'honey_glazed_carrot', quantity: 1, rarity: Rarity.Common },
-		{ name: 'recipe', recipe: 'ham_honey', quantity: 1, rarity: Rarity.Rare },
-		{ name: 'recipe', recipe: 'slime_bread', quantity: 1, rarity: Rarity.Rare },
-		{ name: 'recipe', recipe: 'slime_dumpling', quantity: 1, rarity: Rarity.Rare },
-		{ name: 'Heart', health: 1, quantity: 1, rarity: Rarity.Rare },
-	],
-}, {
-	level: 1,
-	quantity: 5,
-	items: [
-		{ name: 'Heart', health: 1, quantity: 1, rarity: Rarity.Rare },
-	],
-}]
+export const chestLoot: ChestLoot[] = [
+	{
+		level: 0,
+		quantity: 5,
+		items: [
+			{ name: 'carrot_seeds', quantity: 2, rarity: Rarity.Common },
+			{ name: 'tomato_seeds', quantity: 1, rarity: Rarity.Common },
+			{ name: 'lettuce_seeds', quantity: 1, rarity: Rarity.Common },
+			{ name: 'beet_seeds', quantity: 1, rarity: Rarity.Common },
+			{ name: 'recipe', recipe: 'tomato_soup', quantity: 1, rarity: Rarity.Common },
+			{ name: 'recipe', recipe: 'honey_glazed_carrot', quantity: 1, rarity: Rarity.Common },
+			{ name: 'recipe', recipe: 'ham_honey', quantity: 1, rarity: Rarity.Rare },
+			{ name: 'recipe', recipe: 'slime_bread', quantity: 1, rarity: Rarity.Rare },
+			{ name: 'recipe', recipe: 'slime_dumpling', quantity: 1, rarity: Rarity.Rare },
+			{ name: 'Heart', health: 1, quantity: 1, rarity: Rarity.Rare },
+		],
+	},
+	{
+		level: 1,
+		quantity: 5,
+		items: [{ name: 'Heart', health: 1, quantity: 1, rarity: Rarity.Rare }],
+	},
+]

@@ -2,9 +2,12 @@ import type { Node } from 'three/webgpu'
 import rawPalette from '@assets/palette.txt?raw'
 import { abs, color, dot, float, Fn, If, min, vec3, vec4 } from 'three/tsl'
 
-const palette = rawPalette.split('\r\n').filter(Boolean).map(color => `#${color}`.toUpperCase())
+const palette = rawPalette
+	.split('\r\n')
+	.filter(Boolean)
+	.map((color) => `#${color}`.toUpperCase())
 export const createQuantizeFn = () => {
-	const paletteColors = palette.map(hex => color(hex))
+	const paletteColors = palette.map((hex) => color(hex))
 
 	// Returns a Fn that takes any color node and snaps it to the palette
 	return Fn<[Node<'vec4'>], Node<'vec4'>>(([inputColor]) => {
@@ -71,7 +74,9 @@ const hslToRgb = Fn<[Node<'vec3'>], Node<'vec3'>>(([hsl]) => {
 	const s = hsl.y
 	const l = hsl.z
 
-	const c = float(1.0).sub(abs(l.mul(2.0).sub(1.0))).mul(s)
+	const c = float(1.0)
+		.sub(abs(l.mul(2.0).sub(1.0)))
+		.mul(s)
 	const x = c.mul(float(1.0).sub(abs(h.mul(6.0).fract().mul(2.0).sub(1.0))))
 	const m = l.sub(c.div(2.0))
 
@@ -87,31 +92,31 @@ const hslToRgb = Fn<[Node<'vec3'>], Node<'vec3'>>(([hsl]) => {
 		g.assign(x)
 		b.assign(0.0)
 	})
-	// 1-2: r=x, g=c, b=0
+		// 1-2: r=x, g=c, b=0
 		.ElseIf(h6.lessThan(2.0), () => {
 			r.assign(x)
 			g.assign(c)
 			b.assign(0.0)
 		})
-	// 2-3: r=0, g=c, b=x
+		// 2-3: r=0, g=c, b=x
 		.ElseIf(h6.lessThan(3.0), () => {
 			r.assign(0.0)
 			g.assign(c)
 			b.assign(x)
 		})
-	// 3-4: r=0, g=x, b=c
+		// 3-4: r=0, g=x, b=c
 		.ElseIf(h6.lessThan(4.0), () => {
 			r.assign(0.0)
 			g.assign(x)
 			b.assign(c)
 		})
-	// 4-5: r=x, g=0, b=c
+		// 4-5: r=x, g=0, b=c
 		.ElseIf(h6.lessThan(5.0), () => {
 			r.assign(x)
 			g.assign(0.0)
 			b.assign(c)
 		})
-	// 5-6: r=c, g=0, b=x
+		// 5-6: r=c, g=0, b=x
 		.Else(() => {
 			r.assign(c)
 			g.assign(0.0)

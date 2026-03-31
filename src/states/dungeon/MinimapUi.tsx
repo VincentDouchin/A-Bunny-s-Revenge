@@ -15,7 +15,7 @@ import { Direction } from '@/lib/directions'
 import { entries } from '@/utils/mapFunctions'
 import { RoomType } from './generateDungeon'
 
-const RoomUi = ({ room, direction, previous, current }: { room: Room, direction?: Direction, previous?: Room, current: boolean }) => {
+const RoomUi = ({ room, direction, previous, current }: { room: Room; direction?: Direction; previous?: Room; current: boolean }) => {
 	const dir: Record<Direction, string> = {
 		[Direction.N]: '0% calc(-100% - 0.5rem)',
 		[Direction.S]: '0% calc(100% + 0.5rem)',
@@ -31,58 +31,57 @@ const RoomUi = ({ room, direction, previous, current }: { room: Room, direction?
 		[Direction.E]: { width: '1.1rem', height: '0.5rem', left: '100%' },
 		[Direction.W]: { width: '1.1rem', height: '0.5rem', right: '100%' },
 	}
-	css/* css */`
-	.minimap-wrapper{
-		--border: solid 0.2rem black;
-		width: 3rem;
-		height: 2rem;
-		background: ${current ? 'yellow' : 'white'};
-		border-radius: 0.5rem;
-		border: var(--border);
-		position: absolute;
-		translate: ${offset};
-		box-sizing: content-box;
-	}
-	.minimap-container{
-		position: relative;
-		display: grid;
-		place-items: center;
-		height: 100%;
-	}
-	.minimap-icon{
-	 	font-size: 1.5rem;
-		fill: black;
-		display: grid;
-	}
-	.connector{
-		position: absolute;
-		background: white;
-		z-index: 1;
-		box-sizing: content-box;
-	}
-	.corridor{
-		position: absolute;
-		background: black;
-		box-sizing: content-box;
-		border: var(--border);
-	}
-	.east-fade{
-		mask-image: linear-gradient(to left, transparent, rgba(0, 0, 0, 1));
-		border-right: none;
-	}
-	.west-fade{
-		mask-image: linear-gradient(to right, transparent, rgba(0, 0, 0, 1));
-		border-left: none;
-	}
-	.north-fade{
-		mask-image: linear-gradient(to bottom, transparent, rgba(0, 0, 0, 1));
-		border-top: none;
-	}
-	.south-fade{
-		mask-image: linear-gradient(to top, transparent, rgba(0, 0, 0, 1));
-		border-bottom: none;
-	}
-	
+	css /* css */ `
+		.minimap-wrapper {
+			--border: solid 0.2rem black;
+			width: 3rem;
+			height: 2rem;
+			background: ${current ? 'yellow' : 'white'};
+			border-radius: 0.5rem;
+			border: var(--border);
+			position: absolute;
+			translate: ${offset};
+			box-sizing: content-box;
+		}
+		.minimap-container {
+			position: relative;
+			display: grid;
+			place-items: center;
+			height: 100%;
+		}
+		.minimap-icon {
+			font-size: 1.5rem;
+			fill: black;
+			display: grid;
+		}
+		.connector {
+			position: absolute;
+			background: white;
+			z-index: 1;
+			box-sizing: content-box;
+		}
+		.corridor {
+			position: absolute;
+			background: black;
+			box-sizing: content-box;
+			border: var(--border);
+		}
+		.east-fade {
+			mask-image: linear-gradient(to left, transparent, rgba(0, 0, 0, 1));
+			border-right: none;
+		}
+		.west-fade {
+			mask-image: linear-gradient(to right, transparent, rgba(0, 0, 0, 1));
+			border-left: none;
+		}
+		.north-fade {
+			mask-image: linear-gradient(to bottom, transparent, rgba(0, 0, 0, 1));
+			border-top: none;
+		}
+		.south-fade {
+			mask-image: linear-gradient(to top, transparent, rgba(0, 0, 0, 1));
+			border-bottom: none;
+		}
 	`
 	return (
 		<div class="minimap-wrapper">
@@ -107,19 +106,23 @@ const RoomUi = ({ room, direction, previous, current }: { room: Room, direction?
 						<Match when={room.type === RoomType.Seller}>
 							<Store />
 						</Match>
-
 					</Switch>
 				</div>
-				<For each={entries(room.doors).filter(x => x[1] !== previous)}>
+				<For each={entries(room.doors).filter((x) => x[1] !== previous)}>
 					{([direction, nextRoom]) => {
 						return (
 							<>
 								<Show when={nextRoom}>
-									{nextRoom => (
-
+									{(nextRoom) => (
 										<>
-											<div class="connector" style={connectorSize[direction]}></div>
-											<div class="corridor" style={connectorSize[direction]}></div>
+											<div
+												class="connector"
+												style={connectorSize[direction]}
+											></div>
+											<div
+												class="corridor"
+												style={connectorSize[direction]}
+											></div>
 											<RoomUi
 												current={false}
 												room={nextRoom()}
@@ -130,45 +133,53 @@ const RoomUi = ({ room, direction, previous, current }: { room: Room, direction?
 									)}
 								</Show>
 								<Show when={!nextRoom}>
-									<div class="connector" classList={{ [`${direction}-fade`]: true }} style={connectorSize[direction]}></div>
-									<div class="corridor" classList={{ [`${direction}-fade`]: true }} style={connectorSize[direction]}></div>
+									<div
+										class="connector"
+										classList={{ [`${direction}-fade`]: true }}
+										style={connectorSize[direction]}
+									></div>
+									<div
+										class="corridor"
+										classList={{ [`${direction}-fade`]: true }}
+										style={connectorSize[direction]}
+									></div>
 								</Show>
 							</>
 						)
 					}}
 				</For>
-
 			</div>
 		</div>
 	)
 }
 
 export const MiniMapUi = (props: { resources: Resources<typeof app, 'dungeon'> }) => {
-	css/* css */`
-	.minimap{
-		margin: 1rem;
-		width: 15rem;
-		height: 10rem;
-		background: var(--black-transparent);
-		border-radius: 1rem;
-		display: grid;
-		place-items: center;
-		overflow: hidden;
-		position:relative;
-	}
+	css /* css */ `
+		.minimap {
+			margin: 1rem;
+			width: 15rem;
+			height: 10rem;
+			background: var(--black-transparent);
+			border-radius: 1rem;
+			display: grid;
+			place-items: center;
+			overflow: hidden;
+			position: relative;
+		}
 	`
 
 	const visible = atom(false)
 	onMount(() => setTimeout(() => visible(true), 100))
 	return (
-
 		<Transition name="traverse-down">
 			<Show when={visible()}>
 				<div class="minimap">
-					<RoomUi room={props.resources.dungeon} current={true} />
+					<RoomUi
+						room={props.resources.dungeon}
+						current={true}
+					/>
 				</div>
 			</Show>
 		</Transition>
-
 	)
 }

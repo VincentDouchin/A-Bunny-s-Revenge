@@ -20,31 +20,30 @@ export const LoseUi = () => {
 		gameOver(false)
 	}
 
-	css/* css */`
-	.losing{
-		height: fit-content;
-		place-self: center;
-		background: linear-gradient(0deg, transparent, hsla(0, 0%, 0%, 0.4) 20% 80%, transparent);
-		width: 100%;
-		text-align: center;
-		font-size: 9rem;
-		color: red;
-		position: relative;
-
-	}
-	.losing-button{
-		margin: auto;
-		position: absolute;
-		left: 50%;
-		transform: translateX(-50%);
-		display: flex;
-		align-items: center;
-		gap: 1rem;
-}
+	css /* css */ `
+		.losing {
+			height: fit-content;
+			place-self: center;
+			background: linear-gradient(0deg, transparent, hsla(0, 0%, 0%, 0.4) 20% 80%, transparent);
+			width: 100%;
+			text-align: center;
+			font-size: 9rem;
+			color: red;
+			position: relative;
+		}
+		.losing-button {
+			margin: auto;
+			position: absolute;
+			left: 50%;
+			transform: translateX(-50%);
+			display: flex;
+			align-items: center;
+			gap: 1rem;
+		}
 	`
 	return (
 		<Show when={gameOver()}>
-			{(_) =>	{
+			{(_) => {
 				const context = useGame()
 				onMount(() => {
 					playSound('losing_musical')
@@ -55,9 +54,7 @@ export const LoseUi = () => {
 					}
 				})
 				return (
-					<div
-						class="fade-in losing"
-					>
+					<div class="fade-in losing">
 						YOU DIED
 						<button
 							class="button losing-button"
@@ -65,12 +62,12 @@ export const LoseUi = () => {
 						>
 							<Show when={!context?.usingTouch()}>
 								<InputIcon input={menuInputs.get('validate')} />
-							</Show>
-							{' '}
+							</Show>{' '}
 							Retry
 						</button>
 					</div>
-				) }}
+				)
+			}}
 		</Show>
 	)
 }

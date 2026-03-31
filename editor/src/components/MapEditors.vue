@@ -6,8 +6,16 @@ const height = ref(1)
 </script>
 
 <template>
-	<NCard v-if="levelStore.levelData && levelStore.selectedLevel" :key="levelStore.selectedLevel" size="small">
-		<NCollapse v-model:expanded-names="open" accordion display-directive="show">
+	<NCard
+		v-if="levelStore.levelData && levelStore.selectedLevel"
+		:key="levelStore.selectedLevel"
+		size="small"
+	>
+		<NCollapse
+			v-model:expanded-names="open"
+			accordion
+			display-directive="show"
+		>
 			<SingleMapEditor
 				:open
 				map="heightMap"
@@ -44,14 +52,20 @@ const height = ref(1)
 				@update="() => treeStore.getTreesData()"
 			>
 				<template #default="{ color, setColor }">
-					<NInputGroup style="display:grid;grid-template-columns: 1fr 1fr">
-						<NButton :secondary="color === '#00FF00'" @click="setColor('#00FF00')">
+					<NInputGroup style="display: grid; grid-template-columns: 1fr 1fr">
+						<NButton
+							:secondary="color === '#00FF00'"
+							@click="setColor('#00FF00')"
+						>
 							<template #icon>
 								<div class="square green" />
 							</template>
 							Trees
 						</NButton>
-						<NButton :secondary="color === '#FF0000'" @click="setColor('#FF0000')">
+						<NButton
+							:secondary="color === '#FF0000'"
+							@click="setColor('#FF0000')"
+						>
 							<template #icon>
 								<div class="square red" />
 							</template>

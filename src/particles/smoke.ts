@@ -21,10 +21,13 @@ export const smoke = () => {
 		material: mat,
 		renderOrder: 1,
 		behaviors: [
-			new SizeOverLife(new PiecewiseBezier([[new Bezier(1, 0.75, 0.50, 0.25), 0]])),
-			new ColorOverLife(new Gradient(
-				[[new Vector3(0, 0, 0), 0], [new Vector3(0.3, 0.3, 0.3), 1]],
-			)),
+			new SizeOverLife(new PiecewiseBezier([[new Bezier(1, 0.75, 0.5, 0.25), 0]])),
+			new ColorOverLife(
+				new Gradient([
+					[new Vector3(0, 0, 0), 0],
+					[new Vector3(0.3, 0.3, 0.3), 1],
+				]),
+			),
 		],
 	})
 	system.emitter.rotateX(-Math.PI / 2)

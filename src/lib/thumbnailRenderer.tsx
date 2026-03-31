@@ -22,7 +22,7 @@ export class Thumbnailer {
 		this.camera.zoom = 2.3
 		this.camera.lookAt(new Vector3(0, 0.3, 0))
 		this.camera.updateProjectionMatrix()
-		this.scene.add(new AmbientLight(0xFFFFFF, 2))
+		this.scene.add(new AmbientLight(0xffffff, 2))
 		renderer.setSize(this.size, this.size, false)
 		renderer.outputColorSpace = LinearSRGBColorSpace
 	}
@@ -66,7 +66,7 @@ export class Thumbnailer {
 		this.renderer.dispose()
 	}
 
-	spin({ obj }: { obj: Object3D, children: JSXElement }) {
+	spin({ obj }: { obj: Object3D; children: JSXElement }) {
 		const renderer = atom<Thumbnailer | null>(null)
 		onMount(async () => {
 			renderer(await Thumbnailer.create())
@@ -78,7 +78,6 @@ export class Thumbnailer {
 		})
 
 		return {
-
 			update: (delta: number) => {
 				const rendererValue = renderer()
 				if (rendererValue) {

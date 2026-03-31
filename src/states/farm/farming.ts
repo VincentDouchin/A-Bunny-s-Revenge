@@ -54,7 +54,7 @@ export const cropBundle = (grow: boolean, crop: NonNullable<Entity['crop']>) => 
 			to: 10,
 			duration: 500,
 			ease: reverseEasing(createBackIn(3)),
-			onUpdate: f => modelBundle.model.scale.setScalar(f),
+			onUpdate: (f) => modelBundle.model.scale.setScalar(f),
 		})
 	}
 	if (stage === maxStage(crop.name)) {
@@ -100,13 +100,15 @@ export const initPlantableSpotsInteractions = () => {
 	}
 }
 export const interactablePlantableSpot = [
-	() => plantedSpotQuery.onEntityAdded.subscribe((entity) => {
-		ecs.removeComponent(entity, 'interactable')
-		ecs.reindex(entity)
-	}),
-	() => plantableSpotsQuery.onEntityAdded.subscribe((entity) => {
-		ecs.update(entity, { interactable: Interactable.Plant })
-	}),
+	() =>
+		plantedSpotQuery.onEntityAdded.subscribe((entity) => {
+			ecs.removeComponent(entity, 'interactable')
+			ecs.reindex(entity)
+		}),
+	() =>
+		plantableSpotsQuery.onEntityAdded.subscribe((entity) => {
+			ecs.update(entity, { interactable: Interactable.Plant })
+		}),
 ]
 
 const touchedPlantableSpotQuery = plantableSpotsQuery.with('interactionContainer')
@@ -116,10 +118,12 @@ export const harvestCrop = async () => {
 		const { playerAnimator } = player
 		if (gameInputs.get('secondary').justPressed) {
 			for (const spot of touchedPlantableSpotQuery) {
-				if (save.inventories.player.some((item) => {
-					const itemData = itemsData[item.name]
-					return 'seed' in itemData
-				})) {
+				if (
+					save.inventories.player.some((item) => {
+						const itemData = itemsData[item.name]
+						return 'seed' in itemData
+					})
+				) {
 					ecs.addComponent(spot, 'menuType', MenuType.SelectSeed)
 				}
 			}
@@ -130,7 +134,7 @@ export const harvestCrop = async () => {
 					playerAnimator.playOnce('pickup')?.then(async () => {
 						playerAnimator.playAnimation('idle')
 						const extraDrops = Math.floor(spot.planted.crop.luck)
-						const extraChance = Math.random() < (spot.planted.crop.luck % 1) ? 1 : 0
+						const extraChance = Math.random() < spot.planted.crop.luck % 1 ? 1 : 0
 						const totalDrops = 1 + extraDrops + extraChance
 						for (let i = 0; i < totalDrops; i++) {
 							const bundle = itemBundle(spot.planted.crop.name)

@@ -31,7 +31,7 @@ export const CauldronMiniGameUi = () => {
 				return (
 					<Show when={cauldron()}>
 						{(cauldron) => {
-							const lightQuery = ecs.with('parent', 'fireParticles', 'light').where(e => e.parent === cauldron)
+							const lightQuery = ecs.with('parent', 'fireParticles', 'light').where((e) => e.parent === cauldron)
 							onMount(() => {
 								tweens.add({
 									from: params.zoom,
@@ -90,14 +90,14 @@ export const CauldronMiniGameUi = () => {
 									ecs.addComponent(camera, 'cameraOffset', offset)
 									addTag(camera, 'fixedCamera')
 								}
-								targetEntity && ecs.remove(targetEntity)
+								if (targetEntity) ecs.remove(targetEntity)
 								addTag(player(), 'cameraTarget')
 							})
 							const percentSynced = createMemo(() => {
 								const precision = 0.08
 								const diff = (spoon() - spot()) / (Math.PI * 2)
 								const delta = diff - Math.floor(diff)
-								const percent = delta > 0.5 ? ((1 - delta) / precision) : delta / precision
+								const percent = delta > 0.5 ? (1 - delta) / precision : delta / precision
 								return percent > 1 ? 0 : 1 - percent
 							})
 							const isSynced = createMemo(() => percentSynced() > 0)
@@ -108,12 +108,12 @@ export const CauldronMiniGameUi = () => {
 									return
 								}
 								if (output()) {
-									setSpoon(x => x + time.delta / 500 * (1 + progress() / 50))
+									setSpoon((x) => x + (time.delta / 500) * (1 + progress() / 50))
 									cauldron().spoon.rotation?.setFromAxisAngle(new Vector3(0, 1, 0), Math.PI - spoon())
 									if (menuInputs.get('validate').justReleased) {
 										if (isSynced()) {
-											setProgress(x => x + 5 + (30 * percentSynced()))
-											setSpot(x => x + Math.PI / 4 + Math.random() * Math.PI)
+											setProgress((x) => x + 5 + 30 * percentSynced())
+											setSpot((x) => x + Math.PI / 4 + Math.random() * Math.PI)
 											ecs.add({
 												parent: cauldron(),
 												singleEmitter: true,
@@ -132,7 +132,7 @@ export const CauldronMiniGameUi = () => {
 												playSound('cauldron1')
 											}
 										} else {
-											setProgress(x => Math.max(0, x - 10))
+											setProgress((x) => Math.max(0, x - 10))
 											playSound('cauldron3')
 										}
 									}
@@ -145,81 +145,91 @@ export const CauldronMiniGameUi = () => {
 								return `calc(0.5rem + ${percentSynced()}rem)`
 							})
 							const isTouch = createMemo(() => inputManager.controls() === 'touch')
-							css/* css */`
-				.button {
-					position: fixed;
-					height: 80%;
-					left: 0;
-					width: 5rem;
-					margin: 3rem 2rem;
-					display: flex;
-					justify-content: center;
-					flex-direction: column;
-				}
-				.progress-container{
-					display: grid;
-					grid-template-columns: 1fr auto 1fr;
-					place-items: center;
-					gap: 3rem;
-				}
-				.progress{
-					position: relative;
-				}
-				.progress-label {
-					position: absolute;
-					transform: translate(-50%, -100%);
-					font-size: 2rem;
-					color: white;
-					left: 50%;
-				}
-				.progress-bar {
-					width: 2rem;
-					height: 20rem;
-					border: solid 0.5rem hsl(0, 0%, 0%, 0.7);
-					border-radius: 1rem;
-					overflow: hidden;
-					position: relative;
-				}
-				.progress-fill {
-					background: linear-gradient(0, #5ab552, #9de64e);
-					margin-top: auto;
-					position: absolute;
-					bottom: 0;
-					width: 100%;
-					height:${`${progress()}%`}
-				}
-				.output-container{
-					width: 20rem;
-					height: 20rem;
-					border-radius: 200rem;
-					position: relative;
-				}
-				.output{
-					position: absolute;
-					left: 50%;
-					translate: -50%;
-					bottom: calc(100% + 2rem);
-				}
-				.spot {
-					position: absolute;
-					width: 5rem;
-					height: 5rem;
-					border-radius: 300rem;
-					top: 50%;
-					left: 50%;
-					box-sizing: content-box;
-					transform: translate(-50%,-50%);
-					border:  ${`solid ${spotColor()} ${spotSize()}`};
-					translate: ${`calc(10rem * ${spotCoordinates().x}) calc(10rem * ${spotCoordinates().y})`};
-				}
-				`
+							css /* css */ `
+								.button {
+									position: fixed;
+									height: 80%;
+									left: 0;
+									width: 5rem;
+									margin: 3rem 2rem;
+									display: flex;
+									justify-content: center;
+									flex-direction: column;
+								}
+								.progress-container {
+									display: grid;
+									grid-template-columns: 1fr auto 1fr;
+									place-items: center;
+									gap: 3rem;
+								}
+								.progress {
+									position: relative;
+								}
+								.progress-label {
+									position: absolute;
+									transform: translate(-50%, -100%);
+									font-size: 2rem;
+									color: white;
+									left: 50%;
+								}
+								.progress-bar {
+									width: 2rem;
+									height: 20rem;
+									border: solid 0.5rem hsl(0, 0%, 0%, 0.7);
+									border-radius: 1rem;
+									overflow: hidden;
+									position: relative;
+								}
+								.progress-fill {
+									background: linear-gradient(0, #5ab552, #9de64e);
+									margin-top: auto;
+									position: absolute;
+									bottom: 0;
+									width: 100%;
+									height: ${`${progress()}%`};
+								}
+								.output-container {
+									width: 20rem;
+									height: 20rem;
+									border-radius: 200rem;
+									position: relative;
+								}
+								.output {
+									position: absolute;
+									left: 50%;
+									translate: -50%;
+									bottom: calc(100% + 2rem);
+								}
+								.spot {
+									position: absolute;
+									width: 5rem;
+									height: 5rem;
+									border-radius: 300rem;
+									top: 50%;
+									left: 50%;
+									box-sizing: content-box;
+									transform: translate(-50%, -50%);
+									border: ${`solid ${spotColor()} ${spotSize()}`};
+									translate: ${`calc(10rem * ${spotCoordinates().x}) calc(10rem * ${spotCoordinates().y})`};
+								}
+							`
 							return (
 								<>
 									<Show when={isTouch()}>
-										<TouchButton size="10rem" input="primary" controller={menuInputs.touchController!}>
+										<TouchButton
+											size="10rem"
+											input="primary"
+											controller={menuInputs.touchController!}
+										>
 											<Spoon />
 										</TouchButton>
-										<TouchButton size="7rem" distance="15rem" angle="90deg" input="cancel" controller={menuInputs.touchController!}>
+										<TouchButton
+											size="7rem"
+											distance="15rem"
+											angle="90deg"
+											input="cancel"
+											controller={menuInputs.touchController!}
+										>
 											<Exit />
 										</TouchButton>
 									</Show>
@@ -233,7 +243,7 @@ export const CauldronMiniGameUi = () => {
 											</div>
 											<div class="output-container">
 												<Show when={output()}>
-													{output => (
+													{(output) => (
 														<>
 															<div class="output">
 																<ItemDisplay item={output()}></ItemDisplay>

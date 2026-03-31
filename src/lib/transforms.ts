@@ -26,21 +26,23 @@ export const getRotationFromDirection = (direction: Direction) => {
 		[Direction.S]: 2,
 	}
 	const rotation = new Quaternion()
-	rotation.setFromAxisAngle(new Vector3(0, 1, 0), Math.PI / 2 * rotations[direction])
+	rotation.setFromAxisAngle(new Vector3(0, 1, 0), (Math.PI / 2) * rotations[direction])
 	return rotation
 }
 
-const swapPosition = () => positionQuery.onEntityAdded.subscribe((e) => {
-	e.group.position.copy(e.position)
-	e.position = e.group.position
-})
+const swapPosition = () =>
+	positionQuery.onEntityAdded.subscribe((e) => {
+		e.group.position.copy(e.position)
+		e.position = e.group.position
+	})
 
 const bodiesWithoutWorldPositionQuery = ecs.with('bodyDesc', 'group').without('worldPosition')
-const addWorldPosition = () => bodiesWithoutWorldPositionQuery.onEntityAdded.subscribe((entity) => {
-	const worldPosition = new Vector3()
-	entity.group.getWorldPosition(worldPosition)
-	ecs.addComponent(entity, 'worldPosition', worldPosition)
-})
+const addWorldPosition = () =>
+	bodiesWithoutWorldPositionQuery.onEntityAdded.subscribe((entity) => {
+		const worldPosition = new Vector3()
+		entity.group.getWorldPosition(worldPosition)
+		ecs.addComponent(entity, 'worldPosition', worldPosition)
+	})
 const worldPositionQuery = ecs.with('group', 'worldPosition', 'body')
 const updateWorldPosition = () => {
 	for (const entity of worldPositionQuery) {
@@ -57,19 +59,12 @@ const updateWorldPosition = () => {
 	}
 }
 
-const bodiesQuery = ecs.with('body', 'position').without('directedDynamic').where(({ body }) => body.isDynamic() || body.isKinematic())
-const directedDynamicQuery = ecs.with('body', 'position').with('directedDynamic')
+const bodiesQuery = ecs.with('body', 'position').where(({ body }) => body.isDynamic() || body.isKinematic())
 const updateGroupPosition = () => {
 	for (const entity of bodiesQuery) {
 		const { body, position } = entity
 		const bodyPos = body.translation()
 		position.copy(bodyPos)
-	}
-	for (const { body, position, group } of directedDynamicQuery) {
-		body.setTranslation(position, true)
-		if (group) {
-			group.position.copy(position)
-		}
 	}
 }
 const rotationQuery = ecs.with('rotation')
@@ -93,6 +88,6 @@ export const transformsPlugin: Plugin<typeof app> = (app) => {
 
 export const isInIntersectionWithCollider = (collider: Collider) => {
 	let isInIntersection = false
-	world.intersectionPairsWith(collider, () => isInIntersection = true)
+	world.intersectionPairsWith(collider, () => (isInIntersection = true))
 	return isInIntersection
 }

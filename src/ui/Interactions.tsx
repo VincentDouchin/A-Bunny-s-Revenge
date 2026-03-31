@@ -1,6 +1,9 @@
-import type { With } from 'miniplex'
-import type { JSX } from 'solid-js'
+import { getSeed } from '@/constants/items'
 import type { Entity } from '@/global/entity'
+import { Interactable } from '@/global/entity'
+import { ecs, gameInputs, save, ui } from '@/global/init'
+import { app } from '@/global/states'
+import { WeaponStatsUi } from '@/states/dungeon/WeaponStatsUi'
 import Carrot from '@assets/icons/carrot-solid.svg'
 import Clipboard from '@assets/icons/clipboard-check-solid.svg'
 import Talk from '@assets/icons/comment-dots-solid.svg'
@@ -12,49 +15,44 @@ import Sword from '@assets/icons/sword.svg'
 import WateringCan from '@assets/icons/tool_watering_can.svg'
 import Utensils from '@assets/icons/utensils-solid.svg'
 import Wind from '@assets/icons/wind-solid.svg'
+import type { With } from 'miniplex'
+import type { Component } from 'solid-js'
 import { createSignal, For, onMount } from 'solid-js'
 import { Portal, Show } from 'solid-js/web'
 import { css } from 'solid-styled'
 import { Transition } from 'solid-transition-group'
-import { getSeed } from '@/constants/items'
-import { Interactable } from '@/global/entity'
-import { ecs, gameInputs, save, ui } from '@/global/init'
-import { app } from '@/global/states'
-import { WeaponStatsUi } from '@/states/dungeon/WeaponStatsUi'
 import { OutlineText } from './components/styledComponents'
 import { InputIcon } from './InputIcon'
 import { useGame, useQuery } from './store'
 
-export const getInteractables = (
-	player: With<Entity, 'inventory'>,
-	entity?: With<Entity, 'interactable'>,
-): ({ text: string, icon?: JSX.Element } | undefined)[] => {
-	const hasSeedInInventory = player.inventory?.filter(Boolean)?.some(item => getSeed(item.name))
+export const getInteractables = (player: With<Entity, 'inventory'>, entity?: With<Entity, 'interactable'>): ({ text: string; icon?: Component } | undefined)[] => {
+	const hasSeedInInventory = player.inventory?.filter(Boolean)?.some((item) => getSeed(item.name))
 	const hasSelectedSeed = player.inventory?.filter(Boolean).some((item) => {
 		return getSeed(item.name) === save.selectedSeed && item.quantity > 0
 	})
 	if (entity) {
 		switch (entity?.interactable) {
-			case Interactable.Plant: return [
-				hasSelectedSeed ? { text: `plant ${save.selectedSeed}`, icon: Carrot } : undefined,
-				hasSeedInInventory ? { text: 'select seed', icon: Seed } : undefined,
-			]
-			case Interactable.Water: return (player.wateringCan?.waterAmount ?? 0) > 0 ? [{ text: Interactable.Water, icon: WateringCan }] : []
-			case Interactable.FillWateringCan: return [{ text: Interactable.FillWateringCan, icon: Water }]
+			case Interactable.Plant:
+				return [hasSelectedSeed ? { text: `plant ${save.selectedSeed}`, icon: Carrot } : undefined, hasSeedInInventory ? { text: 'select seed', icon: Seed } : undefined]
+			case Interactable.Water:
+				return (player.wateringCan?.waterAmount ?? 0) > 0 ? [{ text: Interactable.Water, icon: WateringCan }] : []
+			case Interactable.FillWateringCan:
+				return [{ text: Interactable.FillWateringCan, icon: Water }]
 			case Interactable.Read:
-			case Interactable.Talk: return [
-				entity.dialogContainer ? undefined : { text: entity.interactable, icon: Talk },
-			]
+			case Interactable.Talk:
+				return [entity.dialogContainer ? undefined : { text: entity.interactable, icon: Talk }]
 			case Interactable.Cauldron:
 			case Interactable.Oven:
-			case Interactable.Chop: return [
-				{ text: 'Prepare', icon: Utensils },
-				entity.recipesQueued?.length ? { text: 'Cook', icon: Spoon } : undefined,
-			]
-			case Interactable.WeaponStand: return [{ text: 'Equip', icon: HandOpen }]
-			case Interactable.Buy: return [{ text: `Buy (${entity.price})` }]
-			case Interactable.BulletinBoard :return [{ text: Interactable.BulletinBoard, icon: Clipboard }]
-			default: return [{ text: entity?.interactable }]
+			case Interactable.Chop:
+				return [{ text: 'Prepare', icon: Utensils }, entity.recipesQueued?.length ? { text: 'Cook', icon: Spoon } : undefined]
+			case Interactable.WeaponStand:
+				return [{ text: 'Equip', icon: HandOpen }]
+			case Interactable.Buy:
+				return [{ text: `Buy (${entity.price})` }]
+			case Interactable.BulletinBoard:
+				return [{ text: Interactable.BulletinBoard, icon: Clipboard }]
+			default:
+				return [{ text: entity?.interactable }]
 		}
 	}
 	if (app.isEnabled('dungeon')) {
@@ -71,8 +69,8 @@ const interactionQuery = ecs.with('interactable', 'interactionContainer', 'posit
 export const InteractionUi = () => {
 	const query = useQuery(interactionQuery)
 	const context = useGame()
-	css/* css */`
-		.interaction{
+	css /* css */ `
+		.interaction {
 			background: var(--black-transparent);
 			padding: 0.25rem 0.5rem;
 			color: white;
@@ -81,7 +79,7 @@ export const InteractionUi = () => {
 			gap: 0.5rem;
 			place-items: center;
 		}
-		.interaction-text{
+		.interaction-text {
 			display: flex;
 			gap: 0.5rem;
 			font-size: 1.5rem;
@@ -106,9 +104,7 @@ export const InteractionUi = () => {
 									<Transition name="popup">
 										<Show when={visible() && (!context?.usingTouch() || entity.weaponStand)}>
 											<div class="interaction">
-												<Show when={entity.weaponStand ? entity.weaponName : null}>
-													{weaponName => <WeaponStatsUi name={weaponName()} />}
-												</Show>
+												<Show when={entity.weaponStand ? entity.weaponName : null}>{(weaponName) => <WeaponStatsUi name={weaponName()} />}</Show>
 												<Show when={!context?.usingTouch()}>
 													<Show when={interactables()[1]}>
 														<div class="interaction-text">

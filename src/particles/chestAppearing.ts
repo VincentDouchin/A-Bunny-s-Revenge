@@ -22,10 +22,7 @@ export const chestAppearing = () => {
 		shape: new ConeEmitter({ radius: 5 }),
 		material: mat,
 		renderOrder: 2,
-		behaviors: [
-			new SizeOverLife(new PiecewiseBezier([[new Bezier(1, 0.75, 0.20, 0), 0]])),
-			new SpeedOverLife(new PiecewiseBezier([[new Bezier(1, 0.8, 0.2, 0.1), 0]])),
-		],
+		behaviors: [new SizeOverLife(new PiecewiseBezier([[new Bezier(1, 0.75, 0.2, 0), 0]])), new SpeedOverLife(new PiecewiseBezier([[new Bezier(1, 0.8, 0.2, 0.1), 0]]))],
 	})
 	system.emitter.rotateX(-Math.PI / 2)
 	return system.emitter

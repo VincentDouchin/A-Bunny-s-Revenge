@@ -2,10 +2,10 @@ import { css } from 'solid-styled'
 import { OutlineText } from '../components/styledComponents'
 
 export const FarmingTutorial = () => {
-	css/* css */`
-	.farming-tutorial{
-		text-align: center;
-	}
+	css /* css */ `
+		.farming-tutorial {
+			text-align: center;
+		}
 	`
 	return (
 		<div class="farming-tutorial">

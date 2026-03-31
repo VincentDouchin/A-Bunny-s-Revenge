@@ -19,7 +19,7 @@ const fishParameters = (e: QueryEntity<typeof fishQuery>) => {
 
 export const fishBehavior = createBehaviorTree(
 	fishQuery,
-	e => ({ ctx: fishParameters(e), entity: e, state: e.fishState }),
+	(e) => ({ ctx: fishParameters(e), entity: e, state: e.fishState }),
 	selector(
 		sequence(
 			inverter(inState('wander')),
@@ -56,7 +56,7 @@ export const fishBehavior = createBehaviorTree(
 					ease: circOut,
 					repeatType: 'mirror',
 					onComplete: () => setState('bounce')({ state: entity.fishState }),
-					onUpdate: f => entity.position.lerpVectors(from, dest, f),
+					onUpdate: (f) => entity.position.lerpVectors(from, dest, f),
 				})
 			}),
 			condition(({ entity }) => !entity.fishingProgress),
@@ -77,7 +77,7 @@ export const fishBehavior = createBehaviorTree(
 					}),
 				),
 				sequence(
-					condition(({ ctx }) => ctx.distance !== null && ctx.distance < 30 && fishQuery.entities.every(e => e.fishState.current === 'wander')),
+					condition(({ ctx }) => ctx.distance !== null && ctx.distance < 30 && fishQuery.entities.every((e) => e.fishState.current === 'wander')),
 					setState('going'),
 				),
 			),
@@ -101,7 +101,7 @@ export const fishBehavior = createBehaviorTree(
 						repeat: 1,
 						repeatType: 'mirror',
 						ease: circOut,
-						onUpdate: f => bobberPosition.lerpVectors(originalPosition, targetPosition, f),
+						onUpdate: (f) => bobberPosition.lerpVectors(originalPosition, targetPosition, f),
 					})
 				}
 			}),
@@ -139,15 +139,14 @@ export const fishBehavior = createBehaviorTree(
 						from: mat.opacity,
 						to: 0,
 						duration: 2000,
-						onUpdate: f => mat.opacity = f,
+						onUpdate: (f) => (mat.opacity = f),
 					})
 				}
 			}),
 		),
 		sequence(
 			inState('runaway'),
-			action(({ entity }) =>	entity.position.add(new Vector3(0, 0, 6).multiplyScalar(time.delta / 1000).applyQuaternion(entity.rotation))),
+			action(({ entity }) => entity.position.add(new Vector3(0, 0, 6).multiplyScalar(time.delta / 1000).applyQuaternion(entity.rotation))),
 		),
 	),
-
 )

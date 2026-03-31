@@ -18,7 +18,7 @@ const touchItem = () => {
 		let lastEntity: Entity | null = null
 
 		for (const item of interactingQuery) {
-			if (getIntersections(player, undefined, c => c === item.collider)) {
+			if (getIntersections(player, undefined, (c) => c === item.collider)) {
 				const sensorPos = new Vector3(0, 0, player.sensor.distance).applyQuaternion(player.rotation).add(player.position)
 				const dist = item.position.distanceTo(sensorPos)
 				if (dist < lastDist) {
@@ -40,21 +40,25 @@ const touchItem = () => {
 	}
 }
 
-const removeOutlines = () => outlineQuery.onEntityRemoved.subscribe((e) => {
-	e.group.traverse(node => node.layers.disable(1))
-})
+const removeOutlines = () =>
+	outlineQuery.onEntityRemoved.subscribe((e) => {
+		e.group.traverse((node) => node.layers.disable(1))
+	})
 
-const addOutline = () => outlineQuery.onEntityAdded.subscribe((e) => {
-	e.group.traverse(node => node.layers.enable(1))
-})
+const addOutline = () =>
+	outlineQuery.onEntityAdded.subscribe((e) => {
+		e.group.traverse((node) => node.layers.enable(1))
+	})
 
-const removeInteractionContainer = () => interactableQuery.onEntityRemoved.subscribe((e) => {
-	ecs.removeComponent(e, 'outline')
-	ecs.removeComponent(e, 'interactionContainer')
-})
+const removeInteractionContainer = () =>
+	interactableQuery.onEntityRemoved.subscribe((e) => {
+		ecs.removeComponent(e, 'outline')
+		ecs.removeComponent(e, 'interactionContainer')
+	})
 
 export const interactionPlugin: Plugin<typeof app> = (app) => {
-	app
-		.onUpdate('game', runIf(() => app.isDisabled('paused'), touchItem))
-		.addSubscribers('game', removeOutlines, addOutline, removeInteractionContainer)
+	app.onUpdate(
+		'game',
+		runIf(() => app.isDisabled('paused'), touchItem),
+	).addSubscribers('game', removeOutlines, addOutline, removeInteractionContainer)
 }

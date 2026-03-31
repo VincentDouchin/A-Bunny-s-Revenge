@@ -53,28 +53,92 @@ import { clickOnMenuButton, initMainMenuCamPos, renderMainMenu, selectMainMenu, 
 import { disablePortrait, enableFullscreen, resize, setupGame, stopOnLosingFocus } from './states/setup/setupGame'
 import { UI } from './ui/UI'
 
-app
-	.onInit(() => {
-		app.enable('default')
-	})
+await app
+	.onInit(() => app.enable('default'))
 	// ! DEFAULT
-	.addPlugins(debugPlugin, hierarchyPlugin, transformsPlugin, physicsPlugin, addToScene('light', 'model', 'dialogContainer', 'interactionContainer', 'miniGameContainer', 'healthBarContainer', 'stun', 'debuffsContainer', 'weaponArc', 'questMarkerContainer', 'lockedOn', 'dashIndicator'), removeStateEntityPlugin)
+	.addPlugins(
+		debugPlugin,
+		hierarchyPlugin,
+		transformsPlugin,
+		physicsPlugin,
+		addToScene(
+			'light',
+			'model',
+			'dialogContainer',
+			'interactionContainer',
+			'miniGameContainer',
+			'healthBarContainer',
+			'stun',
+			'debuffsContainer',
+			'weaponArc',
+			'questMarkerContainer',
+			'lockedOn',
+			'dashIndicator',
+		),
+		removeStateEntityPlugin,
+	)
 	.onEnter('default', initThree, initCamera)
-	.addPlugins(particlesPlugin({ chestAppearingParticles: 1, dashParticles: 5, wateringCanParticles: 1, enemyDefeatedParticles: 5 }))
+
+	.addPlugins(
+		particlesPlugin({
+			chestAppearingParticles: 1,
+			dashParticles: 5,
+			wateringCanParticles: 1,
+			enemyDefeatedParticles: 5,
+		}),
+	)
 	.onEnter('default', initHowler, initTexturesItemsAndEnemies)
 	.addSubscribers('default', () => ui.render(UI), resize, disablePortrait, enableFullscreen, stopOnLosingFocus, completeQuestStep)
 	.onPreUpdate('default', coroutines.tick, savePlayerFromTheEmbraceOfTheVoid, updateMousePosition(), moveCamera())
-	.onUpdate('default', runIf(() => app.isDisabled('paused'), ...updateAnimations('playerAnimator', 'enemyAnimator', 'ovenAnimator', 'houseAnimator', 'chestAnimator', 'kayAnimator', 'cellarDoorAnimator', 'pumpkinBossAnimator', 'explodeAnimator', 'pumpkinSeedAnimator', 'animator', 'deathMageAnimator')))
+	.onUpdate(
+		'default',
+		runIf(
+			() => app.isDisabled('paused'),
+			...updateAnimations(
+				'playerAnimator',
+				'enemyAnimator',
+				'ovenAnimator',
+				'houseAnimator',
+				'chestAnimator',
+				'kayAnimator',
+				'cellarDoorAnimator',
+				'pumpkinBossAnimator',
+				'explodeAnimator',
+				'pumpkinSeedAnimator',
+				'animator',
+				'deathMageAnimator',
+			),
+		),
+	)
 	.onRender('default', renderGame)
-	.onRender('default', runIf(() => app.isDisabled('paused'), stepWorld))
+	.onRender(
+		'default',
+		runIf(() => app.isDisabled('paused'), stepWorld),
+	)
 	.onPreUpdate('default', inputManager.update, ui.update)
-	.onRender('default', runIf(() => app.isDisabled('paused'), updateTimeUniforms))
-	.onPreUpdate('default', runIf(() => app.isDisabled('paused'), time.tick, dayNight, tweens.tick))
+	.onRender(
+		'default',
+		runIf(() => app.isDisabled('paused'), updateTimeUniforms),
+	)
+	.onPreUpdate(
+		'default',
+		runIf(() => app.isDisabled('paused'), time.tick, dayNight, tweens.tick),
+	)
 	// !SETUP
 	.onEnter('default', setupGame)
 	// ! GAME
 	.addPlugins(fishingPlugin, interactionPlugin, tickModifiersPlugin('speed', 'maxHealth', 'strength', 'critChance', 'critDamage', 'attackSpeed', 'lootQuantity', 'lootChance'), spawnTagsPlugin)
-	.addSubscribers('game', bobItems, enableInventoryState, popItems, addHealthBarContainer, ...equip('wateringCan', 'weapon', 'fishingPole'), addQuestMarkers, displayUnlockQuestToast, setupConversation)
+	.addSubscribers(
+		'game',
+		bobItems,
+		enableInventoryState,
+		popItems,
+		addHealthBarContainer,
+		...equip('wateringCan', 'weapon', 'fishingPole'),
+		addQuestMarkers,
+		displayUnlockQuestToast,
+		setupConversation,
+	)
 	.onEnter('game', questManager.enableQuests)
 	.onPreUpdate(
 		'game',
@@ -83,7 +147,11 @@ app
 		runIf(() => app.isDisabled('paused'), playerSteps, applyDeathTimer),
 	)
 	.onUpdate('game', collectItems(false), turnNPCHead, dropBerriesOnHit, updateWeaponArc, sleepyEffects)
-	.onPostUpdate('game', rotateStun, runIf(() => app.isDisabled('menu'), interact))
+	.onPostUpdate(
+		'game',
+		rotateStun,
+		runIf(() => app.isDisabled('menu'), interact),
+	)
 	// ! MENU
 	.onEnter('menu', stopPlayer)
 	.addSubscribers('menu', disableInventoryState)
@@ -96,7 +164,10 @@ app
 	.addSubscribers('mainMenu', ...initMainMenuCamPos)
 	.onExit(
 		'mainMenu',
-		runIf(() => app.isEnabled('intro'), () => resetSave(questManager)),
+		runIf(
+			() => app.isEnabled('intro'),
+			() => resetSave(questManager),
+		),
 		// runIf(() => app.isEnabled('intro'), () => resetSave(questManager), startIntro),
 		// runIf(() => app.isEnabled('farm'), spawnPlayerContinueGame),
 	)
@@ -129,19 +200,22 @@ app
 	// ! DUNGEON
 	.addSubscribers('dungeon', spawnDrops, removeEnemyFromSpawn, applyArchingForce, unlockDungeon)
 	.onEnter('dungeon', spawnDungeon, moveCamera(true), spawnEnemies)
-	.onUpdate('game', runIf(
-		() => app.isDisabled('paused') && app.isDisabled('menu'),
-		seedlingBehavior,
-		meleeBehavior,
-		chargingBehavior,
-		jumpingBehavior,
-		sporeBehavior,
-		rangeBehavior,
-		beeBossBehavior,
-		playerBehavior,
-		mushroomBehavior,
-		...updateStates('playerState', 'enemyState', 'beeBossState', 'pumpkinBossState', 'pumpkinSeedState', 'fishState', 'mushroomState'),
-	))
+	.onUpdate(
+		'game',
+		runIf(
+			() => app.isDisabled('paused') && app.isDisabled('menu'),
+			seedlingBehavior,
+			meleeBehavior,
+			chargingBehavior,
+			jumpingBehavior,
+			sporeBehavior,
+			rangeBehavior,
+			beeBossBehavior,
+			playerBehavior,
+			mushroomBehavior,
+			...updateStates('playerState', 'enemyState', 'beeBossState', 'pumpkinBossState', 'pumpkinSeedState', 'fishState', 'mushroomState'),
+		),
+	)
 	.addPlugins(pumpkinBossPlugin)
 	.onEnter('dungeon', compileShaders, initTexturesItemsAndEnemies)
 	.onUpdate(

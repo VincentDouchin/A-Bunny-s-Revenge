@@ -73,10 +73,8 @@ MeshLine.prototype.setGeometry = function (g, c) {
 }
 
 MeshLine.prototype.setPoints = function (points, wcb) {
-	if (!(points instanceof Float32Array) && !(Array.isArray(points))) {
-		console.error(
-			'ERROR: The BufferArray of points is not instancied correctly.',
-		)
+	if (!(points instanceof Float32Array) && !Array.isArray(points)) {
+		console.error('ERROR: The BufferArray of points is not instancied correctly.')
 		return
 	}
 	// as the points are mutated we store them
@@ -179,11 +177,7 @@ MeshLine.prototype.raycast = MeshLineRaycast
 MeshLine.prototype.compareV3 = function (a, b) {
 	const aa = a * 6
 	const ab = b * 6
-	return (
-		this.positions[aa] === this.positions[ab]
-		&& this.positions[aa + 1] === this.positions[ab + 1]
-		&& this.positions[aa + 2] === this.positions[ab + 2]
-	)
+	return this.positions[aa] === this.positions[ab] && this.positions[aa + 1] === this.positions[ab + 1] && this.positions[aa + 2] === this.positions[ab + 2]
 }
 
 MeshLine.prototype.copyV3 = function (a) {
@@ -306,11 +300,7 @@ function memcpy(src, srcOffset, dst, dstOffset, length) {
 	src = src.subarray || src.slice ? src : src.buffer
 	dst = dst.subarray || dst.slice ? dst : dst.buffer
 
-	src = srcOffset
-		? src.subarray
-			? src.subarray(srcOffset, length && srcOffset + length)
-			: src.slice(srcOffset, length && srcOffset + length)
-		: src
+	src = srcOffset ? (src.subarray ? src.subarray(srcOffset, length && srcOffset + length) : src.slice(srcOffset, length && srcOffset + length)) : src
 
 	if (dst.set) {
 		dst.set(src, dstOffset)
@@ -490,7 +480,7 @@ export class MeshLineMaterial extends ShaderMaterial {
 				useMap: { value: 0 },
 				alphaMap: { value: null },
 				useAlphaMap: { value: 0 },
-				color: { value: new Color(0xFFFFFF) },
+				color: { value: new Color(0xffffff) },
 				opacity: { value: 1 },
 				resolution: { value: new Vector2(1, 1) },
 				sizeAttenuation: { value: 1 },

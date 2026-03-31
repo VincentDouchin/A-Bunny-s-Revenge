@@ -17,10 +17,7 @@ export const itemBundle = (item: AssetNames['items']) => {
 	const bundle = modelColliderBundle(model, RigidBodyType.Dynamic, true, new Vector3(1, 1, 1))
 	bundle.model.castShadow = true
 	bundle.model.renderOrder = 2
-	const shadow = new Mesh(
-		new SphereGeometry(0.3),
-		new MeshBasicMaterial({ color: 0x000000, transparent: true, blending: AdditiveBlending, depthWrite: false }),
-	)
+	const shadow = new Mesh(new SphereGeometry(0.3), new MeshBasicMaterial({ color: 0x000000, transparent: true, blending: AdditiveBlending, depthWrite: false }))
 	shadow.position.y = 0.3
 	shadow.castShadow = true
 	bundle.model.add(shadow)
@@ -30,38 +27,40 @@ export const itemBundle = (item: AssetNames['items']) => {
 		itemLabel: item,
 	})
 }
-export const bobItems = () => itemsQuery.onEntityAdded.subscribe((entity) => {
-	tweens.add({
-		parent: entity,
-		duration: 2000,
-		from: 0,
-		to: Math.PI * 2,
-		repeat: Number.POSITIVE_INFINITY,
-		onUpdate: (f) => {
-			entity.rotation?.setFromAxisAngle(new Vector3(0, 1, 0), f)
-		},
-		ease: linear,
+export const bobItems = () =>
+	itemsQuery.onEntityAdded.subscribe((entity) => {
+		tweens.add({
+			parent: entity,
+			duration: 2000,
+			from: 0,
+			to: Math.PI * 2,
+			repeat: Number.POSITIVE_INFINITY,
+			onUpdate: (f) => {
+				entity.rotation?.setFromAxisAngle(new Vector3(0, 1, 0), f)
+			},
+			ease: linear,
+		})
+		tweens.add({
+			parent: entity,
+			duration: 2000,
+			from: entity.model.position.y,
+			to: entity.model.position.y + 5,
+			repeat: Number.POSITIVE_INFINITY,
+			onUpdate: (f) => (entity.model.position.y = f),
+			ease: easeInOut,
+			repeatType: 'mirror',
+		})
 	})
-	tweens.add({
-		parent: entity,
-		duration: 2000,
-		from: entity.model.position.y,
-		to: entity.model.position.y + 5,
-		repeat: Number.POSITIVE_INFINITY,
-		onUpdate: f => entity.model.position.y = f,
-		ease: easeInOut,
-		repeatType: 'mirror',
-	})
-})
 
-export const popItems = () => ecs.with('body', 'item', 'collider').onEntityAdded.subscribe((e) => {
-	const force = e.popDirection ?? new Vector3().randomDirection()
-	force.y = 30
-	force.x = force.x * 20
-	force.z = force.z * 20
-	e.body.applyImpulse(force, true)
-	playSound(['665181__el_boss__item-or-material-pickup-pop-3-of-3', '665182__el_boss__item-or-material-pickup-pop-2-of-3', '665183__el_boss__item-or-material-pickup-pop-1-of-3'])
-})
+export const popItems = () =>
+	ecs.with('body', 'item', 'collider').onEntityAdded.subscribe((e) => {
+		const force = e.popDirection ?? new Vector3().randomDirection()
+		force.y = 30
+		force.x = force.x * 20
+		force.z = force.z * 20
+		e.body.applyImpulse(force, true)
+		playSound(['665181__el_boss__item-or-material-pickup-pop-3-of-3', '665182__el_boss__item-or-material-pickup-pop-2-of-3', '665183__el_boss__item-or-material-pickup-pop-1-of-3'])
+	})
 const itemsToStopQuery = ecs.with('item', 'body', 'position')
 export const stopItems = () => {
 	for (const item of itemsToStopQuery) {
@@ -71,7 +70,7 @@ export const stopItems = () => {
 				item.body.applyImpulse(force, true)
 				item.bounce.amount -= 1
 				item.bounce.touchedGround = true
-				if (force.y < 1)item.bounce.amount = 0
+				if (force.y < 1) item.bounce.amount = 0
 			} else {
 				item.position.y = item.groundLevel ?? 1
 				item.body.setBodyType(RigidBodyType.Fixed, false)
@@ -103,7 +102,7 @@ export const collectItems = (force: boolean) => async () => {
 						ease: createBackIn(3),
 						duration: dist * 30,
 						onUpdate: (f) => {
-							item.position.lerpVectors(initialPosition, { ...player.position, y: 4 }, f)
+							item.position.lerpVectors(initialPosition, { x: player.position.x, z: player.position.z, y: 4 }, f)
 							item.model.scale.lerpVectors(initialScale, initialScale.clone().multiplyScalar(0.5), f)
 						},
 						onComplete: () => {

@@ -1,6 +1,4 @@
-import { Color, ShaderMaterial, Uniform, Vector2 } from 'three/webgpu'
-import noise from '@/shaders/glsl/lib/cnoise.glsl?raw'
-
+// oxlint-disable unicorn/no-empty-file
 // export const mainMenuBackgound = new ShaderMaterial({
 // 	uniforms: {
 // 		time: new Uniform(0),

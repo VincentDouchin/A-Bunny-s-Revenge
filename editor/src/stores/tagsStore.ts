@@ -8,10 +8,14 @@ export const useTagsStore = defineStore('tags', () => {
 	const key = 'tagsList'
 	const init = async () => {
 		const existingValue = await get(key)
-		tagsList.value = existingValue ?? await loadTagsList()
+		tagsList.value = existingValue ?? (await loadTagsList())
 	}
-	watchDebounced(tagsList, (val) => {
-		set(key, toRaw(val))
-	}, { debounce: 1000, deep: true })
+	watchDebounced(
+		tagsList,
+		(val) => {
+			set(key, toRaw(val))
+		},
+		{ debounce: 1000, deep: true },
+	)
 	return { tagsList, init }
 })

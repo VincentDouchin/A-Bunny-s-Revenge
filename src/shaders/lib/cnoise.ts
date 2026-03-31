@@ -8,66 +8,42 @@
 // Distributed under the MIT license.
 
 import type { Node } from 'three/webgpu'
-import {
-	abs,
-	dot,
-	float,
-	floor,
-	Fn,
-	fract,
-	mix,
-	mod,
-	step,
-	vec3,
-	vec4,
-} from 'three/tsl'
+import { abs, dot, float, floor, Fn, fract, mix, mod, step, vec3, vec4 } from 'three/tsl'
 
 // ---------------------------------------------------------------------------
 // Helpers
 // ---------------------------------------------------------------------------
 
 // Works for both vec3 and vec4 inputs — TSL Fn is polymorphic.
-const mod289vec4 = Fn<[ Node<'vec4'>], Node<'vec4'>>(
-	([x]) => {
-		return x.sub(floor(x.mul(1.0 / 289.0)).mul(289.0))
-	},
-)
-const mod289vec3 = Fn<[Node<'vec3'> ], Node<'vec3'>>(
-	([x]) => {
-		return x.sub(floor(x.mul(1.0 / 289.0)).mul(289.0))
-	},
-)
+const mod289vec4 = Fn<[Node<'vec4'>], Node<'vec4'>>(([x]) => {
+	return x.sub(floor(x.mul(1.0 / 289.0)).mul(289.0))
+})
+const mod289vec3 = Fn<[Node<'vec3'>], Node<'vec3'>>(([x]) => {
+	return x.sub(floor(x.mul(1.0 / 289.0)).mul(289.0))
+})
 
-const permute = Fn<[Node<'vec4'>], Node<'vec4'>>(
-	([x]) => {
-		return mod289vec4(x.mul(34.0).add(10.0).mul(x)) as Node<'vec4'>
-	},
-)
+const permute = Fn<[Node<'vec4'>], Node<'vec4'>>(([x]) => {
+	return mod289vec4(x.mul(34.0).add(10.0).mul(x)) as Node<'vec4'>
+})
 
-const taylorInvSqrt = Fn<[Node<'vec4'>], Node<'vec4'>>(
-	([r]) => {
-		return float(1.79284291400159).sub(r.mul(0.85373472095314)) as Node<'vec4'>
-	},
-)
+const taylorInvSqrt = Fn<[Node<'vec4'>], Node<'vec4'>>(([r]) => {
+	return float(1.79284291400159).sub(r.mul(0.85373472095314)) as Node<'vec4'>
+})
 
-const fade = Fn<[Node<'vec3'>], Node<'vec3'>>(
-	([t]) => {
-		// t^3 * ( t * (t*6 - 15) + 10 )
-		return t.mul(t).mul(t).mul(t.mul(t.mul(6.0).sub(15.0)).add(10.0))
-	},
-)
+const fade = Fn<[Node<'vec3'>], Node<'vec3'>>(([t]) => {
+	// t^3 * ( t * (t*6 - 15) + 10 )
+	return t
+		.mul(t)
+		.mul(t)
+		.mul(t.mul(t.mul(6.0).sub(15.0)).add(10.0))
+})
 
 // ---------------------------------------------------------------------------
 // Shared gradient computation — plain TS helper (not a TSL Fn node), since
 // both cnoise and pnoise share the identical body after computing Pi0/Pi1.
 // ---------------------------------------------------------------------------
 
-function _gradients(
-	Pi0_: Node<'vec3'>,
-	Pi1_: Node<'vec3'>,
-	Pf0: Node<'vec3'>,
-	Pf1: Node<'vec3'>,
-): Node<'float'> {
+function _gradients(Pi0_: Node<'vec3'>, Pi1_: Node<'vec3'>, Pf0: Node<'vec3'>, Pf1: Node<'vec3'>): Node<'float'> {
 	const ix = vec4(Pi0_.x, Pi1_.x, Pi0_.x, Pi1_.x)
 	const iy = vec4(Pi0_.y, Pi0_.y, Pi1_.y, Pi1_.y)
 	const iz0 = Pi0_.zzzz
@@ -112,23 +88,13 @@ function _gradients(
 	const g111 = vec3(gx1f.w, gy1f.w, gz1.w)
 
 	// --- Normalise ---
-	const norm0 = taylorInvSqrt(vec4(
-		dot(g000, g000),
-		dot(g010, g010),
-		dot(g100, g100),
-		dot(g110, g110),
-	))
+	const norm0 = taylorInvSqrt(vec4(dot(g000, g000), dot(g010, g010), dot(g100, g100), dot(g110, g110)))
 	const g000n = g000.mul(norm0.x)
 	const g010n = g010.mul(norm0.y)
 	const g100n = g100.mul(norm0.z)
 	const g110n = g110.mul(norm0.w)
 
-	const norm1 = taylorInvSqrt(vec4(
-		dot(g001, g001),
-		dot(g011, g011),
-		dot(g101, g101),
-		dot(g111, g111),
-	))
+	const norm1 = taylorInvSqrt(vec4(dot(g001, g001), dot(g011, g011), dot(g101, g101), dot(g111, g111)))
 	const g001n = g001.mul(norm1.x)
 	const g011n = g011.mul(norm1.y)
 	const g101n = g101.mul(norm1.z)
@@ -146,11 +112,7 @@ function _gradients(
 
 	// --- Trilinear interpolation ---
 	const fade_xyz = fade(Pf0)
-	const n_z = mix(
-		vec4(n000, n100, n010, n110),
-		vec4(n001, n101, n011, n111),
-		fade_xyz.z,
-	)
+	const n_z = mix(vec4(n000, n100, n010, n110), vec4(n001, n101, n011, n111), fade_xyz.z)
 	const n_yz = mix(n_z.xy, n_z.zw, fade_xyz.y)
 	const n_xyz = mix(n_yz.x, n_yz.y, fade_xyz.x)
 
@@ -161,32 +123,28 @@ function _gradients(
 // Classic Perlin noise  cnoise( P: vec3 ) → float
 // ---------------------------------------------------------------------------
 
-export const cnoise = Fn<[Node<'vec3'>], Node<'float'>>(
-	([P]) => {
-		const Pi0 = floor(P)
-		const Pi1 = Pi0.add(1.0)
-		const Pi0_ = mod289vec3(Pi0)
-		const Pi1_ = mod289vec3(Pi1)
-		const Pf0 = fract(P)
-		const Pf1 = Pf0.sub(1.0)
+export const cnoise = Fn<[Node<'vec3'>], Node<'float'>>(([P]) => {
+	const Pi0 = floor(P)
+	const Pi1 = Pi0.add(1.0)
+	const Pi0_ = mod289vec3(Pi0)
+	const Pi1_ = mod289vec3(Pi1)
+	const Pf0 = fract(P)
+	const Pf1 = Pf0.sub(1.0)
 
-		return _gradients(Pi0_, Pi1_, Pf0, Pf1)
-	},
-)
+	return _gradients(Pi0_, Pi1_, Pf0, Pf1)
+})
 
 // ---------------------------------------------------------------------------
 // Periodic Perlin noise  pnoise( P: vec3, rep: vec3 ) → float
 // ---------------------------------------------------------------------------
 
-export const pnoise = Fn<[Node<'vec3'>, Node<'vec3'>], Node<'float'>>(
-	([P, rep]) => {
-		const Pi0 = mod(floor(P), rep)
-		const Pi1 = mod(Pi0.add(1.0), rep)
-		const Pi0_ = mod289vec3(Pi0)
-		const Pi1_ = mod289vec3(Pi1)
-		const Pf0 = fract(P)
-		const Pf1 = Pf0.sub(1.0)
+export const pnoise = Fn<[Node<'vec3'>, Node<'vec3'>], Node<'float'>>(([P, rep]) => {
+	const Pi0 = mod(floor(P), rep)
+	const Pi1 = mod(Pi0.add(1.0), rep)
+	const Pi0_ = mod289vec3(Pi0)
+	const Pi1_ = mod289vec3(Pi1)
+	const Pf0 = fract(P)
+	const Pf1 = Pf0.sub(1.0)
 
-		return _gradients(Pi0_, Pi1_, Pf0, Pf1)
-	},
-)
+	return _gradients(Pi0_, Pi1_, Pf0, Pf1)
+})

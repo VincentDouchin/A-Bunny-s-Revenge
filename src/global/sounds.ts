@@ -8,11 +8,7 @@ export type soundAssets = { [K in { [k in keyof typeof assets]: (typeof assets)[
 export const [localSoundData, setLocalSoundData] = useLocalStorage<sounds>('soundsData', soundsData as sounds)
 
 const getSelectedSound = <S extends keyof soundAssets, K extends keyof soundAssets[S]>(soundAsset: S, sound: K | K[] | 'random') => {
-	return (sound === 'random'
-		? getRandom(objectKeys(assets[soundAsset]))
-		: Array.isArray(sound)
-			? getRandom(sound)
-			: sound) as keyof soundAssets[S]
+	return (sound === 'random' ? getRandom(objectKeys(assets[soundAsset])) : Array.isArray(sound) ? getRandom(sound) : sound) as keyof soundAssets[S]
 }
 
 const getSound = <S extends keyof soundAssets, K extends keyof soundAssets[S]>(soundAsset: S, sound: K | K[] | 'random'): Howl => {
@@ -53,22 +49,27 @@ export const initHowler = () => {
 	}
 }
 
-export const playSFX = <S extends keyof soundAssets>(soundAsset: S) => <K extends keyof soundAssets[S]>(sound: K | K[] | 'random', options?: { playbackRate?: number, offset?: number, sprite?: string }) => {
-	const selectedSound = getSelectedSound(soundAsset, sound)
-	const soundPlayer = getSound(soundAsset, selectedSound)
-	const volume = localSoundData?.[soundAsset]?.[selectedSound]?.volume ?? 1
-	soundPlayer.volume(volume * settings.soundEffectsVolume / 100)
-	if (options?.playbackRate) {
-		soundPlayer.rate(options.playbackRate)
+export const playSFX =
+	<S extends keyof soundAssets>(soundAsset: S) =>
+	<K extends keyof soundAssets[S]>(sound: K | K[] | 'random', options?: { playbackRate?: number; offset?: number; sprite?: string }) => {
+		const selectedSound = getSelectedSound(soundAsset, sound)
+		const soundPlayer = getSound(soundAsset, selectedSound)
+		const volume = localSoundData?.[soundAsset]?.[selectedSound]?.volume ?? 1
+		soundPlayer.volume((volume * settings.soundEffectsVolume) / 100)
+		if (options?.playbackRate) {
+			soundPlayer.rate(options.playbackRate)
+		}
+		const id = soundPlayer.play(options?.sprite)
+		const duration = soundPlayer.duration(options?.sprite ? id : undefined)
+		return new Promise<void>((resolve) => {
+			setTimeout(
+				() => {
+					resolve()
+				},
+				Math.max((duration * 1000) / (options?.playbackRate ?? 1) + (options?.offset ?? 0), 1),
+			)
+		})
 	}
-	const id = soundPlayer.play(options?.sprite)
-	const duration = soundPlayer.duration(options?.sprite ? id : undefined)
-	return new Promise<void>((resolve) => {
-		setTimeout(() => {
-			resolve()
-		}, Math.max(duration * 1000 / (options?.playbackRate ?? 1) + (options?.offset ?? 0), 1))
-	})
-}
 export const playSound = playSFX<'soundEffects'>('soundEffects')
 export const playVoice = playSFX('voices')
 export const playStep = playSFX<'steps'>('steps')

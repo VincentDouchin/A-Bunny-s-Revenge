@@ -9,7 +9,6 @@ export const SneezeUi = () => {
 	const context = useGame()!
 
 	return (
-
 		<Show when={context.player()}>
 			{(player) => {
 				const affect = [
@@ -17,22 +16,21 @@ export const SneezeUi = () => {
 					['poisoned', '#9DE64E'],
 					['sleepy', '#CFE0ED'],
 				] as const satisfies ReadonlyArray<readonly [ComponentsOfType<Timer<false>>, string]>
-				css/* css */`
-				.debuff-wrapper{
-					display:grid;
-					gap: 0.5rem;
-				}
-				.debuff-container{
-					width:5rem;
-					height: 0.5rem;
-					background: hsl(0,0%,0%,0.5);
-					border-radius:1rem;
-					overflow: hidden;
-				}
-				.debuff{
-					height:100%;
-					
-				}
+				css /* css */ `
+					.debuff-wrapper {
+						display: grid;
+						gap: 0.5rem;
+					}
+					.debuff-container {
+						width: 5rem;
+						height: 0.5rem;
+						background: hsl(0, 0%, 0%, 0.5);
+						border-radius: 1rem;
+						overflow: hidden;
+					}
+					.debuff {
+						height: 100%;
+					}
 				`
 				return (
 					<Portal mount={player().debuffsContainer.element}>
@@ -44,7 +42,10 @@ export const SneezeUi = () => {
 									return (
 										<Show when={affected()}>
 											<div class="debuff-container">
-												<div class="debuff" style={{ width: `${sneezePercent() * 100}%`, background: color }}></div>
+												<div
+													class="debuff"
+													style={{ width: `${sneezePercent() * 100}%`, background: color }}
+												></div>
 											</div>
 										</Show>
 									)
@@ -55,6 +56,5 @@ export const SneezeUi = () => {
 				)
 			}}
 		</Show>
-
 	)
 }

@@ -12,8 +12,7 @@ export const addExploder = (parent: Entity, mat: Material, scale: number) => {
 	model.traverse((node) => {
 		if (node.name === 'Plane') {
 			node.visible = false
-		}
-		else if (node instanceof Mesh) {
+		} else if (node instanceof Mesh) {
 			node.material = mat.clone()
 			node.material.transparent = true
 			node.material.depthWrite = false
@@ -31,17 +30,20 @@ export const addExploder = (parent: Entity, mat: Material, scale: number) => {
 
 			const fragments: Mesh<any, Material>[] = (explodeAnimator.action as any)?._propertyBindings.flatMap((x: any) => x.binding.node.children)
 			if (fragments) {
-				fragments.forEach(node => node.visible = true)
+				fragments.forEach((node) => (node.visible = true))
 
-				setTimeout(() => tweens.add({
-					from: 1,
-					to: 0,
-					duration: 1000,
-					onUpdate: (f) => {
-						fragments.forEach(node => node.material.opacity = f)
-					},
-
-				}), 500)
+				setTimeout(
+					() =>
+						tweens.add({
+							from: 1,
+							to: 0,
+							duration: 1000,
+							onUpdate: (f) => {
+								fragments.forEach((node) => (node.material.opacity = f))
+							},
+						}),
+					500,
+				)
 			}
 		}
 	}

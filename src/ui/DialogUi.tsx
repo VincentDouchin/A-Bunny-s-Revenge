@@ -29,7 +29,10 @@ function splitLetters(sentence: string) {
 			const letter = lettersToParse[i]
 			if (letter === '#') {
 				const nextPountIndex = lettersToParse.findIndex((l, j) => j > i && l === '#')
-				const newColor = lettersToParse.slice(i + 1, nextPountIndex).join('').toLowerCase()
+				const newColor = lettersToParse
+					.slice(i + 1, nextPountIndex)
+					.join('')
+					.toLowerCase()
 				const colorName = colorMap?.[newColor] ?? newColor
 				if (colorName === color) {
 					color = null
@@ -47,32 +50,32 @@ function splitLetters(sentence: string) {
 	return words
 }
 
-export const DialogText = (props: { text: string, finished: Atom<boolean> }) => {
-	css/* css */`
-	@keyframes letter-pop {
-		from {
-			transform: scale(1.5);
+export const DialogText = (props: { text: string; finished: Atom<boolean> }) => {
+	css /* css */ `
+		@keyframes letter-pop {
+			from {
+				transform: scale(1.5);
+			}
+			to {
+				transform: scale(1);
+			}
 		}
-		to {
-			transform: scale(1);
+
+		.letter-visible {
+			animation-name: letter-pop;
+			animation-duration: 0.1s;
+			animation-fill-mode: forwards;
 		}
-	}
 
-	.letter-visible {
-		animation-name: letter-pop;
-		animation-duration: 0.1s;
-		animation-fill-mode: forwards;
-	}
-
-	.letter-hidden {
-		opacity: 0;
-	}
-	.space {
-		width: 0.5rem;
-	}
-	.word{
-		display: inline-flex;
-	}
+		.letter-hidden {
+			opacity: 0;
+		}
+		.space {
+			width: 0.5rem;
+		}
+		.word {
+			display: inline-flex;
+		}
 	`
 	const letterVisible = atom(0)
 	createEffect((val) => {
@@ -97,13 +100,20 @@ export const DialogText = (props: { text: string, finished: Atom<boolean> }) => 
 	return (
 		<For each={words()}>
 			{(word, wi) => {
-				const length = createMemo(() => words().reduce((acc, v, j) => j < wi() ? acc + v.length : acc, 0))
+				const length = createMemo(() => words().reduce((acc, v, j) => (j < wi() ? acc + v.length : acc), 0))
 
 				return (
 					<div class="word">
 						<For each={word}>
 							{(ch, i) => {
-								return <div class={`${(letterVisible() > (i() + 1 + length()) || props.finished()) ? 'letter-visible' : 'letter-hidden'}`} style={{ color: ch.color ?? 'white' }}>{ch.letter}</div>
+								return (
+									<div
+										class={`${letterVisible() > i() + 1 + length() || props.finished() ? 'letter-visible' : 'letter-hidden'}`}
+										style={{ color: ch.color ?? 'white' }}
+									>
+										{ch.letter}
+									</div>
+								)
 							}}
 						</For>
 						<div class="space"></div>
@@ -118,29 +128,30 @@ const dialogQuery = useQuery(ecs.with('dialog'))
 const dialogContainerQuery = ecs.with('dialogContainer')
 const talkingQuery = useQuery(dialogContainerQuery)
 export const DialogUi = () => {
-	css/* css */`
-	.dialog-container {
-		color: white;
-		transform:translateY(-100%);
-		font-family: NanoPlus;
-		font-size: 2rem;
-		background: hsl(0, 0%, 0%, 50%);
-		border-radius: 1rem;
-		padding: 1rem;
-		display: flex;
-		max-width: 15rem;
-		flex-wrap:wrap;
-		min-width: 20rem;
-	}
-	.npc-name{
-		color: white;
-		position: absolute;
-		translate: 1rem -50%;
-		font-family: NanoPlus;
-		font-size: 1.5rem;
-		top: -100%;
-		z-index: 1;
-	}`
+	css /* css */ `
+		.dialog-container {
+			color: white;
+			transform: translateY(-100%);
+			font-family: NanoPlus;
+			font-size: 2rem;
+			background: hsl(0, 0%, 0%, 50%);
+			border-radius: 1rem;
+			padding: 1rem;
+			display: flex;
+			max-width: 15rem;
+			flex-wrap: wrap;
+			min-width: 20rem;
+		}
+		.npc-name {
+			color: white;
+			position: absolute;
+			translate: 1rem -50%;
+			font-family: NanoPlus;
+			font-size: 1.5rem;
+			top: -100%;
+			z-index: 1;
+		}
+	`
 	return (
 		<For each={dialogQuery()}>
 			{(entity) => {
@@ -181,7 +192,7 @@ export const DialogUi = () => {
 
 				ui.updateSync(async () => {
 					if (gameInputs.get('primary').justReleased) {
-						cancelCurrentDialog && cancelCurrentDialog()
+						if (cancelCurrentDialog) cancelCurrentDialog()
 						stepDialog()
 					}
 				})
@@ -212,7 +223,10 @@ export const DialogUi = () => {
 														</OutlineText>
 													</Show>
 													<div class="dialog-container">
-														<DialogText text={text()} finished={finished} />
+														<DialogText
+															text={text()}
+															finished={finished}
+														/>
 													</div>
 												</>
 											)

@@ -31,7 +31,10 @@ export const UI = () => {
 	return (
 		<GameProvider>
 			<DebugUi />
-			<StateUi state="debug" disabled>
+			<StateUi
+				state="debug"
+				disabled
+			>
 				{() => (
 					<>
 						<StateUi state="farm">
@@ -57,18 +60,15 @@ export const UI = () => {
 								</>
 							)}
 						</StateUi>
-						<StateUi state="clearing">
-							{() => <HealthUi />}
-						</StateUi>
-						<StateUi state="mainMenu" disabled>
+						<StateUi state="clearing">{() => <HealthUi />}</StateUi>
+						<StateUi
+							state="mainMenu"
+							disabled
+						>
 							{() => <KeyboardControls />}
 						</StateUi>
-						<StateUi state="mainMenu">
-							{() => <MainMenuUi />}
-						</StateUi>
-						<StateUi state="testDialog">
-							{() => <ConversationUi />}
-						</StateUi>
+						<StateUi state="mainMenu">{() => <MainMenuUi />}</StateUi>
+						<StateUi state="testDialog">{() => <ConversationUi />}</StateUi>
 						<ConversationUi />
 						<Errors />
 						<PauseUi />

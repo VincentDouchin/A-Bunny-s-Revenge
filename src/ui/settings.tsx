@@ -22,8 +22,8 @@ export const Settings = () => {
 		ui.setUiOpacity(settings.uiOpacity)
 	})
 
-	css/* css */`
-		.settings-container{
+	css /* css */ `
+		.settings-container {
 			display: grid;
 			grid-template-columns: 1fr 2fr;
 			color: white;
@@ -35,46 +35,44 @@ export const Settings = () => {
 			overflow-y: scroll;
 			height: 100%;
 			scroll-behavior: smooth;
-    		scrollbar-width: none;
+			scrollbar-width: none;
 		}
-		.volume{
+		.volume {
 			display: grid;
 			grid-template-columns: auto 1fr 0.2fr;
 			gap: 1rem;
-			align-items:center;
-			fill:white;
+			align-items: center;
+			fill: white;
 		}
-		.volume-icon{
+		.volume-icon {
 			width: 2rem;
 			height: 2rem;
-			color: white
+			color: white;
 		}
-		.selected{
+		.selected {
 			border-bottom: solid 0.2rem var(--gold);
 		}
-		.unselected{
+		.unselected {
 			border-bottom: solid 0.2rem transparent;
 		}
-		.range-input-container{
+		.range-input-container {
 			display: grid;
 			grid-template-columns: 1fr 5rem;
 			gap: 2rem;
 			width: 100%;
 		}
-
-
 	`
 	const specificVolumes = [
 		['Global Volume', 'volume', 'mute'],
 		['Music', 'musicVolume', 'musicMute'],
 		['Ambiance', 'ambianceVolume', 'ambianceMute'],
 		['Sound Effects', 'soundEffectsVolume', 'soundEffectsMute'],
-	] as const satisfies ReadonlyArray<readonly [string, keyof typeof settings, keyof typeof settings ]>
+	] as const satisfies ReadonlyArray<readonly [string, keyof typeof settings, keyof typeof settings]>
 	return (
 		<>
 			<InventoryTitle>Settings</InventoryTitle>
 			<Menu>
-				{MenuItem =>	(
+				{(MenuItem) => (
 					<div>
 						<div class="settings-container">
 							<For each={specificVolumes}>
@@ -97,8 +95,8 @@ export const Settings = () => {
 											<MenuItem
 												defaultSelected={index() === 0}
 												onClick={muteSound}
-												onLeft={() => settings[volumeName] = Math.max(settings[volumeName] - 5, 0)}
-												onRight={() => settings[volumeName] = Math.min(settings[volumeName] + 5, 100)}
+												onLeft={() => (settings[volumeName] = Math.max(settings[volumeName] - 5, 0))}
+												onRight={() => (settings[volumeName] = Math.min(settings[volumeName] + 5, 100))}
 											>
 												{({ selected }) => (
 													<div
@@ -114,7 +112,12 @@ export const Settings = () => {
 													{settings[muteName] && <VolumeOff />}
 													{!settings[muteName] && <VolumeOn />}
 												</div>
-												<input type="range" class="input-range" value={settings[volumeName]} onChange={e => setVolume(e.target.valueAsNumber)}></input>
+												<input
+													type="range"
+													class="input-range"
+													value={settings[volumeName]}
+													onChange={(e) => setVolume(e.target.valueAsNumber)}
+												></input>
 												<OutlineText>{String(settings[volumeName])}</OutlineText>
 											</div>
 										</>
@@ -122,20 +125,19 @@ export const Settings = () => {
 								}}
 							</For>
 							<Show when={!isStandalone()}>
-								<MenuItem
-									onClick={() => settings.fullscreen = !settings.fullscreen}
-								>
+								<MenuItem onClick={() => (settings.fullscreen = !settings.fullscreen)}>
 									{({ selected }) => (
 										<div class={selected() ? 'selected' : 'unselected'}>
 											<OutlineText>Auto fullscreen</OutlineText>
 										</div>
 									)}
 								</MenuItem>
-								<CheckBox value={settings.fullscreen ?? false} onClick={() => settings.fullscreen = !settings.fullscreen}></CheckBox>
+								<CheckBox
+									value={settings.fullscreen ?? false}
+									onClick={() => (settings.fullscreen = !settings.fullscreen)}
+								></CheckBox>
 							</Show>
-							<MenuItem
-								onClick={() => settings.controls = (settings.controls === 'keyboard' ? 'mouse' : 'keyboard')}
-							>
+							<MenuItem onClick={() => (settings.controls = settings.controls === 'keyboard' ? 'mouse' : 'keyboard')}>
 								{({ selected }) => (
 									<div class={selected() ? 'selected' : 'unselected'}>
 										<OutlineText>Control Preference</OutlineText>
@@ -145,20 +147,21 @@ export const Settings = () => {
 							<SwitchButtons
 								options={['mouse', 'keyboard']}
 								value={settings.controls}
-								setValue={controls => settings.controls = controls}
+								setValue={(controls) => (settings.controls = controls)}
 							/>
-							<MenuItem
-								onClick={() => settings.showControls = !settings.showControls}
-							>
-								{({ selected }) =>	(
+							<MenuItem onClick={() => (settings.showControls = !settings.showControls)}>
+								{({ selected }) => (
 									<div class={selected() ? 'selected' : 'unselected'}>
 										<OutlineText>Display controls</OutlineText>
 									</div>
 								)}
 							</MenuItem>
-							<CheckBox value={settings.showControls} onClick={(show: boolean) => settings.showControls = show}></CheckBox>
+							<CheckBox
+								value={settings.showControls}
+								onClick={(show: boolean) => (settings.showControls = show)}
+							></CheckBox>
 							<MenuItem>
-								{({ selected }) =>	(
+								{({ selected }) => (
 									<div
 										class={selected() ? 'selected' : 'unselected'}
 										onClick={() => setShadows(!settings.disableShadows)}
@@ -167,25 +170,27 @@ export const Settings = () => {
 									</div>
 								)}
 							</MenuItem>
-							<CheckBox value={settings.disableShadows} onClick={setShadows}></CheckBox>
-							<MenuItem
-								onClick={() => settings.lockCamera = !settings.lockCamera}
-							>
+							<CheckBox
+								value={settings.disableShadows}
+								onClick={setShadows}
+							></CheckBox>
+							<MenuItem onClick={() => (settings.lockCamera = !settings.lockCamera)}>
 								{({ selected }) => (
 									<div class={selected() ? 'selected' : 'unselected'}>
 										<OutlineText>Lock Camera to player</OutlineText>
 									</div>
 								)}
 							</MenuItem>
-							<CheckBox value={settings.lockCamera} onClick={locked => settings.lockCamera = locked}></CheckBox>
+							<CheckBox
+								value={settings.lockCamera}
+								onClick={(locked) => (settings.lockCamera = locked)}
+							></CheckBox>
 							<MenuItem
-								onLeft={() => settings.uiScale = Math.max(settings.uiScale - 1, 2)}
-								onRight={() => settings.uiScale = Math.min(settings.uiScale + 1, 15)}
+								onLeft={() => (settings.uiScale = Math.max(settings.uiScale - 1, 2))}
+								onRight={() => (settings.uiScale = Math.min(settings.uiScale + 1, 15))}
 							>
-								{({ selected }) =>	(
-									<div
-										class={selected() ? 'selected' : 'unselected'}
-									>
+								{({ selected }) => (
+									<div class={selected() ? 'selected' : 'unselected'}>
 										<OutlineText>UI scale</OutlineText>
 									</div>
 								)}
@@ -197,19 +202,16 @@ export const Settings = () => {
 									value={settings.uiScale}
 									min="2"
 									max="15"
-									onChange={e => settings.uiScale = e.target.valueAsNumber}
-								>
-								</input>
+									onChange={(e) => (settings.uiScale = e.target.valueAsNumber)}
+								></input>
 								<OutlineText>{String(Math.min(settings.uiScale / 10))}</OutlineText>
 							</div>
 							<MenuItem
-								onLeft={() => settings.uiOpacity = Math.max(settings.uiOpacity - 10, 0)}
-								onRight={() => settings.uiOpacity = Math.min(settings.uiOpacity + 10, 100)}
+								onLeft={() => (settings.uiOpacity = Math.max(settings.uiOpacity - 10, 0))}
+								onRight={() => (settings.uiOpacity = Math.min(settings.uiOpacity + 10, 100))}
 							>
 								{({ selected }) => (
-									<div
-										class={selected() ? 'selected' : 'unselected'}
-									>
+									<div class={selected() ? 'selected' : 'unselected'}>
 										<OutlineText>UI Opacity</OutlineText>
 									</div>
 								)}
@@ -222,15 +224,12 @@ export const Settings = () => {
 									min="0"
 									step={10}
 									max="100"
-									onChange={e => settings.uiOpacity = e.target.valueAsNumber}
-								>
-								</input>
+									onChange={(e) => (settings.uiOpacity = e.target.valueAsNumber)}
+								></input>
 								<OutlineText>{String(settings.uiOpacity)}</OutlineText>
 							</div>
-							<MenuItem
-								onClick={() => settings.difficulty = settings.difficulty === 'easy' ? 'normal' : 'easy'}
-							>
-								{({ selected }) =>	(
+							<MenuItem onClick={() => (settings.difficulty = settings.difficulty === 'easy' ? 'normal' : 'easy')}>
+								{({ selected }) => (
 									<div class={selected() ? 'selected' : 'unselected'}>
 										<OutlineText>Difficulty</OutlineText>
 									</div>
@@ -239,7 +238,7 @@ export const Settings = () => {
 							<SwitchButtons
 								options={['easy', 'normal']}
 								value={settings.difficulty}
-								setValue={difficulty => settings.difficulty = difficulty}
+								setValue={(difficulty) => (settings.difficulty = difficulty)}
 							/>
 						</div>
 					</div>

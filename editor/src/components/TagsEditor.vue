@@ -8,7 +8,7 @@ defineProps<{
 const tags = defineModel<Partial<Tags>>('tags', { default: () => ({}) })
 const tagsStore = useTagsStore()
 const tagsListOptions = computed(() => {
-	return Object.keys(tagsStore.tagsList ?? {}).map(tag => ({ label: tag, value: tag }))
+	return Object.keys(tagsStore.tagsList ?? {}).map((tag) => ({ label: tag, value: tag }))
 })
 
 const newTag = ref<string | null>(null)
@@ -37,23 +37,25 @@ const addTag = () => {
 	if (!newTag.value || !selectedTag.value) return
 	const key = newTag.value
 	if (selectedTag.value.type === 'tag') {
-		(tags.value as any)[key] = true
-	}
-	else if (selectedTag.value.type === 'number' && tagNumberValue.value !== null) {
-		(tags.value as any)[key] = tagNumberValue.value
-	}
-	else if (tagStringValue.value !== null) {
-		(tags.value as any)[key] = tagStringValue.value
+		;(tags.value as any)[key] = true
+	} else if (selectedTag.value.type === 'number' && tagNumberValue.value !== null) {
+		;(tags.value as any)[key] = tagNumberValue.value
+	} else if (tagStringValue.value !== null) {
+		;(tags.value as any)[key] = tagStringValue.value
 	}
 	newTag.value = null
 }
 const isAddingTagDisabled = computed(() => {
 	switch (selectedTag.value?.type) {
-		case 'number': return tagNumberValue.value === null
-		case 'tag': return false
+		case 'number':
+			return tagNumberValue.value === null
+		case 'tag':
+			return false
 		case 'enum':
-		case 'string': return tagStringValue.value === null
-		default:return true
+		case 'string':
+			return tagStringValue.value === null
+		default:
+			return true
 	}
 })
 const openTagsListModal = ref(false)
@@ -77,18 +79,24 @@ const createTag = () => {
 		content-scrollable
 	>
 		<NList>
-			<template v-for="tag, name in tagsStore.tagsList" :key="name">
+			<template
+				v-for="(tag, name) in tagsStore.tagsList"
+				:key="name"
+			>
 				<NListItem>
 					<NFlex vertical>
 						{{ name }}
-						<NDynamicTags v-if="tag.type === 'enum'" v-model:value="tag.values" />
+						<NDynamicTags
+							v-if="tag.type === 'enum'"
+							v-model:value="tag.values"
+						/>
 					</NFlex>
 					<template #suffix>
 						<NFlex :wrap="false">
 							<NSelect
 								:value="tag.type"
 								style="width: 8rem"
-								:options="['enum', 'string', 'number', 'tag'].map(value => ({ value, label: value }))"
+								:options="['enum', 'string', 'number', 'tag'].map((value) => ({ value, label: value }))"
 								@update:value="(type) => changeTagType(name, type)"
 							/>
 							<NButton @click="() => delete tagsStore.tagsList![name]">
@@ -103,9 +111,15 @@ const createTag = () => {
 				</NListItem>
 			</template>
 			<NListItem>
-				<NInput v-model:value="newTagName" placeholder="" />
+				<NInput
+					v-model:value="newTagName"
+					placeholder=""
+				/>
 				<template #suffix>
-					<NButton :disabled="!newTagName" @click="createTag">
+					<NButton
+						:disabled="!newTagName"
+						@click="createTag"
+					>
 						<template #icon>
 							<NIcon>
 								<fa-plus />
@@ -117,9 +131,15 @@ const createTag = () => {
 			</NListItem>
 		</NList>
 	</NModal>
-	<NCard size="small" :title="global ? 'Model tags' : 'Entity tags'">
+	<NCard
+		size="small"
+		:title="global ? 'Model tags' : 'Entity tags'"
+	>
 		<template #header-extra>
-			<NButton circle @click="openTagsListModal = !openTagsListModal">
+			<NButton
+				circle
+				@click="openTagsListModal = !openTagsListModal"
+			>
 				<template #icon>
 					<NIcon>
 						<fa-tags />
@@ -128,8 +148,16 @@ const createTag = () => {
 			</NButton>
 		</template>
 		<NFlex>
-			<template v-for="value, tag in tags" :key="tag">
-				<NTag :type="global ? 'error' : 'warning'" :bordered="false" closable @close="() => delete tags[tag]">
+			<template
+				v-for="(value, tag) in tags"
+				:key="tag"
+			>
+				<NTag
+					:type="global ? 'error' : 'warning'"
+					:bordered="false"
+					closable
+					@close="() => delete tags[tag]"
+				>
 					{{ tag }} - {{ value }}
 				</NTag>
 			</template>
@@ -137,14 +165,15 @@ const createTag = () => {
 		<template #footer>
 			<NSelect
 				v-model:value="newTag"
-				placeholder="New tag" :options="tagsListOptions"
+				placeholder="New tag"
+				:options="tagsListOptions"
 			/>
-			<NInputGroup style="display:grid;grid-template-columns: 1fr auto">
+			<NInputGroup style="display: grid; grid-template-columns: 1fr auto">
 				<NSelect
 					v-if="selectedTag?.type === 'enum'"
 					v-model:value="tagStringValue"
 					placeholder=""
-					:options="selectedTag.values.map(val => ({ value: val, label: val }))"
+					:options="selectedTag.values.map((val) => ({ value: val, label: val }))"
 				/>
 				<NInput
 					v-if="selectedTag?.type === 'string'"
@@ -157,7 +186,7 @@ const createTag = () => {
 					placeholder=""
 				/>
 				<NButton
-					style="width:100%"
+					style="width: 100%"
 					:disabled="isAddingTagDisabled"
 					@click="addTag"
 				>

@@ -1,9 +1,9 @@
-import type { MeshStandardNodeMaterialParameters, Node, NodeBuilder } from 'three/webgpu'
-import { color, diffuseColor, Fn, materialColor, mix, uniform } from 'three/tsl'
+import { Fn, materialColor, mix, uniform, vec4 } from 'three/tsl'
+import type { MeshStandardNodeMaterialParameters, Node } from 'three/webgpu'
 import { ToonMaterial } from './toonMaterial'
 
 const gardenColorNode = Fn<[Node<'float'>], Node<'vec4'>>(([water]) => {
-	return mix(materialColor as Node<'vec4'>, (materialColor as Node<'vec4'>).mul(0.5), water)
+	return mix(vec4(materialColor), materialColor.toVec4().mul(0.5), water)
 })
 
 export class GardenPlotMaterial extends ToonMaterial {

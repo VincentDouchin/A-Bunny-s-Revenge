@@ -14,7 +14,7 @@ export const SoundUi = () => {
 	onMount(() => {
 		const listener = windowEvent('keydown', (e) => {
 			if (e.key === 'F4') {
-				setShowUi(x => !x)
+				setShowUi((x) => !x)
 			}
 		})
 		onCleanup(() => {
@@ -39,51 +39,49 @@ export const SoundUi = () => {
 		setReactiveSoundData(localSoundData)
 	}
 	const soundAssets = ['music', 'ambiance', 'soundEffects'] as const satisfies readonly (keyof soundAssets)[]
-	css/* css */`
-	.sound-container{
-		position: fixed;
-		inset:0;
-		z-index:10000;
-		overflow-y:scroll;
-	}
-	.first-part{
-		display: flex;
-		gap:30px;
-	}
-	.part-container{
-		background:hsl(0,0%,0%);
-		margin:1rem 10rem;
-		border-radius:1rem;
-		padding:1rem;
-	}
-	.part-title{
-		font-size:3rem;
-		display: inline-block;
-		margin-right: 20px;
-	}
-	.sound-search{
-		display: inline-block;	
-	}
-	.part-list{
-		margin-left:1rem;
-		font-size: 20px;
-		display: grid;
-		grid-template-columns: 1fr 60px 100px 1fr;
-		gap : 1rem;
-	}
-	.sound-part{
-		display:contents;
-	}
-	.sound-part input{
-		width: 100%
-	}
-	.sound-part:hover{
-		color: grey;
-	}
-
+	css /* css */ `
+		.sound-container {
+			position: fixed;
+			inset: 0;
+			z-index: 10000;
+			overflow-y: scroll;
+		}
+		.first-part {
+			display: flex;
+			gap: 30px;
+		}
+		.part-container {
+			background: hsl(0, 0%, 0%);
+			margin: 1rem 10rem;
+			border-radius: 1rem;
+			padding: 1rem;
+		}
+		.part-title {
+			font-size: 3rem;
+			display: inline-block;
+			margin-right: 20px;
+		}
+		.sound-search {
+			display: inline-block;
+		}
+		.part-list {
+			margin-left: 1rem;
+			font-size: 20px;
+			display: grid;
+			grid-template-columns: 1fr 60px 100px 1fr;
+			gap: 1rem;
+		}
+		.sound-part {
+			display: contents;
+		}
+		.sound-part input {
+			width: 100%;
+		}
+		.sound-part:hover {
+			color: grey;
+		}
 	`
 	return (
-
 		<Show when={showSoundUi()}>
 			{(_) => {
 				onMount(() => {
@@ -106,16 +104,27 @@ export const SoundUi = () => {
 								const sounds = createMemo(() => (entries(assets[soundAsset]) as [string, Howl][]).filter(([k]) => !filter() || k.toLowerCase().includes(filter().toLowerCase())))
 								return (
 									<div class="part-container">
-										<div class="part-title" onClick={() => setShowPart(x => !x)}>{soundAsset}</div>
-										<input class="sound-search" placeholder="search sound" value={filter()} onChange={e => setFilter(e.target.value)}></input>
+										<div
+											class="part-title"
+											onClick={() => setShowPart((x) => !x)}
+										>
+											{soundAsset}
+										</div>
+										<input
+											class="sound-search"
+											placeholder="search sound"
+											value={filter()}
+											onChange={(e) => setFilter(e.target.value)}
+										></input>
 
 										<div class="part-list">
 											<Show when={showPart()}>
 												<For each={sounds()}>
 													{([key, howl]) => {
-														const updateVolume = (volume: number) => setReactiveSoundData((x) => {
-															return { ...x, [soundAsset]: { ...x[soundAsset], [key]: { ...(x?.[soundAsset]?.[key] ?? {}), volume } } }
-														})
+														const updateVolume = (volume: number) =>
+															setReactiveSoundData((x) => {
+																return { ...x, [soundAsset]: { ...x[soundAsset], [key]: { ...x?.[soundAsset]?.[key], volume } } }
+															})
 														onMount(() => {
 															if (!(key in (reactiveSoundData()[soundAsset] ?? []))) {
 																updateVolume(50)
@@ -132,7 +141,7 @@ export const SoundUi = () => {
 																	setIsPlaying(false)
 																})
 															}
-															setIsPlaying(x => !x)
+															setIsPlaying((x) => !x)
 														}
 
 														return (
@@ -141,22 +150,20 @@ export const SoundUi = () => {
 																<button onClick={play}>{isPlaying() ? 'pause' : 'play'}</button>
 																<input
 																	value={reactiveSoundData()?.[soundAsset]?.[key]?.volume ?? 1}
-																	onChange={e => updateVolume(e.target.valueAsNumber)}
+																	onChange={(e) => updateVolume(e.target.valueAsNumber)}
 																	type="number"
 																	min="0"
 																	max="2"
 																	step="0.01"
-																>
-																</input>
+																></input>
 																<input
 																	value={reactiveSoundData()[soundAsset]?.[key]?.volume ?? 1}
 																	type="range"
 																	min="0"
 																	max="2"
 																	step="0.01"
-																	onChange={e => updateVolume(e.target.valueAsNumber)}
-																>
-																</input>
+																	onChange={(e) => updateVolume(e.target.valueAsNumber)}
+																></input>
 															</div>
 														)
 													}}
@@ -171,15 +178,17 @@ export const SoundUi = () => {
 							{(soundAsset) => {
 								const keys = Object.keys(assets[soundAsset])
 								const updateVolume = (e: Event) => {
-									setReactiveSoundData(x => ({
+									setReactiveSoundData((x) => ({
 										...x,
 										[soundAsset]: {
 											...x[soundAsset],
-											...Object.keys(assets[soundAsset]).reduce((acc, v) => ({
-												...acc,
-												[v]: { volume: (e.target as HTMLInputElement).valueAsNumber },
-											}), {}),
-
+											...Object.keys(assets[soundAsset]).reduce(
+												(acc, v) => ({
+													...acc,
+													[v]: { volume: (e.target as HTMLInputElement).valueAsNumber },
+												}),
+												{},
+											),
 										},
 									}))
 								}
@@ -193,8 +202,7 @@ export const SoundUi = () => {
 											min="0"
 											max="2"
 											step="0.01"
-										>
-										</input>
+										></input>
 										<input
 											value={reactiveSoundData()?.[soundAsset]?.[keys[0]]?.volume ?? 1}
 											type="range"
@@ -202,8 +210,7 @@ export const SoundUi = () => {
 											max="2"
 											step="0.01"
 											onChange={updateVolume}
-										>
-										</input>
+										></input>
 									</div>
 								)
 							}}
@@ -212,6 +219,5 @@ export const SoundUi = () => {
 				)
 			}}
 		</Show>
-
 	)
 }

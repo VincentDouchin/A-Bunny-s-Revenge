@@ -25,13 +25,11 @@ export const TutorialUi = () => {
 		})
 		onCleanup(unsub)
 	})
-	css/* css */`
-	.tutorial-container {
-		margin:auto;
-		width: 40%;
-		
-	}
-
+	css /* css */ `
+		.tutorial-container {
+			margin: auto;
+			width: 40%;
+		}
 	`
 	return (
 		<Transition name="slide">
@@ -58,7 +56,10 @@ export const TutorialUi = () => {
 								<Show when={tutorial() === TutorialWindow.Farming}>
 									<FarmingTutorial />
 								</Show>
-								<button class="styled" onClick={close}>
+								<button
+									class="styled"
+									onClick={close}
+								>
 									<InputIcon input={menuInputs.get('validate')} />
 									<OutlineText>Continue</OutlineText>
 								</button>

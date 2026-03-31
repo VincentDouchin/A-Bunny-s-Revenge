@@ -20,4 +20,5 @@ export const updateMousePosition = () => {
 			ray.setFromCamera(mousePosition, camera)
 			ray.ray.intersectPlane(rayCatcher, inputManager.mouseWorldPosition)
 		}
-	} }
+	}
+}

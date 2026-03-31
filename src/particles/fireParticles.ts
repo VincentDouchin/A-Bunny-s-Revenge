@@ -22,11 +22,19 @@ export const fireParticles = () => {
 		renderMode: RenderMode.BillBoard,
 		renderOrder: 1,
 		behaviors: [
-			new SizeOverLife(new PiecewiseBezier([[new Bezier(1, 0.75, 0.50, 0.25), 0]])),
-			new ColorOverLife(new Gradient(
-				[[new Vector3(...new Color(0xEC273F).toArray()), 0], [new Vector3(...new Color(0xF3A833).toArray()), 1]],
-				[[0.5, 0], [0, 1]],
-			)),
+			new SizeOverLife(new PiecewiseBezier([[new Bezier(1, 0.75, 0.5, 0.25), 0]])),
+			new ColorOverLife(
+				new Gradient(
+					[
+						[new Vector3(...new Color(0xec273f).toArray()), 0],
+						[new Vector3(...new Color(0xf3a833).toArray()), 1],
+					],
+					[
+						[0.5, 0],
+						[0, 1],
+					],
+				),
+			),
 		],
 	})
 	system.emitter.rotateX(-Math.PI / 2)

@@ -14,9 +14,11 @@ export const kuwahara = Fn<[TextureNode, Node<'vec2'>, Node<'vec2'>, Node<'int'>
 	const s3 = vec3(0.0).toVar()
 
 	// Quadrant 0 – top-left     (i ∈ [−r, 0],  j ∈ [−r, 0])
+	// @ts-ignore TS2590: union too complex — TSL generic depth, safe to ignore
 	Loop({ start: int(0).sub(radius), end: int(1) }, ({ i: j }) => {
 		Loop({ start: int(0).sub(radius), end: int(1) }, ({ i }) => {
-			const c = tex.sample(uvCoord.add(vec2(i.toFloat(), j.toFloat()).div(res))).rgb.toVar()
+			const offset = vec2(i.toFloat(), j.toFloat()).div(res)
+			const c = tex.sample(uvCoord.add(offset)).rgb.toVar()
 			m0.addAssign(c)
 			s0.addAssign(c.mul(c))
 		})

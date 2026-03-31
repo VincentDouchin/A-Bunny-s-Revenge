@@ -1,8 +1,8 @@
-import type { PathInfo } from './assetPipeline'
+import type { PathInfo } from './assetPipeline.ts'
 import { NodeIO } from '@gltf-transform/core'
 import { ALL_EXTENSIONS } from '@gltf-transform/extensions'
 import draco3d from 'draco3dgltf'
-import { AssetTransformer } from './assetPipeline'
+import { AssetTransformer } from './assetPipeline.ts'
 
 export class ExtractAnimations extends AssetTransformer {
 	path = ['assets', 'animations.ts']
@@ -11,12 +11,10 @@ export class ExtractAnimations extends AssetTransformer {
 	io: NodeIO | null = null
 	async registerIO() {
 		if (!this.io) {
-			this.io = new NodeIO()
-				.registerExtensions(ALL_EXTENSIONS)
-				.registerDependencies({
-					'draco3d.decoder': await draco3d.createDecoderModule(),
-					'draco3d.encoder': await draco3d.createEncoderModule(),
-				})
+			this.io = new NodeIO().registerExtensions(ALL_EXTENSIONS).registerDependencies({
+				'draco3d.decoder': await draco3d.createDecoderModule(),
+				'draco3d.encoder': await draco3d.createEncoderModule(),
+			})
 		}
 		return this.io
 	}
@@ -28,8 +26,8 @@ export class ExtractAnimations extends AssetTransformer {
 			const root = glb.getRoot()
 			const animationNames = root
 				.listAnimations()
-				.map(animation => animation.getName())
-				.filter(x => !x.toLowerCase().includes('meta'))
+				.map((animation) => animation.getName())
+				.filter((x) => !x.toLowerCase().includes('meta'))
 				.sort((a, b) => a.localeCompare(b))
 			if (path.name) {
 				this.animations.set(path.name.replace('-optimized', ''), animationNames)
@@ -52,7 +50,7 @@ export interface Animations {`
 		for (const [name, animations] of sortedAnimations) {
 			if (animations.length > 0) {
 				result += `\n
-'${name}' : ${animations.map(x => `'${x}'`).join(` | `)}`
+'${name}' : ${[...new Set(animations)].map((x) => `'${x}'`).join(` | `)}`
 			}
 		}
 		result += `

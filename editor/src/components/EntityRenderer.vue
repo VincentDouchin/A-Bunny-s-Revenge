@@ -35,9 +35,7 @@ watch(
 		const src = assetStore.models?.[props.entity.category]?.[props.entity.model]
 		if (!src) return
 		const group = new Group()
-		const clone = ('animations' in (assetStore.assets as any)?.[props.entity.category]?.[props.entity.model])
-			? SkeletonUtils.clone(src)
-			: src.clone()
+		const clone = SkeletonUtils.clone(src)
 		group.add(clone)
 		if (props.entity.grid) {
 			for (let x = 0; x <= props.entity.grid.repetitionX; x++) {
@@ -59,7 +57,7 @@ const rotation = computed(() => new Euler().setFromQuaternion(new Quaternion().f
 
 <template>
 	<primitive
-		:ref="(e:Object3D) => entityRefs[id] = e"
+		:ref="(e: Object3D) => (entityRefs[id] = e)"
 		:object="model"
 		:rotation="rotation"
 		:scale="scale"
@@ -67,9 +65,12 @@ const rotation = computed(() => new Euler().setFromQuaternion(new Quaternion().f
 		dispose
 	>
 		<!-- @click="selectedEntityId = id" -->
-		<Html v-if="!hideTags && entity.tags && Object.keys(entity.tags).length !== 0" center>
+		<Html
+			v-if="!hideTags && entity.tags && Object.keys(entity.tags).length !== 0"
+			center
+		>
 			<NTag
-				v-for="value, tag in entity.tags"
+				v-for="(value, tag) in entity.tags"
 				:key="tag"
 				:bordered="false"
 				strong

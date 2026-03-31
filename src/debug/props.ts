@@ -1,3 +1,4 @@
+// oxlint-disable unicorn/no-empty-file
 // import type { With } from 'miniplex'
 // import type { BufferGeometry, Object3DEventMap } from 'three/webgpu'
 // import type { Actor, Entity } from '@/global/entity'

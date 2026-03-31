@@ -8,16 +8,19 @@ const getWoodFlooring = ({ x, y }: Vector2Like, map: Texture) => {
 	return new ToonMaterial({ map })
 }
 
-export const getGroundMaterial = (type: 'grass' | 'planks', args: {
-	size: Vector2Like
-	planksTexture: Texture
-	groundTexture: Texture
-	rockTexture: Texture
-	level: CanvasTexture
-	grassNoiseTexture: CanvasTexture | null
-}) => {
+export const getGroundMaterial = (
+	type: 'grass' | 'planks',
+	args: {
+		size: Vector2Like
+		planksTexture: Texture
+		groundTexture: Texture
+		rockTexture: Texture
+		level: CanvasTexture
+		grassNoiseTexture: CanvasTexture | null
+	},
+) => {
 	switch (type) {
-		case 'grass':{
+		case 'grass': {
 			if (!args.grassNoiseTexture) {
 				throw new Error('no grass noise texture')
 			}
@@ -29,7 +32,7 @@ export const getGroundMaterial = (type: 'grass' | 'planks', args: {
 				grassNoiseTexture: args.grassNoiseTexture,
 			})
 		}
-		case 'planks':{
+		case 'planks': {
 			return getWoodFlooring(args.size, args.planksTexture)
 		}
 	}

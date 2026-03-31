@@ -115,7 +115,7 @@ export class InputManager {
 			const keyName = this.layoutMap?.get(key) ?? metaKeys[key]
 			return keys[keyName]
 		})
-		const mouseButtons = input.mouse.map(m => mouse[m])
+		const mouseButtons = input.mouse.map((m) => mouse[m])
 		if (mouseButtons.length && controls === 'mouse') {
 			return mouseButtons
 		}
@@ -194,8 +194,7 @@ export class Input {
 			this.pressed = touchValue
 		}
 		for (const key of this.keys) {
-			if (this.#manager.keys[key])
-				this.pressed = 1
+			if (this.#manager.keys[key]) this.pressed = 1
 		}
 
 		for (const bubtton of this.mouse) {
@@ -275,7 +274,7 @@ export class InputMap<K extends string> {
 	}
 
 	update(gamepads: Gamepad[]) {
-		const gamepadsToUse = gamepads.filter(g => g !== null && this.#gamepads.includes(g?.index))
+		const gamepadsToUse = gamepads.filter((g) => g !== null && this.#gamepads.includes(g?.index))
 		for (const [name, input] of this.#inputs.entries()) {
 			const touchValue = this.touchController?.get(name)
 			input.update(gamepadsToUse, touchValue)

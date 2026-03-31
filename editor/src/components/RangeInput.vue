@@ -1,10 +1,7 @@
-<script setup lang="ts">
-</script>
+<script setup lang="ts"></script>
 
 <template>
-	<NSpace>
-		
-	</NSpace>
+	<NSpace> </NSpace>
 </template>
 
 <style scoped></style>

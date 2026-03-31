@@ -23,34 +23,31 @@ import { isRecipeHidden, ItemDisplay } from './InventoryUi'
 export const recipeQuery = useQuery(ecs.with('menuType', 'recipesQueued').where(({ menuType }) => [MenuType.Oven, MenuType.Cauldron, MenuType.Bench].includes(menuType)))
 const getMenuName = (menuType: MenuType) => {
 	switch (menuType) {
-		case MenuType.Oven :return 'Oven'
-		case MenuType.Cauldron :return 'Cauldron'
-		case MenuType.Bench :return 'Cutting Board'
+		case MenuType.Oven:
+			return 'Oven'
+		case MenuType.Cauldron:
+			return 'Cauldron'
+		case MenuType.Bench:
+			return 'Cutting Board'
 	}
 	return ''
 }
 export const MealBuffs = ({ meals }: { meals: Accessor<Modifier[]> }) => {
 	return (
 		<For each={meals()}>
-			{mod => (
+			{(mod) => (
 				<div>
 					{Math.sign(mod.value) > 0 && <span>+</span>}
 					<span>{mod.value * (mod.type === ModType.Percent ? 100 : 1)}</span>
 					{mod.type === ModType.Percent && <span>%</span>}
-					<span>
-						{' '}
-						{mod.stat}
-					</span>
+					<span> {mod.stat}</span>
 				</div>
 			)}
 		</For>
 	)
 }
 
-export const RecipeDescription = ({ recipe, onClick }: {
-	recipe: Accessor<Recipe>
-	onClick?: () => void
-}) => {
+export const RecipeDescription = ({ recipe, onClick }: { recipe: Accessor<Recipe>; onClick?: () => void }) => {
 	const context = useGame()
 	const name = createMemo(() => itemsData[recipe().output.name].name)
 	const output = createMemo(() => {
@@ -59,48 +56,47 @@ export const RecipeDescription = ({ recipe, onClick }: {
 			return {
 				modifiers: modifiers[itemName].mods,
 				amount: itemsData[itemName].meal,
-
 			}
 		}
 	})
-	css/* css */`
-	.meal-description-container{
-		font-size: 1.5rem;
-		display: grid;
-		height: fit-content;
-	}
-	.description-items{
-		display: grid;
-		gap:1rem;
-		justify-content:center;
-	}
-	.meal-amount{
-		margin: auto;
-	}
-	.name{
-		text-align: center;
-		display: grid;
-		font-size:2rem;
-		padding-bottom:1.5rem;
-	}
-	.ingredients-container{
-		display: grid;
-		grid-template-columns: 1fr 1fr;
-		gap:0.5rem 2rem;
-		width: 100%;
-	}
-	.ingredient{
-		display: flex;
-		align-items: center;
-		gap: 1rem;
-	}
-	.ingredient-img{
-		width: 2rem;
-		height: 2rem;
-	}
-	.ingredient-name{
-		font-size: 1.5rem;
-	}
+	css /* css */ `
+		.meal-description-container {
+			font-size: 1.5rem;
+			display: grid;
+			height: fit-content;
+		}
+		.description-items {
+			display: grid;
+			gap: 1rem;
+			justify-content: center;
+		}
+		.meal-amount {
+			margin: auto;
+		}
+		.name {
+			text-align: center;
+			display: grid;
+			font-size: 2rem;
+			padding-bottom: 1.5rem;
+		}
+		.ingredients-container {
+			display: grid;
+			grid-template-columns: 1fr 1fr;
+			gap: 0.5rem 2rem;
+			width: 100%;
+		}
+		.ingredient {
+			display: flex;
+			align-items: center;
+			gap: 1rem;
+		}
+		.ingredient-img {
+			width: 2rem;
+			height: 2rem;
+		}
+		.ingredient-name {
+			font-size: 1.5rem;
+		}
 	`
 	return (
 		<div class="meal-description-container">
@@ -110,20 +106,30 @@ export const RecipeDescription = ({ recipe, onClick }: {
 					const amount = createMemo(() => output().amount)
 					const modifiers = createMemo(() => output().modifiers)
 					return (
-
 						<div class="description-items">
 							<div class="meal-amount">
-								<MealAmount amount={amount} size="small" />
+								<MealAmount
+									amount={amount}
+									size="small"
+								/>
 							</div>
 							<div class="ingredients-container">
 								<For each={recipe().input}>
 									{(input) => {
-										const amount = ui.sync(() => context?.player().inventory.reduce((acc, v) => v?.name === input.name ? acc + v.quantity : acc, 0) ?? 0)
-										const color = createMemo(() => amount() < input.quantity ? { color: 'red' } : {})
+										const amount = ui.sync(() => context?.player().inventory.reduce((acc, v) => (v?.name === input.name ? acc + v.quantity : acc), 0) ?? 0)
+										const color = createMemo(() => (amount() < input.quantity ? { color: 'red' } : {}))
 										return (
 											<div class="ingredient">
-												<img class="ingredient-img" src={assets.items[input.name].img}>{ }</img>
-												<span class="ingredient-name" style={color()}>{` X ${input.quantity} (${amount()})`}</span>
+												<img
+													class="ingredient-img"
+													src={assets.items[input.name].img}
+												>
+													{}
+												</img>
+												<span
+													class="ingredient-name"
+													style={color()}
+												>{` X ${input.quantity} (${amount()})`}</span>
 											</div>
 										)
 									}}
@@ -133,52 +139,56 @@ export const RecipeDescription = ({ recipe, onClick }: {
 								<MealBuffs meals={modifiers} />
 							</div>
 						</div>
-					) }}
+					)
+				}}
 			</Show>
 
 			<Show when={onClick}>
-				<button onClick={onClick} style={{ 'font-size': '1.2rem', 'display': 'flex', 'gap': '0.5rem', 'justify-self': 'center' }} class="button">
+				<button
+					onClick={onClick}
+					style={{ 'font-size': '1.2rem', display: 'flex', gap: '0.5rem', 'justify-self': 'center' }}
+					class="button"
+				>
 					<InputIcon input={gameInputs.get('secondary')} />
 					Cook
 				</button>
 			</Show>
-
 		</div>
 	)
 }
 export const RecipesUi = () => {
 	const recipeEntity = createMemo(() => recipeQuery()?.[0])
 	const context = useGame()
-	css/* css */`
-	.recipes-container{
-		display: flex;
-		gap: 2rem;
-		min-height: 20rem;
-	}
-	.output{
-		display: flex;
-		gap: 0.5rem;
-		width: fit-content;
-		place-self: center;
-	}
-	.recipes{
-		display: grid;
-		gap: 1rem;
-		grid-template-columns: repeat(5, 1fr);
-		height: fit-content;
-	}
-	.description{
-		width: 20rem
-	}
-	.input-icon{
-		font-size: 1.5rem;
-		color: white;
-		position: absolute;
-		margin-top: 1rem;
-		top: 100%;
-		right: 0.5rem;
-		display:flex;
-	}
+	css /* css */ `
+		.recipes-container {
+			display: flex;
+			gap: 2rem;
+			min-height: 20rem;
+		}
+		.output {
+			display: flex;
+			gap: 0.5rem;
+			width: fit-content;
+			place-self: center;
+		}
+		.recipes {
+			display: grid;
+			gap: 1rem;
+			grid-template-columns: repeat(5, 1fr);
+			height: fit-content;
+		}
+		.description {
+			width: 20rem;
+		}
+		.input-icon {
+			font-size: 1.5rem;
+			color: white;
+			position: absolute;
+			margin-top: 1rem;
+			top: 100%;
+			right: 0.5rem;
+			display: flex;
+		}
 	`
 
 	return (
@@ -191,15 +201,17 @@ export const RecipesUi = () => {
 						}
 					})
 					const recipeQueued = ui.sync(() => recipeEntity()?.recipesQueued ?? [])
-					const recipesFiltered = createMemo(() => recipes.filter(recipe => recipe.processor === entity().menuType))
+					const recipesFiltered = createMemo(() => recipes.filter((recipe) => recipe.processor === entity().menuType))
 					const selectedRecipe = atom<null | Recipe>(null)
 					const cook = () => {
 						const recipe = selectedRecipe()
 
 						if (recipe) {
-							const hasIngredients = recipe.input.every(input => context?.player().inventory.some((item) => {
-								return item?.name === input.name && item.quantity >= input.quantity
-							}))
+							const hasIngredients = recipe.input.every((input) =>
+								context?.player().inventory.some((item) => {
+									return item?.name === input.name && item.quantity >= input.quantity
+								}),
+							)
 							const isUnlocked = save.unlockedRecipes.includes(recipe.output.name)
 							if (hasIngredients && isUnlocked) {
 								if (recipeQueued().length < 4) {
@@ -226,20 +238,19 @@ export const RecipesUi = () => {
 						<GoldContainer>
 							<InventoryTitle>{getMenuName(entity().menuType)}</InventoryTitle>
 							<div class="recipes-container">
-
 								<div>
 									<Menu>
 										{(MenuItem) => {
 											return (
 												<div style={{ display: 'grid', gap: '1rem' }}>
 													<div class="output">
-														<For each={range(0, 4, i => i)}>
+														<For each={range(0, 4, (i) => i)}>
 															{(i) => {
 																return (
 																	<MenuItem>
 																		{({ selected }) => (
 																			<div style={{ color: 'white' }}>
-																				<div style={{ 'display': 'grid', 'align-items': 'center' }}>
+																				<div style={{ display: 'grid', 'align-items': 'center' }}>
 																					<ItemDisplay
 																						selected={selected}
 																						item={recipeQueued()[i]?.output}
@@ -257,12 +268,15 @@ export const RecipesUi = () => {
 															{(recipe, i) => {
 																const hidden = !save.unlockedRecipes.includes(recipe.output.name)
 																const canCraft = createMemo(() => {
-																	if (recipe.input.some((item) => {
-																		return !context?.player().inventory.find((playerItem) => {
-																			return playerItem?.name === item.name && playerItem.quantity >= item.quantity
+																	if (
+																		recipe.input.some((item) => {
+																			return (
+																				!context?.player().inventory.find((playerItem) => {
+																					return playerItem?.name === item.name && playerItem.quantity >= item.quantity
+																				}) && !hidden
+																			)
 																		})
-																		&& !hidden
-																	})) {
+																	) {
 																		return { completed: false }
 																	}
 																	return {}
@@ -274,7 +288,7 @@ export const RecipesUi = () => {
 																		defaultSelected={i() === 0}
 																	>
 																		{({ selected }) => (
-																			<div style={{ 'color': 'white', 'display': 'grid', 'align-items': 'center' }}>
+																			<div style={{ color: 'white', display: 'grid', 'align-items': 'center' }}>
 																				<ItemDisplay
 																					selected={selected}
 																					item={recipe.output}
@@ -304,7 +318,6 @@ export const RecipesUi = () => {
 											)
 										}}
 									</Show>
-
 								</div>
 							</div>
 							<Show when={!context?.usingTouch()}>

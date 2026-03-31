@@ -19,7 +19,12 @@ import { asyncMap, asyncMapValues, entries, filterKeys, mapKeys, mapValues, obje
 
 type GlobEager<T = string> = Record<string, T>
 
-type getToonOptions = (key: string, materialName: string, name: string, node: Mesh) => ({
+type getToonOptions = (
+	key: string,
+	materialName: string,
+	name: string,
+	node: Mesh,
+) => {
 	color?: ColorRepresentation
 	material?: Constructor<Material>
 	side?: Side
@@ -28,13 +33,10 @@ type getToonOptions = (key: string, materialName: string, name: string, node: Me
 	filter?: TextureFilter
 	depthWrite?: boolean
 	isolate?: boolean
-})
+}
 export const materials = new Map<string, Material>()
 
-const loadGLBAsToon = async <K extends string>(
-	paths: Record<K, string>,
-	getOptions?: getToonOptions,
-) => {
+const loadGLBAsToon = async <K extends string>(paths: Record<K, string>, getOptions?: getToonOptions) => {
 	const loaded = await asyncMapValues(paths, async (path, key) => loadGLB(path, key))
 
 	const toons = mapValues(loaded, (glb, key) => {
@@ -45,7 +47,7 @@ const loadGLBAsToon = async <K extends string>(
 					if (!materials.has(node.material.uuid) || options.isolate) {
 						const Mat = options?.material ?? ToonMaterial
 						const newMaterial = new Mat({
-							color: (options && 'color' in options) ? options.color : node.material.color,
+							color: options && 'color' in options ? options.color : node.material.color,
 							map: node.material.map,
 							transparent: options?.transparent ?? node.material.transparent,
 							side: options?.side ?? node.material.side ?? FrontSide,
@@ -77,17 +79,20 @@ const loadGLBAsToon = async <K extends string>(
 }
 
 const cropsLoader = async <K extends string>(stagesPaths: Record<K, string>[]) => {
-	const models = await asyncMap(stagesPaths, paths => loadGLBAsToon(paths, () => ({ shadow: true })))
-	return models.reduce<Record<K, GLTF[]>>((acc, v) => {
-		for (const [key, val] of entries(v)) {
-			acc[key as K] ??= []
-			acc[key as K].push(val)
-		}
-		return acc
-	}, {} as Record<K, GLTF[]>)
+	const models = await asyncMap(stagesPaths, (paths) => loadGLBAsToon(paths, () => ({ shadow: true })))
+	return models.reduce<Record<K, GLTF[]>>(
+		(acc, v) => {
+			for (const [key, val] of entries(v)) {
+				acc[key as K] ??= []
+				acc[key as K].push(val)
+			}
+			return acc
+		},
+		{} as Record<K, GLTF[]>,
+	)
 }
 
-const fontLoader = async<K extends string>(paths: Record<K, string>) => {
+const fontLoader = async <K extends string>(paths: Record<K, string>) => {
 	for (const [key, m] of entries(paths)) {
 		const [name, weight] = key.split('-')
 		const font = new FontFace(name, `url(${m})`, { weight: weight ?? 'normal' })
@@ -108,19 +113,19 @@ const texturesLoader = async <K extends string>(paths: Record<K, string>) => {
 }
 
 interface PackedJSON {
-	frames: Record<string, { frame: { x: number, y: number, w: number, h: number } }>
+	frames: Record<string, { frame: { x: number; y: number; w: number; h: number } }>
 }
 
 const buttonsLoader = async <K extends string>(json: Record<K, string>, png: Record<K, string>) => {
 	return asyncMap(objectKeys(json), async (key) => {
-		const jsonData = await (await fetch(json[key])).json() as PackedJSON
+		const jsonData = (await (await fetch(json[key])).json()) as PackedJSON
 		const img = await loadImage(png[key])
-		const getImg = (frame: { x: number, y: number, w: number, h: number }) => {
+		const getImg = (frame: { x: number; y: number; w: number; h: number }) => {
 			const buffer = getScreenBuffer(frame.w, frame.h)
 			buffer.drawImage(img, frame.x, frame.y, frame.w, frame.h, 0, 0, frame.w, frame.h)
 			return buffer.canvas
 		}
-		const frames = mapKeys(jsonData.frames, val => val.replace('folder/', ''))
+		const frames = mapKeys(jsonData.frames, (val) => val.replace('folder/', ''))
 
 		return (key: string) => {
 			const frame = frames[key]?.frame
@@ -133,16 +138,19 @@ const buttonsLoader = async <K extends string>(json: Record<K, string>, png: Rec
 }
 
 const loadVoices = async <K extends string>(audioPaths: Record<K, string>, globText: Record<K, string>) => {
-	const spriteMap = await asyncMapValues(globText, async src => (await fetch(src)).text())
+	const spriteMap = await asyncMapValues(globText, async (src) => (await fetch(src)).text())
 	return asyncMapValues(audioPaths, async (src, key) => {
 		const sprite = spriteMap[key]
 			.split('\r\n')
 			.filter(Boolean)
-			.map(l => l.split('\t'))
-			.reduce((acc, [start, end, name]) => ({
-				...acc,
-				[name]: [Number(start) * 1000, Number(end) * 1000 - Number(start) * 1000],
-			}), {})
+			.map((l) => l.split('\t'))
+			.reduce(
+				(acc, [start, end, name]) => ({
+					...acc,
+					[name]: [Number(start) * 1000, Number(end) * 1000 - Number(start) * 1000],
+				}),
+				{},
+			)
 		const audio = await loadAudio(src, key)
 		return new Howl({ src: audio, pool: 10, format: 'webm', sprite })
 	})
@@ -204,98 +212,52 @@ const splitChildren = async <K extends string>(glb: Promise<Record<string, GLTF>
 	}, {}) as Record<K, Object3D>
 }
 
-const levelLoader = async <K extends string> (levelsUrls: Record<K, string>, imagesUrls: Record<string, string>) => {
-	const images = await asyncMapValues(imagesUrls, async url => imgToCanvas(await loadImage(url)).canvas)
+const levelLoader = async <K extends string>(levelsUrls: Record<K, string>, imagesUrls: Record<string, string>) => {
+	const images = await asyncMapValues(imagesUrls, async (url) => imgToCanvas(await loadImage(url)).canvas)
 	return asyncMapValues(levelsUrls, async (url, levelName) => {
-		const level = await (await fetch(url)).json() as LevelData
-		const maps = mapKeys(
-			filterKeys(
-				images,
-				key => key.startsWith(levelName),
-			)[0],
-			key => key.replace(`${levelName}/`, ''),
-		)
+		const level = (await (await fetch(url)).json()) as LevelData
+		const maps = mapKeys(filterKeys(images, (key) => key.startsWith(levelName))[0], (key) => key.replace(`${levelName}/`, ''))
 		return { ...level, ...maps } as LevelLoaded
 	})
 }
 
-type AssetsLoaded<T extends Record<string, Promise<any> | any>> = { [K in keyof T]: Awaited<T[K]> }
+type AssetsLoaded<T extends Record<string, any>> = { [K in keyof T]: Awaited<T[K]> }
 export const loadAssets = async (thumbnailRenderer: Thumbnailer, showMarkers: boolean, loader?: () => () => void) => {
 	const clear = loader && loader()
 	const getAssetPaths = getAssetPathsLoader<StaticAssetPath>(import.meta.glob('@assets/**/**.*', { eager: true, query: '?url', import: 'default' }))
 	const assets = {
 		markers: customModels(showMarkers),
 		// ! models
-		characters: loadGLBAsToon(
-			getAssetPaths({ folder: 'characters', extension: 'glb', suffix: '-optimized' }),
-			() => ({ material: CharacterMaterial, shadow: true, filter: NearestFilter }),
-		),
+		characters: loadGLBAsToon(getAssetPaths({ folder: 'characters', extension: 'glb', suffix: '-optimized' }), () => ({ material: CharacterMaterial, shadow: true, filter: NearestFilter })),
 		icons: getAssetPaths({ folder: 'icons', extension: 'svg' }),
 
-		models: loadGLBAsToon(
-			getAssetPaths({ folder: 'models', extension: 'glb', suffix: '-optimized' }),
-			modelOptions,
-		),
-		trees: loadGLBAsToon(
-			getAssetPaths({ folder: 'trees', extension: 'glb', suffix: '-optimized' }),
-			() => ({ material: VegetationMaterial, shadow: false, transparent: true }),
-		),
-		crops: cropsLoader(
-			[1, 2, 3, 4].map(nb => getAssetPaths({ folder: 'crops', extension: 'glb', suffix: `_${nb}-optimized`, lowercase: true })),
-		),
-		gardenPlots: loadGLBAsToon(
-			getAssetPaths({ folder: 'gardenPlots', extension: 'glb', suffix: '-optimized' }),
-			() => ({ material: GardenPlotMaterial }),
-		),
-		weapons: loadGLBAsToon(
-			getAssetPaths({ folder: 'weapons', extension: 'glb', suffix: '-optimized' }),
-			() => ({ shadow: true }),
-		),
+		models: loadGLBAsToon(getAssetPaths({ folder: 'models', extension: 'glb', suffix: '-optimized' }), modelOptions),
+		trees: loadGLBAsToon(getAssetPaths({ folder: 'trees', extension: 'glb', suffix: '-optimized' }), () => ({ material: VegetationMaterial, shadow: false, transparent: true })),
+		crops: cropsLoader([1, 2, 3, 4].map((nb) => getAssetPaths({ folder: 'crops', extension: 'glb', suffix: `_${nb}-optimized`, lowercase: true }))),
+		gardenPlots: loadGLBAsToon(getAssetPaths({ folder: 'gardenPlots', extension: 'glb', suffix: '-optimized' }), () => ({ material: GardenPlotMaterial })),
+		weapons: loadGLBAsToon(getAssetPaths({ folder: 'weapons', extension: 'glb', suffix: '-optimized' }), () => ({ shadow: true })),
 		vegetation: loadGLBAsToon(
 			getAssetPaths({ folder: 'vegetation', extension: 'glb', suffix: '-optimized' }),
 			// () => ({ material: GrassMaterial, shadow: true }),
 		),
-		mainMenuAssets: loadMainMenuAssets(
-			getAssetPaths({ folder: 'mainMenuAssets', extension: 'glb', suffix: '-optimized' }),
-		),
+		mainMenuAssets: loadMainMenuAssets(getAssetPaths({ folder: 'mainMenuAssets', extension: 'glb', suffix: '-optimized' })),
 
-		fruitTrees: loadGLBAsToon(
-			getAssetPaths({ folder: 'fruit_trees', extension: 'glb', suffix: '-optimized' }),
-		),
-		items: loadItems(
-			getAssetPaths({ folder: 'items', extension: 'glb', suffix: '-optimized' }),
-			thumbnailRenderer,
-		),
+		fruitTrees: loadGLBAsToon(getAssetPaths({ folder: 'fruit_trees', extension: 'glb', suffix: '-optimized' })),
+		items: loadItems(getAssetPaths({ folder: 'items', extension: 'glb', suffix: '-optimized' }), thumbnailRenderer),
 		// ! levels
-		levels: levelLoader(
-			getAssetPaths({ folder: 'levels', extension: 'json', suffix: '/data' }),
-			getAssetPaths({ folder: 'levels', extension: 'png' }),
-		),
+		levels: levelLoader(getAssetPaths({ folder: 'levels', extension: 'json', suffix: '/data' }), getAssetPaths({ folder: 'levels', extension: 'png' })),
 
 		// ! textures
-		particles: texturesLoader(
-			getAssetPaths({ folder: 'particles', extension: 'webp' }),
-		),
+		particles: texturesLoader(getAssetPaths({ folder: 'particles', extension: 'webp' })),
 
-		textures: texturesLoader(
-			getAssetPaths({ folder: 'textures', extension: 'webp' }),
-		),
+		textures: texturesLoader(getAssetPaths({ folder: 'textures', extension: 'webp' })),
 
-		buttons: buttonsLoader(
-			getAssetPaths({ folder: 'buttons', extension: 'json' }),
-			getAssetPaths({ folder: 'buttons', extension: 'png' }),
-		),
+		buttons: buttonsLoader(getAssetPaths({ folder: 'buttons', extension: 'json' }), getAssetPaths({ folder: 'buttons', extension: 'png' })),
 
 		// ! audio
-		voices: loadVoices(
-			getAssetPaths({ folder: 'voices', extension: 'webm' }),
-			getAssetPaths({ folder: 'voices', extension: 'txt' }),
-		),
+		voices: loadVoices(getAssetPaths({ folder: 'voices', extension: 'webm' }), getAssetPaths({ folder: 'voices', extension: 'txt' })),
 
-		steps: loadSounds(
-			getAssetPaths({ folder: 'steps', extension: 'webm' }),
-			3,
-		),
+		steps: loadSounds(getAssetPaths({ folder: 'steps', extension: 'webm' }), 3),
 
 		soundEffects: loadSounds(getAssetPaths({ folder: 'soundEffects', extension: 'webm' }), 5),
 
@@ -303,9 +265,7 @@ export const loadAssets = async (thumbnailRenderer: Thumbnailer, showMarkers: bo
 		ambiance: loadSounds(getAssetPaths({ folder: 'ambiance', extension: 'webm' }), 1),
 
 		// ! others
-		fonts: fontLoader(
-			{ ...getAssetPaths({ folder: 'fonts', extension: 'ttf' }), ...getAssetPaths({ folder: 'fonts', extension: 'otf' }) },
-		),
+		fonts: fontLoader({ ...getAssetPaths({ folder: 'fonts', extension: 'ttf' }), ...getAssetPaths({ folder: 'fonts', extension: 'otf' }) }),
 		village: splitChildren<village>(loadGLBAsToon(getAssetPaths({ folder: 'village', extension: 'glb' }))),
 		dungeon: splitChildren<dungeon>(loadGLBAsToon(getAssetPaths({ folder: 'dungeon', extension: 'glb' }))),
 		emotes: {
@@ -314,7 +274,9 @@ export const loadAssets = async (thumbnailRenderer: Thumbnailer, showMarkers: bo
 		},
 	} as const
 
-	const assetsLoaded = await asyncMapValues(assets, async val => await val) as AssetsLoaded<typeof assets>
-	clear && clear()
+	const assetsLoaded = (await asyncMapValues(assets, (val) => val)) as AssetsLoaded<typeof assets>
+	if (clear) {
+		clear()
+	}
 	return assetsLoaded
 }

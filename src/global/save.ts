@@ -50,7 +50,7 @@ export type Settings = {
 export const useSettings = async () => {
 	const existingSettings = await get<Settings>('settings')
 	const settings = createMutable<Settings>(existingSettings ?? blankSettings())
-	const scheduled = createScheduled(fn => debounce(fn, 5000))
+	const scheduled = createScheduled((fn) => debounce(fn, 5000))
 	createEffect(() => {
 		if (scheduled()) {
 			set('settings', { ...settings })
@@ -64,7 +64,7 @@ export type SaveData = {
 	crops: Record<string, NonNullable<Crop>>
 	playerPosition: number[]
 	playerRotation: number[]
-	quests: Record<string, { steps: Record<string, boolean>, data: any, unlocked: boolean }>
+	quests: Record<string, { steps: Record<string, boolean>; data: any; unlocked: boolean }>
 	selectedSeed: null | crops
 	inventories: Record<string, Item[]>
 	modifiers: Meals[]
@@ -72,7 +72,7 @@ export type SaveData = {
 	unlockedPaths: number
 	acorns: number
 	started: boolean
-	daytime: { current: number, dayToNight: boolean, timePassed: number, dayLight: number }
+	daytime: { current: number; dayToNight: boolean; timePassed: number; dayLight: number }
 }
 const blankSave = (): SaveData => ({
 	crops: {},
@@ -92,7 +92,7 @@ const blankSave = (): SaveData => ({
 export const useSave = async () => {
 	const existingSave = await get<SaveData>('save')
 	const save = createMutable(existingSave ?? blankSave())
-	const scheduled = createScheduled(fn => debounce(fn, 2000))
+	const scheduled = createScheduled((fn) => debounce(fn, 2000))
 	createEffect(() => {
 		if (scheduled()) {
 			trackDeep(save)
@@ -110,7 +110,7 @@ export const useSave = async () => {
 		save.inventories[entity.inventoryId] ??= []
 		const inventory = save.inventories[entity.inventoryId]
 
-		const existingItem = inventory.find(it => it && it.name === item.name && stack)
+		const existingItem = inventory.find((it) => it && it.name === item.name && stack)
 		if (existingItem) {
 			wasAdded = true
 			existingItem.quantity += item.quantity
@@ -132,7 +132,7 @@ export const useSave = async () => {
 		if (existingItem) {
 			existingItem.quantity -= item.quantity
 			if (existingItem.quantity <= 0) {
-				delete inventory[existingItemIndex]
+				inventory.splice(existingItemIndex, 1)
 			}
 		}
 	}

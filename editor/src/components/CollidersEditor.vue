@@ -49,7 +49,11 @@ const toggle = (header: HeaderClickInfo<'primary' | `secondary-${number}`>) => {
 </script>
 
 <template>
-	<NCard size="small" :segmented="{ footer: true }" title="Colliders">
+	<NCard
+		size="small"
+		:segmented="{ footer: true }"
+		title="Colliders"
+	>
 		<NCollapse
 			v-if="mesh"
 			:expanded-names="colliderStore.selectedKey ?? ''"
@@ -69,7 +73,10 @@ const toggle = (header: HeaderClickInfo<'primary' | `secondary-${number}`>) => {
 				@add-collider="addPrimaryCollider"
 				@delete-collider="deletePrimaryCollider"
 			/>
-			<template v-for="_secondaryCollider, i in modelData.secondaryColliders" :key="`${category}-${model}-${i}`">
+			<template
+				v-for="(_secondaryCollider, i) in modelData.secondaryColliders"
+				:key="`${category}-${model}-${i}`"
+			>
 				<SingleColliderEditor
 					v-if="modelData.secondaryColliders?.[i]"
 					v-model:collider="modelData.secondaryColliders[i]"
@@ -77,14 +84,18 @@ const toggle = (header: HeaderClickInfo<'primary' | `secondary-${number}`>) => {
 					:category="category"
 					:complex="false"
 					:name="`secondary-${i}`"
-					:title="`Secondary ${i}` "
+					:title="`Secondary ${i}`"
 					:mesh
 					@delete-collider="deleteSecondaryCollider(i)"
 				/>
 			</template>
 		</NCollapse>
 		<template #footer>
-			<NButton v-if="!modelData.collider" style="width:100%" @click="addPrimaryCollider">
+			<NButton
+				v-if="!modelData.collider"
+				style="width: 100%"
+				@click="addPrimaryCollider"
+			>
 				<template #icon>
 					<NIcon>
 						<fa-plus />
@@ -92,7 +103,10 @@ const toggle = (header: HeaderClickInfo<'primary' | `secondary-${number}`>) => {
 				</template>
 				Add primary collider
 			</NButton>
-			<NButton style="width:100%" @click="addSecondaryCollider">
+			<NButton
+				style="width: 100%"
+				@click="addSecondaryCollider"
+			>
 				<template #icon>
 					<NIcon>
 						<fa-plus />

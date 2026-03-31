@@ -24,7 +24,8 @@ export const playerSteps = () => {
 					} else {
 						player.lastStep[foot] = false
 					}
-				} })
+				}
+			})
 		} else {
 			player.lastStep.left = false
 			player.lastStep.right = false

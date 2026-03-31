@@ -15,15 +15,19 @@ export const spawnBouncyItems = (entity: Entity, itemModel: Object3D<Object3DEve
 		const model = itemModel.clone()
 		model.scale.setScalar(4)
 		const angle = Math.random() * Math.PI * 2
-		ecs.add(inMap({
-			position: new Vector3(between(-5, 5), 5, between(-5, 5)).add(position),
-			model,
-			bodyDesc: RigidBodyDesc.dynamic().setLinvel(Math.cos(angle) * between(10, 20), Math.random() * between(20, 30), Math.sin(angle) * between(10, 20)).setAdditionalMass(0.1),
-			groundLevel: size.y / 2,
-			item: true,
-			bounce: { amount: Math.floor(Math.random() * 4), force: new Vector3(0, between(2, 5), 0), touchedGround: false },
-			...entity,
-		}))
+		ecs.add(
+			inMap({
+				position: new Vector3(between(-5, 5), 5, between(-5, 5)).add(position),
+				model,
+				bodyDesc: RigidBodyDesc.dynamic()
+					.setLinvel(Math.cos(angle) * between(10, 20), Math.random() * between(20, 30), Math.sin(angle) * between(10, 20))
+					.setAdditionalMass(0.1),
+				groundLevel: size.y / 2,
+				item: true,
+				bounce: { amount: Math.floor(Math.random() * 4), force: new Vector3(0, between(2, 5), 0), touchedGround: false },
+				...entity,
+			}),
+		)
 		playSound(['665181__el_boss__item-or-material-pickup-pop-3-of-3', '665182__el_boss__item-or-material-pickup-pop-2-of-3', '665183__el_boss__item-or-material-pickup-pop-1-of-3'])
 		await sleep(50)
 	}

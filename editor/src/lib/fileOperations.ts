@@ -14,11 +14,7 @@ export const FOLDER = 'A-Bunny-s-Revenge'
 
 const copyFileLocal = async (filePath: string[], localDir: string | null) => {
 	if (localDir) {
-		await copyFile(
-			await path.join(FOLDER, ...filePath),
-			await path.join(localDir, ...filePath),
-			{ fromPathBaseDir: BaseDirectory.AppData },
-		)
+		await copyFile(await path.join(FOLDER, ...filePath), await path.join(localDir, ...filePath), { fromPathBaseDir: BaseDirectory.AppData })
 	}
 }
 
@@ -42,7 +38,7 @@ const saveTextFile = async (filePath: string[], data: any, localDir: string | nu
 }
 
 export const saveLevelImage = async (level: string, name: string, canvas: HTMLCanvasElement, localDir: string | null) => {
-	const blob = await new Promise<Blob | null>(res => canvas.toBlob(res, 'image/png'))
+	const blob = await new Promise<Blob | null>((res) => canvas.toBlob(res, 'image/png'))
 	if (!blob) return
 	const arrayBuffer = await blob.arrayBuffer()
 	const bytes = new Uint8Array(arrayBuffer)
@@ -91,7 +87,7 @@ const saveTagsListTypes = async (tags: EditorTags, localDir: string | null) => {
 	${key}: true`
 		} else if (val.type === 'enum') {
 			acc += `
-	${key}: ${val.values.map(t => `'${t}'`).join('|')}`
+	${key}: ${val.values.map((t) => `'${t}'`).join('|')}`
 		} else if (val.type === 'number') {
 			acc += `
 	${key}: number`
@@ -114,8 +110,8 @@ export const loadTagsList = async () => {
 		const contents = await readTextFile(filePath, { baseDir: BaseDirectory.AppData })
 		return JSON.parse(contents) as EditorTags
 	} else {
-		await writeTextFile(filePath, JSON.stringify({ }), { baseDir: BaseDirectory.AppData })
-		return { } as EditorTags
+		await writeTextFile(filePath, JSON.stringify({}), { baseDir: BaseDirectory.AppData })
+		return {} as EditorTags
 	}
 }
 export const saveTagsList = async (tags: EditorTags, localDir: string | null) => {

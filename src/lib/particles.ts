@@ -27,7 +27,7 @@ export const spawnVfx = async (vfxOptions: CustomVFXParticlesOptions) => {
 
 const particlePoolQuery = ecs.with('particlePool')
 export const getParticleFromPool = (particle: Particles, target?: Object3D) => {
-	const entity = particlePoolQuery.entities.filter(e => e[particle])[0]
+	const entity = particlePoolQuery.entities.filter((e) => e[particle])[0]
 	if (!entity) {
 		throw new Error(`particle pool not initiated for ${particle}`)
 	}
@@ -107,27 +107,34 @@ const particleDefinitions: Record<Particles, CustomVFXParticlesOptions> = {
 	enemyDefeatedParticles,
 }
 
-export const particlesPlugin = (components: Record<Particles, number>): Plugin<typeof app> => (app) => {
-	for (const component of objectKeys(components)) {
-		const query = ecs.with(component).without('particlePool')
-		const updateParticles = () => {
-			for (const entity of query) {
-				entity[component].update(time.delta / 1000)
+export const particlesPlugin =
+	(components: Record<Particles, number>): Plugin<typeof app> =>
+	(app) => {
+		for (const component of objectKeys(components)) {
+			const query = ecs.with(component).without('particlePool')
+			const updateParticles = () => {
+				for (const entity of query) {
+					entity[component].update(time.delta / 1000)
+				}
 			}
-		}
-		const spawnPool = async () => {
-			for (let i = 0; i < components[component]; i++) {
-				const vfx = await spawnVfx(particleDefinitions[component])
-				ecs.add({ [component]: vfx, particlePool: true })
+			const spawnPool = async () => {
+				for (let i = 0; i < components[component]; i++) {
+					const vfx = await spawnVfx(particleDefinitions[component])
+					ecs.add({ [component]: vfx, particlePool: true })
+				}
 			}
-		}
 
-		app.onRender('default', runIf(() => app.isDisabled('paused'), updateParticles))
-		app.onEnter('game', spawnPool)
-		app.addSubscribers('game', () => query.onEntityRemoved.subscribe((e) => {
-			const vfx = e[component]
-			vfx.clear()
-			ecs.add({ [component]: vfx, particlePool: true })
-		}))
+			app.onRender(
+				'default',
+				runIf(() => app.isDisabled('paused'), updateParticles),
+			)
+			app.onEnter('game', spawnPool)
+			app.addSubscribers('game', () =>
+				query.onEntityRemoved.subscribe((e) => {
+					const vfx = e[component]
+					vfx.clear()
+					ecs.add({ [component]: vfx, particlePool: true })
+				}),
+			)
+		}
 	}
-}

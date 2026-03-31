@@ -32,7 +32,7 @@ onMounted(() => {
 })
 const light = computed(() => new AmbientLight())
 const modelData = computed(() => modelDataStore.modelData?.[props.category]?.[props.model] ?? [])
-const COLORS = [0x00FF00, 0x0000FF, 0xFFFF00, 0x00FFFF, 0xFF00FF]
+const COLORS = [0x00ff00, 0x0000ff, 0xffff00, 0x00ffff, 0xff00ff]
 onUnmounted(() => {
 	world.colliders.forEach((collider) => {
 		world.removeCollider(collider, true)
@@ -54,8 +54,14 @@ const dragging = ref(false)
 </script>
 
 <template>
-	<primitive :object="light" :dispose="true" />
-	<OrbitControls v-if="!dragging" :enable-damping="false" />
+	<primitive
+		:object="light"
+		:dispose="true"
+	/>
+	<OrbitControls
+		v-if="!dragging"
+		:enable-damping="false"
+	/>
 
 	<TresPerspectiveCamera
 		:zoom="2"
@@ -75,14 +81,14 @@ const dragging = ref(false)
 			:key="`${category}-${model}`"
 			v-model:dragging="dragging"
 			v-model:collider="modelData.collider"
-			:color="0xFF0000"
+			:color="0xff0000"
 			:world
 			:model="mesh"
 			:rapier-debug-renderer
 			:transform-mode
 			:index="0"
 		/>
-		<template v-for="_collider, i in modelData.secondaryColliders">
+		<template v-for="(_collider, i) in modelData.secondaryColliders">
 			<Collider
 				v-if="modelData.secondaryColliders?.[i]"
 				id="secondary"

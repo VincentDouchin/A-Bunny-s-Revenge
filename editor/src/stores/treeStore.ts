@@ -13,12 +13,7 @@ export const useTreeStore = defineStore('trees', () => {
 	const levelStore = useLevelStore()
 	const modelDataStore = useModelDataStore()
 	const assetStore = useAssetStore()
-	const treeModels = [
-		'Low_Poly_Forest_treeTall01',
-		'Low_Poly_Forest_treeTall02',
-		'Low_Poly_Forest_treeTall03',
-		'Low_Poly_Forest_treeTall04',
-	] as const
+	const treeModels = ['Low_Poly_Forest_treeTall01', 'Low_Poly_Forest_treeTall02', 'Low_Poly_Forest_treeTall03', 'Low_Poly_Forest_treeTall04'] as const
 	const getTreeData = (i: number, position: Vector3Like) => {
 		const collider = modelDataStore.modelData.trees[treeModels[i]].collider as ColliderData & { type: 'cylinder' }
 		const radius = collider.size.x
@@ -44,33 +39,18 @@ export const useTreeStore = defineStore('trees', () => {
 
 	const getTreesData = () => {
 		if (!levelStore.levelImages?.treeMap || !levelStore.levelData) return { instances: [], data: [] }
-		const instances = getTrees(
-			treeModels.length,
-			levelStore.levelImages?.heightMap ?? null,
-			levelStore.levelImages.treeMap,
-			10,
-			levelStore.levelData.displacementScale,
-		)
-		const data = instances.flatMap((trees, i) => trees.map(t => getTreeData(i, t.position)))
+		const instances = getTrees(treeModels.length, levelStore.levelImages?.heightMap ?? null, levelStore.levelImages.treeMap, 10, levelStore.levelData.displacementScale)
+		const data = instances.flatMap((trees, i) => trees.map((t) => getTreeData(i, t.position)))
 		trees.value = { instances, data }
 	}
 
 	watchEffect(getTreesData)
 
 	const getDoorBoundaries = (e: LevelEntity) => {
-		const halfSize = new Vector3()
-			.fromArray(e.scale)
-			.multiplyScalar(0.5)
-			.applyQuaternion(new Quaternion().fromArray(e.rotation))
+		const halfSize = new Vector3().fromArray(e.scale).multiplyScalar(0.5).applyQuaternion(new Quaternion().fromArray(e.rotation))
 		const p = new Vector3().fromArray(e.position)
-		const min = new Vector2(
-			p.x - Math.abs(halfSize.x),
-			p.z - Math.abs(halfSize.z),
-		)
-		const max = new Vector2(
-			p.x + Math.abs(halfSize.x),
-			p.z + Math.abs(halfSize.z),
-		)
+		const min = new Vector2(p.x - Math.abs(halfSize.x), p.z - Math.abs(halfSize.z))
+		const max = new Vector2(p.x + Math.abs(halfSize.x), p.z + Math.abs(halfSize.z))
 
 		return new Box2(min, max)
 	}
@@ -80,16 +60,18 @@ export const useTreeStore = defineStore('trees', () => {
 		if (!treeDataValue || !levelStore.levelData) return null
 		const size = new Vector2(levelStore.levelData.sizeX, levelStore.levelData.sizeY)
 		const gridData = buildTreeBoundaryGrid(treeDataValue, size, 8)
-		const doorGrids = Object.values(levelStore.levelEntities).filter(e => e.value.tags?.doorDungeon).map((e) => {
-			const box = getDoorBoundaries(e.value)
-			const treesWithDoor = treeDataValue.filter(t => !box.containsPoint(new Vector2(t.position.x, t.position.z)))
-			return {
-				direction: e.value.tags?.doorDungeon,
-				grid: buildTreeBoundaryGrid(treesWithDoor, size, 8),
-				box,
-			}
-		})
-		const data = mergeGrids(gridData, ...doorGrids.map(dg => dg.grid))
+		const doorGrids = Object.values(levelStore.levelEntities)
+			.filter((e) => e.value.tags?.doorDungeon)
+			.map((e) => {
+				const box = getDoorBoundaries(e.value)
+				const treesWithDoor = treeDataValue.filter((t) => !box.containsPoint(new Vector2(t.position.x, t.position.z)))
+				return {
+					direction: e.value.tags?.doorDungeon,
+					grid: buildTreeBoundaryGrid(treesWithDoor, size, 8),
+					box,
+				}
+			})
+		const data = mergeGrids(gridData, ...doorGrids.map((dg) => dg.grid))
 		const obj = visualizeGrid(data)
 		return { data, obj, doorGrids }
 	}
@@ -127,7 +109,7 @@ export const useTreeStore = defineStore('trees', () => {
 				}
 				if (boundaryGrid) {
 					entity.collider = isInBoundaryCell(treeData.position, treeData.radius, boundaryGrid.data)
-					entity.doorDungeon = boundaryGrid.doorGrids.find(d => d.box.containsPoint(treePoint))?.direction as Direction
+					entity.doorDungeon = boundaryGrid.doorGrids.find((d) => d.box.containsPoint(treePoint))?.direction as Direction
 				}
 				instances[modelName].entities.push(entity)
 			}
@@ -147,9 +129,7 @@ export const useTreeStore = defineStore('trees', () => {
 			if (!treesValue.instances[i]?.length) continue
 			const modelName = treeModels[i]
 
-			const instancedModel = new InstancedModel(
-				SkeletonUtils.clone((assetStore.assets.trees[modelName] as any).scene),
-			)
+			const instancedModel = new InstancedModel(SkeletonUtils.clone((assetStore.assets.trees[modelName] as any).scene))
 			for (const tree of treesValue.instances[i]) {
 				instancedModel.addInstance(tree.matrix)
 			}

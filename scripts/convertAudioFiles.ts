@@ -1,9 +1,9 @@
-import type { PathInfo } from './assetPipeline'
+import type { PathInfo } from './assetPipeline.ts'
 import { createWriteStream } from 'node:fs'
 import { rename } from 'node:fs/promises'
 import { path as ffmpegPath } from '@ffmpeg-installer/ffmpeg'
 import ffmpeg from 'fluent-ffmpeg'
-import { AssetTransformer } from './assetPipeline'
+import { AssetTransformer } from './assetPipeline.ts'
 
 export class ConvertAudioFiles extends AssetTransformer {
 	extensions = ['mp3', 'wav', 'ogg']
@@ -32,6 +32,6 @@ export class ConvertAudioFiles extends AssetTransformer {
 		await rename(path.full, path.full.replace('assets', 'rawAssets\\convertedAssets'))
 	}
 
-	remove() { }
-	generate() { }
+	remove() {}
+	generate() {}
 }

@@ -32,7 +32,7 @@ export const dropBerriesOnHit = () => {
 	for (const player of playerQuery) {
 		if (gameInputs.get('primary').justReleased) {
 			for (const bush of berryBushesQuery) {
-				if (getIntersections(player, undefined, c => c === bush.collider)) {
+				if (getIntersections(player, undefined, (c) => c === bush.collider)) {
 					dropBerries(5, bush.position, bush.berries)
 					if (bush.berries.size === 0) {
 						ecs.removeComponent(bush, 'berries')
@@ -43,7 +43,7 @@ export const dropBerriesOnHit = () => {
 			for (const bush of bushesQuery) {
 				if (player.weapon) {
 					ecs.update(bush, { shake: 5 })
-					if (getIntersections(player, undefined, c => c === bush.collider)) {
+					if (getIntersections(player, undefined, (c) => c === bush.collider)) {
 						if (bush.shaken !== undefined) {
 							bush.shaken += 1
 						} else {
@@ -59,7 +59,7 @@ export const dropBerriesOnHit = () => {
 							from: 0,
 							to: 1,
 							duration: 500,
-							onUpdate: f => bush.shake = Math.sin(f * 10) * f,
+							onUpdate: (f) => (bush.shake = Math.sin(f * 10) * f),
 							onComplete: () => {
 								if (bush.shaken === 2) {
 									ecs.remove(bush)

@@ -13,7 +13,7 @@ export const useAssetStore = defineStore('assets', () => {
 		const thumbnailRenderer = await Thumbnailer.create(128)
 		assets.value = await loadAssets(thumbnailRenderer, true)
 		for (const key in assets.value) {
-			const category = assets.value[key as keyof typeof assets['value']]
+			const category = assets.value[key as keyof (typeof assets)['value']]
 			const cat = category as unknown as Record<string, any>
 			for (const asset in cat) {
 				const obj = cat[asset] as unknown as any

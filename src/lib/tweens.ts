@@ -5,7 +5,7 @@ import type { Entity } from '@/global/entity'
 import { Event } from 'eventery'
 import { animate } from 'popmotion'
 
-type TweenOptions<V> = AnimationOptions<V> & { parent?: Entity, destroy?: Entity }
+type TweenOptions<V> = AnimationOptions<V> & { parent?: Entity; destroy?: Entity }
 
 export const tweensManager = (time: Time, ecs: World) => {
 	const tweens = new Set<(f: number) => void>()
@@ -23,7 +23,7 @@ export const tweensManager = (time: Time, ecs: World) => {
 			if (option.destroy) {
 				const complete = option.onComplete
 				option.onComplete = () => {
-					complete && complete()
+					if (complete) complete()
 					ecs.remove(option.destroy)
 				}
 			}
@@ -43,10 +43,13 @@ export const tweensManager = (time: Time, ecs: World) => {
 			await new Promise<void>((resolve) => {
 				const opt = typeof option === 'function' ? option() : option
 				const complete = opt.onComplete
-				add<V>({ ...opt, onComplete: () => {
-					resolve()
-					complete && complete()
-				} })
+				add<V>({
+					...opt,
+					onComplete: () => {
+						resolve()
+						if (complete) complete()
+					},
+				})
 			})
 		}
 	}

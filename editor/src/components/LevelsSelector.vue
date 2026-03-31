@@ -7,16 +7,24 @@ const mode = defineModel<'level' | 'model'>('mode', { required: true })
 </script>
 
 <template>
-	<NCard size="small" title="Levels">
-		<div style="display: grid;">
-			<template v-for="level in levelStore.levels" :key="level">
-				<NInputGroup style="display: grid;grid-template-columns: 1fr auto">
+	<NCard
+		size="small"
+		title="Levels"
+	>
+		<div style="display: grid">
+			<template
+				v-for="level in levelStore.levels"
+				:key="level"
+			>
+				<NInputGroup style="display: grid; grid-template-columns: 1fr auto">
 					<NButton
 						:secondary="levelStore.selectedLevel === level && mode === 'level'"
-						@click="() => {
-							mode = 'level'
-							levelStore.selectedLevel = level
-						}"
+						@click="
+							() => {
+								mode = 'level'
+								levelStore.selectedLevel = level
+							}
+						"
 					>
 						{{ level }}
 					</NButton>

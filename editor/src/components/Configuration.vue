@@ -42,14 +42,14 @@ const pushChanges = async () => {
 				prTitle: 'Update level',
 				prBody: 'Update level',
 			})
-			// eslint-disable-next-line no-alert
+			// oxlint-disable-next-line no-alert
 			alert('Changes pushed successfully!')
 		}
 		pushingChanges.value = 'success'
-		setTimeout(() => pushingChanges.value = null, 2000)
-	} catch (err) {
+		setTimeout(() => (pushingChanges.value = null), 2000)
+	} catch (err: any) {
 		console.error(err)
-		// eslint-disable-next-line no-alert
+		// oxlint-disable-next-line no-alert
 		alert(`Failed to push changes: ${err}`)
 	}
 }
@@ -62,7 +62,7 @@ async function startLogin() {
 
 	// Listen for device flow start
 	const unlistenStart = await listen('device_flow_start', (event) => {
-		const payload = event.payload as { user_code: string, verification_uri: string }
+		const payload = event.payload as { user_code: string; verification_uri: string }
 		userCode.value = payload.user_code
 		verificationUri.value = payload.verification_uri
 	})
@@ -78,7 +78,7 @@ async function startLogin() {
 
 	// Listen for errors
 	const unlistenError = await listen('device_flow_error', (event) => {
-		// eslint-disable-next-line no-alert
+		// oxlint-disable-next-line no-alert
 		alert(`Login failed: ${event.payload}`)
 		loading.value = false
 		unlistenStart()
@@ -101,7 +101,7 @@ const selectFolder = async () => {
 
 <template>
 	<NCard size="small">
-		<NInputGroup style="display: grid;grid-template-columns: 1fr 1fr 1fr">
+		<NInputGroup style="display: grid; grid-template-columns: 1fr 1fr 1fr">
 			<NButton @click="openFolder">
 				<template #icon>
 					<NIcon>
@@ -117,7 +117,10 @@ const selectFolder = async () => {
 							<fa-cloud-arrow-up v-else />
 						</template>
 						<fa-check v-else-if="pushingChanges === 'success'" />
-						<NSpin v-else-if="pushingChanges === 'in_progress'" :size="15" />
+						<NSpin
+							v-else-if="pushingChanges === 'in_progress'"
+							:size="15"
+						/>
 					</NIcon>
 				</template>
 			</NButton>
@@ -136,18 +139,24 @@ const selectFolder = async () => {
 		:show="true"
 		style="width: fit-content"
 	>
-		<div style="display:grid;grid-template-columns: 1fr 1fr; gap: 1rem">
-			<NCard title="Github" :bordered="saveMode === 'github'">
+		<div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem">
+			<NCard
+				title="Github"
+				:bordered="saveMode === 'github'"
+			>
 				<template #header-extra>
 					<NButton
 						:disabled="saveMode === 'github'"
-						@click=" saveMode = 'github'"
+						@click="saveMode = 'github'"
 					>
 						Activate
 					</NButton>
 				</template>
 				<NSpace vertical>
-					<NButton :disabled="loading || saveMode !== 'github'" @click="startLogin">
+					<NButton
+						:disabled="loading || saveMode !== 'github'"
+						@click="startLogin"
+					>
 						<fab-github />
 						{{ loading ? 'Waiting for authorization...' : 'Login with GitHub' }}
 					</NButton>
@@ -155,7 +164,11 @@ const selectFolder = async () => {
 					<div v-if="userCode">
 						<p>
 							Go to
-							<a :href="verificationUri" target="_blank">{{ verificationUri }}</a>
+							<a
+								:href="verificationUri"
+								target="_blank"
+								>{{ verificationUri }}</a
+							>
 							and enter the code:
 						</p>
 						<h2>{{ userCode }}</h2>
@@ -170,7 +183,10 @@ const selectFolder = async () => {
 					</NButton>
 				</NSpace>
 			</NCard>
-			<NCard title="Local" :bordered="saveMode === 'local'">
+			<NCard
+				title="Local"
+				:bordered="saveMode === 'local'"
+			>
 				<template #header-extra>
 					<NButton
 						:disabled="saveMode === 'local'"
@@ -180,7 +196,10 @@ const selectFolder = async () => {
 					</NButton>
 				</template>
 				<NSpace vertical>
-					<NButton with-icon @click="selectFolder">
+					<NButton
+						with-icon
+						@click="selectFolder"
+					>
 						<template #icon>
 							<NIcon>
 								<fa-folder-closed />
@@ -189,7 +208,7 @@ const selectFolder = async () => {
 
 						Select folder
 					</NButton>
-					<NEllipsis style="width:10rem">
+					<NEllipsis style="width: 10rem">
 						{{ localDir }}
 					</NEllipsis>
 				</NSpace>

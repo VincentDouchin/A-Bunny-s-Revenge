@@ -1,3 +1,4 @@
+// oxlint-disable unicorn/no-empty-file
 // import type { Tags } from '@assets/tagsList'
 // import type { NavMesh } from 'navcat'
 // import type { BufferGeometry, Material, Object3D, Vector2Like, Vector3Like } from 'three/webgpu'

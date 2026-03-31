@@ -25,7 +25,7 @@ const genericEnemyAnimationMap = {
 	},
 } as const
 
-export const enemy = <M extends keyof Animations & AssetNames['characters'], A extends string, S extends ComponentsOfType<State<any>>> (fn: () => EnemyDef<M, A, S>) => {
+export const enemy = <M extends keyof Animations & AssetNames['characters'], A extends string, S extends ComponentsOfType<State<any>>>(fn: () => EnemyDef<M, A, S>) => {
 	return (level: number) => enemyBundle(fn(), level)
 }
 

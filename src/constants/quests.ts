@@ -12,17 +12,22 @@ export type QuestStep = Readonly<{
 }>
 
 export class QuestManager<A extends App<any, any>> {
-	constructor(private app: A, private save: SaveData) { }
+	constructor(
+		private app: A,
+		private save: SaveData,
+	) {}
 
 	#quests = new Set<Quest2<A, any, any>>()
 	completeStepEvent = new Event<[QuestStep]>()
 	unlockedQuestEvent = new Event<[Quest2<any, any, any>]>()
-	createQuest<S extends QuestStep[] = [], D extends Record<string, any> = Record<string, never>>(questData: Readonly<{
-		state: AppStates<A>
-		steps: S
-		data: D
-		name: string
-	}>) {
+	createQuest<S extends QuestStep[] = [], D extends Record<string, any> = Record<string, never>>(
+		questData: Readonly<{
+			state: AppStates<A>
+			steps: S
+			data: D
+			name: string
+		}>,
+	) {
 		const quest = new Quest2(questData, this.app, this.save, this)
 		this.#quests.add(quest)
 		return quest
@@ -82,7 +87,7 @@ export class Quest2<A extends App<any, Record<string, never>>, S extends Readonl
 	}
 
 	unlock() {
-		if (this.#steps.some(s => !this.hasCompletedStep(s.key))) {
+		if (this.#steps.some((s) => !this.hasCompletedStep(s.key))) {
 			this.save.quests[this.name].unlocked = true
 			this.unlocked = true
 			// @ts-expect-error fix this later
@@ -92,7 +97,7 @@ export class Quest2<A extends App<any, Record<string, never>>, S extends Readonl
 	}
 
 	getStep(step: S[number]['key']): QuestStep {
-		return this.#steps.find(s => s.key === step)!
+		return this.#steps.find((s) => s.key === step)!
 	}
 
 	complete(step: S[number]['key']) {
@@ -101,13 +106,13 @@ export class Quest2<A extends App<any, Record<string, never>>, S extends Readonl
 			subscribers()
 		}
 		this.#manager.completeStepEvent.emit(this.getStep(step))
-		if (this.#steps.findIndex(s => s.key === step) === this.#steps.length - 1) {
+		if (this.#steps.findIndex((s) => s.key === step) === this.#steps.length - 1) {
 			this.#app.disable(this.state)
 		}
 	}
 
 	#previousStep(step: S[number]['key']): S[number]['key'] | undefined {
-		const index = this.#steps.findIndex(s => s.key === step)
+		const index = this.#steps.findIndex((s) => s.key === step)
 		const previousStep = this.#steps[index - 1]
 		return previousStep?.key
 	}

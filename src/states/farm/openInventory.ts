@@ -23,12 +23,14 @@ export const closePlayerInventory = () => {
 }
 
 const openInventoryQuery = ecs.with('menuType')
-export const enableInventoryState = () => openInventoryQuery.onEntityAdded.subscribe(() => {
-	app.enable('menu')
-})
-export const disableInventoryState = () => openInventoryQuery.onEntityRemoved.subscribe(() => {
-	app.disable('menu')
-})
+export const enableInventoryState = () =>
+	openInventoryQuery.onEntityAdded.subscribe(() => {
+		app.enable('menu')
+	})
+export const disableInventoryState = () =>
+	openInventoryQuery.onEntityRemoved.subscribe(() => {
+		app.disable('menu')
+	})
 export const toggleMenuState = [enableInventoryState, disableInventoryState]
 
 const interactableQuery = ecs.with('collider', 'interactionContainer', 'interactable')

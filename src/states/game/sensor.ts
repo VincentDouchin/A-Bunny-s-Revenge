@@ -6,9 +6,7 @@ import { Vector3 } from 'three/webgpu'
 import { world } from '@/global/init'
 
 export const getIntersections = (e: With<Entity, 'position' | 'rotation' | 'sensor'>, group?: number, callback?: (collider: Collider) => boolean) => {
-	const h = e.sensor.shape instanceof Cuboid
-		? e.sensor.shape.halfExtents.y
-		: 0
+	const h = e.sensor.shape instanceof Cuboid ? e.sensor.shape.halfExtents.y : 0
 	const position = new Vector3(0, h, e.sensor.distance).applyQuaternion(e.rotation).add(e.position)
 
 	if (callback) {

@@ -6,18 +6,16 @@
 		"lib": ["ESNext", "DOM", "DOM.Iterable"],
 		"useDefineForClassFields": true,
 		"experimentalDecorators": true,
-		"baseUrl": "./",
 		"module": "ESNext",
 		/* Bundler mode */
 		"moduleResolution": "bundler",
 		"paths": {
+			"*": ["./*"],
 			"@/*": ["./src/*"],
 			"@assets/*": ["./assets/*"]
 		},
 		"resolveJsonModule": true,
-		"types": [
-			"new-javascript"
-		],
+		"types": ["new-javascript", "vite-plus/client", "@total-typescript/ts-reset"],
 		"allowImportingTsExtensions": true,
 		/* Linting */
 		"strict": true,
@@ -29,5 +27,4 @@
 		"isolatedModules": true,
 		"skipLibCheck": true
 	}
-
 }

@@ -33,8 +33,8 @@ export const OvenMiniGameUi = () => {
 				return (
 					<For each={ovenQuery()}>
 						{(oven) => {
-							const smokeTrailsQuery = ecs.with('parent', 'smokeParticles').where(e => e.parent === oven)
-							const fireQuery = ecs.with('parent', 'fireParticles', 'light').where(e => e.parent === oven)
+							const smokeTrailsQuery = ecs.with('parent', 'smokeParticles').where((e) => e.parent === oven)
+							const fireQuery = ecs.with('parent', 'fireParticles', 'light').where((e) => e.parent === oven)
 							const output = ui.sync(() => oven.recipesQueued?.[0]?.output)
 							let targetEntity: Entity | null = null
 							let offset: Vector3
@@ -75,7 +75,7 @@ export const OvenMiniGameUi = () => {
 									duration: 1000,
 									onUpdate: updateCameraZoom,
 								})
-								targetEntity && ecs.remove(targetEntity)
+								if (targetEntity) ecs.remove(targetEntity)
 								addTag(player(), 'cameraTarget')
 								for (const camera of cameraQuery) {
 									ecs.removeComponent(camera, 'cameraOffset')
@@ -93,7 +93,7 @@ export const OvenMiniGameUi = () => {
 									onUpdate: (f) => {
 										for (const fire of fireQuery) {
 											fire.light.intensity = f * 10
-											fire.fireParticles.emissionOverTime = new ConstantValue(f * 2 / 30)
+											fire.fireParticles.emissionOverTime = new ConstantValue((f * 2) / 30)
 										}
 									},
 								})
@@ -101,7 +101,7 @@ export const OvenMiniGameUi = () => {
 							const [bar, setBar] = createSignal(50)
 							const [target, setTarget] = createSignal(50)
 							const [heat, setHeat] = createSignal(100)
-							const heatHeight = createMemo(() => 10 + 20 * heat() / 100)
+							const heatHeight = createMemo(() => 10 + (20 * heat()) / 100)
 							const [progress, setProgress] = createSignal(0)
 							const [direction, setDirection] = createSignal(Math.random() > 0.5 ? 1 : -1)
 							const [timer, setTimer] = createSignal(between(3, 5))
@@ -113,24 +113,24 @@ export const OvenMiniGameUi = () => {
 								if (output()) {
 									const finalOutput = output()
 									if (gameInputs.get('primary').justReleased) {
-										setBar(x => Math.min(100, x - 10))
+										setBar((x) => Math.min(100, x - 10))
 									}
-									setBar(x => x + 25 * time.delta / 1000)
+									setBar((x) => x + (25 * time.delta) / 1000)
 									if (bar() < target() + heatHeight() / 2 && bar() > target() - heatHeight() / 2) {
-										setProgress(x => Math.min(100, x + 20 * time.delta / 1000))
-										setHeat(x => Math.min(100, x + 5 * time.delta / 1000))
+										setProgress((x) => Math.min(100, x + (20 * time.delta) / 1000))
+										setHeat((x) => Math.min(100, x + (5 * time.delta) / 1000))
 									} else {
-										setHeat(x => Math.max(0, x - 15 * time.delta / 1000))
+										setHeat((x) => Math.max(0, x - (15 * time.delta) / 1000))
 									}
 									for (const smokeTrail of smokeTrailsQuery) {
 										smokeTrail.smokeParticles.emissionOverTime = new ConstantValue(heat() / 30)
 									}
-									setTimer(x => x - time.delta / 1000)
+									setTimer((x) => x - time.delta / 1000)
 									if (timer() <= 0) {
-										setDirection(x => x *= -1)
+										setDirection((x) => (x *= -1))
 										setTimer(between(2, 7))
 									}
-									setTarget(x => Math.max(0, Math.min(100, x + direction() * 3 * (time.delta / 1000) * (1 + progress() / 20))))
+									setTarget((x) => Math.max(0, Math.min(100, x + direction() * 3 * (time.delta / 1000) * (1 + progress() / 20))))
 									if (progress() >= 100) {
 										setProgress(0)
 										playSound('zapsplat_foley_heavy_flat_stone_very_sort_drag_scrape_002_87118')
@@ -159,123 +159,133 @@ export const OvenMiniGameUi = () => {
 									}
 								}
 							})
-							css/* css */`
-				.minigame-container{
-					display: grid;
-					grid-template-columns: auto auto auto;
-					gap: 1rem 3rem;
-					width: fit-content;
-					align-items: center;
-					margin-left: 15rem;
-					position: relative;
-				}
-				.progress-text{
-					position: absolute;
-					transform: translate(-50%, -100%);
-					font-size: 2rem;
-					color: white;
-					left: 50%;
-				}
-				.progress-container{
-					width: 2rem;
-					height: 20rem;
-					border: solid 0.5rem hsla(0, 0%, 0%, 0.7);
-					border-radius: 1rem;
-					overflow: hidden;
-					position: relative;
-				}
-				.progress-bar{
-					height: ${`${progress()}%`};
-					width: 100%;
-					background: linear-gradient(0, #5ab552, #9de64e);
-					margin-top: auto;
-					position: absolute;
-					bottom: 0;
-				}
-				.target-container{
-					width: 5rem;
-					height: 20rem;
-					background: hsla(0, 0%, 100%, 0.7);
-					border-radius: 1rem;
-					outline: solid 0.5rem hsla(0, 0%, 0%, 0.7);
-					display: grid;
-					overflow: hidden;
-					position: relative;
-				}
-				.target{
-					height: ${`${heatHeight()}%`};
-					width: 100%;
-					position: absolute;
-					background: linear-gradient(0deg, transparent, #f3a833, #e98537, #f3a833, transparent);
-					transform: translate(0, -50%);
-					top: ${`${target()}%`};
-				}
-				.target-bar{
-					height: 0.5rem;
-					background: black;
-					top: ${`${bar()}%`};
-					position: relative;
-					width: 100%;
-					transition: all 200ms ease;
-				}
-				.relative{
-					position: relative;
-				}
-				.heat-text{
-					position: absolute;
-					transform: translate(-50%, -100%);
-					font-size: 2rem;
-					color: white;
-					left: 50%;
-				}
-				.heat-container{
-					width: 2rem;
-					height: 20rem;
-					border: solid 0.5rem hsla(0, 0%, 0%, 0.7);
-					border-radius: 1rem;
-					overflow: hidden;
-					position: relative;
-				}
-				.heat-bar{
-					height: ${`${heat()}%`};
-					width: 100%;
-					background: linear-gradient(0, #ec273f, #de5d3a, #e98537, #f3a833);
-					margin-top: auto;
-					position: absolute;
-					bottom: 0;
-				}
-				.input-container{
-					position: absolute;
-					top: 100%;
-					font-size: 1.5rem;
-					color: white;
-					width: max-content;
-					transform: translateX(-50%);
-					margin-top: 1rem;
-					left: 50%;
-				}
-				.input-icon{
-					display: flex;
-					flex-wrap: nowrap;
-				}
-				
-				`
+							css /* css */ `
+								.minigame-container {
+									display: grid;
+									grid-template-columns: auto auto auto;
+									gap: 1rem 3rem;
+									width: fit-content;
+									align-items: center;
+									margin-left: 15rem;
+									position: relative;
+								}
+								.progress-text {
+									position: absolute;
+									transform: translate(-50%, -100%);
+									font-size: 2rem;
+									color: white;
+									left: 50%;
+								}
+								.progress-container {
+									width: 2rem;
+									height: 20rem;
+									border: solid 0.5rem hsla(0, 0%, 0%, 0.7);
+									border-radius: 1rem;
+									overflow: hidden;
+									position: relative;
+								}
+								.progress-bar {
+									height: ${`${progress()}%`};
+									width: 100%;
+									background: linear-gradient(0, #5ab552, #9de64e);
+									margin-top: auto;
+									position: absolute;
+									bottom: 0;
+								}
+								.target-container {
+									width: 5rem;
+									height: 20rem;
+									background: hsla(0, 0%, 100%, 0.7);
+									border-radius: 1rem;
+									outline: solid 0.5rem hsla(0, 0%, 0%, 0.7);
+									display: grid;
+									overflow: hidden;
+									position: relative;
+								}
+								.target {
+									height: ${`${heatHeight()}%`};
+									width: 100%;
+									position: absolute;
+									background: linear-gradient(0deg, transparent, #f3a833, #e98537, #f3a833, transparent);
+									transform: translate(0, -50%);
+									top: ${`${target()}%`};
+								}
+								.target-bar {
+									height: 0.5rem;
+									background: black;
+									top: ${`${bar()}%`};
+									position: relative;
+									width: 100%;
+									transition: all 200ms ease;
+								}
+								.relative {
+									position: relative;
+								}
+								.heat-text {
+									position: absolute;
+									transform: translate(-50%, -100%);
+									font-size: 2rem;
+									color: white;
+									left: 50%;
+								}
+								.heat-container {
+									width: 2rem;
+									height: 20rem;
+									border: solid 0.5rem hsla(0, 0%, 0%, 0.7);
+									border-radius: 1rem;
+									overflow: hidden;
+									position: relative;
+								}
+								.heat-bar {
+									height: ${`${heat()}%`};
+									width: 100%;
+									background: linear-gradient(0, #ec273f, #de5d3a, #e98537, #f3a833);
+									margin-top: auto;
+									position: absolute;
+									bottom: 0;
+								}
+								.input-container {
+									position: absolute;
+									top: 100%;
+									font-size: 1.5rem;
+									color: white;
+									width: max-content;
+									transform: translateX(-50%);
+									margin-top: 1rem;
+									left: 50%;
+								}
+								.input-icon {
+									display: flex;
+									flex-wrap: nowrap;
+								}
+							`
 							return (
 								<>
 									<Show when={context?.usingTouch()}>
-										<TouchButton size="10rem" input="primary" controller={gameInputs.touchController!}>
+										<TouchButton
+											size="10rem"
+											input="primary"
+											controller={gameInputs.touchController!}
+										>
 											<Fire />
 										</TouchButton>
-										<TouchButton size="7rem" distance="15rem" angle="100deg" input="cancel" controller={menuInputs.touchController!}>
+										<TouchButton
+											size="7rem"
+											distance="15rem"
+											angle="100deg"
+											input="cancel"
+											controller={menuInputs.touchController!}
+										>
 											<Exit />
 										</TouchButton>
 									</Show>
 
 									<div class="minigame-container">
-
 										{/*  progress */}
 										<div class="relative">
-											<div class="progress-text"><OutlineText>Progress</OutlineText></div>
+											<div class="progress-text">
+												<OutlineText>Progress</OutlineText>
+											</div>
 											<div class="progress-container">
 												<div class="progress-bar"></div>
 											</div>
@@ -283,8 +293,11 @@ export const OvenMiniGameUi = () => {
 										{/* middle */}
 										<div class="relative">
 											<Show when={output()}>
-												{output => (
-													<div class="output" style={{ position: 'absolute', bottom: 'calc(100% + 2rem)', transform: 'translate(-50%)', left: '50%' }}>
+												{(output) => (
+													<div
+														class="output"
+														style={{ position: 'absolute', bottom: 'calc(100% + 2rem)', transform: 'translate(-50%)', left: '50%' }}
+													>
 														<ItemDisplay item={output()}></ItemDisplay>
 													</div>
 												)}
@@ -310,12 +323,13 @@ export const OvenMiniGameUi = () => {
 										</div>
 										{/* heat */}
 										<div class="relative">
-											<div class="heat-text"><OutlineText>Heat</OutlineText></div>
+											<div class="heat-text">
+												<OutlineText>Heat</OutlineText>
+											</div>
 											<div class="heat-container">
 												<div class="heat-bar"></div>
 											</div>
 										</div>
-
 									</div>
 								</>
 							)

@@ -3,7 +3,7 @@ import type { NavMesh } from 'navcat'
 import type { QuaternionLike, Vector3Like } from 'three/webgpu'
 import type { Direction } from '@/lib/directions'
 
-export type EditorTags = Record<string, { type: 'tag' } | { type: 'enum', values: string[] } | { type: 'number' } | { type: 'string' }>
+export type EditorTags = Record<string, { type: 'tag' } | { type: 'enum'; values: string[] } | { type: 'number' } | { type: 'string' }>
 export interface LevelEntity {
 	category: string
 	model: string
@@ -45,20 +45,23 @@ export interface LevelData {
 	navMesh: NavMesh | null
 	grass: [number, number, number, number][]
 }
-export type LevelLoaded = LevelData &Partial< Record<MapNames, HTMLCanvasElement>>
+export type LevelLoaded = LevelData & Partial<Record<MapNames, HTMLCanvasElement>>
 export type Shape = 'cuboid' | 'ball' | 'capsule' | 'cylinder'
-export type ColliderData = {
-	type: Shape
-	size: { x: number, y: number, z: number }
-	position: { x: number, y: number, z: number }
-	rotation: number[]
-} | {
-	type: 'link'
-	category: string
-	model: string
-} | {
-	type: 'trimesh'
-}
+export type ColliderData =
+	| {
+			type: Shape
+			size: { x: number; y: number; z: number }
+			position: { x: number; y: number; z: number }
+			rotation: number[]
+	  }
+	| {
+			type: 'link'
+			category: string
+			model: string
+	  }
+	| {
+			type: 'trimesh'
+	  }
 
 export interface AssetData {
 	collider?: ColliderData

@@ -1,10 +1,10 @@
 import type { QuaternionLike, Texture, Vector2Like, Vector3Like, Vector4Like } from 'three/webgpu'
-import FastNoiseLite from 'fastnoise-lite'
 import { instancedBufferAttribute } from 'three/tsl'
 import { Euler, InstancedBufferAttribute, InstancedMesh, Matrix4, PlaneGeometry, Quaternion, Vector3 } from 'three/webgpu'
 import { canvasToBuffer } from '@/global/assetLoaders'
 import { GrassMaterial } from '@/shaders/grassMaterial'
 import { round } from '@/utils/mapFunctions'
+import FastNoiseLite from '@/lib/FastNoiseLite.ts'
 
 export const setDisplacement = (size: Vector2Like, heightCanvas: HTMLCanvasElement | null, waterCanvas: HTMLCanvasElement | null, heightOffset: number) => {
 	const canvasScale = 1
@@ -17,7 +17,7 @@ export const setDisplacement = (size: Vector2Like, heightCanvas: HTMLCanvasEleme
 	const imageData = ctx?.getImageData(0, 0, width, height).data
 	const waterCtx = waterCanvas?.getContext('2d', { willReadFrequently: true })
 	const waterData = waterCtx?.getImageData(0, 0, width, height).data
-	for (let i = 0; i < (width * height * 4); i += 4) {
+	for (let i = 0; i < width * height * 4; i += 4) {
 		const index = i / 4
 		const x = index % width
 		const y = Math.floor(index / width) + 1
@@ -42,7 +42,7 @@ const spawnFromCanvas = <C extends (HTMLCanvasElement | null)[], T>(
 	fn: (values: { [K in keyof C]: Vector4Like | null }, x: number, y: number, z: number) => T | undefined,
 ) => {
 	const dispData = displacementMap ? canvasToBuffer(displacementMap) : null
-	const imgDatas = images.map(image => image ? canvasToBuffer(image) : null)
+	const imgDatas = images.map((image) => (image ? canvasToBuffer(image) : null))
 	const image = images[0]!
 	const width = image.width
 	const height = image.height
@@ -61,12 +61,7 @@ const spawnFromCanvas = <C extends (HTMLCanvasElement | null)[], T>(
 				}
 				return null
 			}) as { [K in keyof C]: Vector4Like | null }
-			const res = fn(
-				values,
-				x,
-				y,
-				displacement,
-			)
+			const res = fn(values, x, y, displacement)
 
 			if (res !== undefined) {
 				result.push(res)
@@ -79,12 +74,8 @@ const spawnFromCanvas = <C extends (HTMLCanvasElement | null)[], T>(
 
 const vec3toRaw = ({ x, y, z }: Vector3Like) => ({ x: round(x), y: round(y), z: round(z) })
 const quattoRaw = ({ x, y, z, w }: QuaternionLike) => ({ x: round(x), y: round(y), z: round(z), w: round(w) })
-export const composeMatrix = (args: { position: Vector3Like, scale: Vector3Like, rotation: QuaternionLike }) => {
-	return new Matrix4().compose(
-		new Vector3().copy(args.position),
-		new Quaternion().copy(args.rotation),
-		new Vector3().copy(args.scale),
-	)
+export const composeMatrix = (args: { position: Vector3Like; scale: Vector3Like; rotation: QuaternionLike }) => {
+	return new Matrix4().compose(new Vector3().copy(args.position), new Quaternion().copy(args.rotation), new Vector3().copy(args.scale))
 }
 
 export const getTrees = (possibleModels: number, displacement: HTMLCanvasElement | null, treeMap: HTMLCanvasElement, gridSize: number, HEIGHT: number) => {
@@ -99,13 +90,11 @@ export const getTrees = (possibleModels: number, displacement: HTMLCanvasElement
 	noise.SetNoiseType(FastNoiseLite.NoiseType.OpenSimplex2)
 	spawnFromCanvas(displacement, [treeMap], gridSize, HEIGHT, ([val], x, y, displacement) => {
 		if (val?.x === 255 || val?.y === 255) {
-			const position = new Vector3(
-				(x - treeMap.width / 2) / gridSize + noise.GetNoise(x, y, y),
-				displacement,
-				(y - treeMap.height / 2) / gridSize + noise.GetNoise(y, x, x),
-			).multiplyScalar(gridSize)
+			const position = new Vector3((x - treeMap.width / 2) / gridSize + noise.GetNoise(x, y, y), displacement, (y - treeMap.height / 2) / gridSize + noise.GetNoise(y, x, x)).multiplyScalar(
+				gridSize,
+			)
 			const rotation = new Quaternion().setFromEuler(new Euler(0, noise.GetNoise(x, y, x), 0))
-			const scale = new Vector3().setScalar(3 + (1 * Math.abs(noise.GetNoise(x, y, x))))
+			const scale = new Vector3().setScalar(3 + 1 * Math.abs(noise.GetNoise(x, y, x)))
 			const treeIndex = Math.floor(possibleModels * Math.abs(Math.sin((x + y) * 50 * (x - y))))
 			trees[treeIndex] ??= []
 			const treeGroup = trees[treeIndex]
@@ -145,7 +134,7 @@ export const getGrass = (
 				displacement,
 				(y - grassMap.height / 2) / gridSize + noise.GetNoise(y, x, x) * gridSize,
 			).multiplyScalar(gridSize)
-			const scale = 0.5 + (1 * Math.abs(noise.GetNoise(x, y, x)))
+			const scale = 0.5 + 1 * Math.abs(noise.GetNoise(x, y, x))
 			grass.push({
 				position: vec3toRaw(position),
 				scale: round(scale),
@@ -158,18 +147,11 @@ export const getGrass = (
 export const getGrassModel = (
 	grassTexture: Texture,
 	grassNoiseTexture: Texture,
-	maps: { heightMap?: HTMLCanvasElement, grassMap: HTMLCanvasElement, waterMap?: HTMLCanvasElement, pathMap?: HTMLCanvasElement },
+	maps: { heightMap?: HTMLCanvasElement; grassMap: HTMLCanvasElement; waterMap?: HTMLCanvasElement; pathMap?: HTMLCanvasElement },
 	displacementScale: number,
-	size: { x: number, y: number },
+	size: { x: number; y: number },
 ) => {
-	const grass = getGrass(
-		maps?.heightMap ?? null,
-		maps.grassMap,
-		maps?.waterMap ?? null,
-		maps?.pathMap ?? null,
-		1,
-		displacementScale,
-	)
+	const grass = getGrass(maps?.heightMap ?? null, maps.grassMap, maps?.waterMap ?? null, maps?.pathMap ?? null, 1, displacementScale)
 	if (grass.length === 0) return null
 	const bladeWidth = 4
 	const bladeHeight = 4

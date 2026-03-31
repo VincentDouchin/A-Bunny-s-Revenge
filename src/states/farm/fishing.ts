@@ -30,7 +30,7 @@ const fishingPoleBundle = () => {
 }
 
 const playerFishingQuery = ecs.with('fishingPole', 'model', 'position', 'rotation', 'playerAnimator')
-const fishingQuery = ecs.with('menuType', 'group').where(e => e.menuType === MenuType.Fishing)
+const fishingQuery = ecs.with('menuType', 'group').where((e) => e.menuType === MenuType.Fishing)
 export const stopFishing = (force: boolean = false) => {
 	for (const player of playerFishingQuery) {
 		if ((menuInputs.get('cancel').justReleased || force) && player.fishingPole.bobber) {
@@ -111,8 +111,10 @@ const useFishingPole = () => {
 					const bobber = ecs.add({
 						parent: fishingPole,
 						position: getWorldPosition(fishingPole.model.getObjectByName('tip')!),
-						model: new Mesh(new SphereGeometry(1), new MeshBasicMaterial({ color: 0xFF0000 })),
-						bodyDesc: RigidBodyDesc.dynamic().setLinvel(...new Vector3(0, 100, 30).applyQuaternion(player.rotation).toArray()).setAngularDamping(2),
+						model: new Mesh(new SphereGeometry(1), new MeshBasicMaterial({ color: 0xff0000 })),
+						bodyDesc: RigidBodyDesc.dynamic()
+							.setLinvel(...new Vector3(0, 100, 30).applyQuaternion(player.rotation).toArray())
+							.setAngularDamping(2),
 						rotation: rot,
 						colliderDesc: ColliderDesc.ball(1).setSensor(true),
 					})
@@ -128,17 +130,14 @@ const useFishingPole = () => {
 	}
 }
 const fishBundle = (parentPos: Vector3) => {
-	const model = new Mesh(
-		new PlaneGeometry(8, 3),
-		new MeshBasicMaterial({ map: assets.textures.fish, depthWrite: false, opacity: 0, transparent: true }),
-	)
+	const model = new Mesh(new PlaneGeometry(8, 3), new MeshBasicMaterial({ map: assets.textures.fish, depthWrite: false, opacity: 0, transparent: true }))
 	model.rotateX(-Math.PI / 2)
 	model.rotateZ(Math.PI / 2)
 	tweens.add({
 		from: model.material.opacity,
 		to: 0.5,
 		duration: 2000,
-		onUpdate: f => model.material.opacity = f,
+		onUpdate: (f) => (model.material.opacity = f),
 	})
 	const rot = new Quaternion().setFromAxisAngle(new Vector3(0, 1, 0), Math.PI * 2 * Math.random())
 	const dist = 20
@@ -152,13 +151,14 @@ const fishBundle = (parentPos: Vector3) => {
 	})
 }
 const fishSpawnerQuery = ecs.with('fishSpawner', 'group')
-const addFish = () => fishSpawnerQuery.onEntityAdded.subscribe((e) => {
-	setTimeout(() => {
-		range(0, 5, () => {
-			ecs.add(fishBundle(getWorldPosition(e.group)))
-		})
-	}, 100)
-})
+const addFish = () =>
+	fishSpawnerQuery.onEntityAdded.subscribe((e) => {
+		setTimeout(() => {
+			range(0, 5, () => {
+				ecs.add(fishBundle(getWorldPosition(e.group)))
+			})
+		}, 100)
+	})
 const fishQuery = ecs.with('fish', 'position', 'model')
 const deSpawnFish = () => {
 	for (const spawner of fishSpawnerQuery) {
@@ -172,7 +172,7 @@ const deSpawnFish = () => {
 						from: mat.opacity,
 						to: 0,
 						duration: 2000,
-						onUpdate: f => mat.opacity = f,
+						onUpdate: (f) => (mat.opacity = f),
 						onComplete: () => {
 							ecs.add(fishBundle(getWorldPosition(spawner.group)))
 						},
@@ -187,5 +187,8 @@ export const fishingPlugin: Plugin<typeof app> = (app) => {
 	app.addSubscribers('game', addFish)
 		.onPreUpdate('game', updateFishingLine)
 		.onUpdate('game', useFishingPole, () => stopFishing(false), deSpawnFish)
-		.onUpdate('game', runIf(() => app.isDisabled('paused'), fishBehavior))
+		.onUpdate(
+			'game',
+			runIf(() => app.isDisabled('paused'), fishBehavior),
+		)
 }

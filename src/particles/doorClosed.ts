@@ -22,7 +22,12 @@ export const doorClosed = () => {
 		renderOrder: 2,
 		behaviors: [
 			new SizeOverLife(new PiecewiseBezier([[new Bezier(1, 0.75, 0.75, 0.25), 0]])),
-			new ColorOverLife(new Gradient([[new Vector3(0, 0, 0), 0], [new Vector3(0.3, 0.3, 0.3), 1]])),
+			new ColorOverLife(
+				new Gradient([
+					[new Vector3(0, 0, 0), 0],
+					[new Vector3(0.3, 0.3, 0.3), 1],
+				]),
+			),
 			new SpeedOverLife(new PiecewiseBezier([[new Bezier(1, 0.8, 0.5, 0), 0]])),
 		],
 	})

@@ -1,7 +1,23 @@
 import type { Object3D } from 'three/webgpu'
 import { CSS2DRenderer } from 'three/addons'
 
-import { ACESFilmicToneMapping, BasicShadowMap, DepthTexture, Group, Material, MeshBasicNodeMaterial, NodeMaterial, OrthographicCamera, QuadMesh, RenderTarget, SRGBColorSpace, Texture, Vector2, Vector3, WebGPURenderer } from 'three/webgpu'
+import {
+	ACESFilmicToneMapping,
+	BasicShadowMap,
+	DepthTexture,
+	Group,
+	Material,
+	MeshBasicNodeMaterial,
+	NodeMaterial,
+	OrthographicCamera,
+	QuadMesh,
+	RenderTarget,
+	SRGBColorSpace,
+	Texture,
+	Vector2,
+	Vector3,
+	WebGPURenderer,
+} from 'three/webgpu'
 
 import { setupPostProcessing } from '@/shaders/EdgePass'
 import { entries, objectValues } from '@/utils/mapFunctions'
@@ -25,14 +41,7 @@ outlineTarget.depthTexture = new DepthTexture(width, height)
 const outlineTarget2 = new RenderTarget(width, height)
 export const finalTarget = new RenderTarget(width, height)
 
-const { postProcessing, uniforms, outlineNode } = setupPostProcessing(
-	renderer,
-	width,
-	height,
-	target,
-	outlineTarget,
-	outlineTarget2,
-)
+const { postProcessing, uniforms, outlineNode } = setupPostProcessing(renderer, width, height, target, outlineTarget, outlineTarget2)
 
 // Create a quad mesh for rendering the outline pass
 const outlineMaterial = new NodeMaterial()
@@ -69,13 +78,13 @@ export const initThree = () => {
 	document.body.appendChild(cssRenderer.domElement)
 	ecs.add({ scene, renderer, renderGroup: RenderGroup.Game, group: new Group() })
 }
-export const gameRenderGroupQuery = ecs.with('renderer', 'renderGroup', 'scene').where(e => e.renderGroup === RenderGroup.Game)
-export const cameraQuery = ecs.with('camera', 'renderGroup', 'cameraOffset').where(e => e.renderGroup === RenderGroup.Game)
+export const gameRenderGroupQuery = ecs.with('renderer', 'renderGroup', 'scene').where((e) => e.renderGroup === RenderGroup.Game)
+export const cameraQuery = ecs.with('camera', 'renderGroup', 'cameraOffset').where((e) => e.renderGroup === RenderGroup.Game)
 
-export const dialogRenderGroupQuery = ecs.with('renderGroup', 'scene').where(e => e.renderGroup === RenderGroup.Dialog)
-export const dialogCameraQuery = ecs.with('camera', 'renderGroup', 'cameraOffset').where(e => e.renderGroup === RenderGroup.Dialog)
+export const dialogRenderGroupQuery = ecs.with('renderGroup', 'scene').where((e) => e.renderGroup === RenderGroup.Dialog)
+export const dialogCameraQuery = ecs.with('camera', 'renderGroup', 'cameraOffset').where((e) => e.renderGroup === RenderGroup.Dialog)
 
-export const gameCameraQuery = cameraQuery.with('cameraOffset').where(e => e.renderGroup === RenderGroup.Game)
+export const gameCameraQuery = cameraQuery.with('cameraOffset').where((e) => e.renderGroup === RenderGroup.Game)
 const outlineQuery = ecs.with('outline')
 const blankMaterial = new MeshBasicNodeMaterial()
 

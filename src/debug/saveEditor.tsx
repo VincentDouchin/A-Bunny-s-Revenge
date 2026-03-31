@@ -11,7 +11,7 @@ import { sleep } from '@/utils/sleep'
 const theme = `<link href="https://cdnjs.cloudflare.com/ajax/libs/jsoneditor/10.0.0/jsoneditor.min.css" rel="stylesheet" type="text/css">`
 export const SaveEditor = () => {
 	const [show, setShow] = createSignal(false)
-	const listener = (e: KeyboardEvent) => e.key === 'F3' && setShow(x => !x)
+	const listener = (e: KeyboardEvent) => e.key === 'F3' && setShow((x) => !x)
 	onMount(() => document.body.addEventListener('keydown', listener))
 	onCleanup(() => {
 		document.body.removeEventListener('keydown', listener)
@@ -23,8 +23,7 @@ export const SaveEditor = () => {
 
 				onMount(() => {
 					app.enable('debug')
-					if (!document.head.innerHTML.includes(theme))
-						document.head.innerHTML += theme
+					if (!document.head.innerHTML.includes(theme)) document.head.innerHTML += theme
 					const options: JSONEditorOptions = {
 						schema: saveDataSchema,
 						mode: 'tree',
@@ -45,11 +44,11 @@ export const SaveEditor = () => {
 				})
 
 				return (
-
-					<div
-						style={{ position: 'fixed', right: 0, top: 0, width: '800px', background: 'white', color: 'black', height: '100vh' }}
-					>
-						<div style={{ height: '100%' }} ref={setEl}></div>
+					<div style={{ position: 'fixed', right: 0, top: 0, width: '800px', background: 'white', color: 'black', height: '100vh' }}>
+						<div
+							style={{ height: '100%' }}
+							ref={setEl}
+						></div>
 					</div>
 				)
 			}}

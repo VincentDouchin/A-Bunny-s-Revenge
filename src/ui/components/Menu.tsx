@@ -84,13 +84,13 @@ export function Menu({ children, showArrow = () => false }: MenuProps) {
 	onCleanup(() => {
 		items.clear()
 		selected(null)
-		Object.values(callbacks).forEach(callback => callback.clear())
+		Object.values(callbacks).forEach((callback) => callback.clear())
 	})
 	createEffect(() => {
 		const el = selected()
 		if (el) {
 			const callback = callbacks.selected.get(el)
-			callback && callback()
+			if (callback) callback()
 		}
 	})
 
@@ -148,43 +148,50 @@ export function Menu({ children, showArrow = () => false }: MenuProps) {
 			const selfValue = self()
 			if (!selfValue) return
 			if (isSelected()) {
-				onClick && onClick()
+				if (onClick) onClick()
 			} else {
 				selected(selfValue)
 			}
 		}
 		const trigger = () => selected(self())
 		return (
-			<div style="position: relative" ref={el => self(el)} onClick={click} onMouseEnter={() => selected(self())}>
+			<div
+				style="position: relative"
+				ref={(el) => self(el)}
+				onClick={click}
+				onMouseEnter={() => selected(self())}
+			>
 				{children({ selected: isSelected, trigger })}
 			</div>
 		)
 	}
-	css/* css */`
-	.arrow-container{
-		position: fixed;
-		inset: 0;
-		pointer-events: none;
-	}
-	.arrow{
-		position: absolute;
-		left: 0px;
-		top: 50%;
-		translate: -1.2em -50%;
-		font-size: 2em;
-		fill: white;
-	}
-	:global(.arrow svg){
-		stroke: black;
-		stroke-width: 15%;
-	}
+	css /* css */ `
+		.arrow-container {
+			position: fixed;
+			inset: 0;
+			pointer-events: none;
+		}
+		.arrow {
+			position: absolute;
+			left: 0px;
+			top: 50%;
+			translate: -1.2em -50%;
+			font-size: 2em;
+			fill: white;
+		}
+		:global(.arrow svg) {
+			stroke: black;
+			stroke-width: 15%;
+		}
 	`
 	return (
 		<>
 			<Show when={(typeof showArrow === 'function' ? showArrow() : showArrow) && selected()}>
-				{selected => (
+				{(selected) => (
 					<Portal mount={selected()}>
-						<div class="arrow"><CaretRight /></div>
+						<div class="arrow">
+							<CaretRight />
+						</div>
 					</Portal>
 				)}
 			</Show>

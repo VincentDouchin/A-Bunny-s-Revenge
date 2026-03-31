@@ -1,5 +1,5 @@
+import { abs, add, color, div, dot, Fn, mix, mul, normalWorld, positionWorld, smoothstep, step, sub, texture, uniform, uniformTexture, uv, vec2, vec3, vec4 } from 'three/tsl'
 import type { Texture, TextureNode, UniformNode, Vector2 } from 'three/webgpu'
-import { abs, add, color, div, dot, equal, Fn, mix, mul, normalWorld, positionWorld, select, smoothstep, step, sub, texture, uniform, uniformTexture, uv, vec2, vec3, vec4 } from 'three/tsl'
 import { DataTexture } from 'three/webgpu'
 
 import { cnoise } from './lib/cnoise'
@@ -17,14 +17,8 @@ export class GroundMaterial extends ToonMaterial {
 	grassColor = color('#26854C')
 	pathColor = color('#856342')
 	pathColor2 = color('#A26D3F')
-	constructor(parameters: {
-		groundTexture: Texture
-		rockTexture: Texture
-		level?: Texture
-		levelSize: Vector2
-		grassNoiseTexture: Texture
-	}) {
-		super({ })
+	constructor(parameters: { groundTexture: Texture; rockTexture: Texture; level?: Texture; levelSize: Vector2; grassNoiseTexture: Texture }) {
+		super({})
 		this.sizeUniform = uniform(parameters.levelSize)
 		this.groundTexture = texture(parameters.groundTexture)
 		this.rockTexture = texture(parameters.rockTexture)
@@ -42,15 +36,10 @@ export class GroundMaterial extends ToonMaterial {
 
 			const levelSample = this.level.sample(vUv)
 
-			const pathNoise = add(
-				cnoise(vec3(scaled_uv.y, scaled_uv.y, scaled_uv.y)),
-				div(cnoise(vec3(scaled_uv.x, scaled_uv.y, scaled_uv.y)), 2.0),
-			)
-			const path = select(
-				equal(step(pathNoise, 0.2), 0.0),
-				this.pathColor,
-				mix(this.pathColor, this.pathColor2, 0.1).toColor(),
-			)
+			const pathNoise = add(cnoise(vec3(scaled_uv.y, scaled_uv.y, scaled_uv.y)), div(cnoise(vec3(scaled_uv.x, scaled_uv.y, scaled_uv.y)), 2.0))
+			const pathColorNoise = step(pathNoise, 0.2)
+			const darkPathColor = mix(this.pathColor, this.pathColor2, 0.1).toColor()
+			const path = mix(this.pathColor, darkPathColor, pathColorNoise)
 
 			const noiseTexture = this.grassNoiseTexture.sample(vUv)
 			const grass = mix(this.grassColor, this.topColor, noiseTexture.x)
@@ -74,10 +63,7 @@ export class GroundMaterial extends ToonMaterial {
 
 			const path_amount = levelSample.a
 
-			const path_noised = step(
-				sub(0.5, path_amount),
-				mul(cnoise(vec3(scaled_uv.x, scaled_uv.y, 1.0)), div(path_amount, 3.0)),
-			)
+			const path_noised = step(sub(0.5, path_amount), mul(cnoise(vec3(scaled_uv.x, scaled_uv.y, 1.0)), div(path_amount, 3.0)))
 
 			const grass_and_path = mix(grass, path, path_noised)
 

@@ -13,7 +13,10 @@ export const recipes = [
 		processor: MenuType.Cauldron,
 	},
 	{
-		input: [{ name: 'tomato', quantity: 3 }, { name: 'parsley', quantity: 1 }],
+		input: [
+			{ name: 'tomato', quantity: 3 },
+			{ name: 'parsley', quantity: 1 },
+		],
 		output: { name: 'tomato_soup', quantity: 1 },
 		processor: MenuType.Cauldron,
 	},
@@ -23,17 +26,26 @@ export const recipes = [
 		processor: MenuType.Oven,
 	},
 	{
-		input: [{ name: 'carrot', quantity: 1 }, { name: 'honey', quantity: 2 }],
+		input: [
+			{ name: 'carrot', quantity: 1 },
+			{ name: 'honey', quantity: 2 },
+		],
 		output: { name: 'honey_glazed_carrot', quantity: 1 },
 		processor: MenuType.Oven,
 	},
 	{
-		input: [{ name: 'beet', quantity: 2 }, { name: 'lettuce', quantity: 2 }],
+		input: [
+			{ name: 'beet', quantity: 2 },
+			{ name: 'lettuce', quantity: 2 },
+		],
 		output: { name: 'beetroot_salad', quantity: 1 },
 		processor: MenuType.Bench,
 	},
 	{
-		input: [{ name: 'ham', quantity: 1 }, { name: 'honey', quantity: 2 }],
+		input: [
+			{ name: 'ham', quantity: 1 },
+			{ name: 'honey', quantity: 2 },
+		],
 		output: { name: 'ham_honey', quantity: 1 },
 		processor: MenuType.Oven,
 	},
@@ -80,9 +92,7 @@ export const recipes = [
 		processor: MenuType.Oven,
 	},
 	{
-		input: [
-			{ name: 'beet', quantity: 3 },
-		],
+		input: [{ name: 'beet', quantity: 3 }],
 		output: { name: 'sugar', quantity: 1 },
 		processor: MenuType.Cauldron,
 	},

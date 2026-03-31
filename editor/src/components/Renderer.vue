@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import type { TresRendererSetupContext } from '@tresjs/core'
 import { TresCanvas } from '@tresjs/core'
-import { LinearSRGBColorSpace, WebGPURenderer } from 'three/webgpu'
+import { ACESFilmicToneMapping, SRGBColorSpace, WebGPURenderer } from 'three/webgpu'
 import { toValue } from 'vue'
 
 const createWebGPURenderer = (ctx: TresRendererSetupContext) => {
@@ -11,7 +11,9 @@ const createWebGPURenderer = (ctx: TresRendererSetupContext) => {
 		antialias: true,
 	})
 	renderer.debug.checkShaderErrors = false
-	renderer.outputColorSpace = LinearSRGBColorSpace
+	renderer.outputColorSpace = SRGBColorSpace
+	renderer.toneMapping = ACESFilmicToneMapping
+	renderer.toneMappingExposure = 0.8
 	return renderer
 }
 </script>

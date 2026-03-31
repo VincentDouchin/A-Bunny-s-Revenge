@@ -5,21 +5,24 @@ import { Vector2 } from 'three'
 import { loadImage } from '@/global/assetLoaders'
 import { getScreenBuffer } from '@/utils/buffer'
 
-const props = withDefaults(defineProps<{
-	map: MapNames
-	title: string
-	levelData: Omit<LevelData, 'entities'>
-	open: string[]
-	realTimeUpdate?: boolean
-	eraseColor?: string
-	defaultColor: string
-	enableTransparency?: boolean
-	enableBlur?: boolean
-}>(), {
-	realTimeUpdate: false,
-	enableTransparency: true,
-	enableBlur: true,
-})
+const props = withDefaults(
+	defineProps<{
+		map: MapNames
+		title: string
+		levelData: Omit<LevelData, 'entities'>
+		open: string[]
+		realTimeUpdate?: boolean
+		eraseColor?: string
+		defaultColor: string
+		enableTransparency?: boolean
+		enableBlur?: boolean
+	}>(),
+	{
+		realTimeUpdate: false,
+		enableTransparency: true,
+		enableBlur: true,
+	},
+)
 
 const emit = defineEmits<{
 	(e: 'update'): void
@@ -77,10 +80,10 @@ const relativeMousePosition = (pos: Vector2Like) => {
 	}
 }
 const drawLine = (ctx: CanvasRenderingContext2D, start: Vector2Like, end: Vector2Like) => {
-	ctx.strokeStyle = (mode.value === 'eraser' && props.eraseColor) ? props.eraseColor : color.value
+	ctx.strokeStyle = mode.value === 'eraser' && props.eraseColor ? props.eraseColor : color.value
 	ctx.lineJoin = 'round'
 	ctx.lineWidth = radius.value
-	ctx.filter = `blur(${(blur.value) * radius.value}px)`
+	ctx.filter = `blur(${blur.value * radius.value}px)`
 	ctx.imageSmoothingEnabled = true
 	ctx.beginPath()
 
@@ -123,7 +126,7 @@ const moveStroke = (pos: Vector2Like) => {
 		tempCanvas.value.globalCompositeOperation = 'source-over'
 		tempCanvas.value.drawImage(finalCanvasCtx.value.canvas, 0, 0, x.value, y.value)
 		tempCanvas.value.globalAlpha = transparency.value / 100
-		tempCanvas.value.globalCompositeOperation = (mode.value === 'brush' || props.eraseColor) ? 'source-over' : 'destination-out'
+		tempCanvas.value.globalCompositeOperation = mode.value === 'brush' || props.eraseColor ? 'source-over' : 'destination-out'
 		tempCanvas.value.drawImage(strokeCanvasCtx.value.canvas, 0, 0, x.value, y.value)
 		tempCanvas.value.globalAlpha = 1
 		setCanvas(tempCanvas.value)
@@ -135,7 +138,7 @@ const endStroke = () => {
 			isDrawing = false
 			lastPos = null
 			finalCanvasCtx.value.globalAlpha = transparency.value / 100
-			finalCanvasCtx.value.globalCompositeOperation = (mode.value === 'brush' || props.eraseColor) ? 'source-over' : 'destination-out'
+			finalCanvasCtx.value.globalCompositeOperation = mode.value === 'brush' || props.eraseColor ? 'source-over' : 'destination-out'
 			finalCanvasCtx.value.drawImage(strokeCanvasCtx.value.canvas, 0, 0, x.value, y.value)
 			finalCanvasCtx.value.globalAlpha = 1
 			setCanvas(finalCanvasCtx.value)
@@ -202,17 +205,18 @@ const destroy = () => {
 </script>
 
 <template>
-	<NCollapseItem :name="map" :title="title">
+	<NCollapseItem
+		:name="map"
+		:title="title"
+	>
 		<NFlex vertical>
 			<NEmpty v-if="!img">
 				<template #extra>
-					<NButton @click="init">
-						Add map
-					</NButton>
+					<NButton @click="init"> Add map </NButton>
 				</template>
 			</NEmpty>
 			<template v-else>
-				<NInputGroup style="display:grid;grid-template-columns: 1fr 1fr 1fr 1fr 1fr;">
+				<NInputGroup style="display: grid; grid-template-columns: 1fr 1fr 1fr 1fr 1fr">
 					<NButton @click="undo">
 						<template #icon>
 							<NIcon>
@@ -220,7 +224,10 @@ const destroy = () => {
 							</NIcon>
 						</template>
 					</NButton>
-					<NButton :disabled="future.length === 0" @click="redo">
+					<NButton
+						:disabled="future.length === 0"
+						@click="redo"
+					>
 						<template #icon>
 							<NIcon>
 								<fa-arrow-rotate-right />
@@ -252,15 +259,19 @@ const destroy = () => {
 				<div
 					class="map-container"
 					:style="{ background: eraseColor }"
-					@contextmenu="e => e.preventDefault()"
-					@pointerdown="(e) => {
-						const pos = getMousePosition(e)
-						if (pos) startStroke(relativeMousePosition(pos), e.buttons === 1 ? 'brush' : 'eraser')
-					}"
-					@pointermove="(e) => {
-						const pos = getMousePosition(e)
-						if (pos) moveStroke(relativeMousePosition(pos))
-					}"
+					@contextmenu="(e) => e.preventDefault()"
+					@pointerdown="
+						(e) => {
+							const pos = getMousePosition(e)
+							if (pos) startStroke(relativeMousePosition(pos), e.buttons === 1 ? 'brush' : 'eraser')
+						}
+					"
+					@pointermove="
+						(e) => {
+							const pos = getMousePosition(e)
+							if (pos) moveStroke(relativeMousePosition(pos))
+						}
+					"
 					@pointerup="endStroke"
 					@pointerleave="endStroke"
 				>
@@ -268,8 +279,9 @@ const destroy = () => {
 						ref="cursorCanvasRef"
 						class="mouse"
 						:style="{ opacity: transparency / 100 }"
-						:width="x" :height="y"
-						style="width:100%;z-index:2"
+						:width="x"
+						:height="y"
+						style="width: 100%; z-index: 2"
 					/>
 					<ElementWrapper
 						:el="img"
@@ -277,23 +289,37 @@ const destroy = () => {
 					/>
 					<canvas
 						ref="strokeCanvasRef"
-						:style="{ 'opacity': transparency / 100, 'mix-blend-mode': mode === 'eraser' ? 'exclusion' : 'normal' }"
-						:width="x" :height="y"
-						style="width:100%"
+						:style="{ opacity: transparency / 100, 'mix-blend-mode': mode === 'eraser' ? 'exclusion' : 'normal' }"
+						:width="x"
+						:height="y"
+						style="width: 100%"
 					/>
 				</div>
 
 				Radius
-				<NSlider v-model:value="radius" :max="100" />
+				<NSlider
+					v-model:value="radius"
+					:max="100"
+				/>
 				<template v-if="enableBlur">
 					Blur
-					<NSlider v-model:value="blur" :max="2" :step="0.1" />
+					<NSlider
+						v-model:value="blur"
+						:max="2"
+						:step="0.1"
+					/>
 				</template>
 				<template v-if="enableTransparency">
 					Opacity
-					<NSlider v-model:value="transparency" :max="100" />
+					<NSlider
+						v-model:value="transparency"
+						:max="100"
+					/>
 				</template>
-				<slot :color="color" :set-color="(c:string) => color = c" />
+				<slot
+					:color="color"
+					:set-color="(c: string) => (color = c)"
+				/>
 			</template>
 		</NFlex>
 	</NCollapseItem>

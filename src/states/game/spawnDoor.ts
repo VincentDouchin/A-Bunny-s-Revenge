@@ -101,29 +101,30 @@ const playerQuery = ecs.with('collider', 'currentHealth', 'position')
 // 	}
 // })
 
-const vineDoorsLockedQueries = ecs.with('doorType', 'doorLevel', 'doorLocked', 'collider').where(e => e.doorType === 'vine')
-export const hideVinesDoors = () => vineDoorsLockedQueries.onEntityRemoved.subscribe((e) => {
-	e.collider.setSensor(true)
-	const vinesBottom = e.model?.getObjectByName('GATE')
-	if (vinesBottom) {
-		playSound('zapsplat_foley_tree_palm_front_dead_large_dry_movement_ground_001_99605', { playbackRate: 1.5 })
-		const initialPosition = vinesBottom.position.y
-		tweens.add({
-			from: 0,
-			to: 1,
-			duration: 5000,
-			onUpdate: (f) => {
-				vinesBottom.position.y = initialPosition - 30 * f
-				vinesBottom.traverse((node) => {
-					if (node instanceof Mesh && node.material instanceof VineGateMaterial) {
-						node.material.time.value = f * 2
-						node.material.depthWrite = false
-					}
-				})
-			},
-		})
-	}
-})
+const vineDoorsLockedQueries = ecs.with('doorType', 'doorLevel', 'doorLocked', 'collider').where((e) => e.doorType === 'vine')
+export const hideVinesDoors = () =>
+	vineDoorsLockedQueries.onEntityRemoved.subscribe((e) => {
+		e.collider.setSensor(true)
+		const vinesBottom = e.model?.getObjectByName('GATE')
+		if (vinesBottom) {
+			playSound('zapsplat_foley_tree_palm_front_dead_large_dry_movement_ground_001_99605', { playbackRate: 1.5 })
+			const initialPosition = vinesBottom.position.y
+			tweens.add({
+				from: 0,
+				to: 1,
+				duration: 5000,
+				onUpdate: (f) => {
+					vinesBottom.position.y = initialPosition - 30 * f
+					vinesBottom.traverse((node) => {
+						if (node instanceof Mesh && node.material instanceof VineGateMaterial) {
+							node.material.time.value = f * 2
+							node.material.depthWrite = false
+						}
+					})
+				},
+			})
+		}
+	})
 const doorsQuery = ecs.with('door', 'collider').without('doorLocked')
 export const collideWithDoorFarm = async () => {
 	for (const door of doorsQuery) {
@@ -138,13 +139,14 @@ export const collideWithDoorFarm = async () => {
 const playerWithWeaponQuery = playerQuery.with('weapon')
 
 const clearingDoorLockedQuery = ecs.with('doorLocked', 'doorLevel')
-export const unlockDoorClearing = () => playerWithWeaponQuery.onEntityAdded.subscribe(() => {
-	for (const door of clearingDoorLockedQuery) {
-		if (door.doorLevel <= save.unlockedPaths) {
-			ecs.removeComponent(door, 'doorLocked')
+export const unlockDoorClearing = () =>
+	playerWithWeaponQuery.onEntityAdded.subscribe(() => {
+		for (const door of clearingDoorLockedQuery) {
+			if (door.doorLevel <= save.unlockedPaths) {
+				ecs.removeComponent(door, 'doorLocked')
+			}
 		}
-	}
-})
+	})
 export const collideWithDoorClearing = async () => {
 	for (const door of doorsQuery) {
 		if (door.door === 'farm') {
@@ -159,8 +161,8 @@ export const collideWithDoorClearing = async () => {
 			for (const player of playerWithWeaponQuery) {
 				if (world.intersectionPair(door.collider, player.collider)) {
 					const dungeon = genDungeon(8, false)
-					const start = dungeon.find(r => r.type === RoomType.Entrance)!
-					const startDir = entries(start.doors).reduce<Direction | null>((acc, [dir, room]) => room ? acc : dir, null)!
+					const start = dungeon.find((r) => r.type === RoomType.Entrance)!
+					const startDir = entries(start.doors).reduce<Direction | null>((acc, [dir, room]) => (room ? acc : dir), null)!
 					app.enable('dungeon', {
 						direction: otherDirection[startDir],
 						dungeon: start,

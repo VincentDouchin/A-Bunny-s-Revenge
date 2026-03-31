@@ -20,6 +20,7 @@ import { getScreenBuffer, scaleCanvas } from '@/utils/buffer'
 import { getGroundMaterial } from './groundMaterial'
 import { spawnLight } from './spawnLights'
 import { composeMatrix, getGrassModel, setDisplacement } from './spawnTrees'
+import { objectValues } from '@/utils/mapFunctions'
 
 export const getDisplacementMap = (level: LevelLoaded) => {
 	const ctx = getScreenBuffer(level.sizeX, level.sizeY)
@@ -59,19 +60,14 @@ const spawnWater = (level: LevelLoaded, parent: Entity) => {
 	ecs.add({
 		model: waterMesh,
 		position: new Vector3(0, -3, 0),
-		withTimeUniform: (time: number) => waterMaterial.time.value = time,
+		withTimeUniform: (time: number) => (waterMaterial.time.value = time),
 		rotation: new Quaternion().setFromAxisAngle(new Vector3(1, 0, 0), -Math.PI / 2),
 		parent,
 	})
 }
 
 const spawnGround = (level: LevelLoaded, parent: Entity) => {
-	const geometry = setDisplacement(
-		new Vector2(level.sizeX, level.sizeY),
-		level.heightMap ?? null,
-		level.waterMap ?? null,
-		level.displacementScale,
-	)
+	const geometry = setDisplacement(new Vector2(level.sizeX, level.sizeY), level.heightMap ?? null, level.waterMap ?? null, level.displacementScale)
 	const material = getGroundMaterial(level.floorTexture ?? 'grass', {
 		size: { x: level.sizeX, y: level.sizeY },
 		planksTexture: assets.textures.planks,
@@ -84,9 +80,9 @@ const spawnGround = (level: LevelLoaded, parent: Entity) => {
 	groundMesh.rotation.x = -Math.PI / 2
 	groundMesh.position.y = -level.displacementScale / 2
 	groundMesh.receiveShadow = true
-	const gridScale = 0.20
+	const gridScale = 0.2
 	const heightfieldMap = scaleCanvas(getDisplacementMap(level), gridScale)
-	const heights = canvasToArray(heightfieldMap).map(pixel => pixel.y / 255)
+	const heights = canvasToArray(heightfieldMap).map((pixel) => pixel.y / 255)
 	const heightfield = new Float32Array(heights.length)
 	heightfield.set(heights)
 	const colliderNorth = ColliderDesc.cuboid(level.sizeX / 2, 50, 1).setTranslation(0, 0, level.sizeY + 0.5 / 2)
@@ -97,15 +93,8 @@ const spawnGround = (level: LevelLoaded, parent: Entity) => {
 	ecs.add({
 		model: groundMesh,
 		position: new Vector3(0, 0, 0),
-		bodyDesc: new RigidBodyDesc(RigidBodyType.Fixed)
-			.setCcdEnabled(true),
-		colliderDesc: ColliderDesc
-			.heightfield(
-				level.sizeX * gridScale - 1,
-				level.sizeY * gridScale - 1,
-				heightfield,
-				{ x: level.sizeY, y: level.displacementScale, z: level.sizeX },
-			)
+		bodyDesc: new RigidBodyDesc(RigidBodyType.Fixed).setCcdEnabled(true),
+		colliderDesc: ColliderDesc.heightfield(level.sizeX * gridScale - 1, level.sizeY * gridScale - 1, heightfield, { x: level.sizeY, y: level.displacementScale, z: level.sizeX })
 			.setTranslation(0, -level.displacementScale / 4, 0)
 			.setRotation(new Quaternion().setFromAxisAngle(new Vector3(0, 1, 0), Math.PI / 2))
 			.setCollisionGroups(collisionGroups('floor', ['enemy', 'player']))
@@ -116,8 +105,8 @@ const spawnGround = (level: LevelLoaded, parent: Entity) => {
 	})
 }
 
-const spawnInstances = <C extends keyof typeof assets, M extends keyof typeof assets[C]>(level: LevelLoaded, parent: Entity, directions?: Direction[]) => {
-	for (const instance of Object.values(level.instances)) {
+const spawnInstances = <C extends keyof typeof assets, M extends keyof (typeof assets)[C]>(level: LevelLoaded, parent: Entity, directions?: Direction[]) => {
+	for (const instance of objectValues(level.instances)) {
 		if (instance.entities.length === 0) {
 			continue
 		}
@@ -132,7 +121,9 @@ const spawnInstances = <C extends keyof typeof assets, M extends keyof typeof as
 				instancedModel.addInstance(composeMatrix(instanceEntity))
 				if (instanceEntity.collider) {
 					const treeSize = size.clone().multiply(instanceEntity.scale)
-					secondaryCollidersDesc.push(ColliderDesc.cylinder(treeSize.y, treeSize.x / 2).setTranslation(instanceEntity.position.x, instanceEntity.position.y + treeSize.y / 2, instanceEntity.position.z))
+					secondaryCollidersDesc.push(
+						ColliderDesc.cylinder(treeSize.y, treeSize.x / 2).setTranslation(instanceEntity.position.x, instanceEntity.position.y + treeSize.y / 2, instanceEntity.position.z),
+					)
 				}
 			}
 		}
@@ -142,12 +133,11 @@ const spawnInstances = <C extends keyof typeof assets, M extends keyof typeof as
 			position: new Vector3(),
 			bodyDesc,
 			secondaryCollidersDesc,
-
 		})
 	}
 }
 
-const getModel = <C extends keyof typeof assets, M extends keyof typeof assets[C]>(category: string, model: string) => {
+const getModel = <C extends keyof typeof assets, M extends keyof (typeof assets)[C]>(category: string, model: string) => {
 	const gltf = assets?.[category as C]?.[model as M] as GLTF | Object3D
 	if (!gltf) {
 		console.error(assets?.[category as C] ?? assets)
@@ -164,13 +154,13 @@ const spawnEntity = (mapEntity: LevelEntity, entityId: string, parent: Entity) =
 	const model = getModel(mapEntity.category, mapEntity.model)
 	const boundingBox = (boundingBoxes as unknown as Record<string, Record<string, AssetData>>)?.[mapEntity.category]?.[mapEntity.model]
 	const boundingBoxScale = boundingBox?.scale
-	const tags = { ...(boundingBox?.tags ?? {}), ...(mapEntity?.tags ?? {}) }
+	const tags = { ...boundingBox?.tags, ...mapEntity?.tags }
 	model.scale.copy(new Vector3().fromArray(mapEntity.scale))
 	model.userData = mapEntity
 	if (boundingBoxScale) {
 		model.scale.multiply(new Vector3().fromArray(boundingBoxScale))
 	}
-	const position = new Vector3().set(...mapEntity.position)
+	const position = new Vector3().fromArray(mapEntity.position)
 	const rotation = new Quaternion().fromArray(mapEntity.rotation)
 	const getBody = () => {
 		if (boundingBox?.collider) {
@@ -186,11 +176,7 @@ const spawnEntity = (mapEntity: LevelEntity, entityId: string, parent: Entity) =
 		for (let y = 0; y <= mapEntity.grid.repetitionY; y++) {
 			for (let x = 0; x <= mapEntity.grid.repetitionX; x++) {
 				if (!(x === 0 && y === 0)) {
-					const gridPosition = new Vector3(
-						x * mapEntity.grid.spacingX,
-						0,
-						y * mapEntity.grid.spacingY,
-					).multiply(model.scale).applyQuaternion(rotation).add(position)
+					const gridPosition = new Vector3(x * mapEntity.grid.spacingX, 0, y * mapEntity.grid.spacingY).multiply(model.scale).applyQuaternion(rotation).add(position)
 					ecs.add({
 						model: SkeletonUtils.clone(model),
 						position: gridPosition,
@@ -249,7 +235,7 @@ const spawnLevelAsset = (level: LevelLoaded, state: AppStates<typeof app>) => {
 	return levelEntity
 }
 
-export const spawnLevel = (levelName: keyof typeof assets['levels'], state: AppStates<typeof app>) => () => {
+export const spawnLevel = (levelName: keyof (typeof assets)['levels'], state: AppStates<typeof app>) => () => {
 	const level = assets.levels[levelName]
 	const parent = spawnLevelAsset(level, state)
 	spawnInstances(level, parent)

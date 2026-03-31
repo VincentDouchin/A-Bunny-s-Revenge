@@ -9,7 +9,11 @@ export const getSize = (model: Object3D<Object3DEventMap>) => {
 	return size
 }
 
-export const traverseFind = <T extends Constructor<Object3D<Object3DEventMap>> = Constructor<Object3D<Object3DEventMap>>>(obj: Object3D<Object3DEventMap>, fn: (node: Object3D<Object3DEventMap>) => boolean, instance?: T): InstanceType<T> | null => {
+export const traverseFind = <T extends Constructor<Object3D<Object3DEventMap>> = Constructor<Object3D<Object3DEventMap>>>(
+	obj: Object3D<Object3DEventMap>,
+	fn: (node: Object3D<Object3DEventMap>) => boolean,
+	instance?: T,
+): InstanceType<T> | null => {
 	let result: InstanceType<T> | null = null
 
 	obj.traverse((node) => {

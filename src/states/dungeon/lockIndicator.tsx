@@ -7,11 +7,11 @@ import { useQuery } from '@/ui/store'
 
 const lockedOnQuery = useQuery(ecs.with('lockedOn'))
 export const LockIndicator = () => {
-	css/* css */`
-	.indicator{
-		fill: white;
-		font-size: 3rem;
-	}
+	css /* css */ `
+		.indicator {
+			fill: white;
+			font-size: 3rem;
+		}
 	`
 	return (
 		<For each={lockedOnQuery()}>

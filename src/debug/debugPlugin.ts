@@ -5,12 +5,13 @@ import { app } from '@/global/states'
 import { windowEvent } from '@/lib/uiManager'
 import { debugOptions } from './debugState'
 
-const enableDebugState = () => windowEvent('keydown', (e) => {
-	if (e.key === 'F3') {
-		e.preventDefault()
-		app.enable('debug')
-	}
-})
+const enableDebugState = () =>
+	windowEvent('keydown', (e) => {
+		if (e.key === 'F3') {
+			e.preventDefault()
+			app.enable('debug')
+		}
+	})
 
 const attackInFarm = () => {
 	if (debugOptions.attackInFarm()) {

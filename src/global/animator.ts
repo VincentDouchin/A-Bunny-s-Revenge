@@ -20,7 +20,7 @@ export class Animator<K extends string = any> extends AnimationMixer {
 		const clips = {} as Record<K, AnimationClip>
 		if (animationMap) {
 			for (const [animationName, clipName] of entries(animationMap)) {
-				const correspondingClip = animations.find(clip => clip.name === clipName)
+				const correspondingClip = animations.find((clip) => clip.name === clipName)
 				if (correspondingClip) {
 					clips[animationName] = correspondingClip
 				}
@@ -107,11 +107,14 @@ export class Animator<K extends string = any> extends AnimationMixer {
 		this.delay = delay
 		this.play(animation, { ...options, loopOnce: true })
 		return new Promise<void>((resolve) => {
-			setTimeout(() => {
-				this.current = undefined
-				this.delay = 0
-				resolve()
-			}, (clip.duration / (options?.timeScale ?? 1) - delay) * 1000)
+			setTimeout(
+				() => {
+					this.current = undefined
+					this.delay = 0
+					resolve()
+				},
+				(clip.duration / (options?.timeScale ?? 1) - delay) * 1000,
+			)
 		})
 	}
 

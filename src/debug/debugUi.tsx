@@ -25,7 +25,7 @@ import { SaveEditor } from './saveEditor'
 import { SoundUi } from './SoundUi'
 
 export const [selectedBoss, setSelectedBoss] = useLocalStorage<{ boss: Boss }>('selectedBoss', { boss: 'Armabee_Evolved' })
-const rendererQuery = ecs.with('renderer', 'scene', 'renderGroup').where(e => e.renderGroup === RenderGroup.Game)
+const rendererQuery = ecs.with('renderer', 'scene', 'renderGroup').where((e) => e.renderGroup === RenderGroup.Game)
 
 const [localParams, setParams] = useLocalStorage('params', params as any)
 Object.assign(params, { ...localParams, zoom: params.zoom, cameraOffsetX: 0, cameraOffsetY: 150, cameraOffsetZ: -200 })
@@ -34,7 +34,7 @@ export const getGameRenderGroup = () => {
 	if (gameRenderGroup) {
 		return gameRenderGroup
 	} else {
-		throw new Error('can\'t find game renderGroup')
+		throw new Error("can't find game renderGroup")
 	}
 }
 
@@ -58,7 +58,7 @@ export const DebugUi = () => {
 			ecs.remove(player)
 		}
 		ecs.add({
-			...playerBundle(10, null),
+			...(await playerBundle(10, null)),
 			position: new Vector3(),
 			rotation: new Quaternion(),
 			targetRotation: new Quaternion(),
@@ -103,14 +103,7 @@ export const DebugUi = () => {
 		const camera = removeCamera()
 		if (!camera) return
 		// (depthQuad.material as ShaderMaterial).uniforms.orthographic.value = true
-		ecs.addComponent(camera, 'camera', new OrthographicCamera(
-			-width / 2 / params.zoom,
-			width / 2 / params.zoom,
-			height / 2 / params.zoom,
-			-height / 2 / params.zoom,
-			0.1,
-			1000,
-		))
+		ecs.addComponent(camera, 'camera', new OrthographicCamera(-width / 2 / params.zoom, width / 2 / params.zoom, height / 2 / params.zoom, -height / 2 / params.zoom, 0.1, 1000))
 	}
 	const enableAttackAnimations = () => {
 		debugOptions.attackInFarm(!debugOptions.attackInFarm())
@@ -148,12 +141,15 @@ export const DebugUi = () => {
 		}
 	}
 	ui.updateSync(() => {
-		debugRenderer && debugRenderer.update()
+		if (debugRenderer) {
+			debugRenderer.update()
+		}
 	})
 
 	const debug = () => {
+		// oxlint-disable-next-line no-unused-expressions
 		save
-		// eslint-disable-next-line no-debugger
+		// oxlint-disable-next-line no-debugger
 		debugger
 	}
 
@@ -195,11 +191,10 @@ export const DebugUi = () => {
 				const conversation = parse(result) as unknown as Conversation
 				try {
 					validateConversation(conversation)
-					// eslint-disable-next-line no-console
+					// oxlint-disable-next-line no-console
 					console.log(conversation)
 					ecs.add({ conversation })
-				}
-				catch (e) {
+				} catch (e) {
 					conversationError(String(e))
 				}
 			}
@@ -207,14 +202,29 @@ export const DebugUi = () => {
 		reader.readAsText(file)
 	}
 	return (
-		<div style={{ 'position': 'absolute', 'color': 'white', 'z-index': 1000 }}>
+		<div style={{ position: 'absolute', color: 'white', 'z-index': 1000 }}>
 			<Show when={showUi()}>
-				<div style={{ 'background': 'darkgray', 'display': 'grid', 'grid-template-columns': 'auto auto', 'color': 'black', 'font-size': '20px', 'padding': '10px', 'margin': '10px', 'gap': '10px', 'max-height': '80vh', 'overflow-y': 'auto' }}>
+				<div
+					style={{
+						background: 'darkgray',
+						display: 'grid',
+						'grid-template-columns': 'auto auto',
+						color: 'black',
+						'font-size': '20px',
+						padding: '10px',
+						margin: '10px',
+						gap: '10px',
+						'max-height': '80vh',
+						'overflow-y': 'auto',
+					}}
+				>
 					<div>test dialog</div>
-					<input type="file" accept=".toml" onInput={testConversation}></input>
-					<Show when={conversationError()}>
-						{error => <div style={{ 'color': 'red', 'grid-column': 'span 2' }}>{error()}</div>}
-					</Show>
+					<input
+						type="file"
+						accept=".toml"
+						onInput={testConversation}
+					></input>
+					<Show when={conversationError()}>{(error) => <div style={{ color: 'red', 'grid-column': 'span 2' }}>{error()}</div>}</Show>
 					<button onClick={() => displayCharacterList(!displayCharacterList())}>Display character list</button>
 					<div></div>
 					<Show when={displayCharacterList()}>
@@ -224,7 +234,7 @@ export const DebugUi = () => {
 								return (
 									<>
 										<button onClick={() => showAnimations(!showAnimations())}>{name}</button>
-										<div>{showAnimations() && model.animations?.map(animation => animation.name).join(' / ')}</div>
+										<div>{showAnimations() && model.animations?.map((animation) => animation.name).join(' / ')}</div>
 									</>
 								)
 							})}
@@ -246,41 +256,68 @@ export const DebugUi = () => {
 						type="number"
 						value={params.renderHeight}
 						onChange={updatePixelation}
-					>
-					</input>
+					></input>
 					SpeedUp
 					<input
 						type="number"
 						value={params?.speedUp}
-						onChange={e => params.speedUp = e.target.valueAsNumber}
-					>
-					</input>
+						onChange={(e) => (params.speedUp = e.target.valueAsNumber)}
+					></input>
 					Dialog speed
 					<input
 						type="number"
 						value={params?.dialogSpeed}
-						onChange={e => params.dialogSpeed = e.target.valueAsNumber}
-					>
-					</input>
+						onChange={(e) => (params.dialogSpeed = e.target.valueAsNumber)}
+					></input>
 					Pixelation
-					<input type="checkbox" checked={params.pixelation} onChange={e => changePixelation(e.target.checked)}></input>
+					<input
+						type="checkbox"
+						checked={params.pixelation}
+						onChange={(e) => changePixelation(e.target.checked)}
+					></input>
 					Skip main menu
-					<input type="checkbox" checked={params.skipMainMenu} onChange={e => setParams(d => ({ ...d, skipMainMenu: e.target.checked }))}></input>
+					<input
+						type="checkbox"
+						checked={params.skipMainMenu}
+						onChange={(e) => setParams((d) => ({ ...d, skipMainMenu: e.target.checked }))}
+					></input>
 					Debug Boss
 					<div>
-						<input type="checkbox" checked={params.debugBoss} onChange={e => setParams(d => ({ ...d, debugBoss: e.target.checked }))}></input>
-						<select onChange={e => setSelectedBoss(_ => ({ boss: e.target.value as Boss }))}>
+						<input
+							type="checkbox"
+							checked={params.debugBoss}
+							onChange={(e) => setParams((d) => ({ ...d, debugBoss: e.target.checked }))}
+						></input>
+						<select onChange={(e) => setSelectedBoss((_) => ({ boss: e.target.value as Boss }))}>
 							{Object.keys(bosses).map((name) => {
-								return <option selected={name === selectedBoss.boss} value={name}>{name}</option>
+								return (
+									<option
+										selected={name === selectedBoss.boss}
+										value={name}
+									>
+										{name}
+									</option>
+								)
 							})}
 						</select>
 					</div>
 					Debug Enemies
-					<input type="checkbox" checked={params.debugEnemies} onChange={e => setParams(d => ({ ...d, debugEnemies: e.target.checked }))}></input>
+					<input
+						type="checkbox"
+						checked={params.debugEnemies}
+						onChange={(e) => setParams((d) => ({ ...d, debugEnemies: e.target.checked }))}
+					></input>
 					Debug Intro
-					<input type="checkbox" checked={params.debugIntro} onChange={e => setParams(d => ({ ...d, debugIntro: e.target.checked }))}></input>
+					<input
+						type="checkbox"
+						checked={params.debugIntro}
+						onChange={(e) => setParams((d) => ({ ...d, debugIntro: e.target.checked }))}
+					></input>
 					Debug Renderer
-					<input type="checkbox" onChange={e => toggleDebugRenderer(e.target.checked)}></input>
+					<input
+						type="checkbox"
+						onChange={(e) => toggleDebugRenderer(e.target.checked)}
+					></input>
 					Time of day
 					<input
 						type="range"
@@ -292,26 +329,43 @@ export const DebugUi = () => {
 							setCurrentTime(e.target.valueAsNumber)
 							dayTime.current = e.target.valueAsNumber
 						}}
+					></input>
+					<button
+						classList={{ selected: dayToNight() }}
+						onClick={() => (dayTime.dayToNight = true)}
 					>
-					</input>
-					<button classList={{ selected: dayToNight() }} onClick={() => dayTime.dayToNight = true}>Day to night</button>
-					<button classList={{ selected: !dayToNight() }} onClick={() => dayTime.dayToNight = false}>Night to day</button>
+						Day to night
+					</button>
+					<button
+						classList={{ selected: !dayToNight() }}
+						onClick={() => (dayTime.dayToNight = false)}
+					>
+						Night to day
+					</button>
 				</div>
 				<div style={{ display: 'flex', gap: '1rem', margin: '1rem', width: '20rem' }}>
 					<button onClick={centerPlayer}>center player</button>
 					<button onClick={destroyCrops}>Destroy crops</button>
 					<button onClick={reset}>Reset Save</button>
-					<button classList={{ selected: debugOptions.attackInFarm() }} onClick={enableAttackAnimations}>
+					<button
+						classList={{ selected: debugOptions.attackInFarm() }}
+						onClick={enableAttackAnimations}
+					>
 						{debugOptions.attackInFarm() ? 'Disable attack animations' : 'Enable attack animations'}
 					</button>
-					<button classList={{ selected: debugOptions.godMode() }} onClick={toggleGodMode}>{debugOptions.godMode() ? 'Disable god mode' : 'Enable god mode'}</button>
+					<button
+						classList={{ selected: debugOptions.godMode() }}
+						onClick={toggleGodMode}
+					>
+						{debugOptions.godMode() ? 'Disable god mode' : 'Enable god mode'}
+					</button>
 				</div>
 
 				<div style={{ position: 'fixed', right: 0, top: 0 }}>
-					<div style={{ 'background': 'darkgray', 'margin': '1rem', 'padding': '1rem', 'color': 'black', 'font-size': '20px' }}>
+					<div style={{ background: 'darkgray', margin: '1rem', padding: '1rem', color: 'black', 'font-size': '20px' }}>
 						<div>Debug NPC encounters</div>
 						<For each={objectKeys(encounters)}>
-							{encounter => (
+							{(encounter) => (
 								<div>
 									{encounter}
 									<button onClick={() => encounters[encounter]()}>enable</button>
@@ -319,10 +373,10 @@ export const DebugUi = () => {
 							)}
 						</For>
 					</div>
-					<div style={{ 'background': 'darkgray', 'margin': '1rem', 'padding': '1rem', 'color': 'black', 'font-size': '20px', 'height': '20rem', 'overflow-y': 'scroll' }}>
+					<div style={{ background: 'darkgray', margin: '1rem', padding: '1rem', color: 'black', 'font-size': '20px', height: '20rem', 'overflow-y': 'scroll' }}>
 						<div>Unlock recipes</div>
-						<For each={recipes.map(r => r.output.name)}>
-							{recipe => (
+						<For each={recipes.map((r) => r.output.name)}>
+							{(recipe) => (
 								<div>
 									{recipe}
 									<button onClick={() => save.unlockedRecipes.push(recipe)}>enable</button>

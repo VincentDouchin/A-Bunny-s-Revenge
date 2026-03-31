@@ -28,35 +28,46 @@ export const PauseUi = () => {
 			}
 		}
 	})
-	css/* css */`
-	.container{
-		display: grid;
-		place-items: center;
-	}
-	.option{
-		position: relative;
-	}
-	
+	css /* css */ `
+		.container {
+			display: grid;
+			place-items: center;
+		}
+		.option {
+			position: relative;
+		}
 	`
 	return (
-		<Modal open={context?.isPauseState()} showClose={settings()}>
+		<Modal
+			open={context?.isPauseState()}
+			showClose={settings()}
+		>
 			<GoldContainer>
 				<Show when={!settings()}>
 					<div class="container">
 						<OutlineText textSize="4rem">Paused</OutlineText>
 						<Menu showArrow={true}>
-							{MenuItem => (
+							{(MenuItem) => (
 								<>
-									<MenuItem defaultSelected={true} onClick={() => app.disable('paused')}>
-										{({ selected }) =>	(
-											<OutlineText textSize="2rem" color={selected() ? 'white' : 'var(--grey)'}>
+									<MenuItem
+										defaultSelected={true}
+										onClick={() => app.disable('paused')}
+									>
+										{({ selected }) => (
+											<OutlineText
+												textSize="2rem"
+												color={selected() ? 'white' : 'var(--grey)'}
+											>
 												Resume
 											</OutlineText>
 										)}
 									</MenuItem>
 									<MenuItem onClick={() => settings(true)}>
-										{({ selected }) =>	(
-											<OutlineText textSize="2rem" color={selected() ? 'white' : 'var(--grey)'}>
+										{({ selected }) => (
+											<OutlineText
+												textSize="2rem"
+												color={selected() ? 'white' : 'var(--grey)'}
+											>
 												Settings
 											</OutlineText>
 										)}

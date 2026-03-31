@@ -7,7 +7,7 @@ export const stunBundle = (offset: number) => {
 	const group = new Group()
 	group.position.y = offset + 5
 	range(0, 5, (i) => {
-		const angle = i / 5 * (Math.PI * 2)
+		const angle = (i / 5) * (Math.PI * 2)
 		const star = new Sprite(new SpriteMaterial({ map: assets.particles.star, depthWrite: false }))
 		star.scale.setScalar(2)
 		star.position.x = Math.cos(angle) * 5

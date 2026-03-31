@@ -28,9 +28,28 @@ import type { Dash } from '@/states/game/dash'
 import type { MainMenuBook } from '@/states/mainMenu/book'
 import { CSS2DObject } from 'three/addons'
 
-export type AssetNames = { [K in keyof typeof assets]: keyof typeof assets[K] }
+export type AssetNames = { [K in keyof typeof assets]: keyof (typeof assets)[K] }
 
-export type PlayerAnimations = 'idle' | 'runFront' | 'runLeft' | 'runRight' | 'runBack' | 'lightAttack' | 'slashAttack' | 'heavyAttack' | 'hit' | 'fishing' | 'sleeping' | 'wakeUp' | 'interact' | 'pickup' | 'dashFront' | 'dashLeft' | 'dashRight' | 'dashBack' | 'dead'
+export type PlayerAnimations =
+	| 'idle'
+	| 'runFront'
+	| 'runLeft'
+	| 'runRight'
+	| 'runBack'
+	| 'lightAttack'
+	| 'slashAttack'
+	| 'heavyAttack'
+	| 'hit'
+	| 'fishing'
+	| 'sleeping'
+	| 'wakeUp'
+	| 'interact'
+	| 'pickup'
+	| 'dashFront'
+	| 'dashLeft'
+	| 'dashRight'
+	| 'dashBack'
+	| 'dead'
 export type EnemyAnimations = 'idle' | 'running' | 'attacking' | 'hit' | 'dead'
 export type PumpkinSeedAnimations = EnemyAnimations | 'spawn'
 export type PumpkinBossAnimations = EnemyAnimations | 'spawn' | 'summon'
@@ -99,14 +118,14 @@ export interface Crop {
 }
 
 export interface AttackStyle {
-	playerAttackStyle: { justEntered: boolean, lastAttack: number, heavyAttack: number }
+	playerAttackStyle: { justEntered: boolean; lastAttack: number; heavyAttack: number }
 	melee: true
 	jumping: true
 	spore: true
 	beeBoss: true
 	pumpkinBoss: { summonTimer: Timer<false> }
-	charging: { amount: number, max: number }
-	range: { amount: number, max: number }
+	charging: { amount: number; max: number }
+	range: { amount: number; max: number }
 	pumpkinSeed: true
 	mushroom: true
 }
@@ -114,14 +133,16 @@ export interface AttackStyle {
 export type AllAnimators = { [K in keyof Required<Entity>]: Required<Entity>[K] extends Animator ? K : never }[keyof Entity]
 
 export type AllAnimations = { [K in keyof Entity]: Required<Entity>[K] extends Animator<infer A> ? A : never }[keyof Entity] & string
-export type AnimatorsWith<A extends AllAnimations[]> = { [K in keyof Required<Entity>]: Required<Entity>[K] extends Animator<infer B> ? A[number] extends B ? Required<Entity>[K] : Animator<any> : Animator<any> }[keyof Entity]
+export type AnimatorsWith<A extends AllAnimations[]> = {
+	[K in keyof Required<Entity>]: Required<Entity>[K] extends Animator<infer B> ? (A[number] extends B ? Required<Entity>[K] : Animator<any>) : Animator<any>
+}[keyof Entity]
 
 export type BaseEnemyStates = 'idle' | 'running' | 'attack' | 'hit' | 'dying' | 'dead' | 'waitingAttack' | 'cooldown'
 export type PlayerStates = 'idle' | 'running' | 'attack0' | 'attack1' | 'attack2' | 'dying' | 'dead' | 'picking' | 'dash' | 'hit' | 'stun' | 'poisoned' | 'managed'
 
 export type AllStates = { [K in keyof Entity]: Required<Entity>[K] extends State<infer A> ? A : never }[keyof Entity] & string
 
-export type WithState<S extends AllStates[]> = { [K in keyof Required<Entity>]: Required<Entity>[K] extends State<infer S2> ? S[number] extends S2 ? K : never : never }[keyof Required<Entity>]
+export type WithState<S extends AllStates[]> = { [K in keyof Required<Entity>]: Required<Entity>[K] extends State<infer S2> ? (S[number] extends S2 ? K : never) : never }[keyof Required<Entity>]
 
 export type StatesWith<S extends AllStates[]> = Required<Entity>[WithState<S>]
 
@@ -131,10 +152,9 @@ export class EmoteContainer extends CSS2DObject {
 	}
 }
 
-export type Entity = Partial<AttackStyle>
-	& Partial<Tags>
-	& Partial<Record<Particles, Vfx>>
-	& {
+export type Entity = Partial<AttackStyle> &
+	Partial<Tags> &
+	Partial<Record<Particles, Vfx>> & {
 		playerAnimator?: Animator<PlayerAnimations>
 		// ! BehaviorTree
 		enemyState?: State<BaseEnemyStates | 'stun'>
@@ -204,13 +224,13 @@ export type Entity = Partial<AttackStyle>
 		pumpkinSeedAnimator?: Animator<PumpkinSeedAnimations>
 		deathMageAnimator?: Animator<Animations['death_mage']>
 		// ! Farming
-		sensor?: { shape: Shape, distance: number }
+		sensor?: { shape: Shape; distance: number }
 		crop?: Crop
 		planted?: With<Entity, 'crop'>
 		wateringCan?: With<Entity, 'model' | 'waterAmount' | 'wateringCanParticles'>
 		waterAmount?: number
 		// ! Game
-		map?: keyof typeof assets['levels']
+		map?: keyof (typeof assets)['levels']
 		ground?: true
 		interacting?: true
 		interactable?: Interactable
@@ -236,7 +256,7 @@ export type Entity = Partial<AttackStyle>
 		health?: number
 		popDirection?: Vector3
 		groundLevel?: number
-		bounce?: { amount: number, force: Vector3, touchedGround: boolean }
+		bounce?: { amount: number; force: Vector3; touchedGround: boolean }
 		// ! Inventory
 		inventory?: (Item | null)[]
 		inventorySize?: number
@@ -250,7 +270,7 @@ export type Entity = Partial<AttackStyle>
 		npc?: true
 		voice?: AssetNames['voices']
 		npcName?: (typeof NPC)[number]
-		questMarker?: { quest: Quest2<any, any, any>, step: string }[]
+		questMarker?: { quest: Quest2<any, any, any>; step: string }[]
 		questMarkerContainer?: Group
 		questMarkerPosition?: Vector3
 		actor?: Actor
@@ -309,7 +329,7 @@ export type Entity = Partial<AttackStyle>
 		miniGameContainer?: CSS2DObject
 		spoon?: Entity
 		// ! Sounds
-		lastStep?: { left: boolean, right: boolean }
+		lastStep?: { left: boolean; right: boolean }
 		// ! DayNight
 		nightLight?: Light
 		emissiveMat?: MeshPhongMaterial
@@ -334,12 +354,12 @@ export type Entity = Partial<AttackStyle>
 		stun?: Group
 		hitTimer?: Timer<true>
 		// ! Wander
-		wander?: { target: Vector3, cooldown: Timer<false> }
+		wander?: { target: Vector3; cooldown: Timer<false> }
 		// ! Debuffs
 		debuffsContainer?: CSS2DObject
 		// ! Trail
 		trailMaker?: true
-		trail?: { origin: Entity, timer: Timer<false> }
+		trail?: { origin: Entity; timer: Timer<false> }
 		poison?: true
 		// ! Stall
 		price?: number
@@ -352,7 +372,7 @@ export type Entity = Partial<AttackStyle>
 		fishingSpot?: true
 		bobber?: With<Entity, 'position'>
 		fish?: Timer<false>
-		fishingProgress?: { attempts: number, success: number, done: boolean }
+		fishingProgress?: { attempts: number; success: number; done: boolean }
 		bobbing?: true
 		fishSpawner?: true
 		// ! Lock on
@@ -368,11 +388,11 @@ export type BehaviorNode<E> = (e: E) => 'success' | 'failure' | 'running'
 export type Bundle<C extends keyof Entity> = () => With<Entity, C>
 
 export type KeysOfType<T, U> = {
-	[K in keyof T]: T[K] extends U ? K : never;
+	[K in keyof T]: T[K] extends U ? K : never
 }[keyof T]
 
 export type ComponentsOfType<T> = KeysOfType<Required<Entity>, T>
 
 export type QueryEntity<Q extends Query<any>, O extends keyof Entity | void = void> = O extends string ? With<Entity, QueryKeys<Q> | O> : With<Entity, QueryKeys<Q>>
 
-export type QueryKeys<Q extends Query<any>> = Q extends Query<infer E> ? E extends object ? RequiredKeysOf<E> : never : never
+export type QueryKeys<Q extends Query<any>> = Q extends Query<infer E> ? (E extends object ? RequiredKeysOf<E> : never) : never

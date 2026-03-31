@@ -8,12 +8,12 @@ import { app } from '@/global/states'
 import { action } from '@/lib/behaviors'
 
 export const getMovementForce = ({ movementForce, speed, targetMovementForce }: With<Entity, 'movementForce' | 'speed'>) => {
-	const targetForce = movementForce.clone().multiplyScalar(speed.value * params.speedUp * time.delta / 1000)
+	const targetForce = movementForce.clone().multiplyScalar((speed.value * params.speedUp * time.delta) / 1000)
 	const force = targetMovementForce ? targetMovementForce.lerp(targetForce, time.delta / 100) : targetForce
 
 	return {
 		force,
-		isMoving: (Math.abs(force.x) + Math.abs(force.z)) > 0.05,
+		isMoving: Math.abs(force.x) + Math.abs(force.z) > 0.05,
 	}
 }
 const lockedOnQuery = ecs.with('lockedOn', 'position')
@@ -45,11 +45,7 @@ export const getPlayerRotation = (e: With<Entity, 'position'>, force: Vector3) =
 	}
 	if (app.isDisabled('menu') && settings.controls === 'mouse') {
 		if (inputManager.controls() === 'gamepad') {
-			return new Vector3(
-				gameInputs.get('lookLeft').pressed - gameInputs.get('lookRight').pressed,
-				0,
-				gameInputs.get('lookForward').pressed - gameInputs.get('lookBackward').pressed,
-			).normalize()
+			return new Vector3(gameInputs.get('lookLeft').pressed - gameInputs.get('lookRight').pressed, 0, gameInputs.get('lookForward').pressed - gameInputs.get('lookBackward').pressed).normalize()
 		}
 		if (inputManager.controls() === 'keyboard') {
 			return inputManager.mouseWorldPosition.clone().sub(e.position).normalize()
@@ -57,37 +53,40 @@ export const getPlayerRotation = (e: With<Entity, 'position'>, force: Vector3) =
 	}
 	return force
 }
-export const applyMove = <E extends With<Entity, 'body'>, C>(fn: ({ entity }: { entity: E } & C) => Vector3) => action<{ entity: E } & C>((args) => {
-	const { body, controller, collider } = args.entity
-	const force = fn(args)
-	if (controller && collider && body.isKinematic()) {
-		if (!controller.computedGrounded()) {
-			force.add(new Vector3(0, -0.2, 0))
+export const applyMove = <E extends With<Entity, 'body'>, C>(fn: ({ entity }: { entity: E } & C) => Vector3) =>
+	action<{ entity: E } & C>((args) => {
+		const { body, controller, collider } = args.entity
+		const force = fn(args)
+		if (controller && collider && body.isKinematic()) {
+			if (!controller.computedGrounded()) {
+				force.add(new Vector3(0, -0.2, 0))
+			}
+			controller.computeColliderMovement(collider, force, QueryFilterFlags.EXCLUDE_SENSORS, undefined)
+			const movement = controller.computedMovement()
+			const bodyPos = body.translation()
+			const dest = new Vector3(bodyPos.x, bodyPos.y, bodyPos.z).add(movement)
+			body.setNextKinematicTranslation(dest)
+		} else {
+			body.applyImpulse(force.multiplyScalar(1000), true)
 		}
-		controller.computeColliderMovement(collider, force, QueryFilterFlags.EXCLUDE_SENSORS, undefined)
-		const movement = controller.computedMovement()
-		const bodyPos = body.translation()
-		const dest = new Vector3(bodyPos.x, bodyPos.y, bodyPos.z).add(movement)
-		body.setNextKinematicTranslation(dest)
-	} else {
-		body.applyImpulse(force.multiplyScalar(1000), true)
-	}
-})
+	})
 
-export const applyRotate = <E extends With<Entity, 'rotation' | 'targetRotation'>, C>(fn: ({ entity }: { entity: E } & C) => Vector3) => action<{ entity: E } & C>((args) => {
-	if (app.isEnabled('paused') || app.isEnabled('menu')) return
-	const rot = fn(args)
-	if (rot.length() > 0) {
-		args.entity.targetRotation.setFromAxisAngle(new Vector3(0, 1, 0), Math.atan2(rot.x, rot.z))
-	}
-})
+export const applyRotate = <E extends With<Entity, 'rotation' | 'targetRotation'>, C>(fn: ({ entity }: { entity: E } & C) => Vector3) =>
+	action<{ entity: E } & C>((args) => {
+		if (app.isEnabled('paused') || app.isEnabled('menu')) return
+		const rot = fn(args)
+		if (rot.length() > 0) {
+			args.entity.targetRotation.setFromAxisAngle(new Vector3(0, 1, 0), Math.atan2(rot.x, rot.z))
+		}
+	})
 
-export const moveToDirection = <E extends With<Entity, 'movementForce'>, C extends { direction?: Vector3 | null }, R>() => action((args: { entity: E, ctx: C } & R) => {
-	if (args.ctx.direction) {
-		args.entity.movementForce.x = args.ctx.direction.x
-		args.entity.movementForce.z = args.ctx.direction.z
-	}
-})
+export const moveToDirection = <E extends With<Entity, 'movementForce'>, C extends { direction?: Vector3 | null }, R>() =>
+	action((args: { entity: E; ctx: C } & R) => {
+		if (args.ctx.direction) {
+			args.entity.movementForce.x = args.ctx.direction.x
+			args.entity.movementForce.z = args.ctx.direction.z
+		}
+	})
 
 export const takeDamage = (entity: With<Entity, 'currentHealth'>, damage: number) => {
 	if (settings.difficulty === 'easy') {

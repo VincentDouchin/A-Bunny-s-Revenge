@@ -13,7 +13,7 @@ import { useLocalStorage } from '@/utils/useLocalStorage'
 
 export type stringCaster<K extends string> = (s: string) => K
 export const getFileName = <K extends string>(path: string) => {
-	return path.split(/[./]/g).at(-2) ?? '' as K
+	return path.split(/[./]/g).at(-2) ?? ('' as K)
 }
 export const getFolderName = (path: string) => {
 	return path.split(/[./]/g).at(-3) ?? ''
@@ -47,10 +47,10 @@ const cachedLoader = async <R>(storeName: string, fn: (arr: ArrayBuffer) => Prom
 			try {
 				const arr = await (await fetch(src)).arrayBuffer()
 				await set(key, arr, store)
-				setLocalManifest(manifest => ({ ...manifest, [key]: assetManifest[key as keyof typeof assetManifest]?.modified }))
+				setLocalManifest((manifest) => ({ ...manifest, [key]: assetManifest[key as keyof typeof assetManifest]?.modified }))
 
 				return await fn(arr!)
-			// eslint-disable-next-line unused-imports/no-unused-vars
+				// eslint-disable-next-line unused-imports/no-unused-vars
 			} catch (_error) {
 				console.error(`Error loading ${src} ${key}`)
 			}
@@ -79,23 +79,24 @@ export const draco = getDracoLoader()
 export const loadGLB = await cachedLoader(
 	'glb',
 	(arrayBuffer: ArrayBuffer) => new GLTFLoader().setDRACOLoader(draco).parseAsync(arrayBuffer, ''),
-	src => new GLTFLoader().setDRACOLoader(draco).loadAsync(src),
+	(src) => new GLTFLoader().setDRACOLoader(draco).loadAsync(src),
 )
 
 export const loadAudio = await cachedLoader(
 	'glb',
 	async (arrayBuffer: ArrayBuffer) => {
-		const audioBlob = await new Blob([arrayBuffer], { type: 'audio/webm' })
+		const audioBlob = new Blob([arrayBuffer], { type: 'audio/webm' })
 		const url = URL.createObjectURL(audioBlob)
 		return url
 	},
-	src => Promise.resolve(src),
+	(src) => Promise.resolve(src),
 )
-export const loadImage = (path: string) => new Promise<HTMLImageElement>((resolve) => {
-	const img = new Image()
-	img.src = path
-	img.onload = () => resolve(img)
-})
+export const loadImage = (path: string) =>
+	new Promise<HTMLImageElement>((resolve) => {
+		const img = new Image()
+		img.src = path
+		img.onload = () => resolve(img)
+	})
 
 // export interface InstanceHandle {
 // 	setMatrix: (fn: (matrix: Matrix4) => void) => void
@@ -204,42 +205,42 @@ export const loaderProgress = () => {
 	return clear
 }
 
-type ExtractFromPath<
-	T extends string,
-	F extends string,
-	P extends string,
-	S extends string,
-	E extends string,
-> = {
+type ExtractFromPath<T extends string, F extends string, P extends string, S extends string, E extends string> = {
 	[Path in T]: Path extends `${F}/${P}${infer R}${S}.${E}` ? R : never
 }[T]
 const escapeRegex = (str?: string) => (str ?? '').replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
 
-export const getAssetPathsLoader = <Paths extends string>(assetPaths: Record<string, string>) => <
-	F extends string = '',
-	P extends string = '',
-	S extends string = '',
-	E extends string = '',
-	L extends boolean = false,
->({ folder, suffix, extension, lowercase, prefix }: { folder?: F, suffix?: S, extension: E, lowercase?: L, prefix?: P }) => {
-	const escapedPrefix = escapeRegex(prefix)
-	const escapedFolder = escapeRegex(folder)
-	const escapedSuffix = escapeRegex(suffix)
-	const escapedExtension = escapeRegex(extension)
-	const regex = new RegExp(`${escapedFolder}/${escapedPrefix}(.*?)${escapedSuffix}.${escapedExtension}`)
-	return [...assets]
-		.filter(assets => assets.match(regex)?.[0])
-		.reduce((acc, v) => {
-			const realPath = Object.entries(assetPaths).find(([rawPath, _realPath]) => rawPath.endsWith(v))?.[1]
-			if (!realPath) {
-				throw new Error(`${v} does not exist`)
-			}
-			let fileName = regex.exec(v)![1]
-			if (lowercase) {
-				fileName = fileName.toLocaleLowerCase()
-			}
-			return ({ ...acc, [fileName]: realPath })
-		}, {}) as L extends true
-		? Simplify<Record<Lowercase<ExtractFromPath<Paths, F, P, S, E>>, string>>
-		: Simplify<Record<ExtractFromPath<Paths, F, P, S, E>, string>>
-}
+export const getAssetPathsLoader =
+	<Paths extends string>(assetPaths: Record<string, string>) =>
+	<F extends string = '', P extends string = '', S extends string = '', E extends string = '', L extends boolean = false>({
+		folder,
+		suffix,
+		extension,
+		lowercase,
+		prefix,
+	}: {
+		folder?: F
+		suffix?: S
+		extension: E
+		lowercase?: L
+		prefix?: P
+	}) => {
+		const escapedPrefix = escapeRegex(prefix)
+		const escapedFolder = escapeRegex(folder)
+		const escapedSuffix = escapeRegex(suffix)
+		const escapedExtension = escapeRegex(extension)
+		const regex = new RegExp(`${escapedFolder}/${escapedPrefix}(.*?)${escapedSuffix}.${escapedExtension}`)
+		return [...assets]
+			.filter((assets) => assets.match(regex)?.[0])
+			.reduce((acc, v) => {
+				const realPath = Object.entries(assetPaths).find(([rawPath, _realPath]) => rawPath.endsWith(v))?.[1]
+				if (!realPath) {
+					throw new Error(`${v} does not exist`)
+				}
+				let fileName = regex.exec(v)![1]
+				if (lowercase) {
+					fileName = fileName.toLocaleLowerCase()
+				}
+				return { ...acc, [fileName]: realPath }
+			}, {}) as L extends true ? Simplify<Record<Lowercase<ExtractFromPath<Paths, F, P, S, E>>, string>> : Simplify<Record<ExtractFromPath<Paths, F, P, S, E>, string>>
+	}

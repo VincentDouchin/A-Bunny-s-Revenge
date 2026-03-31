@@ -12,9 +12,8 @@ import { baseEnemyQuery } from './enemyBehavior'
 
 const pollenQuery = ecs.with('pollen')
 
-const rangedAttacks = (e: With<Entity, 'group' | 'rotation' | 'strength'>) => getRandom(pollenQuery.size > 5
-	? [honeyProjectile, projectilesCircleAttack]
-	: [pollenAttack, honeyProjectile, projectilesCircleAttack])(e)
+const rangedAttacks = (e: With<Entity, 'group' | 'rotation' | 'strength'>) =>
+	getRandom(pollenQuery.size > 5 ? [honeyProjectile, projectilesCircleAttack] : [pollenAttack, honeyProjectile, projectilesCircleAttack])(e)
 
 export const beeBossBehavior = createBehaviorTree(
 	baseEnemyQuery.with('boss', 'enemyAnimator', 'beeBoss', 'beeBossState'),
@@ -26,7 +25,7 @@ export const beeBossBehavior = createBehaviorTree(
 		sequence(
 			inverter(inState('attack', 'waitingAttack', 'cooldown')),
 			condition(({ entity, ctx }) => {
-				return ctx.player && getIntersections(entity, undefined, c => c.handle === ctx.player?.collider.handle)
+				return ctx.player && getIntersections(entity, undefined, (c) => c.handle === ctx.player?.collider.handle)
 			}),
 			setState('waitingAttack'),
 		),
@@ -57,6 +56,5 @@ export const beeBossBehavior = createBehaviorTree(
 		runningNode(),
 		waitingAttackNode(300)(),
 		cooldownNode(between(1_000, 3_000), 0.8)(),
-
 	),
 )

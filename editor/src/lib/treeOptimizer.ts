@@ -11,24 +11,17 @@ interface TreeData {
 export interface GridData {
 	grid: Set<string>
 	gridSize: number
-	levelWorldBounds: { minX: number, maxX: number, minZ: number, maxZ: number }
+	levelWorldBounds: { minX: number; maxX: number; minZ: number; maxZ: number }
 }
 export const mergeGrids = (grid: GridData, ...grids: GridData[]) => {
-	const newGrid = new Set([...grid.grid, ...grids.flatMap(g => Array.from(g.grid))])
+	const newGrid = new Set([...grid.grid, ...grids.flatMap((g) => Array.from(g.grid))])
 	return {
 		...grid,
 		grid: newGrid,
 	}
 }
 
-function circleIntersectsCell(
-	treeX: number,
-	treeZ: number,
-	radius: number,
-	cellX: number,
-	cellZ: number,
-	gridSize: number,
-): boolean {
+function circleIntersectsCell(treeX: number, treeZ: number, radius: number, cellX: number, cellZ: number, gridSize: number): boolean {
 	const cellMinX = cellX * gridSize
 	const cellMaxX = (cellX + 1) * gridSize
 	const cellMinZ = cellZ * gridSize
@@ -44,21 +37,11 @@ function circleIntersectsCell(
 	return distanceSquared <= radius * radius
 }
 
-function cellIsInsideLevel(
-	gridX: number,
-	gridZ: number,
-	gridSize: number,
-	bounds: { minX: number, maxX: number, minZ: number, maxZ: number },
-): boolean {
+function cellIsInsideLevel(gridX: number, gridZ: number, gridSize: number, bounds: { minX: number; maxX: number; minZ: number; maxZ: number }): boolean {
 	const cellCenterX = (gridX + 0.5) * gridSize
 	const cellCenterZ = (gridZ + 0.5) * gridSize
 
-	return (
-		cellCenterX >= bounds.minX
-		&& cellCenterX <= bounds.maxX
-		&& cellCenterZ >= bounds.minZ
-		&& cellCenterZ <= bounds.maxZ
-	)
+	return cellCenterX >= bounds.minX && cellCenterX <= bounds.maxX && cellCenterZ >= bounds.minZ && cellCenterZ <= bounds.maxZ
 }
 
 // Grid operations
@@ -106,9 +89,7 @@ function cullEmptyCells(gridData: GridData, trees: TreeData[]): GridData {
 		}
 	})
 
-	const newGrid = new Set(
-		Array.from(gridData.grid).filter(key => cellsWithTrees.has(key)),
-	)
+	const newGrid = new Set(Array.from(gridData.grid).filter((key) => cellsWithTrees.has(key)))
 
 	return { ...gridData, grid: newGrid }
 }
@@ -132,9 +113,7 @@ function removeInteriorCells(gridData: GridData): GridData {
 			[gx + 1, gz + 1],
 		]
 
-		const touchesEdge = neighbors.some(([nx, nz]) =>
-			!cellIsInsideLevel(nx, nz, gridData.gridSize, gridData.levelWorldBounds),
-		)
+		const touchesEdge = neighbors.some(([nx, nz]) => !cellIsInsideLevel(nx, nz, gridData.gridSize, gridData.levelWorldBounds))
 
 		if (touchesEdge) {
 			edgeCells.add(key)
@@ -175,11 +154,7 @@ function removeInteriorCells(gridData: GridData): GridData {
 }
 
 // Query functions
-export function isInBoundaryCell(
-	position: Vector3Like,
-	radius: number,
-	gridData: GridData,
-): boolean {
+export function isInBoundaryCell(position: Vector3Like, radius: number, gridData: GridData): boolean {
 	const minCellX = Math.floor((position.x - radius) / gridData.gridSize)
 	const maxCellX = Math.floor((position.x + radius) / gridData.gridSize)
 	const minCellZ = Math.floor((position.z - radius) / gridData.gridSize)
@@ -187,10 +162,7 @@ export function isInBoundaryCell(
 
 	for (let gx = minCellX; gx <= maxCellX; gx++) {
 		for (let gz = minCellZ; gz <= maxCellZ; gz++) {
-			if (
-				gridData.grid.has(`${gx},${gz}`)
-				&& circleIntersectsCell(position.x, position.z, radius, gx, gz, gridData.gridSize)
-			) {
+			if (gridData.grid.has(`${gx},${gz}`) && circleIntersectsCell(position.x, position.z, radius, gx, gz, gridData.gridSize)) {
 				return true
 			}
 		}
@@ -200,11 +172,7 @@ export function isInBoundaryCell(
 }
 
 // Main entry point
-export function buildTreeBoundaryGrid(
-	trees: TreeData[],
-	levelSize: Vector2,
-	gridSize: number = 5,
-): GridData {
+export function buildTreeBoundaryGrid(trees: TreeData[], levelSize: Vector2, gridSize: number = 5): GridData {
 	let gridData = initializeGrid(levelSize.x, levelSize.y, gridSize)
 	gridData = cullEmptyCells(gridData, trees)
 	gridData = removeInteriorCells(gridData)
@@ -213,8 +181,8 @@ export function buildTreeBoundaryGrid(
 
 // Visualization
 export function visualizeGrid(gridData: GridData) {
-	const material = new LineBasicNodeMaterial({ color: 0x00FF00 })
-	const material2 = new LineBasicNodeMaterial({ color: 0xFF0000 })
+	const material = new LineBasicNodeMaterial({ color: 0x00ff00 })
+	const material2 = new LineBasicNodeMaterial({ color: 0xff0000 })
 	const group = new Group()
 
 	gridData.grid.forEach((key) => {

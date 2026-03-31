@@ -1,15 +1,14 @@
 import { css } from 'solid-styled'
 
 export const MainMenuUi = () => {
-	css/* css */`
-	.main-menu-ui-container{
-		position:fixed;
-		top: 3rem;
-		right:3rem;
-		fill:white;
-		font-size: 5rem;
-		
-	}
+	css /* css */ `
+		.main-menu-ui-container {
+			position: fixed;
+			top: 3rem;
+			right: 3rem;
+			fill: white;
+			font-size: 5rem;
+		}
 	`
 	// const mute = () => {
 	// 	settings.mute = !settings.mute

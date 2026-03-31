@@ -8,5 +8,4 @@ interface DebugOptions {
 export const debugOptions: DebugOptions = {
 	attackInFarm: atom(false),
 	godMode: atom(false),
-
 }

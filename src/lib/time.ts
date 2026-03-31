@@ -34,7 +34,7 @@ export class DayTime {
 	}
 
 	tick(delta: number) {
-		this.current += (delta / this.dayLength * (this.dayToNight ? 1 : -1))
+		this.current += (delta / this.dayLength) * (this.dayToNight ? 1 : -1)
 		this.current = clamp(this.current, 0, 1)
 		this.timePassed += delta
 		if (this.current < 0.5) this.dayLight += delta

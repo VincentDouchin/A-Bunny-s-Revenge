@@ -2,13 +2,15 @@ export const entries = <T extends Record<string, any>>(obj: T) => Object.entries
 
 export const objectKeys = <T extends Record<string, any>>(obj: T) => Object.keys(obj) as (keyof T)[]
 
-export const objectValues = <T extends Record<string, any>>(obj: T) => Object.values(obj) as (T[keyof T])[]
+export const objectValues = <T extends Record<string, any>>(obj: T) => Object.values(obj) as T[keyof T][]
 
-export const asyncMapValues = async<T extends Record<string, any>, F extends (arg: T[keyof T], key: keyof T) => any>(obj: T, fn: F) => {
+export const asyncMapValues = async <T extends Record<string, any>, F extends (arg: T[keyof T], key: keyof T) => any>(obj: T, fn: F) => {
 	const res = {} as Record<keyof T, Awaited<ReturnType<F>>>
-	await Promise.all(entries(obj).map(async ([key, val]) => {
-		res[key] = await fn(val, key)
-	}))
+	await Promise.all(
+		entries(obj).map(async ([key, val]) => {
+			res[key] = await fn(val, key)
+		}),
+	)
 	return res
 }
 export const mapValues = <T extends Record<string, any>, F extends (arg: T[keyof T], key: keyof T) => any>(obj: T, fn: F) => {
@@ -23,7 +25,7 @@ export const groupByObject = <T extends Record<string, any>, F extends (key: key
 	const res = {} as Record<string, Record<keyof T, T[keyof T]>>
 	for (const [key, val] of entries(obj)) {
 		const newKey = fn(key)
-		res[newKey] ??= {} as Record<keyof T, T [keyof T]>
+		res[newKey] ??= {} as Record<keyof T, T[keyof T]>
 		res[newKey][key] = val
 	}
 	return res as { [key in ReturnType<F>]: Record<keyof T, T[keyof T]> }
@@ -71,7 +73,7 @@ export const filterKeys = <T>(obj: Record<string, T>, fn: (key: string) => boole
 	const filtered: Record<string, T> = {}
 	const notFiltered: Record<string, T> = {}
 	for (const [key, val] of entries(obj)) {
-		(fn(key) ? filtered : notFiltered)[key] = val
+		;(fn(key) ? filtered : notFiltered)[key] = val
 	}
 	return [filtered, notFiltered]
 }
@@ -79,7 +81,7 @@ export const getRandom = <T>(arr: T[]) => arr[Math.floor(Math.random() * arr.len
 
 export const between = (min: number, max: number) => Math.random() * (max - min) + min
 
-export const enumerate = <T>(arr: T[] | ReadonlyArray<T>): [T, number][] => arr.map((el, i) => ([el, i]))
+export const enumerate = <T>(arr: T[] | ReadonlyArray<T>): [T, number][] => arr.map((el, i) => [el, i])
 
 export function memo<T extends any[], R>(func: (...args: T) => R): (...args: T) => R {
 	const cache = new Map<string, R>()
@@ -99,8 +101,8 @@ export function memo<T extends any[], R>(func: (...args: T) => R): (...args: T) 
 export const shuffle = <T>(array: T[]) => {
 	const arr = [...array]
 	for (let i = arr.length - 1; i > 0; i--) {
-		const rand = Math.floor(Math.random() * (i + 1));
-		[arr[i], arr[rand]] = [arr[rand], arr[i]]
+		const rand = Math.floor(Math.random() * (i + 1))
+		;[arr[i], arr[rand]] = [arr[rand], arr[i]]
 	}
 	return arr
 }
@@ -117,32 +119,14 @@ export const once = (fn: (...args: any[]) => void) => {
 
 type Func<T, R> = (input: T) => R
 export function pipe<A, B>(fn1: (a: A) => B): (a: A) => B
-export function pipe<A, B, C>(
-	fn1: (a: A) => B,
-	fn2: (b: B) => C
-): (a: A) => C
-export function pipe<A, B, C, D>(
-	fn1: (a: A) => B,
-	fn2: (b: B) => C,
-	fn3: (c: C) => D
-): (a: A) => D
-export function pipe<A, B, C, D, E>(
-	fn1: (a: A) => B,
-	fn2: (b: B) => C,
-	fn3: (c: C) => D,
-	fn4: (d: D) => E
-): (a: A) => E
-export function pipe<A, B, C, D, E, F>(
-	fn1: (a: A) => B,
-	fn2: (b: B) => C,
-	fn3: (c: C) => D,
-	fn4: (d: D) => E,
-	fn5: (e: E) => F
-): (a: A) => F
+export function pipe<A, B, C>(fn1: (a: A) => B, fn2: (b: B) => C): (a: A) => C
+export function pipe<A, B, C, D>(fn1: (a: A) => B, fn2: (b: B) => C, fn3: (c: C) => D): (a: A) => D
+export function pipe<A, B, C, D, E>(fn1: (a: A) => B, fn2: (b: B) => C, fn3: (c: C) => D, fn4: (d: D) => E): (a: A) => E
+export function pipe<A, B, C, D, E, F>(fn1: (a: A) => B, fn2: (b: B) => C, fn3: (c: C) => D, fn4: (d: D) => E, fn5: (e: E) => F): (a: A) => F
 export function pipe(...fns: Func<any, any>[]): (input: any) => any {
-	return input => fns.reduce((result, fn) => fn(result), input)
+	return (input) => fns.reduce((result, fn) => fn(result), input)
 }
 
-export const opt = <O extends object>(condition: boolean, obj: O) => condition ? obj : {}
+export const opt = <O extends object>(condition: boolean, obj: O) => (condition ? obj : {})
 
 export const round = (num: number) => Math.round((num + Number.EPSILON) * 100) / 100

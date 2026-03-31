@@ -16,30 +16,34 @@ const seedQuery = useQuery(ecs.with('menuType', 'interactionContainer', 'gardenP
 export const SeedUi = () => {
 	const context = useGame()
 
-	css/* css */`
-	.seeds{
-		display: flex;
-		padding: 1rem 1rem 2rem 1rem;
-		border-radius: 1rem;
-		gap: 1rem;
-		position: relative;
-	}
+	css /* css */ `
+		.seeds {
+			display: flex;
+			padding: 1rem 1rem 2rem 1rem;
+			border-radius: 1rem;
+			gap: 1rem;
+			position: relative;
+		}
 
-	.input-icon{
-		position:absolute;
-		right:-0.5rem;
-		top:100%;
-		margin-top: 1rem;
-		display: flex;
-		align-items: center;
-		color: white;
-		font-size: 1.5rem;
-	}
+		.input-icon {
+			position: absolute;
+			right: -0.5rem;
+			top: 100%;
+			margin-top: 1rem;
+			display: flex;
+			align-items: center;
+			color: white;
+			font-size: 1.5rem;
+		}
 	`
 	return (
 		<Show when={context?.player()}>
 			{(player) => {
-				const seeds = ui.sync(() => player().inventory.filter(item => item && getSeed(item.name)).filter(Boolean))
+				const seeds = ui.sync(() =>
+					player()
+						.inventory.filter((item) => item && getSeed(item.name))
+						.filter(Boolean),
+				)
 				const chooseSeed = (seed: Item, entity: Entity) => {
 					const crop = getSeed(seed.name)
 					if (crop) {
@@ -48,7 +52,6 @@ export const SeedUi = () => {
 					}
 				}
 				return (
-
 					<Menu>
 						{(MenuItem) => {
 							return (
@@ -82,7 +85,10 @@ export const SeedUi = () => {
 																			>
 																				{({ selected }) => (
 																					<div class="seed">
-																						<ItemDisplay item={seed} selected={selected}></ItemDisplay>
+																						<ItemDisplay
+																							item={seed}
+																							selected={selected}
+																						></ItemDisplay>
 																					</div>
 																				)}
 																			</MenuItem>
@@ -100,8 +106,8 @@ export const SeedUi = () => {
 							)
 						}}
 					</Menu>
-
-				) }}
+				)
+			}}
 		</Show>
 	)
 }

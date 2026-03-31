@@ -12,7 +12,22 @@ import { action, condition, createBehaviorTree, enteringState, inState, inverter
 import { applyMove, applyRotate, moveToDirection } from './behaviorHelpers'
 import { attackNode, cooldownNode, damagedByPlayer, deadNode, enemyContext, hitNode, idleNode, runningNode, stunNode, waitingAttackNode, withContext } from './commonBehaviors'
 
-export const baseEnemyQuery = ecs.with('movementForce', 'body', 'speed', 'rotation', 'position', 'group', 'strength', 'collider', 'model', 'currentHealth', 'size', 'hitTimer', 'targetRotation', 'sensor')
+export const baseEnemyQuery = ecs.with(
+	'movementForce',
+	'body',
+	'speed',
+	'rotation',
+	'position',
+	'group',
+	'strength',
+	'collider',
+	'model',
+	'currentHealth',
+	'size',
+	'hitTimer',
+	'targetRotation',
+	'sensor',
+)
 
 // ! Seedling
 export const seedlingBehavior = createBehaviorTree(
@@ -41,7 +56,6 @@ export const seedlingBehavior = createBehaviorTree(
 			'zapsplat_foley_tree_leaves_branch_whoosh_impact_designed_013_47844',
 			'zapsplat_foley_tree_leaves_branch_whoosh_impact_designed_017_47848',
 		])(),
-
 	),
 )
 // ! Range
@@ -74,13 +88,12 @@ export const rangeBehavior = createBehaviorTree(
 			selector(
 				sequence(
 					condition(({ entity }) => entity.range.amount === entity.range.max),
-					action(({ entity }) => entity.range.amount = 0),
+					action(({ entity }) => (entity.range.amount = 0)),
 					setState('cooldown'),
 				),
 				setState('waitingAttack'),
 			),
 		),
-
 	),
 )
 
@@ -88,16 +101,7 @@ export const rangeBehavior = createBehaviorTree(
 export const meleeBehavior = createBehaviorTree(
 	baseEnemyQuery.with('enemyState', 'melee', 'enemyAnimator'),
 	withContext('enemyState', 'enemyAnimator', enemyContext),
-	selector(
-		deadNode(),
-		hitNode(),
-		damagedByPlayer(),
-		waitingAttackNode(300)(),
-		cooldownNode(2000)(),
-		attackNode()(),
-		runningNode(),
-		idleNode(),
-	),
+	selector(deadNode(), hitNode(), damagedByPlayer(), waitingAttackNode(300)(), cooldownNode(2000)(), attackNode()(), runningNode(), idleNode()),
 )
 // ! Spore
 export const sporeBehavior = createBehaviorTree(
@@ -118,11 +122,13 @@ export const sporeBehavior = createBehaviorTree(
 			enteringState('attack'),
 			action(({ animator, entity }) => {
 				animator.playOnce('attacking')
-				ecs.add(inMap({
-					position: entity.position.clone().add(new Vector3(0, 0, 15).applyQuaternion(entity.rotation)),
-					...pollenBundle(0xCFE0ED, 0xCFD1ED),
-					sleepingPowder: true,
-				}))
+				ecs.add(
+					inMap({
+						position: entity.position.clone().add(new Vector3(0, 0, 15).applyQuaternion(entity.rotation)),
+						...pollenBundle(0xcfe0ed, 0xcfd1ed),
+						sleepingPowder: true,
+					}),
+				)
 			}),
 		),
 		sequence(
@@ -180,7 +186,7 @@ export const chargingBehavior = createBehaviorTree(
 			selector(
 				sequence(
 					condition(({ entity }) => entity.charging.amount === entity.charging.max),
-					action(({ entity }) => entity.charging.amount = 0),
+					action(({ entity }) => (entity.charging.amount = 0)),
 					setState('cooldown'),
 				),
 				setState('waitingAttack'),
@@ -195,7 +201,6 @@ export const chargingBehavior = createBehaviorTree(
 		),
 		runningNode(),
 		idleNode(),
-
 	),
 )
 // ! Jumping
@@ -233,15 +238,17 @@ export const jumpingBehavior = createBehaviorTree(
 					playSound('zapsplat_multimedia_game_sound_thump_hit_bubble_deep_underwater_88732')
 					const impact = new Mesh(new PlaneGeometry(2, 2), impactMaterial)
 					impact.rotateX(-Math.PI / 2)
-					const impactEntity = ecs.add(inMap({
-						model: impact,
-						faction: Faction.Enemy,
-						attacking: true,
-						bodyDesc: RigidBodyDesc.fixed(),
-						strength: entity.strength,
-						colliderDesc: ColliderDesc.cylinder(1, 1).setSensor(true),
-						position: entity.position.clone(),
-					}))
+					const impactEntity = ecs.add(
+						inMap({
+							model: impact,
+							faction: Faction.Enemy,
+							attacking: true,
+							bodyDesc: RigidBodyDesc.fixed(),
+							strength: entity.strength,
+							colliderDesc: ColliderDesc.cylinder(1, 1).setSensor(true),
+							position: entity.position.clone(),
+						}),
+					)
 					tweens.add({
 						from: 2,
 						to: 15,
@@ -256,7 +263,6 @@ export const jumpingBehavior = createBehaviorTree(
 					})
 				})
 			}),
-
 		),
 		sequence(
 			inState('attack'),
@@ -268,7 +274,6 @@ export const jumpingBehavior = createBehaviorTree(
 		cooldownNode(2000)(),
 		idleNode(),
 		runningNode(),
-
 	),
 )
 
@@ -313,7 +318,19 @@ export const mushroomBehavior = createBehaviorTree(
 			action(({ ctx, entity }) => {
 				if (ctx.direction && ctx.player) {
 					ctx.direction?.negate()
-					const hit =	world.castShape(entity.position, entity.rotation, ctx.direction, entity.collider.shape, 1, 20, false, undefined, collisionGroups('enemy', ['obstacle']), undefined, undefined)
+					const hit = world.castShape(
+						entity.position,
+						entity.rotation,
+						ctx.direction,
+						entity.collider.shape,
+						1,
+						20,
+						false,
+						undefined,
+						collisionGroups('enemy', ['obstacle']),
+						undefined,
+						undefined,
+					)
 					if (hit) {
 						ctx.direction = ctx.direction.normalize().reflect(new Vector3().copy(hit.normal1).normalize()).normalize()
 					}

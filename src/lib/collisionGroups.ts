@@ -1,6 +1,6 @@
 const getCollisionGroups = <G extends string>(...groups: G[]) => {
 	return (is: G | undefined, touches: G[]) => {
-		let isIndex = (1 << ((is ? groups.indexOf(is) : 0) + 16))
+		let isIndex = 1 << ((is ? groups.indexOf(is) : 0) + 16)
 		for (const touch of touches) {
 			isIndex = isIndex | (1 << groups.indexOf(touch))
 		}

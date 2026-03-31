@@ -37,7 +37,10 @@ watchEffect(() => {
 		material.level.value = levelStore.pathTexture
 	}
 })
-watch(() => levelStore.grassNoise, () => material.grassNoiseTexture = texture(new CanvasTexture(levelStore.grassNoise)))
+watch(
+	() => levelStore.grassNoise,
+	() => (material.grassNoiseTexture = texture(new CanvasTexture(levelStore.grassNoise))),
+)
 const waterMaterial = computed(() => {
 	if (levelStore.levelImages.waterMap) {
 		return new WaterMaterial({}, new Vector2(levelData.value.sizeX, levelData.value.sizeY))
@@ -103,7 +106,7 @@ useEventListener(renderer.domElement, 'click', (e) => {
 				})
 				selectedEntityId.value = id
 			}
-		} else	{
+		} else {
 			ray.setFromCamera(new Vector2(mousePosition.value.x, mousePosition.value.y), camera.value)
 			for (const key in entityRefs.value) {
 				const entity = entityRefs.value[key]
@@ -128,7 +131,10 @@ onBeforeRender(() => {
 </script>
 
 <template>
-	<primitive :object="light" dispose />
+	<primitive
+		:object="light"
+		dispose
+	/>
 	<primitive
 		v-if="tempModel"
 		:object="tempModel"
@@ -139,14 +145,12 @@ onBeforeRender(() => {
 		:object="treeStore.grassModel"
 		dispose
 	/>
-	<TresPerspectiveCamera
-		:position="[0, 50, 25]"
-	/>
+	<TresPerspectiveCamera :position="[0, 50, 25]" />
 	<TransformControls
 		v-if="selectedEntityId && entityRefs[selectedEntityId]"
 		:object="entityRefs[selectedEntityId]"
 		:mode="transformMode"
-		@dragging="e => dragging = e"
+		@dragging="(e) => (dragging = e)"
 		@mouse-up="updateSelectedEntity"
 	/>
 	<template v-if="levelStore.levelData">
@@ -161,9 +165,13 @@ onBeforeRender(() => {
 			:object="treeStore.boundaryGrid.obj"
 			dispose
 		/>
-		<Bounds clip use-mounted :offset="0.2">
+		<Bounds
+			clip
+			use-mounted
+			:offset="0.2"
+		>
 			<TresMesh
-				:ref="(e:any) => groundMesh = e"
+				:ref="(e: any) => (groundMesh = e)"
 				:rotation="[-Math.PI / 2, 0, 0]"
 				:material="material"
 				:position="[0, -levelStore.levelData.displacementScale / 2, 0]"
@@ -171,8 +179,14 @@ onBeforeRender(() => {
 				<!-- @pointermove="e => pointerPos = e.intersection.point"
 				@pointerleave="pointerPos = null"
 				@pointerdown="placeTempModel" -->
-				<primitive v-if="levelStore.groundGeometry" :object="levelStore.groundGeometry" />
-				<TresPlaneGeometry v-else :args="[levelData.sizeX, levelData.sizeY]" />
+				<primitive
+					v-if="levelStore.groundGeometry"
+					:object="levelStore.groundGeometry"
+				/>
+				<TresPlaneGeometry
+					v-else
+					:args="[levelData.sizeX, levelData.sizeY]"
+				/>
 			</TresMesh>
 		</Bounds>
 		<TresMesh
@@ -183,10 +197,16 @@ onBeforeRender(() => {
 		>
 			<TresPlaneGeometry :args="[levelData.sizeX, levelData.sizeY]" />
 		</TresMesh>
-		<template v-for="entity, id in levelStore.levelEntities" :key="id">
+		<template
+			v-for="(entity, id) in levelStore.levelEntities"
+			:key="id"
+		>
 			<EntityRenderer
 				v-if="entity && entity !== true"
-				:id v-model:entity-refs="entityRefs" :entity="entity.value" :hide-tags
+				:id
+				v-model:entity-refs="entityRefs"
+				:entity="entity.value"
+				:hide-tags
 			/>
 		</template>
 	</template>

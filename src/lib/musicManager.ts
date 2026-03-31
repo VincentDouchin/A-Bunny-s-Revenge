@@ -11,7 +11,7 @@ export class MusicManager {
 			const player = assets.music[theme]
 
 			player.volume((localSoundData.music?.[theme]?.volume ?? 1) * settings.musicVolume)
-			player.fade(0, (localSoundData.music?.[theme]?.volume ?? 1), 20)
+			player.fade(0, localSoundData.music?.[theme]?.volume ?? 1, 20)
 			player.play()
 			player.on('end', () => {
 				this.theme = null
@@ -26,7 +26,7 @@ export class MusicManager {
 		const player = assets.ambiance[ambience]
 		player.play()
 		player.volume((localSoundData.ambiance?.[ambience]?.volume ?? 1) * settings.ambianceVolume)
-		player.fade(0, (localSoundData.ambiance?.[ambience]?.volume ?? 1), 10)
+		player.fade(0, localSoundData.ambiance?.[ambience]?.volume ?? 1, 10)
 		player.loop(true)
 		this.ambience = player
 	}

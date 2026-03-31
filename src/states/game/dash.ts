@@ -8,8 +8,8 @@ export const dashMaterial = () => {
 	const angleUniform = uniform(0)
 	const displayUniform = uniform(0)
 
-	const color1 = vec3(...new Color(0x6DEAD6).toArray())
-	const color2 = vec3(...new Color(0x36C5F4).toArray())
+	const color1 = vec3(...new Color(0x6dead6).toArray())
+	const color2 = vec3(...new Color(0x36c5f4).toArray())
 
 	const material = new SpriteNodeMaterial()
 	material.side = DoubleSide
@@ -22,25 +22,14 @@ export const dashMaterial = () => {
 
 	const color = mix(color1, color2, displayUniform.sub(0.2))
 
-	const angled_color = select(
-		centered_uv.x.greaterThanEqual(0),
-		atan(centered_uv.x, centered_uv.y),
-		sub(PI, atan(centered_uv.x, negate(centered_uv.y))),
-	)
+	const angled_color = select(centered_uv.x.greaterThanEqual(0), atan(centered_uv.x, centered_uv.y), sub(PI, atan(centered_uv.x, negate(centered_uv.y))))
 
 	const len = length(centered_uv)
-	const circle = sub(
-		step(len, 1.0),
-		step(len, 0.4),
-	)
+	const circle = sub(step(len, 1.0), step(len, 0.4))
 
 	const progress = mul(angleUniform, 2.0).sub(angled_color.div(PI).div(2))
 
-	const opacity = select(
-		greaterThanEqual(div(displayUniform, 0.5), 1),
-		mul(float(1).sub(displayUniform), circle),
-		circle.mul(progress),
-	)
+	const opacity = select(greaterThanEqual(div(displayUniform, 0.5), 1), mul(float(1).sub(displayUniform), circle), circle.mul(progress))
 
 	material.fragmentNode = vec4(color, opacity)
 

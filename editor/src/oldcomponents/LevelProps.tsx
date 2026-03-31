@@ -1,3 +1,4 @@
+// oxlint-disable unicorn/no-empty-file
 // import type { Atom } from 'solid-use/atom'
 // import type { Vector2, Vector2Like } from 'three/webgpu'
 // import type { AnchorX, AnchorY } from './ResizeModal'

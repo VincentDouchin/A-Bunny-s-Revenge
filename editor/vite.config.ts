@@ -6,11 +6,10 @@ import IconsResolver from 'unplugin-icons/resolver'
 import Icons from 'unplugin-icons/vite'
 import { NaiveUiResolver } from 'unplugin-vue-components/resolvers'
 import Components from 'unplugin-vue-components/vite'
-import { defineConfig } from 'vite'
+import { defineConfig } from 'vite-plus'
 
 export default defineConfig({
 	plugins: [
-
 		Vue({
 			...templateCompilerOptions,
 		}),
@@ -39,7 +38,6 @@ export default defineConfig({
 				}),
 			],
 		}),
-
 	],
 	server: {
 		port: 3000,

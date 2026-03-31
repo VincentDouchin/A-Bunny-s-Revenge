@@ -1,17 +1,12 @@
-import type { Animations } from '@assets/animations'
-import type { AssetNames, Entity, PlayerAnimations, PlayerStates } from '@/global/entity'
-import type { app } from '@/global/states'
-import type { UpdateSystem } from '@/lib/app'
-import { ActiveEvents, Cuboid } from '@dimforge/rapier3d-compat'
-import { CSS2DObject, SkeletonUtils } from 'three/addons'
-import { LinearSRGBColorSpace, Mesh, Quaternion, Vector3 } from 'three/webgpu'
 import { State } from '@/behaviors/state'
 import { getGameRenderGroup } from '@/debug/debugUi'
 import { Animator } from '@/global/animator'
+import type { AssetNames, Entity, PlayerAnimations, PlayerStates } from '@/global/entity'
 import { Faction } from '@/global/entity'
 import { assets, ecs, save, world } from '@/global/init'
-import { menuInputMap, playerInputMap } from '@/global/inputMaps'
 import { ModifierContainer } from '@/global/modifiers'
+import type { app } from '@/global/states'
+import type { UpdateSystem } from '@/lib/app'
 import { capsuleColliderBundle } from '@/lib/colliders'
 import { collisionGroups } from '@/lib/collisionGroups'
 import { inMap } from '@/lib/hierarchy'
@@ -21,6 +16,10 @@ import { Timer } from '@/lib/timer'
 import { windowEvent } from '@/lib/uiManager'
 import { enemyDefeatedParticles } from '@/particles/enemyDefeated'
 import { sleep } from '@/utils/sleep'
+import type { Animations } from '@assets/animations'
+import { ActiveEvents, Cuboid } from '@dimforge/rapier3d-compat'
+import { CSS2DObject, SkeletonUtils } from 'three/addons'
+import { LinearSRGBColorSpace, Mesh, Quaternion, Vector3 } from 'three/webgpu'
 import { healthBundle } from '../dungeon/health'
 import { Dash } from './dash'
 import { inventoryBundle } from './inventory'
@@ -70,21 +69,14 @@ export const playerBundle = async (health: number, weapon: AssetNames['weapons']
 	model.scale.multiplyScalar(4.5)
 	const size = new Vector3(5, 6, 5)
 	const bundle = capsuleColliderBundle(model, size)
-	bundle.bodyDesc
-		.setAdditionalMass(1)
-		.setLinearDamping(20)
-		.setUserData('player')
-	bundle.colliderDesc
-		.setCollisionGroups(collisionGroups('player', ['obstacle', 'enemy', 'floor']))
-		.setActiveEvents(ActiveEvents.COLLISION_EVENTS)
+	bundle.bodyDesc.setAdditionalMass(1).setLinearDamping(20).setUserData('player')
+	bundle.colliderDesc.setCollisionGroups(collisionGroups('player', ['obstacle', 'enemy', 'floor'])).setActiveEvents(ActiveEvents.COLLISION_EVENTS)
 
 	const debuffsContainer = new CSS2DObject(document.createElement('div'))
 	debuffsContainer.position.setY(15)
 
 	const player = inMap({
 		debuffsContainer,
-		...menuInputMap(),
-		...playerInputMap(),
 		...inventoryBundle(Number.POSITIVE_INFINITY, 'player'),
 		...bundle,
 		...characterControllerBundle(),
@@ -101,7 +93,7 @@ export const playerBundle = async (health: number, weapon: AssetNames['weapons']
 		lootChance: new Stat(0),
 		strength: new Stat(1),
 		critChance: new Stat(0.05),
-		critDamage: new Stat(0.20),
+		critDamage: new Stat(0.2),
 		attackSpeed: new Stat(1),
 		npcName: 'Player',
 		lastStep: { right: false, left: false },

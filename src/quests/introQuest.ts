@@ -1,3 +1,4 @@
+// oxlint-disable unicorn/no-empty-file
 // import type { Query, With } from 'miniplex'
 // import type { QuestStep } from '@/constants/quests'
 // import type { Entity } from '@/global/entity'

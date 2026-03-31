@@ -43,15 +43,7 @@ export class WeaponArc extends Mesh {
 	addVertices(bottom: Vector3, top: Vector3) {
 		if (this.lastPoints) {
 			const [lb, lt] = this.lastPoints
-			this.vertices = new Float32Array([
-				...top.toArray(),
-				...bottom.toArray(),
-				...lb,
-				...top.toArray(),
-				...lt,
-				...lb,
-				...this.vertices.slice(0, 128 * 3),
-			])
+			this.vertices = new Float32Array([...top.toArray(), ...bottom.toArray(), ...lb, ...top.toArray(), ...lt, ...lb, ...this.vertices.slice(0, 128 * 3)])
 			this.setVertices()
 		}
 		this.lastPoints = [bottom.toArray(), top.toArray()]
@@ -62,7 +54,14 @@ export class WeaponArc extends Mesh {
 		const uv = range(0, nbVertices, (i) => {
 			const x1 = 1 - (i * 2) / (nbVertices * 2)
 			const x2 = 1 - (i * 2 + 1) / (nbVertices * 2)
-			return [[x1, 1], [x1, 0], [x2, 0], [x1, 1], [x2, 1], [x2, 0]].flat()
+			return [
+				[x1, 1],
+				[x1, 0],
+				[x2, 0],
+				[x1, 1],
+				[x2, 1],
+				[x2, 0],
+			].flat()
 		}).flat()
 		this.geometry.setAttribute('uv', new BufferAttribute(new Float32Array(uv), 2))
 		this.geometry.setAttribute('position', new BufferAttribute(this.vertices, 3))

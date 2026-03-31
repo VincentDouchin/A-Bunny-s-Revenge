@@ -17,10 +17,33 @@ import { applyMove, applyRotate, getMovementForce, getPlayerRotation, getRelativ
 import { withContext } from './commonBehaviors'
 
 const ANIMATION_SPEED = 1.3
-export const playerQuery = ecs.with('playerAnimator', 'movementForce', 'speed', 'body', 'rotation', 'attackSpeed', 'dashIndicator', 'collider', 'currentHealth', 'model', 'hitTimer', 'size', 'sneeze', 'targetRotation', 'poisoned', 'size', 'position', 'targetMovementForce', 'sleepy', 'modifiers', 'playerState', 'playerAttackStyle')
+export const playerQuery = ecs.with(
+	'playerAnimator',
+	'movementForce',
+	'speed',
+	'body',
+	'rotation',
+	'attackSpeed',
+	'dashIndicator',
+	'collider',
+	'currentHealth',
+	'model',
+	'hitTimer',
+	'size',
+	'sneeze',
+	'targetRotation',
+	'poisoned',
+	'size',
+	'position',
+	'targetMovementForce',
+	'sleepy',
+	'modifiers',
+	'playerState',
+	'playerAttackStyle',
+)
 const enemyQuery = ecs.with('faction', 'strength', 'collider', 'position', 'attacking')
-const enemyWithSensor = enemyQuery.with('sensor', 'rotation').where(entity => entity.faction === Faction.Enemy)
-const enemyWithoutSensor = enemyQuery.without('sensor').where(entity => entity.faction === Faction.Enemy)
+const enemyWithSensor = enemyQuery.with('sensor', 'rotation').where((entity) => entity.faction === Faction.Enemy)
+const enemyWithoutSensor = enemyQuery.without('sensor').where((entity) => entity.faction === Faction.Enemy)
 const getAttackingEnemy = (player: QueryEntity<typeof playerQuery>) => {
 	if (player.hitTimer.running()) return null
 	for (const enemy of enemyWithoutSensor) {
@@ -29,7 +52,7 @@ const getAttackingEnemy = (player: QueryEntity<typeof playerQuery>) => {
 		}
 	}
 	for (const enemy of enemyWithSensor) {
-		const intersections = getIntersections(enemy, undefined, c => c.handle === player.collider.handle)
+		const intersections = getIntersections(enemy, undefined, (c) => c.handle === player.collider.handle)
 		if (intersections) {
 			return enemy
 		}
@@ -94,7 +117,8 @@ export const playerBehavior = createBehaviorTree(
 					if (ctx.touchedByEnemy.projectile) {
 						ecs.remove(ctx.touchedByEnemy)
 					}
-					takeDamage(entity, ctx.touchedByEnemy.strength.value) }
+					takeDamage(entity, ctx.touchedByEnemy.strength.value)
+				}
 				flash(entity, 200, 'damage')
 				entity.playerAnimator.playOnce('hit', { timeScale: 1.3 }, 0.2)
 				entity.hitTimer.reset()
@@ -134,12 +158,14 @@ export const playerBehavior = createBehaviorTree(
 				entity.playerAnimator.playOnce('hit')
 				entity.poisoned.enabled = false
 				flash(entity, 500, 'poisoned')
-				ecs.add(inMap({
-					parent: entity,
-					position: new Vector3(0, 10, 0),
-					emitter: poisonBubbles(false),
-					autoDestroy: true,
-				}))
+				ecs.add(
+					inMap({
+						parent: entity,
+						position: new Vector3(0, 10, 0),
+						emitter: poisonBubbles(false),
+						autoDestroy: true,
+					}),
+				)
 				takeDamage(entity, 1)
 				addCameraShake()
 				spawnDamageNumber(1, entity, false)
@@ -166,7 +192,7 @@ export const playerBehavior = createBehaviorTree(
 			inState('attack0'),
 			parallel(
 				condition(() => gameInputs.get('primary').justPressed),
-				action(({ entity }) => entity.playerAttackStyle.lastAttack = 1),
+				action(({ entity }) => (entity.playerAttackStyle.lastAttack = 1)),
 			),
 			waitFor(({ entity }) => !entity.playerAnimator.isPlaying(attacks[0])),
 			selector(
@@ -187,13 +213,13 @@ export const playerBehavior = createBehaviorTree(
 			inState('attack1'),
 			parallel(
 				condition(() => gameInputs.get('primary').justPressed),
-				action(({ entity }) => entity.playerAttackStyle.lastAttack = 2),
+				action(({ entity }) => (entity.playerAttackStyle.lastAttack = 2)),
 			),
 			waitFor(({ entity }) => !entity.playerAnimator.isPlaying(attacks[1])),
 			selector(
 				sequence(
 					condition(({ entity }) => entity.playerAttackStyle.lastAttack === 1),
-					action(({ entity }) => entity.playerAttackStyle.lastAttack = 0),
+					action(({ entity }) => (entity.playerAttackStyle.lastAttack = 0)),
 					setState('idle'),
 				),
 				setState('attack2'),
@@ -208,7 +234,7 @@ export const playerBehavior = createBehaviorTree(
 		sequence(
 			inState('attack2'),
 			waitFor(({ entity }) => !entity.playerAnimator.isPlaying(attacks[2])),
-			action(({ entity }) => entity.playerAttackStyle.lastAttack = 0),
+			action(({ entity }) => (entity.playerAttackStyle.lastAttack = 0)),
 			setState('idle'),
 		),
 		// ! Dash
@@ -277,6 +303,5 @@ export const playerBehavior = createBehaviorTree(
 				setState('idle'),
 			),
 		),
-
 	),
 )

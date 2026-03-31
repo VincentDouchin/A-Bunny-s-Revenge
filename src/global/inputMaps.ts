@@ -3,7 +3,7 @@ import { GAMEPAD_AXIS, GAMEPAD_BUTTON, MOUSE_BUTTONS, MOUSE_WHEEL } from '@/lib/
 import { inputManager } from './init'
 
 const playerInputs = ['left', 'right', 'forward', 'backward', 'inventory', 'primary', 'secondary', 'pause', 'lookRight', 'lookLeft', 'lookForward', 'lookBackward', 'lock'] as const
-export type PlayerInputMap = InputMap<typeof playerInputs[number]>
+export type PlayerInputMap = InputMap<(typeof playerInputs)[number]>
 export const playerInputMap = () => {
 	const map = inputManager.createMap(playerInputs, true).setGamepads(0)
 	map.get('right').setKeys('KeyD').setAxes(GAMEPAD_AXIS.LEFT_X, 1)
@@ -23,7 +23,7 @@ export const playerInputMap = () => {
 }
 
 const menuInputs = ['up', 'down', 'left', 'right', 'validate', 'cancel', 'tab', 'tabLeft', 'tabRight', 'click'] as const
-export type MenuInputMap = InputMap<typeof menuInputs[number]>
+export type MenuInputMap = InputMap<(typeof menuInputs)[number]>
 export const menuInputMap = () => {
 	const map = inputManager.createMap(menuInputs, true).setGamepads(0)
 	map.get('up').setKeys('KeyW').setButtons(GAMEPAD_BUTTON.UP)

@@ -28,14 +28,14 @@ export const useLevelStore = defineStore('level', () => {
 	const levelData = ref<Omit<LevelData, 'entities'> | null>(null)
 	const key = computed(() => `level-${selectedLevel.value}`)
 	const init = async () => {
-		levels.value = (await loadLevels()).map(l => l.name)
+		levels.value = (await loadLevels()).map((l) => l.name)
 	}
 
 	const imagesStore = (level: string) => createStore(`${level}-images`, 'images')
 	const entityStore = (level: string) => createStore(`${level}-entities`, 'entities')
 	const instancesStore = (level: string) => createStore(`${level}-instances`, 'instances')
 	const initDb = async (level: string) => {
-		if (!await get(`data-${level}`)) {
+		if (!(await get(`data-${level}`))) {
 			const levelLoaded = await loadLevel(level)
 			if (levelLoaded.entities) {
 				await setMany(Object.entries(levelLoaded.entities), entityStore(level))
@@ -57,21 +57,29 @@ export const useLevelStore = defineStore('level', () => {
 			await set(`data-${level}`, levelLoaded)
 		}
 	}
-	watchDebounced(levelData, () => {
-		if (selectedLevel.value) {
-			set(`data-${selectedLevel.value}`, toRaw(levelData.value))
-		}
-	}, { deep: true, debounce: 1000 })
+	watchDebounced(
+		levelData,
+		() => {
+			if (selectedLevel.value) {
+				set(`data-${selectedLevel.value}`, toRaw(levelData.value))
+			}
+		},
+		{ deep: true, debounce: 1000 },
+	)
 	const saveImage = async (canvas: HTMLCanvasElement, map: MapNames) => {
-		const blob = await new Promise<Blob | null>(res => canvas.toBlob(res, 'image/png'))
+		const blob = await new Promise<Blob | null>((res) => canvas.toBlob(res, 'image/png'))
 		set(map, blob, imagesStore(selectedLevel.value!))
 	}
-	watchDebounced(levelImages, async () => {
-		for (const map in levelImages.value) {
-			const mapName = map as MapNames
-			await saveImage(levelImages.value[mapName]!, mapName)
-		}
-	}, { debounce: 1000 })
+	watchDebounced(
+		levelImages,
+		async () => {
+			for (const map in levelImages.value) {
+				const mapName = map as MapNames
+				await saveImage(levelImages.value[mapName]!, mapName)
+			}
+		},
+		{ debounce: 1000 },
+	)
 
 	const saveImageDebounced = useDebounceFn(saveImage, 1000)
 
@@ -101,11 +109,10 @@ export const useLevelStore = defineStore('level', () => {
 	}
 
 	const getEntities = async (level: string) => {
-		return (await entries<string, LevelEntity>(entityStore(level)))
-			.reduce<Record<string, LevelEntity>>((acc, [key, val]) => {
-				acc[key] = val
-				return acc
-			}, {})
+		return (await entries<string, LevelEntity>(entityStore(level))).reduce<Record<string, LevelEntity>>((acc, [key, val]) => {
+			acc[key] = val
+			return acc
+		}, {})
 	}
 	const getLevelData = (level: string) => get(`data-${level}`)
 
@@ -140,11 +147,15 @@ export const useLevelStore = defineStore('level', () => {
 		delete levelImages.value[map]
 	}
 
-	watchDebounced(levelData, (val) => {
-		if (val) {
-			set(key.value, toRaw(val))
-		}
-	}, { debounce: 1000, deep: true })
+	watchDebounced(
+		levelData,
+		(val) => {
+			if (val) {
+				set(key.value, toRaw(val))
+			}
+		},
+		{ debounce: 1000, deep: true },
+	)
 	const wacthHandles: Record<string, WatchHandle> = {}
 	// Watch for entities being added/removed
 	watchArray(
@@ -181,15 +192,16 @@ export const useLevelStore = defineStore('level', () => {
 	const grassNoise = computed(() => {
 		if (levelData.value?.floorTexture !== 'grass' || !selectedLevel.value) return
 		renderer.setSize(levelData.value.sizeX * 10, levelData.value.sizeY * 10)
-		const quad = new FullScreenQuad(new ShaderMaterial({
-			vertexShader: /* glsl */`
+		const quad = new FullScreenQuad(
+			new ShaderMaterial({
+				vertexShader: /* glsl */ `
 			varying vec2 vUv;
 			void main() {
 				vUv = uv;
 				vec4 modelViewPosition = modelViewMatrix * vec4(position, 1.0);
 				gl_Position = projectionMatrix * modelViewPosition;
 			}`,
-			fragmentShader: /* glsl */`
+				fragmentShader: /* glsl */ `
 			${FastNoiseLiteSrc}
 			varying vec2 vUv;
 			void main() {
@@ -209,7 +221,8 @@ export const useLevelStore = defineStore('level', () => {
 				gl_FragColor = vec4(vec3(n),1.);
 			}
 			`,
-		}))
+			}),
+		)
 		quad.render(renderer)
 		return renderer.domElement
 	})
@@ -229,7 +242,7 @@ export const useLevelStore = defineStore('level', () => {
 
 	watchEffect(setGroundGeometry)
 
-	const pathTexture = computed(() => levelImages.value.pathMap ? new CanvasTexture(levelImages.value.pathMap) : undefined)
+	const pathTexture = computed(() => (levelImages.value.pathMap ? new CanvasTexture(levelImages.value.pathMap) : undefined))
 	const destroyEntity = (id: string) => {
 		if (selectedEntityId.value === id) {
 			selectedEntityId.value = null
@@ -265,5 +278,24 @@ export const useLevelStore = defineStore('level', () => {
 		await saveLevelFile(selectedLevel.value, levelData, localDir)
 	}
 
-	return { selectedEntityId, levels, init, selectedLevel, levelData, levelImages, grassNoise, rollback, groundGeometry, setGroundGeometry, levelEntities, pathTexture, destroyEntity, saveImage, saveImageDebounced, resetMap, destroyMap, save }
+	return {
+		selectedEntityId,
+		levels,
+		init,
+		selectedLevel,
+		levelData,
+		levelImages,
+		grassNoise,
+		rollback,
+		groundGeometry,
+		setGroundGeometry,
+		levelEntities,
+		pathTexture,
+		destroyEntity,
+		saveImage,
+		saveImageDebounced,
+		resetMap,
+		destroyMap,
+		save,
+	}
 })

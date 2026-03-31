@@ -25,7 +25,7 @@ export class UIManager {
 	}
 
 	setFontSize(uiScale: number) {
-		document.documentElement.style.setProperty('font-size', `${uiScale / 10 * 2}vh`)
+		document.documentElement.style.setProperty('font-size', `${(uiScale / 10) * 2}vh`)
 	}
 
 	setUiOpacity(uiOpacity: number) {

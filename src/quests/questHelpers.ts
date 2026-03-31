@@ -21,27 +21,32 @@ const setActor = (e: QueryEntity<typeof actorsQuery>, actors: Partial<Record<Act
 		}
 	}
 }
-export const addActors = (actors: Partial<Record<Actor, (e: QueryEntity<typeof actorsQuery>) => Entity | void>>) => (state: AppStates<typeof app>): Plugin<typeof app> => (app) => {
-	app.addSubscribers(state, () => actorsQuery.onEntityAdded.subscribe((e) => {
-		setActor(e, actors)
-	}))
-	app.onEnter(state, () => {
-		for (const e of actorsQuery) {
-			setActor(e, actors)
-		}
-	})
-}
+export const addActors =
+	(actors: Partial<Record<Actor, (e: QueryEntity<typeof actorsQuery>) => Entity | void>>) =>
+	(state: AppStates<typeof app>): Plugin<typeof app> =>
+	(app) => {
+		app.addSubscribers(state, () =>
+			actorsQuery.onEntityAdded.subscribe((e) => {
+				setActor(e, actors)
+			}),
+		)
+		app.onEnter(state, () => {
+			for (const e of actorsQuery) {
+				setActor(e, actors)
+			}
+		})
+	}
 
 const questMarkerQuery = ecs.with('questMarker')
 
-export const showMarker = ({ quest, step }: { quest: Quest2<any, any, any>, step: string }) => {
+export const showMarker = ({ quest, step }: { quest: Quest2<any, any, any>; step: string }) => {
 	return quest.showMarker(step)
 }
 
 export const displayQuestMarker = (e: QueryEntity<typeof questMarkerQuery>) => {
 	if (e.questMarker.some(showMarker)) {
 		const questMarkerContainer = new Group()
-		const mat = new MeshBasicMaterial({ color: 0xFFFF33, depthWrite: false })
+		const mat = new MeshBasicMaterial({ color: 0xffff33, depthWrite: false })
 		const dot = new Mesh(new SphereGeometry(0.5), mat)
 		const line = new Mesh(new CylinderGeometry(0.5, 0.5, 4), mat)
 		line.position.setY(3)
@@ -87,20 +92,22 @@ export const displayQuestMarker = (e: QueryEntity<typeof questMarkerQuery>) => {
 }
 export const addQuestMarkers = () => questMarkerQuery.onEntityAdded.subscribe(displayQuestMarker)
 
-export const completeQuestStep = () => questManager.completeStepEvent.subscribe((questStep) => {
-	toastEvent.emit({ type: 'questStep', description: questStep.description })
-	for (const entity of questMarkerQuery) {
-		displayQuestMarker(entity)
-	}
-})
+export const completeQuestStep = () =>
+	questManager.completeStepEvent.subscribe((questStep) => {
+		toastEvent.emit({ type: 'questStep', description: questStep.description })
+		for (const entity of questMarkerQuery) {
+			displayQuestMarker(entity)
+		}
+	})
 
-export const displayUnlockQuestToast = () => questManager.unlockedQuestEvent.subscribe((quest) => {
-	toastEvent.emit({ type: 'quest', quest: quest.name })
+export const displayUnlockQuestToast = () =>
+	questManager.unlockedQuestEvent.subscribe((quest) => {
+		toastEvent.emit({ type: 'quest', quest: quest.name })
 
-	for (const entity of questMarkerQuery) {
-		displayQuestMarker(entity)
-	}
-})
+		for (const entity of questMarkerQuery) {
+			displayQuestMarker(entity)
+		}
+	})
 
 // const mapQuery = ecs.with('map')
 // export const isInMap = (map: string) => {

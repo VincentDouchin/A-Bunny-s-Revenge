@@ -9,7 +9,6 @@ export type AnchorY = 'top' | 'bottom' | 'center'
 
 const props = defineProps<{
 	size: Vector2Like
-
 }>()
 
 // const emit = defineEmits<{
@@ -33,7 +32,11 @@ watch(
 	},
 )
 
-interface GridCell { x: AnchorX, y: AnchorY, rotation?: string }
+interface GridCell {
+	x: AnchorX
+	y: AnchorY
+	rotation?: string
+}
 
 const gridCells: GridCell[] = [
 	{ x: 'left', y: 'top', rotation: 'rotate(45deg)' },
@@ -58,16 +61,22 @@ function setAnchor(x: AnchorX, y: AnchorY) {
 
 const getOffsetX = (anchorX: AnchorX, newWidth: number, oldWidth: number) => {
 	switch (anchorX) {
-		case 'left': return 0
-		case 'center': return Math.floor((newWidth - oldWidth) / 2)
-		case 'right': return newWidth - oldWidth
+		case 'left':
+			return 0
+		case 'center':
+			return Math.floor((newWidth - oldWidth) / 2)
+		case 'right':
+			return newWidth - oldWidth
 	}
 }
 const getOffsetY = (anchorX: AnchorY, newHeight: number, oldHeight: number) => {
 	switch (anchorX) {
-		case 'top': return 0
-		case 'center': return Math.floor((newHeight - oldHeight) / 2)
-		case 'bottom': return newHeight - oldHeight
+		case 'top':
+			return 0
+		case 'center':
+			return Math.floor((newHeight - oldHeight) / 2)
+		case 'bottom':
+			return newHeight - oldHeight
 	}
 }
 const resize = (anchorX: AnchorX, anchorY: AnchorY, mode: 'extend' | 'resize', size: Vector2Like) => {
@@ -112,15 +121,14 @@ const resize = (anchorX: AnchorX, anchorY: AnchorY, mode: 'extend' | 'resize', s
 		const entity = levelStore.levelEntities[key]
 		const [x, y, z] = entity.value.position
 		if (mode === 'extend') {
-			const newX = (x + ocx + ox) - ncx
-			const newZ = (z + ocy + oy) - ncy
+			const newX = x + ocx + ox - ncx
+			const newZ = z + ocy + oy - ncy
 			entity.value.position = [newX, y, newZ]
-		}
-		else {
+		} else {
 			const sx = nw / ow
 			const sy = nh / oh
-			const newX = ((x + ocx) * sx) - ncx
-			const newZ = ((z + ocy) * sy) - ncy
+			const newX = (x + ocx) * sx - ncx
+			const newZ = (z + ocy) * sy - ncy
 			entity.value.position = [newX, y, newZ]
 		}
 	}
@@ -131,16 +139,25 @@ function applyResize() {
 </script>
 
 <template>
-	<NButton style="width: 100%" @click="open = true">
+	<NButton
+		style="width: 100%"
+		@click="open = true"
+	>
 		<template #icon>
 			<fa-arrows-up-down-left-right />
 		</template>
 		Resize
 	</NButton>
 
-	<NModal v-model:show="open" preset="card" title="Resize" closable style="width:fit-content">
+	<NModal
+		v-model:show="open"
+		preset="card"
+		title="Resize"
+		closable
+		style="width: fit-content"
+	>
 		<NSpace vertical>
-			<div style="margin:0 auto;width: fit-content;">
+			<div style="margin: 0 auto; width: fit-content">
 				<NInputGroup class="resize-grid">
 					<NButton
 						v-for="cell in gridCells"
@@ -174,10 +191,21 @@ function applyResize() {
 				</NInputGroupLabel>
 				<NInputNumber v-model:value="sizeY" />
 			</NInputGroup>
-			<NTabs v-model:value="mode" type="segment">
-				<NTab v-for="name in ['extend', 'resize']" :key="name" :name />
+			<NTabs
+				v-model:value="mode"
+				type="segment"
+			>
+				<NTab
+					v-for="name in ['extend', 'resize']"
+					:key="name"
+					:name
+				/>
 			</NTabs>
-			<NButton type="primary" style="width: 100%;" @click="applyResize">
+			<NButton
+				type="primary"
+				style="width: 100%"
+				@click="applyResize"
+			>
 				Apply
 			</NButton>
 		</NSpace>

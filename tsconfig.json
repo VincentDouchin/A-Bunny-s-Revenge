@@ -1,17 +1,8 @@
 {
 	"extends": "./tsconfig.base.json",
 	"compilerOptions": {
-
-		"types": [
-			"vite-plugin-solid-svg/types-component-solid",
-			"vite/client",
-			"vite-plugin-pwa/client",
-			"new-javascript",
-			"@total-typescript/ts-reset",
-			"./src/types/three.meshline.d.ts"
-
-		],
+		"types": ["vite-plugin-solid-svg/types-component-solid", "vite-plugin-pwa/client", "new-javascript", "vite-plus/client", "@total-typescript/ts-reset"],
 		"plugins": [{ "name": "typescript-plugin-toml" }]
 	},
-	"include": ["src", "assets", "vite"]
+	"include": ["src", "assets", "vite", "scripts", "vite.config.ts"]
 }

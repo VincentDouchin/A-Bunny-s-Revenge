@@ -1,10 +1,9 @@
-import { Group, Mesh, PerspectiveCamera, PlaneGeometry, Scene, Vector3 } from 'three/webgpu'
 import { updateCameraZoom } from '@/global/camera'
 import { params } from '@/global/context'
 import { RenderGroup } from '@/global/entity'
 import { coroutines, ecs } from '@/global/init'
-import { menuInputMap } from '@/global/inputMaps'
 import { renderer } from '@/global/rendering'
+import { Group, Mesh, PerspectiveCamera, PlaneGeometry, Scene, Vector3 } from 'three/webgpu'
 // import { mainMenuBackgound } from '@/shaders/mainMenuBackground'
 import { MainMenuBook } from './book'
 
@@ -53,7 +52,6 @@ export const intiMainMenuRendering = () => {
 	ecs.add({
 		menuBook,
 		stateEntity: 'mainMenu',
-		...menuInputMap(),
 		// withTimeUniform: menuBook.withTimeUniforms,
 	})
 }

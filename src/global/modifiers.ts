@@ -25,9 +25,7 @@ export const modifiers: Record<Modifiers, ModifierDef> = {
 	godMode: {
 		duration: null,
 		stackable: false,
-		mods: [
-			{ stat: 'strength', type: ModType.Add, stage: ModStage.Add, value: 1000 },
-		],
+		mods: [{ stat: 'strength', type: ModType.Add, stage: ModStage.Add, value: 1000 }],
 	},
 	sleepingPowder: {
 		duration: 5000,
@@ -40,37 +38,27 @@ export const modifiers: Record<Modifiers, ModifierDef> = {
 	honeySpot: {
 		duration: 5000,
 		stackable: false,
-		mods: [
-			{ stat: 'speed', type: ModType.Percent, stage: ModStage.Total, value: -80 },
-		],
+		mods: [{ stat: 'speed', type: ModType.Percent, stage: ModStage.Total, value: -80 }],
 	},
 	cookie: {
 		duration: null,
 		stackable: true,
-		mods: [
-			{ stat: 'maxHealth', value: 1, stage: ModStage.Total, type: ModType.Add },
-		],
+		mods: [{ stat: 'maxHealth', value: 1, stage: ModStage.Total, type: ModType.Add }],
 	},
 	roasted_carrot: {
 		duration: null,
 		stackable: true,
-		mods: [
-			{ stat: 'strength', stage: ModStage.Base, type: ModType.Add, value: 0.2 },
-		],
+		mods: [{ stat: 'strength', stage: ModStage.Base, type: ModType.Add, value: 0.2 }],
 	},
 	carrot_soup: {
 		duration: null,
 		stackable: true,
-		mods: [
-			{ stat: 'lootChance', stage: ModStage.Base, type: ModType.Percent, value: 50 },
-		],
+		mods: [{ stat: 'lootChance', stage: ModStage.Base, type: ModType.Percent, value: 50 }],
 	},
 	tomato_soup: {
 		duration: null,
 		stackable: true,
-		mods: [
-			{ stat: 'lootQuantity', stage: ModStage.Base, type: ModType.Add, value: 1 },
-		],
+		mods: [{ stat: 'lootQuantity', stage: ModStage.Base, type: ModType.Add, value: 1 }],
 	},
 	honey_glazed_carrot: {
 		duration: null,
@@ -91,16 +79,12 @@ export const modifiers: Record<Modifiers, ModifierDef> = {
 	ham_honey: {
 		duration: null,
 		stackable: true,
-		mods: [
-			{ stat: 'maxHealth', stage: ModStage.Base, type: ModType.Add, value: 3 },
-		],
+		mods: [{ stat: 'maxHealth', stage: ModStage.Base, type: ModType.Add, value: 3 }],
 	},
 	slime_bread: {
 		duration: null,
 		stackable: true,
-		mods: [
-			{ stat: 'maxHealth', stage: ModStage.Base, type: ModType.Add, value: 1 },
-		],
+		mods: [{ stat: 'maxHealth', stage: ModStage.Base, type: ModType.Add, value: 1 }],
 	},
 	slime_dumpling: {
 		duration: null,
@@ -151,13 +135,12 @@ export const modifiers: Record<Modifiers, ModifierDef> = {
 			{ stat: 'lootChance', stage: ModStage.Base, type: ModType.Percent, value: 0.5 },
 		],
 	},
-
 }
 
 export class ModifierContainer {
 	toAdd = new Set<Modifiers>()
 	added = new Set<Modifiers>()
-	modifiers = new Set<{ name: Modifiers, duration: Timer<false> | null }>()
+	modifiers = new Set<{ name: Modifiers; duration: Timer<false> | null }>()
 	removed = new Set<Modifiers>()
 	hasModifier(key: Modifiers) {
 		for (const mod of this.modifiers) {
@@ -186,7 +169,7 @@ export class ModifierContainer {
 	}
 
 	getMods(stat: ComponentsOfType<Stat>) {
-		return Array.from(this.modifiers).flatMap(({ name }) => modifiers[name].mods.filter(mod => mod.stat === stat))
+		return Array.from(this.modifiers).flatMap(({ name }) => modifiers[name].mods.filter((mod) => mod.stat === stat))
 	}
 
 	tick(delta: number) {
@@ -206,16 +189,18 @@ export class ModifierContainer {
 }
 
 const modifiersQuery = ecs.with('modifiers')
-export const tickModifiersPlugin = (...stats: ComponentsOfType<Stat>[]): Plugin<typeof app> => (app) => {
-	app.onPreUpdate('game', () => {
-		for (const entity of modifiersQuery) {
-			entity.modifiers.tick(time.delta)
-			for (const stat of stats) {
-				const statComponent = entity[stat]
-				if (statComponent) {
-					statComponent.modifiers = entity.modifiers.getMods(stat)
+export const tickModifiersPlugin =
+	(...stats: ComponentsOfType<Stat>[]): Plugin<typeof app> =>
+	(app) => {
+		app.onPreUpdate('game', () => {
+			for (const entity of modifiersQuery) {
+				entity.modifiers.tick(time.delta)
+				for (const stat of stats) {
+					const statComponent = entity[stat]
+					if (statComponent) {
+						statComponent.modifiers = entity.modifiers.getMods(stat)
+					}
 				}
 			}
-		}
-	})
-}
+		})
+	}

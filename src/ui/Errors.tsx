@@ -5,18 +5,18 @@ import { errorEvent } from '@/global/events'
 
 export const Errors = () => {
 	const errors = createSet<string>([])
-	errorEvent.subscribe(error => errors.add(error))
-	css/* css */`
-	.errors{
-		position:fixed;
-		inset:0;
-		display: flex;
-		place-items: center;
-		font-size: 3em;
-		color: red;
-		flex-direction: column;
-		margin: auto;
-	}
+	errorEvent.subscribe((error) => errors.add(error))
+	css /* css */ `
+		.errors {
+			position: fixed;
+			inset: 0;
+			display: flex;
+			place-items: center;
+			font-size: 3em;
+			color: red;
+			flex-direction: column;
+			margin: auto;
+		}
 	`
 	return (
 		<Show when={errors.size > 0}>

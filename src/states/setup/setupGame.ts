@@ -21,7 +21,7 @@ export const setupGame = async () => {
 		app.enable('testDialog')
 		updateRenderSize()
 		updateCameraZoom()
-	} else	if (params.debugBoss) {
+	} else if (params.debugBoss) {
 		// const bossRoom = assignPlanAndEnemies([{ position: { x: 0, y: 0 }, connections: { north: 1, south: null }, type: RoomType.Boss }], 0)
 		// bossRoom[0].enemies = [bosses[selectedBoss.boss](0)]
 		// app.enable('dungeon', { dungeon: bossRoom[0], direction: Direction.S, firstEntry: true, playerHealth: 10, dungeonLevel: 0, weapon: 'Hoe' })
@@ -106,19 +106,24 @@ export const disablePortrait = () => {
 
 	return () => mediaMatch.removeEventListener('change', listener)
 }
-export const enableFullscreen = () => windowEvent('pointerup', () => {
-	if (settings.fullscreen) {
-		document.documentElement.requestFullscreen()
-	}
-})
+export const enableFullscreen = () =>
+	windowEvent('pointerup', () => {
+		if (settings.fullscreen) {
+			document.documentElement.requestFullscreen()
+		}
+	})
 
-export const resize = () => windowEvent('resize', throttle(() => {
-	if (app.isEnabled('mainMenu')) {
-		updateCameraZoom()
-		updateRenderSize(new Vector2(window.innerWidth, window.innerHeight))
-		setMainCameraPosition()
-	} else {
-		updateRenderSize()
-		updateCameraZoom()
-	}
-}, 100))
+export const resize = () =>
+	windowEvent(
+		'resize',
+		throttle(() => {
+			if (app.isEnabled('mainMenu')) {
+				updateCameraZoom()
+				updateRenderSize(new Vector2(window.innerWidth, window.innerHeight))
+				setMainCameraPosition()
+			} else {
+				updateRenderSize()
+				updateCameraZoom()
+			}
+		}, 100),
+	)

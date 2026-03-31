@@ -92,43 +92,31 @@ export const waterlayer = Fn<[Node<'vec2'>], Node<'float'>>(([uv_immutable]) => 
 	return max(ret, 0.0)
 })
 
-const water = Fn<[uv: Node<'vec2'>, cdir: Node<'vec3'>, time: Node<'float'>, waterColor: Node<'vec3'>, waterColor2: Node<'vec3'>, foamColor: Node<'vec3'>], Node<'vec3'>>(([uv_immutable, cdir, time, water_color, water_color2, foam_color]) => {
-	const uv0 = uv_immutable.mul(vec2(0.25))
-	const a = mul(0.025, cdir.xz).div(cdir.y)
+const water = Fn<[uv: Node<'vec2'>, cdir: Node<'vec3'>, time: Node<'float'>, waterColor: Node<'vec3'>, waterColor2: Node<'vec3'>, foamColor: Node<'vec3'>], Node<'vec3'>>(
+	([uv_immutable, cdir, time, water_color, water_color2, foam_color]) => {
+		const uv0 = uv_immutable.mul(vec2(0.25))
+		const a = mul(0.025, cdir.xz).div(cdir.y)
 
-	// Two-pass parallax: each pass shifts uv by a * sin(wave)
-	const uv1 = uv0.add(a.mul(sin(uv0.x.add(time))))
-	const uv2 = uv1.add(a.mul(sin(mul(0.841471, uv1.x).sub(mul(0.540302, uv1.y)).add(time))))
+		// Two-pass parallax: each pass shifts uv by a * sin(wave)
+		const uv1 = uv0.add(a.mul(sin(uv0.x.add(time))))
+		const uv2 = uv1.add(a.mul(sin(mul(0.841471, uv1.x).sub(mul(0.540302, uv1.y)).add(time))))
 
-	// Texture distortion
-	const d1 = time.mul(0.07).add(mod(uv2.x.add(uv2.y), 6.283185307))
-	const d2 = time.mul(0.5).add(mod(uv2.x.add(uv2.y).add(0.25).mul(1.3), 18.84955592))
-	const dist = vec2(
-		sin(d1).mul(0.15).add(sin(d2).mul(0.05)),
-		cos(d1).mul(0.15).add(cos(d2).mul(0.05)),
-	)
+		// Texture distortion
+		const d1 = time.mul(0.07).add(mod(uv2.x.add(uv2.y), 6.283185307))
+		const d2 = time.mul(0.5).add(mod(uv2.x.add(uv2.y).add(0.25).mul(1.3), 18.84955592))
+		const dist = vec2(sin(d1).mul(0.15).add(sin(d2).mul(0.05)), cos(d1).mul(0.15).add(cos(d2).mul(0.05)))
 
-	return mix(
-		mix(water_color, water_color2, waterlayer(uv2.add(dist.xy))),
-		foam_color,
-		waterlayer(vec2(1.0).sub(uv2).sub(dist.yx)),
-	)
-})
+		return mix(mix(water_color, water_color2, waterlayer(uv2.add(dist.xy))), foam_color, waterlayer(vec2(1.0).sub(uv2).sub(dist.yx)))
+	},
+)
 export class WaterMaterial extends ToonMaterial {
 	time = uniform(0)
 	size: UniformNode<'vec2', Vector2>
-	waterColor = color(0x36C5F4)
-	foam_color = color(0xCFF5F6)
+	waterColor = color(0x36c5f4)
+	foam_color = color(0xcff5f6)
 	constructor(params: MeshStandardNodeMaterialParameters, size: Vector2) {
 		super(params)
 		this.size = uniform(size)
-		this.colorNode = water(
-			uv().mul(this.size).div(8),
-			vec3(0, 1, 0),
-			this.time,
-			this.waterColor.sub(0.2),
-			this.waterColor,
-			this.foam_color,
-		)
+		this.colorNode = water(uv().mul(this.size).div(8), vec3(0, 1, 0), this.time, this.waterColor.sub(0.2), this.waterColor, this.foam_color)
 	}
 }

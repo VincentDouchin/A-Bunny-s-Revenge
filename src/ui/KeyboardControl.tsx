@@ -17,28 +17,28 @@ export const KeyboardControls = () => {
 			{(player) => {
 				const interactables = getInteractables(player())
 				const context = useGame()
-				css/* css */`
-				.controls-container{
-					position: fixed;
-					bottom:0;
-					left: 0;
-					margin: 1rem;
-					border-radius: 1rem;
-					overflow: hidden;
-					padding: 1rem;
-					gap:1rem;
-					background:var(--black-transparent);
-				}
-				.keyboard-controls{
-					font-size:1.5rem;
-					display:flex;
-					gap:0.5rem;
-					color: white;	
-				}
-				.controls-icons{
-					display: flex;
-					gap:0.2rem;
-				}
+				css /* css */ `
+					.controls-container {
+						position: fixed;
+						bottom: 0;
+						left: 0;
+						margin: 1rem;
+						border-radius: 1rem;
+						overflow: hidden;
+						padding: 1rem;
+						gap: 1rem;
+						background: var(--black-transparent);
+					}
+					.keyboard-controls {
+						font-size: 1.5rem;
+						display: flex;
+						gap: 0.5rem;
+						color: white;
+					}
+					.controls-icons {
+						display: flex;
+						gap: 0.2rem;
+					}
 				`
 				const farm = ui.sync(() => app.isEnabled('farm'))
 				const visible = atom(false)
@@ -74,7 +74,7 @@ export const KeyboardControls = () => {
 									</div>
 								</Show>
 								<StateUi state="dungeon">
-									{() =>	(
+									{() => (
 										<div class="keyboard-controls">
 											<div class="controls-icons">
 												<InputIcon input={gameInputs.get('lock')}></InputIcon>
@@ -89,7 +89,6 @@ export const KeyboardControls = () => {
 											<div class="keyboard-controls">
 												<InputIcon input={gameInputs.get('primary')}></InputIcon>
 												<OutlineText>{interactable().text}</OutlineText>
-
 											</div>
 										)
 									}}
@@ -100,7 +99,6 @@ export const KeyboardControls = () => {
 											<div class="keyboard-controls">
 												<InputIcon input={gameInputs.get('secondary')}></InputIcon>
 												<OutlineText>{interactable().text}</OutlineText>
-
 											</div>
 										)
 									}}

@@ -15,25 +15,28 @@ export const spawnDamageNumber = (amount: number, enemy: With<Entity, 'position'
 	const top = y + between(2, 4)
 	const position = enemy.position.clone().add(new Vector3(0, y, 0))
 	const damageNumber = ecs.add({ model: mesh, position })
-	tweens.async({
-		from: y,
-		to: top,
-		duration: 200,
-		onUpdate: f => damageNumber.position.y = f,
-		ease: circIn,
-	}, {
-		from: top,
-		to: top - between(2, 4),
-		duration: 200,
-		ease: circOut,
-		onUpdate: f => damageNumber.position.y = f,
-	})
+	tweens.async(
+		{
+			from: y,
+			to: top,
+			duration: 200,
+			onUpdate: (f) => (damageNumber.position.y = f),
+			ease: circIn,
+		},
+		{
+			from: top,
+			to: top - between(2, 4),
+			duration: 200,
+			ease: circOut,
+			onUpdate: (f) => (damageNumber.position.y = f),
+		},
+	)
 	tweens.add({
 		from: 4,
 		to: 0,
 		duration: 400,
 		ease: createExpoIn(1),
-		onUpdate: f => el.style.fontSize = `${f}em`,
+		onUpdate: (f) => (el.style.fontSize = `${f}em`),
 	})
 	const origin = enemy.position.clone()
 	const direction = new Vector3().randomDirection()

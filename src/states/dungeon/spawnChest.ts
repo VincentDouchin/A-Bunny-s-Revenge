@@ -28,7 +28,7 @@ export const chestBundle = () => {
 export const spawnChest = (dungeonLevel: number) => {
 	const player = lootPlayerQuery.first
 	if (!player) throw new Error('Player does not exist')
-	const pool = chestLoot.find(lootPool => lootPool.level === dungeonLevel)
+	const pool = chestLoot.find((lootPool) => lootPool.level === dungeonLevel)
 	if (!pool) throw new Error(`lootPool not found for level ${dungeonLevel}`)
 	const items = lootPool(pool.items, player, pool.quantity)
 	if (items.length === 0) return
@@ -41,14 +41,14 @@ export const spawnChest = (dungeonLevel: number) => {
 		from: 0,
 		to: 8,
 		ease: reverseEasing(createBackIn(4)),
-		onUpdate: f => chestEntity.model.scale.setScalar(f),
+		onUpdate: (f) => chestEntity.model.scale.setScalar(f),
 		onComplete: async () => {
 			chestEntity.chestAnimator.playClamped('chest_open')
 			await sleep(200)
 			for (let i = 0; i < items.length; i++) {
 				const item = items[i]
 				await sleep(100)
-				const angle = Math.PI / 2 + ((0.5 * Math.random()) * (Math.random() < 0.5 ? 1 : -1))
+				const angle = Math.PI / 2 + 0.5 * Math.random() * (Math.random() < 0.5 ? 1 : -1)
 				ecs.add({
 					...dropBundle(item),
 					position: new Vector3(0, 5, 0),

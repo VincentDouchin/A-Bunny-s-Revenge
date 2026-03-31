@@ -14,8 +14,7 @@ const GameContext = createContext<{
 	usingKeyboard: Accessor<boolean>
 	usingGamepad: Accessor<boolean>
 	isPauseState: Accessor<boolean>
-	player: Accessor<typeof playerQuery['entities'][number]>
-
+	player: Accessor<(typeof playerQuery)['entities'][number]>
 }>()
 const playerQuery = playerInventoryQuery.with('maxHealth', 'currentHealth', 'maxHealth', 'currentHealth', 'strength', 'sneeze', 'debuffsContainer', 'poisoned', 'position', 'sleepy', 'modifiers')
 export const useQuery = <T,>(query: Query<T>) => {
@@ -24,7 +23,7 @@ export const useQuery = <T,>(query: Query<T>) => {
 		setEntities(() => query.entities)
 	})
 	query.onEntityRemoved.subscribe((e) => {
-		setEntities(prev => prev.filter(entity => entity !== e))
+		setEntities((prev) => prev.filter((entity) => entity !== e))
 	})
 	return entities
 }
@@ -50,11 +49,7 @@ export function GameProvider(props: { children: JSXElement | JSXElement[] }) {
 		isPauseState,
 	}))
 
-	return (
-		<GameContext.Provider value={data()}>
-			{props.children}
-		</GameContext.Provider>
-	)
+	return <GameContext.Provider value={data()}>{props.children}</GameContext.Provider>
 }
 
 export const useGame = () => useContext(GameContext)

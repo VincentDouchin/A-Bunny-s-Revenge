@@ -18,10 +18,7 @@
 					"$ref": "#/definitions/items"
 				}
 			},
-			"required": [
-				"name",
-				"quantity"
-			],
+			"required": ["name", "quantity"],
 			"type": "object"
 		},
 		"Meals": {
@@ -70,13 +67,7 @@
 								"type": "boolean"
 							}
 						},
-						"required": [
-							"luck",
-							"name",
-							"planted",
-							"stage",
-							"watered"
-						],
+						"required": ["luck", "name", "planted", "stage", "watered"],
 						"type": "object"
 					},
 					"type": "object"
@@ -97,12 +88,7 @@
 							"type": "number"
 						}
 					},
-					"required": [
-						"current",
-						"dayToNight",
-						"timePassed",
-						"dayLight"
-					],
+					"required": ["current", "dayToNight", "timePassed", "dayLight"],
 					"type": "object"
 				},
 				"inventories": {
@@ -182,33 +168,11 @@
 					"type": "array"
 				}
 			},
-			"required": [
-				"crops",
-				"playerPosition",
-				"playerRotation",
-				"quests",
-				"selectedSeed",
-				"inventories",
-				"modifiers",
-				"unlockedRecipes",
-				"unlockedPaths",
-				"acorns",
-				"daytime"
-			],
+			"required": ["crops", "playerPosition", "playerRotation", "quests", "selectedSeed", "inventories", "modifiers", "unlockedRecipes", "unlockedPaths", "acorns", "daytime"],
 			"type": "object"
 		},
 		"crops": {
-			"enum": [
-				"carrot",
-				"beet",
-				"tomato",
-				"lettuce",
-				"pumpkin",
-				"wheat",
-				"haricot",
-				"magic_bean",
-				"potato"
-			],
+			"enum": ["carrot", "beet", "tomato", "lettuce", "pumpkin", "wheat", "haricot", "magic_bean", "potato"],
 			"type": "string"
 		},
 		"items": {

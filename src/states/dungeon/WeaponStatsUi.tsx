@@ -5,11 +5,9 @@ import { OutlineText } from '@/ui/components/styledComponents'
 export const WeaponStatsUi = ({ name }: { name: AssetNames['weapons'] }) => {
 	const data = weaponsData[name]
 	return (
-		<div style={{ 'display': 'grid', 'place-items': 'center' }}>
+		<div style={{ display: 'grid', 'place-items': 'center' }}>
 			<div>
-				<OutlineText textSize="1.5rem">
-					{data.name}
-				</OutlineText>
+				<OutlineText textSize="1.5rem">{data.name}</OutlineText>
 			</div>
 			<div>
 				<OutlineText textSize="1.2rem">
@@ -33,6 +31,4 @@ export const WeaponStatsUi = ({ name }: { name: AssetNames['weapons'] }) => {
 	)
 }
 
-export const TouchWeaponStats = () => {
-
-}
+export const TouchWeaponStats = () => {}

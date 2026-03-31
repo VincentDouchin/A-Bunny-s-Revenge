@@ -5,37 +5,34 @@ import { gameInputs, settings } from '@/global/init'
 import { OutlineText, SwitchButtons } from '../components/styledComponents'
 import { InputIcon } from '../InputIcon'
 
-export const MovementTutorial = ({ context }: {
-	context: ReturnType<typeof useGame>
-}) => {
-	css/* css */`
-		.tuto-input-icon{
-		font-size:5rem
-	}
-	.gamepad-controls{
-		display:grid;
-		grid-template-columns: 1fr 2fr;
-		gap: 3rem;
-	}
-	.control-method{
-
-		text-align:center;
-		display: grid;
-		gap: 1rem;
-		place-items:center;
-	}
-	.controls{
-		font-size: 2rem;
-		width: 100%;
-	}
-	.keys{
-		display: flex;
-		gap:1rem;
-	}
-	.dpad{
-		display:grid;
-		grid-template-areas: ". forward ." "left backward right "
-	}
+export const MovementTutorial = ({ context }: { context: ReturnType<typeof useGame> }) => {
+	css /* css */ `
+		.tuto-input-icon {
+			font-size: 5rem;
+		}
+		.gamepad-controls {
+			display: grid;
+			grid-template-columns: 1fr 2fr;
+			gap: 3rem;
+		}
+		.control-method {
+			text-align: center;
+			display: grid;
+			gap: 1rem;
+			place-items: center;
+		}
+		.controls {
+			font-size: 2rem;
+			width: 100%;
+		}
+		.keys {
+			display: flex;
+			gap: 1rem;
+		}
+		.dpad {
+			display: grid;
+			grid-template-areas: '. forward .' 'left backward right ';
+		}
 	`
 	return (
 		<div>
@@ -51,15 +48,25 @@ export const MovementTutorial = ({ context }: {
 				<div class="control-method">
 					<OutlineText textSize="2rem">Do you prefer using the mouse or the keyboard to direct the player?</OutlineText>
 					<div class="controls">
-						<SwitchButtons options={['keyboard', 'mouse']} value={settings.controls} setValue={val => settings.controls = val} />
+						<SwitchButtons
+							options={['keyboard', 'mouse']}
+							value={settings.controls}
+							setValue={(val) => (settings.controls = val)}
+						/>
 					</div>
 					<OutlineText textSize="1.5rem">You can change this option in the settings later</OutlineText>
 					<br />
 					<div class="gamepad-controls">
-
 						<div class="dpad">
 							<For each={['right', 'left', 'forward', 'backward'] as const}>
-								{dir => <div style={{ 'grid-area': dir }}><InputIcon size={3} input={gameInputs.get(dir)} /></div>}
+								{(dir) => (
+									<div style={{ 'grid-area': dir }}>
+										<InputIcon
+											size={3}
+											input={gameInputs.get(dir)}
+										/>
+									</div>
+								)}
 							</For>
 						</div>
 						<OutlineText textSize="2rem">Use the keys to move the player.</OutlineText>

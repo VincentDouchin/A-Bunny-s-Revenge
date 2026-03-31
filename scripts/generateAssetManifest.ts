@@ -1,11 +1,11 @@
 import type { Stats } from 'node:fs'
-import type { PathInfo } from './assetPipeline'
+import type { PathInfo } from './assetPipeline.ts'
 import { Formatter } from 'fracturedjsonjs'
-import { AssetTransformer } from './assetPipeline'
+import { AssetTransformer } from './assetPipeline.ts'
 
 export class GenerateAssetManifest extends AssetTransformer {
 	on = ['add', 'remove', 'init'] as const
-	modified = new Map<string, { size: number, modified: number }>()
+	modified = new Map<string, { size: number; modified: number }>()
 	path = ['assets', 'assetManifest.json']
 	folder = 'assets'
 

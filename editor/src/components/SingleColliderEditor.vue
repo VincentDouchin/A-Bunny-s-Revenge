@@ -33,9 +33,9 @@ const colliderShapeOptions = computed(() => {
 const type = ref<ColliderData['type'] | null>(null)
 const linkedCategory = ref<string | null>(null)
 const linkedModel = ref<string | null>(null)
-const size = ref<{ x: number, y: number, z: number }>({ x: 1, y: 1, z: 1 })
-const position = ref<{ x: number, y: number, z: number }>({ x: 0, y: 0, z: 0 })
-const rotation = ref <QuaternionTuple>(new Quaternion().toArray())
+const size = ref<{ x: number; y: number; z: number }>({ x: 1, y: 1, z: 1 })
+const position = ref<{ x: number; y: number; z: number }>({ x: 0, y: 0, z: 0 })
+const rotation = ref<QuaternionTuple>(new Quaternion().toArray())
 onMounted(() => {
 	if (collider.value) {
 		type.value = collider.value.type
@@ -55,31 +55,37 @@ onMounted(() => {
 	}
 })
 
-const categoryOptions = computed(() => Object.keys(assetStore.models).toSorted((a, b) => a.localeCompare(b)).map(value => ({ value, label: value })))
+const categoryOptions = computed(() =>
+	Object.keys(assetStore.models)
+		.toSorted((a, b) => a.localeCompare(b))
+		.map((value) => ({ value, label: value })),
+)
 const modelOptions = computed(() => {
 	if (linkedCategory.value === null) {
 		return []
 	}
 	return Object.keys(assetStore.models[linkedCategory.value])
-		.filter(x => x !== props.model)
+		.filter((x) => x !== props.model)
 		.toSorted((a, b) => a.localeCompare(b))
-		.map(value => ({ value, label: value }))
+		.map((value) => ({ value, label: value }))
 })
 
 const getComputedSize = (shape: Exclude<ColliderData['type'], 'trimesh' | 'link'>) => {
 	switch (shape) {
-		case 'ball': return { x: size.value.x, y: size.value.x, z: size.value.x }
+		case 'ball':
+			return { x: size.value.x, y: size.value.x, z: size.value.x }
 		case 'cylinder':
-		case 'capsule': return { x: size.value.x, y: size.value.y, z: size.value.x }
-		default: return { x: size.value.x, y: size.value.y, z: size.value.z }
+		case 'capsule':
+			return { x: size.value.x, y: size.value.y, z: size.value.x }
+		default:
+			return { x: size.value.x, y: size.value.y, z: size.value.z }
 	}
 }
 
 const newCollider = computed(() => {
 	if (type.value === 'trimesh') {
 		return { type: 'trimesh' }
-	}
-	else if (type.value === 'link') {
+	} else if (type.value === 'link') {
 		if (linkedCategory.value && linkedModel.value && linkedModel.value in assetStore.models[linkedCategory.value]) {
 			return { type: 'link', category: toRaw(linkedCategory.value), model: toRaw(linkedModel.value) }
 		}
@@ -114,7 +120,11 @@ const setAutoSize = () => {
 </script>
 
 <template>
-	<NCollapseItem :title="title" :name="name" :disabled="!collider">
+	<NCollapseItem
+		:title="title"
+		:name="name"
+		:disabled="!collider"
+	>
 		<NSpace vertical>
 			<NSelect
 				v-model:value="type"
@@ -122,9 +132,7 @@ const setAutoSize = () => {
 			/>
 			<template v-if="type === 'link'">
 				<NInputGroup>
-					<NInputGroupLabel>
-						Category
-					</NInputGroupLabel>
+					<NInputGroupLabel> Category </NInputGroupLabel>
 					<NSelect
 						v-model:value="linkedCategory"
 						filterable
@@ -133,9 +141,7 @@ const setAutoSize = () => {
 					/>
 				</NInputGroup>
 				<NInputGroup>
-					<NInputGroupLabel>
-						Model
-					</NInputGroupLabel>
+					<NInputGroupLabel> Model </NInputGroupLabel>
 					<NSelect
 						v-model:value="linkedModel"
 						filterable
@@ -145,7 +151,11 @@ const setAutoSize = () => {
 					/>
 				</NInputGroup>
 			</template>
-			<NButton v-if="type !== 'trimesh' && type !== 'link'" style="width: 100%;" @click="setAutoSize">
+			<NButton
+				v-if="type !== 'trimesh' && type !== 'link'"
+				style="width: 100%"
+				@click="setAutoSize"
+			>
 				<template #icon>
 					<NIcon>
 						<fa-A />
@@ -153,7 +163,10 @@ const setAutoSize = () => {
 				</template>
 				Auto size
 			</NButton>
-			<NButton style="width: 100%;" @click="emit('deleteCollider')">
+			<NButton
+				style="width: 100%"
+				@click="emit('deleteCollider')"
+			>
 				<template #icon>
 					<NIcon>
 						<fa-trash />

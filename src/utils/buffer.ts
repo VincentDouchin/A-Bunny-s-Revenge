@@ -15,7 +15,7 @@ export const blankTexture = (w: number, h: number, color = 'red') => {
 	buffer.fillRect(0, 0, w, h)
 	return new CanvasTexture(buffer.canvas)
 }
-export const scaleCanvas = (canvas: HTMLCanvasElement, scale: number | { x: number, y: number }) => {
+export const scaleCanvas = (canvas: HTMLCanvasElement, scale: number | { x: number; y: number }) => {
 	const scaleX = typeof scale === 'number' ? scale : scale.x
 	const scaleY = typeof scale === 'number' ? scale : scale.y
 	const newWidth = Math.floor(canvas.width * scaleX)

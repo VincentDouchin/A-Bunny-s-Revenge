@@ -1,3 +1,4 @@
+// oxlint-disable unicorn/no-empty-file
 // import type { Accessor, Setter } from 'solid-js'
 // import type { Atom } from 'solid-use/atom'
 // import { faGithub } from '@fortawesome/free-brands-svg-icons'
@@ -22,56 +23,56 @@
 // 	const [verificationUri, setVerificationUri] = createSignal('')
 // 	const [loading, setLoading] = createSignal(false)
 
-	// async function startLogin() {
-	// 	setLoading(true)
+// async function startLogin() {
+// 	setLoading(true)
 
-	// 	// Listen for device flow start
-	// 	const unlistenStart = await listen('device_flow_start', (event) => {
-	// 		const payload = event.payload as { user_code: string, verification_uri: string }
-	// 		setUserCode(payload.user_code)
-	// 		setVerificationUri(payload.verification_uri)
-	// 	})
+// 	// Listen for device flow start
+// 	const unlistenStart = await listen('device_flow_start', (event) => {
+// 		const payload = event.payload as { user_code: string, verification_uri: string }
+// 		setUserCode(payload.user_code)
+// 		setVerificationUri(payload.verification_uri)
+// 	})
 
-	// 	// Listen for success
-	// 	const unlistenSuccess = await listen('device_flow_success', () => {
-	// 		setLoading(false)
-	// 		onLoggedIn()f
-	// 		unlistenStart()
-	// 		unlistenSuccess()
-	// 	})
+// 	// Listen for success
+// 	const unlistenSuccess = await listen('device_flow_success', () => {
+// 		setLoading(false)
+// 		onLoggedIn()f
+// 		unlistenStart()
+// 		unlistenSuccess()
+// 	})
 
-	// 	// Listen for errors
-	// 	const unlistenError = await listen('device_flow_error', (event) => {
-	// 		// eslint-disable-next-line no-alert
-	// 		alert(`Login failed: ${event.payload}`)
-	// 		setLoading(false)
-	// 		unlistenStart()
-	// 		unlistenSuccess()
-	// 		unlistenError()
-	// 	})
+// 	// Listen for errors
+// 	const unlistenError = await listen('device_flow_error', (event) => {
+// 		// eslint-disable-next-line no-alert
+// 		alert(`Login failed: ${event.payload}`)
+// 		setLoading(false)
+// 		unlistenStart()
+// 		unlistenSuccess()
+// 		unlistenError()
+// 	})
 
-	// 	// Trigger Tauri command
-	// 	await invoke('start_github_device_flow')
-	// }
+// 	// Trigger Tauri command
+// 	await invoke('start_github_device_flow')
+// }
 
 // 	return (
 // 		<>
-			// <button with-icon onClick={startLogin} disabled={loading() || disabled()}>
-			// 	<Fa icon={faGithub}></Fa>
-			// 	{loading() ? 'Waiting for authorization...' : 'Login with GitHub'}
-			// </button>
+// <button with-icon onClick={startLogin} disabled={loading() || disabled()}>
+// 	<Fa icon={faGithub}></Fa>
+// 	{loading() ? 'Waiting for authorization...' : 'Login with GitHub'}
+// </button>
 
-			// {userCode() && (
-			// 	<div>
-			// 		<p>
-			// 			Go to
-			// 			<a href={verificationUri()} target="_blank">{verificationUri()}</a>
-			// 			{' '}
-			// 			and enter the code:
-			// 		</p>
-			// 		<h2>{userCode()}</h2>
-			// 	</div>
-			// )}
+// {userCode() && (
+// 	<div>
+// 		<p>
+// 			Go to
+// 			<a href={verificationUri()} target="_blank">{verificationUri()}</a>
+// 			{' '}
+// 			and enter the code:
+// 		</p>
+// 		<h2>{userCode()}</h2>
+// 	</div>
+// )}
 // 		</>
 // 	)
 // }
@@ -143,7 +144,7 @@
 // 				repoPath: await path.join(dir, FOLDER),
 // 			})
 // 			reload()
-// 		} catch (err) {
+// 		} catch (err:any) {
 // 			console.error('❌ Failed to start clone:', err)
 // 			error(String(err))
 // 		}
@@ -176,7 +177,7 @@
 // 			}
 // 			pushingChanges('success')
 // 			setTimeout(() => pushingChanges(null), 2000)
-// 		} catch (err) {
+// 		} catch (err:any) {
 // 			console.error(err)
 // 			// eslint-disable-next-line no-alert
 // 			alert(`Failed to push changes: ${err}`)
@@ -193,13 +194,13 @@
 // 		}
 // 	}
 
-	// const selectFolder = async () => {
-	// 	const path = await open({
-	// 		multiple: false,
-	// 		directory: true,
-	// 	})
-	// 	setLocalFolder(path)
-	// }
+// const selectFolder = async () => {
+// 	const path = await open({
+// 		multiple: false,
+// 		directory: true,
+// 	})
+// 	setLocalFolder(path)
+// }
 
 // 	css/* css */`
 // 	.configuration-title{
@@ -303,45 +304,45 @@
 // 					)}
 // 					open={authModalOpen}
 // 				>
-					// <div style="display:grid;grid-template-columns: auto auto; gap: 2rem">
-					// 	<div>
-					// 		<section class="login-option-container">
-					// 			<div class="title">Github</div>
-					// 			<GithubDeviceLogin
-					// 				disabled={disabledGithubLogin}
-					// 				onLoggedIn={() => {
-					// 					loggedIn(true)
-					// 					authModalOpen(false)
-					// 				}}
-					// 			/>
-					// 			<button with-icon onClick={pullLatest}>
-					// 				<Fa icon={faCloudArrowDown}></Fa>
-					// 				Pull latest
-					// 			</button>
-					// 			<button
-					// 				onClick={() => setSaveMode('github')}
-					// 				disabled={saveMode() === 'github'}
-					// 			>
-					// 				Activate
-					// 			</button>
-					// 		</section>
-					// 	</div>
-					// 	<div>
-					// 		<section class="login-option-container">
-					// 			<div class="title">Local</div>
-					// 			<button with-icon onClick={selectFolder}>
-					// 				<Fa icon={faFolderClosed}></Fa>
-					// 				Select folder
-					// 			</button>
-					// 			{localFolder()}
-					// 			<button
-					// 				disabled={saveMode() === 'local'}
-					// 				onClick={() => setSaveMode('local')}
-					// 			>
-					// 				Activate
-					// 			</button>
-					// 		</section>
-					// 	</div>
+// <div style="display:grid;grid-template-columns: auto auto; gap: 2rem">
+// 	<div>
+// 		<section class="login-option-container">
+// 			<div class="title">Github</div>
+// 			<GithubDeviceLogin
+// 				disabled={disabledGithubLogin}
+// 				onLoggedIn={() => {
+// 					loggedIn(true)
+// 					authModalOpen(false)
+// 				}}
+// 			/>
+// 			<button with-icon onClick={pullLatest}>
+// 				<Fa icon={faCloudArrowDown}></Fa>
+// 				Pull latest
+// 			</button>
+// 			<button
+// 				onClick={() => setSaveMode('github')}
+// 				disabled={saveMode() === 'github'}
+// 			>
+// 				Activate
+// 			</button>
+// 		</section>
+// 	</div>
+// 	<div>
+// 		<section class="login-option-container">
+// 			<div class="title">Local</div>
+// 			<button with-icon onClick={selectFolder}>
+// 				<Fa icon={faFolderClosed}></Fa>
+// 				Select folder
+// 			</button>
+// 			{localFolder()}
+// 			<button
+// 				disabled={saveMode() === 'local'}
+// 				onClick={() => setSaveMode('local')}
+// 			>
+// 				Activate
+// 			</button>
+// 		</section>
+// 	</div>
 // 					</div>
 // 				</Modal>
 // 				<Modal

@@ -1,24 +1,23 @@
-import type { With } from 'miniplex'
 import type { ComponentsOfType, Entity } from '@/global/entity'
-import type { Modifiers } from '@/global/modifiers'
-import type { Stat } from '@/lib/stats'
-import { ActiveCollisionTypes, ColliderDesc, RigidBodyDesc, RigidBodyType } from '@dimforge/rapier3d-compat'
-import { between } from 'randomish'
-import { ConeGeometry, Mesh, MeshBasicMaterial, MeshToonMaterial, Quaternion, SphereGeometry, Vector3 } from 'three/webgpu'
 import { Faction } from '@/global/entity'
 import { ecs, time, world } from '@/global/init'
+import type { Modifiers } from '@/global/modifiers'
 import { modelColliderBundle } from '@/lib/colliders'
 import { inMap } from '@/lib/hierarchy'
+import type { Stat } from '@/lib/stats'
 import { Timer } from '@/lib/timer'
 import { getWorldPosition } from '@/lib/transforms'
 import { honeyDrippingParticles, honeySplatParticlesBundle } from '@/particles/honeySplatParticles'
 import { pollenBundle } from '@/particles/pollenParticles'
 import { projectileTrail } from '@/particles/projectileTrail'
-import { sleepyEmitter } from '@/particles/sleepyParticles'
 import { sleep } from '@/utils/sleep'
+import { ActiveCollisionTypes, ColliderDesc, RigidBodyDesc, RigidBodyType } from '@dimforge/rapier3d-compat'
+import type { With } from 'miniplex'
+import { between } from 'randomish'
+import { ConeGeometry, Mesh, MeshBasicMaterial, MeshToonMaterial, Quaternion, SphereGeometry, Vector3 } from 'three/webgpu'
 
 const projectileBundle = (rotation: Quaternion, origin: Vector3, strength: Stat) => {
-	const model = new Mesh(new ConeGeometry(1, 4, 7), new MeshToonMaterial({ color: 0x2C1E31 }))
+	const model = new Mesh(new ConeGeometry(1, 4, 7), new MeshToonMaterial({ color: 0x2c1e31 }))
 	model.rotateX(Math.PI / 2)
 	return inMap({
 		projectile: true,
@@ -31,8 +30,13 @@ const projectileBundle = (rotation: Quaternion, origin: Vector3, strength: Stat)
 		emitter: projectileTrail(),
 		movementForce: new Vector3(0, 0, 1).applyQuaternion(rotation),
 		position: origin.clone().add(new Vector3(0, 5, 10).applyQuaternion(rotation)),
-		bodyDesc: RigidBodyDesc.kinematicVelocityBased().lockRotations().setLinvel(...new Vector3(0, 0, 50).applyQuaternion(rotation).toArray()),
-		colliderDesc: ColliderDesc.cone(2, 1).setActiveCollisionTypes(ActiveCollisionTypes.ALL).setSensor(true).setRotation(new Quaternion().setFromAxisAngle(new Vector3(1, 0, 0), Math.PI / 2)),
+		bodyDesc: RigidBodyDesc.kinematicVelocityBased()
+			.lockRotations()
+			.setLinvel(...new Vector3(0, 0, 50).applyQuaternion(rotation).toArray()),
+		colliderDesc: ColliderDesc.cone(2, 1)
+			.setActiveCollisionTypes(ActiveCollisionTypes.ALL)
+			.setSensor(true)
+			.setRotation(new Quaternion().setFromAxisAngle(new Vector3(1, 0, 0), Math.PI / 2)),
 	})
 }
 
@@ -45,7 +49,7 @@ export const projectilesCircleAttack = async ({ group, strength }: With<Entity, 
 	const initialAngle = Math.random() * Math.PI * 2
 	for (let i = 0; i < 8; i++) {
 		const origin = getWorldPosition(group)
-		const angle = initialAngle + Math.PI * 2 / 8 * i
+		const angle = initialAngle + ((Math.PI * 2) / 8) * i
 		const rotation = new Quaternion().setFromAxisAngle(new Vector3(0, 1, 0), angle)
 		ecs.add(projectileBundle(rotation, origin, strength))
 		await sleep(100)
@@ -55,41 +59,43 @@ export const projectilesCircleAttack = async ({ group, strength }: With<Entity, 
 export const honeyProjectile = ({ group, rotation }: With<Entity, 'group' | 'rotation'>) => {
 	const origin = getWorldPosition(group)
 	const size = 2
-	const model = new Mesh(
-		new SphereGeometry(size, 8, 8),
-		new MeshBasicMaterial({ color: 0xF7F3B7, transparent: true, opacity: 0.6, depthWrite: false }),
-	)
+	const model = new Mesh(new SphereGeometry(size, 8, 8), new MeshBasicMaterial({ color: 0xf7f3b7, transparent: true, opacity: 0.6, depthWrite: false }))
 	const bundle = modelColliderBundle(model, RigidBodyType.Dynamic, true, new Vector3(1, 1, 1))
 	bundle.bodyDesc.gravityScale = 0.2
 	const force = between(20, 30)
 	const dir = new Vector3(0, force, force).applyQuaternion(rotation)
 	bundle.bodyDesc.setLinvel(...dir.toArray())
 	bundle.colliderDesc.setMass(0.1)
-	ecs.add(inMap({
-		...bundle,
-		rotation: rotation.clone(),
-		position: new Vector3(0, 5, 0).add(origin),
-		honeyProjectile: true,
-		emitter: honeyDrippingParticles(),
-		deathTimer: new Timer(2000, false),
-		archingProjectile: new Vector3(0, 150, 100),
-	}))
+	ecs.add(
+		inMap({
+			...bundle,
+			rotation: rotation.clone(),
+			position: new Vector3(0, 5, 0).add(origin),
+			honeyProjectile: true,
+			emitter: honeyDrippingParticles(),
+			deathTimer: new Timer(2000, false),
+			archingProjectile: new Vector3(0, 150, 100),
+		}),
+	)
 }
 const archingQuery = ecs.with('archingProjectile', 'body', 'rotation').without('bodyDesc')
-export const applyArchingForce = () => archingQuery.onEntityAdded.subscribe(async (e) => {
-	e.body.applyImpulse(e.archingProjectile.applyQuaternion(e.rotation), true)
-})
+export const applyArchingForce = () =>
+	archingQuery.onEntityAdded.subscribe(async (e) => {
+		e.body.applyImpulse(e.archingProjectile.applyQuaternion(e.rotation), true)
+	})
 
 const honeyProjectilesQuery = ecs.with('position', 'honeyProjectile')
 export const honeySplat = () => {
 	for (const honey of honeyProjectilesQuery) {
 		if (honey.position.y <= 1) {
 			ecs.remove(honey)
-			ecs.add(inMap({
-				...honeySplatParticlesBundle(),
-				position: honey.position.clone().setY(1),
-				honeySpot: true,
-			}))
+			ecs.add(
+				inMap({
+					...honeySplatParticlesBundle(),
+					position: honey.position.clone().setY(1),
+					honeySpot: true,
+				}),
+			)
 		}
 	}
 }
@@ -110,13 +116,15 @@ export const pollenAttack = async ({ group }: With<Entity, 'group'>) => {
 	const origin = getWorldPosition(group)
 	const max = Math.floor(between(3, 6))
 	for (let i = 0; i < max; i++) {
-		const angle = i / max * Math.PI * 2 + (Math.random() - 0.5)
+		const angle = (i / max) * Math.PI * 2 + (Math.random() - 0.5)
 		const distance = between(20, 70)
-		ecs.add(inMap({
-			position: new Vector3(Math.cos(angle) * distance, 0, Math.sin(angle) * distance).add(origin),
-			...pollenBundle(0xE8D282, 0xF7F3B7),
-			pollen: true,
-		}))
+		ecs.add(
+			inMap({
+				position: new Vector3(Math.cos(angle) * distance, 0, Math.sin(angle) * distance).add(origin),
+				...pollenBundle(0xe8d282, 0xf7f3b7),
+				pollen: true,
+			}),
+		)
 		await sleep(between(200, 600))
 	}
 }
@@ -165,10 +173,10 @@ const sleepyQuery = ecs.with('player', 'modifiers', 'model')
 export const sleepyEffects = () => {
 	for (const entity of sleepyQuery) {
 		if (entity.modifiers.added.has('sleepingPowder')) {
-			ecs.update(entity, { emitter: sleepyEmitter() })
+			// ecs.update(entity, { emitter: sleepyEmitter() })
 		}
 		if (entity.modifiers.removed.has('sleepingPowder')) {
-			ecs.removeComponent(entity, 'emitter')
+			// ecs.removeComponent(entity, 'emitter')
 		}
 	}
 }

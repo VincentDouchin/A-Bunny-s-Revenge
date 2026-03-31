@@ -4,7 +4,7 @@ const levelStore = useLevelStore()
 
 <template>
 	<NCard size="small">
-		<div style="display:grid">
+		<div style="display: grid">
 			<ResizeModal
 				v-if="levelStore.levelData"
 				:size="{ x: levelStore.levelData.sizeX, y: levelStore.levelData.sizeY }"

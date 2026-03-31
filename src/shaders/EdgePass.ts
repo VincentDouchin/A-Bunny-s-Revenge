@@ -36,7 +36,7 @@ export const createQuantizeNode = (
 	palette: string[], // hex strings, e.g. ['#0f380f', '#306230']
 ) => {
 	// Parse once at node-build time — these become shader constants
-	const paletteColors = palette.map(hex => color(hex))
+	const paletteColors = palette.map((hex) => color(hex))
 
 	return Fn(() => {
 		const inputColor = inputNode.rgb
@@ -59,11 +59,7 @@ export const createQuantizeNode = (
 }
 
 // Outline shader node (depth comparison)
-const createOutlineNode = (
-	targetDepthTexture: DepthTexture,
-	outlineDepthTexture: DepthTexture,
-	outlineTextureSource: Texture,
-) => {
+const createOutlineNode = (targetDepthTexture: DepthTexture, outlineDepthTexture: DepthTexture, outlineTextureSource: Texture) => {
 	const targetDepth = texture(targetDepthTexture)
 	const outlineDepth = texture(outlineDepthTexture)
 	const outlineTexture = texture(outlineTextureSource)
@@ -102,11 +98,7 @@ const createSobelNode = (
 
 	return Fn(() => {
 		const pixelSize = vec2(1.0).div(uniforms.resolution)
-		const uvCoord = uv()
-			.add(uniforms.subPixelOffset)
-			.div(pixelSize)
-			.floor()
-			.mul(pixelSize)
+		const uvCoord = uv().add(uniforms.subPixelOffset).div(pixelSize).floor().mul(pixelSize)
 
 		// Edge detection
 		const G = sobelFn(tDepth, uvCoord, uniforms.resolution)
@@ -120,26 +112,20 @@ const createSobelNode = (
 
 		// Outline overlay
 		const outlineEdge = sobelFn(outline, uvCoord, uniforms.resolution)
-		finalColor.assign(outlineEdge.greaterThan(0.0).select(vec4(1.0), finalColor))
+		const isOutline = outlineEdge.greaterThan(0.0).toFloat()
+		finalColor.assign(mix(vec4(1.0), finalColor, isOutline))
 
 		return finalColor
 	})()
 }
 
 // Setup post processing
-export const setupPostProcessing = (
-	renderer: WebGPURenderer,
-	width: number,
-	height: number,
-	target: RenderTarget,
-	outlineTarget: RenderTarget,
-	outlineTarget2: RenderTarget,
-) => {
+export const setupPostProcessing = (renderer: WebGPURenderer, width: number, height: number, target: RenderTarget, outlineTarget: RenderTarget, outlineTarget2: RenderTarget) => {
 	const postProcessing = new RenderPipeline(renderer)
 
 	// Only parameters that change need to be uniforms
 	const uniforms: SobelUniforms = {
-		edgeColor: uniform(color(0x4D3533)),
+		edgeColor: uniform<'color', Color>(color('#4d3533')),
 		resolution: uniform(new Vector2(width, height)),
 		subPixelOffset: uniform(new Vector2(0, 0)),
 	}

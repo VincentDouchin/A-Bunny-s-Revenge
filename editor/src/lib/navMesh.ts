@@ -102,7 +102,7 @@ export const generateNavMesh = (obj: Mesh<BufferGeometry>[]) => {
 
 export const getMesh = (boundingBox: AssetData | undefined, matrix: Matrix4, model: Object3D) => {
 	const mat = new MeshBasicNodeMaterial({
-		color: 0xFF0000,
+		color: 0xff0000,
 		// transparent: true,
 		// opacity: 0.2,
 	})
@@ -162,9 +162,7 @@ export const getMesh = (boundingBox: AssetData | undefined, matrix: Matrix4, mod
 
 	group2.applyMatrix4(matrix)
 
-	const globalScale = new Vector3().fromArray(
-		boundingBox.scale ?? [1, 1, 1],
-	)
+	const globalScale = new Vector3().fromArray(boundingBox.scale ?? [1, 1, 1])
 	group2.scale.multiply(globalScale)
 
 	/* -----------------------------
@@ -328,9 +326,9 @@ export function updateNavMeshVisualization(scene: Scene, navMesh: NavMesh) {
 			const poly = tile.polys[polyIndex]
 
 			if (poly.flags === 0) {
-				setPolyColor(polyRef, 0xFF0000, true, 0) // red, semi-transparent
+				setPolyColor(polyRef, 0xff0000, true, 0) // red, semi-transparent
 			} else {
-				setPolyColor(polyRef, 0xFF0000, false, 1.0) // green, opaque
+				setPolyColor(polyRef, 0xff0000, false, 1.0) // green, opaque
 			}
 		}
 	}

@@ -9,15 +9,18 @@ const secondaryCollidersQuery = ecs.with('body', 'secondaryCollidersDesc')
 const bodiesToRemove = new Set<RigidBody>()
 const collidersToRemove = new Set<Collider>()
 const secondaryCollidersToRemove = new Set<Collider[]>()
-const removeBodies = () => ecs.with('body').onEntityRemoved.subscribe((entity) => {
-	bodiesToRemove.add(entity.body)
-})
-const removeColliders = () => ecs.with('collider').onEntityRemoved.subscribe((entity) => {
-	collidersToRemove.add(entity.collider)
-})
-const removeSecondaryColliders = () => ecs.with('secondaryColliders').onEntityRemoved.subscribe((e) => {
-	secondaryCollidersToRemove.add(e.secondaryColliders)
-})
+const removeBodies = () =>
+	ecs.with('body').onEntityRemoved.subscribe((entity) => {
+		bodiesToRemove.add(entity.body)
+	})
+const removeColliders = () =>
+	ecs.with('collider').onEntityRemoved.subscribe((entity) => {
+		collidersToRemove.add(entity.collider)
+	})
+const removeSecondaryColliders = () =>
+	ecs.with('secondaryColliders').onEntityRemoved.subscribe((e) => {
+		secondaryCollidersToRemove.add(e.secondaryColliders)
+	})
 
 export const stepWorld = () => {
 	const callBacks: Array<() => void> = []
@@ -42,7 +45,7 @@ export const stepWorld = () => {
 		})
 	}
 	for (const entity of secondaryCollidersQuery) {
-		const colliders = entity.secondaryCollidersDesc.map(desc => world.createCollider(desc, entity.body))
+		const colliders = entity.secondaryCollidersDesc.map((desc) => world.createCollider(desc, entity.body))
 		callBacks.push(() => {
 			ecs.addComponent(entity, 'secondaryColliders', colliders)
 		})
@@ -63,7 +66,7 @@ export const stepWorld = () => {
 		}
 	}
 	secondaryCollidersToRemove.clear()
-	callBacks.forEach(callBack => callBack())
+	callBacks.forEach((callBack) => callBack())
 }
 
 export const physicsPlugin: Plugin<typeof app> = (app) => {

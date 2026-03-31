@@ -15,11 +15,7 @@
 	--gold-tarnished: #a26d3f;
 	--grey: grey;
 	--black-transparent: linear-gradient(to bottom, hsla(0, 0%, 0%, 0.4), hsla(0, 0%, 0%, 0.2));
-	--gold-transparent: linear-gradient(
-		to bottom,
-		color-mix(in srgb, var(--gold), transparent 60%),
-		color-mix(in srgb, var(--gold), transparent 80%)
-	);
+	--gold-transparent: linear-gradient(to bottom, color-mix(in srgb, var(--gold), transparent 60%), color-mix(in srgb, var(--gold), transparent 80%));
 	--meal-color: #f3a833;
 	font-size: 2vh;
 }
@@ -147,23 +143,22 @@ canvas.main {
 	opacity: 0;
 }
 
-
 .bounce-enter-active {
-  animation: bounce-in 0.5s;
+	animation: bounce-in 0.5s;
 }
 
 @keyframes bounce-in {
-  0% {
-    transform: scale(0) translateY(100%);
-	opacity: 0;
-  }
-  50% {
-    transform: scale(1.2);
-	opacity: 1;
-  }
-  100% {
-    transform: scale(1) translateY(0px);
-  }
+	0% {
+		transform: scale(0) translateY(100%);
+		opacity: 0;
+	}
+	50% {
+		transform: scale(1.2);
+		opacity: 1;
+	}
+	100% {
+		transform: scale(1) translateY(0px);
+	}
 }
 
 /* ! BUTTONS */
@@ -260,9 +255,9 @@ input[type='range']::-webkit-slider-thumb {
 	width: 150px;
 }
 
-@keyframes spin{
+@keyframes spin {
 	0% {
-    transform: rotate(0deg);
+		transform: rotate(0deg);
 	}
 	100% {
 		transform: rotate(1turn);
@@ -279,16 +274,16 @@ input[type='range']::-webkit-slider-thumb {
 	margin: 0 10vh;
 }
 .loader::before {
-	content: "";
+	content: '';
 	margin: auto;
 	width: 20vw;
 	aspect-ratio: 1;
 	background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" fill="white" viewBox="0 0 512 512"><!--!Font Awesome Free v7.0.1 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free Copyright 2025 Fonticons, Inc.--><path d="M208 48a48 48 0 1 1 96 0 48 48 0 1 1 -96 0zm0 416a48 48 0 1 1 96 0 48 48 0 1 1 -96 0zM48 208a48 48 0 1 1 0 96 48 48 0 1 1 0-96zm368 48a48 48 0 1 1 96 0 48 48 0 1 1 -96 0zM75 369.1A48 48 0 1 1 142.9 437 48 48 0 1 1 75 369.1zM75 75A48 48 0 1 1 142.9 142.9 48 48 0 1 1 75 75zM437 369.1A48 48 0 1 1 369.1 437 48 48 0 1 1 437 369.1z"/></svg>');
-    animation-name: spin;
-    animation-direction: normal;
-    animation-duration:  2s;
-    animation-iteration-count: infinite;
-    animation-timing-function: steps(8);
+	animation-name: spin;
+	animation-direction: normal;
+	animation-duration: 2s;
+	animation-iteration-count: infinite;
+	animation-timing-function: steps(8);
 	z-index: 100;
 }
 .loader::after {
@@ -296,7 +291,6 @@ input[type='range']::-webkit-slider-thumb {
 	content: 'We are loading the assets, please wait a minute...';
 	color: white;
 	font-size: 10vh;
-
 }
 
 .landscape-warning {

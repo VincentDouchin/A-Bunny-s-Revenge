@@ -17,11 +17,11 @@ export const flash = (entity: With<Entity, 'model'>, duration: number, type: 'pr
 				if (node instanceof Mesh && node.material instanceof CharacterMaterial) {
 					node.material.flash.value = f
 					if (type === 'preparing') {
-						node.material.flashColor.value = new Color(0xFFFFFF)
+						node.material.flashColor.value = new Color(0xffffff)
 					} else if (type === 'damage') {
-						node.material.flashColor.value = new Color(0xFF0000)
+						node.material.flashColor.value = new Color(0xff0000)
 					} else if (type === 'poisoned') {
-						node.material.flashColor.value = new Color(0x9DE64E)
+						node.material.flashColor.value = new Color(0x9de64e)
 					}
 				}
 			})
@@ -37,7 +37,7 @@ export const squish = (entity: With<Entity, 'group'>) => {
 		ease: circIn,
 		repeat: 1,
 		repeatType: 'reverse',
-		onUpdate: f => entity.group.scale.copy(f),
+		onUpdate: (f) => entity.group.scale.copy(f),
 	})
 }
 

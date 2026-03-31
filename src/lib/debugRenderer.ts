@@ -5,7 +5,7 @@ export class RapierDebugRenderer extends LineSegments {
 	world: World
 
 	constructor(world: World) {
-		super(new BufferGeometry(), new LineBasicMaterial({ color: 0xFFFFFF, vertexColors: true }))
+		super(new BufferGeometry(), new LineBasicMaterial({ color: 0xffffff, vertexColors: true }))
 		this.world = world
 		this.frustumCulled = false
 		this.visible = false

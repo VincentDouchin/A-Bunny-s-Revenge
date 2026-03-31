@@ -1,4 +1,18 @@
-import { AxisAngleGenerator, Bezier, ConstantValue, ForceOverLife, HemisphereEmitter, IntervalValue, ParticleSystem, PiecewiseBezier, RandomQuatGenerator, RenderMode, Rotation3DOverLife, SizeOverLife, Vector3 } from 'three.quarks'
+import {
+	AxisAngleGenerator,
+	Bezier,
+	ConstantValue,
+	ForceOverLife,
+	HemisphereEmitter,
+	IntervalValue,
+	ParticleSystem,
+	PiecewiseBezier,
+	RandomQuatGenerator,
+	RenderMode,
+	Rotation3DOverLife,
+	SizeOverLife,
+	Vector3,
+} from 'three.quarks'
 import { DoubleSide, MeshStandardMaterial, PlaneGeometry } from 'three/webgpu'
 import { assets } from '@/global/init'
 
@@ -24,7 +38,7 @@ export const shakenLeaves = () => {
 		material: mat,
 		renderMode: RenderMode.Mesh,
 		behaviors: [
-			new SizeOverLife(new PiecewiseBezier([[new Bezier(1, 1, 0.50, 0.50), 0]])),
+			new SizeOverLife(new PiecewiseBezier([[new Bezier(1, 1, 0.5, 0.5), 0]])),
 			new Rotation3DOverLife(new AxisAngleGenerator(new Vector3(0, 0.5, 0.2).normalize(), new ConstantValue(1))),
 			new ForceOverLife(new ConstantValue(0), new ConstantValue(0), new ConstantValue(-5)),
 		],

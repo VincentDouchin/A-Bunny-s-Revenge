@@ -8,7 +8,7 @@ import { GoldContainer, InventoryTitle, OutlineText } from '@/ui/components/styl
 import { InputIcon } from '@/ui/InputIcon'
 import { useGame, useQuery } from '@/ui/store'
 
-const openBulletinBoardQuery = useQuery(ecs.with('menuType').where(e => e.menuType === MenuType.Quest))
+const openBulletinBoardQuery = useQuery(ecs.with('menuType').where((e) => e.menuType === MenuType.Quest))
 
 export const QuestUi = () => {
 	const context = useGame()
@@ -25,49 +25,49 @@ export const QuestUi = () => {
 						ecs.removeComponent(board, 'menuType')
 					}
 				})
-				css/* css */`
-							.quest-container{
-								max-height: 30rem;
-								overflow: hidden;
-								display: grid;
-								gap: 0.5rem
-							}
-							.quest{
-								color: white;
-								background: hsl(0, 0%, 0%, 0.3);
-								padding: 1rem;
-								border-radius:1rem;
-								margin: 0.2rem;
-								box-sizing: border-box;
-							}
-							.step{
-								display: flex;
-								gap: 1rem;
-							}
-							.quest-description{
-								font-size: 1.5rem;
-								margin:auto 0;
-							}
-							.step-container{
-								display: grid;
-								gap: 0.5rem;
-							}
-							.no-quests{
-								text-align: center;
-								font-size:2rem;
-								color:white;
-								min-width: 20rem;
-							}
-							.input-icon{
-								position:absolute;
-								right:0.5rem;
-								top:100%;
-								display: flex;
-								align-items: center;
-								color: white;
-								font-size: 1.5rem;
-							}
-							`
+				css /* css */ `
+					.quest-container {
+						max-height: 30rem;
+						overflow: hidden;
+						display: grid;
+						gap: 0.5rem;
+					}
+					.quest {
+						color: white;
+						background: hsl(0, 0%, 0%, 0.3);
+						padding: 1rem;
+						border-radius: 1rem;
+						margin: 0.2rem;
+						box-sizing: border-box;
+					}
+					.step {
+						display: flex;
+						gap: 1rem;
+					}
+					.quest-description {
+						font-size: 1.5rem;
+						margin: auto 0;
+					}
+					.step-container {
+						display: grid;
+						gap: 0.5rem;
+					}
+					.no-quests {
+						text-align: center;
+						font-size: 2rem;
+						color: white;
+						min-width: 20rem;
+					}
+					.input-icon {
+						position: absolute;
+						right: 0.5rem;
+						top: 100%;
+						display: flex;
+						align-items: center;
+						color: white;
+						font-size: 1.5rem;
+					}
+				`
 				return (
 					<Modal open={visible()}>
 						<Show when={visible()}>
@@ -81,7 +81,6 @@ export const QuestUi = () => {
 									</div>
 								</Show>
 							</GoldContainer>
-
 						</Show>
 					</Modal>
 				)
