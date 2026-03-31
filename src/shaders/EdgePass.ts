@@ -113,7 +113,7 @@ const createSobelNode = (
 		// Outline overlay
 		const outlineEdge = sobelFn(outline, uvCoord, uniforms.resolution)
 		const isOutline = outlineEdge.greaterThan(0.0).toFloat()
-		finalColor.assign(mix(vec4(1.0), finalColor, isOutline))
+		finalColor.assign(mix(finalColor, vec4(1.0), isOutline))
 
 		return finalColor
 	})()
