@@ -16,9 +16,6 @@ import { OptimizeAssets } from './scripts/optimizeAssets.ts'
 import staticAssetsPlugin from './scripts/static-assets.ts'
 
 export default defineConfig({
-	staged: {
-		'*': 'vp check --fix',
-	},
 	optimizeDeps: {
 		exclude: ['@solid-primitives/deep'],
 	},
