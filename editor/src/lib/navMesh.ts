@@ -1,12 +1,62 @@
+import { vec3toRaw } from '@/utils/mapFunctions'
 import type { NavMesh, NodeRef } from 'navcat'
-import type { SoloNavMeshInput, SoloNavMeshOptions } from 'navcat/blocks'
-import type { DebugObject } from 'navcat/three'
-import type { Matrix4, Object3D, Raycaster, Scene } from 'three/webgpu'
-import type { AssetData } from '../types'
 import { getNodeByTileAndPoly, getNodeRefIndex } from 'navcat'
-import { floodFillNavMesh, generateSoloNavMesh } from 'navcat/blocks'
-import { createNavMeshHelper, createNavMeshPolyHelper, getPositionsAndIndices } from 'navcat/three'
+import type { SoloNavMeshInput, SoloNavMeshOptions } from 'navcat/blocks'
+import { floodFillNavMesh, generateSoloNavMesh, mergePositionsAndIndices } from 'navcat/blocks'
+import type { DebugObject } from 'navcat/three'
+import { createNavMeshPolyHelper } from 'navcat/three'
+import { type BufferAttribute } from 'three'
+import type { Matrix4, Object3D, Raycaster, Scene } from 'three/webgpu'
 import { BoxGeometry, BufferGeometry, CapsuleGeometry, CylinderGeometry, Float32BufferAttribute, Group, Mesh, MeshBasicMaterial, MeshBasicNodeMaterial, SphereGeometry, Vector3 } from 'three/webgpu'
+import type { AssetData } from '../types'
+
+const _position = new Vector3()
+
+export const getPositionsAndIndices = (meshes: Mesh[]): [positions: number[], indices: number[]] => {
+	const toMerge: {
+		positions: ArrayLike<number>
+		indices: ArrayLike<number>
+	}[] = []
+
+	for (const mesh of meshes) {
+		const positionAttribute = mesh.geometry.attributes.position as BufferAttribute
+
+		if (!positionAttribute || positionAttribute.itemSize !== 3) {
+			continue
+		}
+
+		mesh.updateMatrixWorld()
+
+		const positions = new Float32Array(positionAttribute.count * 3)
+
+		for (let i = 0; i < positionAttribute.count; i++) {
+			const pos = _position.fromBufferAttribute(positionAttribute, i)
+			mesh.localToWorld(pos)
+			const indx = i * 3
+			positions[indx] = pos.x
+			positions[indx + 1] = pos.y
+			positions[indx + 2] = pos.z
+		}
+
+		let indices: ArrayLike<number> | undefined = mesh.geometry.getIndex()?.array
+
+		if (indices === undefined) {
+			// this will become indexed when merging with other meshes
+			const ascendingIndex: number[] = []
+			for (let i = 0; i < positionAttribute.count; i++) {
+				ascendingIndex.push(i)
+			}
+			indices = ascendingIndex
+		}
+
+		toMerge.push({
+			positions,
+			indices,
+		})
+	}
+	console.log(toMerge)
+	return mergePositionsAndIndices(toMerge)
+}
 
 export const generateNavMesh = (obj: Mesh<BufferGeometry>[]) => {
 	// generation input
@@ -65,13 +115,16 @@ export const generateNavMesh = (obj: Mesh<BufferGeometry>[]) => {
 	}
 
 	// generate a navmesh
-	const result = generateSoloNavMesh(input, options)
-
-	const navMesh = result.navMesh // the nav mesh
+	// const worker = new NavMeshWorker()
+	// worker.postMessage({ input, options })
+	// worker.onmessage = ({ data }) => {
+	// 	res(JSON.parse(data) as NavMesh)
+	// }
+	const res = generateSoloNavMesh(input, options)
+	return res.navMesh
 	// const intermediates = result.intermediates // intermediate data for debugging
 
 	// visualize the navmesh in threejs
-	const navMeshHelper = createNavMeshHelper(navMesh)
 
 	// // find a path
 	// const start: Vec3 = [-4, 0, -4]
@@ -97,16 +150,14 @@ export const generateNavMesh = (obj: Mesh<BufferGeometry>[]) => {
 	// 	const searchNodesHelper = createSearchNodesHelper(path.nodePath.nodes)
 	// 	scene.add(searchNodesHelper.object)
 	// }
-	return { navMesh, navMeshHelper }
 }
 
+const mat = new MeshBasicNodeMaterial({
+	color: 0xff0000,
+	// transparent: true,
+	// opacity: 0.2,
+})
 export const getMesh = (boundingBox: AssetData | undefined, matrix: Matrix4, model: Object3D) => {
-	const mat = new MeshBasicNodeMaterial({
-		color: 0xff0000,
-		// transparent: true,
-		// opacity: 0.2,
-	})
-
 	const collider = boundingBox?.collider
 	if (collider && collider.type === 'trimesh') {
 		const meshes: Mesh[] = []
@@ -131,16 +182,16 @@ export const getMesh = (boundingBox: AssetData | undefined, matrix: Matrix4, mod
 
 	switch (collider.type) {
 		case 'ball':
-			geo = new SphereGeometry(0.5)
+			geo = new SphereGeometry(0.5, 6, 6)
 			break
 		case 'capsule':
-			geo = new CapsuleGeometry(0.5)
+			geo = new CapsuleGeometry(0.5, 1, 6, 6, 6)
 			break
 		case 'cuboid':
 			geo = new BoxGeometry()
 			break
 		case 'cylinder':
-			geo = new CylinderGeometry(0.5, 0.5)
+			geo = new CylinderGeometry(0.5, 0.5, 1, 6)
 			break
 	}
 
@@ -153,8 +204,8 @@ export const getMesh = (boundingBox: AssetData | undefined, matrix: Matrix4, mod
 	mesh.position.y = collider.type === 'capsule' ? 1 : 0.5
 
 	const group = new Group()
-	group.scale.copy(collider.size)
-	group.position.copy(collider.position)
+	group.scale.copy(vec3toRaw(collider.size))
+	group.position.copy(vec3toRaw(collider.position))
 	group.add(mesh)
 
 	const group2 = new Group()
@@ -334,20 +385,83 @@ export function updateNavMeshVisualization(scene: Scene, navMesh: NavMesh) {
 	}
 }
 
-function applyFloodFillPruning(scene: Scene, navMesh: NavMesh, startRef?: NodeRef) {
-	// apply flood fill pruning using navMesh.nodes and navMesh.links
-	const selectedStartRef = startRef
+export class NavMeshVisualizer extends Group {
+	private polyHelpers = new Map<NodeRef, PolyHelper>()
 
-	if (selectedStartRef) {
-		floodFillPruneNavMesh(navMesh, [selectedStartRef as NodeRef])
+	constructor(private navMesh: NavMesh) {
+		super()
+		this.update()
 	}
 
-	updateNavMeshVisualization(scene, navMesh)
-}
+	update(): void {
+		this.clear()
+		this.createPolyHelpers()
+		this.applyFlags()
+	}
 
-export const floodFill = (scene: Scene, ray: Raycaster, navMesh: NavMesh) => {
-	const clickedPolyRef = findClickedPolygon(ray, navMesh)
-	if (clickedPolyRef) {
-		applyFloodFillPruning(scene, navMesh, clickedPolyRef)
+	floodFill(ray: Raycaster): void {
+		const clicked = findClickedPolygon(ray, this.navMesh)
+		console.log(clicked)
+		if (!clicked) return
+		floodFillPruneNavMesh(this.navMesh, [clicked])
+		this.update()
+	}
+
+	dispose(): void {
+		this.clear()
+	}
+
+	private createPolyHelpers(): void {
+		for (const tileId in this.navMesh.tiles) {
+			const tile = this.navMesh.tiles[tileId]
+			for (let polyIndex = 0; polyIndex < tile.polys.length; polyIndex++) {
+				const node = getNodeByTileAndPoly(this.navMesh, tile, polyIndex)
+				const helper = createNavMeshPolyHelper(this.navMesh, node.ref, [0.3, 0.8, 0.3])
+				helper.object.position.y += 0.1
+				this.add(helper.object)
+				this.polyHelpers.set(node.ref, { helper, nodeRef: node.ref })
+			}
+		}
+	}
+
+	applyFlags(): void {
+		for (const tileId in this.navMesh.tiles) {
+			const tile = this.navMesh.tiles[tileId]
+			for (let polyIndex = 0; polyIndex < tile.polys.length; polyIndex++) {
+				const polyRef = getNodeByTileAndPoly(this.navMesh, tile, polyIndex).ref
+				const poly = tile.polys[polyIndex]
+				if (poly.flags === 0) {
+					this.setPolyColor(polyRef, 0xff0000, true, 0)
+				} else {
+					this.setPolyColor(polyRef, 0x0000ff, false, 1.0)
+				}
+			}
+		}
+	}
+
+	clear() {
+		for (const { helper } of this.polyHelpers.values()) {
+			this.remove(helper.object)
+			helper.dispose()
+		}
+		this.polyHelpers.clear()
+		return super.clear()
+	}
+
+	private setPolyColor(polyRef: NodeRef, color: number, transparent: boolean, opacity: number): void {
+		const helperInfo = this.polyHelpers.get(polyRef)
+		if (!helperInfo) return
+		helperInfo.helper.object.traverse((child: any) => {
+			if (child instanceof Mesh && child.material) {
+				const mats = Array.isArray(child.material) ? child.material : [child.material]
+				mats.forEach((mat) => {
+					if ('color' in mat) {
+						mat.color.setHex(color)
+						mat.transparent = transparent
+						mat.opacity = opacity
+					}
+				})
+			}
+		})
 	}
 }

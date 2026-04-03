@@ -1,7 +1,7 @@
 <script setup lang="ts">
-import type { Object3D, QuaternionTuple, Vector3Like } from 'three/webgpu'
-import type { ColliderData } from '../types'
+import type { Object3D, QuaternionTuple } from 'three/webgpu'
 import { Box3, Quaternion, Vector3 } from 'three/webgpu'
+import type { ColliderData } from '../types'
 
 const props = defineProps<{
 	model: string

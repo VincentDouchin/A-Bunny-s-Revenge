@@ -1,4 +1,4 @@
-import type { Matrix4, QuaternionLike, Vector3Like } from 'three'
+import type { Matrix4, QuaternionLike, Vector3Like, Mesh } from 'three'
 import type { InstancedMesh } from 'three/webgpu'
 import type { ColliderData, InstanceData, InstanceEntity, LevelEntity } from '../types'
 import type { Direction } from '@/lib/directions'
@@ -6,8 +6,9 @@ import { defineStore } from 'pinia'
 import { SkeletonUtils } from 'three/addons'
 import { Box2, CanvasTexture, Group, Quaternion, Vector2, Vector3 } from 'three/webgpu'
 import { InstancedModel } from '@/global/assetLoaders'
-import { getGrassModel, getTrees } from '@/states/game/spawnTrees'
+import { composeMatrix, getGrassModel, getTrees } from '@/states/game/spawnTrees'
 import { buildTreeBoundaryGrid, isInBoundaryCell, mergeGrids, visualizeGrid } from '../lib/treeOptimizer'
+import { getMesh } from '../lib/navMesh'
 
 export const useTreeStore = defineStore('trees', () => {
 	const levelStore = useLevelStore()
@@ -35,7 +36,7 @@ export const useTreeStore = defineStore('trees', () => {
 			radius: number
 		}[]
 	}
-	const trees = ref<Trees | null>(null)
+	const trees = shallowRef<Trees | null>(null)
 
 	const getTreesData = () => {
 		if (!levelStore.levelImages?.treeMap || !levelStore.levelData) return { instances: [], data: [] }
@@ -54,7 +55,7 @@ export const useTreeStore = defineStore('trees', () => {
 
 		return new Box2(min, max)
 	}
-	const showBoundaryGrid = ref(false)
+
 	const getBoundaryGrid = () => {
 		const treeDataValue = trees.value?.data
 		if (!treeDataValue || !levelStore.levelData) return null
@@ -77,10 +78,7 @@ export const useTreeStore = defineStore('trees', () => {
 	}
 
 	const boundaryGrid = computed(() => {
-		if (showBoundaryGrid.value) {
-			return getBoundaryGrid()
-		}
-		return null
+		return getBoundaryGrid()
 	})
 
 	const getTreesInstances = (boundaryGrid: ReturnType<typeof getBoundaryGrid> | null = null) => {
@@ -120,6 +118,31 @@ export const useTreeStore = defineStore('trees', () => {
 
 	const treeInstances = computed(() => getTreesInstances(boundaryGrid.value))
 
+	const boundaryMeshes = computed(() => {
+		const group = new Group()
+		const meshes: Mesh[] = []
+		const treeInstances = getTreesInstances(getBoundaryGrid())
+		for (const key in treeInstances) {
+			const instance = treeInstances?.[key]
+			if (instance) {
+				const bb = useModelDataStore().modelData?.[instance.category]?.[instance.model]
+				const model = useAssetStore().models[instance.category][instance.model]
+				for (const instanceEntity of instance.entities) {
+					if (instanceEntity.collider) {
+						const matrix = composeMatrix(instanceEntity)
+
+						const meshColliders = getMesh(bb, matrix, model)
+						meshColliders.forEach((mesh) => {
+							meshes.push(mesh)
+							group.add(mesh)
+						})
+					}
+				}
+			}
+		}
+		return { meshes, group }
+	})
+
 	const treesModels = computed(() => {
 		const treesValue = trees.value
 		if (!treesValue || !treeInstances.value || !assetStore.assets) return null
@@ -137,7 +160,7 @@ export const useTreeStore = defineStore('trees', () => {
 		}
 		return newTreeGroup
 	})
-	const grassModel = ref<InstancedMesh | null>(null)
+	const grassModel = shallowRef<InstancedMesh | null>(null)
 
 	const setGrassModel = () => {
 		if (!assetStore.assets || !levelStore.grassNoise || !levelStore.levelImages.grassMap || !levelStore.levelData) {
@@ -158,5 +181,5 @@ export const useTreeStore = defineStore('trees', () => {
 		}
 	}
 	watchEffect(setGrassModel)
-	return { trees, treesModels, boundaryGrid, getTreesData, grassModel, setGrassModel, treeInstances }
+	return { trees, treesModels, boundaryGrid, getTreesData, grassModel, setGrassModel, treeInstances,  getBoundaryGrid, getTreesInstances, boundaryMeshes }
 })

@@ -1,7 +1,6 @@
 import { createPinia } from 'pinia'
 import { createApp } from 'vue'
-// @ts-expect-error lint issue
-import App from 'App.vue'
+import App from './App.vue'
 import 'vfonts/FiraCode.css'
 
 const root = document.getElementById('root')!

@@ -5,12 +5,11 @@ import { Bounds, MapControls, TransformControls } from '@tresjs/cientos'
 import { useLoop, useTres } from '@tresjs/core'
 import { SkeletonUtils } from 'three/addons'
 import { texture } from 'three/tsl'
-import { AmbientLight, CanvasTexture, MathUtils, Quaternion, Raycaster, Vector2, Vector3 } from 'three/webgpu'
+import { AmbientLight, CanvasTexture, ConeGeometry, MathUtils, MeshBasicNodeMaterial, Quaternion, Raycaster, Vector2, Vector3 } from 'three/webgpu'
 import { GroundMaterial } from '@/shaders/groundMaterial'
 import { WaterMaterial } from '@/shaders/waterMaterial'
 
 const props = defineProps<{
-	hideTags: boolean
 	transformMode: 'translate' | 'scale' | 'rotate'
 	selectedModel: string | null
 	selectedCategory: string | null
@@ -64,6 +63,7 @@ const updateSelectedEntity = () => {
 const { renderer, camera } = useTres()
 const { onBeforeRender } = useLoop()
 const { x: mouseX, y: mouseY } = useMouse()
+
 const mousePosition = computed(() => {
 	const box = renderer.domElement.getBoundingClientRect()
 	if (mouseX.value >= box.left && mouseX.value <= box.right && mouseY.value >= box.top && mouseY.value <= box.bottom) {
@@ -75,7 +75,6 @@ const mousePosition = computed(() => {
 	return null
 })
 const ray = new Raycaster()
-const groundMesh = ref<Object3D | null>(null)
 
 const tempModel = computed(() => {
 	if (!props.selectedModel || selectedEntityId.value || !props.selectedCategory || !props.selectedModel) return null
@@ -89,11 +88,23 @@ const tempModel = computed(() => {
 	return clone
 })
 
+const anchorRef = ref<Object3D | null>(null)
+
+const updateAnchorPos = () => {
+	if (anchorRef.value) {
+		const pos = anchorRef.value.position
+		levelStore.navMeshAnchor = {
+			x: pos.x,
+			y: pos.z,
+		}
+	}
+}
+
 useEventListener(renderer.domElement, 'click', (e) => {
 	if (mousePosition.value && camera.value) {
 		ray.setFromCamera(new Vector2(mousePosition.value.x, mousePosition.value.y), camera.value)
-		if (tempModel.value && groundMesh.value) {
-			const intersection = ray.intersectObject(groundMesh.value)
+		if (tempModel.value && levelStore.groundMesh) {
+			const intersection = ray.intersectObject(levelStore.groundMesh)
 			if (e.button === 0 && intersection?.[0]?.point && props.selectedCategory && props.selectedModel && !selectedEntityId.value) {
 				const id = MathUtils.generateUUID()
 				levelStore.levelEntities[id] = ref({
@@ -120,9 +131,9 @@ useEventListener(renderer.domElement, 'click', (e) => {
 })
 
 onBeforeRender(() => {
-	if (mousePosition.value && camera.value && groundMesh.value && tempModel.value) {
+	if (mousePosition.value && camera.value && levelStore.groundMesh && tempModel.value) {
 		ray.setFromCamera(new Vector2(mousePosition.value.x, mousePosition.value.y), camera.value)
-		const intersection = ray.intersectObject(groundMesh.value)
+		const intersection = ray.intersectObject(levelStore.groundMesh)
 		if (intersection?.[0]?.point) {
 			tempModel.value.position.copy(intersection[0].point)
 		}
@@ -135,16 +146,37 @@ onBeforeRender(() => {
 		:object="light"
 		dispose
 	/>
+
 	<primitive
 		v-if="tempModel"
 		:object="tempModel"
 		dispose
 	/>
-	<primitive
-		v-if="treeStore.grassModel"
-		:object="treeStore.grassModel"
-		dispose
-	/>
+
+	<template v-if="levelStore.moveAnchor">
+		<TresGroup
+			:scale="10"
+			:position="[levelStore.navMeshAnchor.x, 0, levelStore.navMeshAnchor.y]"
+			:ref="(e) => (anchorRef = e as any)"
+		>
+			<TresMesh
+				:position="[0, 0.5, 0]"
+				:rotation="[Math.PI, 0, 0]"
+				:geometry="new ConeGeometry(0.5, 1)"
+				:material="new MeshBasicNodeMaterial()"
+			>
+			</TresMesh>
+		</TresGroup>
+		<TransformControls
+			v-if="anchorRef"
+			:object="anchorRef"
+			mode="translate"
+			:showY="false"
+			@dragging="(e) => (dragging = e)"
+			@mouse-up="updateAnchorPos"
+		/>
+	</template>
+
 	<TresPerspectiveCamera :position="[0, 50, 25]" />
 	<TransformControls
 		v-if="selectedEntityId && entityRefs[selectedEntityId]"
@@ -153,16 +185,45 @@ onBeforeRender(() => {
 		@dragging="(e) => (dragging = e)"
 		@mouse-up="updateSelectedEntity"
 	/>
+
 	<template v-if="levelStore.levelData">
 		<primitive
-			v-if="treeStore.treesModels"
+			v-if="levelStore.mouseMesh"
+			:object="levelStore.mouseMesh"
+			:rotation="[-Math.PI / 2, 0, 0]"
+			:position="[0, -levelStore.levelData.displacementScale / 2, 0]"
+			dispose
+		/>
+		<primitive
+			v-if="levelStore.navMeshHelper && levelStore.displayed.navMesh"
+			:object="levelStore.navMeshHelper"
+			:position="[0, 2, 0]"
+			dispose
+		/>
+		<primitive
+			v-if="treeStore.grassModel && levelStore.displayed.grass"
+			:object="treeStore.grassModel"
+			dispose
+		/>
+		<primitive
+			v-if="treeStore.treesModels && levelStore.displayed.trees"
 			:object="treeStore.treesModels"
 			dispose
 		/>
 
 		<primitive
-			v-if="treeStore.boundaryGrid?.obj"
+			v-if="treeStore.boundaryGrid?.obj && levelStore.displayed.boundary"
 			:object="treeStore.boundaryGrid.obj"
+			dispose
+		/>
+		<primitive
+			v-if="treeStore.boundaryMeshes?.group && levelStore.displayed.colliders"
+			:object="treeStore.boundaryMeshes?.group"
+			dispose
+		/>
+		<primitive
+			v-if="levelStore.entitiesBoundaryMeshes?.group && levelStore.displayed.colliders"
+			:object="levelStore.entitiesBoundaryMeshes?.group"
 			dispose
 		/>
 		<Bounds
@@ -171,21 +232,18 @@ onBeforeRender(() => {
 			:offset="0.2"
 		>
 			<TresMesh
-				:ref="(e: any) => (groundMesh = e)"
-				:rotation="[-Math.PI / 2, 0, 0]"
+				:ref="(e: any) => (levelStore.groundMesh = e)"
 				:material="material"
+				:rotation="[-Math.PI / 2, 0, 0]"
 				:position="[0, -levelStore.levelData.displacementScale / 2, 0]"
 			>
-				<!-- @pointermove="e => pointerPos = e.intersection.point"
-				@pointerleave="pointerPos = null"
-				@pointerdown="placeTempModel" -->
 				<primitive
 					v-if="levelStore.groundGeometry"
 					:object="levelStore.groundGeometry"
 				/>
 				<TresPlaneGeometry
 					v-else
-					:args="[levelData.sizeX, levelData.sizeY]"
+					:args="[levelData.sizeX, levelData.sizeY, levelData.sizeX, levelData.sizeY]"
 				/>
 			</TresMesh>
 		</Bounds>
@@ -206,7 +264,6 @@ onBeforeRender(() => {
 				:id
 				v-model:entity-refs="entityRefs"
 				:entity="entity.value"
-				:hide-tags
 			/>
 		</template>
 	</template>

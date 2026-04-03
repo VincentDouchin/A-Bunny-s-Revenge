@@ -1,18 +1,20 @@
-import type { BufferGeometry } from 'three/webgpu'
-import type { WatchHandle } from 'vue'
-import type { LevelData, LevelEntity, MapNames } from '../types'
-import { useLocalStorage } from '@vueuse/core'
-import { createStore, del, entries, get, set, setMany } from 'idb-keyval'
-import { defineStore } from 'pinia'
-import { WebGLRenderer } from 'three'
-import { FullScreenQuad } from 'three/addons'
-import { CanvasTexture, ShaderMaterial } from 'three/webgpu'
-import { computed, ref, watchEffect } from 'vue'
 import { loadImage } from '@/global/assetLoaders'
 import { getGrass, setDisplacement } from '@/states/game/spawnTrees'
 import { imgToCanvas } from '@/utils/buffer'
+import { useLocalStorage } from '@vueuse/core'
+import { createStore, del, entries, get, set, setMany } from 'idb-keyval'
+import { NavMesh } from 'navcat'
+import { defineStore } from 'pinia'
+import { WebGLRenderer } from 'three'
+import { FullScreenQuad } from 'three/addons'
+import { BufferGeometry, CanvasTexture, Group, Matrix4, Mesh, Object3D, Quaternion, ShaderMaterial, Vector3, Raycaster, MeshBasicNodeMaterial, Texture } from 'three/webgpu'
+import type { WatchHandle } from 'vue'
+import { computed, ref, watchEffect } from 'vue'
 import FastNoiseLiteSrc from '../lib/FastNoiseLite.glsl?raw'
-import { createLevelFolder, deleteFile, loadImageFile, loadLevel, loadLevels, saveLevelFile, saveLevelImage } from '../lib/fileOperations'
+import { createLevelFolder, deleteFile, loadImageFile, loadLevel, loadLevels, removeLevel, saveLevelFile, saveLevelImage } from '../lib/fileOperations'
+import { generateNavMesh, getMesh, NavMeshVisualizer } from '../lib/navMesh'
+import type { LevelData, LevelEntity, MapNames } from '../types'
+import { DOWN } from '@/constants/vectors'
 
 const strToSeed = (str: string) => str.split('').reduce((acc, v) => acc + v.charCodeAt(0) - 73, 0)
 
@@ -27,6 +29,7 @@ export const useLevelStore = defineStore('level', () => {
 	const levelEntities = shallowReactive<Record<string, Ref<LevelEntity, LevelEntity>>>({})
 	const levelData = ref<Omit<LevelData, 'entities'> | null>(null)
 	const key = computed(() => `level-${selectedLevel.value}`)
+	const navMesh = shallowRef<NavMesh | null>(null)
 	const init = async () => {
 		levels.value = (await loadLevels()).map((l) => l.name)
 	}
@@ -34,6 +37,10 @@ export const useLevelStore = defineStore('level', () => {
 	const imagesStore = (level: string) => createStore(`${level}-images`, 'images')
 	const entityStore = (level: string) => createStore(`${level}-entities`, 'entities')
 	const instancesStore = (level: string) => createStore(`${level}-instances`, 'instances')
+
+	watch(navMesh, () => {
+		set(`navmesh-${selectedLevel.value}`, navMesh.value)
+	})
 	const initDb = async (level: string) => {
 		if (!(await get(`data-${level}`))) {
 			const levelLoaded = await loadLevel(level)
@@ -107,6 +114,7 @@ export const useLevelStore = defineStore('level', () => {
 			}
 		}
 	}
+	const getNavMesh = (level: string) => get(`navmesh-${level}`)
 
 	const getEntities = async (level: string) => {
 		return (await entries<string, LevelEntity>(entityStore(level))).reduce<Record<string, LevelEntity>>((acc, [key, val]) => {
@@ -121,6 +129,7 @@ export const useLevelStore = defineStore('level', () => {
 		await fetchLevelImages(level)
 		const data = await getLevelData(level)
 		const savedEntities = await getEntities(level)
+		navMesh.value = await getNavMesh(level)
 		for (const id in levelEntities) {
 			delete levelEntities[id]
 		}
@@ -131,11 +140,49 @@ export const useLevelStore = defineStore('level', () => {
 
 		levelData.value = data
 	}
-	const rollback = async (name: string) => {
-		await del(`level-${name}`)
-		if (name === selectedLevel.value) {
-			fetchLevel(name)
+	const rollback = async () => {
+		if (!selectedLevel.value) return
+		await del(`level-${selectedLevel.value}`)
+		fetchLevel(selectedLevel.value)
+	}
+	const destroy = async () => {
+		if (!selectedLevel.value) return
+		const level = selectedLevel.value
+
+		// Stop all entity watch handles before clearing entities
+		for (const id in wacthHandles) {
+			wacthHandles[id]()
+			delete wacthHandles[id]
 		}
+
+		// Clear all IndexedDB stores for this level
+		const [imageEntries, entityEntries, instanceEntries] = await Promise.all([entries(imagesStore(level)), entries(entityStore(level)), entries(instancesStore(level))])
+		await Promise.all([
+			...imageEntries.map(([k]) => del(k, imagesStore(level))),
+			...entityEntries.map(([k]) => del(k, entityStore(level))),
+			...instanceEntries.map(([k]) => del(k, instancesStore(level))),
+			del(`data-${level}`),
+			del(`navmesh-${level}`),
+			del(key.value),
+		])
+
+		// Clear in-memory reactive state
+		levelImages.value = {}
+		for (const id in levelEntities) {
+			delete levelEntities[id]
+		}
+		levelData.value = null
+		navMesh.value = null
+		navMeshHelper.value = null
+		groundGeometry.value = null
+		groundMesh.value = null
+
+		// Remove the level from the filesystem and levels list
+		await removeLevel(level)
+		levels.value = levels.value.filter((l) => l !== level)
+
+		// Deselect the level last so watchers don't trigger a re-fetch
+		selectedLevel.value = null
 	}
 	const resetMap = async (map: MapNames) => {
 		await del(map, imagesStore(selectedLevel.value!))
@@ -227,7 +274,7 @@ export const useLevelStore = defineStore('level', () => {
 		return renderer.domElement
 	})
 
-	const groundGeometry = ref<BufferGeometry | null>(null)
+	const groundGeometry = shallowRef<BufferGeometry | null>(null)
 
 	const setGroundGeometry = () => {
 		if (levelData.value) {
@@ -278,6 +325,60 @@ export const useLevelStore = defineStore('level', () => {
 		await saveLevelFile(selectedLevel.value, levelData, localDir)
 	}
 
+	const navMeshHelper = shallowRef<NavMeshVisualizer | null>(null)
+	watchEffect(() => {
+		if (navMesh.value) {
+			navMeshHelper.value = new NavMeshVisualizer(navMesh.value)
+			const ray = new Raycaster(new Vector3(navMeshAnchor.value.x, 100, navMeshAnchor.value.y), DOWN, 1, 200)
+			navMeshHelper.value.floodFill(ray)
+		} else {
+			navMeshHelper.value = null
+		}
+	})
+
+	const groundMesh = shallowRef<Object3D | null>(null)
+
+	const entitiesBoundaryMeshes = computed(() => {
+		const group = new Group()
+		const meshes: Mesh<BufferGeometry>[] = []
+		for (const id in levelEntities) {
+			const data = levelEntities[id].value
+			const matrix = new Matrix4().compose(new Vector3().fromArray(data.position), new Quaternion().fromArray(data.rotation), new Vector3().fromArray(data.scale))
+			const bb = modelDataStore.modelData?.[data.category]?.[data.model]
+			const model = assetStore.models[data.category][data.model]
+			console.log(data.model)
+			getMesh(bb, matrix, model).forEach((mesh) => {
+				group.add(mesh)
+				meshes.push(mesh)
+			})
+		}
+		return { group, meshes }
+	})
+
+	const modelDataStore = useModelDataStore()
+	const treeStore = useTreeStore()
+	const assetStore = useAssetStore()
+	const anchorName = computed(() => `anchor-${selectedLevel.value}`)
+	const navMeshAnchor = useLocalStorage(anchorName, { x: 0, y: 0 })
+	const addNavMesh = async () => {
+		const meshes: Mesh<BufferGeometry>[] = [toRaw(groundMesh.value) as any, ...treeStore.boundaryMeshes.meshes, ...entitiesBoundaryMeshes.value.meshes]
+		console.log(meshes)
+		navMesh.value = generateNavMesh(meshes)
+	}
+
+	const moveAnchor = ref(false)
+	const displayed = useLocalStorage('displayed', {
+		tags: true,
+		grass: true,
+		trees: true,
+		boundary: true,
+		colliders: true,
+		navMesh: true,
+	})
+
+	const mouseMaterial = new MeshBasicNodeMaterial({ transparent: true, map: new Texture() })
+	const mouseMesh = computed(() => (groundGeometry.value ? new Mesh(groundGeometry.value, mouseMaterial) : null))
+
 	return {
 		selectedEntityId,
 		levels,
@@ -297,5 +398,16 @@ export const useLevelStore = defineStore('level', () => {
 		resetMap,
 		destroyMap,
 		save,
+		groundMesh,
+		addNavMesh,
+		navMesh,
+		navMeshHelper,
+		entitiesBoundaryMeshes,
+		displayed,
+		navMeshAnchor,
+		moveAnchor,
+		mouseMaterial,
+		mouseMesh,
+		destroy,
 	}
 })

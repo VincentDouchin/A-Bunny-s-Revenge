@@ -1,15 +1,13 @@
 <script setup lang="ts">
-import type { LevelEntity } from '../types'
 import { Html } from '@tresjs/cientos'
 import { useThemeVars } from 'naive-ui'
 import { SkeletonUtils } from 'three/addons'
 import { Euler, Group, Object3D, Quaternion } from 'three/webgpu'
-import { range } from '@/utils/mapFunctions'
+import type { LevelEntity } from '../types'
 
 const props = defineProps<{
 	entity: LevelEntity
 	id: string
-	hideTags: boolean
 }>()
 
 const entityRefs = defineModel<Record<string, Object3D>>('entityRefs', { required: true })
@@ -17,6 +15,7 @@ const entityRefs = defineModel<Record<string, Object3D>>('entityRefs', { require
 onUnmounted(() => {
 	delete entityRefs.value[props.id]
 })
+const levelStore = useLevelStore()
 const modelDataStore = useModelDataStore()
 const assetStore = useAssetStore()
 const themeVars = useThemeVars()
@@ -66,7 +65,7 @@ const rotation = computed(() => new Euler().setFromQuaternion(new Quaternion().f
 	>
 		<!-- @click="selectedEntityId = id" -->
 		<Html
-			v-if="!hideTags && entity.tags && Object.keys(entity.tags).length !== 0"
+			v-if="levelStore.displayed.tags && entity.tags && Object.keys(entity.tags).length !== 0"
 			center
 		>
 			<NTag

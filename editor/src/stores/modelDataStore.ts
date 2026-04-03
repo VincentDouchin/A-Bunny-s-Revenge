@@ -5,7 +5,7 @@ import { loadBoundingBox } from '../lib/fileOperations'
 
 export const useModelDataStore = defineStore('modelData', () => {
 	const key = 'modelData'
-	const modelData = shallowRef<Record<string, Record<string, AssetData>>>({})
+	const modelData = ref<Record<string, Record<string, AssetData>>>({})
 	const init = async () => {
 		const existingValue = await get(key)
 		modelData.value = existingValue ?? (await loadBoundingBox())

@@ -1,7 +1,7 @@
 import type { Vector2, Vector3Like } from 'three/webgpu'
 import { Vector3 } from 'three'
 
-import { BufferGeometry, Group, Line, LineBasicNodeMaterial, Mesh, MeshBasicNodeMaterial, SphereGeometry } from 'three/webgpu'
+import { BufferGeometry, Group, Line, LineBasicNodeMaterial, Mesh, MeshBasicNodeMaterial, PlaneGeometry, DoubleSide } from 'three/webgpu'
 
 interface TreeData {
 	position: Vector3Like
@@ -181,15 +181,15 @@ export function buildTreeBoundaryGrid(trees: TreeData[], levelSize: Vector2, gri
 
 // Visualization
 export function visualizeGrid(gridData: GridData) {
-	const material = new LineBasicNodeMaterial({ color: 0x00ff00 })
-	const material2 = new LineBasicNodeMaterial({ color: 0xff0000 })
+	const lineMaterial = new LineBasicNodeMaterial({ color: 0xffffff })
+	const material = new MeshBasicNodeMaterial({ color: 0xffffff, side: DoubleSide })
+
 	const group = new Group()
 
 	gridData.grid.forEach((key) => {
 		const [gx, gz] = key.split(',').map(Number)
 		const x = gx * gridData.gridSize
 		const z = gz * gridData.gridSize
-		const inside = cellIsInsideLevel(gx, gz, gridData.gridSize, gridData.levelWorldBounds)
 
 		const points = [
 			new Vector3(x, 0, z),
@@ -199,12 +199,12 @@ export function visualizeGrid(gridData: GridData) {
 			new Vector3(x, 0, z),
 		]
 
-		const m = new Mesh(new SphereGeometry(1), new MeshBasicNodeMaterial())
-		m.position.copy({ x: x + gridData.gridSize / 2, z: z + gridData.gridSize / 2, y: -2 })
-		group.add(m)
-
+		const plane = new Mesh(new PlaneGeometry(gridData.gridSize, gridData.gridSize), material)
+		plane.rotation.x = -Math.PI / 2
+		plane.position.set(x + gridData.gridSize / 2, 0, z + gridData.gridSize / 2)
+		group.add(plane)
 		const geometry = new BufferGeometry().setFromPoints(points)
-		const line = new Line(geometry, inside ? material2 : material)
+		const line = new Line(geometry, lineMaterial)
 		group.add(line)
 	})
 

@@ -11,16 +11,10 @@ const colliderStore = useColliderStore()
 const tagsStore = useTagsStore()
 const loaded = ref(false)
 onMounted(async () => {
-	await assetStore.init()
-	await modelDataStore.init()
-	await thumbnailStore.init()
-	await levelStore.init()
-	await tagsStore.init()
-	await init()
+	await Promise.all([assetStore.init(), modelDataStore.init(), thumbnailStore.init(), levelStore.init(), tagsStore.init(), init()])
 	loaded.value = true
 })
 
-const hideTags = useLocalStorage('hideTags', false)
 const mode = useLocalStorage<'level' | 'model'>('mode', 'level')
 const selectedCategory = useLocalStorage<null | string>('selectedCategory', null)
 const selectedModel = useLocalStorage<null | string>('selectedModel', null)
@@ -67,12 +61,13 @@ watch(
 		<NGlobalStyle />
 		<div
 			v-if="loaded"
+			v-cloak
 			class="wrapper"
 		>
 			<div class="container">
 				<div class="top">
 					<NScrollbar style="min-height: 0; height: 100%">
-						<div style="display: grid; gap: 1rem; flex-direction: column; grid-template-rows: auto auto">
+						<div style="display: grid; gap: 1rem">
 							<Configuration />
 							<LevelsSelector v-model:mode="mode" />
 							<LevelProps v-if="levelStore.levelData && mode === 'level'" />
@@ -92,17 +87,13 @@ watch(
 							() => {
 								levelStore.selectedEntityId = null
 								colliderStore.selectedCollider = null
-								selectedModel = null
+								if (mode === 'level') selectedModel = null
 							}
 						"
 					>
 						<div style="position: relative; height: 100%; overflow: clip">
 							<div style="position: absolute; z-index: 1">
 								<NFlex>
-									<NFlex v-if="mode === 'level'">
-										<NSwitch v-model:value="hideTags" />
-										<NText> Hide tags </NText>
-									</NFlex>
 									<NInputGroup v-if="colliderStore.selectedKey || levelStore.selectedEntityId">
 										<NButton
 											:secondary="transformMode === 'translate'"
@@ -145,7 +136,6 @@ watch(
 									v-if="levelStore.levelData && assetStore.assets !== null && mode === 'level'"
 									v-model:selected-entity-id="levelStore.selectedEntityId"
 									:level-data="levelStore.levelData"
-									:hide-tags="hideTags"
 									:transform-mode
 									:selected-model
 									:selected-category
@@ -160,19 +150,22 @@ watch(
 						</div>
 					</NCard>
 					<NScrollbar style="min-height: 0; height: 100%">
-						<CollidersEditor
-							v-if="mode === 'model' && selectedCategory && selectedModel"
-							:category="selectedCategory"
-							:model="selectedModel"
-						/>
-						<MapEditors
-							v-if="mode === 'level' && !levelStore.selectedEntityId"
-							:key="levelStore.selectedLevel ?? ''"
-						/>
-						<EntityProps
-							v-if="levelStore.selectedEntityId"
-							:selected-entity-id="levelStore.selectedEntityId"
-						/>
+						<div style="display: grid; gap: 1rem">
+							<DisplayedToggles v-if="mode === 'level'" />
+							<CollidersEditor
+								v-if="mode === 'model' && selectedCategory && selectedModel"
+								:category="selectedCategory"
+								:model="selectedModel"
+							/>
+							<MapEditors
+								v-if="mode === 'level' && !levelStore.selectedEntityId"
+								:key="levelStore.selectedLevel ?? ''"
+							/>
+							<EntityProps
+								v-if="levelStore.selectedEntityId"
+								:selected-entity-id="levelStore.selectedEntityId"
+							/>
+						</div>
 					</NScrollbar>
 				</div>
 				<NCard

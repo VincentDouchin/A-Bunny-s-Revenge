@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import type { Vector2Like } from 'three'
 import type { LevelData, MapNames } from '../types'
-import { Vector2 } from 'three'
+import { Vector2, CanvasTexture } from 'three'
 import { loadImage } from '@/global/assetLoaders'
 import { getScreenBuffer } from '@/utils/buffer'
 
@@ -105,7 +105,11 @@ const drawMouse = (pos: Vector2Like) => {
 		clearCanvas(cursorCanvasCtx.value)
 		cursorCanvasCtx.value.globalCompositeOperation = 'source-over'
 		drawLine(cursorCanvasCtx.value, pos, { x: pos.x + 1, y: pos.y + 1 })
-		// mouseCanvas.value = mode.value ? strokeCanvas.value : cursorCanvas.value
+		if (props.open[0] === props.map) {
+			levelStore.mouseMaterial.map = new CanvasTexture(cursorCanvasCtx.value.canvas)
+			levelStore.mouseMaterial.needsUpdate = true
+			console.log('ok')
+		}
 	}
 }
 
