@@ -1,3 +1,4 @@
+// app.ts
 import { entries, objectKeys } from '@/utils/mapFunctions'
 
 export type AppStates<A extends App<any, any>> = A extends App<infer States, any> ? States[number] : never

@@ -3,9 +3,9 @@
 	"version": "0.0.0",
 	"private": true,
 	"scripts": {
-		"dev": "vite",
-		"build": "tsc -b && vite build",
-		"preview": "vite preview",
+		"dev": "vp dev",
+		"build": "tsc && vp build",
+		"preview": "vp preview",
 		"tauri": "tauri",
 		"desktop build": "npm run tauri build"
 	},

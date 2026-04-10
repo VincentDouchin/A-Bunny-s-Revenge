@@ -1,18 +1,17 @@
+import { renderer, settings, ui } from '@/global/init'
+import { setAllMuted } from '@/global/sounds'
+import { isStandalone } from '@/states/game/FullscreenUi'
 import VolumeOn from '@assets/icons/volume-high-solid.svg'
 import VolumeOff from '@assets/icons/volume-xmark-solid.svg'
 import { createEffect, For, Show } from 'solid-js'
 import { css } from 'solid-styled'
-import { settings, ui } from '@/global/init'
-import { renderer } from '@/global/rendering'
-import { setAllMuted } from '@/global/sounds'
-import { isStandalone } from '@/states/game/FullscreenUi'
 import { Menu } from './components/Menu'
 import { CheckBox, InventoryTitle, OutlineText, SwitchButtons } from './components/styledComponents'
 
 export const Settings = () => {
 	const setShadows = (shadowsEnabled: boolean) => {
 		settings.disableShadows = shadowsEnabled
-		renderer.shadowMap.enabled = !shadowsEnabled
+		renderer.shadowMap.enabled = shadowsEnabled
 	}
 	createEffect(() => {
 		ui.setFontSize(settings.uiScale)

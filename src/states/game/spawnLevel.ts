@@ -21,6 +21,7 @@ import { getGroundMaterial } from './groundMaterial'
 import { spawnLight } from './spawnLights'
 import { composeMatrix, getGrassModel, setDisplacement } from './spawnTrees'
 import { objectValues } from '@/utils/mapFunctions'
+import { SplatMaterial } from '@/shaders/splatMaterial'
 
 export const getDisplacementMap = (level: LevelLoaded) => {
 	const ctx = getScreenBuffer(level.sizeX, level.sizeY)
@@ -73,13 +74,14 @@ const spawnGround = (level: LevelLoaded, parent: Entity) => {
 		planksTexture: assets.textures.planks,
 		groundTexture: assets.textures.Dirt4_Dark,
 		rockTexture: assets.textures.Rocks1_Light,
-		level: new CanvasTexture(level.pathMap),
+		level: level.pathMap ? new CanvasTexture(level.pathMap) : null,
 		grassNoiseTexture: new CanvasTexture(level.grassNoise),
 	})
 	const groundMesh = new Mesh(geometry, material)
 	groundMesh.rotation.x = -Math.PI / 2
 	groundMesh.position.y = -level.displacementScale / 2
 	groundMesh.receiveShadow = true
+
 	const gridScale = 0.2
 	const heightfieldMap = scaleCanvas(getDisplacementMap(level), gridScale)
 	const heights = canvasToArray(heightfieldMap).map((pixel) => pixel.y / 255)
@@ -101,6 +103,16 @@ const spawnGround = (level: LevelLoaded, parent: Entity) => {
 			.setActiveEvents(ActiveEvents.COLLISION_EVENTS),
 		ground: true,
 		secondaryCollidersDesc,
+		parent,
+	})
+	const splatMaterial = new SplatMaterial()
+	const splatModel = new Mesh(geometry, splatMaterial)
+	splatModel.rotation.x = -Math.PI / 2
+	splatModel.position.y = -level.displacementScale / 2 + 0.1
+	ecs.add({
+		position: new Vector3(),
+		model: splatModel,
+		splatDisplay: splatMaterial,
 		parent,
 	})
 }

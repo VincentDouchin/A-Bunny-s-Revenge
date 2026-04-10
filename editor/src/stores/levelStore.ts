@@ -1,3 +1,4 @@
+import { DOWN } from '@/constants/vectors'
 import { loadImage } from '@/global/assetLoaders'
 import { getGrass, setDisplacement } from '@/states/game/spawnTrees'
 import { imgToCanvas } from '@/utils/buffer'
@@ -5,16 +6,15 @@ import { useLocalStorage } from '@vueuse/core'
 import { createStore, del, entries, get, set, setMany } from 'idb-keyval'
 import { NavMesh } from 'navcat'
 import { defineStore } from 'pinia'
-import { WebGLRenderer, Material } from 'three'
+import { WebGLRenderer } from 'three'
 import { FullScreenQuad } from 'three/addons'
-import { BufferGeometry, CanvasTexture, Group, Matrix4, Mesh, Object3D, Quaternion, ShaderMaterial, Vector3, Raycaster, MeshBasicNodeMaterial, Texture } from 'three/webgpu'
+import { BufferGeometry, CanvasTexture, Group, Matrix4, Mesh, MeshBasicNodeMaterial, Object3D, Quaternion, Raycaster, ShaderMaterial, Texture, Vector3 } from 'three/webgpu'
 import type { WatchHandle } from 'vue'
 import { computed, onScopeDispose, ref, shallowRef, watchEffect } from 'vue'
 import FastNoiseLiteSrc from '../lib/FastNoiseLite.glsl?raw'
 import { createLevelFolder, deleteFile, loadImageFile, loadLevel, loadLevels, removeLevel, saveLevelFile, saveLevelImage } from '../lib/fileOperations'
 import { generateNavMesh, getMesh, NavMeshVisualizer } from '../lib/navMesh'
 import type { LevelData, LevelEntity, MapNames } from '../types'
-import { DOWN } from '@/constants/vectors'
 
 const strToSeed = (str: string) => str.split('').reduce((acc, v) => acc + v.charCodeAt(0) - 73, 0)
 
@@ -338,6 +338,9 @@ export const useLevelStore = defineStore('level', () => {
 				await saveLevelImage(selectedLevel.value, name, canvas, localDir)
 			}
 		}
+		if (levelData.floorTexture === 'grass' && grassNoise.value) {
+			await saveLevelImage(selectedLevel.value, 'grassNoise', grassNoise.value, localDir)
+		}
 		if (levelImages.value.grassMap) {
 			levelData.grass = getGrass(
 				levelImages.value.heightMap ?? null,
@@ -347,6 +350,9 @@ export const useLevelStore = defineStore('level', () => {
 				2,
 				levelData.displacementScale,
 			).map(({ position, scale }) => [position.x, position.y, position.z, scale])
+		}
+		if (navMesh.value) {
+			levelData.navMesh = toRaw(navMesh.value)
 		}
 		await saveLevelFile(selectedLevel.value, levelData, localDir)
 	}
@@ -364,34 +370,21 @@ export const useLevelStore = defineStore('level', () => {
 
 	const groundMesh = shallowRef<Object3D | null>(null)
 
-	const entitiesBoundaryMeshes = shallowRef<{ group: Group; meshes: Mesh<BufferGeometry>[] }>({ group: new Group(), meshes: [] })
-	watchEffect(() => {
-		if (Object.keys(assetStore.models).length === 0) return
-		entitiesBoundaryMeshes.value.group.traverse((obj) => {
-			if (obj instanceof Mesh) {
-				obj.geometry?.dispose()
-				if (Array.isArray(obj.material)) {
-					obj.material.forEach((m) => (m as Material).dispose())
-				} else {
-					obj.material?.dispose()
-				}
-			}
-		})
-
+	const entitiesBoundaryMeshes = computed(() => {
 		const group = new Group()
 		const meshes: Mesh<BufferGeometry>[] = []
+		if (Object.keys(assetStore.models).length === 0) return { group, meshes }
 		for (const id in levelEntities) {
 			const data = levelEntities[id].value
 			const matrix = new Matrix4().compose(new Vector3().fromArray(data.position), new Quaternion().fromArray(data.rotation), new Vector3().fromArray(data.scale))
 			const bb = modelDataStore.modelData?.[data.category]?.[data.model]
 			const model = assetStore.models[data.category][data.model]
-			console.log(data.model)
 			getMesh(bb, matrix, model).forEach((mesh) => {
 				group.add(mesh)
 				meshes.push(mesh)
 			})
 		}
-		entitiesBoundaryMeshes.value = { group, meshes }
+		return { group, meshes }
 	})
 
 	const anchorName = computed(() => `anchor-${selectedLevel.value}`)
@@ -399,7 +392,6 @@ export const useLevelStore = defineStore('level', () => {
 
 	const addNavMesh = async () => {
 		const meshes: Mesh<BufferGeometry>[] = [toRaw(groundMesh.value) as any, ...treeStore.boundaryMeshes.meshes, ...entitiesBoundaryMeshes.value.meshes]
-		console.log(meshes)
 		navMesh.value = generateNavMesh(meshes)
 	}
 
@@ -411,6 +403,7 @@ export const useLevelStore = defineStore('level', () => {
 		boundary: true,
 		colliders: true,
 		navMesh: true,
+		models: true,
 	})
 
 	const mouseMaterial = new MeshBasicNodeMaterial({ transparent: true, map: new Texture() })

@@ -6,7 +6,7 @@ import type { app } from '@/global/states'
 import { Object3D, Vector3 } from 'three/webgpu'
 import { VFXParticles } from 'vanilla-vfx'
 import { getGameRenderGroup } from '@/debug/debugUi'
-import { ecs, time } from '@/global/init'
+import { ecs, renderer, time } from '@/global/init'
 import { chestAppearingParticles } from '@/particles/chestAppearing'
 import { dashParticles } from '@/particles/dashParticles'
 import { enemyDefeatedParticles } from '@/particles/enemyDefeated'
@@ -18,7 +18,7 @@ export type Particles = 'dashParticles' | 'wateringCanParticles' | 'chestAppeari
 
 export type ParticlesPool = Record<Particles, Pool<Vfx>>
 export const spawnVfx = async (vfxOptions: CustomVFXParticlesOptions) => {
-	const { renderer, scene } = getGameRenderGroup()
+	const { scene } = getGameRenderGroup()
 	const vfx = new Vfx(renderer, vfxOptions)
 	scene.add(vfx.group)
 	await vfx.init()
@@ -118,6 +118,7 @@ export const particlesPlugin =
 				}
 			}
 			const spawnPool = async () => {
+				console.log('ok', component, components[component])
 				for (let i = 0; i < components[component]; i++) {
 					const vfx = await spawnVfx(particleDefinitions[component])
 					ecs.add({ [component]: vfx, particlePool: true })
@@ -128,8 +129,8 @@ export const particlesPlugin =
 				'default',
 				runIf(() => app.isDisabled('paused'), updateParticles),
 			)
-			app.onEnter('game', spawnPool)
-			app.addSubscribers('game', () =>
+			app.onEnter('default', spawnPool)
+			app.addSubscribers('default', () =>
 				query.onEntityRemoved.subscribe((e) => {
 					const vfx = e[component]
 					vfx.clear()

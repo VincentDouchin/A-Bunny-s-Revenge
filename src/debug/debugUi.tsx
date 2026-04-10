@@ -11,8 +11,8 @@ import { recipes } from '@/constants/recipes'
 import { validateConversation } from '@/conversation/setupConversation'
 import { params } from '@/global/context'
 import { RenderGroup } from '@/global/entity'
-import { assets, dayTime, ecs, save, scene, ui, world } from '@/global/init'
-import { cameraQuery, gameCameraQuery, getTargetSize, height, updateRenderSize, width } from '@/global/rendering'
+import { assets, dayTime, ecs, renderer, save, scene, ui, world } from '@/global/init'
+import { cameraQuery, gameCameraQuery, getTargetSize, updateRenderSize } from '@/global/rendering'
 import { app } from '@/global/states'
 import { RapierDebugRenderer } from '@/lib/debugRenderer'
 import { encounters } from '@/states/dungeon/encounters'
@@ -25,7 +25,7 @@ import { SaveEditor } from './saveEditor'
 import { SoundUi } from './SoundUi'
 
 export const [selectedBoss, setSelectedBoss] = useLocalStorage<{ boss: Boss }>('selectedBoss', { boss: 'Armabee_Evolved' })
-const rendererQuery = ecs.with('renderer', 'scene', 'renderGroup').where((e) => e.renderGroup === RenderGroup.Game)
+const rendererQuery = ecs.with('scene', 'renderGroup').where((e) => e.renderGroup === RenderGroup.Game)
 
 const [localParams, setParams] = useLocalStorage('params', params as any)
 Object.assign(params, { ...localParams, zoom: params.zoom, cameraOffsetX: 0, cameraOffsetY: 150, cameraOffsetZ: -200 })
@@ -47,7 +47,6 @@ const changePixelation = (pixelation: boolean) => {
 	if (pixelation) {
 		updateRenderSize(getTargetSize())
 	} else {
-		const { renderer } = getGameRenderGroup()
 		renderer.setSize(window.innerWidth, window.innerHeight)
 	}
 }
@@ -96,13 +95,13 @@ export const DebugUi = () => {
 	const changeCameraNormal = () => {
 		const camera = removeCamera()
 		if (!camera) return
-		// (depthQuad.material as ShaderMaterial).uniforms.orthographic.value = false
 		ecs.addComponent(camera, 'camera', new PerspectiveCamera(params.fov, window.innerWidth / window.innerHeight, 0.1, 1000))
 	}
 	const changeCameraOrtho = () => {
 		const camera = removeCamera()
 		if (!camera) return
-		// (depthQuad.material as ShaderMaterial).uniforms.orthographic.value = true
+		const width = window.innerWidth
+		const height = window.innerHeight
 		ecs.addComponent(camera, 'camera', new OrthographicCamera(-width / 2 / params.zoom, width / 2 / params.zoom, height / 2 / params.zoom, -height / 2 / params.zoom, 0.1, 1000))
 	}
 	const enableAttackAnimations = () => {

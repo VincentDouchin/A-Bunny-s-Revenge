@@ -36,6 +36,7 @@ export class WeaponArc extends Mesh {
 	constructor() {
 		super(new BufferGeometry(), weaponArcMaterial())
 		this.frustumCulled = false
+		this.renderOrder = 1
 		this.geometry.setAttribute('uv', new BufferAttribute(new Float32Array(), 2))
 		this.geometry.setAttribute('position', new BufferAttribute(new Float32Array(), 3))
 	}

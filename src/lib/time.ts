@@ -1,14 +1,20 @@
+import { save } from '@/global/init'
 import { easeInOut } from 'popmotion'
 import { clamp } from 'three/src/math/MathUtils.js'
-import { Clock } from 'three/webgpu'
-import { save } from '@/global/init'
+import { Timer } from 'three/webgpu'
 
-export class Time extends Clock {
-	delta = 0
-	elapsed = 0
-	tick = () => {
-		this.delta = this.getDelta() * 1000
-		this.elapsed += this.delta
+export class Time extends Timer {
+	get delta() {
+		return this.getDelta() * 1000
+	}
+	get elapsed() {
+		return this.getElapsed()
+	}
+	stop() {
+		this.setTimescale(0)
+	}
+	start() {
+		this.setTimescale(1)
 	}
 }
 

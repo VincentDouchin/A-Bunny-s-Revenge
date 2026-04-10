@@ -28,7 +28,7 @@ const material = new GroundMaterial({
 	groundTexture: toRaw(assetStore.assets!.textures.Dirt4_Dark),
 	levelSize: new Vector2(levelData.value.sizeX, levelData.value.sizeY),
 	rockTexture: toRaw(assetStore.assets!.textures.Rocks1_Light),
-	level: undefined,
+	level: null,
 })
 
 watchEffect(() => {
@@ -255,16 +255,18 @@ onBeforeRender(() => {
 		>
 			<TresPlaneGeometry :args="[levelData.sizeX, levelData.sizeY]" />
 		</TresMesh>
-		<template
-			v-for="(entity, id) in levelStore.levelEntities"
-			:key="id"
-		>
-			<EntityRenderer
-				v-if="entity && entity !== true"
-				:id
-				v-model:entity-refs="entityRefs"
-				:entity="entity.value"
-			/>
+		<template v-if="levelStore.displayed.models">
+			<template
+				v-for="(entity, id) in levelStore.levelEntities"
+				:key="id"
+			>
+				<EntityRenderer
+					v-if="entity"
+					:id
+					v-model:entity-refs="entityRefs"
+					:entity="entity.value"
+				/>
+			</template>
 		</template>
 	</template>
 	<MapControls

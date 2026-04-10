@@ -5,6 +5,7 @@ import { render } from 'solid-js/web'
 
 export class UIManager {
 	root: HTMLElement
+	#disposeUI: (() => void) | null = null
 	constructor(settings: Settings) {
 		const el = document.createElement('div')
 		el.style.position = 'fixed'
@@ -21,7 +22,9 @@ export class UIManager {
 	listeners = new Set<() => void>()
 
 	render(ui: () => JSXElement) {
-		return render(ui, this.root)
+		this.#disposeUI?.()
+		this.#disposeUI = render(ui, this.root)
+		return this.#disposeUI
 	}
 
 	setFontSize(uiScale: number) {
@@ -50,6 +53,11 @@ export class UIManager {
 		for (const listener of this.listeners) {
 			listener()
 		}
+	}
+	dispose() {
+		this.#disposeUI?.()
+		this.#disposeUI = null
+		this.root.remove()
 	}
 }
 

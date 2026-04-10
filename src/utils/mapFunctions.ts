@@ -1,3 +1,5 @@
+import { QuaternionLike, Vector3Like } from 'three/webgpu'
+
 export const entries = <T extends Record<string, any>>(obj: T) => Object.entries(obj) as [keyof T, T[keyof T]][]
 
 export const objectKeys = <T extends Record<string, any>>(obj: T) => Object.keys(obj) as (keyof T)[]
@@ -130,3 +132,5 @@ export function pipe(...fns: Func<any, any>[]): (input: any) => any {
 export const opt = <O extends object>(condition: boolean, obj: O) => (condition ? obj : {})
 
 export const round = (num: number) => Math.round((num + Number.EPSILON) * 100) / 100
+export const vec3toRaw = ({ x, y, z }: Vector3Like) => ({ x: round(x), y: round(y), z: round(z) })
+export const quattoRaw = ({ x, y, z, w }: QuaternionLike) => ({ x: round(x), y: round(y), z: round(z), w: round(w) })

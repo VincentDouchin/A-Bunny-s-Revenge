@@ -1,24 +1,25 @@
 import { updateCameraZoom } from '@/global/camera'
 import { params } from '@/global/context'
 import { RenderGroup } from '@/global/entity'
-import { coroutines, ecs } from '@/global/init'
-import { renderer } from '@/global/rendering'
-import { Group, Mesh, PerspectiveCamera, PlaneGeometry, Scene, Vector3 } from 'three/webgpu'
-// import { mainMenuBackgound } from '@/shaders/mainMenuBackground'
+import { coroutines, ecs, time } from '@/global/init'
+import { gameRenderGroupQuery } from '@/rendering/passes'
+import { MainMenuBackgroundMaterial } from '@/shaders/mainMenuBackgroundMaterial'
+import { AmbientLight, Group, Mesh, PerspectiveCamera, PlaneGeometry, Scene, Vector3 } from 'three/webgpu'
 import { MainMenuBook } from './book'
 
 const ZOOM_OUT = -5
 
 const addBackground = (scene: Scene) => {
-	const background = new Mesh(new PlaneGeometry(20, 10))
+	const mat = new MainMenuBackgroundMaterial()
+	const background = new Mesh(new PlaneGeometry(20, 10), mat)
 	const coroutine = coroutines.add(function* () {
-		// const now = Date.now()
-		// while (true) {
-		// 	mainMenuBackgound.uniforms.time.value = now - Date.now()
-		// 	mainMenuBackgound.uniforms.resolution.value = new Vector2(window.innerWidth, window.innerHeight)
-		// 	mainMenuBackgound.needsUpdate = true
-		// 	yield
-		// }
+		const now = Date.now()
+		while (true) {
+			mat.time.value = now - Date.now()
+			// mat.resolution.value = new Vector2(window.innerWidth, window.innerHeight)
+			mat.needsUpdate = true
+			yield
+		}
 	})
 	background.rotateX(-Math.PI / 2)
 	background.addEventListener('removed', coroutine)
@@ -26,10 +27,12 @@ const addBackground = (scene: Scene) => {
 }
 
 export const intiMainMenuRendering = () => {
+	const gameRenderGroup = gameRenderGroupQuery.first
+	if (!gameRenderGroup) return
 	const scene = new Scene()
+	scene.add(new AmbientLight(undefined, 1.5))
 	updateCameraZoom(params.zoom + ZOOM_OUT)
 	const mainMenuRenderGroup = ecs.add({
-		renderer,
 		scene,
 		renderGroup: RenderGroup.MainMenu,
 		stateEntity: 'mainMenu',
@@ -39,19 +42,23 @@ export const intiMainMenuRendering = () => {
 	camera.name = 'mainMenu'
 	ecs.add({
 		camera,
-		position: new Vector3(0, 3, 0),
 		parent: mainMenuRenderGroup,
 		renderGroup: RenderGroup.MainMenu,
 		stateEntity: 'mainMenu',
 	})
+	camera.position.set(0, 3, 0.2)
 	camera.lookAt(new Vector3())
 
 	addBackground(scene)
-	const menuBook = new MainMenuBook()
+	const menuBook = new MainMenuBook(gameRenderGroup.renderPipeline.targets.final.texture)
 	scene.add(menuBook)
 	ecs.add({
 		menuBook,
 		stateEntity: 'mainMenu',
-		// withTimeUniform: menuBook.withTimeUniforms,
+		withTimeUniform() {
+			menuBook.pageRightTexture.needsUpdate = true
+			menuBook.windowShader.house.needsUpdate = true
+			menuBook.windowShader.time.value = time.elapsed
+		},
 	})
 }

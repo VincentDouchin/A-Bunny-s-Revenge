@@ -1,8 +1,9 @@
 import type { AssetNames } from '@/global/entity'
 import { weaponsData } from '@/constants/weapons'
-import { assets, ecs, scene } from '@/global/init'
+import { assets, ecs } from '@/global/init'
 import { getWorldPosition } from '@/lib/transforms'
 import { WeaponArc } from '@/shaders/weaponArc'
+import { gameRenderGroupQuery } from '@/global/rendering'
 
 export const weaponBundle = (weaponName: AssetNames['weapons']) => {
 	const data = weaponsData[weaponName]
@@ -19,8 +20,12 @@ export const updateWeaponArc = () => {
 			const parentPosition = getWorldPosition(weapon.model)
 			const tipPosition = getWorldPosition(weapon.model.getObjectByName('tip')!)
 			if (parentPosition) {
-				scene.add(weapon.weaponArc)
-				weapon.weaponArc.addVertices(parentPosition, tipPosition)
+				const renderGroup = gameRenderGroupQuery.first
+				if (renderGroup) {
+					renderGroup.scene.add(weapon.weaponArc)
+
+					weapon.weaponArc.addVertices(parentPosition, tipPosition)
+				}
 			}
 		} else {
 			weapon.weaponArc.removeVertices()

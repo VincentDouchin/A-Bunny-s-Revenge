@@ -1,9 +1,8 @@
-import type { Material } from 'three/webgpu'
+import type { Material, Texture } from 'three/webgpu'
 import { easeInOut } from 'popmotion'
-import { CanvasTexture, Mesh, MeshBasicMaterial, Object3D } from 'three/webgpu'
+import { CanvasTexture, Mesh, MeshBasicMaterial, MeshStandardNodeMaterial, Object3D } from 'three/webgpu'
 import { assets, save, tweens } from '@/global/init'
 import { playSound } from '@/global/sounds'
-import { app } from '@/global/states'
 import { DrawnHouseMaterial } from '@/shaders/drawnHouseMaterial'
 import { cloneCanvas, imgToCanvas } from '@/utils/buffer'
 
@@ -38,10 +37,11 @@ export class MainMenuBook extends Object3D {
 	disabledTextColor = '#a597aa'
 	font = 'EnchantedLand'
 	transition = false
-	windowShader = new DrawnHouseMaterial()
+	windowShader: DrawnHouseMaterial
 	confirmed = false
-	constructor() {
+	constructor(targetTexture: Texture) {
 		super()
+		this.windowShader = new DrawnHouseMaterial(targetTexture)
 		const book = assets.mainMenuAssets.book.scene.clone()
 		this.add(book)
 		this.scale.setScalar(10)
@@ -75,7 +75,7 @@ export class MainMenuBook extends Object3D {
 				this.withTimeUniforms.push(this.windowShader)
 			}
 			if (node instanceof Mesh && node.name === 'pageRight') {
-				node.material = new MeshBasicMaterial({ map: this.pageRightTexture })
+				node.material = new MeshStandardNodeMaterial({ map: this.pageRightTexture })
 			}
 
 			for (const text of ['Continue', 'New Game', 'Settings', 'Credits'] as const) {
@@ -124,12 +124,12 @@ export class MainMenuBook extends Object3D {
 					duration: 1000,
 					onPlay() {
 						if (newSelected === 'Continue') {
-							app.disable('intro')
-							app.enable('farm', { direction: 'doorFarm' })
+							// app.disable('intro')
+							// app.enable('farm', { direction: 'doorFarm' })
 						}
 						if (newSelected === 'New Game') {
-							app.disable('farm')
-							app.enable('intro')
+							// app.disable('farm')
+							// app.enable('intro')
 						}
 					},
 					onUpdate: (f) => (this.windowShader.windowSize.value = f),

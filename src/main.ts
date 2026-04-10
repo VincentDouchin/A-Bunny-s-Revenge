@@ -1,3 +1,4 @@
+// main.ts
 import { beeBossBehavior } from './behaviors/beeBossBehavior'
 import { chargingBehavior, jumpingBehavior, meleeBehavior, mushroomBehavior, rangeBehavior, seedlingBehavior, sporeBehavior } from './behaviors/enemyBehavior'
 import { playerBehavior } from './behaviors/playerBehavior'
@@ -7,10 +8,10 @@ import { setupConversation } from './conversation/setupConversation'
 import { debugPlugin } from './debug/debugPlugin'
 import { updateAnimations } from './global/animations'
 import { initCamera, moveCamera } from './global/camera'
-import { coroutines, inputManager, musicManager, questManager, resetSave, time, tweens, ui } from './global/init'
+import { coroutines, inputManager, musicManager, questManager, scene, time, tweens, ui, world } from './global/init'
 import { tickModifiersPlugin } from './global/modifiers'
 import { updateMousePosition } from './global/mousePosition'
-import { compileShaders, initTexturesItemsAndEnemies, initThree, renderGame } from './global/rendering'
+import { compileShaders, initTexturesItemsAndEnemies } from './global/rendering'
 import { initHowler } from './global/sounds'
 import { app } from './global/states'
 import { runIf } from './lib/app'
@@ -20,6 +21,9 @@ import { physicsPlugin, stepWorld } from './lib/physics'
 import { transformsPlugin } from './lib/transforms'
 // import { enableCutscene, introQuestActors, spawnIntroPlayer, startIntro } from './quests/introQuest'
 import { addQuestMarkers, completeQuestStep, displayUnlockQuestToast } from './quests/questHelpers'
+import { renderGame } from './rendering/passes'
+import { initRenderPipeline } from './rendering/pipeline'
+import { updateSplatDisplay } from './shaders/splatMaterial'
 import { applyArchingForce, destroyProjectiles, honeySplat, sleepyEffects, stepInHoney, tickPoison, tickSleepy, tickSneeze } from './states/dungeon/attacks'
 import { applyDeathTimer, tickHitCooldown } from './states/dungeon/battle'
 import { dropBerriesOnHit } from './states/dungeon/bushes'
@@ -77,8 +81,7 @@ await app
 		),
 		removeStateEntityPlugin,
 	)
-	.onEnter('default', initThree, initCamera)
-
+	.onEnter('default', initRenderPipeline, initCamera)
 	.addPlugins(
 		particlesPlugin({
 			chestAppearingParticles: 1,
@@ -122,7 +125,12 @@ await app
 	)
 	.onPreUpdate(
 		'default',
-		runIf(() => app.isDisabled('paused'), time.tick, dayNight, tweens.tick),
+		runIf(
+			() => app.isDisabled('paused'),
+			() => time.update(),
+			dayNight,
+			tweens.tick,
+		),
 	)
 	// !SETUP
 	.onEnter('default', setupGame)
@@ -146,7 +154,7 @@ await app
 		runIf(canPlayerMove, movePlayer, updateDashDisplay),
 		runIf(() => app.isDisabled('paused'), playerSteps, applyDeathTimer),
 	)
-	.onUpdate('game', collectItems(false), turnNPCHead, dropBerriesOnHit, updateWeaponArc, sleepyEffects)
+	.onUpdate('game', collectItems(false), turnNPCHead, dropBerriesOnHit, updateWeaponArc, updateSplatDisplay, sleepyEffects)
 	.onPostUpdate(
 		'game',
 		rotateStun,
@@ -162,15 +170,14 @@ await app
 	.onRender('mainMenu', renderMainMenu)
 	.onUpdate('mainMenu', selectMainMenu, clickOnMenuButton)
 	.addSubscribers('mainMenu', ...initMainMenuCamPos)
-	.onExit(
-		'mainMenu',
-		runIf(
-			() => app.isEnabled('intro'),
-			() => resetSave(questManager),
-		),
-		// runIf(() => app.isEnabled('intro'), () => resetSave(questManager), startIntro),
-		// runIf(() => app.isEnabled('farm'), spawnPlayerContinueGame),
-	)
+	// .onExit(
+	// 	// 'mainMenu',
+	// 	// runIf(
+	// 	// 	() => resetSave(questManager),
+	// 	// ),
+	// 	// runIf(() => app.isEnabled('intro'), () => resetSave(questManager), startIntro),
+	// 	// runIf(() => app.isEnabled('farm'), spawnPlayerContinueGame),
+	// )
 	// ! INTRO
 	// .onEnter('intro', spawnLevel('intro', 'intro'), spawnLevelData)
 	// .addPlugins(spawnIntroPlayer('intro'))
@@ -222,9 +229,9 @@ await app
 		'dungeon',
 		// runIf(canPlayerMove, harvestCrop, unlockDoorDungeon),
 		// runIf(canPlayerMove, allowDoorCollision, collideWithDoorDungeon, harvestCrop, unlockDoorDungeon),
-		runIf(() => app.isDisabled('paused'), tickHitCooldown, tickSneeze, tickPoison, tickInactiveTimer, tickSleepy),
+		runIf(() => app.isDisabled('paused'), tickHitCooldown, tickSneeze, spawnPoisonTrail, tickPoison, tickInactiveTimer, tickSleepy),
 	)
-	.onUpdate('dungeon', destroyProjectiles, honeySplat, stepInHoney, spawnPoisonTrail, lockOnEnemy, buyItems)
+	.onUpdate('dungeon', destroyProjectiles, honeySplat, stepInHoney, lockOnEnemy, buyItems)
 	.onExit('dungeon', deSpawnOfType('map'))
 	// ! PAUSED
 	.onEnter('paused', () => time.stop(), musicManager.pause)
@@ -238,3 +245,15 @@ await app
 	// .onEnter('test', compileShaders, initTexturesItemsAndEnemies)
 	// .onUpdate('test', collideWithDoorFarm)
 	.start()
+
+if (import.meta.hot) {
+	import.meta.hot.dispose(async () => {
+		await app.stop() // your existing stop() method
+		app.pause() // cancel the rAF loop
+		ui.dispose()
+		scene.clear()
+		world.forEachRigidBody((body) => world.removeRigidBody(body))
+		world.forEachCollider((collider) => world.removeCollider(collider, false))
+	})
+	import.meta.hot.accept()
+}

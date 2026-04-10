@@ -1,16 +1,7 @@
 import type { Entity } from '@/global/entity'
-import Exit from '@assets/icons/arrow-left-solid.svg'
-import Spoon from '@assets/icons/spoon-solid.svg'
-import { between } from 'randomish'
-import { createMemo, createSignal, onCleanup, onMount, Show } from 'solid-js'
-import { Portal } from 'solid-js/web'
-import { css } from 'solid-styled'
-import { Vector3 } from 'three/webgpu'
-import { updateCameraZoom } from '@/global/camera'
-import { params } from '@/global/context'
 import { MenuType } from '@/global/entity'
 import { cookedMealEvent } from '@/global/events'
-import { ecs, inputManager, menuInputs, time, tweens, ui } from '@/global/init'
+import { ecs, inputManager, menuInputs, time, ui } from '@/global/init'
 import { cameraQuery } from '@/global/rendering'
 import { playSound } from '@/global/sounds'
 import { addTag } from '@/lib/hierarchy'
@@ -18,6 +9,13 @@ import { getWorldPosition } from '@/lib/transforms'
 import { cauldronSparkles } from '@/particles/cauldronSparkles'
 import { useGame, useQuery } from '@/ui/store'
 import { TouchButton } from '@/ui/TouchControls'
+import Exit from '@assets/icons/arrow-left-solid.svg'
+import Spoon from '@assets/icons/spoon-solid.svg'
+import { between } from 'randomish'
+import { createMemo, createSignal, onCleanup, onMount, Show } from 'solid-js'
+import { Portal } from 'solid-js/web'
+import { css } from 'solid-styled'
+import { Vector3 } from 'three/webgpu'
 import { itemBundle } from '../game/items'
 import { ItemDisplay } from './InventoryUi'
 
@@ -31,31 +29,31 @@ export const CauldronMiniGameUi = () => {
 				return (
 					<Show when={cauldron()}>
 						{(cauldron) => {
-							const lightQuery = ecs.with('parent', 'fireParticles', 'light').where((e) => e.parent === cauldron)
-							onMount(() => {
-								tweens.add({
-									from: params.zoom,
-									to: 15,
-									duration: 1000,
-									onUpdate: updateCameraZoom,
-								})
-								for (const { fireParticles } of lightQuery) {
-									fireParticles.restart()
-									fireParticles.play()
-								}
-							})
-							onCleanup(() => {
-								for (const { fireParticles } of lightQuery) {
-									fireParticles.endEmit()
-								}
+							// const lightQuery = ecs.with('parent', 'fireParticles', 'light').where((e) => e.parent === cauldron)
+							// onMount(() => {
+							// 	tweens.add({
+							// 		from: params.zoom,
+							// 		to: 15,
+							// 		duration: 1000,
+							// 		onUpdate: updateCameraZoom,
+							// 	})
+							// 	for (const { fireParticles } of lightQuery) {
+							// 		fireParticles.restart()
+							// 		fireParticles.play()
+							// 	}
+							// })
+							// onCleanup(() => {
+							// 	for (const { fireParticles } of lightQuery) {
+							// 		fireParticles.endEmit()
+							// 	}
 
-								tweens.add({
-									from: 15,
-									to: params.zoom,
-									duration: 1000,
-									onUpdate: updateCameraZoom,
-								})
-							})
+							// 	tweens.add({
+							// 		from: 15,
+							// 		to: params.zoom,
+							// 		duration: 1000,
+							// 		onUpdate: updateCameraZoom,
+							// 	})
+							// })
 							const output = ui.sync(() => cauldron().recipesQueued[0]?.output)
 							let targetEntity: Entity | null = null
 							const [spot, setSpot] = createSignal(between(0, Math.PI * 2))

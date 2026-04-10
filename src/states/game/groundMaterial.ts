@@ -15,7 +15,7 @@ export const getGroundMaterial = (
 		planksTexture: Texture
 		groundTexture: Texture
 		rockTexture: Texture
-		level: CanvasTexture
+		level: CanvasTexture | null
 		grassNoiseTexture: CanvasTexture | null
 	},
 ) => {

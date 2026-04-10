@@ -16,9 +16,13 @@ import { OptimizeAssets } from './scripts/optimizeAssets.ts'
 import staticAssetsPlugin from './scripts/static-assets.ts'
 
 export default defineConfig({
-	optimizeDeps: {
-		exclude: ['@solid-primitives/deep'],
+	staged: {
+		'*': 'vp check --fix',
 	},
+	optimizeDeps: {
+		include: ['@dimforge/rapier3d-compat', 'three'],
+	},
+
 	plugins: [
 		assetPipeline('./assets/**/*.*', [new GenerateAssetNames(), new GenerateAssetManifest(), new OptimizeAssets(), new ExtractAnimations(), new ConvertAudioFiles(), new ConvertFBXToGLB()]),
 		solidPlugin(),
@@ -81,7 +85,13 @@ export default defineConfig({
 	// prevent vite from obscuring rust errors
 	clearScreen: false,
 	// Tauri expects a fixed port, fail if that port is not available
-	server: { strictPort: true, host: true },
+	server: {
+		strictPort: true,
+		host: true,
+		warmup: {
+			clientFiles: ['./src/main.ts', './src/global/init.ts'],
+		},
+	},
 	// to access the Tauri environment variables set by the CLI with information about the current target
 	envPrefix: ['VITE_', 'TAURI_PLATFORM', 'TAURI_ARCH', 'TAURI_FAMILY', 'TAURI_PLATFORM_VERSION', 'TAURI_PLATFORM_TYPE', 'TAURI_DEBUG'],
 })

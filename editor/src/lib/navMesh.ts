@@ -54,7 +54,6 @@ export const getPositionsAndIndices = (meshes: Mesh[]): [positions: number[], in
 			indices,
 		})
 	}
-	console.log(toMerge)
 	return mergePositionsAndIndices(toMerge)
 }
 
@@ -114,48 +113,12 @@ export const generateNavMesh = (obj: Mesh<BufferGeometry>[]) => {
 		detailSampleMaxError,
 	}
 
-	// generate a navmesh
-	// const worker = new NavMeshWorker()
-	// worker.postMessage({ input, options })
-	// worker.onmessage = ({ data }) => {
-	// 	res(JSON.parse(data) as NavMesh)
-	// }
 	const res = generateSoloNavMesh(input, options)
 	return res.navMesh
-	// const intermediates = result.intermediates // intermediate data for debugging
-
-	// visualize the navmesh in threejs
-
-	// // find a path
-	// const start: Vec3 = [-4, 0, -4]
-	// const end: Vec3 = [4, 0, 4]
-	// const halfExtents: Vec3 = [0.5, 0.5, 0.5]
-
-	// const path = findPath(navMesh, start, end, halfExtents, DEFAULT_QUERY_FILTER)
-
-	// console.log(
-	// 	'path:',
-	// 	path.path.map(p => p.position),
-	// )
-
-	// // visualise the path points
-	// for (const point of path.path) {
-	// 	const sphere = new Mesh(new SphereGeometry(0.1), new MeshStandardMaterial({ color: 0xFF0000 }))
-	// 	sphere.position.set(point.position[0], point.position[1], point.position[2])
-	// 	scene.add(sphere)
-	// }
-
-	// // visualise the A* search nodes
-	// if (path.nodePath) {
-	// 	const searchNodesHelper = createSearchNodesHelper(path.nodePath.nodes)
-	// 	scene.add(searchNodesHelper.object)
-	// }
 }
 
 const mat = new MeshBasicNodeMaterial({
 	color: 0xff0000,
-	// transparent: true,
-	// opacity: 0.2,
 })
 export const getMesh = (boundingBox: AssetData | undefined, matrix: Matrix4, model: Object3D) => {
 	const collider = boundingBox?.collider
@@ -401,7 +364,6 @@ export class NavMeshVisualizer extends Group {
 
 	floodFill(ray: Raycaster): void {
 		const clicked = findClickedPolygon(ray, this.navMesh)
-		console.log(clicked)
 		if (!clicked) return
 		floodFillPruneNavMesh(this.navMesh, [clicked])
 		this.update()

@@ -1,15 +1,3 @@
-import type { Animations } from '@assets/animations'
-import type { Tags } from '@assets/tagsList'
-import type { Collider, ColliderDesc, KinematicCharacterController, RigidBody, RigidBodyDesc, Shape } from '@dimforge/rapier3d-compat'
-import type { Event } from 'eventery'
-import type { Query, With } from 'miniplex'
-import type { BatchedRenderer, ParticleSystem } from 'three.quarks'
-import type { BufferGeometry, Camera, Group, Light, Mesh, MeshPhongMaterial, Object3D, Quaternion, Scene, Vector3, WebGPURenderer } from 'three/webgpu'
-import type { RequiredKeysOf } from 'type-fest'
-import type { Animator } from './animator'
-import type { assets } from './init'
-import type { ModifierContainer } from './modifiers'
-import type { app } from './states'
 import type { State } from '@/behaviors/state'
 import type { Drop } from '@/constants/enemies'
 import type { crops, Item } from '@/constants/items'
@@ -26,7 +14,20 @@ import type { WeaponArc } from '@/shaders/weaponArc'
 import type { Room } from '@/states/dungeon/generateDungeon'
 import type { Dash } from '@/states/game/dash'
 import type { MainMenuBook } from '@/states/mainMenu/book'
-import { CSS2DObject } from 'three/addons'
+import type { Animations } from '@assets/animations'
+import type { Tags } from '@assets/tagsList'
+import type { Collider, ColliderDesc, KinematicCharacterController, RigidBody, RigidBodyDesc, Shape } from '@dimforge/rapier3d-compat'
+import type { Event } from 'eventery'
+import type { Query, With } from 'miniplex'
+import { SobelUniforms } from 'src/shaders/EdgePass'
+import { CSS2DObject, CSS2DRenderer } from 'three/addons'
+import type { BufferGeometry, Camera, Group, Light, Mesh, MeshPhongMaterial, Object3D, QuadMesh, Quaternion, RenderPipeline, RenderTarget, Scene, Vector2, Vector3 } from 'three/webgpu'
+import type { RequiredKeysOf } from 'type-fest'
+import type { Animator } from './animator'
+import type { assets } from './init'
+import type { ModifierContainer } from './modifiers'
+import type { app } from './states'
+import { SplatMaterial } from 'src/shaders/splatMaterial'
 
 export type AssetNames = { [K in keyof typeof assets]: keyof (typeof assets)[K] }
 
@@ -184,12 +185,18 @@ export type Entity = Partial<AttackStyle> &
 		mainCamera?: true
 		cameraLookAt?: Vector3
 		cameraOffset?: Vector3
+		subPixelOffset?: Vector2
 		cameraLerp?: Vector3
 		lockX?: boolean
 		// ! ThreeJS
 		scene?: Scene
-		renderer?: WebGPURenderer
-		batchRenderer?: BatchedRenderer
+		cssRenderer?: CSS2DRenderer
+		renderPipeline?: {
+			targets: { scene: RenderTarget; outline: RenderTarget; outlineComposite: RenderTarget; final: RenderTarget }
+			uniforms: SobelUniforms
+			postProcessing: RenderPipeline
+			outlineQuad: QuadMesh
+		}
 		camera?: Camera
 		light?: Light
 		group?: Group
@@ -311,9 +318,9 @@ export type Entity = Partial<AttackStyle> &
 		// wateringCanEmitter?: Vfx
 		// dashParticles?: Vfx
 		// enemyDefeated?: ParticleSystem
-		enemyImpact?: ParticleSystem
-		smokeParticles?: ParticleSystem
-		fireParticles?: ParticleSystem
+		// enemyImpact?: ParticleSystem
+		// smokeParticles?: ParticleSystem
+		// fireParticles?: ParticleSystem
 		particlePool?: true
 		// ! Stats
 		strength?: Stat
@@ -359,7 +366,8 @@ export type Entity = Partial<AttackStyle> &
 		debuffsContainer?: CSS2DObject
 		// ! Trail
 		trailMaker?: true
-		trail?: { origin: Entity; timer: Timer<false> }
+		trail?: { origin: With<Entity, 'position'>; timer: Timer<false>; intensity: number }
+		splatDisplay?: SplatMaterial
 		poison?: true
 		// ! Stall
 		price?: number

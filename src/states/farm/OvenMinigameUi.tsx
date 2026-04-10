@@ -4,7 +4,6 @@ import Fire from '@assets/icons/fire-solid.svg'
 import { between } from 'randomish'
 import { createMemo, createSignal, For, onCleanup, onMount, Show } from 'solid-js'
 import { css } from 'solid-styled'
-import { ConstantValue } from 'three.quarks'
 import { Vector3 } from 'three/webgpu'
 import { updateCameraZoom } from '@/global/camera'
 import { params } from '@/global/context'
@@ -33,8 +32,8 @@ export const OvenMiniGameUi = () => {
 				return (
 					<For each={ovenQuery()}>
 						{(oven) => {
-							const smokeTrailsQuery = ecs.with('parent', 'smokeParticles').where((e) => e.parent === oven)
-							const fireQuery = ecs.with('parent', 'fireParticles', 'light').where((e) => e.parent === oven)
+							// const smokeTrailsQuery = ecs.with('parent', 'smokeParticles').where((e) => e.parent === oven)
+							// const fireQuery = ecs.with('parent', 'fireParticles', 'light').where((e) => e.parent === oven)
 							const output = ui.sync(() => oven.recipesQueued?.[0]?.output)
 							let targetEntity: Entity | null = null
 							let offset: Vector3
@@ -58,15 +57,15 @@ export const OvenMiniGameUi = () => {
 									cameraTarget: true,
 								})
 
-								for (const smokeTrail of smokeTrailsQuery) {
-									smokeTrail.smokeParticles.restart()
-									smokeTrail.smokeParticles.play()
-								}
+								// for (const smokeTrail of smokeTrailsQuery) {
+								// 	smokeTrail.smokeParticles.restart()
+								// 	smokeTrail.smokeParticles.play()
+								// }
 
-								for (const fire of fireQuery) {
-									fire.fireParticles.restart()
-									fire.fireParticles.play()
-								}
+								// for (const fire of fireQuery) {
+								// 	fire.fireParticles.restart()
+								// 	fire.fireParticles.play()
+								// }
 							})
 							onCleanup(() => {
 								tweens.add({
@@ -83,20 +82,20 @@ export const OvenMiniGameUi = () => {
 									addTag(camera, 'fixedCamera')
 								}
 								ecs.removeComponent(oven, 'cameraTarget')
-								for (const smokeTrail of smokeTrailsQuery) {
-									smokeTrail.smokeParticles.endEmit()
-								}
-								tweens.add({
-									from: 1,
-									to: 0,
-									duration: 4000,
-									onUpdate: (f) => {
-										for (const fire of fireQuery) {
-											fire.light.intensity = f * 10
-											fire.fireParticles.emissionOverTime = new ConstantValue((f * 2) / 30)
-										}
-									},
-								})
+								// for (const smokeTrail of smokeTrailsQuery) {
+								// 	smokeTrail.smokeParticles.endEmit()
+								// }
+								// tweens.add({
+								// 	from: 1,
+								// 	to: 0,
+								// 	duration: 4000,
+								// 	onUpdate: (f) => {
+								// 		for (const fire of fireQuery) {
+								// 			fire.light.intensity = f * 10
+								// 			fire.fireParticles.emissionOverTime = new ConstantValue((f * 2) / 30)
+								// 		}
+								// 	},
+								// })
 							})
 							const [bar, setBar] = createSignal(50)
 							const [target, setTarget] = createSignal(50)
@@ -122,9 +121,9 @@ export const OvenMiniGameUi = () => {
 									} else {
 										setHeat((x) => Math.max(0, x - (15 * time.delta) / 1000))
 									}
-									for (const smokeTrail of smokeTrailsQuery) {
-										smokeTrail.smokeParticles.emissionOverTime = new ConstantValue(heat() / 30)
-									}
+									// for (const smokeTrail of smokeTrailsQuery) {
+									// 	smokeTrail.smokeParticles.emissionOverTime = new ConstantValue(heat() / 30)
+									// }
 									setTimer((x) => x - time.delta / 1000)
 									if (timer() <= 0) {
 										setDirection((x) => (x *= -1))

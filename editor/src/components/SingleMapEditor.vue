@@ -108,7 +108,6 @@ const drawMouse = (pos: Vector2Like) => {
 		if (props.open[0] === props.map) {
 			levelStore.mouseMaterial.map = new CanvasTexture(cursorCanvasCtx.value.canvas)
 			levelStore.mouseMaterial.needsUpdate = true
-			console.log('ok')
 		}
 	}
 }

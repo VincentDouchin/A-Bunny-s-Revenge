@@ -1,6 +1,5 @@
 import type { Plugin } from '@/lib/app'
 import { ecs } from '@/global/init'
-import { renderer } from '@/global/rendering'
 import { app } from '@/global/states'
 import { windowEvent } from '@/lib/uiManager'
 import { debugOptions } from './debugState'
@@ -27,9 +26,5 @@ const godMode = () => {
 }
 
 export const debugPlugin: Plugin<typeof app> = (state) => {
-	state
-		.addSubscribers('default', enableDebugState)
-		.onUpdate('default', attackInFarm, godMode)
-		.onEnter('debug', () => renderer.setClearColor('grey'))
-		.onExit('debug', () => renderer.setClearColor('black'))
+	state.addSubscribers('default', enableDebugState).onUpdate('default', attackInFarm, godMode)
 }

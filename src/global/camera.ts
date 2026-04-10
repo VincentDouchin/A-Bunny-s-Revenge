@@ -1,5 +1,5 @@
 import { easeOut } from 'popmotion'
-import { OrthographicCamera, PerspectiveCamera, Vector3 } from 'three/webgpu'
+import { OrthographicCamera, PerspectiveCamera, Vector2, Vector3 } from 'three/webgpu'
 import { params } from './context'
 import { RenderGroup } from './entity'
 import { assets, ecs, settings, tweens } from './init'
@@ -19,6 +19,7 @@ export const initCamera = () => {
 		cameraShake: new Vector3(),
 		cameraOffset: new Vector3(),
 		cameraLerp: new Vector3(),
+		subPixelOffset: new Vector2(),
 	})
 }
 const cameraQuery = ecs.with('camera')

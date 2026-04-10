@@ -237,6 +237,7 @@ export type StaticAssetPath =
   'levels/clearing/waterMap.png' |
   'levels/dungeon_room_1/data.json' |
   'levels/dungeon_room_1/grassMap.png' |
+  'levels/dungeon_room_1/grassNoise.png' |
   'levels/dungeon_room_1/treeMap.png' |
   'levels/farm/data.json' |
   'levels/farm/grassMap.png' |
@@ -743,6 +744,7 @@ export const assets = new Set<string>([
   'levels/clearing/waterMap.png',
   'levels/dungeon_room_1/data.json',
   'levels/dungeon_room_1/grassMap.png',
+  'levels/dungeon_room_1/grassNoise.png',
   'levels/dungeon_room_1/treeMap.png',
   'levels/farm/data.json',
   'levels/farm/grassMap.png',

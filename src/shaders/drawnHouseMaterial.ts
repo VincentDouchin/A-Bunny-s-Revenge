@@ -1,20 +1,21 @@
 import { assets } from '@/global/init'
-import { finalTarget } from '@/global/rendering'
 import { abs, float, Fn, length, mix, screenUV, smoothstep, step, texture, uniform, uv, vec3 } from 'three/tsl'
-import { MeshBasicNodeMaterial, Vector2 } from 'three/webgpu'
+import { MeshStandardNodeMaterial, Texture, TextureNode, Vector2 } from 'three/webgpu'
 import { cnoise } from './lib/cnoise'
 import { kuwahara } from './lib/kuwahara'
 
-export class DrawnHouseMaterial extends MeshBasicNodeMaterial {
-	house = texture(finalTarget.texture)
+export class DrawnHouseMaterial extends MeshStandardNodeMaterial {
+	house: TextureNode
 	parchment = texture(assets.textures.parchment)
 	time = uniform(0)
 	parchmentMix = uniform(0.7)
 	windowSize = uniform(0)
 	resolution = uniform(new Vector2(window.innerWidth, window.innerHeight))
 	kSize = uniform(5)
-	constructor() {
+	constructor(targetTexture: Texture) {
 		super({ transparent: true })
+		this.house = texture(targetTexture)
+		this.house.needsUpdate = true
 		this.colorNode = Fn(() => {
 			// screenUV is the TSL equivalent of the original NDC→UV conversion:
 			//   vCoords = vPos.xy / vPos.w * 0.5 + 0.5

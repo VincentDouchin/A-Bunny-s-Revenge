@@ -1,6 +1,4 @@
-import { throttle } from '@solid-primitives/scheduled'
-import { Vector2 } from 'three/webgpu'
-import { Armabee } from '@/constants/enemies'
+import { PoisonSnail } from '@/constants/enemies'
 import { updateCameraZoom } from '@/global/camera'
 import { params } from '@/global/context'
 import { settings, time } from '@/global/init'
@@ -8,6 +6,8 @@ import { updateRenderSize } from '@/global/rendering'
 import { app } from '@/global/states'
 import { Direction } from '@/lib/directions'
 import { windowEvent } from '@/lib/uiManager'
+import { throttle } from '@solid-primitives/scheduled'
+import { Vector2 } from 'three/webgpu'
 import { assignPlanAndEnemies, RoomType } from '../dungeon/generateDungeon'
 import { setMainCameraPosition } from '../mainMenu/mainMenuRendering'
 
@@ -29,13 +29,13 @@ export const setupGame = async () => {
 		updateCameraZoom()
 	} else if (params.debugEnemies) {
 		const enemiesRoom = assignPlanAndEnemies([{ position: { x: 0, y: 0 }, connections: { north: 1, south: null, east: null }, type: RoomType.Battle }], 0)
-		enemiesRoom[0].enemies = [Armabee(0), Armabee(0)]
+		enemiesRoom[0].enemies = [PoisonSnail(0)]
 		enemiesRoom[0].type = RoomType.Battle
 		app.enable('dungeon', { direction: Direction.N, dungeon: enemiesRoom[0], firstEntry: true, playerHealth: 10, dungeonLevel: 0, weapon: 'SwordWeapon' })
 		updateRenderSize()
 		updateCameraZoom()
 	} else if (params.debugIntro) {
-		await app.enable('intro')
+		// await app.enable('intro')
 		// setTimeout(() => startIntro(), 2000)
 		app.disable('cutscene')
 		updateRenderSize()

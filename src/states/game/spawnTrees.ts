@@ -3,7 +3,7 @@ import { instancedBufferAttribute } from 'three/tsl'
 import { Euler, InstancedBufferAttribute, InstancedMesh, Matrix4, PlaneGeometry, Quaternion, Vector3 } from 'three/webgpu'
 import { canvasToBuffer } from '@/global/assetLoaders'
 import { GrassMaterial } from '@/shaders/grassMaterial'
-import { round } from '@/utils/mapFunctions'
+import { quattoRaw, round, vec3toRaw } from '@/utils/mapFunctions'
 import FastNoiseLite from '@/lib/FastNoiseLite.ts'
 
 export const setDisplacement = (size: Vector2Like, heightCanvas: HTMLCanvasElement | null, waterCanvas: HTMLCanvasElement | null, heightOffset: number) => {
@@ -72,10 +72,8 @@ const spawnFromCanvas = <C extends (HTMLCanvasElement | null)[], T>(
 	return result
 }
 
-const vec3toRaw = ({ x, y, z }: Vector3Like) => ({ x: round(x), y: round(y), z: round(z) })
-const quattoRaw = ({ x, y, z, w }: QuaternionLike) => ({ x: round(x), y: round(y), z: round(z), w: round(w) })
 export const composeMatrix = (args: { position: Vector3Like; scale: Vector3Like; rotation: QuaternionLike }) => {
-	return new Matrix4().compose(new Vector3().copy(args.position), new Quaternion().copy(args.rotation), new Vector3().copy(args.scale))
+	return new Matrix4().compose(new Vector3().copy(vec3toRaw(args.position)), new Quaternion().copy(quattoRaw(args.rotation)), new Vector3().copy(vec3toRaw(args.scale)))
 }
 
 export const getTrees = (possibleModels: number, displacement: HTMLCanvasElement | null, treeMap: HTMLCanvasElement, gridSize: number, HEIGHT: number) => {
@@ -159,10 +157,15 @@ export const getGrassModel = (
 	geo.translate(0, bladeHeight / 2, 0)
 
 	const mat = new GrassMaterial(grassTexture, grassNoiseTexture, size)
+
 	const positionData = new Float32Array(grass.flatMap(({ position }) => [position.x, position.y, position.z]))
+	const scaleData = new Float32Array(grass.flatMap(({ scale }) => [scale, scale, scale]))
 	const positionAttribute = new InstancedBufferAttribute(positionData, 3)
+	const scaleAttribute = new InstancedBufferAttribute(scaleData, 3)
 	const instancePos = instancedBufferAttribute(positionAttribute)
+	const instanceScale = instancedBufferAttribute(scaleAttribute)
 	mat.positionNode = instancePos
+	mat.scaleNode = instanceScale
 
 	const mesh = new InstancedMesh(geo, mat, grass.length)
 	mesh.frustumCulled = false

@@ -113,8 +113,8 @@ export const hitNode: EnemyNode<['idle' | 'hit' | 'dead'], ['hit']> = () =>
 					flash(entity, 200, 'damage')
 					const [damage, crit] = calculateDamage(ctx.player)
 					takeDamage(entity, damage * 2)
-					entity.enemyImpact?.restart()
-					entity.enemyImpact?.play()
+					// entity.enemyImpact?.restart()
+					// entity.enemyImpact?.play()
 					spawnDamageNumber(damage, entity, crit)
 					// ! knockBack
 					const force = ctx.player.position.clone().sub(entity.position).normalize().multiplyScalar(-50000)

@@ -48,16 +48,17 @@ const cachedLoader = async <R>(storeName: string, fn: (arr: ArrayBuffer) => Prom
 
 		const cached = await cache.match(cacheUrl)
 		if (cached) {
-			return fn(await cached.arrayBuffer())
+			return fn(await cached.arrayBuffer())!
 		}
 
 		try {
 			const response = await fetch(src)
 			await cache.put(cacheUrl, response.clone())
-			return fn(await response.arrayBuffer())
+			return fn(await response.arrayBuffer())!
 		} catch {
 			console.error(`Error loading ${src} ${key}`)
 		}
+		throw new Error(`Error loading ${src} ${key}`)
 	}
 }
 
@@ -72,10 +73,11 @@ const getDracoLoader = () => {
 	return new DRACOLoader(loadingManager).setDecoderPath('').preload()
 }
 export const draco = getDracoLoader()
+const loader = new GLTFLoader().setDRACOLoader(draco)
 export const loadGLB = await cachedLoader(
 	'glb',
-	(arrayBuffer: ArrayBuffer) => new GLTFLoader().setDRACOLoader(draco).parseAsync(arrayBuffer, ''),
-	(src) => new GLTFLoader().setDRACOLoader(draco).loadAsync(src),
+	(arrayBuffer: ArrayBuffer) => loader.parseAsync(arrayBuffer, ''),
+	(src) => loader.loadAsync(src),
 )
 
 export const loadAudio = await cachedLoader(

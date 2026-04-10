@@ -1,9 +1,7 @@
 import { ecs, time } from '@/global/init'
 import { inMap } from '@/lib/hierarchy'
 import { Timer } from '@/lib/timer'
-import { easeOut } from 'popmotion'
-import { between } from 'randomish'
-import { CylinderGeometry, Mesh, MeshBasicMaterial } from 'three/webgpu'
+import { between } from '@/utils/mapFunctions'
 
 export const poisonBubbles = (_looping = true, _emission = 3) => {
 	// const system = new ParticleSystem({
@@ -40,27 +38,27 @@ export const spawnPoisonTrail = () => {
 				dist = Math.min(dist, trail.position.distanceTo(trailMaker.position))
 			}
 		}
-		if (dist === Number.POSITIVE_INFINITY || dist > 5) {
-			const radius = between(3, 5)
+		if (dist > 2) {
 			ecs.add(
 				inMap({
-					trail: { origin: trailMaker, timer: new Timer(4000, false) },
-					model: new Mesh(new CylinderGeometry(radius, radius, 2, 16, 1), new MeshBasicMaterial({ color: 0x9de64e, depthWrite: false })),
+					trail: {
+						origin: trailMaker,
+						timer: new Timer(2000, false),
+						intensity: between(0.5, 2),
+					},
 					position: trailMaker.position.clone(),
-					emitter: poisonBubbles(),
-					autoDestroy: true,
 					poison: true,
 				}),
 			)
 		}
 	}
 	for (const trail of trailQuery) {
-		trail.trail.timer?.tick(time.delta)
-		if (trail.model instanceof Mesh) {
-			trail.model.material.opacity = easeOut((1 - trail.trail.timer.percent()) / 2)
+		const dist = trail.trail.origin.position.distanceTo(trail.position)
+		if (dist > 10) {
+			trail.trail.timer.tick(time.delta)
 		}
 		if (trail.trail.timer.finished()) {
-			// trail.emitter.system.endEmit()
+			ecs.remove(trail)
 		}
 	}
 }

@@ -6,7 +6,7 @@ import type { Constructor } from 'type-fest'
 import type { Thumbnailer } from '@/lib/thumbnailRenderer'
 import type { StaticAssetPath } from '@/static-assets'
 import { Howl } from 'howler'
-import { DoubleSide, FrontSide, Mesh, MeshBasicMaterial, NearestFilter, RepeatWrapping, SRGBColorSpace, Texture } from 'three/webgpu'
+import { DoubleSide, FrontSide, Mesh, MeshStandardNodeMaterial, NearestFilter, RepeatWrapping, SRGBColorSpace, Texture } from 'three/webgpu'
 import { getAssetPathsLoader, loadAudio, loadGLB, loadImage, textureLoader } from '@/global/assetLoaders'
 import { CharacterMaterial } from '@/shaders/characterMaterial'
 import { GardenPlotMaterial } from '@/shaders/gardenPlotMaterial'
@@ -16,8 +16,6 @@ import { VineGateMaterial } from '@/shaders/VineGateMaterial'
 import { customModels } from '@/states/game/doorModel'
 import { getScreenBuffer, imgToCanvas } from '@/utils/buffer'
 import { asyncMap, asyncMapValues, entries, filterKeys, mapKeys, mapValues, objectKeys, objectValues } from '@/utils/mapFunctions'
-
-type GlobEager<T = string> = Record<string, T>
 
 type getToonOptions = (
 	key: string,
@@ -176,12 +174,12 @@ const loadItems = async <K extends string>(paths: Record<K, string>, thumbnail: 
 	return modelsAndthumbnails
 }
 
-const loadMainMenuAssets = async (glob: GlobEager) => {
+const loadMainMenuAssets = async <K extends string>(glob: Record<K, string>) => {
 	return await asyncMapValues(glob, async (src, key) => {
 		const glb = await loadGLB(src, key)
 		glb.scene.traverse((node) => {
 			if (node instanceof Mesh) {
-				node.material = new MeshBasicMaterial({ map: node.material.map, color: node.material.color })
+				node.material = new MeshStandardNodeMaterial({ map: node.material.map, color: node.material.color })
 			}
 		})
 		return glb

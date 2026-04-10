@@ -3,16 +3,16 @@ import { PerspectiveCamera, Raycaster, Vector2, Vector3 } from 'three/webgpu'
 import { moveCamera, updateCameraZoom } from '@/global/camera'
 import { params } from '@/global/context'
 import { RenderGroup } from '@/global/entity'
-import { ecs, inputManager, menuInputs, save, tweens } from '@/global/init'
+import { ecs, inputManager, menuInputs, renderer, save, tweens } from '@/global/init'
 import { getTargetSize, updateRenderSize } from '@/global/rendering'
 import { app } from '@/global/states'
 import { once } from '@/utils/mapFunctions'
 
 export type MenuOptions = 'Continue' | 'New Game' | 'Settings' | 'Credits'
 
-export const mainMenuRenderGroupQuery = ecs.with('renderer', 'scene', 'renderGroup').where((e) => e.renderGroup === RenderGroup.MainMenu)
+export const mainMenuRenderGroupQuery = ecs.with('scene', 'renderGroup').where((e) => e.renderGroup === RenderGroup.MainMenu)
 const menuBookQuery = ecs.with('menuBook')
-export const cameraQuery = ecs.with('camera', 'renderGroup', 'position')
+export const cameraQuery = ecs.with('camera', 'renderGroup')
 const mainMenuCameraQuery = cameraQuery.where((e) => e.renderGroup === RenderGroup.MainMenu)
 export const gameCameraQuery = cameraQuery.with('cameraOffset').where((e) => e.renderGroup === RenderGroup.Game)
 const houseQuery = ecs.with('npcName', 'worldPosition', 'houseAnimator', 'rotation', 'collider').where((e) => e.npcName === 'Grandma')
@@ -28,8 +28,8 @@ export const setMainCameraPosition = () => {
 			menuCam.camera.updateMatrixWorld()
 			const offset = new Vector3(0, 150, 200)
 			// reset gameCam
-			gameCam.position.copy(offset)
-			gameCam.position.copy(offset)
+			gameCam.camera.position.copy(offset)
+			gameCam.camera.position.copy(offset)
 			gameCam.camera.lookAt(new Vector3())
 			gameCam.camera.updateMatrixWorld()
 
@@ -46,7 +46,7 @@ export const setMainCameraPosition = () => {
 
 export const initMainMenuCamPos = [() => houseQuery.onEntityAdded.subscribe(setMainCameraPosition), () => playerMarkerQuery.onEntityAdded.subscribe(setMainCameraPosition)]
 export const renderMainMenu = () => {
-	for (const { scene, renderer } of mainMenuRenderGroupQuery) {
+	for (const { scene } of mainMenuRenderGroupQuery) {
 		for (const camera of mainMenuCameraQuery) {
 			renderer.setRenderTarget(null)
 			renderer.render(scene, camera.camera)
@@ -54,11 +54,7 @@ export const renderMainMenu = () => {
 	}
 }
 export const setupWindow = () => {
-	if (save.started) {
-		app.enable('farm', { direction: null })
-	} else {
-		app.enable('intro')
-	}
+	return app.enable('farm', { direction: null })
 }
 
 export const transitionToGame = once(async () => {
@@ -78,7 +74,7 @@ export const transitionToGame = once(async () => {
 				const mainMenuCam = mainMenuCameraQuery.first
 
 				if (mainMenuCam && mainMenuCam.camera instanceof PerspectiveCamera) {
-					mainMenuCam.position.x = -1.5 * f
+					mainMenuCam.camera.position.x = -1.5 * f
 					mainMenuCam.camera.zoom = 10 * f + 1
 					mainMenuCam.camera.updateProjectionMatrix()
 					const newSize = finalResolution.clone().add(new Vector2(window.innerWidth, window.innerHeight).sub(finalResolution).multiplyScalar(1 - f))

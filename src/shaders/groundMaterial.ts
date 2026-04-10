@@ -17,13 +17,13 @@ export class GroundMaterial extends ToonMaterial {
 	grassColor = color('#26854C')
 	pathColor = color('#856342')
 	pathColor2 = color('#A26D3F')
-	constructor(parameters: { groundTexture: Texture; rockTexture: Texture; level?: Texture; levelSize: Vector2; grassNoiseTexture: Texture }) {
+	constructor(parameters: { groundTexture: Texture; rockTexture: Texture; level: Texture | null; levelSize: Vector2; grassNoiseTexture: Texture | null }) {
 		super({})
 		this.sizeUniform = uniform(parameters.levelSize)
 		this.groundTexture = texture(parameters.groundTexture)
 		this.rockTexture = texture(parameters.rockTexture)
 		this.level = uniformTexture(parameters.level ?? defaultTexture)
-		this.grassNoiseTexture = texture(parameters.grassNoiseTexture)
+		this.grassNoiseTexture = texture(parameters.grassNoiseTexture ?? defaultTexture)
 		this.setupColorNode()
 	}
 

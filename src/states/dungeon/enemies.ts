@@ -17,7 +17,6 @@ import { inMap } from '@/lib/hierarchy'
 import { getParticleFromPool } from '@/lib/particles'
 import { Stat } from '@/lib/stats'
 import { Timer } from '@/lib/timer'
-import { impact } from '@/particles/impact'
 import { opt } from '@/utils/mapFunctions'
 import { collectItems } from '../game/items'
 import { healthBundle } from './health'
@@ -70,7 +69,7 @@ export const enemyBundle = <M extends keyof Animations & AssetNames['characters'
 		strength: new Stat(1 + level),
 		inactive: new Timer(2000, false),
 		faction: Faction.Enemy,
-		enemyImpact: impact(),
+		// enemyImpact: impact(),
 		enemyName: enemy.name,
 		movementForce: new Vector3(),
 		speed: new Stat(50 * enemy.speed),
